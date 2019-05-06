@@ -20,21 +20,22 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.github.victools.jsonschema.generator.impl.JsonNodeUtils;
+import com.github.victools.jsonschema.generator.impl.ReflectionTypeUtils;
 import com.github.victools.jsonschema.generator.impl.SchemaGenerationContext;
+import com.github.victools.jsonschema.generator.impl.TypeVariableContext;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,19 +68,19 @@ public class SchemaGenerator {
      */
     public JsonNode generateSchema(Class<?> mainTargetType) {
         logger.debug("begin preparation of schema generation for {}", mainTargetType);
-        SchemaGenerationContext context = new SchemaGenerationContext();
-        this.traverseGenericType(mainTargetType, null, null, false, Collections.emptyMap(), context);
+        SchemaGenerationContext generationContext = new SchemaGenerationContext();
+        this.traverseGenericType(mainTargetType, null, false, TypeVariableContext.EMPTY_SCOPE, generationContext);
 
         logger.debug("completed preparation and now continuing with actual schema generation for {}", mainTargetType);
         ObjectNode jsonSchemaResult = this.config.createObjectNode();
         jsonSchemaResult.put(SchemaConstants.TAG_SCHEMA, SchemaConstants.TAG_SCHEMA_DRAFT7);
-        ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(mainTargetType, context);
+        ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(mainTargetType, generationContext);
         if (definitionsNode.size() > 0) {
             logger.debug("adding \"{}\" to schema with {} entries", SchemaConstants.TAG_DEFINITIONS, definitionsNode.size());
             jsonSchemaResult.set(SchemaConstants.TAG_DEFINITIONS, definitionsNode);
         }
         logger.debug("adding attributes of targeted main type {} to schema", mainTargetType);
-        ObjectNode mainSchemaNode = context.getDefinition(mainTargetType);
+        ObjectNode mainSchemaNode = generationContext.getDefinition(mainTargetType);
         jsonSchemaResult.setAll(mainSchemaNode);
         logger.trace("successfully generated JSON schema for {}\n{}", mainTargetType, jsonSchemaResult);
         return jsonSchemaResult;
@@ -89,40 +90,21 @@ public class SchemaGenerator {
      * Preparation Step: add the given targetType to the generation context.
      *
      * @param targetType (possibly generic) type to add to the generation context
-     * @param declaringType parent type in which the given targetType is defined as field or return value of a method (is null for the main target)
      * @param targetNode node in the JSON schema to which all collected attributes should be added
      * @param isNullable whether the field/method's return value is allowed to be null in the declaringType in this particular scenario
-     * @param generics mapping of generic type variables to their actual types (according the type arguments on the declaring type's declaring type)
-     * @param context generation context to add type definitions and their references to (to be resolved at the end of the schema generation)
+     * @param typeVariables type variables and their actual types (according to the type arguments on the declaring type's declaring type)
+     * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
-    private void traverseGenericType(Type targetType, Type declaringType, ObjectNode targetNode, boolean isNullable,
-            Map<String, Type> generics, SchemaGenerationContext context) {
-        logger.debug("traversing {}", targetType);
-        Map<String, Type> declaringTypeGenerics;
-        Type actualTargetType;
-        if (declaringType instanceof ParameterizedType) {
-            declaringTypeGenerics = new HashMap<>();
-            ParameterizedType parameterizedParent = (ParameterizedType) declaringType;
-            TypeVariable<?>[] genericParams = ((Class<?>) parameterizedParent.getRawType()).getTypeParameters();
-            Type[] typeArguments = parameterizedParent.getActualTypeArguments();
-            for (int index = 0; index < typeArguments.length; index++) {
-                Type typeArgument = ReflectionUtils.resolveGenericTypePlaceholder(typeArguments[index], generics);
-                declaringTypeGenerics.put(genericParams[index].getName(), typeArgument);
-            }
-            logger.debug("determined {} generic parameters", declaringTypeGenerics.size());
-            actualTargetType = ReflectionUtils.resolveGenericTypePlaceholder(targetType, declaringTypeGenerics);
-        } else {
-            declaringTypeGenerics = Collections.emptyMap();
-            actualTargetType = targetType;
-        }
-        if (context.containsDefinition(actualTargetType)) {
-            logger.debug("adding reference to existing definition of {}", actualTargetType);
-            context.addReference(actualTargetType, targetNode, isNullable);
+    private void traverseGenericType(Type targetType, ObjectNode targetNode, boolean isNullable,
+            TypeVariableContext typeVariables, SchemaGenerationContext generationContext) {
+        if (generationContext.containsDefinition(targetType)) {
+            logger.debug("adding reference to existing definition of {}", targetType);
+            generationContext.addReference(targetType, targetNode, isNullable);
             // nothing more to be done
-        } else if (ReflectionUtils.isArrayType(actualTargetType)) {
-            this.traverseArrayType(actualTargetType, targetNode, isNullable, declaringTypeGenerics, context);
+        } else if (ReflectionTypeUtils.isArrayType(targetType)) {
+            this.traverseArrayType(targetType, targetNode, isNullable, typeVariables, generationContext);
         } else {
-            this.traverseObjectType(actualTargetType, targetNode, isNullable, declaringTypeGenerics, context);
+            this.traverseObjectType(targetType, targetNode, isNullable, typeVariables, generationContext);
         }
     }
 
@@ -132,17 +114,16 @@ public class SchemaGenerator {
      * @param targetType (possibly generic) array type to add to the generation context
      * @param targetNode node in the JSON schema to which all collected attributes should be added
      * @param isNullable whether the field/method's return value the targetType refers to is allowed to be null in the declaring type
-     * @param generics mapping of generic type variables to their actual types (according the declaring type's type arguments)
-     * @param context generation context to add type definitions and their references to (to be resolved at the end of the schema generation)
+     * @param typeVariables mapping of generic type variables to their actual types (according the declaring type's type arguments)
+     * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
     private void traverseArrayType(Type targetType, ObjectNode targetNode, boolean isNullable,
-            Map<String, Type> generics, SchemaGenerationContext context) {
-        logger.debug("traversing array type {}", targetType);
+            TypeVariableContext typeVariables, SchemaGenerationContext generationContext) {
         ObjectNode definition;
         if (targetNode == null) {
             // only if the main target schema is an array, do we need to store this node as definition
             definition = this.config.createObjectNode();
-            context.putDefinition(targetType, definition);
+            generationContext.putDefinition(targetType, definition);
         } else {
             definition = targetNode;
         }
@@ -155,11 +136,9 @@ public class SchemaGenerator {
         ObjectNode arrayItemTypeRef = this.config.createObjectNode();
         definition.set(SchemaConstants.TAG_ITEMS, arrayItemTypeRef);
         logger.debug("looking-up component type of array {}", targetType);
-        Type genericItemType = ReflectionUtils.getArrayComponentType(targetType);
-        logger.debug("resolve (possibly) generic array component type {}", genericItemType);
-        Type itemType = ReflectionUtils.resolveGenericTypePlaceholder(genericItemType, generics);
+        Type itemType = ReflectionTypeUtils.getArrayComponentType(targetType, typeVariables);
         logger.debug("resolved array component type {}", itemType);
-        this.traverseGenericType(itemType, targetType, arrayItemTypeRef, false, generics, context);
+        this.traverseGenericType(itemType, arrayItemTypeRef, false, TypeVariableContext.forType(targetType, typeVariables), generationContext);
     }
 
     /**
@@ -168,17 +147,16 @@ public class SchemaGenerator {
      * @param targetType object type to add to the generation context
      * @param targetNode node in the JSON schema to which all collected attributes should be added
      * @param isNullable whether the field/method's return value the targetType refers to is allowed to be null in the declaring type
-     * @param generics mapping of generic type variables to their actual types (according the declaring type's type arguments)
-     * @param context generation context to add type definitions and their references to (to be resolved at the end of the schema generation)
+     * @param typeVariables mapping of generic type variables to their actual types (according the declaring type's type arguments)
+     * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
     private void traverseObjectType(Type targetType, ObjectNode targetNode, boolean isNullable,
-            Map<String, Type> generics, SchemaGenerationContext context) {
-        logger.debug("traversing object type {}", targetType);
+            TypeVariableContext typeVariables, SchemaGenerationContext generationContext) {
         CustomDefinition customDefinition = this.config.getCustomDefinition(targetType);
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
             if (targetNode == null) {
                 logger.debug("storing configured custom inline type for {} as definition (since it is the main schema \"#\")", targetType);
-                context.putDefinition(targetType, customDefinition.getValue());
+                generationContext.putDefinition(targetType, customDefinition.getValue());
                 // targetNode will be populated at the end, in buildDefinitionsAndResolveReferences()
             } else {
                 logger.debug("directly applying configured custom inline type for {}", targetType);
@@ -187,41 +165,39 @@ public class SchemaGenerator {
         } else {
             logger.debug("initialising definition for {}", targetType);
             ObjectNode definition = this.config.createObjectNode();
-            context.putDefinition(targetType, definition);
+            generationContext.putDefinition(targetType, definition);
             if (targetNode != null) {
                 logger.debug("adding reference to new definition of {}", targetType);
                 // targetNode is only null for the main class for which the schema is being generated
-                context.addReference(targetType, targetNode, isNullable);
+                generationContext.addReference(targetType, targetNode, isNullable);
             }
             if (customDefinition == null) {
                 logger.debug("generating definition for {}", targetType);
                 definition.put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_OBJECT);
 
-                Map<String, Field> fields = new TreeMap<>();
-                Map<String, Method> methods = new TreeMap<>();
-                final Class<?> rawTargetType = ReflectionUtils.getRawType(targetType);
-                for (Class<?> currentTargetClass = rawTargetType;
-                        currentTargetClass != null && currentTargetClass != Object.class;
-                        currentTargetClass = currentTargetClass.getSuperclass()) {
+                final ObjectNode targetPropertiesContainer = this.config.createObjectNode();
+                final Set<String> fields = new HashSet<>();
+                final Set<String> methods = new HashSet<>();
+                Type currentTargetType = targetType;
+                while (currentTargetType != null && currentTargetType != Object.class) {
+                    TypeVariableContext currentTypeVariableScope = TypeVariableContext.forType(currentTargetType, typeVariables);
+                    final Class<?> currentTargetClass = ReflectionTypeUtils.getRawType(currentTargetType);
                     logger.debug("iterating over declared fields from {}", currentTargetClass);
                     Stream.of(currentTargetClass.getDeclaredFields())
                             .filter(declaredField -> !this.config.shouldIgnore(declaredField))
-                            .forEach(declaredField -> fields.putIfAbsent(declaredField.getName(), declaredField));
+                            .sorted(Comparator.comparing(Field::getName))
+                            .filter(singleField -> fields.add(singleField.getName()))
+                            .forEach(field -> this.populateField(field, targetPropertiesContainer, currentTypeVariableScope, generationContext));
                     logger.debug("iterating over declared public methods from {}", currentTargetClass);
                     Stream.of(currentTargetClass.getDeclaredMethods())
                             .filter(declaredMethod -> (declaredMethod.getModifiers() & Modifier.PUBLIC) != 0)
                             .filter(declaredMethod -> !this.config.shouldIgnore(declaredMethod))
-                            .forEach(declaredMethod -> methods.putIfAbsent(declaredMethod.getName(), declaredMethod));
+                            .sorted(Comparator.comparing(Method::toGenericString))
+                            .forEach(method -> this.populateMethod(method, targetPropertiesContainer, currentTypeVariableScope, generationContext));
+                    currentTargetType = currentTargetClass.getGenericSuperclass();
                 }
-                if (rawTargetType != null) {
-                    ObjectNode targetPropertiesContainer = this.config.createObjectNode();
-                    fields.values()
-                            .forEach(field -> this.populateField(field, targetType, targetPropertiesContainer, generics, context));
-                    methods.values()
-                            .forEach(method -> this.populateMethod(method, targetType, targetPropertiesContainer, generics, context));
-                    if (targetPropertiesContainer.size() > 0) {
-                        definition.set(SchemaConstants.TAG_PROPERTIES, targetPropertiesContainer);
-                    }
+                if (targetPropertiesContainer.size() > 0) {
+                    definition.set(SchemaConstants.TAG_PROPERTIES, targetPropertiesContainer);
                 }
             } else {
                 logger.debug("applying configured custom definition for {}", targetType);
@@ -234,50 +210,48 @@ public class SchemaGenerator {
      * Preparation Step: add the given field to the specified {@link ObjectNode}.
      *
      * @param field declared field that should be added to the specified node
-     * @param declaringType type to which the field belongs (possibly a sub type of the actual class it is declared in)
      * @param parentProperties node in the JSON schema to which the field's sub schema should be added as property
-     * @param generics mapping of generic type variables to their actual types (according the declaring type's type arguments)
-     * @param context generation context to add type definitions and their references to (to be resolved at the end of the schema generation)
+     * @param typeVariables mapping of generic type variables to their actual types (according the declaring type's type arguments)
+     * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
-    private void populateField(Field field, Type declaringType, ObjectNode parentProperties,
-            Map<String, Type> generics, SchemaGenerationContext context) {
+    private void populateField(Field field, ObjectNode parentProperties, TypeVariableContext typeVariables,
+            SchemaGenerationContext generationContext) {
         ObjectNode subSchema = this.config.createObjectNode();
         String defaultName = field.getName();
         String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(field, defaultName)).orElse(defaultName);
-        logger.debug("adding field \"{}\" under name \"{}\" in schema for {}", defaultName, propertyName, declaringType);
+        logger.debug("adding field \"{}\" under name \"{}\" in schema for {}", defaultName, propertyName, field.getDeclaringClass());
         parentProperties.set(propertyName, subSchema);
 
-        Type fieldType = ReflectionUtils.resolveGenericTypePlaceholder(field.getGenericType(), generics);
+        Type fieldType = typeVariables.resolveGenericTypePlaceholder(field.getGenericType());
         fieldType = Optional.ofNullable(this.config.resolveTargetTypeOverride(field, fieldType)).orElse(fieldType);
         boolean isNullable = this.config.isNullable(field);
         ObjectNode fieldAttributes = this.collectFieldAttributes(field);
 
-        this.populateSchema(fieldType, declaringType, subSchema, isNullable, generics, fieldAttributes, context);
+        this.populateSchema(fieldType, subSchema, isNullable, typeVariables, fieldAttributes, generationContext);
     }
 
     /**
      * Preparation Step: add the given method to the specified {@link ObjectNode}.
      *
      * @param method declared method that should be added to the specified node
-     * @param declaringType type to which the method belongs (possibly a sub type of the actual class it is declared in)
      * @param parentProperties node in the JSON schema to which the method's (and its return value's) sub schema should be added as property
-     * @param generics mapping of generic type variables to their actual types (according the declaring type's type arguments)
-     * @param context generation context to add type definitions and their references to (to be resolved at the end of the schema generation)
+     * @param typeVariables mapping of generic type variables to their actual types (according the declaring type's type arguments)
+     * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
-    private void populateMethod(Method method, Type declaringType, ObjectNode parentProperties,
-            Map<String, Type> generics, SchemaGenerationContext context) {
+    private void populateMethod(Method method, ObjectNode parentProperties, TypeVariableContext typeVariables,
+            SchemaGenerationContext generationContext) {
         ObjectNode subSchema = this.config.createObjectNode();
         String defaultName = this.buildMethodName(method);
         String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(method, defaultName)).orElse(defaultName);
         parentProperties.set(propertyName, subSchema);
 
-        Type returnValueType = ReflectionUtils.resolveGenericTypePlaceholder(method.getGenericReturnType(), generics);
+        Type returnValueType = typeVariables.resolveGenericTypePlaceholder(method.getGenericReturnType());
         returnValueType = Optional.ofNullable(this.config.resolveTargetTypeOverride(method, returnValueType))
                 .orElse(returnValueType);
         boolean isNullable = this.config.isNullable(method);
         ObjectNode methodAttributes = this.collectMethodAttributes(method);
 
-        this.populateSchema(returnValueType, declaringType, subSchema, isNullable, generics, methodAttributes, context);
+        this.populateSchema(returnValueType, subSchema, isNullable, typeVariables, methodAttributes, generationContext);
     }
 
     /**
@@ -297,17 +271,16 @@ public class SchemaGenerator {
      * Preparation Step: combine the collected attributes and the javaType's definition in the given targetNode.
      *
      * @param javaType field's type or method return value's type that should be represented by the given targetNode
-     * @param declaringType type to which the field/method belongs (possibly a sub type of the actual class it is declared in)
      * @param targetNode node in the JSON schema that should represent the associated javaType and include the separately collected attributes
      * @param isNullable whether the field/method's return value the javaType refers to is allowed to be null in the declaringType
-     * @param generics mapping of generic type variables to their actual types (according the declaring type's type arguments)
+     * @param typeVariables mapping of generic type variables to their actual types (according the declaring type's type arguments)
      * @param collectedAttributes separately collected attribute for the field/method in their respective declaring type
-     * @param context generation context to add type definitions and their references to (to be resolved at the end of the schema generation)
+     * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      * @see #populateField(Field, Type, ObjectNode, Map, SchemaGenerationContext)
      * @see #populateMethod(Method, Type, ObjectNode, Map, SchemaGenerationContext)
      */
-    private void populateSchema(Type javaType, Type declaringType, ObjectNode targetNode, boolean isNullable, Map<String, Type> generics,
-            ObjectNode collectedAttributes, SchemaGenerationContext context) {
+    private void populateSchema(Type javaType, ObjectNode targetNode, boolean isNullable,
+            TypeVariableContext typeVariables, ObjectNode collectedAttributes, SchemaGenerationContext generationContext) {
         // create an "allOf" wrapper for the attributes related to this particular field and its general type
         ObjectNode referenceContainer;
         CustomDefinition customDefinition = this.config.getCustomDefinition(javaType);
@@ -315,7 +288,7 @@ public class SchemaGenerator {
                 || collectedAttributes.size() == 0
                 || (customDefinition != null && customDefinition.isMeantToBeInline())
                 || javaType == void.class
-                || ReflectionUtils.isArrayType(javaType)) {
+                || ReflectionTypeUtils.isArrayType(javaType)) {
             // no need for the allOf, can use the sub-schema instance directly as reference
             referenceContainer = targetNode;
         } else {
@@ -336,7 +309,7 @@ public class SchemaGenerator {
         } else if (javaType != void.class) {
             // only add reference for separate definition if it is not a fixed type that should be in-lined
             try {
-                this.traverseGenericType(javaType, declaringType, referenceContainer, isNullable, generics, context);
+                this.traverseGenericType(javaType, referenceContainer, isNullable, typeVariables, generationContext);
             } catch (UnsupportedOperationException ex) {
                 logger.warn("Skipping type definition due to error", ex);
             }
@@ -460,14 +433,13 @@ public class SchemaGenerator {
      * appropriate definition or contain the respective (sub) schema directly inline.
      *
      * @param mainSchemaTarget main type for which generateSchema() was invoked
-     * @param context generation context containing all definitions of (sub) schemas and the list of references to them
+     * @param generationContext context containing all definitions of (sub) schemas and the list of references to them
      * @return node representing the main schema's "definitions" (may be empty)
      */
-    private ObjectNode buildDefinitionsAndResolveReferences(Class<?> mainSchemaTarget, SchemaGenerationContext context) {
+    private ObjectNode buildDefinitionsAndResolveReferences(Class<?> mainSchemaTarget, SchemaGenerationContext generationContext) {
         // determine short names to be used as definition names
-        Map<Type, String> aliases = context.getDefinedTypes().stream()
-                .collect(Collectors.toMap(key -> key,
-                        key -> (key instanceof Class<?>) ? ((Class<?>) key).getSimpleName() : key.getTypeName()));
+        Map<Type, String> aliases = generationContext.getDefinedTypes().stream()
+                .collect(Collectors.toMap(key -> key, this::buildTypeAlias));
         // check if there are any duplicate aliases
         if (aliases.size() > new HashSet<>(aliases.values()).size()) {
             Predicate<Map.Entry<Type, String>> hasEntryDuplicateAlias = entry -> aliases.values().stream()
@@ -483,15 +455,15 @@ public class SchemaGenerator {
         boolean createDefinitionsForAll = this.config.shouldCreateDefinitionsForAllObjects();
         for (Map.Entry<Type, String> aliasEntry : aliases.entrySet()) {
             Type type = aliasEntry.getKey();
-            List<ObjectNode> referencingNodes = context.getReferences(type);
-            List<ObjectNode> nullableReferences = context.getNullableReferences(type);
+            List<ObjectNode> referencingNodes = generationContext.getReferences(type);
+            List<ObjectNode> nullableReferences = generationContext.getNullableReferences(type);
             String alias = aliasEntry.getValue();
             final String referenceKey;
             boolean referenceInline = type != mainSchemaTarget
                     && (referencingNodes.isEmpty() || (!createDefinitionsForAll && (referencingNodes.size() + nullableReferences.size()) < 2));
             if (referenceInline) {
                 // it is a simple type, just in-line the sub-schema everywhere
-                referencingNodes.forEach(referenceNode -> referenceNode.setAll(context.getDefinition(type)));
+                referencingNodes.forEach(referenceNode -> referenceNode.setAll(generationContext.getDefinition(type)));
                 referenceKey = null;
             } else {
                 // the same sub-schema is referenced in multiple places
@@ -499,7 +471,7 @@ public class SchemaGenerator {
                     referenceKey = SchemaConstants.TAG_REF_MAIN;
                 } else {
                     // add it to the definitions (unless it is the main schema)
-                    definitionsNode.set(alias, context.getDefinition(type));
+                    definitionsNode.set(alias, generationContext.getDefinition(type));
                     referenceKey = SchemaConstants.TAG_REF_PREFIX + alias;
                 }
                 referencingNodes.forEach(referenceNode -> referenceNode.put(SchemaConstants.TAG_REF, referenceKey));
@@ -507,7 +479,7 @@ public class SchemaGenerator {
             if (!nullableReferences.isEmpty()) {
                 ObjectNode definition;
                 if (referenceInline) {
-                    definition = context.getDefinition(type);
+                    definition = generationContext.getDefinition(type);
                 } else {
                     definition = this.config.createObjectNode().put(SchemaConstants.TAG_REF, referenceKey);
                 }
@@ -527,5 +499,28 @@ public class SchemaGenerator {
             }
         }
         return definitionsNode;
+    }
+
+    /**
+     * Create the alias (to be used in "definitions") for a given type, excluding package information.
+     * <br>
+     * If this does not yield unique aliases, use {@link Type#getTypeName()} instead.
+     *
+     * @param targetType type for which to build a simple alias
+     * @return alias (consisting of simple type names without package information)
+     */
+    private String buildTypeAlias(Type targetType) {
+        String alias;
+        if (targetType instanceof Class<?>) {
+            alias = ((Class<?>) targetType).getSimpleName();
+        } else if (targetType instanceof ParameterizedType) {
+            Class<?> rawType = ReflectionTypeUtils.getRawType(targetType);
+            alias = rawType.getSimpleName() + Stream.of(((ParameterizedType) targetType).getActualTypeArguments())
+                    .map(this::buildTypeAlias)
+                    .collect(Collectors.joining(", ", "<", ">"));
+        } else {
+            alias = targetType.getTypeName();
+        }
+        return alias;
     }
 }

@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.generator.impl;
+package com.github.victools.jsonschema.generator.impl.module;
 
 import com.github.victools.jsonschema.generator.Module;
-import com.github.victools.jsonschema.generator.ReflectionUtils;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 
 /**
- * Default module being included if {@code Option.EXCLUDE_GETTER_METHODS} is enabled.
+ * Default module being included if {@code Option.EXCLUDE_VOID_METHODS} is enabled.
  */
-public class GetterMethodExclusionModule implements Module {
+public class VoidMethodExclusionModule implements Module {
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         builder.forMethods()
-                .addIgnoreCheck(ReflectionUtils::isGetter);
+                .addIgnoreCheck(method -> method.getReturnType() == void.class);
     }
 }

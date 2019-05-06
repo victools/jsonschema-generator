@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.generator;
+package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 

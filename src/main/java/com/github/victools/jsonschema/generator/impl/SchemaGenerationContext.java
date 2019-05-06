@@ -35,16 +35,6 @@ public class SchemaGenerationContext {
     private final Map<Type, List<ObjectNode>> nullableReferences = new HashMap<>();
 
     /**
-     * Whether this context (already) contains a definition for the specified type.
-     *
-     * @param javaType type to check for
-     * @return whether a definition for the given type is already present
-     */
-    public boolean containsDefinition(Type javaType) {
-        return this.definitions.containsKey(javaType);
-    }
-
-    /**
      * Add the given type's definition to this context.
      *
      * @param javaType type to which the definition belongs
@@ -54,6 +44,16 @@ public class SchemaGenerationContext {
     public SchemaGenerationContext putDefinition(Type javaType, ObjectNode definitionNode) {
         this.definitions.put(javaType, definitionNode);
         return this;
+    }
+
+    /**
+     * Whether this context (already) contains a definition for the specified type.
+     *
+     * @param javaType type to check for
+     * @return whether a definition for the given type is already present
+     */
+    public boolean containsDefinition(Type javaType) {
+        return this.definitions.containsKey(javaType);
     }
 
     /**

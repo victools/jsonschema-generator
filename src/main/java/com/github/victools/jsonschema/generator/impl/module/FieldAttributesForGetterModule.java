@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.generator.impl;
+package com.github.victools.jsonschema.generator.impl.module;
 
 import com.github.victools.jsonschema.generator.Module;
-import com.github.victools.jsonschema.generator.ReflectionUtils;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.impl.ReflectionGetterUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -39,7 +39,7 @@ public class FieldAttributesForGetterModule implements Module {
      * @return generated resolver for a getter method
      */
     private static <R> Function<Method, R> resolveForField(Function<Field, R> resolver) {
-        return method -> Optional.ofNullable(ReflectionUtils.findFieldForGetter(method))
+        return method -> Optional.ofNullable(ReflectionGetterUtils.findFieldForGetter(method))
                 .map(resolver)
                 .orElse(null);
     }
@@ -53,7 +53,7 @@ public class FieldAttributesForGetterModule implements Module {
      * @return generated resolver for a getter method
      */
     private static <D, R> BiFunction<Method, D, R> resolveForFieldWithDefault(BiFunction<Field, D, R> resolver) {
-        return (method, defaultValue) -> Optional.ofNullable(ReflectionUtils.findFieldForGetter(method))
+        return (method, defaultValue) -> Optional.ofNullable(ReflectionGetterUtils.findFieldForGetter(method))
                 .map(field -> resolver.apply(field, defaultValue))
                 .orElse(null);
     }

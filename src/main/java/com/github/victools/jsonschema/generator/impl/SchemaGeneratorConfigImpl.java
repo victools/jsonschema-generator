@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.ReflectionUtils;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import java.lang.reflect.Field;
@@ -94,7 +93,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
 
     @Override
     public CustomDefinition getCustomDefinition(Type javaType) {
-        Class<?> rawType = ReflectionUtils.getRawType(javaType);
+        Class<?> rawType = ReflectionTypeUtils.getRawType(javaType);
         List<Function<Type, CustomDefinition>> definitionMappings = this.customDefinitions.get(rawType);
         if (definitionMappings == null) {
             return null;

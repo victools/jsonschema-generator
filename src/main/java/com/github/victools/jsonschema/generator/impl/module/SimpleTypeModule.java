@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.generator.impl;
+package com.github.victools.jsonschema.generator.impl.module;
 
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaConstants;
@@ -38,5 +38,11 @@ public class SimpleTypeModule implements Module {
 
         builder.withFixedTypeMapping(SchemaConstants.TAG_TYPE_NUMBER,
                 Double.class, double.class, Float.class, float.class, Byte.class, byte.class);
+
+        builder.withFixedTypeMapping(SchemaConstants.TAG_TYPE_OBJECT,
+                Object.class);
+
+        builder.withFixedTypeMapping(SchemaConstants.TAG_TYPE_ARRAY,
+                Object[].class);
     }
 }

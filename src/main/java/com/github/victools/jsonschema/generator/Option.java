@@ -16,14 +16,14 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.github.victools.jsonschema.generator.impl.ConstantValueModule;
-import com.github.victools.jsonschema.generator.impl.FieldAttributesForGetterModule;
-import com.github.victools.jsonschema.generator.impl.FieldWithoutGetterExclusionModule;
-import com.github.victools.jsonschema.generator.impl.GetterAttributesForFieldModule;
-import com.github.victools.jsonschema.generator.impl.GetterMethodExclusionModule;
-import com.github.victools.jsonschema.generator.impl.ObjectClassExclusionModule;
-import com.github.victools.jsonschema.generator.impl.SimpleTypeModule;
-import com.github.victools.jsonschema.generator.impl.VoidMethodExclusionModule;
+import com.github.victools.jsonschema.generator.impl.module.ConstantValueModule;
+import com.github.victools.jsonschema.generator.impl.module.FieldAttributesForGetterModule;
+import com.github.victools.jsonschema.generator.impl.module.FieldWithoutGetterExclusionModule;
+import com.github.victools.jsonschema.generator.impl.module.GetterAttributesForFieldModule;
+import com.github.victools.jsonschema.generator.impl.module.GetterMethodExclusionModule;
+import com.github.victools.jsonschema.generator.impl.module.ObjectClassExclusionModule;
+import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
+import com.github.victools.jsonschema.generator.impl.module.VoidMethodExclusionModule;
 
 /**
  * Configuration options to be set on a {@link SchemaGeneratorConfigBuilder} instance.

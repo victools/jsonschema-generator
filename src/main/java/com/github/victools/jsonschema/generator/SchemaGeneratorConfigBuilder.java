@@ -100,6 +100,16 @@ public class SchemaGeneratorConfigBuilder {
     }
 
     /**
+     * Check whether the given setting/option has been set and if yes, whether it is enabled or disabled.
+     *
+     * @param setting generator option to check for
+     * @return currently configured flag (i.e. true/false if already set), or null if not configured (yet)
+     */
+    public Boolean getSetting(Option setting) {
+        return this.options.get(setting);
+    }
+
+    /**
      * Map certain java types to a schema containing only a "type" property of the specified value.
      *
      * @param jsonSchemaTypeValue textual representation of the resulting JSON schema's "type"
