@@ -6,7 +6,7 @@
 
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <licenses>
@@ -47,7 +47,9 @@
 
         <version.jackson>2.9.8</version.jackson>
         <version.junit>4.12</version.junit>
+        <version.junitparams>1.1.1</version.junitparams>
         <version.log4j>2.11.2</version.log4j>
+        <version.mockito>2.27.0</version.mockito>
         <version.slf4j>1.7.26</version.slf4j>
     </properties>
 
@@ -94,6 +96,18 @@
             <version>${version.junit}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>pl.pragmatists</groupId>
+            <artifactId>JUnitParams</artifactId>
+            <version>${version.junitparams}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${version.mockito}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -115,6 +129,32 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>commons-collections</groupId>
+                        <artifactId>commons-collections</artifactId>
+                        <version>3.2.2</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
