@@ -38,7 +38,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper)
     .withDisabled(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT) // default: enabled
     .withDisabled(Option.METHODS_RETURN_NULLABLE_BY_DEFAULT) // default: enabled
-    .withEnabled(DEFINITIONS_FOR_ALL_OBJECTS); // default: disabled
+    .withEnabled(Option.DEFINITIONS_FOR_ALL_OBJECTS); // default: disabled
 ```
 
 #### Adding Separate Modules (e.g. from another library)

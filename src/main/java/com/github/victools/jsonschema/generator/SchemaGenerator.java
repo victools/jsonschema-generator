@@ -35,7 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -175,9 +175,7 @@ public class SchemaGenerator {
                 logger.debug("generating definition for {}", targetType);
                 definition.put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_OBJECT);
 
-                final ObjectNode targetPropertiesContainer = this.config.createObjectNode();
-                final Set<String> fields = new HashSet<>();
-                final Set<String> methods = new HashSet<>();
+                final Map<String, ObjectNode> targetProperties = new TreeMap<>();
                 Type currentTargetType = targetType;
                 while (currentTargetType != null && currentTargetType != Object.class) {
                     TypeVariableContext currentTypeVariableScope = TypeVariableContext.forType(currentTargetType, typeVariables);
@@ -186,18 +184,17 @@ public class SchemaGenerator {
                     Stream.of(currentTargetClass.getDeclaredFields())
                             .filter(declaredField -> !this.config.shouldIgnore(declaredField))
                             .sorted(Comparator.comparing(Field::getName))
-                            .filter(singleField -> fields.add(singleField.getName()))
-                            .forEach(field -> this.populateField(field, targetPropertiesContainer, currentTypeVariableScope, generationContext));
+                            .forEach(field -> this.populateField(field, targetProperties, currentTypeVariableScope, generationContext));
                     logger.debug("iterating over declared public methods from {}", currentTargetClass);
                     Stream.of(currentTargetClass.getDeclaredMethods())
                             .filter(declaredMethod -> (declaredMethod.getModifiers() & Modifier.PUBLIC) != 0)
                             .filter(declaredMethod -> !this.config.shouldIgnore(declaredMethod))
                             .sorted(Comparator.comparing(Method::toGenericString))
-                            .forEach(method -> this.populateMethod(method, targetPropertiesContainer, currentTypeVariableScope, generationContext));
+                            .forEach(method -> this.populateMethod(method, targetProperties, currentTypeVariableScope, generationContext));
                     currentTargetType = currentTargetClass.getGenericSuperclass();
                 }
-                if (targetPropertiesContainer.size() > 0) {
-                    definition.set(SchemaConstants.TAG_PROPERTIES, targetPropertiesContainer);
+                if (!targetProperties.isEmpty()) {
+                    definition.set(SchemaConstants.TAG_PROPERTIES, this.config.createObjectNode().setAll(targetProperties));
                 }
             } else {
                 logger.debug("applying configured custom definition for {}", targetType);
@@ -214,13 +211,15 @@ public class SchemaGenerator {
      * @param typeVariables mapping of generic type variables to their actual types (according the declaring type's type arguments)
      * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
-    private void populateField(Field field, ObjectNode parentProperties, TypeVariableContext typeVariables,
+    private void populateField(Field field, Map<String, ObjectNode> parentProperties, TypeVariableContext typeVariables,
             SchemaGenerationContext generationContext) {
         ObjectNode subSchema = this.config.createObjectNode();
         String defaultName = field.getName();
         String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(field, defaultName)).orElse(defaultName);
         logger.debug("adding field \"{}\" under name \"{}\" in schema for {}", defaultName, propertyName, field.getDeclaringClass());
-        parentProperties.set(propertyName, subSchema);
+        if (parentProperties.putIfAbsent(propertyName, subSchema) != null) {
+            return;
+        }
 
         Type fieldType = typeVariables.resolveGenericTypePlaceholder(field.getGenericType());
         fieldType = Optional.ofNullable(this.config.resolveTargetTypeOverride(field, fieldType)).orElse(fieldType);
@@ -238,12 +237,14 @@ public class SchemaGenerator {
      * @param typeVariables mapping of generic type variables to their actual types (according the declaring type's type arguments)
      * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
-    private void populateMethod(Method method, ObjectNode parentProperties, TypeVariableContext typeVariables,
+    private void populateMethod(Method method, Map<String, ObjectNode> parentProperties, TypeVariableContext typeVariables,
             SchemaGenerationContext generationContext) {
         ObjectNode subSchema = this.config.createObjectNode();
         String defaultName = this.buildMethodName(method);
         String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(method, defaultName)).orElse(defaultName);
-        parentProperties.set(propertyName, subSchema);
+        if (parentProperties.putIfAbsent(propertyName, subSchema) != null) {
+            return;
+        }
 
         Type returnValueType = typeVariables.resolveGenericTypePlaceholder(method.getGenericReturnType());
         returnValueType = Optional.ofNullable(this.config.resolveTargetTypeOverride(method, returnValueType))
