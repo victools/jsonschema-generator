@@ -30,11 +30,11 @@ import com.github.victools.jsonschema.generator.impl.module.VoidMethodExclusionM
  */
 public enum Option implements Module {
     /**
-     * Whether field and methods declaring directly in the Object class should be excluded.
+     * Whether methods declared directly in the Object class should be excluded (it has no fields). This is strongly recommended to be kept enabled.
      * <br>
      * Default: true
      */
-    IGNORE_OBJECT_CLASS(true, ObjectClassExclusionModule.class),
+    IGNORE_OBJECT_CLASS_METHODS(true, ObjectClassExclusionModule.class),
     /**
      * Whether some fixed types for "string"/"boolean"/"integer"/"number" should be included.
      * <br>

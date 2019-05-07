@@ -20,7 +20,7 @@ import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 
 /**
- * Default module being included if {@code Option.IGNORE_OBJECT_CLASS} is enabled.
+ * Default module being included if {@code Option.IGNORE_OBJECT_CLASS_METHODS} is enabled.
  */
 public class ObjectClassExclusionModule implements Module {
 
