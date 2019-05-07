@@ -26,8 +26,7 @@ public class ObjectClassExclusionModule implements Module {
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
-        builder.forFields()
-                .addIgnoreCheck(field -> field.getDeclaringClass() == Object.class);
+        // the Object class has only methods and no fields, i.e. only methods need to be excluded specifically
         builder.forMethods()
                 .addIgnoreCheck(method -> method.getDeclaringClass() == Object.class);
     }

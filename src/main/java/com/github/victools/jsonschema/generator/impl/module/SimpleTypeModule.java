@@ -41,8 +41,5 @@ public class SimpleTypeModule implements Module {
 
         builder.withFixedTypeMapping(SchemaConstants.TAG_TYPE_OBJECT,
                 Object.class);
-
-        builder.withFixedTypeMapping(SchemaConstants.TAG_TYPE_ARRAY,
-                Object[].class);
     }
 }

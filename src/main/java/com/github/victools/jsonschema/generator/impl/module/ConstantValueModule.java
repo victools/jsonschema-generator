@@ -41,7 +41,8 @@ public class ConstantValueModule implements Module {
             try {
                 return Collections.singletonList(field.get(null));
             } catch (IllegalAccessException ex) {
-                // exception should never be thrown (due to calling .setAccessible(true) before)
+                // exception should never be thrown (due to calling setAccessible(true) before)
+                throw new RuntimeException(ex);
             }
         }
         return null;

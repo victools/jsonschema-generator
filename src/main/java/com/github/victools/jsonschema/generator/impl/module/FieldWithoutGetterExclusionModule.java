@@ -28,7 +28,7 @@ public class FieldWithoutGetterExclusionModule implements Module {
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
-        builder.forFields().addIgnoreCheck(field -> (field.getModifiers() & Modifier.PUBLIC) == 0
-                && ReflectionGetterUtils.findGetterForField(field) == null);
+        builder.forFields()
+                .addIgnoreCheck(field -> (field.getModifiers() & Modifier.PUBLIC) == 0 && !ReflectionGetterUtils.hasGetter(field));
     }
 }
