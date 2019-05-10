@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "CONSTANT": {
+            "type": "integer"
+        },
+        "genericValue": {
+            "type": "string"
+        },
+        "getGenericValue()": {
+            "type": ["string", "null"]
+        },
+        "getPrimitiveValue()": {
+            "type": "integer"
+        },
+        "isSimpleTestClass()": {
+            "type": "boolean"
+        },
+        "primitiveValue": {
+            "type": "integer"
+        }
+    }
+}

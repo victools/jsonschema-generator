@@ -6,7 +6,7 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="com.github.victools" level="DEBUG"/>
+        <Logger name="com.github.victools" level="INFO"/>
         <Root level="error">
             <AppenderRef ref="Console"/>
         </Root>
