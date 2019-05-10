@@ -49,10 +49,10 @@ public final class TypeVariableContext {
      */
     public static TypeVariableContext forType(Type targetType, TypeVariableContext parentTypeVariables) {
         TypeVariableContext result;
-        if (targetType instanceof ParameterizedType) {
+        if (targetType instanceof Class<?> && ((Class<?>) targetType).getTypeParameters().length > 0) {
+            result = new TypeVariableContext((Class<?>) targetType);
+        } else if (targetType instanceof ParameterizedType) {
             result = new TypeVariableContext((ParameterizedType) targetType, parentTypeVariables);
-        } else if (targetType instanceof Class<?>) {
-            result = new TypeVariableContext((Class<?>) targetType, parentTypeVariables);
         } else if (targetType instanceof GenericArrayType) {
             result = parentTypeVariables;
         } else {
@@ -74,6 +74,21 @@ public final class TypeVariableContext {
     }
 
     /**
+     * Constructor: for a {@link Class}.
+     *
+     * @param targetType type for which to collect type variables and their associated types
+     */
+    private TypeVariableContext(Class<?> targetType) {
+        TypeVariable<?>[] genericParams = targetType.getTypeParameters();
+        this.typeVariablesByName = new HashMap<>();
+        for (TypeVariable<?> singleParameter : genericParams) {
+            Type[] bounds = singleParameter.getBounds();
+            Type typeArgument = Stream.of(bounds).findFirst().orElse(Object.class);
+            this.typeVariablesByName.put(singleParameter.getName(), typeArgument);
+        }
+    }
+
+    /**
      * Constructor: for a {@link ParameterizedType}.
      *
      * @param targetType type for which to collect type variables and their associated types
@@ -81,35 +96,11 @@ public final class TypeVariableContext {
      */
     private TypeVariableContext(ParameterizedType targetType, TypeVariableContext parentTypeVariables) {
         TypeVariable<?>[] genericParams = ((Class<?>) targetType.getRawType()).getTypeParameters();
-        if (genericParams.length == 0) {
-            this.typeVariablesByName = Collections.emptyMap();
-        } else {
-            this.typeVariablesByName = new HashMap<>();
-            Type[] typeArguments = targetType.getActualTypeArguments();
-            for (int index = 0; index < genericParams.length; index++) {
-                Type typeArgument = parentTypeVariables.resolveGenericTypePlaceholder(typeArguments[index]);
-                this.typeVariablesByName.put(genericParams[index].getName(), typeArgument);
-            }
-        }
-    }
-
-    /**
-     * Constructor: for a {@link Class}.
-     *
-     * @param targetType type for which to collect type variables and their associated types
-     * @param parentTypeVariables type variables present in the class where the given targetType is declared (e.g. as field)
-     */
-    private TypeVariableContext(Class<?> targetType, TypeVariableContext parentTypeVariables) {
-        TypeVariable<?>[] genericParams = targetType.getTypeParameters();
-        if (genericParams.length == 0) {
-            this.typeVariablesByName = Collections.emptyMap();
-        } else {
-            this.typeVariablesByName = new HashMap<>();
-            for (TypeVariable<?> singleParameter : genericParams) {
-                Type[] bounds = singleParameter.getBounds();
-                Type typeArgument = bounds.length == 0 ? Object.class : parentTypeVariables.resolveGenericTypePlaceholder(bounds[0]);
-                this.typeVariablesByName.put(singleParameter.getName(), typeArgument);
-            }
+        this.typeVariablesByName = new HashMap<>();
+        Type[] typeArguments = targetType.getActualTypeArguments();
+        for (int index = 0; index < genericParams.length; index++) {
+            Type typeArgument = parentTypeVariables.resolveGenericTypePlaceholder(typeArguments[index]);
+            this.typeVariablesByName.put(genericParams[index].getName(), typeArgument);
         }
     }
 
