@@ -27,6 +27,9 @@ public class SimpleTypeModule implements Module {
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
+        builder.forFields().addNullableCheck(field -> field.getType().isPrimitive() ? Boolean.FALSE : null);
+        builder.forMethods().addNullableCheck(method -> method.getReturnType().isPrimitive() ? Boolean.FALSE : null);
+
         builder.withFixedTypeMapping(SchemaConstants.TAG_TYPE_STRING,
                 String.class, Character.class, char.class, CharSequence.class);
 
