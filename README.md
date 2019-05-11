@@ -36,9 +36,8 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 ```
 ```java
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper)
-    .withDisabled(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT) // default: enabled
-    .withDisabled(Option.METHODS_RETURN_NULLABLE_BY_DEFAULT) // default: enabled
-    .withEnabled(Option.DEFINITIONS_FOR_ALL_OBJECTS); // default: disabled
+    .with(Option.DEFINITIONS_FOR_ALL_OBJECTS), // default: disabled
+    .without(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT, Option.METHODS_RETURN_NULLABLE_BY_DEFAULT); // default: enabled
 ```
 
 #### Adding Separate Modules (e.g. from another library)
@@ -49,5 +48,5 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 ```java
 Module separateModule = new YourSeparateModule();
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper)
-    .withModule(separateModule);
+    .with(separateModule);
 ```
