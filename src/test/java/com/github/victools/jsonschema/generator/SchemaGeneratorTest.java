@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.List;
@@ -27,7 +26,6 @@ import java.util.Scanner;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.naming.TestCaseName;
-import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +40,7 @@ public class SchemaGeneratorTest {
 
     Object parametersForTestGenerateSchema_SimpleType() {
         return new Object[][]{
+            {Object.class, SchemaConstants.TAG_TYPE_OBJECT},
             {String.class, SchemaConstants.TAG_TYPE_STRING},
             {Character.class, SchemaConstants.TAG_TYPE_STRING},
             {char.class, SchemaConstants.TAG_TYPE_STRING},
@@ -50,17 +49,16 @@ public class SchemaGeneratorTest {
             {boolean.class, SchemaConstants.TAG_TYPE_BOOLEAN},
             {Integer.class, SchemaConstants.TAG_TYPE_INTEGER},
             {int.class, SchemaConstants.TAG_TYPE_INTEGER},
-            {Short.class, SchemaConstants.TAG_TYPE_INTEGER},
-            {short.class, SchemaConstants.TAG_TYPE_INTEGER},
             {Long.class, SchemaConstants.TAG_TYPE_INTEGER},
             {long.class, SchemaConstants.TAG_TYPE_INTEGER},
+            {Short.class, SchemaConstants.TAG_TYPE_INTEGER},
+            {short.class, SchemaConstants.TAG_TYPE_INTEGER},
+            {Byte.class, SchemaConstants.TAG_TYPE_INTEGER},
+            {byte.class, SchemaConstants.TAG_TYPE_INTEGER},
             {Double.class, SchemaConstants.TAG_TYPE_NUMBER},
             {double.class, SchemaConstants.TAG_TYPE_NUMBER},
             {Float.class, SchemaConstants.TAG_TYPE_NUMBER},
-            {float.class, SchemaConstants.TAG_TYPE_NUMBER},
-            {Byte.class, SchemaConstants.TAG_TYPE_NUMBER},
-            {byte.class, SchemaConstants.TAG_TYPE_NUMBER},
-            {Object.class, SchemaConstants.TAG_TYPE_OBJECT}
+            {float.class, SchemaConstants.TAG_TYPE_NUMBER}
         };
     }
 
@@ -70,31 +68,35 @@ public class SchemaGeneratorTest {
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper()).build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(targetType);
+        Assert.assertEquals(2, result.size());
         Assert.assertNotNull(result.get("$schema"));
-        JSONAssert.assertEquals("{\"type\":\"" + expectedJsonSchemaType + "\"}", new JSONObject(result.toString()), JSONCompareMode.LENIENT);
+        Assert.assertEquals(expectedJsonSchemaType, result.get(SchemaConstants.TAG_TYPE).asText());
     }
 
-    Object parametersForTestGenerateSchema_Object() {
+    Object parametersForTestGenerateSchema() {
         return new Object[][]{
-            {"default-options", EnumSet.noneOf(Option.class), EnumSet.noneOf(Option.class)},
-            {"no-getters", EnumSet.of(Option.EXCLUDE_GETTER_METHODS), EnumSet.noneOf(Option.class)},
-            {"with-void-methods", EnumSet.noneOf(Option.class), EnumSet.of(Option.EXCLUDE_VOID_METHODS)},
-            {"not-nullable-fields", EnumSet.noneOf(Option.class), EnumSet.of(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT)}
+            {"testclass1_default-options", TestClass1.class, EnumSet.noneOf(Option.class), EnumSet.noneOf(Option.class)},
+            {"testclass1_no-getters", TestClass1.class, EnumSet.of(Option.EXCLUDE_GETTER_METHODS), EnumSet.noneOf(Option.class)},
+            {"testclass1_with-void-methods", TestClass1.class, EnumSet.noneOf(Option.class), EnumSet.of(Option.EXCLUDE_VOID_METHODS)},
+            {"testclass1_not-nullable-fields", TestClass1.class, EnumSet.noneOf(Option.class), EnumSet.of(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT)},
+            {"testclass2_array", TestClass2[].class, EnumSet.noneOf(Option.class), EnumSet.noneOf(Option.class)},
+            {"testclass3_default-options", TestClass3.class, EnumSet.noneOf(Option.class), EnumSet.noneOf(Option.class)}
         };
     }
 
     @Test
     @Parameters
     @TestCaseName(value = "{method}({0}) [{index}]")
-    public void testGenerateSchema_Object(String caseTitle, EnumSet<Option> enabledOptions, EnumSet<Option> disabledOptions) throws Exception {
+    public void testGenerateSchema(String caseTitle, Class<?> targetType,
+            EnumSet<Option> enabledOptions, EnumSet<Option> disabledOptions) throws Exception {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper());
-        enabledOptions.forEach(configBuilder::withEnabled);
-        disabledOptions.forEach(configBuilder::withDisabled);
+        enabledOptions.forEach(configBuilder::with);
+        disabledOptions.forEach(configBuilder::without);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
-        JsonNode result = generator.generateSchema(TestClass1.class);
+        JsonNode result = generator.generateSchema(targetType);
         System.out.println(caseTitle + "\n" + result.toString());
-        JSONAssert.assertEquals(loadResource("testclass1_" + caseTitle + ".json"), result.toString(), JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.NON_EXTENSIBLE);
     }
 
     private static final String loadResource(String resourcePath) throws IOException {
@@ -114,7 +116,7 @@ public class SchemaGeneratorTest {
         public static final Long CONSTANT = 5L;
 
         private int primitiveValue;
-        private Integer internalValue;
+        private Integer ignoredInternalValue;
 
         public int getPrimitiveValue() {
             return this.primitiveValue;
@@ -132,6 +134,7 @@ public class SchemaGeneratorTest {
     private static class TestClass2<T> {
 
         private T genericValue;
+        public T[] genericArray;
 
         public T getGenericValue() {
             return this.genericValue;
@@ -140,20 +143,20 @@ public class SchemaGeneratorTest {
 
     private static class TestClass3 {
 
-        private List<BigDecimal> decimalValues;
-        private TestClass2<Long> nested;
-        private String text;
+        private TestClass2<Long> nestedLong;
+        private TestClass2<TestClass1[]> nestedClass1Array;
+        private List<? extends TestClass2<Long>> nestedLongList;
 
-        public List<BigDecimal> getDecimalValues() {
-            return decimalValues;
+        public TestClass2<Long> getNestedLong() {
+            return this.nestedLong;
         }
 
-        public TestClass2<Long> getNested() {
-            return nested;
+        public TestClass2<TestClass1[]> getNestedClass1Array() {
+            return this.nestedClass1Array;
         }
 
-        public String getText() {
-            return text;
+        public List<? extends TestClass2<Long>> getNestedLongList() {
+            return this.nestedLongList;
         }
     }
 }

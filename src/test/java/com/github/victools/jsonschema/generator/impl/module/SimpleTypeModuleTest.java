@@ -16,7 +16,7 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
-import com.github.victools.jsonschema.generator.SchemaConstants;
+import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import java.lang.reflect.Field;
@@ -53,16 +53,8 @@ public class SimpleTypeModuleTest {
         Mockito.verifyNoMoreInteractions(methodConfigPart);
         Mockito.verify(this.builder, Mockito.times(2)).forMethods();
 
-        Mockito.verify(this.builder).withFixedTypeMapping(SchemaConstants.TAG_TYPE_STRING,
-                String.class, Character.class, char.class, CharSequence.class);
-        Mockito.verify(this.builder).withFixedTypeMapping(SchemaConstants.TAG_TYPE_BOOLEAN,
-                Boolean.class, boolean.class);
-        Mockito.verify(this.builder).withFixedTypeMapping(SchemaConstants.TAG_TYPE_INTEGER,
-                Integer.class, int.class, Short.class, short.class, Long.class, long.class);
-        Mockito.verify(this.builder).withFixedTypeMapping(SchemaConstants.TAG_TYPE_NUMBER,
-                Double.class, double.class, Float.class, float.class, Byte.class, byte.class);
-        Mockito.verify(this.builder).withFixedTypeMapping(SchemaConstants.TAG_TYPE_OBJECT,
-                Object.class);
+        Mockito.verify(this.builder).getObjectMapper();
+        Mockito.verify(this.builder).with(Mockito.any(CustomDefinitionProvider.class));
 
         Mockito.verifyNoMoreInteractions(this.builder);
     }

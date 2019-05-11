@@ -20,12 +20,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.impl.SchemaGeneratorConfigImpl;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -37,7 +36,7 @@ public class SchemaGeneratorConfigBuilder {
     private final Map<Option, Boolean> options = new HashMap<>();
     private final SchemaGeneratorConfigPart<Field> fieldConfigPart = new SchemaGeneratorConfigPart<>();
     private final SchemaGeneratorConfigPart<Method> methodConfigPart = new SchemaGeneratorConfigPart<>();
-    private final Map<Class<?>, List<Function<Type, CustomDefinition>>> customDefinitions = new HashMap<>();
+    private final List<CustomDefinitionProvider> customDefinitions = new ArrayList<>();
 
     /**
      * Constructor of an empty configuration builder.
@@ -57,90 +56,15 @@ public class SchemaGeneratorConfigBuilder {
         // apply the configurations associated with enabled settings/options
         Stream.of(Option.values())
                 .filter(setting -> this.options.getOrDefault(setting, setting.isEnabledByDefault()))
-                .forEach(this::withModule);
+                .map(Option::getModule)
+                .filter(Objects::nonNull)
+                .forEach(this::with);
         // construct the actual configuration instance
         return new SchemaGeneratorConfigImpl(this.objectMapper,
                 this.options,
                 this.fieldConfigPart,
                 this.methodConfigPart,
                 this.customDefinitions);
-    }
-
-    /**
-     * Applying a module to this configuration builder instance.
-     *
-     * @param module configuration module to add/apply
-     * @return this builder instance (for chaining)
-     */
-    public SchemaGeneratorConfigBuilder withModule(Module module) {
-        module.applyToConfigBuilder(this);
-        return this;
-    }
-
-    /**
-     * Enable an option for the schema generation.
-     *
-     * @param setting generator option to enable
-     * @return this builder instance (for chaining)
-     */
-    public SchemaGeneratorConfigBuilder withEnabled(Option setting) {
-        this.options.put(setting, true);
-        return this;
-    }
-
-    /**
-     * Disable an option for the schema generation.
-     *
-     * @param setting generator option to disable
-     * @return this builder instance (for chaining)
-     */
-    public SchemaGeneratorConfigBuilder withDisabled(Option setting) {
-        this.options.put(setting, false);
-        return this;
-    }
-
-    /**
-     * Check whether the given setting/option has been set and if yes, whether it is enabled or disabled.
-     *
-     * @param setting generator option to check for
-     * @return currently configured flag (i.e. true/false if already set), or null if not configured (yet)
-     */
-    public Boolean getSetting(Option setting) {
-        return this.options.get(setting);
-    }
-
-    /**
-     * Map certain java types to a schema containing only a "type" property of the specified value.
-     *
-     * @param jsonSchemaTypeValue textual representation of the resulting JSON schema's "type"
-     * @param javaTypes java types to map to such a simple schema representation
-     * @return this builder instance (for chaining)
-     */
-    public SchemaGeneratorConfigBuilder withFixedTypeMapping(String jsonSchemaTypeValue, Class<?>... javaTypes) {
-        Function<Type, CustomDefinition> customDefinition = _genericType -> new CustomDefinition(
-                this.objectMapper.createObjectNode().put(SchemaConstants.TAG_TYPE, jsonSchemaTypeValue), true);
-        for (Class<?> javaType : javaTypes) {
-            this.withCustomDefinition(javaType, customDefinition);
-        }
-        return this;
-    }
-
-    /**
-     * Adding an optional custom schema definition for a certain (raw) java type. Falls-back to the next custom schema definition for the same tyoe if
-     * the given one returns null. If there is no further custom schema provider, then the standard behaviour is applied.
-     *
-     * @param javaType (raw) java type for which to register a custom definition provider
-     * @param definitionProvider provider of a custom definition to register, which may return null
-     * @return this builder instance (for chaining)
-     */
-    public SchemaGeneratorConfigBuilder withCustomDefinition(Class<?> javaType, Function<Type, CustomDefinition> definitionProvider) {
-        List<Function<Type, CustomDefinition>> valueList = this.customDefinitions.get(javaType);
-        if (valueList == null) {
-            valueList = new ArrayList<>();
-            this.customDefinitions.put(javaType, valueList);
-        }
-        valueList.add(definitionProvider);
-        return this;
     }
 
     /**
@@ -159,5 +83,88 @@ public class SchemaGeneratorConfigBuilder {
      */
     public SchemaGeneratorConfigPart<Method> forMethods() {
         return this.methodConfigPart;
+    }
+
+    /**
+     * Retrieve the associated object mapper instance.
+     *
+     * @return supplier for object and array nodes for the JSON structure being generated
+     */
+    public ObjectMapper getObjectMapper() {
+        return this.objectMapper;
+    }
+
+    /**
+     * Check whether the given setting/option has been set and if yes, whether it is enabled or disabled.
+     *
+     * @param setting generator option to check for
+     * @return currently configured flag (i.e. true/false if already set), or null if not configured
+     */
+    public Boolean getSetting(Option setting) {
+        return this.options.get(setting);
+    }
+
+    /**
+     * Applying a module to this configuration builder instance.
+     *
+     * @param module configuration module to add/apply
+     * @return this builder instance (for chaining)
+     */
+    public SchemaGeneratorConfigBuilder with(Module module) {
+        module.applyToConfigBuilder(this);
+        return this;
+    }
+
+    /**
+     * Adding a custom schema provider – if it returns null for a given type, the next definition provider will be applied.
+     * <br>
+     * If all custom schema providers return null (or there is none), then the standard behaviour applies.
+     *
+     * @param definitionProvider provider of a custom definition to register, which may return null
+     * @return this builder instance (for chaining)
+     */
+    public SchemaGeneratorConfigBuilder with(CustomDefinitionProvider definitionProvider) {
+        this.customDefinitions.add(definitionProvider);
+        return this;
+    }
+
+    /**
+     * Enable an option for the schema generation.
+     *
+     * @param setting generator option to enable
+     * @param moreSettings additional generator options to enable
+     * @return this builder instance (for chaining)
+     */
+    public SchemaGeneratorConfigBuilder with(Option setting, Option... moreSettings) {
+        return this.setOptionEnabled(setting, moreSettings, true);
+    }
+
+    /**
+     * Disable an option for the schema generation.
+     *
+     * @param setting generator option to disable
+     * @param moreSettings additional generator options to disable
+     * @return this builder instance (for chaining)
+     */
+    public SchemaGeneratorConfigBuilder without(Option setting, Option... moreSettings) {
+        return this.setOptionEnabled(setting, moreSettings, false);
+    }
+
+    /**
+     * Enabled/disable an option for the schema generation.
+     *
+     * @param setting generator option to enabled/disable
+     * @param moreSettings additional generator options to enable/disable
+     * @param enabled whether to enable or disable the given generator options
+     * @return this builder instance (for chaining)
+     */
+    private SchemaGeneratorConfigBuilder setOptionEnabled(Option setting, Option[] moreSettings, boolean enabled) {
+        this.options.put(setting, enabled);
+        if (moreSettings != null) {
+            for (Option additionalSetting : moreSettings) {
+                this.options.put(additionalSetting, enabled);
+            }
+        }
+        return this;
     }
 }

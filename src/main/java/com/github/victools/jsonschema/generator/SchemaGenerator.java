@@ -18,6 +18,7 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.github.victools.jsonschema.generator.impl.JsonNodeUtils;
@@ -138,7 +139,8 @@ public class SchemaGenerator {
         logger.debug("looking-up component type of array {}", targetType);
         Type itemType = ReflectionTypeUtils.getArrayComponentType(targetType, typeVariables);
         logger.debug("resolved array component type {}", itemType);
-        this.traverseGenericType(itemType, arrayItemTypeRef, false, TypeVariableContext.forType(targetType, typeVariables), generationContext);
+        TypeVariableContext targetTypeVariables = TypeVariableContext.forType(itemType, typeVariables);
+        this.traverseGenericType(itemType, arrayItemTypeRef, false, targetTypeVariables, generationContext);
     }
 
     /**
@@ -152,7 +154,11 @@ public class SchemaGenerator {
      */
     private void traverseObjectType(Type targetType, ObjectNode targetNode, boolean isNullable,
             TypeVariableContext typeVariables, SchemaGenerationContext generationContext) {
-        CustomDefinition customDefinition = this.config.getCustomDefinition(targetType);
+        TypeVariableContext targetTypeVariables = TypeVariableContext.forType(targetType, typeVariables);
+        if (typeVariables != TypeVariableContext.EMPTY_SCOPE) {
+            logger.debug("traversing {} with {}", targetType, typeVariables);
+        }
+        CustomDefinition customDefinition = this.config.getCustomDefinition(targetType, typeVariables);
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
             if (targetNode == null) {
                 logger.debug("storing configured custom inline type for {} as definition (since it is the main schema \"#\")", targetType);
@@ -175,10 +181,13 @@ public class SchemaGenerator {
                 logger.debug("generating definition for {}", targetType);
                 definition.put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_OBJECT);
 
-                final Map<String, ObjectNode> targetProperties = new TreeMap<>();
+                final Map<String, JsonNode> targetProperties = new TreeMap<>();
                 Type currentTargetType = targetType;
-                while (currentTargetType != null && currentTargetType != Object.class) {
-                    TypeVariableContext currentTypeVariableScope = TypeVariableContext.forType(currentTargetType, typeVariables);
+                do {
+                    if (currentTargetType != targetType) {
+                        targetTypeVariables = TypeVariableContext.forType(currentTargetType, targetTypeVariables);
+                    }
+                    final TypeVariableContext currentTypeVariableScope = targetTypeVariables;
                     final Class<?> currentTargetClass = ReflectionTypeUtils.getRawType(currentTargetType);
                     logger.debug("iterating over declared fields from {}", currentTargetClass);
                     Stream.of(currentTargetClass.getDeclaredFields())
@@ -187,12 +196,12 @@ public class SchemaGenerator {
                             .forEach(field -> this.populateField(field, targetProperties, currentTypeVariableScope, generationContext));
                     logger.debug("iterating over declared public methods from {}", currentTargetClass);
                     Stream.of(currentTargetClass.getDeclaredMethods())
-                            .filter(declaredMethod -> (declaredMethod.getModifiers() & Modifier.PUBLIC) != 0)
+                            .filter(declaredMethod -> (declaredMethod.getModifiers() & Modifier.PUBLIC) == Modifier.PUBLIC)
                             .filter(declaredMethod -> !this.config.shouldIgnore(declaredMethod))
                             .sorted(Comparator.comparing(Method::toGenericString))
                             .forEach(method -> this.populateMethod(method, targetProperties, currentTypeVariableScope, generationContext));
                     currentTargetType = currentTargetClass.getGenericSuperclass();
-                }
+                } while (currentTargetType != null && currentTargetType != Object.class);
                 if (!targetProperties.isEmpty()) {
                     definition.set(SchemaConstants.TAG_PROPERTIES, this.config.createObjectNode().setAll(targetProperties));
                 }
@@ -211,7 +220,7 @@ public class SchemaGenerator {
      * @param typeVariables mapping of generic type variables to their actual types (according the declaring type's type arguments)
      * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
-    private void populateField(Field field, Map<String, ObjectNode> parentProperties, TypeVariableContext typeVariables,
+    private void populateField(Field field, Map<String, JsonNode> parentProperties, TypeVariableContext typeVariables,
             SchemaGenerationContext generationContext) {
         ObjectNode subSchema = this.config.createObjectNode();
         String defaultName = field.getName();
@@ -222,7 +231,8 @@ public class SchemaGenerator {
         }
 
         Type fieldType = typeVariables.resolveGenericTypePlaceholder(field.getGenericType());
-        fieldType = Optional.ofNullable(this.config.resolveTargetTypeOverride(field, fieldType)).orElse(fieldType);
+        fieldType = Optional.ofNullable(this.config.resolveTargetTypeOverride(field, fieldType))
+                .orElse(fieldType);
         boolean isNullable = this.config.isNullable(field);
         ObjectNode fieldAttributes = this.collectFieldAttributes(field);
 
@@ -237,7 +247,7 @@ public class SchemaGenerator {
      * @param typeVariables mapping of generic type variables to their actual types (according the declaring type's type arguments)
      * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
-    private void populateMethod(Method method, Map<String, ObjectNode> parentProperties, TypeVariableContext typeVariables,
+    private void populateMethod(Method method, Map<String, JsonNode> parentProperties, TypeVariableContext typeVariables,
             SchemaGenerationContext generationContext) {
         ObjectNode subSchema = this.config.createObjectNode();
         String defaultName = this.buildMethodName(method);
@@ -246,13 +256,19 @@ public class SchemaGenerator {
             return;
         }
 
-        Type returnValueType = typeVariables.resolveGenericTypePlaceholder(method.getGenericReturnType());
+        TypeVariableContext extendedTypeVariables = TypeVariableContext.forMethod(method, typeVariables);
+        Type returnValueType = extendedTypeVariables.resolveGenericTypePlaceholder(method.getGenericReturnType());
         returnValueType = Optional.ofNullable(this.config.resolveTargetTypeOverride(method, returnValueType))
                 .orElse(returnValueType);
-        boolean isNullable = this.config.isNullable(method);
-        ObjectNode methodAttributes = this.collectMethodAttributes(method);
 
-        this.populateSchema(returnValueType, subSchema, isNullable, typeVariables, methodAttributes, generationContext);
+        if (returnValueType == void.class) {
+            parentProperties.replace(propertyName, subSchema, BooleanNode.FALSE);
+        } else {
+            boolean isNullable = this.config.isNullable(method);
+            ObjectNode methodAttributes = this.collectMethodAttributes(method);
+
+            this.populateSchema(returnValueType, subSchema, isNullable, extendedTypeVariables, methodAttributes, generationContext);
+        }
     }
 
     /**
@@ -284,11 +300,10 @@ public class SchemaGenerator {
             TypeVariableContext typeVariables, ObjectNode collectedAttributes, SchemaGenerationContext generationContext) {
         // create an "allOf" wrapper for the attributes related to this particular field and its general type
         ObjectNode referenceContainer;
-        CustomDefinition customDefinition = this.config.getCustomDefinition(javaType);
+        CustomDefinition customDefinition = this.config.getCustomDefinition(javaType, typeVariables);
         if (collectedAttributes == null
                 || collectedAttributes.size() == 0
                 || (customDefinition != null && customDefinition.isMeantToBeInline())
-                || javaType == void.class
                 || ReflectionTypeUtils.isArrayType(javaType)) {
             // no need for the allOf, can use the sub-schema instance directly as reference
             referenceContainer = targetNode;
@@ -307,7 +322,7 @@ public class SchemaGenerator {
             if (isNullable) {
                 this.makeNullable(referenceContainer);
             }
-        } else if (javaType != void.class) {
+        } else {
             // only add reference for separate definition if it is not a fixed type that should be in-lined
             try {
                 this.traverseGenericType(javaType, referenceContainer, isNullable, typeVariables, generationContext);

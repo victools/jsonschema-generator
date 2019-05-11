@@ -5,6 +5,12 @@
         "CONSTANT": {
             "type": "integer"
         },
+        "genericArray": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
         "genericValue": {
             "type": "string"
         },

@@ -20,9 +20,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
+import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.TypePlaceholderResolver;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -32,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Default implementation of a schema generator's configuration.
@@ -43,7 +44,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     private final Map<Option, Boolean> options;
     private final SchemaGeneratorConfigPart<Field> fieldConfigPart;
     private final SchemaGeneratorConfigPart<Method> methodConfigPart;
-    private final Map<Class<?>, List<Function<Type, CustomDefinition>>> customDefinitions;
+    private final List<CustomDefinitionProvider> customDefinitions;
 
     /**
      * Constructor of a configuration instance.
@@ -52,13 +53,13 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      * @param options specifically configured settings/options (thereby overriding the default enabled/disabled flag)
      * @param fieldConfigPart configuration part for fields
      * @param methodConfigPart configuration part for methods
-     * @param customDefinitions custom suppliers for a type's (sub) schema definition
+     * @param customDefinitions custom suppliers for a type's schema definition
      */
     public SchemaGeneratorConfigImpl(ObjectMapper objectMapper,
             Map<Option, Boolean> options,
             SchemaGeneratorConfigPart<Field> fieldConfigPart,
             SchemaGeneratorConfigPart<Method> methodConfigPart,
-            Map<Class<?>, List<Function<Type, CustomDefinition>>> customDefinitions) {
+            List<CustomDefinitionProvider> customDefinitions) {
         this.objectMapper = objectMapper;
         this.options = options;
         this.fieldConfigPart = fieldConfigPart;
@@ -92,14 +93,9 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public CustomDefinition getCustomDefinition(Type javaType) {
-        Class<?> rawType = ReflectionTypeUtils.getRawType(javaType);
-        List<Function<Type, CustomDefinition>> definitionMappings = this.customDefinitions.get(rawType);
-        if (definitionMappings == null) {
-            return null;
-        }
-        CustomDefinition result = definitionMappings.stream()
-                .map(objectNodeSupplier -> objectNodeSupplier.apply(javaType))
+    public CustomDefinition getCustomDefinition(Type javaType, TypePlaceholderResolver placeholderResolver) {
+        CustomDefinition result = this.customDefinitions.stream()
+                .map(provider -> provider.provideCustomSchemaDefinition(javaType, placeholderResolver))
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);

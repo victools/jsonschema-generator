@@ -39,14 +39,14 @@ public class SchemaGeneratorConfigBuilderTest {
     }
 
     @Test
-    public void testGetSetting_WithEnabled() {
-        Assert.assertSame(this.builder, this.builder.withEnabled(Option.DEFINITIONS_FOR_ALL_OBJECTS));
+    public void testGetSetting_WithOption() {
+        Assert.assertSame(this.builder, this.builder.with(Option.DEFINITIONS_FOR_ALL_OBJECTS));
         Assert.assertTrue(this.builder.getSetting(Option.DEFINITIONS_FOR_ALL_OBJECTS));
     }
 
     @Test
-    public void testGetSetting_WithDisabled() {
-        Assert.assertSame(this.builder, this.builder.withDisabled(Option.DEFINITIONS_FOR_ALL_OBJECTS));
+    public void testGetSetting_WithoutOption() {
+        Assert.assertSame(this.builder, this.builder.without(Option.DEFINITIONS_FOR_ALL_OBJECTS));
         Assert.assertFalse(this.builder.getSetting(Option.DEFINITIONS_FOR_ALL_OBJECTS));
     }
 

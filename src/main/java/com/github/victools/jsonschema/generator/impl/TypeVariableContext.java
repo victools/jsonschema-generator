@@ -16,7 +16,9 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
+import com.github.victools.jsonschema.generator.TypePlaceholderResolver;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -24,6 +26,7 @@ import java.lang.reflect.WildcardType;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Collection of type variables and their associated types (as far as they can be resolved).
  */
-public final class TypeVariableContext {
+public final class TypeVariableContext implements TypePlaceholderResolver {
 
     private static final Logger logger = LoggerFactory.getLogger(TypeVariableContext.class);
 
@@ -50,7 +53,8 @@ public final class TypeVariableContext {
     public static TypeVariableContext forType(Type targetType, TypeVariableContext parentTypeVariables) {
         TypeVariableContext result;
         if (targetType instanceof Class<?> && ((Class<?>) targetType).getTypeParameters().length > 0) {
-            result = new TypeVariableContext((Class<?>) targetType);
+            TypeVariable<?>[] genericParams = ((Class<?>) targetType).getTypeParameters();
+            result = new TypeVariableContext(genericParams, TypeVariableContext.EMPTY_SCOPE);
         } else if (targetType instanceof ParameterizedType) {
             result = new TypeVariableContext((ParameterizedType) targetType, parentTypeVariables);
         } else if (targetType instanceof GenericArrayType) {
@@ -61,16 +65,29 @@ public final class TypeVariableContext {
         return result;
     }
 
+    public static TypeVariableContext forMethod(Method targetMethod, TypeVariableContext parentTypeVariables) {
+        TypeVariableContext result;
+        TypeVariable<?>[] genericParams = targetMethod.getTypeParameters();
+        if (genericParams.length == 0) {
+            result = parentTypeVariables;
+        } else {
+            result = new TypeVariableContext(genericParams, parentTypeVariables);
+        }
+        return result;
+    }
+
     /**
      * Mapped type variable names to their respective values (as far as they can be resolved).
      */
     private final Map<String, Type> typeVariablesByName;
+    private final TypeVariableContext parentContext;
 
     /**
      * Constructor: only intended to be used by the {@link TypeVariableContext#EMPTY_SCOPE}.
      */
     private TypeVariableContext() {
         this.typeVariablesByName = Collections.emptyMap();
+        this.parentContext = null;
     }
 
     /**
@@ -78,14 +95,14 @@ public final class TypeVariableContext {
      *
      * @param targetType type for which to collect type variables and their associated types
      */
-    private TypeVariableContext(Class<?> targetType) {
-        TypeVariable<?>[] genericParams = targetType.getTypeParameters();
-        this.typeVariablesByName = new HashMap<>();
+    private TypeVariableContext(TypeVariable<?>[] genericParams, TypeVariableContext baseTypeVariables) {
+        this.typeVariablesByName = new HashMap<>(baseTypeVariables.typeVariablesByName);
         for (TypeVariable<?> singleParameter : genericParams) {
             Type[] bounds = singleParameter.getBounds();
             Type typeArgument = Stream.of(bounds).findFirst().orElse(Object.class);
             this.typeVariablesByName.put(singleParameter.getName(), typeArgument);
         }
+        this.parentContext = baseTypeVariables.parentContext;
     }
 
     /**
@@ -102,36 +119,33 @@ public final class TypeVariableContext {
             Type typeArgument = parentTypeVariables.resolveGenericTypePlaceholder(typeArguments[index]);
             this.typeVariablesByName.put(genericParams[index].getName(), typeArgument);
         }
+        this.parentContext = parentTypeVariables;
     }
 
-    /**
-     * Determine the actual type behind the given {@link TypeVariable} or {@link WildcardType} (as far as possible).
-     * <br>
-     * If the given type is not a {@link TypeVariable} or {@link WildcardType}, it will be returned as-is.
-     *
-     * @param targetType (possible) TypeVariable or WildcardType to resolve
-     * @return actual type behind the given target type
-     */
+    @Override
     public Type resolveGenericTypePlaceholder(Type targetType) {
         Type actualTargetType = targetType;
         while (actualTargetType instanceof TypeVariable || actualTargetType instanceof WildcardType) {
             logger.debug("attempting to resolve actual type of {}", actualTargetType);
-            Type newTargetType = actualTargetType;
-            if (newTargetType instanceof WildcardType) {
-                newTargetType = Stream.of(((WildcardType) newTargetType).getUpperBounds()).findFirst().orElse(Object.class);
+            Type newTargetType;
+            if (actualTargetType instanceof WildcardType) {
+                newTargetType = Stream.of(((WildcardType) actualTargetType).getUpperBounds()).findFirst().orElse(null);
                 logger.debug("looked-up upper bound of wildcard type: {}", newTargetType);
-            } else if (newTargetType instanceof TypeVariable) {
-                String variableName = ((TypeVariable) newTargetType).getName();
+            } else if (actualTargetType instanceof TypeVariable) {
+                String variableName = ((TypeVariable) actualTargetType).getName();
                 if (this.typeVariablesByName.containsKey(variableName)) {
                     newTargetType = this.typeVariablesByName.get(variableName);
                     logger.debug("resolved type variable \"{}\" as {}", variableName, newTargetType);
+                } else if (this.parentContext != null) {
+                    newTargetType = this.parentContext.resolveGenericTypePlaceholder(actualTargetType);
                 } else {
-                    throw new IllegalStateException(variableName + " is an undefined variable in this context. Maybe wrong context was applied?");
+                    throw new IllegalStateException(variableName + " is an undefined variable in this " + this.toString()
+                            + ". Maybe wrong context was applied?");
                 }
+            } else {
+                newTargetType = null;
             }
-            if (newTargetType == actualTargetType
-                    || newTargetType == Object.class
-                    || newTargetType == null) {
+            if (newTargetType == null || newTargetType == actualTargetType) {
                 logger.info("Skipping type variable {} as no specific type can be determined beyond {}.",
                         targetType.getTypeName(), actualTargetType.getTypeName());
                 return Object.class;
@@ -139,5 +153,12 @@ public final class TypeVariableContext {
             actualTargetType = newTargetType;
         }
         return actualTargetType;
+    }
+
+    @Override
+    public String toString() {
+        return this.typeVariablesByName.entrySet().stream()
+                .map(entry -> entry.getKey() + " > " + entry.getValue())
+                .collect(Collectors.joining(",\n\t", "TypeVariableContext(\n\t", "\n)"));
     }
 }

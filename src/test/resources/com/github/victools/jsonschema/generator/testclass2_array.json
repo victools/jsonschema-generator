@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "genericArray": {
+                "type": ["array", "null"],
+                "items": {
+                    "type": "object"
+                }
+            },
+            "genericValue": {
+                "type": ["object", "null"]
+            },
+            "getGenericValue()": {
+                "type": ["object", "null"]
+            }
+        }
+    }
+}

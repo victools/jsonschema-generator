@@ -1,0 +1,111 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "TestClass2<Long>": {
+            "type": "object",
+            "properties": {
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "genericValue": {
+                    "type": ["integer", "null"]
+                },
+                "getGenericValue()": {
+                    "type": ["integer", "null"]
+                }
+            }
+        },
+        "nullable-TestClass2<Long>": {
+            "oneOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestClass2<Long>"
+                }]
+        },
+        "TestClass1": {
+            "type": "object",
+            "properties": {
+                "CONSTANT": {
+                    "type": ["integer", "null"]
+                },
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "genericValue": {
+                    "type": ["string", "null"]
+                },
+                "getGenericValue()": {
+                    "type": ["string", "null"]
+                },
+                "getPrimitiveValue()": {
+                    "type": "integer"
+                },
+                "isSimpleTestClass()": {
+                    "type": "boolean"
+                },
+                "primitiveValue": {
+                    "type": "integer"
+                }
+            }
+        },
+        "nullable-TestClass2<TestClass1[]>": {
+            "type": ["object", "null"],
+            "properties": {
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/TestClass1"
+                        }
+                    }
+                },
+                "genericValue": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/TestClass1"
+                    }
+                },
+                "getGenericValue()": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/TestClass1"
+                    }
+                }
+            }
+        }
+    },
+    "type": "object",
+    "properties": {
+        "getNestedClass1Array()": {
+            "$ref": "#/definitions/nullable-TestClass2<TestClass1[]>"
+        },
+        "getNestedLong()": {
+            "$ref": "#/definitions/nullable-TestClass2<Long>"
+        },
+        "getNestedLongList()": {
+            "type": ["array", "null"],
+            "items": {
+                "$ref": "#/definitions/TestClass2<Long>"
+            }
+        },
+        "nestedClass1Array": {
+            "$ref": "#/definitions/nullable-TestClass2<TestClass1[]>"
+        },
+        "nestedLong": {
+            "$ref": "#/definitions/nullable-TestClass2<Long>"
+        },
+        "nestedLongList": {
+            "type": ["array", "null"],
+            "items": {
+                "$ref": "#/definitions/TestClass2<Long>"
+            }
+        }
+    }
+}

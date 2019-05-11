@@ -5,6 +5,12 @@
         "CONSTANT": {
             "type": ["integer", "null"]
         },
+        "genericArray": {
+            "type": ["array", "null"],
+            "items": {
+                "type": "string"
+            }
+        },
         "genericValue": {
             "type": ["string", "null"]
         },
