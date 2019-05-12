@@ -1,30 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
-        "TestClass2<Long>": {
-            "type": "object",
-            "properties": {
-                "genericArray": {
-                    "type": ["array", "null"],
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "genericValue": {
-                    "type": ["integer", "null"]
-                },
-                "getGenericValue()": {
-                    "type": ["integer", "null"]
-                }
-            }
-        },
-        "nullable-TestClass2<Long>": {
-            "oneOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/TestClass2<Long>"
-                }]
-        },
         "TestClass1": {
             "type": "object",
             "properties": {
@@ -54,7 +30,31 @@
                 }
             }
         },
-        "nullable-TestClass2<TestClass1[]>": {
+        "TestClass2<Long>": {
+            "type": "object",
+            "properties": {
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "genericValue": {
+                    "type": ["integer", "null"]
+                },
+                "getGenericValue()": {
+                    "type": ["integer", "null"]
+                }
+            }
+        },
+        "TestClass2<Long> (nullable)": {
+            "oneOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestClass2<Long>"
+                }]
+        },
+        "TestClass2<TestClass1[]> (nullable)": {
             "type": ["object", "null"],
             "properties": {
                 "genericArray": {
@@ -79,15 +79,49 @@
                     }
                 }
             }
+        },
+        "TestClass2<TestClass2<String>> (nullable)": {
+            "type": ["object", "null"],
+            "properties": {
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "genericValue": {
+                    "type": ["string", "null"]
+                },
+                "getGenericValue()": {
+                    "type": ["string", "null"]
+                }
+            }
+        },
+        "TestClass4<String> (nullable)": {
+            "type": ["object", "null"],
+            "properties": {
+                "class2OfClass2OfT": {
+                    "$ref": "#/definitions/TestClass2<TestClass2<String>> (nullable)"
+                },
+                "getClass2OfClass2OfT()": {
+                    "$ref": "#/definitions/TestClass2<TestClass2<String>> (nullable)"
+                }
+            }
         }
     },
     "type": "object",
     "properties": {
+        "class4": {
+            "$ref": "#/definitions/TestClass4<String> (nullable)"
+        },
+        "getClass4()": {
+            "$ref": "#/definitions/TestClass4<String> (nullable)"
+        },
         "getNestedClass1Array()": {
-            "$ref": "#/definitions/nullable-TestClass2<TestClass1[]>"
+            "$ref": "#/definitions/TestClass2<TestClass1[]> (nullable)"
         },
         "getNestedLong()": {
-            "$ref": "#/definitions/nullable-TestClass2<Long>"
+            "$ref": "#/definitions/TestClass2<Long> (nullable)"
         },
         "getNestedLongList()": {
             "type": ["array", "null"],
@@ -96,10 +130,10 @@
             }
         },
         "nestedClass1Array": {
-            "$ref": "#/definitions/nullable-TestClass2<TestClass1[]>"
+            "$ref": "#/definitions/TestClass2<TestClass1[]> (nullable)"
         },
         "nestedLong": {
-            "$ref": "#/definitions/nullable-TestClass2<Long>"
+            "$ref": "#/definitions/TestClass2<Long> (nullable)"
         },
         "nestedLongList": {
             "type": ["array", "null"],

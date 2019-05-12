@@ -21,10 +21,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.JavaType;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.TypePlaceholderResolver;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -93,9 +93,9 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public CustomDefinition getCustomDefinition(Type javaType, TypePlaceholderResolver placeholderResolver) {
+    public CustomDefinition getCustomDefinition(JavaType javaType) {
         CustomDefinition result = this.customDefinitions.stream()
-                .map(provider -> provider.provideCustomSchemaDefinition(javaType, placeholderResolver))
+                .map(provider -> provider.provideCustomSchemaDefinition(javaType))
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);

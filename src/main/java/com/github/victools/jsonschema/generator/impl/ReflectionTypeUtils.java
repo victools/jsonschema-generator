@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
+import com.github.victools.jsonschema.generator.JavaType;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -77,24 +78,24 @@ public final class ReflectionTypeUtils {
     /**
      * Determine the type of the item/component within the given array type.
      *
-     * @param javaArrayType array type for which to determine the type of contained items/components
-     * @param typeVariables type variables in the array's context
+     * @param arrayType array type for which to determine the type of contained items/components
      * @return item/component type
      * @see #isArrayType(Type)
      */
-    public static Type getArrayComponentType(Type javaArrayType, TypeVariableContext typeVariables) {
-        TypeVariableContext componentTypeVariables = typeVariables;
+    public static Type getArrayComponentType(JavaType arrayType) {
+        Type genericType = arrayType.getType();
+        TypeVariableContext componentTypeVariables = TypeVariableContext.forType(arrayType);
         Type componentType = null;
-        if (ReflectionTypeUtils.isArrayType(javaArrayType)) {
-            if (javaArrayType instanceof GenericArrayType) {
+        if (ReflectionTypeUtils.isArrayType(genericType)) {
+            if (genericType instanceof GenericArrayType) {
                 // an array whose component type is either a ParameterizedType or a TypeVariable
-                componentType = ((GenericArrayType) javaArrayType).getGenericComponentType();
-            } else if (javaArrayType instanceof Class<?>) {
+                componentType = ((GenericArrayType) genericType).getGenericComponentType();
+            } else if (genericType instanceof Class<?>) {
                 // an array whose component type is a plain Class
-                componentType = ((Class<?>) javaArrayType).getComponentType();
-            } else if (javaArrayType instanceof ParameterizedType) {
+                componentType = ((Class<?>) genericType).getComponentType();
+            } else if (genericType instanceof ParameterizedType) {
                 // an implementation of the Collection interface
-                ParameterizedType parameterizedTargetType = (ParameterizedType) javaArrayType;
+                ParameterizedType parameterizedTargetType = (ParameterizedType) genericType;
                 Class<?> rawTargetType = (Class<?>) parameterizedTargetType.getRawType();
                 while (rawTargetType != Collection.class) {
                     Type collectionSuperType = Stream.of(rawTargetType.getGenericInterfaces())
@@ -109,7 +110,7 @@ public final class ReflectionTypeUtils {
             }
         }
         if (componentType == null) {
-            throw new UnsupportedOperationException("Cannot determine array component type for target: " + javaArrayType);
+            throw new UnsupportedOperationException("Cannot determine array component type for target: " + genericType);
         }
         return componentTypeVariables.resolveGenericTypePlaceholder(componentType);
     }

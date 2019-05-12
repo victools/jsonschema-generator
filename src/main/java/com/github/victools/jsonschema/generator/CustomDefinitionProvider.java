@@ -16,8 +16,6 @@
 
 package com.github.victools.jsonschema.generator;
 
-import java.lang.reflect.Type;
-
 /**
  * Provider of non-standard JSON schema definitions.
  */
@@ -27,8 +25,7 @@ public interface CustomDefinitionProvider {
      * Look-up the non-standard JSON schema definition for a given type. If it returns null, the next definition provider is expected to be applied.
      *
      * @param javaType generic type to provide custom definition for
-     * @param placeholderResolver resolver for type variables in the specific context (if the javaType is a generic/parameterized type)
      * @return non-standard JSON schema definition (may be null)
      */
-    CustomDefinition provideCustomSchemaDefinition(Type javaType, TypePlaceholderResolver placeholderResolver);
+    CustomDefinition provideCustomSchemaDefinition(JavaType javaType);
 }

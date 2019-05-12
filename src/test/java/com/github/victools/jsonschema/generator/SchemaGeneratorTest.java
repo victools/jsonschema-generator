@@ -96,12 +96,13 @@ public class SchemaGeneratorTest {
 
         JsonNode result = generator.generateSchema(targetType);
         System.out.println(caseTitle + "\n" + result.toString());
-        JSONAssert.assertEquals(loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 
     private static final String loadResource(String resourcePath) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
-        try (InputStream inputStream = SchemaGeneratorTest.class.getResourceAsStream(resourcePath);
+        try (InputStream inputStream = SchemaGeneratorTest.class
+                .getResourceAsStream(resourcePath);
                 Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
             while (scanner.hasNext()) {
                 stringBuilder.append(scanner.nextLine()).append('\n');
@@ -109,6 +110,7 @@ public class SchemaGeneratorTest {
         }
         String fileAsString = stringBuilder.toString();
         return fileAsString;
+
     }
 
     private static class TestClass1 extends TestClass2<String> {
@@ -146,6 +148,7 @@ public class SchemaGeneratorTest {
         private TestClass2<Long> nestedLong;
         private TestClass2<TestClass1[]> nestedClass1Array;
         private List<? extends TestClass2<Long>> nestedLongList;
+        private TestClass4<String> class4;
 
         public TestClass2<Long> getNestedLong() {
             return this.nestedLong;
@@ -157,6 +160,19 @@ public class SchemaGeneratorTest {
 
         public List<? extends TestClass2<Long>> getNestedLongList() {
             return this.nestedLongList;
+        }
+
+        public TestClass4<String> getClass4() {
+            return this.class4;
+        }
+    }
+
+    private static class TestClass4<T> {
+
+        private TestClass2<TestClass2<T>> class2OfClass2OfT;
+
+        public TestClass2<TestClass2<T>> getClass2OfClass2OfT() {
+            return this.class2OfClass2OfT;
         }
     }
 }

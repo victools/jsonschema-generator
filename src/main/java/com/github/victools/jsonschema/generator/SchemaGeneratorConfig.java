@@ -54,10 +54,9 @@ public interface SchemaGeneratorConfig {
      * Look-up the non-standard JSON schema definition for a given type. If this returns null, the standard behaviour is expected to be applied.
      *
      * @param javaType generic type to provide custom definition for
-     * @param placeholderResolver resolver for type variables in the specific context (if the javaType is a generic/parameterized type)
      * @return non-standard JSON schema definition (may be null)
      */
-    CustomDefinition getCustomDefinition(Type javaType, TypePlaceholderResolver placeholderResolver);
+    CustomDefinition getCustomDefinition(JavaType javaType);
 
     /**
      * Check whether a field/property is nullable.

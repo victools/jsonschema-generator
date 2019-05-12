@@ -20,10 +20,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.JavaType;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.TypePlaceholderResolver;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -146,7 +146,8 @@ public class SimpleTypeModule implements Module {
         }
 
         @Override
-        public CustomDefinition provideCustomSchemaDefinition(Type genericType, TypePlaceholderResolver placeholderResolver) {
+        public CustomDefinition provideCustomSchemaDefinition(JavaType javaType) {
+            Type genericType = javaType.getType();
             if (!(genericType instanceof Class<?>)) {
                 return null;
             }

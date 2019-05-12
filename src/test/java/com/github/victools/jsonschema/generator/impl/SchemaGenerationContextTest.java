@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.JavaType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +33,7 @@ public class SchemaGenerationContextTest {
     @Test
     public void testHandlingDefinition_ExistentNode() {
         SchemaGenerationContext context = new SchemaGenerationContext();
-        Type javaType = Mockito.mock(Type.class);
+        JavaType javaType = Mockito.mock(JavaType.class);
         ObjectNode definitionInput = Mockito.mock(ObjectNode.class);
         SchemaGenerationContext returnValue = context.putDefinition(javaType, definitionInput);
 
@@ -45,7 +46,7 @@ public class SchemaGenerationContextTest {
     @Test
     public void testHandlingDefinition_EmptyContext() {
         SchemaGenerationContext context = new SchemaGenerationContext();
-        Type javaType = Mockito.mock(Type.class);
+        JavaType javaType = Mockito.mock(JavaType.class);
 
         Assert.assertFalse(context.containsDefinition(javaType));
         Assert.assertNull(context.getDefinition(javaType));
@@ -55,7 +56,7 @@ public class SchemaGenerationContextTest {
     @Test
     public void testReference_SameType() {
         SchemaGenerationContext context = new SchemaGenerationContext();
-        Type javaType = Mockito.mock(Type.class);
+        JavaType javaType = Mockito.mock(JavaType.class);
 
         // initially, all lists are empty
         Assert.assertEquals(Collections.<ObjectNode>emptyList(), context.getReferences(javaType));
@@ -86,8 +87,8 @@ public class SchemaGenerationContextTest {
     @Test
     public void testReference_DifferentTypes() {
         SchemaGenerationContext context = new SchemaGenerationContext();
-        Type javaTypeOne = Mockito.mock(Type.class);
-        Type javaTypeTwo = Mockito.mock(Type.class);
+        JavaType javaTypeOne = Mockito.mock(JavaType.class);
+        JavaType javaTypeTwo = Mockito.mock(JavaType.class);
 
         // adding an entry creates the "references" list for that type
         ObjectNode referenceInputOne = Mockito.mock(ObjectNode.class);

@@ -21,11 +21,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.JavaType;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,37 +101,36 @@ public class SchemaGeneratorConfigImplTest {
 
     @Test
     public void testGetCustomDefinition_noMapping() {
-        Assert.assertNull(this.instance.getCustomDefinition(String.class, TypeVariableContext.EMPTY_SCOPE));
+        Assert.assertNull(this.instance.getCustomDefinition(new JavaType(String.class, TypeVariableContext.EMPTY_SCOPE)));
     }
 
     @Test
     public void testGetCustomDefinition_withMappingReturningNull() {
         CustomDefinitionProvider provider = Mockito.mock(CustomDefinitionProvider.class);
         this.customDefinitions.add(provider);
-        Type javaType = double.class;
-        TypeVariableContext context = TypeVariableContext.EMPTY_SCOPE;
-        Assert.assertNull(this.instance.getCustomDefinition(javaType, context));
+        JavaType javaType = new JavaType(double.class, TypeVariableContext.EMPTY_SCOPE);
+        Assert.assertNull(this.instance.getCustomDefinition(javaType));
 
         // ensure that the provider has been called and the given java type and type variable context were forward accordingly
-        Mockito.verify(provider).provideCustomSchemaDefinition(javaType, context);
+        Mockito.verify(provider).provideCustomSchemaDefinition(javaType);
     }
 
     @Test
     public void testGetCustomDefinition_withMappingReturningValue() {
         CustomDefinition value = Mockito.mock(CustomDefinition.class);
-        this.customDefinitions.add((_input1, _input2) -> value);
-        Assert.assertSame(value, this.instance.getCustomDefinition(Boolean.class, TypeVariableContext.EMPTY_SCOPE));
+        this.customDefinitions.add(_input -> value);
+        Assert.assertSame(value, this.instance.getCustomDefinition(new JavaType(Boolean.class, TypeVariableContext.EMPTY_SCOPE)));
     }
 
     @Test
     public void testGetCustomDefinition_withMultipleMappings() {
         CustomDefinition valueOne = Mockito.mock(CustomDefinition.class);
         CustomDefinition valueTwo = Mockito.mock(CustomDefinition.class);
-        this.customDefinitions.add((_input1, _input2) -> null);
-        this.customDefinitions.add((_input1, _input2) -> valueOne);
-        this.customDefinitions.add((_input1, _input2) -> valueTwo);
+        this.customDefinitions.add(_input -> null);
+        this.customDefinitions.add(_input -> valueOne);
+        this.customDefinitions.add(_input -> valueTwo);
         // ignoring definition look-ups that return null, but taking the first non-null definition
-        Assert.assertSame(valueOne, this.instance.getCustomDefinition(Float.class, TypeVariableContext.EMPTY_SCOPE));
+        Assert.assertSame(valueOne, this.instance.getCustomDefinition(new JavaType(Float.class, TypeVariableContext.EMPTY_SCOPE)));
     }
 
     Object parametersForTestIsNullable() {

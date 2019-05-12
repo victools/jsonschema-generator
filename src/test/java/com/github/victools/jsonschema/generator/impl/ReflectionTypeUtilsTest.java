@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
+import com.github.victools.jsonschema.generator.JavaType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -102,7 +103,7 @@ public class ReflectionTypeUtilsTest {
     public void testGetArrayComponentType_ClassResult(String fieldName, Class<?> expectedResult) throws Exception {
         Type fieldType = TestClass.class.getDeclaredField(fieldName).getGenericType();
         TypeVariableContext typeVariables = TypeVariableContext.forType(TestClass.class, TypeVariableContext.EMPTY_SCOPE);
-        Type result = ReflectionTypeUtils.getArrayComponentType(fieldType, typeVariables);
+        Type result = ReflectionTypeUtils.getArrayComponentType(new JavaType(fieldType, typeVariables));
 
         Assert.assertSame(expectedResult, result);
     }
@@ -115,7 +116,7 @@ public class ReflectionTypeUtilsTest {
     })
     public void testGetArrayComponentType_notAnArray(String fieldName) throws Exception {
         Type fieldType = TestClass.class.getDeclaredField(fieldName).getGenericType();
-        ReflectionTypeUtils.getArrayComponentType(fieldType, TypeVariableContext.EMPTY_SCOPE);
+        ReflectionTypeUtils.getArrayComponentType(new JavaType(fieldType, TypeVariableContext.EMPTY_SCOPE));
     }
 
     private static class TestClass<S, T extends Number> {
