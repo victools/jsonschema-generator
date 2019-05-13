@@ -24,6 +24,7 @@ import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
 import com.github.victools.jsonschema.generator.JavaType;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.TypeVariableContext;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -151,11 +152,11 @@ public class SchemaGeneratorConfigImplTest {
     @Parameters(method = "parametersForTestIsNullable")
     public void testIsNullableField(Boolean configResult, Boolean optionEnabled, boolean expectedResult) throws Exception {
         Field field = TestClass.class.getDeclaredField("field");
-        Mockito.when(this.fieldConfigPart.isNullable(field)).thenReturn(configResult);
+        Mockito.when(this.fieldConfigPart.isNullable(field, null)).thenReturn(configResult);
         if (optionEnabled != null) {
             this.options.put(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT, optionEnabled);
         }
-        boolean result = this.instance.isNullable(field);
+        boolean result = this.instance.isNullable(field, null);
         Assert.assertEquals(expectedResult, result);
     }
 
@@ -163,11 +164,11 @@ public class SchemaGeneratorConfigImplTest {
     @Parameters(method = "parametersForTestIsNullable")
     public void testIsNullableMethod(Boolean configResult, Boolean optionEnabled, boolean expectedResult) throws Exception {
         Method method = TestClass.class.getDeclaredMethod("getField");
-        Mockito.when(this.methodConfigPart.isNullable(method)).thenReturn(configResult);
+        Mockito.when(this.methodConfigPart.isNullable(method, null)).thenReturn(configResult);
         if (optionEnabled != null) {
             this.options.put(Option.METHODS_RETURN_NULLABLE_BY_DEFAULT, optionEnabled);
         }
-        boolean result = this.instance.isNullable(method);
+        boolean result = this.instance.isNullable(method, null);
         Assert.assertEquals(expectedResult, result);
     }
 

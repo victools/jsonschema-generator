@@ -24,6 +24,7 @@ import com.github.victools.jsonschema.generator.JavaType;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.impl.ReflectionTypeUtils;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -119,12 +120,27 @@ public class SimpleTypeModule implements Module {
         return this.with(javaType, SchemaConstants.TAG_TYPE_NUMBER);
     }
 
+    /**
+     * Determine whether a given type is nullable – returning false if the type refers to a primitive type.
+     *
+     * @param <F> either method or field
+     * @param firstParameter reference to the method/field (which is being ignored here)
+     * @param type method return value's or field's type
+     * @return false if type is a primitive, otherwise null
+     */
+    private <F> Boolean isNullableType(F firstParameter, JavaType type) {
+        // no need to resolve the JavaType, as generics cannot contain primitive types
+        Class<?> rawType = ReflectionTypeUtils.getRawType(type.getType());
+        if (rawType != null && rawType.isPrimitive()) {
+            return Boolean.FALSE;
+        }
+        return null;
+    }
+
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
-        builder.forFields()
-                .addNullableCheck(field -> field.getType().isPrimitive() ? Boolean.FALSE : null);
-        builder.forMethods()
-                .addNullableCheck(method -> method.getReturnType().isPrimitive() ? Boolean.FALSE : null);
+        builder.forFields().addNullableCheck(this::isNullableType);
+        builder.forMethods().addNullableCheck(this::isNullableType);
 
         builder.with(new SimpleTypeDefinitionProvider(builder.getObjectMapper()));
     }

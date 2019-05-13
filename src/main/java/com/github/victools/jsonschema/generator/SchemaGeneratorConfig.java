@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Collection;
 
@@ -62,17 +61,19 @@ public interface SchemaGeneratorConfig {
      * Check whether a field/property is nullable.
      *
      * @param field object's field/property to check
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return whether the field/property is nullable
      */
-    boolean isNullable(Field field);
+    boolean isNullable(Field field, JavaType fieldType);
 
     /**
      * Check whether a method's return value is nullable.
      *
      * @param method method to check
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return whether the method's return value is nullable
      */
-    boolean isNullable(Method method);
+    boolean isNullable(Method method, JavaType returnValueType);
 
     /**
      * Check whether a field/property should be ignored.
@@ -97,7 +98,7 @@ public interface SchemaGeneratorConfig {
      * @param defaultType default type to be used if no override value is being provided
      * @return target type (may be null)
      */
-    Type resolveTargetTypeOverride(Field field, Type defaultType);
+    JavaType resolveTargetTypeOverride(Field field, JavaType defaultType);
 
     /**
      * Determine the alternative target type from a method's return value.
@@ -106,7 +107,7 @@ public interface SchemaGeneratorConfig {
      * @param defaultType default type to be used if no override value is being provided
      * @return target type (may be null)
      */
-    Type resolveTargetTypeOverride(Method method, Type defaultType);
+    JavaType resolveTargetTypeOverride(Method method, JavaType defaultType);
 
     /**
      * Determine the alternative name in a parent JSON Schema's "properties" from an object's field/property.
@@ -130,223 +131,251 @@ public interface SchemaGeneratorConfig {
      * Determine the "title" of an object's field/property.
      *
      * @param field object's field/property to determine "title" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "title" in a JSON Schema (may be null)
      */
-    String resolveTitle(Field field);
+    String resolveTitle(Field field, JavaType fieldType);
 
     /**
      * Determine the "title" of a method's return value.
      *
      * @param method method for whose return value to determine "title" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "title" in a JSON Schema (may be null)
      */
-    String resolveTitle(Method method);
+    String resolveTitle(Method method, JavaType returnValueType);
 
     /**
      * Determine the "description" of an object's field/property.
      *
      * @param field object's field/property to determine "description" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "description" in a JSON Schema (may be null)
      */
-    String resolveDescription(Field field);
+    String resolveDescription(Field field, JavaType fieldType);
 
     /**
      * Determine the "description" of a method's return value.
      *
      * @param method method for whose return value to determine "description" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "description" in a JSON Schema (may be null)
      */
-    String resolveDescription(Method method);
+    String resolveDescription(Method method, JavaType returnValueType);
 
     /**
      * Determine the "enum"/"const" of an object's field/property.
      *
      * @param field object's field/property to determine "enum"/"const" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "enum"/"const" in a JSON Schema (may be null)
      */
-    Collection<?> resolveEnum(Field field);
+    Collection<?> resolveEnum(Field field, JavaType fieldType);
 
     /**
      * Determine the "enum"/"const" of a method's return value.
      *
      * @param method method for whose return value to determine "enum"/"const" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "enum"/"const" in a JSON Schema (may be null)
      */
-    Collection<?> resolveEnum(Method method);
+    Collection<?> resolveEnum(Method method, JavaType returnValueType);
 
     /**
      * Determine the "minLength" of an object's field/property.
      *
      * @param field object's field/property to determine "minLength" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "minLength" in a JSON Schema (may be null)
      */
-    Integer resolveStringMinLength(Field field);
+    Integer resolveStringMinLength(Field field, JavaType fieldType);
 
     /**
      * Determine the "minLength" of a method's return value.
      *
      * @param method method for whose return value to determine "minLength" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "minLength" in a JSON Schema (may be null)
      */
-    Integer resolveStringMinLength(Method method);
+    Integer resolveStringMinLength(Method method, JavaType returnValueType);
 
     /**
      * Determine the "maxLength" of an object's field/property.
      *
      * @param field object's field/property to determine "maxLength" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "maxLength" in a JSON Schema (may be null)
      */
-    Integer resolveStringMaxLength(Field field);
+    Integer resolveStringMaxLength(Field field, JavaType fieldType);
 
     /**
      * Determine the "maxLength" of a method's return value.
      *
      * @param method method for whose return value to determine "maxLength" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "maxLength" in a JSON Schema (may be null)
      */
-    Integer resolveStringMaxLength(Method method);
+    Integer resolveStringMaxLength(Method method, JavaType returnValueType);
 
     /**
      * Determine the "format" of an object's field/property.
      *
      * @param field object's field/property to determine "format" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "format" in a JSON Schema (may be null)
      */
-    String resolveStringFormat(Field field);
+    String resolveStringFormat(Field field, JavaType fieldType);
 
     /**
      * Determine the "format" of a method's return value.
      *
      * @param method method for whose return value to determine "format" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "format" in a JSON Schema (may be null)
      */
-    String resolveStringFormat(Method method);
+    String resolveStringFormat(Method method, JavaType returnValueType);
 
     /**
      * Determine the "minimum" of an object's field/property.
      *
      * @param field object's field/property to determine "minimum" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "minimum" in a JSON Schema (may be null)
      */
-    BigDecimal resolveNumberInclusiveMinimum(Field field);
+    BigDecimal resolveNumberInclusiveMinimum(Field field, JavaType fieldType);
 
     /**
      * Determine the "minimum" of a method's return value.
      *
      * @param method method for whose return value to determine "minimum" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "minimum" in a JSON Schema (may be null)
      */
-    BigDecimal resolveNumberInclusiveMinimum(Method method);
+    BigDecimal resolveNumberInclusiveMinimum(Method method, JavaType returnValueType);
 
     /**
      * Determine the "exclusiveMinimum" of an object's field/property.
      *
      * @param field object's field/property to determine "exclusiveMinimum" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "exclusiveMinimum" in a JSON Schema (may be null)
      */
-    BigDecimal resolveNumberExclusiveMinimum(Field field);
+    BigDecimal resolveNumberExclusiveMinimum(Field field, JavaType fieldType);
 
     /**
      * Determine the "exclusiveMinimum" of a method's return value.
      *
      * @param method method for whose return value to determine "exclusiveMinimum" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "exclusiveMinimum" in a JSON Schema (may be null)
      */
-    BigDecimal resolveNumberExclusiveMinimum(Method method);
+    BigDecimal resolveNumberExclusiveMinimum(Method method, JavaType returnValueType);
 
     /**
      * Determine the "maximum" of an object's field/property.
      *
      * @param field object's field/property to determine "maximum" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "maximum" in a JSON Schema (may be null)
      */
-    BigDecimal resolveNumberInclusiveMaximum(Field field);
+    BigDecimal resolveNumberInclusiveMaximum(Field field, JavaType fieldType);
 
     /**
      * Determine the "maximum" of a method's return value.
      *
      * @param method method for whose return value to determine "maximum" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "maximum" in a JSON Schema (may be null)
      */
-    BigDecimal resolveNumberInclusiveMaximum(Method method);
+    BigDecimal resolveNumberInclusiveMaximum(Method method, JavaType returnValueType);
 
     /**
      * Determine the "exclusiveMaximum" of an object's field/property.
      *
      * @param field object's field/property to determine "exclusiveMaximum" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "exclusiveMaximum" in a JSON Schema (may be null)
      */
-    BigDecimal resolveNumberExclusiveMaximum(Field field);
+    BigDecimal resolveNumberExclusiveMaximum(Field field, JavaType fieldType);
 
     /**
      * Determine the "exclusiveMaximum" of a method's return value.
      *
      * @param method method for whose return value to determine "exclusiveMaximum" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "exclusiveMaximum" in a JSON Schema (may be null)
      */
-    BigDecimal resolveNumberExclusiveMaximum(Method method);
+    BigDecimal resolveNumberExclusiveMaximum(Method method, JavaType returnValueType);
 
     /**
      * Determine the "multipleOf" of an object's field/property.
      *
      * @param field object's field/property to determine "multipleOf" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "multipleOf" in a JSON Schema (may be null)
      */
-    BigDecimal resolveNumberMultipleOf(Field field);
+    BigDecimal resolveNumberMultipleOf(Field field, JavaType fieldType);
 
     /**
      * Determine the "multipleOf" of a method's return value.
      *
      * @param method method for whose return value to determine "multipleOf" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "multipleOf" in a JSON Schema (may be null)
      */
-    BigDecimal resolveNumberMultipleOf(Method method);
+    BigDecimal resolveNumberMultipleOf(Method method, JavaType returnValueType);
 
     /**
      * Determine the "minItems" of an object's field/property.
      *
      * @param field object's field/property to determine "minItems" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "minItems" in a JSON Schema (may be null)
      */
-    Integer resolveArrayMinItems(Field field);
+    Integer resolveArrayMinItems(Field field, JavaType fieldType);
 
     /**
      * Determine the "minItems" of a method's return value.
      *
      * @param method method for whose return value to determine "minItems" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "minItems" in a JSON Schema (may be null)
      */
-    Integer resolveArrayMinItems(Method method);
+    Integer resolveArrayMinItems(Method method, JavaType returnValueType);
 
     /**
      * Determine the "maxItems" of an object's field/property.
      *
      * @param field object's field/property to determine "maxItems" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "maxItems" in a JSON Schema (may be null)
      */
-    Integer resolveArrayMaxItems(Field field);
+    Integer resolveArrayMaxItems(Field field, JavaType fieldType);
 
     /**
      * Determine the "maxItems" of a method's return value.
      *
      * @param method method for whose return value to determine "maxItems" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "maxItems" in a JSON Schema (may be null)
      */
-    Integer resolveArrayMaxItems(Method method);
+    Integer resolveArrayMaxItems(Method method, JavaType returnValueType);
 
     /**
      * Determine the "uniqueItems" of an object's field/property.
      *
      * @param field object's field/property to determine "uniqueItems" value for
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(Field, JavaType)})
      * @return "uniqueItems" in a JSON Schema (may be null)
      */
-    Boolean resolveArrayUniqueItems(Field field);
+    Boolean resolveArrayUniqueItems(Field field, JavaType fieldType);
 
     /**
      * Determine the "uniqueItems" of a method's return value.
      *
      * @param method method for whose return value to determine "uniqueItems" value for
+     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(Method, JavaType)})
      * @return "uniqueItems" in a JSON Schema (may be null)
      */
-    Boolean resolveArrayUniqueItems(Method method);
+    Boolean resolveArrayUniqueItems(Method method, JavaType returnValueType);
 }

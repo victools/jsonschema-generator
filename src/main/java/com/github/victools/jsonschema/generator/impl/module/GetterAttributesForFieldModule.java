@@ -24,7 +24,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * Default module being included if {@code Option.INCLUDE_GETTER_ATTRIBUTES_FOR_FIELDS} is enabled.
@@ -34,25 +33,12 @@ public class GetterAttributesForFieldModule implements Module {
     /**
      * Create a field's resolver method that applies the given method resolver on the field's getter (if there is one).
      *
+     * @param <D> expected second parameter
      * @param <R> expected attribute value being resolved
      * @param resolver resolver for a method to be applied on a field's getter (if there is one)
      * @return generated resolver for a field
      */
-    private static <R> Function<Field, R> resolveForGetterMethod(Function<Method, R> resolver) {
-        return field -> Optional.ofNullable(ReflectionGetterUtils.findGetterForField(field))
-                .map(resolver)
-                .orElse(null);
-    }
-
-    /**
-     * Create a field's resolver method that applies the given method resolver on the field's getter (if there is one).
-     *
-     * @param <D> expected default value type
-     * @param <R> expected attribute value being resolved
-     * @param resolver resolver for a method to be applied on a field's getter (if there is one)
-     * @return generated resolver for a field
-     */
-    private static <D, R> BiFunction<Field, D, R> resolveForGetterMethodWithDefault(BiFunction<Method, D, R> resolver) {
+    private static <D, R> BiFunction<Field, D, R> resolveForGetter(BiFunction<Method, D, R> resolver) {
         return (field, defaultValue) -> Optional.ofNullable(ReflectionGetterUtils.findGetterForField(field))
                 .map(method -> resolver.apply(method, defaultValue))
                 .orElse(null);
@@ -62,21 +48,21 @@ public class GetterAttributesForFieldModule implements Module {
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         SchemaGeneratorConfigPart<Method> methodConfigPart = builder.forMethods();
         builder.forFields()
-                .addArrayMaxItemsResolver(resolveForGetterMethod(methodConfigPart::resolveArrayMaxItems))
-                .addArrayMinItemsResolver(resolveForGetterMethod(methodConfigPart::resolveArrayMinItems))
-                .addArrayUniqueItemsResolver(resolveForGetterMethod(methodConfigPart::resolveArrayUniqueItems))
-                .addDescriptionResolver(resolveForGetterMethod(methodConfigPart::resolveDescription))
-                .addEnumResolver(resolveForGetterMethod(methodConfigPart::resolveEnum))
-                .addNullableCheck(resolveForGetterMethod(methodConfigPart::isNullable))
-                .addNumberExclusiveMaximumResolver(resolveForGetterMethod(methodConfigPart::resolveNumberExclusiveMaximum))
-                .addNumberExclusiveMinimumResolver(resolveForGetterMethod(methodConfigPart::resolveNumberExclusiveMinimum))
-                .addNumberInclusiveMaximumResolver(resolveForGetterMethod(methodConfigPart::resolveNumberInclusiveMaximum))
-                .addNumberInclusiveMinimumResolver(resolveForGetterMethod(methodConfigPart::resolveNumberInclusiveMinimum))
-                .addNumberMultipleOfResolver(resolveForGetterMethod(methodConfigPart::resolveNumberMultipleOf))
-                .addStringFormatResolver(resolveForGetterMethod(methodConfigPart::resolveStringFormat))
-                .addStringMaxLengthResolver(resolveForGetterMethod(methodConfigPart::resolveStringMaxLength))
-                .addStringMinLengthResolver(resolveForGetterMethod(methodConfigPart::resolveStringMinLength))
-                .addTargetTypeOverrideResolver(resolveForGetterMethodWithDefault(methodConfigPart::resolveTargetTypeOverride))
-                .addTitleResolver(resolveForGetterMethod(methodConfigPart::resolveTitle));
+                .addArrayMaxItemsResolver(resolveForGetter(methodConfigPart::resolveArrayMaxItems))
+                .addArrayMinItemsResolver(resolveForGetter(methodConfigPart::resolveArrayMinItems))
+                .addArrayUniqueItemsResolver(resolveForGetter(methodConfigPart::resolveArrayUniqueItems))
+                .addDescriptionResolver(resolveForGetter(methodConfigPart::resolveDescription))
+                .addEnumResolver(resolveForGetter(methodConfigPart::resolveEnum))
+                .addNullableCheck(resolveForGetter(methodConfigPart::isNullable))
+                .addNumberExclusiveMaximumResolver(resolveForGetter(methodConfigPart::resolveNumberExclusiveMaximum))
+                .addNumberExclusiveMinimumResolver(resolveForGetter(methodConfigPart::resolveNumberExclusiveMinimum))
+                .addNumberInclusiveMaximumResolver(resolveForGetter(methodConfigPart::resolveNumberInclusiveMaximum))
+                .addNumberInclusiveMinimumResolver(resolveForGetter(methodConfigPart::resolveNumberInclusiveMinimum))
+                .addNumberMultipleOfResolver(resolveForGetter(methodConfigPart::resolveNumberMultipleOf))
+                .addStringFormatResolver(resolveForGetter(methodConfigPart::resolveStringFormat))
+                .addStringMaxLengthResolver(resolveForGetter(methodConfigPart::resolveStringMaxLength))
+                .addStringMinLengthResolver(resolveForGetter(methodConfigPart::resolveStringMinLength))
+                .addTargetTypeOverrideResolver(resolveForGetter(methodConfigPart::resolveTargetTypeOverride))
+                .addTitleResolver(resolveForGetter(methodConfigPart::resolveTitle));
     }
 }

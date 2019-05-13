@@ -24,13 +24,11 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.github.victools.jsonschema.generator.impl.JsonNodeUtils;
 import com.github.victools.jsonschema.generator.impl.ReflectionTypeUtils;
 import com.github.victools.jsonschema.generator.impl.SchemaGenerationContext;
-import com.github.victools.jsonschema.generator.impl.TypeVariableContext;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -127,10 +125,9 @@ public class SchemaGenerator {
         }
         ObjectNode arrayItemTypeRef = this.config.createObjectNode();
         definition.set(SchemaConstants.TAG_ITEMS, arrayItemTypeRef);
-        Type itemType = ReflectionTypeUtils.getArrayComponentType(targetType);
-        logger.debug("resolved array component type {}", itemType);
-        TypeVariableContext targetTypeVariables = TypeVariableContext.forType(itemType, targetType.getParentTypeVariables());
-        this.traverseGenericType(new JavaType(itemType, targetTypeVariables), arrayItemTypeRef, false, generationContext);
+        JavaType itemType = ReflectionTypeUtils.getArrayComponentType(targetType);
+        logger.debug("resolved array component type {}", itemType.getType());
+        this.traverseGenericType(itemType, arrayItemTypeRef, false, generationContext);
     }
 
     /**
@@ -164,7 +161,8 @@ public class SchemaGenerator {
                 logger.debug("generating definition for {}", targetType);
                 definition.put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_OBJECT);
 
-                final Map<String, JsonNode> targetProperties = new TreeMap<>();
+                final Map<String, JsonNode> targetFields = new TreeMap<>();
+                final Map<String, JsonNode> targetMethods = new TreeMap<>();
                 TypeVariableContext targetTypeVariables;
                 JavaType currentTargetType = targetType;
                 do {
@@ -174,18 +172,19 @@ public class SchemaGenerator {
                     logger.debug("iterating over declared fields from {}", currentTargetClass);
                     Stream.of(currentTargetClass.getDeclaredFields())
                             .filter(declaredField -> !this.config.shouldIgnore(declaredField))
-                            .sorted(Comparator.comparing(Field::getName))
-                            .forEach(field -> this.populateField(field, targetProperties, currentTypeVariableScope, generationContext));
+                            .forEach(field -> this.populateField(field, targetFields, currentTypeVariableScope, generationContext));
                     logger.debug("iterating over declared public methods from {}", currentTargetClass);
                     Stream.of(currentTargetClass.getDeclaredMethods())
                             .filter(declaredMethod -> (declaredMethod.getModifiers() & Modifier.PUBLIC) == Modifier.PUBLIC)
                             .filter(declaredMethod -> !this.config.shouldIgnore(declaredMethod))
-                            .sorted(Comparator.comparing(Method::toGenericString))
-                            .forEach(method -> this.populateMethod(method, targetProperties, currentTypeVariableScope, generationContext));
+                            .forEach(method -> this.populateMethod(method, targetMethods, currentTypeVariableScope, generationContext));
                     currentTargetType = new JavaType(currentTargetClass.getGenericSuperclass(), currentTypeVariableScope);
                 } while (currentTargetType.getType() != null && currentTargetType.getType() != Object.class);
-                if (!targetProperties.isEmpty()) {
-                    definition.set(SchemaConstants.TAG_PROPERTIES, this.config.createObjectNode().setAll(targetProperties));
+                if (!targetFields.isEmpty() || !targetMethods.isEmpty()) {
+                    ObjectNode propertiesNode = this.config.createObjectNode();
+                    propertiesNode.setAll(targetFields);
+                    propertiesNode.setAll(targetMethods);
+                    definition.set(SchemaConstants.TAG_PROPERTIES, propertiesNode);
                 }
             } else {
                 logger.debug("applying configured custom definition for {}", targetType);
@@ -204,20 +203,21 @@ public class SchemaGenerator {
      */
     private void populateField(Field field, Map<String, JsonNode> parentProperties, TypeVariableContext typeVariables,
             SchemaGenerationContext generationContext) {
-        ObjectNode subSchema = this.config.createObjectNode();
         String defaultName = field.getName();
         String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(field, defaultName)).orElse(defaultName);
-        if (parentProperties.putIfAbsent(propertyName, subSchema) != null) {
+        if (parentProperties.containsKey(propertyName)) {
             return;
         }
+        ObjectNode subSchema = this.config.createObjectNode();
+        parentProperties.put(propertyName, subSchema);
 
-        Type fieldType = typeVariables.resolveGenericTypePlaceholder(field.getGenericType());
+        JavaType fieldType = typeVariables.resolveGenericTypePlaceholder(field.getGenericType());
         fieldType = Optional.ofNullable(this.config.resolveTargetTypeOverride(field, fieldType))
                 .orElse(fieldType);
-        boolean isNullable = this.config.isNullable(field);
-        ObjectNode fieldAttributes = this.collectFieldAttributes(field);
+        boolean isNullable = this.config.isNullable(field, fieldType);
+        ObjectNode fieldAttributes = this.collectFieldAttributes(field, fieldType);
 
-        this.populateSchema(new JavaType(fieldType, typeVariables), subSchema, isNullable, fieldAttributes, generationContext);
+        this.populateSchema(fieldType, subSchema, isNullable, fieldAttributes, generationContext);
     }
 
     /**
@@ -230,38 +230,31 @@ public class SchemaGenerator {
      */
     private void populateMethod(Method method, Map<String, JsonNode> parentProperties, TypeVariableContext parentTypeVariables,
             SchemaGenerationContext generationContext) {
-        ObjectNode subSchema = this.config.createObjectNode();
-        String defaultName = this.buildMethodName(method);
-        String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(method, defaultName)).orElse(defaultName);
-        if (parentProperties.putIfAbsent(propertyName, subSchema) != null) {
-            return;
-        }
         TypeVariableContext extendedTypeVariables = TypeVariableContext.forMethod(method, parentTypeVariables);
-        Type returnValueType = extendedTypeVariables.resolveGenericTypePlaceholder(method.getGenericReturnType());
+        JavaType returnValueType = extendedTypeVariables.resolveGenericTypePlaceholder(method.getGenericReturnType());
         returnValueType = Optional.ofNullable(this.config.resolveTargetTypeOverride(method, returnValueType))
                 .orElse(returnValueType);
 
-        if (returnValueType == void.class) {
-            parentProperties.replace(propertyName, subSchema, BooleanNode.FALSE);
-        } else {
-            boolean isNullable = this.config.isNullable(method);
-            ObjectNode methodAttributes = this.collectMethodAttributes(method);
-
-            this.populateSchema(new JavaType(returnValueType, extendedTypeVariables), subSchema, isNullable, methodAttributes, generationContext);
-        }
-    }
-
-    /**
-     * Build the standard name (may be overridden) for a method, including its input parameters. The latter should ensure in most cases, that the
-     * generated method name is unique within its declaring type even if it is overloaded (same name but different parameters).
-     *
-     * @param method method for which to build the name string, including input parameters
-     * @return standard name with which to represent the given method in a generated JSON schema
-     */
-    private String buildMethodName(Method method) {
-        return method.getName() + Stream.of(method.getParameterTypes())
-                .map(Class::getSimpleName)
+        String defaultName = method.getName() + Stream.of(method.getGenericParameterTypes())
+                .map(parameter -> new JavaType(parameter, extendedTypeVariables).toString())
                 .collect(Collectors.joining(", ", "(", ")"));
+        String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(method, defaultName)).orElse(defaultName);
+        if (parentProperties.containsKey(propertyName)) {
+            logger.debug("ignoring {}.{}", method.getDeclaringClass(), method);
+            return;
+        }
+
+        if (returnValueType.getType() == void.class || returnValueType.getType() == Void.class) {
+            parentProperties.put(propertyName, BooleanNode.FALSE);
+        } else {
+            ObjectNode subSchema = this.config.createObjectNode();
+            parentProperties.put(propertyName, subSchema);
+
+            boolean isNullable = this.config.isNullable(method, returnValueType);
+            ObjectNode methodAttributes = this.collectMethodAttributes(method, returnValueType);
+
+            this.populateSchema(returnValueType, subSchema, isNullable, methodAttributes, generationContext);
+        }
     }
 
     /**
@@ -359,13 +352,14 @@ public class SchemaGenerator {
      * Collect a field's contextual attributes (i.e. everything not related to the structure).
      *
      * @param field the field for which to collect JSON schema attributes
+     * @param type associated field type
      * @return node holding all collected attributes (possibly empty)
      */
-    private ObjectNode collectFieldAttributes(Field field) {
+    private ObjectNode collectFieldAttributes(Field field, JavaType type) {
         ObjectNode node = this.config.createObjectNode();
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_TITLE, this.config.resolveTitle(field));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_DESCRIPTION, this.config.resolveDescription(field));
-        Collection<?> enumValues = this.config.resolveEnum(field);
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_TITLE, this.config.resolveTitle(field, type));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_DESCRIPTION, this.config.resolveDescription(field, type));
+        Collection<?> enumValues = this.config.resolveEnum(field, type);
         if (enumValues != null && !enumValues.isEmpty()) {
             if (enumValues.size() == 1) {
                 node.putPOJO(SchemaConstants.TAG_CONST, enumValues.iterator().next());
@@ -375,17 +369,17 @@ public class SchemaGenerator {
                 node.set(SchemaConstants.TAG_ENUM, array);
             }
         }
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_LENGTH_MIN, this.config.resolveStringMinLength(field));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_LENGTH_MAX, this.config.resolveStringMaxLength(field));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_FORMAT, this.config.resolveStringFormat(field));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_MINIMUM, this.config.resolveNumberInclusiveMinimum(field));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_MINIMUM_EXCLUSIVE, this.config.resolveNumberExclusiveMinimum(field));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_MAXIMUM, this.config.resolveNumberInclusiveMaximum(field));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_MAXIMUM_EXCLUSIVE, this.config.resolveNumberExclusiveMaximum(field));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_MULTIPLE_OF, this.config.resolveNumberMultipleOf(field));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_ITEMS_MIN, this.config.resolveArrayMinItems(field));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_ITEMS_MAX, this.config.resolveArrayMaxItems(field));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_ITEMS_UNIQUE, this.config.resolveArrayUniqueItems(field));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_LENGTH_MIN, this.config.resolveStringMinLength(field, type));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_LENGTH_MAX, this.config.resolveStringMaxLength(field, type));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_FORMAT, this.config.resolveStringFormat(field, type));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_MINIMUM, this.config.resolveNumberInclusiveMinimum(field, type));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_MINIMUM_EXCLUSIVE, this.config.resolveNumberExclusiveMinimum(field, type));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_MAXIMUM, this.config.resolveNumberInclusiveMaximum(field, type));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_MAXIMUM_EXCLUSIVE, this.config.resolveNumberExclusiveMaximum(field, type));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_MULTIPLE_OF, this.config.resolveNumberMultipleOf(field, type));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_ITEMS_MIN, this.config.resolveArrayMinItems(field, type));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_ITEMS_MAX, this.config.resolveArrayMaxItems(field, type));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_ITEMS_UNIQUE, this.config.resolveArrayUniqueItems(field, type));
         return node;
     }
 
@@ -393,13 +387,14 @@ public class SchemaGenerator {
      * Collect a method's contextual attributes (i.e. everything not related to the structure).
      *
      * @param method the method for which to collect JSON schema attributes
+     * @param returnType associated return value type
      * @return node holding all collected attributes (possibly empty)
      */
-    private ObjectNode collectMethodAttributes(Method method) {
+    private ObjectNode collectMethodAttributes(Method method, JavaType returnType) {
         ObjectNode node = this.config.createObjectNode();
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_TITLE, this.config.resolveTitle(method));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_DESCRIPTION, this.config.resolveDescription(method));
-        Collection<?> enumValues = this.config.resolveEnum(method);
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_TITLE, this.config.resolveTitle(method, returnType));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_DESCRIPTION, this.config.resolveDescription(method, returnType));
+        Collection<?> enumValues = this.config.resolveEnum(method, returnType);
         if (enumValues != null && !enumValues.isEmpty()) {
             if (enumValues.size() == 1) {
                 node.putPOJO(SchemaConstants.TAG_CONST, enumValues.iterator().next());
@@ -409,17 +404,17 @@ public class SchemaGenerator {
                 node.set(SchemaConstants.TAG_ENUM, array);
             }
         }
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_LENGTH_MIN, this.config.resolveStringMinLength(method));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_LENGTH_MAX, this.config.resolveStringMaxLength(method));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_FORMAT, this.config.resolveStringFormat(method));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_MINIMUM, this.config.resolveNumberInclusiveMinimum(method));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_MINIMUM_EXCLUSIVE, this.config.resolveNumberExclusiveMinimum(method));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_MAXIMUM, this.config.resolveNumberInclusiveMaximum(method));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_MAXIMUM_EXCLUSIVE, this.config.resolveNumberExclusiveMaximum(method));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_MULTIPLE_OF, this.config.resolveNumberMultipleOf(method));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_ITEMS_MIN, this.config.resolveArrayMinItems(method));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_ITEMS_MAX, this.config.resolveArrayMaxItems(method));
-        JsonNodeUtils.setAttributeIfNotNull(node, SchemaConstants.TAG_ITEMS_UNIQUE, this.config.resolveArrayUniqueItems(method));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_LENGTH_MIN, this.config.resolveStringMinLength(method, returnType));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_LENGTH_MAX, this.config.resolveStringMaxLength(method, returnType));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_FORMAT, this.config.resolveStringFormat(method, returnType));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_MINIMUM, this.config.resolveNumberInclusiveMinimum(method, returnType));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_MINIMUM_EXCLUSIVE, this.config.resolveNumberExclusiveMinimum(method, returnType));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_MAXIMUM, this.config.resolveNumberInclusiveMaximum(method, returnType));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_MAXIMUM_EXCLUSIVE, this.config.resolveNumberExclusiveMaximum(method, returnType));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_MULTIPLE_OF, this.config.resolveNumberMultipleOf(method, returnType));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_ITEMS_MIN, this.config.resolveArrayMinItems(method, returnType));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_ITEMS_MAX, this.config.resolveArrayMaxItems(method, returnType));
+        JsonNodeUtils.setIfValueNotNull(node, SchemaConstants.TAG_ITEMS_UNIQUE, this.config.resolveArrayUniqueItems(method, returnType));
         return node;
     }
 

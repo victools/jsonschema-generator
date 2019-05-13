@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.generator.impl;
 
 import com.github.victools.jsonschema.generator.JavaType;
+import com.github.victools.jsonschema.generator.TypeVariableContext;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -82,7 +83,7 @@ public final class ReflectionTypeUtils {
      * @return item/component type
      * @see #isArrayType(Type)
      */
-    public static Type getArrayComponentType(JavaType arrayType) {
+    public static JavaType getArrayComponentType(JavaType arrayType) {
         Type genericType = arrayType.getType();
         TypeVariableContext componentTypeVariables = TypeVariableContext.forType(arrayType);
         Type componentType = null;

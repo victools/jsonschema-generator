@@ -27,7 +27,6 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
@@ -103,14 +102,14 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public boolean isNullable(Field field) {
-        return Optional.ofNullable(this.fieldConfigPart.isNullable(field))
+    public boolean isNullable(Field field, JavaType fieldType) {
+        return Optional.ofNullable(this.fieldConfigPart.isNullable(field, fieldType))
                 .orElseGet(() -> this.isOptionEnabled(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT));
     }
 
     @Override
-    public boolean isNullable(Method method) {
-        return Optional.ofNullable(this.methodConfigPart.isNullable(method))
+    public boolean isNullable(Method method, JavaType returnValueType) {
+        return Optional.ofNullable(this.methodConfigPart.isNullable(method, returnValueType))
                 .orElseGet(() -> this.isOptionEnabled(Option.METHODS_RETURN_NULLABLE_BY_DEFAULT));
     }
 
@@ -125,12 +124,12 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public Type resolveTargetTypeOverride(Field field, Type defaultType) {
+    public JavaType resolveTargetTypeOverride(Field field, JavaType defaultType) {
         return this.fieldConfigPart.resolveTargetTypeOverride(field, defaultType);
     }
 
     @Override
-    public Type resolveTargetTypeOverride(Method method, Type defaultType) {
+    public JavaType resolveTargetTypeOverride(Method method, JavaType defaultType) {
         return this.methodConfigPart.resolveTargetTypeOverride(method, defaultType);
     }
 
@@ -145,142 +144,142 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public String resolveTitle(Field field) {
-        return this.fieldConfigPart.resolveTitle(field);
+    public String resolveTitle(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveTitle(field, fieldType);
     }
 
     @Override
-    public String resolveTitle(Method method) {
-        return this.methodConfigPart.resolveTitle(method);
+    public String resolveTitle(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveTitle(method, returnValueType);
     }
 
     @Override
-    public String resolveDescription(Field field) {
-        return this.fieldConfigPart.resolveDescription(field);
+    public String resolveDescription(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveDescription(field, fieldType);
     }
 
     @Override
-    public String resolveDescription(Method method) {
-        return this.methodConfigPart.resolveDescription(method);
+    public String resolveDescription(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveDescription(method, returnValueType);
     }
 
     @Override
-    public Collection<?> resolveEnum(Field field) {
-        return this.fieldConfigPart.resolveEnum(field);
+    public Collection<?> resolveEnum(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveEnum(field, fieldType);
     }
 
     @Override
-    public Collection<?> resolveEnum(Method method) {
-        return this.methodConfigPart.resolveEnum(method);
+    public Collection<?> resolveEnum(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveEnum(method, returnValueType);
     }
 
     @Override
-    public Integer resolveStringMinLength(Field field) {
-        return this.fieldConfigPart.resolveStringMinLength(field);
+    public Integer resolveStringMinLength(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveStringMinLength(field, fieldType);
     }
 
     @Override
-    public Integer resolveStringMinLength(Method method) {
-        return this.methodConfigPart.resolveStringMinLength(method);
+    public Integer resolveStringMinLength(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveStringMinLength(method, returnValueType);
     }
 
     @Override
-    public Integer resolveStringMaxLength(Field field) {
-        return this.fieldConfigPart.resolveStringMaxLength(field);
+    public Integer resolveStringMaxLength(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveStringMaxLength(field, fieldType);
     }
 
     @Override
-    public Integer resolveStringMaxLength(Method method) {
-        return this.methodConfigPart.resolveStringMaxLength(method);
+    public Integer resolveStringMaxLength(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveStringMaxLength(method, returnValueType);
     }
 
     @Override
-    public String resolveStringFormat(Field field) {
-        return this.fieldConfigPart.resolveStringFormat(field);
+    public String resolveStringFormat(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveStringFormat(field, fieldType);
     }
 
     @Override
-    public String resolveStringFormat(Method method) {
-        return this.methodConfigPart.resolveStringFormat(method);
+    public String resolveStringFormat(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveStringFormat(method, returnValueType);
     }
 
     @Override
-    public BigDecimal resolveNumberInclusiveMinimum(Field field) {
-        return this.fieldConfigPart.resolveNumberInclusiveMinimum(field);
+    public BigDecimal resolveNumberInclusiveMinimum(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveNumberInclusiveMinimum(field, fieldType);
     }
 
     @Override
-    public BigDecimal resolveNumberInclusiveMinimum(Method method) {
-        return this.methodConfigPart.resolveNumberInclusiveMinimum(method);
+    public BigDecimal resolveNumberInclusiveMinimum(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveNumberInclusiveMinimum(method, returnValueType);
     }
 
     @Override
-    public BigDecimal resolveNumberExclusiveMinimum(Field field) {
-        return this.fieldConfigPart.resolveNumberExclusiveMinimum(field);
+    public BigDecimal resolveNumberExclusiveMinimum(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveNumberExclusiveMinimum(field, fieldType);
     }
 
     @Override
-    public BigDecimal resolveNumberExclusiveMinimum(Method method) {
-        return this.methodConfigPart.resolveNumberExclusiveMinimum(method);
+    public BigDecimal resolveNumberExclusiveMinimum(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveNumberExclusiveMinimum(method, returnValueType);
     }
 
     @Override
-    public BigDecimal resolveNumberInclusiveMaximum(Field field) {
-        return this.fieldConfigPart.resolveNumberInclusiveMaximum(field);
+    public BigDecimal resolveNumberInclusiveMaximum(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveNumberInclusiveMaximum(field, fieldType);
     }
 
     @Override
-    public BigDecimal resolveNumberInclusiveMaximum(Method method) {
-        return this.methodConfigPart.resolveNumberInclusiveMaximum(method);
+    public BigDecimal resolveNumberInclusiveMaximum(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveNumberInclusiveMaximum(method, returnValueType);
     }
 
     @Override
-    public BigDecimal resolveNumberExclusiveMaximum(Field field) {
-        return this.fieldConfigPart.resolveNumberExclusiveMaximum(field);
+    public BigDecimal resolveNumberExclusiveMaximum(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveNumberExclusiveMaximum(field, fieldType);
     }
 
     @Override
-    public BigDecimal resolveNumberExclusiveMaximum(Method method) {
-        return this.methodConfigPart.resolveNumberExclusiveMaximum(method);
+    public BigDecimal resolveNumberExclusiveMaximum(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveNumberExclusiveMaximum(method, returnValueType);
     }
 
     @Override
-    public BigDecimal resolveNumberMultipleOf(Field field) {
-        return this.fieldConfigPart.resolveNumberMultipleOf(field);
+    public BigDecimal resolveNumberMultipleOf(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveNumberMultipleOf(field, fieldType);
     }
 
     @Override
-    public BigDecimal resolveNumberMultipleOf(Method method) {
-        return this.methodConfigPart.resolveNumberMultipleOf(method);
+    public BigDecimal resolveNumberMultipleOf(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveNumberMultipleOf(method, returnValueType);
     }
 
     @Override
-    public Integer resolveArrayMinItems(Field field) {
-        return this.fieldConfigPart.resolveArrayMinItems(field);
+    public Integer resolveArrayMinItems(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveArrayMinItems(field, fieldType);
     }
 
     @Override
-    public Integer resolveArrayMinItems(Method method) {
-        return this.methodConfigPart.resolveArrayMinItems(method);
+    public Integer resolveArrayMinItems(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveArrayMinItems(method, returnValueType);
     }
 
     @Override
-    public Integer resolveArrayMaxItems(Field field) {
-        return this.fieldConfigPart.resolveArrayMaxItems(field);
+    public Integer resolveArrayMaxItems(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveArrayMaxItems(field, fieldType);
     }
 
     @Override
-    public Integer resolveArrayMaxItems(Method method) {
-        return this.methodConfigPart.resolveArrayMaxItems(method);
+    public Integer resolveArrayMaxItems(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveArrayMaxItems(method, returnValueType);
     }
 
     @Override
-    public Boolean resolveArrayUniqueItems(Field field) {
-        return this.fieldConfigPart.resolveArrayUniqueItems(field);
+    public Boolean resolveArrayUniqueItems(Field field, JavaType fieldType) {
+        return this.fieldConfigPart.resolveArrayUniqueItems(field, fieldType);
     }
 
     @Override
-    public Boolean resolveArrayUniqueItems(Method method) {
-        return this.methodConfigPart.resolveArrayUniqueItems(method);
+    public Boolean resolveArrayUniqueItems(Method method, JavaType returnValueType) {
+        return this.methodConfigPart.resolveArrayUniqueItems(method, returnValueType);
     }
 }

@@ -24,7 +24,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * Default module being included if {@code Option.INCLUDE_FIELD_ATTRIBUTES_FOR_GETTERS} is enabled.
@@ -34,25 +33,12 @@ public class FieldAttributesForGetterModule implements Module {
     /**
      * Create a method's resolver that applies the given field resolver method on the associated field (if there is one).
      *
+     * @param <D> expected second parameter
      * @param <R> expected attribute value being resolved
      * @param resolver resolver for a field to be applied on a getter method's associated field (if there is one)
      * @return generated resolver for a getter method
      */
-    private static <R> Function<Method, R> resolveForField(Function<Field, R> resolver) {
-        return method -> Optional.ofNullable(ReflectionGetterUtils.findFieldForGetter(method))
-                .map(resolver)
-                .orElse(null);
-    }
-
-    /**
-     * Create a method's resolver that applies the given field resolver method on the associated field (if there is one).
-     *
-     * @param <D> expected default value type
-     * @param <R> expected attribute value being resolved
-     * @param resolver resolver for a field to be applied on a getter method's associated field (if there is one)
-     * @return generated resolver for a getter method
-     */
-    private static <D, R> BiFunction<Method, D, R> resolveForFieldWithDefault(BiFunction<Field, D, R> resolver) {
+    private static <D, R> BiFunction<Method, D, R> resolveForField(BiFunction<Field, D, R> resolver) {
         return (method, defaultValue) -> Optional.ofNullable(ReflectionGetterUtils.findFieldForGetter(method))
                 .map(field -> resolver.apply(field, defaultValue))
                 .orElse(null);
@@ -76,7 +62,7 @@ public class FieldAttributesForGetterModule implements Module {
                 .addStringFormatResolver(resolveForField(fieldConfigPart::resolveStringFormat))
                 .addStringMaxLengthResolver(resolveForField(fieldConfigPart::resolveStringMaxLength))
                 .addStringMinLengthResolver(resolveForField(fieldConfigPart::resolveStringMinLength))
-                .addTargetTypeOverrideResolver(resolveForFieldWithDefault(fieldConfigPart::resolveTargetTypeOverride))
+                .addTargetTypeOverrideResolver(resolveForField(fieldConfigPart::resolveTargetTypeOverride))
                 .addTitleResolver(resolveForField(fieldConfigPart::resolveTitle));
     }
 }

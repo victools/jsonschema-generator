@@ -37,7 +37,7 @@ public final class JsonNodeUtils {
      * @param attributeName name of the attribute to set
      * @param attributeValue value to set (or to ignore if it is null)
      */
-    public static void setAttributeIfNotNull(ObjectNode node, String attributeName, Object attributeValue) {
+    public static void setIfValueNotNull(ObjectNode node, String attributeName, Object attributeValue) {
         if (attributeValue != null) {
             node.putPOJO(attributeName, attributeValue);
         }

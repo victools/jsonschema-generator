@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.generator.impl;
+package com.github.victools.jsonschema.generator;
 
 import com.github.victools.jsonschema.generator.JavaType;
-import com.github.victools.jsonschema.generator.TypePlaceholderResolver;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -35,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Collection of type variables and their associated types (as far as they can be resolved).
  */
-public final class TypeVariableContext implements TypePlaceholderResolver {
+public final class TypeVariableContext {
 
     private static final Logger logger = LoggerFactory.getLogger(TypeVariableContext.class);
 
@@ -65,9 +64,17 @@ public final class TypeVariableContext implements TypePlaceholderResolver {
         TypeVariableContext result;
         if (targetType instanceof Class<?> && ((Class<?>) targetType).getTypeParameters().length > 0) {
             TypeVariable<?>[] genericParams = ((Class<?>) targetType).getTypeParameters();
-            result = new TypeVariableContext(targetType, genericParams, TypeVariableContext.EMPTY_SCOPE);
+            result = new TypeVariableContext(genericParams, TypeVariableContext.EMPTY_SCOPE);
         } else if (targetType instanceof ParameterizedType) {
-            result = new TypeVariableContext((ParameterizedType) targetType, parentTypeVariables);
+            ParameterizedType parameterizedTargetType = (ParameterizedType) targetType;
+            TypeVariable<?>[] genericParams = ((Class<?>) parameterizedTargetType.getRawType()).getTypeParameters();
+            Map<String, JavaType> typeVariables = new HashMap<>();
+            Type[] typeArguments = parameterizedTargetType.getActualTypeArguments();
+            for (int index = 0; index < genericParams.length; index++) {
+                typeVariables.put(genericParams[index].getName(),
+                        new JavaType(typeArguments[index], parentTypeVariables));
+            }
+            result = new TypeVariableContext(typeVariables, parentTypeVariables);
         } else if (targetType instanceof GenericArrayType) {
             result = parentTypeVariables;
         } else {
@@ -89,93 +96,106 @@ public final class TypeVariableContext implements TypePlaceholderResolver {
         if (genericParams.length == 0) {
             result = parentTypeVariables;
         } else {
-            result = new TypeVariableContext(parentTypeVariables.referenceType, genericParams, parentTypeVariables);
+            result = new TypeVariableContext(genericParams, parentTypeVariables);
         }
         return result;
     }
 
-    private final Type referenceType;
     /**
      * Mapped type variable names to their respective values (as far as they can be resolved).
      */
-    private final Map<String, Type> typeVariablesByName;
+    private final Map<String, JavaType> typeVariablesByName;
     private final TypeVariableContext parentContext;
 
     /**
      * Constructor: only intended to be used by the {@link TypeVariableContext#EMPTY_SCOPE}.
      */
     private TypeVariableContext() {
-        this.referenceType = null;
-        this.typeVariablesByName = Collections.emptyMap();
-        this.parentContext = null;
+        this(Collections.emptyMap(), null);
+    }
+
+    /**
+     * Constructor simply setting the given parameters to the corresponding private fields.
+     *
+     * @param typeVariablesByName mapping of type variables to their declared types
+     * @param parentContext type variables declared in the next higher level (e.g. sub-class)
+     */
+    private TypeVariableContext(Map<String, JavaType> typeVariablesByName, TypeVariableContext parentContext) {
+        this.typeVariablesByName = typeVariablesByName;
+        this.parentContext = parentContext;
     }
 
     /**
      * Constructor: for a {@link Class} or {@link Method}.
      *
-     * @param targetType reference type for which to augment the given context
      * @param genericParams additional type parameters to add to given context
      * @param baseTypeVariables declaring type's context to augment with additional type parameters
      */
-    private TypeVariableContext(Type targetType, TypeVariable<?>[] genericParams, TypeVariableContext baseTypeVariables) {
-        this.referenceType = targetType;
+    private TypeVariableContext(TypeVariable<?>[] genericParams, TypeVariableContext baseTypeVariables) {
         this.typeVariablesByName = new HashMap<>(baseTypeVariables.typeVariablesByName);
         for (TypeVariable<?> singleParameter : genericParams) {
-            Type[] bounds = singleParameter.getBounds();
-            Type typeArgument = Stream.of(bounds).findFirst().orElse(Object.class);
-            this.typeVariablesByName.put(singleParameter.getName(), typeArgument);
+            Type typeArgument = Stream.of(singleParameter.getBounds())
+                    .findFirst().orElse(Object.class);
+            this.typeVariablesByName.put(singleParameter.getName(), new JavaType(typeArgument, this));
         }
         this.parentContext = baseTypeVariables.parentContext;
     }
 
     /**
-     * Constructor: for a {@link ParameterizedType}.
+     * Determine the actual type behind the given {@link TypeVariable} or {@link WildcardType} (as far as possible).
+     * <br>
+     * If the given type is not a {@link TypeVariable} or {@link WildcardType}, it will be returned as-is.
      *
-     * @param targetType type for which to collect type variables and their associated types
-     * @param parentTypeVariables type variables present in the class where the given targetType is declared (e.g. as field)
+     * @param targetType (possible) TypeVariable or WildcardType to resolve
+     * @return actual type behind the given target type
      */
-    private TypeVariableContext(ParameterizedType targetType, TypeVariableContext parentTypeVariables) {
-        this.referenceType = targetType;
-        TypeVariable<?>[] genericParams = ((Class<?>) targetType.getRawType()).getTypeParameters();
-        this.typeVariablesByName = new HashMap<>();
-        Type[] typeArguments = targetType.getActualTypeArguments();
-        for (int index = 0; index < genericParams.length; index++) {
-            Type typeArgument = parentTypeVariables.resolveGenericTypePlaceholder(typeArguments[index]);
-            this.typeVariablesByName.put(genericParams[index].getName(), typeArgument);
+    public JavaType resolveGenericTypePlaceholder(Type targetType) {
+        Type actualTargetType = targetType;
+        while (actualTargetType instanceof WildcardType) {
+            logger.debug("resolving wildcard type's upper bound ({})", actualTargetType);
+            actualTargetType = Stream.of(((WildcardType) actualTargetType).getUpperBounds())
+                    .findFirst().orElse(Object.class);
         }
-        this.parentContext = parentTypeVariables;
+        JavaType result;
+        if (actualTargetType instanceof TypeVariable) {
+            result = this.resolveTypeVariable((TypeVariable<?>) actualTargetType);
+        } else {
+            // nothing to (further) look-up
+            result = new JavaType(actualTargetType, this);
+        }
+        return result;
     }
 
-    @Override
-    public Type resolveGenericTypePlaceholder(Type targetType) {
-        Type actualTargetType = targetType;
-        while (actualTargetType instanceof TypeVariable || actualTargetType instanceof WildcardType) {
-            logger.debug("attempting to resolve actual type of {}", actualTargetType);
-            Type newTargetType;
-            if (actualTargetType instanceof TypeVariable) {
-                String variableName = ((TypeVariable) actualTargetType).getName();
-                if (this.parentContext != null && this.parentContext.typeVariablesByName.containsKey(variableName)) {
-                    logger.debug("resorting to reference type {} for resolving {}", this.referenceType, actualTargetType);
-                    newTargetType = this.parentContext.resolveGenericTypePlaceholder(actualTargetType);
-                } else if (this.typeVariablesByName.containsKey(variableName)) {
-                    newTargetType = this.typeVariablesByName.get(variableName);
-                    logger.debug("resolved type variable \"{}\" as {}", variableName, newTargetType);
-                } else {
-                    throw new IllegalStateException(variableName + " is an undefined variable in this " + this.toString()
-                            + ". Maybe wrong context was applied?");
-                }
+    /**
+     * Determine the actual type behind the given type variable.
+     *
+     * @param typeVariable type variable to resolve
+     * @return actual type behind the given type variable
+     */
+    private JavaType resolveTypeVariable(TypeVariable<?> typeVariable) {
+        String variableName = typeVariable.getName();
+        logger.debug("attempting to resolve type variable {}", variableName);
+        if (this.typeVariablesByName.containsKey(variableName)) {
+            JavaType resolvedType = this.typeVariablesByName.get(variableName);
+            // exclude the variable having been looked up
+            TypeVariableContext resolvedContext = resolvedType.getParentTypeVariables();
+            TypeVariableContext nextContext;
+            if (resolvedContext == this) {
+                // resolved type is in the same context, since self-references are not allowed: ignore the visited type variable going forward
+                Map<String, JavaType> typeVariables = new HashMap<>(resolvedContext.typeVariablesByName);
+                typeVariables.remove(variableName);
+                nextContext = new TypeVariableContext(typeVariables, resolvedContext.parentContext);
             } else {
-                newTargetType = Stream.of(((WildcardType) actualTargetType).getUpperBounds()).findFirst().orElse(null);
-                logger.debug("looked-up upper bound of wildcard type: {}", newTargetType);
+                nextContext = resolvedContext;
             }
-            if (newTargetType == null || newTargetType == actualTargetType) {
-                logger.info("Skipping type variable {} as no specific type can be determined beyond {}.",
-                        targetType.getTypeName(), actualTargetType.getTypeName());
-                return Object.class;
-            }
-            actualTargetType = newTargetType;
+            return nextContext.resolveGenericTypePlaceholder(resolvedType.getType());
         }
-        return actualTargetType;
+        if (this.parentContext != null) {
+            logger.debug("looking-up type variable {} in parent context", variableName);
+            return this.parentContext.resolveGenericTypePlaceholder(typeVariable);
+        }
+        logger.debug("{} is an undefined variable in this {}", variableName, this);
+        throw new IllegalStateException("Maybe wrong context was applied?");
     }
 
     @Override
@@ -192,8 +212,7 @@ public final class TypeVariableContext implements TypePlaceholderResolver {
 
     @Override
     public int hashCode() {
-        return this.typeVariablesByName.hashCode()
-                + (this.referenceType == null ? 0 : this.referenceType.hashCode() * 3)
+        return this.typeVariablesByName.hashCode() * 3
                 + (this.parentContext == null ? 0 : this.parentContext.hashCode() * 7);
     }
 
@@ -207,10 +226,6 @@ public final class TypeVariableContext implements TypePlaceholderResolver {
         }
         TypeVariableContext otherContext = (TypeVariableContext) other;
         if (!this.typeVariablesByName.equals(otherContext.typeVariablesByName)) {
-            return false;
-        }
-        if ((this.referenceType == null && otherContext.referenceType != null)
-                || (this.referenceType != null && !this.referenceType.equals(otherContext.referenceType))) {
             return false;
         }
         if ((this.parentContext == null && otherContext.parentContext != null)

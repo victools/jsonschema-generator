@@ -75,7 +75,7 @@ public class ConstantValueModuleTest {
         this.instance.applyToConfigBuilder(this.builder);
 
         Field field = TestClass.class.getDeclaredField(fieldName);
-        Collection<?> result = this.fieldConfigPart.resolveEnum(field);
+        Collection<?> result = this.fieldConfigPart.resolveEnum(field, null);
         Assert.assertEquals(expectedResult, result);
     }
 
@@ -96,7 +96,7 @@ public class ConstantValueModuleTest {
         instance.applyToConfigBuilder(this.builder);
 
         Field field = TestClass.class.getDeclaredField(fieldName);
-        Boolean result = this.fieldConfigPart.isNullable(field);
+        Boolean result = this.fieldConfigPart.isNullable(field, null);
         Assert.assertEquals(expectedResult, result);
     }
 

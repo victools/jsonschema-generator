@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.github.victools.jsonschema.generator.JavaType;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import java.lang.reflect.Field;
@@ -32,9 +33,10 @@ public class ConstantValueModule implements Module {
      * Look-up the given field's constant (i.e. final static) value, or return null.
      *
      * @param field targeted field
+     * @param fieldType targeted field's type
      * @return collection containing single constant value; returning null if field has no constant value
      */
-    private static List<?> extractConstantFieldValue(Field field) {
+    private static List<?> extractConstantFieldValue(Field field, JavaType fieldType) {
         int staticAndFinal = Modifier.STATIC | Modifier.FINAL;
         if ((field.getModifiers() & staticAndFinal) == staticAndFinal) {
             field.setAccessible(true);
@@ -52,10 +54,11 @@ public class ConstantValueModule implements Module {
      * Determine whether the given field is a constant (i.e. static and final) and if so, indicant whether the constant value is null.
      *
      * @param field targeted field
+     * @param fieldType targeted field's type
      * @return true/false depending on constant value being null; otherwise returning null if field is not a constant
      */
-    private static Boolean isNullableConstantField(Field field) {
-        List<?> constantValues = extractConstantFieldValue(field);
+    private static Boolean isNullableConstantField(Field field, JavaType fieldType) {
+        List<?> constantValues = extractConstantFieldValue(field, fieldType);
         if (constantValues == null) {
             return null;
         }

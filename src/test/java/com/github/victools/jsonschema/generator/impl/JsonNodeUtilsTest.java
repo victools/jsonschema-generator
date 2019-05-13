@@ -26,19 +26,19 @@ import org.mockito.Mockito;
 public class JsonNodeUtilsTest {
 
     @Test
-    public void testSetAttributeIfNotNull_isNull() {
+    public void testSetIfValueNotNull_isNull() {
         ObjectNode node = Mockito.mock(ObjectNode.class);
-        JsonNodeUtils.setAttributeIfNotNull(node, "field", null);
+        JsonNodeUtils.setIfValueNotNull(node, "field", null);
 
         Mockito.verifyZeroInteractions(node);
     }
 
     @Test
-    public void testSetAttributeIfNotNull_isNotNull() {
+    public void testSetIfValueNotNull_isNotNull() {
         ObjectNode node = Mockito.mock(ObjectNode.class);
         String fieldName = "field";
         String value = "value";
-        JsonNodeUtils.setAttributeIfNotNull(node, fieldName, value);
+        JsonNodeUtils.setIfValueNotNull(node, fieldName, value);
 
         Mockito.verify(node).putPOJO(fieldName, value);
     }

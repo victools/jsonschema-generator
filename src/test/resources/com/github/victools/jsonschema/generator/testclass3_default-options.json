@@ -54,6 +54,30 @@
                     "$ref": "#/definitions/TestClass2<Long>"
                 }]
         },
+        "TestClass2<String>": {
+            "type": "object",
+            "properties": {
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "genericValue": {
+                    "type": ["string", "null"]
+                },
+                "getGenericValue()": {
+                    "type": ["string", "null"]
+                }
+            }
+        },
+        "TestClass2<String> (nullable)": {
+            "oneOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestClass2<String>"
+                }]
+        },
         "TestClass2<TestClass1[]> (nullable)": {
             "type": ["object", "null"],
             "properties": {
@@ -86,14 +110,14 @@
                 "genericArray": {
                     "type": ["array", "null"],
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/TestClass2<String>"
                     }
                 },
                 "genericValue": {
-                    "type": ["string", "null"]
+                    "$ref": "#/definitions/TestClass2<String> (nullable)"
                 },
                 "getGenericValue()": {
-                    "type": ["string", "null"]
+                    "$ref": "#/definitions/TestClass2<String> (nullable)"
                 }
             }
         },
