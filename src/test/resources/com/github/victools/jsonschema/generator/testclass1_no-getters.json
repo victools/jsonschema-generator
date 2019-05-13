@@ -14,11 +14,11 @@
         "genericValue": {
             "type": ["string", "null"]
         },
-        "isSimpleTestClass()": {
-            "type": "boolean"
-        },
         "primitiveValue": {
             "type": "integer"
+        },
+        "isSimpleTestClass()": {
+            "type": "boolean"
         }
     }
 }

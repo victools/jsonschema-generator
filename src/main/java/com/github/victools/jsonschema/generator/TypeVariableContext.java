@@ -16,7 +16,6 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.github.victools.jsonschema.generator.JavaType;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -26,7 +25,6 @@ import java.lang.reflect.WildcardType;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,44 +192,6 @@ public final class TypeVariableContext {
             logger.debug("looking-up type variable {} in parent context", variableName);
             return this.parentContext.resolveGenericTypePlaceholder(typeVariable);
         }
-        logger.debug("{} is an undefined variable in this {}", variableName, this);
-        throw new IllegalStateException("Maybe wrong context was applied?");
-    }
-
-    @Override
-    public String toString() {
-        if (this == EMPTY_SCOPE) {
-            return "TypeVariableContext()";
-        }
-        String thisContext = this.typeVariablesByName.entrySet().stream()
-                .map(entry -> entry.getKey() + " > " + entry.getValue())
-                .collect(Collectors.joining(",\n\t", "TypeVariableContext(\n\t", "\n)"));
-        thisContext += ", parent: " + this.parentContext;
-        return thisContext;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.typeVariablesByName.hashCode() * 3
-                + (this.parentContext == null ? 0 : this.parentContext.hashCode() * 7);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        if (!(other instanceof TypeVariableContext)) {
-            return false;
-        }
-        TypeVariableContext otherContext = (TypeVariableContext) other;
-        if (!this.typeVariablesByName.equals(otherContext.typeVariablesByName)) {
-            return false;
-        }
-        if ((this.parentContext == null && otherContext.parentContext != null)
-                || (this.parentContext != null && !this.parentContext.equals(otherContext.parentContext))) {
-            return false;
-        }
-        return true;
+        throw new IllegalStateException(variableName + "is an undefined variable in this context. Maybe wrong context was applied?");
     }
 }

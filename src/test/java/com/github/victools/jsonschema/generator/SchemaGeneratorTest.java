@@ -17,10 +17,12 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.victools.jsonschema.generator.impl.ReflectionTypeUtils;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.EnumSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import junitparams.JUnitParamsRunner;
@@ -73,25 +75,65 @@ public class SchemaGeneratorTest {
         Assert.assertEquals(expectedJsonSchemaType, result.get(SchemaConstants.TAG_TYPE).asText());
     }
 
+    private static boolean isTypeOf(JavaType type, Class<?> rawSuperType) {
+        Class<?> rawType = ReflectionTypeUtils.getRawType(type.getType());
+        return rawType != null && rawSuperType.isAssignableFrom(rawType);
+    }
+
+    private static void populateConfigPart(SchemaGeneratorConfigPart<?> configPart) {
+        configPart
+                .addArrayMinItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type.getType()) ? 0 : null)
+                .addArrayMaxItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type.getType()) ? Integer.MAX_VALUE : null)
+                .addArrayUniqueItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type.getType()) ? false : null)
+                .addDescriptionResolver((field, type) -> type.toString())
+                .addEnumResolver((field, type) -> isTypeOf(type, Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
+                .addEnumResolver((field, type) -> isTypeOf(type, String.class) ? Arrays.asList("constant string value") : null)
+                .addNumberExclusiveMaximumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
+                .addNumberExclusiveMinimumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ZERO : null)
+                .addNumberInclusiveMaximumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.TEN : null)
+                .addNumberInclusiveMinimumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ONE : null)
+                .addNumberMultipleOfResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ONE : null)
+                .addPropertyNameOverrideResolver((field, defaultName) -> "_" + defaultName)
+                .addStringFormatResolver((field, type) -> isTypeOf(type, String.class) ? "date" : null)
+                .addStringMaxLengthResolver((field, type) -> isTypeOf(type, String.class) ? 256 : null)
+                .addStringMinLengthResolver((field, type) -> isTypeOf(type, String.class) ? 1 : null)
+                .addTitleResolver((field, type) -> type.getType().toString());
+    }
+
     Object parametersForTestGenerateSchema() {
+        Module neutralModule = configBuilder -> {
+        };
+        Module excludingGetters = configBuilder -> configBuilder.with(Option.EXCLUDE_GETTER_METHODS);
+        Module includingVoidMethods = configBuilder -> configBuilder.without(Option.EXCLUDE_VOID_METHODS);
+        Module nonNullableFields = configBuilder -> configBuilder.without(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT);
+        Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields());
+        Module methodModule = configBuilder -> populateConfigPart(configBuilder.forMethods());
+        Module fieldsOnlyModule = configBuilder -> configBuilder.with(methodModule)
+                .with(Option.INCLUDE_GETTER_ATTRIBUTES_FOR_FIELDS, Option.DEFINITIONS_FOR_ALL_OBJECTS)
+                .forMethods().addIgnoreCheck(method -> true);
+        Module methodsOnlyModule = configBuilder -> configBuilder.with(fieldModule)
+                .with(Option.INCLUDE_FIELD_ATTRIBUTES_FOR_GETTERS, Option.DEFINITIONS_FOR_ALL_OBJECTS)
+                .forFields().addIgnoreCheck(field -> true);
         return new Object[][]{
-            {"testclass1_default-options", TestClass1.class, EnumSet.noneOf(Option.class), EnumSet.noneOf(Option.class)},
-            {"testclass1_no-getters", TestClass1.class, EnumSet.of(Option.EXCLUDE_GETTER_METHODS), EnumSet.noneOf(Option.class)},
-            {"testclass1_with-void-methods", TestClass1.class, EnumSet.noneOf(Option.class), EnumSet.of(Option.EXCLUDE_VOID_METHODS)},
-            {"testclass1_not-nullable-fields", TestClass1.class, EnumSet.noneOf(Option.class), EnumSet.of(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT)},
-            {"testclass2_array", TestClass2[].class, EnumSet.noneOf(Option.class), EnumSet.noneOf(Option.class)},
-            {"testclass3_default-options", TestClass3.class, EnumSet.noneOf(Option.class), EnumSet.noneOf(Option.class)}
+            {"testclass1_default-options", TestClass1.class, neutralModule},
+            {"testclass1_no-getters", TestClass1.class, excludingGetters},
+            {"testclass1_with-void-methods", TestClass1.class, includingVoidMethods},
+            {"testclass1_not-nullable-fields", TestClass1.class, nonNullableFields},
+            {"testclass2_array", TestClass2[].class, neutralModule},
+            {"testclass3_default-options", TestClass3.class, neutralModule},
+            {"testclass3_field-attributes", TestClass3.class, fieldModule},
+            {"testclass3_method-attributes", TestClass3.class, methodModule},
+            {"testclass3_fields-only", TestClass3.class, fieldsOnlyModule},
+            {"testclass3_methods-only", TestClass3.class, methodsOnlyModule}
         };
     }
 
     @Test
     @Parameters
     @TestCaseName(value = "{method}({0}) [{index}]")
-    public void testGenerateSchema(String caseTitle, Class<?> targetType,
-            EnumSet<Option> enabledOptions, EnumSet<Option> disabledOptions) throws Exception {
+    public void testGenerateSchema(String caseTitle, Class<?> targetType, Module testModule) throws Exception {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper());
-        enabledOptions.forEach(configBuilder::with);
-        disabledOptions.forEach(configBuilder::without);
+        configBuilder.with(testModule);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(targetType);
@@ -124,7 +166,7 @@ public class SchemaGeneratorTest {
             return this.primitiveValue;
         }
 
-        public void calculateSomething() {
+        public <A extends B, B extends Number> void calculateSomething(A param0, B param1) {
             // nothing to do
         }
 

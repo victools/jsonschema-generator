@@ -14,6 +14,9 @@
         "genericValue": {
             "type": ["string", "null"]
         },
+        "primitiveValue": {
+            "type": "integer"
+        },
         "getGenericValue()": {
             "type": ["string", "null"]
         },
@@ -22,9 +25,6 @@
         },
         "isSimpleTestClass()": {
             "type": "boolean"
-        },
-        "primitiveValue": {
-            "type": "integer"
         }
     }
 }

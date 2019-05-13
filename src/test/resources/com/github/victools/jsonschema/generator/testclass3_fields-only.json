@@ -14,19 +14,18 @@
                     }
                 },
                 "genericValue": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "title": "class java.lang.String",
+                    "description": "String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date"
                 },
                 "primitiveValue": {
-                    "type": "integer"
-                },
-                "getGenericValue()": {
-                    "type": ["string", "null"]
-                },
-                "getPrimitiveValue()": {
-                    "type": "integer"
-                },
-                "isSimpleTestClass()": {
-                    "type": "boolean"
+                    "type": "integer",
+                    "title": "int",
+                    "description": "int"
                 }
             }
         },
@@ -40,10 +39,15 @@
                     }
                 },
                 "genericValue": {
-                    "type": ["integer", "null"]
-                },
-                "getGenericValue()": {
-                    "type": ["integer", "null"]
+                    "type": ["integer", "null"],
+                    "title": "class java.lang.Long",
+                    "description": "Long",
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 1E+1,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
                 }
             }
         },
@@ -64,10 +68,13 @@
                     }
                 },
                 "genericValue": {
-                    "type": ["string", "null"]
-                },
-                "getGenericValue()": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "title": "class java.lang.String",
+                    "description": "String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date"
                 }
             }
         },
@@ -95,12 +102,6 @@
                     "items": {
                         "$ref": "#/definitions/TestClass1"
                     }
-                },
-                "getGenericValue()": {
-                    "type": ["array", "null"],
-                    "items": {
-                        "$ref": "#/definitions/TestClass1"
-                    }
                 }
             }
         },
@@ -114,10 +115,12 @@
                     }
                 },
                 "genericValue": {
-                    "$ref": "#/definitions/TestClass2<String> (nullable)"
-                },
-                "getGenericValue()": {
-                    "$ref": "#/definitions/TestClass2<String> (nullable)"
+                    "allOf": [{
+                            "$ref": "#/definitions/TestClass2<String> (nullable)"
+                        }, {
+                            "title": "com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass2<T>",
+                            "description": "TestClass2<String>"
+                        }]
                 }
             }
         },
@@ -125,10 +128,12 @@
             "type": ["object", "null"],
             "properties": {
                 "class2OfClass2OfT": {
-                    "$ref": "#/definitions/TestClass2<TestClass2<String>> (nullable)"
-                },
-                "getClass2OfClass2OfT()": {
-                    "$ref": "#/definitions/TestClass2<TestClass2<String>> (nullable)"
+                    "allOf": [{
+                            "$ref": "#/definitions/TestClass2<TestClass2<String>> (nullable)"
+                        }, {
+                            "title": "com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass2<com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass2<T>>",
+                            "description": "TestClass2<TestClass2<String>>"
+                        }]
                 }
             }
         }
@@ -136,30 +141,30 @@
     "type": "object",
     "properties": {
         "class4": {
-            "$ref": "#/definitions/TestClass4<String> (nullable)"
+            "allOf": [{
+                    "$ref": "#/definitions/TestClass4<String> (nullable)"
+                }, {
+                    "title": "com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass4<java.lang.String>",
+                    "description": "TestClass4<String>"
+                }]
         },
         "nestedClass1Array": {
-            "$ref": "#/definitions/TestClass2<TestClass1[]> (nullable)"
+            "allOf": [{
+                    "$ref": "#/definitions/TestClass2<TestClass1[]> (nullable)"
+                }, {
+                    "title": "com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass2<com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass1[]>",
+                    "description": "TestClass2<TestClass1[]>"
+                }]
         },
         "nestedLong": {
-            "$ref": "#/definitions/TestClass2<Long> (nullable)"
+            "allOf": [{
+                    "$ref": "#/definitions/TestClass2<Long> (nullable)"
+                }, {
+                    "title": "com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass2<java.lang.Long>",
+                    "description": "TestClass2<Long>"
+                }]
         },
         "nestedLongList": {
-            "type": ["array", "null"],
-            "items": {
-                "$ref": "#/definitions/TestClass2<Long>"
-            }
-        },
-        "getClass4()": {
-            "$ref": "#/definitions/TestClass4<String> (nullable)"
-        },
-        "getNestedClass1Array()": {
-            "$ref": "#/definitions/TestClass2<TestClass1[]> (nullable)"
-        },
-        "getNestedLong()": {
-            "$ref": "#/definitions/TestClass2<Long> (nullable)"
-        },
-        "getNestedLongList()": {
             "type": ["array", "null"],
             "items": {
                 "$ref": "#/definitions/TestClass2<Long>"

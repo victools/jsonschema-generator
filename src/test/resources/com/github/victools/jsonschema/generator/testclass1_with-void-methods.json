@@ -2,7 +2,6 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
-        "calculateSomething()": false,
         "CONSTANT": {
             "type": ["integer", "null"]
         },
@@ -15,6 +14,10 @@
         "genericValue": {
             "type": ["string", "null"]
         },
+        "primitiveValue": {
+            "type": "integer"
+        },
+        "calculateSomething(Number, Number)": false,
         "getGenericValue()": {
             "type": ["string", "null"]
         },
@@ -23,9 +26,6 @@
         },
         "isSimpleTestClass()": {
             "type": "boolean"
-        },
-        "primitiveValue": {
-            "type": "integer"
         }
     }
 }
