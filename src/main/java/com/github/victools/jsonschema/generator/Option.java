@@ -38,12 +38,6 @@ public enum Option {
      */
     ADDITIONAL_FIXED_TYPES(true, SimpleTypeModule::forPrimitiveAndAdditionalTypes, SimpleTypeModule::forPrimitiveTypes),
     /**
-     * Whether some additional types should be included via fixed definitions instead of being subject to the standard collection of properties.
-     * <br>
-     * Default: true (enabled)
-     */
-    FIXED_SIMPLE_TYPES(true, SimpleTypeModule::new, null),
-    /**
      * Whether the constant values of static final fields should be included.
      * <br>
      * Default: false (disabled)
