@@ -82,7 +82,7 @@ public final class ReflectionTypeUtils {
      *
      * @param arrayType array type for which to determine the type of contained items/components
      * @return item/component type
-     * @see #isArrayType(Type)
+     * @see #isArrayType(JavaType)
      */
     public static JavaType getArrayComponentType(JavaType arrayType) {
         TypeVariableContext componentTypeVariables = TypeVariableContext.forType(arrayType);

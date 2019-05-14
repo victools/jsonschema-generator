@@ -18,7 +18,6 @@ package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.JavaType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -62,7 +61,7 @@ public class SchemaGenerationContext {
      *
      * @param javaType type for which to retrieve the stored definition
      * @return JSON schema definition (or null if none is present)
-     * @see #putDefinition(Type, ObjectNode)
+     * @see #putDefinition(JavaType, ObjectNode)
      */
     public ObjectNode getDefinition(JavaType javaType) {
         return this.definitions.get(javaType);
