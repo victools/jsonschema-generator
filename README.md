@@ -27,6 +27,8 @@ SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(ob
 SchemaGeneratorConfig config = configBuilder.build();
 SchemaGenerator generator = new SchemaGenerator(config);
 JsonNode jsonSchema = generator.generateSchema(YourClass.class);
+
+System.out.println(jsonSchema.toString());
 ```
 
 #### Toggling Standard Options
@@ -36,8 +38,8 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 ```
 ```java
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper)
-    .with(Option.DEFINITIONS_FOR_ALL_OBJECTS), // default: disabled
-    .without(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT, Option.METHODS_RETURN_NULLABLE_BY_DEFAULT); // default: enabled
+    .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_FIELDS_BY_DEFAULT, Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT) // default: disabled
+    .without(Option.ADDITIONAL_FIXED_TYPES); // default enabled
 ```
 
 #### Adding Separate Modules (e.g. from another library)
