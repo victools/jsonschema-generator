@@ -26,27 +26,41 @@ import java.util.stream.Stream;
  */
 public class JavaType {
 
-    private final Type type;
+    private final Type declaredType;
+    private volatile Type resolvedType;
     private final TypeVariableContext parentTypeVariables;
 
     /**
      * Constructor including the actual (possibly generic) java type and the type variables available in its parent's context.
      *
-     * @param type actual (possibly generic) java type being represented
+     * @param declaredType (possibly generic) java type being represented
      * @param typeVariables resolver for type variables in the specific (i.e. declaring type's) context
      */
-    public JavaType(Type type, TypeVariableContext typeVariables) {
-        this.type = type;
+    public JavaType(Type declaredType, TypeVariableContext typeVariables) {
+        this.declaredType = declaredType;
+        this.resolvedType = null;
         this.parentTypeVariables = typeVariables;
     }
 
     /**
-     * Getter for the wrapped java type.
+     * Getter for the represented java type (as declared).
      *
-     * @return actual (possibly generic) java type being represented
+     * @return (possibly generic) java type being represented
      */
-    public Type getType() {
-        return this.type;
+    Type getDeclaredType() {
+        return this.declaredType;
+    }
+
+    /**
+     * Getter for the resolved java type.
+     *
+     * @return actual java type being represented
+     */
+    public Type getResolvedType() {
+        if (this.resolvedType == null) {
+            this.resolvedType = this.parentTypeVariables.resolveGenericTypePlaceholder(this.declaredType).declaredType;
+        }
+        return this.resolvedType;
     }
 
     /**
@@ -66,17 +80,18 @@ public class JavaType {
      */
     private String convertTypeToString(boolean fullClassNames) {
         String result;
-        if (this.type instanceof Class<?>) {
-            result = fullClassNames ? this.type.getTypeName() : ((Class<?>) this.type).getSimpleName();
-        } else if (this.type instanceof ParameterizedType) {
-            Class<?> rawType = (Class<?>) ((ParameterizedType) this.type).getRawType();
+        Type targetType = this.getResolvedType();
+        if (targetType instanceof Class<?>) {
+            result = fullClassNames ? targetType.getTypeName() : ((Class<?>) targetType).getSimpleName();
+        } else if (targetType instanceof ParameterizedType) {
+            Class<?> rawType = (Class<?>) ((ParameterizedType) targetType).getRawType();
             result = fullClassNames ? rawType.getTypeName() : rawType.getSimpleName();
-            result += Stream.of(((ParameterizedType) this.type).getActualTypeArguments())
+            result += Stream.of(((ParameterizedType) targetType).getActualTypeArguments())
                     .map(this.parentTypeVariables::resolveGenericTypePlaceholder)
                     .map(typeArgument -> typeArgument.convertTypeToString(fullClassNames))
                     .collect(Collectors.joining(", ", "<", ">"));
         } else {
-            result = this.type.getTypeName();
+            result = this.declaredType.getTypeName();
         }
         return result;
     }
@@ -88,7 +103,7 @@ public class JavaType {
 
     @Override
     public int hashCode() {
-        return this.type.hashCode();
+        return this.getResolvedType().hashCode();
     }
 
     @Override

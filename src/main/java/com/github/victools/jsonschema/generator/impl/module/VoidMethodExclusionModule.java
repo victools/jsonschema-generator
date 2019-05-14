@@ -20,7 +20,7 @@ import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 
 /**
- * Default module being included if {@code Option.EXCLUDE_VOID_METHODS} is enabled.
+ * Default module being included if {@code Option.VOID_METHODS} is disabled.
  */
 public class VoidMethodExclusionModule implements Module {
 

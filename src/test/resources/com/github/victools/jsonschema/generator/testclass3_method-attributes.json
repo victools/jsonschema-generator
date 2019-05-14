@@ -5,38 +5,38 @@
             "type": "object",
             "properties": {
                 "CONSTANT": {
-                    "type": ["integer", "null"]
+                    "type": "integer"
                 },
                 "genericArray": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "genericValue": {
-                    "type": ["string", "null"]
+                    "type": "string"
                 },
                 "primitiveValue": {
                     "type": "integer"
                 },
                 "_getGenericValue()": {
                     "type": ["string", "null"],
-                    "title": "class java.lang.String",
-                    "description": "String",
+                    "title": "String",
+                    "description": "looked-up from method: String",
                     "const": "constant string value",
                     "minLength": 1,
                     "maxLength": 256,
                     "format": "date"
                 },
                 "_getPrimitiveValue()": {
-                    "type": "integer",
+                    "type": ["integer", "null"],
                     "title": "int",
-                    "description": "int"
+                    "description": "looked-up from method: int"
                 },
                 "_isSimpleTestClass()": {
-                    "type": "boolean",
+                    "type": ["boolean", "null"],
                     "title": "boolean",
-                    "description": "boolean"
+                    "description": "looked-up from method: boolean"
                 }
             }
         },
@@ -44,18 +44,18 @@
             "type": "object",
             "properties": {
                 "genericArray": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
                 "genericValue": {
-                    "type": ["integer", "null"]
+                    "type": "integer"
                 },
                 "_getGenericValue()": {
                     "type": ["integer", "null"],
-                    "title": "class java.lang.Long",
-                    "description": "Long",
+                    "title": "Long",
+                    "description": "looked-up from method: Long",
                     "enum": [1, 2, 3, 4, 5],
                     "minimum": 1,
                     "exclusiveMinimum": 0,
@@ -65,29 +65,22 @@
                 }
             }
         },
-        "TestClass2<Long> (nullable)": {
-            "oneOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/TestClass2<Long>"
-                }]
-        },
         "TestClass2<String>": {
             "type": "object",
             "properties": {
                 "genericArray": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "genericValue": {
-                    "type": ["string", "null"]
+                    "type": "string"
                 },
                 "_getGenericValue()": {
                     "type": ["string", "null"],
-                    "title": "class java.lang.String",
-                    "description": "String",
+                    "title": "String",
+                    "description": "looked-up from method: String",
                     "const": "constant string value",
                     "minLength": 1,
                     "maxLength": 256,
@@ -95,18 +88,11 @@
                 }
             }
         },
-        "TestClass2<String> (nullable)": {
-            "oneOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/TestClass2<String>"
-                }]
-        },
-        "TestClass2<TestClass1[]> (nullable)": {
-            "type": ["object", "null"],
+        "TestClass2<TestClass1[]>": {
+            "type": "object",
             "properties": {
                 "genericArray": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "type": "array",
                         "items": {
@@ -115,7 +101,7 @@
                     }
                 },
                 "genericValue": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "$ref": "#/definitions/TestClass1"
                     }
@@ -128,40 +114,48 @@
                 }
             }
         },
-        "TestClass2<TestClass2<String>> (nullable)": {
-            "type": ["object", "null"],
+        "TestClass2<TestClass2<String>>": {
+            "type": "object",
             "properties": {
                 "genericArray": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "$ref": "#/definitions/TestClass2<String>"
                     }
                 },
                 "genericValue": {
-                    "$ref": "#/definitions/TestClass2<String> (nullable)"
+                    "$ref": "#/definitions/TestClass2<String>"
                 },
                 "_getGenericValue()": {
                     "allOf": [{
-                            "$ref": "#/definitions/TestClass2<String> (nullable)"
+                            "oneOf": [{
+                                    "type": "null"
+                                }, {
+                                    "$ref": "#/definitions/TestClass2<String>"
+                                }]
                         }, {
-                            "title": "com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass2<T>",
-                            "description": "TestClass2<String>"
+                            "title": "TestClass2<String>",
+                            "description": "looked-up from method: TestClass2<String>"
                         }]
                 }
             }
         },
-        "TestClass4<String> (nullable)": {
-            "type": ["object", "null"],
+        "TestClass4<String>": {
+            "type": "object",
             "properties": {
                 "class2OfClass2OfT": {
-                    "$ref": "#/definitions/TestClass2<TestClass2<String>> (nullable)"
+                    "$ref": "#/definitions/TestClass2<TestClass2<String>>"
                 },
                 "_getClass2OfClass2OfT()": {
                     "allOf": [{
-                            "$ref": "#/definitions/TestClass2<TestClass2<String>> (nullable)"
+                            "oneOf": [{
+                                    "type": "null"
+                                }, {
+                                    "$ref": "#/definitions/TestClass2<TestClass2<String>>"
+                                }]
                         }, {
-                            "title": "com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass2<com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass2<T>>",
-                            "description": "TestClass2<TestClass2<String>>"
+                            "title": "TestClass2<TestClass2<String>>",
+                            "description": "looked-up from method: TestClass2<TestClass2<String>>"
                         }]
                 }
             }
@@ -170,42 +164,54 @@
     "type": "object",
     "properties": {
         "class4": {
-            "$ref": "#/definitions/TestClass4<String> (nullable)"
+            "$ref": "#/definitions/TestClass4<String>"
         },
         "nestedClass1Array": {
-            "$ref": "#/definitions/TestClass2<TestClass1[]> (nullable)"
+            "$ref": "#/definitions/TestClass2<TestClass1[]>"
         },
         "nestedLong": {
-            "$ref": "#/definitions/TestClass2<Long> (nullable)"
+            "$ref": "#/definitions/TestClass2<Long>"
         },
         "nestedLongList": {
-            "type": ["array", "null"],
+            "type": "array",
             "items": {
                 "$ref": "#/definitions/TestClass2<Long>"
             }
         },
         "_getClass4()": {
             "allOf": [{
-                    "$ref": "#/definitions/TestClass4<String> (nullable)"
+                    "oneOf": [{
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/TestClass4<String>"
+                        }]
                 }, {
-                    "title": "com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass4<java.lang.String>",
-                    "description": "TestClass4<String>"
+                    "title": "TestClass4<String>",
+                    "description": "looked-up from method: TestClass4<String>"
                 }]
         },
         "_getNestedClass1Array()": {
             "allOf": [{
-                    "$ref": "#/definitions/TestClass2<TestClass1[]> (nullable)"
+                    "oneOf": [{
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/TestClass2<TestClass1[]>"
+                        }]
                 }, {
-                    "title": "com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass2<com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass1[]>",
-                    "description": "TestClass2<TestClass1[]>"
+                    "title": "TestClass2<TestClass1[]>",
+                    "description": "looked-up from method: TestClass2<TestClass1[]>"
                 }]
         },
         "_getNestedLong()": {
             "allOf": [{
-                    "$ref": "#/definitions/TestClass2<Long> (nullable)"
+                    "oneOf": [{
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/TestClass2<Long>"
+                        }]
                 }, {
-                    "title": "com.github.victools.jsonschema.generator.SchemaGeneratorTest$TestClass2<java.lang.Long>",
-                    "description": "TestClass2<Long>"
+                    "title": "TestClass2<Long>",
+                    "description": "looked-up from method: TestClass2<Long>"
                 }]
         },
         "_getNestedLongList()": {

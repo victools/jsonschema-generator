@@ -21,110 +21,117 @@ import com.github.victools.jsonschema.generator.impl.module.FieldAttributesForGe
 import com.github.victools.jsonschema.generator.impl.module.FieldWithoutGetterExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.GetterAttributesForFieldModule;
 import com.github.victools.jsonschema.generator.impl.module.GetterMethodExclusionModule;
-import com.github.victools.jsonschema.generator.impl.module.ObjectClassExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
 import com.github.victools.jsonschema.generator.impl.module.StaticMethodExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.VoidMethodExclusionModule;
+import java.util.function.Supplier;
 
 /**
  * Configuration options to be set on a {@link SchemaGeneratorConfigBuilder} instance.
  */
 public enum Option {
     /**
-     * Whether methods declared directly in the Object class should be excluded (it has no fields). This is strongly recommended to be kept enabled.
+     * Whether additional types (and not just primitives and their associated classes should be included as fixed schema with a "type" attribute of
+     * "string"/"boolean"/"integer"/"number".
      * <br>
      * Default: true (enabled)
      */
-    IGNORE_OBJECT_CLASS_METHODS(true, ObjectClassExclusionModule.class),
+    ADDITIONAL_FIXED_TYPES(true, SimpleTypeModule::forPrimitiveAndAdditionalTypes, SimpleTypeModule::forPrimitiveTypes),
     /**
-     * Whether some fixed types for "string"/"boolean"/"integer"/"number" should be included.
+     * Whether some additional types should be included via fixed definitions instead of being subject to the standard collection of properties.
      * <br>
      * Default: true (enabled)
      */
-    INCLUDE_FIXED_SIMPLE_TYPES(true, SimpleTypeModule.class),
+    FIXED_SIMPLE_TYPES(true, SimpleTypeModule::new, null),
     /**
      * Whether the constant values of static final fields should be included.
      * <br>
      * Default: false (disabled)
      */
-    INCLUDE_CONSTANT_FIELD_VALUES(false, ConstantValueModule.class),
+    VALUES_FROM_CONSTANT_FIELDS(false, ConstantValueModule::new, null),
     /**
-     * Whether all fields with private/package/protected visibility and not accompanying getter method should be excluded.
-     * <br>
-     * Default: true (enabled)
-     */
-    EXCLUDE_NONPUBLIC_FIELDS_WITHOUT_GETTERS(true, FieldWithoutGetterExclusionModule.class),
-    /**
-     * Whether methods without return value (e.g. setters) should be excluded.
-     * <br>
-     * Default: true (enabled)
-     */
-    EXCLUDE_VOID_METHODS(true, VoidMethodExclusionModule.class),
-    /**
-     * Whether static methods should be excluded.
-     * <br>
-     * Default: true (enabled)
-     */
-    EXCLUDE_STATIC_METHODS(true, StaticMethodExclusionModule.class),
-    /**
-     * Whether getter methods should be excluded (assuming their fields are included instead).
+     * Whether all fields with private/package/protected visibility and no accompanying getter method should be included.
      * <br>
      * Default: false (disabled)
      */
-    EXCLUDE_GETTER_METHODS(false, GetterMethodExclusionModule.class),
+    NONPUBLIC_FIELDS_WITHOUT_GETTERS(false, null, FieldWithoutGetterExclusionModule::new),
+    /**
+     * Whether methods without return value (e.g. setters) should be included.
+     * <br>
+     * Default: false (disabled)
+     */
+    VOID_METHODS(false, null, VoidMethodExclusionModule::new),
+    /**
+     * Whether static methods should be included.
+     * <br>
+     * Default: false (disabled)
+     */
+    STATIC_METHODS(false, null, StaticMethodExclusionModule::new),
+    /**
+     * Whether getter methods should be included (assuming their fields are not included).
+     * <br>
+     * Default: false (disabled)
+     */
+    GETTER_METHODS(true, null, GetterMethodExclusionModule::new),
     /**
      * Whether attributes collected for a field's getter method should be associated with the field directly (assuming the getters are excluded).
      * <br>
-     * Beware: this should NOT be enabled at the same time as {@link #INCLUDE_FIELD_ATTRIBUTES_FOR_GETTERS}
+     * Beware: this should NOT be enabled at the same time as {@link #FIELD_ATTRIBUTES_FOR_GETTERS}
      * <br>
      * Default: false (disabled)
      */
-    INCLUDE_GETTER_ATTRIBUTES_FOR_FIELDS(false, GetterAttributesForFieldModule.class),
+    GETTER_ATTRIBUTES_FOR_FIELDS(false, GetterAttributesForFieldModule::new, null),
     /**
      * Whether attributes collected for a field should be associated with its getter method directly (assuming the fields are excluded).
      * <br>
-     * Beware: this should NOT be enabled at the same time as {@link #INCLUDE_GETTER_ATTRIBUTES_FOR_FIELDS}
+     * Beware: this should NOT be enabled at the same time as {@link #GETTER_ATTRIBUTES_FOR_FIELDS}
      * <br>
      * Default: false (disabled)
      */
-    INCLUDE_FIELD_ATTRIBUTES_FOR_GETTERS(false, FieldAttributesForGetterModule.class),
+    FIELD_ATTRIBUTES_FOR_GETTERS(false, FieldAttributesForGetterModule::new, null),
     /**
      * Whether an object's field/property should be deemed to be nullable if no specific check says otherwise.
      * <br>
-     * Default: true (enabled)
+     * Default: false (disabled)
      */
-    FIELDS_ARE_NULLABLE_BY_DEFAULT(true, null),
+    NULLABLE_FIELDS_BY_DEFAULT(false, null, null),
     /**
      * Whether a method's return value should be deemed to be nullable if no specific check says otherwise.
      * <br>
-     * Default: true (enabled)
+     * Default: false (disabled)
      */
-    METHODS_RETURN_NULLABLE_BY_DEFAULT(true, null),
+    NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT(false, null, null),
     /**
      * Whether all referenced objects should be listed in the schema's "definitions", otherwise single occurrences are defined in-line.
      * <br>
      * Default: false (disabled)
      */
-    DEFINITIONS_FOR_ALL_OBJECTS(false, null);
+    DEFINITIONS_FOR_ALL_OBJECTS(false, null, null);
 
     /**
      * Whether the setting is enabled by default.
      */
     private final boolean enabledByDefault;
     /**
-     * Optional: the module realising the setting/option.
+     * Optional: the module realising the setting/option if it is enabled.
      */
-    private final Class<?> defaultModuleClass;
+    private final Supplier<Module> enabledModuleProvider;
+    /**
+     * Optional: the module realising the setting/option if it is disabled.
+     */
+    private final Supplier<Module> disabledModuleProvider;
 
     /**
      * Constructor.
      *
      * @param defaultValue whether the setting is enabled by default
-     * @param defaultModuleClass type of the module realising this setting/option if it is enabled
+     * @param enabledModuleProvider type of the module realising this setting/option if it is enabled
+     * @param disabledModuleProvider type of the module realising this setting/option if it is disabled
      */
-    private Option(boolean defaultValue, Class<? extends Module> defaultModuleClass) {
+    private Option(boolean defaultValue, Supplier<Module> enabledModuleProvider, Supplier<Module> disabledModuleProvider) {
         this.enabledByDefault = defaultValue;
-        this.defaultModuleClass = defaultModuleClass;
+        this.enabledModuleProvider = enabledModuleProvider;
+        this.disabledModuleProvider = disabledModuleProvider;
     }
 
     /**
@@ -139,16 +146,11 @@ public enum Option {
     /**
      * Retrieve the associated configuration changes as a module instance if possible (depending on particular setting/option: may return null).
      *
+     * @param isEnabled whether the option is currently enabled
      * @return a module instance representing this setting/option's associated configurations (may be null)
      */
-    public Module getModule() {
-        if (this.defaultModuleClass == null) {
-            return null;
-        }
-        try {
-            return (Module) this.defaultModuleClass.getConstructor().newInstance();
-        } catch (ReflectiveOperationException ex) {
-            throw new IllegalStateException("Default Module without public no-args constructor is not supported", ex);
-        }
+    public Module getModule(boolean isEnabled) {
+        Supplier<Module> targetModuleProvider = isEnabled ? this.enabledModuleProvider : this.disabledModuleProvider;
+        return targetModuleProvider == null ? null : targetModuleProvider.get();
     }
 }

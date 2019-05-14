@@ -76,18 +76,19 @@ public class SchemaGeneratorTest {
     }
 
     private static boolean isTypeOf(JavaType type, Class<?> rawSuperType) {
-        Class<?> rawType = ReflectionTypeUtils.getRawType(type.getType());
+        Class<?> rawType = ReflectionTypeUtils.getRawType(type.getResolvedType());
         return rawType != null && rawSuperType.isAssignableFrom(rawType);
     }
 
-    private static void populateConfigPart(SchemaGeneratorConfigPart<?> configPart) {
+    private static void populateConfigPart(SchemaGeneratorConfigPart<?> configPart, String descriptionPrefix) {
         configPart
-                .addArrayMinItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type.getType()) ? 0 : null)
-                .addArrayMaxItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type.getType()) ? Integer.MAX_VALUE : null)
-                .addArrayUniqueItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type.getType()) ? false : null)
-                .addDescriptionResolver((field, type) -> type.toString())
+                .addArrayMinItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type) ? 0 : null)
+                .addArrayMaxItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type) ? Integer.MAX_VALUE : null)
+                .addArrayUniqueItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type) ? false : null)
+                .addDescriptionResolver((field, type) -> descriptionPrefix + type.toString())
                 .addEnumResolver((field, type) -> isTypeOf(type, Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
                 .addEnumResolver((field, type) -> isTypeOf(type, String.class) ? Arrays.asList("constant string value") : null)
+                .addNullableCheck((field, type) -> Boolean.TRUE)
                 .addNumberExclusiveMaximumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
                 .addNumberExclusiveMinimumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ZERO : null)
                 .addNumberInclusiveMaximumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.TEN : null)
@@ -97,33 +98,33 @@ public class SchemaGeneratorTest {
                 .addStringFormatResolver((field, type) -> isTypeOf(type, String.class) ? "date" : null)
                 .addStringMaxLengthResolver((field, type) -> isTypeOf(type, String.class) ? 256 : null)
                 .addStringMinLengthResolver((field, type) -> isTypeOf(type, String.class) ? 1 : null)
-                .addTitleResolver((field, type) -> type.getType().toString());
+                .addTitleResolver((field, type) -> type.toString());
     }
 
     Object parametersForTestGenerateSchema() {
         Module neutralModule = configBuilder -> {
         };
-        Module excludingGetters = configBuilder -> configBuilder.with(Option.EXCLUDE_GETTER_METHODS);
-        Module includingVoidMethods = configBuilder -> configBuilder.without(Option.EXCLUDE_VOID_METHODS);
-        Module nonNullableFields = configBuilder -> configBuilder.without(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT);
-        Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields());
-        Module methodModule = configBuilder -> populateConfigPart(configBuilder.forMethods());
+        Module excludingGetters = configBuilder -> configBuilder.without(Option.GETTER_METHODS);
+        Module nullableFields = configBuilder -> configBuilder.with(Option.NULLABLE_FIELDS_BY_DEFAULT);
+        Module includingVoidMethods = configBuilder -> configBuilder.with(Option.VOID_METHODS);
+        Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields(), "looked-up from field: ");
+        Module methodModule = configBuilder -> populateConfigPart(configBuilder.forMethods(), "looked-up from method: ");
         Module fieldsOnlyModule = configBuilder -> configBuilder.with(methodModule)
-                .with(Option.INCLUDE_GETTER_ATTRIBUTES_FOR_FIELDS, Option.DEFINITIONS_FOR_ALL_OBJECTS)
+                .with(Option.GETTER_ATTRIBUTES_FOR_FIELDS, Option.DEFINITIONS_FOR_ALL_OBJECTS)
                 .forMethods().addIgnoreCheck(method -> true);
         Module methodsOnlyModule = configBuilder -> configBuilder.with(fieldModule)
-                .with(Option.INCLUDE_FIELD_ATTRIBUTES_FOR_GETTERS, Option.DEFINITIONS_FOR_ALL_OBJECTS)
+                .with(Option.FIELD_ATTRIBUTES_FOR_GETTERS, Option.DEFINITIONS_FOR_ALL_OBJECTS)
                 .forFields().addIgnoreCheck(field -> true);
         return new Object[][]{
             {"testclass1_default-options", TestClass1.class, neutralModule},
             {"testclass1_no-getters", TestClass1.class, excludingGetters},
+            {"testclass1_nullable-fields", TestClass1.class, nullableFields},
             {"testclass1_with-void-methods", TestClass1.class, includingVoidMethods},
-            {"testclass1_not-nullable-fields", TestClass1.class, nonNullableFields},
             {"testclass2_array", TestClass2[].class, neutralModule},
             {"testclass3_default-options", TestClass3.class, neutralModule},
             {"testclass3_field-attributes", TestClass3.class, fieldModule},
-            {"testclass3_method-attributes", TestClass3.class, methodModule},
             {"testclass3_fields-only", TestClass3.class, fieldsOnlyModule},
+            {"testclass3_method-attributes", TestClass3.class, methodModule},
             {"testclass3_methods-only", TestClass3.class, methodsOnlyModule}
         };
     }
@@ -137,7 +138,7 @@ public class SchemaGeneratorTest {
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(targetType);
-        System.out.println(caseTitle + "\n" + result.toString());
+        // System.out.println(caseTitle + "\n" + result.toString());
         JSONAssert.assertEquals(loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 

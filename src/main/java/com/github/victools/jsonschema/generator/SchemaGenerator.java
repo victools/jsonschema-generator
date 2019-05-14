@@ -91,7 +91,7 @@ public class SchemaGenerator {
             logger.debug("adding reference to existing definition of {}", targetType);
             generationContext.addReference(targetType, targetNode, isNullable);
             // nothing more to be done
-        } else if (ReflectionTypeUtils.isArrayType(targetType.getType())) {
+        } else if (ReflectionTypeUtils.isArrayType(targetType)) {
             this.traverseArrayType(targetType, targetNode, isNullable, generationContext);
         } else {
             this.traverseObjectType(targetType, targetNode, isNullable, generationContext);
@@ -125,7 +125,7 @@ public class SchemaGenerator {
         ObjectNode arrayItemTypeRef = this.config.createObjectNode();
         definition.set(SchemaConstants.TAG_ITEMS, arrayItemTypeRef);
         JavaType itemType = ReflectionTypeUtils.getArrayComponentType(targetType);
-        logger.debug("resolved array component type {}", itemType.getType());
+        logger.debug("resolved array component type {}", itemType);
         this.traverseGenericType(itemType, arrayItemTypeRef, false, generationContext);
     }
 
@@ -167,7 +167,7 @@ public class SchemaGenerator {
                 do {
                     targetTypeVariables = TypeVariableContext.forType(currentTargetType);
                     final TypeVariableContext currentTypeVariableScope = targetTypeVariables;
-                    final Class<?> currentTargetClass = ReflectionTypeUtils.getRawType(currentTargetType.getType());
+                    final Class<?> currentTargetClass = ReflectionTypeUtils.getRawType(currentTargetType.getResolvedType());
                     logger.debug("iterating over declared fields from {}", currentTargetClass);
                     Stream.of(currentTargetClass.getDeclaredFields())
                             .filter(declaredField -> !this.config.shouldIgnore(declaredField))
@@ -178,7 +178,7 @@ public class SchemaGenerator {
                             .filter(declaredMethod -> !this.config.shouldIgnore(declaredMethod))
                             .forEach(method -> this.populateMethod(method, targetMethods, currentTypeVariableScope, generationContext));
                     currentTargetType = new JavaType(currentTargetClass.getGenericSuperclass(), currentTypeVariableScope);
-                } while (currentTargetType.getType() != null && currentTargetType.getType() != Object.class);
+                } while (currentTargetType.getResolvedType() != null && currentTargetType.getResolvedType() != Object.class);
                 if (!targetFields.isEmpty() || !targetMethods.isEmpty()) {
                     ObjectNode propertiesNode = this.config.createObjectNode();
                     propertiesNode.setAll(targetFields);
@@ -243,7 +243,7 @@ public class SchemaGenerator {
             return;
         }
 
-        if (returnValueType.getType() == void.class || returnValueType.getType() == Void.class) {
+        if (returnValueType.getResolvedType() == void.class || returnValueType.getResolvedType() == Void.class) {
             parentProperties.put(propertyName, BooleanNode.FALSE);
         } else {
             ObjectNode subSchema = this.config.createObjectNode();
@@ -275,7 +275,7 @@ public class SchemaGenerator {
         if (collectedAttributes == null
                 || collectedAttributes.size() == 0
                 || (customDefinition != null && customDefinition.isMeantToBeInline())
-                || ReflectionTypeUtils.isArrayType(javaType.getType())) {
+                || ReflectionTypeUtils.isArrayType(javaType)) {
             // no need for the allOf, can use the sub-schema instance directly as reference
             referenceContainer = targetNode;
         } else {

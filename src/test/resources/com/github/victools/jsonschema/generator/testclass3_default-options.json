@@ -5,22 +5,22 @@
             "type": "object",
             "properties": {
                 "CONSTANT": {
-                    "type": ["integer", "null"]
+                    "type": "integer"
                 },
                 "genericArray": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "genericValue": {
-                    "type": ["string", "null"]
+                    "type": "string"
                 },
                 "primitiveValue": {
                     "type": "integer"
                 },
                 "getGenericValue()": {
-                    "type": ["string", "null"]
+                    "type": "string"
                 },
                 "getPrimitiveValue()": {
                     "type": "integer"
@@ -34,55 +34,41 @@
             "type": "object",
             "properties": {
                 "genericArray": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
                 "genericValue": {
-                    "type": ["integer", "null"]
+                    "type": "integer"
                 },
                 "getGenericValue()": {
-                    "type": ["integer", "null"]
+                    "type": "integer"
                 }
             }
-        },
-        "TestClass2<Long> (nullable)": {
-            "oneOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/TestClass2<Long>"
-                }]
         },
         "TestClass2<String>": {
             "type": "object",
             "properties": {
                 "genericArray": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
                 "genericValue": {
-                    "type": ["string", "null"]
+                    "type": "string"
                 },
                 "getGenericValue()": {
-                    "type": ["string", "null"]
+                    "type": "string"
                 }
             }
         },
-        "TestClass2<String> (nullable)": {
-            "oneOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/TestClass2<String>"
-                }]
-        },
-        "TestClass2<TestClass1[]> (nullable)": {
-            "type": ["object", "null"],
+        "TestClass2<TestClass1[]>": {
+            "type": "object",
             "properties": {
                 "genericArray": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "type": "array",
                         "items": {
@@ -91,44 +77,44 @@
                     }
                 },
                 "genericValue": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "$ref": "#/definitions/TestClass1"
                     }
                 },
                 "getGenericValue()": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "$ref": "#/definitions/TestClass1"
                     }
                 }
             }
         },
-        "TestClass2<TestClass2<String>> (nullable)": {
-            "type": ["object", "null"],
+        "TestClass2<TestClass2<String>>": {
+            "type": "object",
             "properties": {
                 "genericArray": {
-                    "type": ["array", "null"],
+                    "type": "array",
                     "items": {
                         "$ref": "#/definitions/TestClass2<String>"
                     }
                 },
                 "genericValue": {
-                    "$ref": "#/definitions/TestClass2<String> (nullable)"
+                    "$ref": "#/definitions/TestClass2<String>"
                 },
                 "getGenericValue()": {
-                    "$ref": "#/definitions/TestClass2<String> (nullable)"
+                    "$ref": "#/definitions/TestClass2<String>"
                 }
             }
         },
-        "TestClass4<String> (nullable)": {
-            "type": ["object", "null"],
+        "TestClass4<String>": {
+            "type": "object",
             "properties": {
                 "class2OfClass2OfT": {
-                    "$ref": "#/definitions/TestClass2<TestClass2<String>> (nullable)"
+                    "$ref": "#/definitions/TestClass2<TestClass2<String>>"
                 },
                 "getClass2OfClass2OfT()": {
-                    "$ref": "#/definitions/TestClass2<TestClass2<String>> (nullable)"
+                    "$ref": "#/definitions/TestClass2<TestClass2<String>>"
                 }
             }
         }
@@ -136,31 +122,31 @@
     "type": "object",
     "properties": {
         "class4": {
-            "$ref": "#/definitions/TestClass4<String> (nullable)"
+            "$ref": "#/definitions/TestClass4<String>"
         },
         "nestedClass1Array": {
-            "$ref": "#/definitions/TestClass2<TestClass1[]> (nullable)"
+            "$ref": "#/definitions/TestClass2<TestClass1[]>"
         },
         "nestedLong": {
-            "$ref": "#/definitions/TestClass2<Long> (nullable)"
+            "$ref": "#/definitions/TestClass2<Long>"
         },
         "nestedLongList": {
-            "type": ["array", "null"],
+            "type": "array",
             "items": {
                 "$ref": "#/definitions/TestClass2<Long>"
             }
         },
         "getClass4()": {
-            "$ref": "#/definitions/TestClass4<String> (nullable)"
+            "$ref": "#/definitions/TestClass4<String>"
         },
         "getNestedClass1Array()": {
-            "$ref": "#/definitions/TestClass2<TestClass1[]> (nullable)"
+            "$ref": "#/definitions/TestClass2<TestClass1[]>"
         },
         "getNestedLong()": {
-            "$ref": "#/definitions/TestClass2<Long> (nullable)"
+            "$ref": "#/definitions/TestClass2<Long>"
         },
         "getNestedLongList()": {
-            "type": ["array", "null"],
+            "type": "array",
             "items": {
                 "$ref": "#/definitions/TestClass2<Long>"
             }

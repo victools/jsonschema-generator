@@ -3,23 +3,23 @@
     "type": "object",
     "properties": {
         "CONSTANT": {
-            "type": ["integer", "null"]
+            "type": "integer"
         },
         "genericArray": {
-            "type": ["array", "null"],
+            "type": "array",
             "items": {
                 "type": "string"
             }
         },
         "genericValue": {
-            "type": ["string", "null"]
+            "type": "string"
         },
         "primitiveValue": {
             "type": "integer"
         },
         "calculateSomething(Number, Number)": false,
         "getGenericValue()": {
-            "type": ["string", "null"]
+            "type": "string"
         },
         "getPrimitiveValue()": {
             "type": "integer"

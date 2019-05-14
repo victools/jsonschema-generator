@@ -48,7 +48,7 @@ public final class TypeVariableContext {
      * @return collected type variables (may be the {@link TypeVariableContext#EMPTY_SCOPE})
      */
     public static TypeVariableContext forType(JavaType targetType) {
-        return TypeVariableContext.forType(targetType.getType(), targetType.getParentTypeVariables());
+        return TypeVariableContext.forType(targetType.getResolvedType(), targetType.getParentTypeVariables());
     }
 
     /**
@@ -186,7 +186,7 @@ public final class TypeVariableContext {
             } else {
                 nextContext = resolvedContext;
             }
-            return nextContext.resolveGenericTypePlaceholder(resolvedType.getType());
+            return nextContext.resolveGenericTypePlaceholder(resolvedType.getDeclaredType());
         }
         if (this.parentContext != null) {
             logger.debug("looking-up type variable {} in parent context", variableName);

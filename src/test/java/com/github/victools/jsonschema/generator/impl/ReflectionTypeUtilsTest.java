@@ -16,8 +16,8 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import com.github.victools.jsonschema.generator.TypeVariableContext;
 import com.github.victools.jsonschema.generator.JavaType;
+import com.github.victools.jsonschema.generator.TypeVariableContext;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -83,7 +83,7 @@ public class ReflectionTypeUtilsTest {
     })
     public void testIsArrayType(String fieldName, boolean expectedResult) throws Exception {
         Type fieldType = TestClass.class.getDeclaredField(fieldName).getGenericType();
-        boolean result = ReflectionTypeUtils.isArrayType(fieldType);
+        boolean result = ReflectionTypeUtils.isArrayType(new JavaType(fieldType, TypeVariableContext.EMPTY_SCOPE));
 
         Assert.assertSame(expectedResult, result);
     }
@@ -105,7 +105,7 @@ public class ReflectionTypeUtilsTest {
         Type fieldType = TestClass.class.getDeclaredField(fieldName).getGenericType();
         TypeVariableContext typeVariables = TypeVariableContext.forType(TestClass.class, TypeVariableContext.EMPTY_SCOPE);
         JavaType result = ReflectionTypeUtils.getArrayComponentType(new JavaType(fieldType, typeVariables));
-        Assert.assertSame(expectedResult, result.getType());
+        Assert.assertSame(expectedResult, result.getResolvedType());
     }
 
     @Test(expected = UnsupportedOperationException.class)

@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 
 /**
- * Default module being included if {@code Option.INCLUDE_FIELD_ATTRIBUTES_FOR_GETTERS} is enabled.
+ * Default module being included if {@code Option.FIELD_ATTRIBUTES_FOR_GETTERS} is enabled.
  */
 public class FieldAttributesForGetterModule implements Module {
 

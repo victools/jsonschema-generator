@@ -67,12 +67,13 @@ public final class ReflectionTypeUtils {
      * @param javaType (generic) type to check for being an array
      * @return whether the given type represents an array or collection
      */
-    public static boolean isArrayType(Type javaType) {
-        if (javaType instanceof GenericArrayType) {
+    public static boolean isArrayType(JavaType javaType) {
+        Type genericType = javaType.getResolvedType();
+        if (genericType instanceof GenericArrayType) {
             // ReflectionUtils.getRawType() returns null for a GenericArrayType
             return true;
         }
-        Class<?> rawType = ReflectionTypeUtils.getRawType(javaType);
+        Class<?> rawType = ReflectionTypeUtils.getRawType(genericType);
         return rawType.isArray() || Collection.class.isAssignableFrom(rawType);
     }
 
@@ -84,10 +85,10 @@ public final class ReflectionTypeUtils {
      * @see #isArrayType(Type)
      */
     public static JavaType getArrayComponentType(JavaType arrayType) {
-        Type genericType = arrayType.getType();
         TypeVariableContext componentTypeVariables = TypeVariableContext.forType(arrayType);
         Type componentType = null;
-        if (ReflectionTypeUtils.isArrayType(genericType)) {
+        if (ReflectionTypeUtils.isArrayType(arrayType)) {
+            Type genericType = arrayType.getResolvedType();
             if (genericType instanceof GenericArrayType) {
                 // an array whose component type is either a ParameterizedType or a TypeVariable
                 componentType = ((GenericArrayType) genericType).getGenericComponentType();
@@ -111,7 +112,7 @@ public final class ReflectionTypeUtils {
             }
         }
         if (componentType == null) {
-            throw new UnsupportedOperationException("Cannot determine array component type for target: " + genericType);
+            throw new UnsupportedOperationException("Cannot determine array component type for target: " + arrayType);
         }
         return componentTypeVariables.resolveGenericTypePlaceholder(componentType);
     }

@@ -55,8 +55,7 @@ public class SchemaGeneratorConfigBuilder {
     public SchemaGeneratorConfig build() {
         // apply the configurations associated with enabled settings/options
         Stream.of(Option.values())
-                .filter(setting -> this.options.getOrDefault(setting, setting.isEnabledByDefault()))
-                .map(Option::getModule)
+                .map(setting -> setting.getModule(this.options.getOrDefault(setting, setting.isEnabledByDefault())))
                 .filter(Objects::nonNull)
                 .forEach(this::with);
         // construct the actual configuration instance

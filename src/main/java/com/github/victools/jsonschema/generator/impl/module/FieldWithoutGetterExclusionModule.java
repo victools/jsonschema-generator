@@ -22,7 +22,7 @@ import com.github.victools.jsonschema.generator.impl.ReflectionGetterUtils;
 import java.lang.reflect.Modifier;
 
 /**
- * Default module being included if {@code Option.EXCLUDE_NONPUBLIC_FIELDS_WITHOUT_GETTERS} is enabled.
+ * Default module being included if {@code Option.NONPUBLIC_FIELDS_WITHOUT_GETTERS} is disabled.
  */
 public class FieldWithoutGetterExclusionModule implements Module {
 

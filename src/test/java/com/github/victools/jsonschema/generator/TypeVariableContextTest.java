@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.generator.impl;
+package com.github.victools.jsonschema.generator;
 
-import com.github.victools.jsonschema.generator.TypeVariableContext;
-import com.github.victools.jsonschema.generator.JavaType;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -49,7 +47,7 @@ public class TypeVariableContextTest {
         TypeVariableContext context = TypeVariableContext.forType(TestClass1.class, TypeVariableContext.EMPTY_SCOPE);
         Class<String> typePlaceholder = String.class;
         JavaType result = context.resolveGenericTypePlaceholder(typePlaceholder);
-        Assert.assertEquals(typePlaceholder, result.getType());
+        Assert.assertEquals(typePlaceholder, result.getResolvedType());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -63,7 +61,7 @@ public class TypeVariableContextTest {
         TypeVariableContext context = TypeVariableContext.forType(TestClass1.class, TypeVariableContext.EMPTY_SCOPE);
         Type typePlaceholder = TestClass1.class.getDeclaredField("numberField").getGenericType();
         JavaType result = context.resolveGenericTypePlaceholder(typePlaceholder);
-        Assert.assertEquals(Number.class, result.getType());
+        Assert.assertEquals(Number.class, result.getResolvedType());
     }
 
     @Test
@@ -72,7 +70,7 @@ public class TypeVariableContextTest {
         TypeVariableContext context = TypeVariableContext.forType(stringListBigDecimalType, TypeVariableContext.EMPTY_SCOPE);
         Type typePlaceholder = TestClass1.class.getDeclaredField("numberField").getGenericType();
         JavaType result = context.resolveGenericTypePlaceholder(typePlaceholder);
-        Assert.assertEquals(BigDecimal.class, result.getType());
+        Assert.assertEquals(BigDecimal.class, result.getResolvedType());
     }
 
     @Test
@@ -82,7 +80,7 @@ public class TypeVariableContextTest {
         TypeVariableContext context = TypeVariableContext.forType(genericArray, parentContext);
         Type genericComponentType = genericArray.getGenericComponentType();
         JavaType result = context.resolveGenericTypePlaceholder(genericComponentType);
-        Assert.assertEquals(Number.class, result.getType());
+        Assert.assertEquals(Number.class, result.getResolvedType());
     }
 
     private class TestClass1<S extends Number> {

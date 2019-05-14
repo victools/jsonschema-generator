@@ -136,7 +136,7 @@ public class SchemaGeneratorConfigImplTest {
 
     Object parametersForTestIsNullable() {
         return new Object[][]{
-            {null, null, true},
+            {null, null, false},
             {null, Boolean.TRUE, true},
             {null, Boolean.FALSE, false},
             {Boolean.TRUE, null, true},
@@ -154,7 +154,7 @@ public class SchemaGeneratorConfigImplTest {
         Field field = TestClass.class.getDeclaredField("field");
         Mockito.when(this.fieldConfigPart.isNullable(field, null)).thenReturn(configResult);
         if (optionEnabled != null) {
-            this.options.put(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT, optionEnabled);
+            this.options.put(Option.NULLABLE_FIELDS_BY_DEFAULT, optionEnabled);
         }
         boolean result = this.instance.isNullable(field, null);
         Assert.assertEquals(expectedResult, result);
@@ -166,7 +166,7 @@ public class SchemaGeneratorConfigImplTest {
         Method method = TestClass.class.getDeclaredMethod("getField");
         Mockito.when(this.methodConfigPart.isNullable(method, null)).thenReturn(configResult);
         if (optionEnabled != null) {
-            this.options.put(Option.METHODS_RETURN_NULLABLE_BY_DEFAULT, optionEnabled);
+            this.options.put(Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT, optionEnabled);
         }
         boolean result = this.instance.isNullable(method, null);
         Assert.assertEquals(expectedResult, result);

@@ -21,7 +21,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import java.lang.reflect.Modifier;
 
 /**
- * Default module being included if {@code Option.EXCLUDE_STATIC_METHODS} is enabled.
+ * Default module being included if {@code Option.STATIC_METHODS} is disabled.
  */
 public class StaticMethodExclusionModule implements Module {
 

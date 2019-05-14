@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Default module being included if {@code Option.INCLUDE_CONSTANT_FIELD_VALUES} is enabled.
+ * Default module being included if {@code Option.VALUES_FROM_CONSTANT_FIELDS} is enabled.
  */
 public class ConstantValueModule implements Module {
 

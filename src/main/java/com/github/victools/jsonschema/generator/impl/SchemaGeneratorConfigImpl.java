@@ -104,13 +104,13 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public boolean isNullable(Field field, JavaType fieldType) {
         return Optional.ofNullable(this.fieldConfigPart.isNullable(field, fieldType))
-                .orElseGet(() -> this.isOptionEnabled(Option.FIELDS_ARE_NULLABLE_BY_DEFAULT));
+                .orElseGet(() -> this.isOptionEnabled(Option.NULLABLE_FIELDS_BY_DEFAULT));
     }
 
     @Override
     public boolean isNullable(Method method, JavaType returnValueType) {
         return Optional.ofNullable(this.methodConfigPart.isNullable(method, returnValueType))
-                .orElseGet(() -> this.isOptionEnabled(Option.METHODS_RETURN_NULLABLE_BY_DEFAULT));
+                .orElseGet(() -> this.isOptionEnabled(Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT));
     }
 
     @Override

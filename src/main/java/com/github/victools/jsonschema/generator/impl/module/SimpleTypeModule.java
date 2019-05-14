@@ -26,37 +26,79 @@ import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.impl.ReflectionTypeUtils;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
- * Default module being included if {@code Option.INCLUDE_FIXED_SIMPLE_TYPES} is enabled.
+ * Default module being included if {@code Option.FIXED_PRIMITIVE_TYPES} is enabled.
  */
 public class SimpleTypeModule implements Module {
 
-    private final Map<Class<?>, String> fixedJsonSchemaTypes = new HashMap<>();
-
     /**
-     * Constructor initialising the mapping between simple java classes and their corresponding JSON Schema equivalents.
+     * Factory method: creating an instance of the {@link SimpleTypeModule} containing mappings for various primitive types and their non-primitive
+     * counter parts (e.g. {@code boolean} and {@code Boolean}).
      *
-     * @see #applyToConfigBuilder(SchemaGeneratorConfigBuilder)
+     * @return created module instance
+     * @see #forPrimitiveAndAdditionalTypes()
      */
-    public SimpleTypeModule() {
-        this.withObjectType(Object.class);
+    public static SimpleTypeModule forPrimitiveTypes() {
+        SimpleTypeModule module = new SimpleTypeModule();
+
+        module.withObjectType(Object.class);
 
         Stream.of(String.class, Character.class, char.class, CharSequence.class)
-                .forEach(this::withStringType);
+                .forEach(module::withStringType);
 
         Stream.of(Boolean.class, boolean.class)
-                .forEach(this::withBooleanType);
+                .forEach(module::withBooleanType);
 
         Stream.of(Integer.class, int.class, Long.class, long.class, Short.class, short.class, Byte.class, byte.class)
-                .forEach(this::withIntegerType);
+                .forEach(module::withIntegerType);
 
         Stream.of(Double.class, double.class, Float.class, float.class)
-                .forEach(this::withNumberType);
+                .forEach(module::withNumberType);
+
+        return module;
     }
+
+    /**
+     * Factory method: creating an instance of the {@link SimpleTypeModule} containing mappings for various primitive types and their non-primitive
+     * counter parts (e.g. {@code boolean} and {@code Boolean}) as well as other classes that are normally serialised in a JSON as non-objects, e.g.
+     * <br>{@link BigDecimal}, {@link BigInteger}, {@link UUID}, {@link LocalDate}, {@link LocalDateTime}, and a number of other date-time types.
+     *
+     * @return created module instance
+     * @see #forPrimitiveTypes()
+     */
+    public static SimpleTypeModule forPrimitiveAndAdditionalTypes() {
+        SimpleTypeModule module = SimpleTypeModule.forPrimitiveTypes();
+
+        Stream.of(LocalDate.class, LocalDateTime.class, LocalTime.class, ZonedDateTime.class, OffsetDateTime.class, OffsetTime.class,
+                Instant.class, ZoneId.class, Date.class, Calendar.class, UUID.class)
+                .forEach(module::withStringType);
+
+        module.withIntegerType(BigInteger.class);
+
+        Stream.of(BigDecimal.class, Number.class)
+                .forEach(module::withNumberType);
+
+        return module;
+    }
+
+    private final Map<Class<?>, String> fixedJsonSchemaTypes = new HashMap<>();
 
     /**
      * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute.
@@ -124,13 +166,13 @@ public class SimpleTypeModule implements Module {
      * Determine whether a given type is nullable – returning false if the type refers to a primitive type.
      *
      * @param <F> either method or field
-     * @param firstParameter reference to the method/field (which is being ignored here)
+     * @param fieldOrMethod reference to the method/field (which is being ignored here)
      * @param type method return value's or field's type
      * @return false if type is a primitive, otherwise null
      */
-    private <F> Boolean isNullableType(F firstParameter, JavaType type) {
+    private <F> Boolean isNullableType(F fieldOrMethod, JavaType type) {
         // no need to resolve the JavaType, as generics cannot contain primitive types
-        Class<?> rawType = ReflectionTypeUtils.getRawType(type.getType());
+        Class<?> rawType = ReflectionTypeUtils.getRawType(type.getResolvedType());
         if (rawType != null && rawType.isPrimitive()) {
             return Boolean.FALSE;
         }
@@ -146,7 +188,7 @@ public class SimpleTypeModule implements Module {
     }
 
     /**
-     * Implementation of the {@link CustomDefinitionProvider} interface for apply fixed schema definition for simple java classes.
+     * Implementation of the {@link CustomDefinitionProvider} interface for applying fixed schema definitions for simple java types.
      */
     private class SimpleTypeDefinitionProvider implements CustomDefinitionProvider {
 
@@ -163,7 +205,7 @@ public class SimpleTypeModule implements Module {
 
         @Override
         public CustomDefinition provideCustomSchemaDefinition(JavaType javaType) {
-            Type genericType = javaType.getType();
+            Type genericType = javaType.getResolvedType();
             if (!(genericType instanceof Class<?>)) {
                 return null;
             }
@@ -172,7 +214,7 @@ public class SimpleTypeModule implements Module {
                 return null;
             }
             // create fixed JSON schema definition, containing only the corresponding "type" attribute
-            ObjectNode customSchema = objectMapper.createObjectNode()
+            ObjectNode customSchema = this.objectMapper.createObjectNode()
                     .put(SchemaConstants.TAG_TYPE, jsonSchemaTypeValue);
             // set true as second parameter to indicate simple types to be always in-lined (i.e. not put into definitions)
             return new CustomDefinition(customSchema, true);
