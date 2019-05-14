@@ -52,7 +52,6 @@ public interface SchemaConstants {
     String TAG_LENGTH_MIN = "minLength";
     String TAG_LENGTH_MAX = "maxLength";
     String TAG_FORMAT = "format";
-    String TAG_PATTERN = "pattern";
 
     String TAG_MINIMUM = "minimum";
     String TAG_MINIMUM_EXCLUSIVE = "exclusiveMinimum";

@@ -214,7 +214,7 @@ public class SchemaGenerator {
         fieldType = Optional.ofNullable(this.config.resolveTargetTypeOverride(field, fieldType))
                 .orElse(fieldType);
         boolean isNullable = this.config.isNullable(field, fieldType);
-        ObjectNode fieldAttributes = new AttributeCollector(this.config).collectFieldAttributes(field, fieldType);
+        ObjectNode fieldAttributes = AttributeCollector.collectFieldAttributes(field, fieldType, this.config);
 
         this.populateSchema(fieldType, subSchema, isNullable, fieldAttributes, generationContext);
     }
@@ -250,7 +250,7 @@ public class SchemaGenerator {
             parentProperties.put(propertyName, subSchema);
 
             boolean isNullable = this.config.isNullable(method, returnValueType);
-            ObjectNode methodAttributes = new AttributeCollector(this.config).collectMethodAttributes(method, returnValueType);
+            ObjectNode methodAttributes = AttributeCollector.collectMethodAttributes(method, returnValueType, this.config);
 
             this.populateSchema(returnValueType, subSchema, isNullable, methodAttributes, generationContext);
         }

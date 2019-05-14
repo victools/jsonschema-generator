@@ -31,40 +31,31 @@ import java.util.Collection;
  */
 public class AttributeCollector {
 
-    private SchemaGeneratorConfig config;
-
-    /**
-     * Constructor for a given configuration instance.
-     *
-     * @param config configuration to apply when looking-up attribute values
-     */
-    public AttributeCollector(SchemaGeneratorConfig config) {
-        this.config = config;
-    }
-
     /**
      * Collect a field's contextual attributes (i.e. everything not related to the structure).
      *
      * @param field the field for which to collect JSON schema attributes
      * @param type associated field type
+     * @param config configuration to apply when looking-up attribute values
      * @return node holding all collected attributes (possibly empty)
      */
-    public ObjectNode collectFieldAttributes(Field field, JavaType type) {
-        ObjectNode node = this.config.createObjectNode();
-        this.setTitle(node, this.config.resolveTitle(field, type));
-        this.setDescription(node, this.config.resolveDescription(field, type));
-        this.setEnum(node, this.config.resolveEnum(field, type));
-        this.setStringMinLength(node, this.config.resolveStringMinLength(field, type));
-        this.setStringMaxLength(node, this.config.resolveStringMaxLength(field, type));
-        this.setStringFormat(node, this.config.resolveStringFormat(field, type));
-        this.setNumberInclusiveMinimum(node, this.config.resolveNumberInclusiveMinimum(field, type));
-        this.setNumberExclusiveMinimum(node, this.config.resolveNumberExclusiveMinimum(field, type));
-        this.setNumberInclusiveMaximum(node, this.config.resolveNumberInclusiveMaximum(field, type));
-        this.setNumberExclusiveMaximum(node, this.config.resolveNumberExclusiveMaximum(field, type));
-        this.setNumberMultipleOf(node, this.config.resolveNumberMultipleOf(field, type));
-        this.setArrayMinItems(node, this.config.resolveArrayMinItems(field, type));
-        this.setArrayMaxItems(node, this.config.resolveArrayMaxItems(field, type));
-        this.setArrayUniqueItems(node, this.config.resolveArrayUniqueItems(field, type));
+    public static ObjectNode collectFieldAttributes(Field field, JavaType type, SchemaGeneratorConfig config) {
+        ObjectNode node = config.createObjectNode();
+        AttributeCollector collector = new AttributeCollector();
+        collector.setTitle(node, config.resolveTitle(field, type));
+        collector.setDescription(node, config.resolveDescription(field, type));
+        collector.setEnum(node, config.resolveEnum(field, type));
+        collector.setStringMinLength(node, config.resolveStringMinLength(field, type));
+        collector.setStringMaxLength(node, config.resolveStringMaxLength(field, type));
+        collector.setStringFormat(node, config.resolveStringFormat(field, type));
+        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(field, type));
+        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(field, type));
+        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(field, type));
+        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(field, type));
+        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(field, type));
+        collector.setArrayMinItems(node, config.resolveArrayMinItems(field, type));
+        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(field, type));
+        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(field, type));
         return node;
     }
 
@@ -73,24 +64,26 @@ public class AttributeCollector {
      *
      * @param method the method for which to collect JSON schema attributes
      * @param returnType associated return value type
+     * @param config configuration to apply when looking-up attribute values
      * @return node holding all collected attributes (possibly empty)
      */
-    public ObjectNode collectMethodAttributes(Method method, JavaType returnType) {
-        ObjectNode node = this.config.createObjectNode();
-        this.setTitle(node, this.config.resolveTitle(method, returnType));
-        this.setDescription(node, this.config.resolveDescription(method, returnType));
-        this.setEnum(node, this.config.resolveEnum(method, returnType));
-        this.setStringMinLength(node, this.config.resolveStringMinLength(method, returnType));
-        this.setStringMaxLength(node, this.config.resolveStringMaxLength(method, returnType));
-        this.setStringFormat(node, this.config.resolveStringFormat(method, returnType));
-        this.setNumberInclusiveMinimum(node, this.config.resolveNumberInclusiveMinimum(method, returnType));
-        this.setNumberExclusiveMinimum(node, this.config.resolveNumberExclusiveMinimum(method, returnType));
-        this.setNumberInclusiveMaximum(node, this.config.resolveNumberInclusiveMaximum(method, returnType));
-        this.setNumberExclusiveMaximum(node, this.config.resolveNumberExclusiveMaximum(method, returnType));
-        this.setNumberMultipleOf(node, this.config.resolveNumberMultipleOf(method, returnType));
-        this.setArrayMinItems(node, this.config.resolveArrayMinItems(method, returnType));
-        this.setArrayMaxItems(node, this.config.resolveArrayMaxItems(method, returnType));
-        this.setArrayUniqueItems(node, this.config.resolveArrayUniqueItems(method, returnType));
+    public static ObjectNode collectMethodAttributes(Method method, JavaType returnType, SchemaGeneratorConfig config) {
+        ObjectNode node = config.createObjectNode();
+        AttributeCollector collector = new AttributeCollector();
+        collector.setTitle(node, config.resolveTitle(method, returnType));
+        collector.setDescription(node, config.resolveDescription(method, returnType));
+        collector.setEnum(node, config.resolveEnum(method, returnType));
+        collector.setStringMinLength(node, config.resolveStringMinLength(method, returnType));
+        collector.setStringMaxLength(node, config.resolveStringMaxLength(method, returnType));
+        collector.setStringFormat(node, config.resolveStringFormat(method, returnType));
+        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(method, returnType));
+        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(method, returnType));
+        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(method, returnType));
+        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(method, returnType));
+        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(method, returnType));
+        collector.setArrayMinItems(node, config.resolveArrayMinItems(method, returnType));
+        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(method, returnType));
+        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(method, returnType));
         return node;
     }
 
@@ -99,11 +92,13 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param title attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setTitle(ObjectNode node, String title) {
+    public AttributeCollector setTitle(ObjectNode node, String title) {
         if (title != null) {
             node.put(SchemaConstants.TAG_TITLE, title);
         }
+        return this;
     }
 
     /**
@@ -111,11 +106,13 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param description attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setDescription(ObjectNode node, String description) {
+    public AttributeCollector setDescription(ObjectNode node, String description) {
         if (description != null) {
             node.put(SchemaConstants.TAG_DESCRIPTION, description);
         }
+        return this;
     }
 
     /**
@@ -123,8 +120,9 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param enumValues attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setEnum(ObjectNode node, Collection<?> enumValues) {
+    public AttributeCollector setEnum(ObjectNode node, Collection<?> enumValues) {
         if (enumValues != null && !enumValues.isEmpty()) {
             if (enumValues.size() == 1) {
                 Object singleValue = enumValues.iterator().next();
@@ -134,7 +132,7 @@ public class AttributeCollector {
                     node.putPOJO(SchemaConstants.TAG_CONST, singleValue);
                 }
             } else {
-                ArrayNode array = this.config.createArrayNode();
+                ArrayNode array = node.arrayNode();
                 for (Object singleValue : enumValues) {
                     if (singleValue instanceof String) {
                         array.add((String) singleValue);
@@ -145,6 +143,7 @@ public class AttributeCollector {
                 node.set(SchemaConstants.TAG_ENUM, array);
             }
         }
+        return this;
     }
 
     /**
@@ -152,11 +151,13 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param minLength attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setStringMinLength(ObjectNode node, Integer minLength) {
+    public AttributeCollector setStringMinLength(ObjectNode node, Integer minLength) {
         if (minLength != null) {
             node.put(SchemaConstants.TAG_LENGTH_MIN, minLength);
         }
+        return this;
     }
 
     /**
@@ -164,11 +165,13 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param maxLength attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setStringMaxLength(ObjectNode node, Integer maxLength) {
+    public AttributeCollector setStringMaxLength(ObjectNode node, Integer maxLength) {
         if (maxLength != null) {
             node.put(SchemaConstants.TAG_LENGTH_MAX, maxLength);
         }
+        return this;
     }
 
     /**
@@ -176,11 +179,13 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param format attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setStringFormat(ObjectNode node, String format) {
+    public AttributeCollector setStringFormat(ObjectNode node, String format) {
         if (format != null) {
             node.put(SchemaConstants.TAG_FORMAT, format);
         }
+        return this;
     }
 
     /**
@@ -188,11 +193,13 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param inclusiveMinimum attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setNumberInclusiveMinimum(ObjectNode node, BigDecimal inclusiveMinimum) {
+    public AttributeCollector setNumberInclusiveMinimum(ObjectNode node, BigDecimal inclusiveMinimum) {
         if (inclusiveMinimum != null) {
             node.put(SchemaConstants.TAG_MINIMUM, inclusiveMinimum);
         }
+        return this;
     }
 
     /**
@@ -200,11 +207,13 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param exclusiveMinimum attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setNumberExclusiveMinimum(ObjectNode node, BigDecimal exclusiveMinimum) {
+    public AttributeCollector setNumberExclusiveMinimum(ObjectNode node, BigDecimal exclusiveMinimum) {
         if (exclusiveMinimum != null) {
             node.put(SchemaConstants.TAG_MINIMUM_EXCLUSIVE, exclusiveMinimum);
         }
+        return this;
     }
 
     /**
@@ -212,11 +221,13 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param inclusiveMaximum attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setNumberInclusiveMaximum(ObjectNode node, BigDecimal inclusiveMaximum) {
+    public AttributeCollector setNumberInclusiveMaximum(ObjectNode node, BigDecimal inclusiveMaximum) {
         if (inclusiveMaximum != null) {
             node.put(SchemaConstants.TAG_MAXIMUM, inclusiveMaximum);
         }
+        return this;
     }
 
     /**
@@ -224,11 +235,13 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param exclusiveMaximum attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setNumberExclusiveMaximum(ObjectNode node, BigDecimal exclusiveMaximum) {
+    public AttributeCollector setNumberExclusiveMaximum(ObjectNode node, BigDecimal exclusiveMaximum) {
         if (exclusiveMaximum != null) {
             node.put(SchemaConstants.TAG_MAXIMUM_EXCLUSIVE, exclusiveMaximum);
         }
+        return this;
     }
 
     /**
@@ -236,11 +249,13 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param multipleOf attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setNumberMultipleOf(ObjectNode node, BigDecimal multipleOf) {
+    public AttributeCollector setNumberMultipleOf(ObjectNode node, BigDecimal multipleOf) {
         if (multipleOf != null) {
             node.put(SchemaConstants.TAG_MULTIPLE_OF, multipleOf);
         }
+        return this;
     }
 
     /**
@@ -248,11 +263,13 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param minItemCount attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setArrayMinItems(ObjectNode node, Integer minItemCount) {
+    public AttributeCollector setArrayMinItems(ObjectNode node, Integer minItemCount) {
         if (minItemCount != null) {
             node.put(SchemaConstants.TAG_ITEMS_MIN, minItemCount);
         }
+        return this;
     }
 
     /**
@@ -260,11 +277,13 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param maxItemCount attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setArrayMaxItems(ObjectNode node, Integer maxItemCount) {
+    public AttributeCollector setArrayMaxItems(ObjectNode node, Integer maxItemCount) {
         if (maxItemCount != null) {
             node.put(SchemaConstants.TAG_ITEMS_MAX, maxItemCount);
         }
+        return this;
     }
 
     /**
@@ -272,10 +291,12 @@ public class AttributeCollector {
      *
      * @param node schema node to set attribute on
      * @param uniqueItems attribute value to set
+     * @return this instance (for chaining)
      */
-    private void setArrayUniqueItems(ObjectNode node, Boolean uniqueItems) {
+    public AttributeCollector setArrayUniqueItems(ObjectNode node, Boolean uniqueItems) {
         if (uniqueItems != null) {
             node.put(SchemaConstants.TAG_ITEMS_UNIQUE, uniqueItems);
         }
+        return this;
     }
 }
