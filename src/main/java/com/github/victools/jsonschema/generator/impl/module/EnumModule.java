@@ -63,7 +63,7 @@ public class EnumModule implements Module {
      *
      * @param treatAsString whether to treat enums as plain strings
      */
-    private EnumModule(boolean treatAsString) {
+    public EnumModule(boolean treatAsString) {
         this.treatAsString = treatAsString;
     }
 
@@ -82,12 +82,15 @@ public class EnumModule implements Module {
     /**
      * Look-up the given enum type's constant values.
      *
-     * @param enumType targeted enum type
+     * @param method targeted method
+     * @param returnType method's return type
      * @return collection containing constant enum values
      */
-    private static List<String> extractEnumValues(Method method, JavaType type) {
+    private static List<String> extractEnumValues(Method method, JavaType returnType) {
         if (method.getDeclaringClass() == Enum.class) {
-            Type actualEnumType = type.getParentTypeVariables().resolveGenericTypePlaceholder(Enum.class.getTypeParameters()[0]).getResolvedType();
+            Type actualEnumType = returnType.getParentTypeVariables()
+                    .resolveGenericTypePlaceholder(Enum.class.getTypeParameters()[0])
+                    .getResolvedType();
             return EnumModule.extractEnumValues((Class) actualEnumType);
         }
         return null;
@@ -96,6 +99,7 @@ public class EnumModule implements Module {
     /**
      * Look-up the given enum type's constant values.
      *
+     * @param <E> specific enum type
      * @param enumType targeted enum type
      * @return collection containing constant enum values
      */
