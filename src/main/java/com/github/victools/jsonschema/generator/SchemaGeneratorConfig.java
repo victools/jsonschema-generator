@@ -36,6 +36,13 @@ public interface SchemaGeneratorConfig {
     boolean shouldCreateDefinitionsForAllObjects();
 
     /**
+     * Determine whether the "{@value SchemaConstants#TAG_SCHEMA}" attribute with value "{@value SchemaConstants#TAG_SCHEMA_DRAFT7}" should be added.
+     *
+     * @return whether to add the schema version attribute
+     */
+    boolean shouldIncludeSchemaVersionIndicator();
+
+    /**
      * Generate an empty JSON node representing an object (which will subsequently be filled by the generator).
      *
      * @return JSON object node

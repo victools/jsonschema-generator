@@ -95,10 +95,22 @@ public class SchemaGenerationContext {
         return this;
     }
 
+    /**
+     * Getter for the nodes representing not-nullable references to the given type.
+     *
+     * @param javaType target type
+     * @return not-nullable nodes to be populated with the schema of the given type
+     */
     public List<ObjectNode> getReferences(JavaType javaType) {
         return Collections.unmodifiableList(this.references.getOrDefault(javaType, Collections.emptyList()));
     }
 
+    /**
+     * Getter for the nodes representing nullable references to the given type.
+     *
+     * @param javaType target type
+     * @return nullable nodes to be populated with the schema of the given type
+     */
     public List<ObjectNode> getNullableReferences(JavaType javaType) {
         return Collections.unmodifiableList(this.nullableReferences.getOrDefault(javaType, Collections.emptyList()));
     }

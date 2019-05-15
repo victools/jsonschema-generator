@@ -100,11 +100,11 @@ public final class ReflectionTypeUtils {
                 ParameterizedType parameterizedTargetType = (ParameterizedType) genericType;
                 Class<?> rawTargetType = (Class<?>) parameterizedTargetType.getRawType();
                 while (rawTargetType != Collection.class) {
+                    componentTypeVariables = TypeVariableContext.forType(parameterizedTargetType, componentTypeVariables);
                     Type collectionSuperType = Stream.of(rawTargetType.getGenericInterfaces())
                             .filter(interfaceType -> Collection.class.isAssignableFrom(ReflectionTypeUtils.getRawType(interfaceType)))
                             .findFirst()
                             .orElse(rawTargetType.getGenericSuperclass());
-                    componentTypeVariables = TypeVariableContext.forType(parameterizedTargetType, componentTypeVariables);
                     parameterizedTargetType = (ParameterizedType) collectionSuperType;
                     rawTargetType = (Class<?>) parameterizedTargetType.getRawType();
                 }

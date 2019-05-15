@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.github.victools.jsonschema.generator.impl.ReflectionTypeUtils;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.stream.Collectors;
@@ -81,17 +82,17 @@ public class JavaType {
     private String convertTypeToString(boolean fullClassNames) {
         String result;
         Type targetType = this.getResolvedType();
-        if (targetType instanceof Class<?>) {
-            result = fullClassNames ? targetType.getTypeName() : ((Class<?>) targetType).getSimpleName();
-        } else if (targetType instanceof ParameterizedType) {
-            Class<?> rawType = (Class<?>) ((ParameterizedType) targetType).getRawType();
-            result = fullClassNames ? rawType.getTypeName() : rawType.getSimpleName();
-            result += Stream.of(((ParameterizedType) targetType).getActualTypeArguments())
-                    .map(this.parentTypeVariables::resolveGenericTypePlaceholder)
-                    .map(typeArgument -> typeArgument.convertTypeToString(fullClassNames))
-                    .collect(Collectors.joining(", ", "<", ">"));
-        } else {
+        Class<?> rawType = ReflectionTypeUtils.getRawType(targetType);
+        if (rawType == null || fullClassNames) {
             result = this.declaredType.getTypeName();
+        } else {
+            result = rawType.getSimpleName();
+            if (targetType instanceof ParameterizedType) {
+                result += Stream.of(((ParameterizedType) targetType).getActualTypeArguments())
+                        .map(this.parentTypeVariables::resolveGenericTypePlaceholder)
+                        .map(typeArgument -> typeArgument.convertTypeToString(fullClassNames))
+                        .collect(Collectors.joining(", ", "<", ">"));
+            }
         }
         return result;
     }

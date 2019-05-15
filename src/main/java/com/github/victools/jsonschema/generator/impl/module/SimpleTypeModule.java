@@ -44,7 +44,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
- * Default module being included if {@code Option.FIXED_PRIMITIVE_TYPES} is enabled.
+ * Default module being included for the {@code Option.ADDITIONAL_FIXED_TYPES}.
  */
 public class SimpleTypeModule implements Module {
 

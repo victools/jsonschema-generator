@@ -82,6 +82,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldIncludeSchemaVersionIndicator() {
+        return this.isOptionEnabled(Option.SCHEMA_VERSION_INDICATOR);
+    }
+
+    @Override
     public ObjectNode createObjectNode() {
         return this.objectMapper.createObjectNode();
     }

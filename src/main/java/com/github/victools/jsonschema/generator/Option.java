@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.generator;
 
 import com.github.victools.jsonschema.generator.impl.module.ConstantValueModule;
+import com.github.victools.jsonschema.generator.impl.module.EnumModule;
 import com.github.victools.jsonschema.generator.impl.module.FieldAttributesForGetterModule;
 import com.github.victools.jsonschema.generator.impl.module.FieldWithoutGetterExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.GetterAttributesForFieldModule;
@@ -31,12 +32,25 @@ import java.util.function.Supplier;
  */
 public enum Option {
     /**
+     * Whether the "{@value SchemaConstants#TAG_SCHEMA}" attribute with value "{@value SchemaConstants#TAG_SCHEMA_DRAFT7}" should be included.
+     * <br>
+     * Default: true (enabled)
+     */
+    SCHEMA_VERSION_INDICATOR(true, null, null),
+    /**
      * Whether additional types (and not just primitives and their associated classes should be included as fixed schema with a "type" attribute of
      * "string"/"boolean"/"integer"/"number".
      * <br>
      * Default: true (enabled)
      */
     ADDITIONAL_FIXED_TYPES(true, SimpleTypeModule::forPrimitiveAndAdditionalTypes, SimpleTypeModule::forPrimitiveTypes),
+    /**
+     * Whether enums should be treated as plain "{@value SchemaConstants#TAG_TYPE_STRING}" values, otherwise they are treated as
+     * "{@value SchemaConstants#TAG_TYPE_OBJECT}", with all methods but {@link Enum#name() name()} being excluded.
+     * <br>
+     * Default: true (enabled)
+     */
+    ENUM_AS_STRING(true, EnumModule::asStrings, EnumModule::asObjects),
     /**
      * Whether the constant values of static final fields should be included.
      * <br>
@@ -143,7 +157,7 @@ public enum Option {
      * @param isEnabled whether the option is currently enabled
      * @return a module instance representing this setting/option's associated configurations (may be null)
      */
-    public Module getModule(boolean isEnabled) {
+    Module getModule(boolean isEnabled) {
         Supplier<Module> targetModuleProvider = isEnabled ? this.enabledModuleProvider : this.disabledModuleProvider;
         return targetModuleProvider == null ? null : targetModuleProvider.get();
     }

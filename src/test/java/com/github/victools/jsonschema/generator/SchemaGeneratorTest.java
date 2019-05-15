@@ -104,7 +104,7 @@ public class SchemaGeneratorTest {
     Object parametersForTestGenerateSchema() {
         Module neutralModule = configBuilder -> {
         };
-        Module excludingGetters = configBuilder -> configBuilder.without(Option.GETTER_METHODS);
+        Module excludingGetters = configBuilder -> configBuilder.without(Option.GETTER_METHODS, Option.SCHEMA_VERSION_INDICATOR);
         Module nullableFields = configBuilder -> configBuilder.with(Option.NULLABLE_FIELDS_BY_DEFAULT);
         Module includingVoidMethods = configBuilder -> configBuilder.with(Option.VOID_METHODS);
         Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields(), "looked-up from field: ");
@@ -115,6 +115,7 @@ public class SchemaGeneratorTest {
         Module methodsOnlyModule = configBuilder -> configBuilder.with(fieldModule)
                 .with(Option.FIELD_ATTRIBUTES_FOR_GETTERS, Option.DEFINITIONS_FOR_ALL_OBJECTS)
                 .forFields().addIgnoreCheck(field -> true);
+        Module enumsAsObjectsModule = configBuilder -> configBuilder.without(Option.ENUM_AS_STRING);
         return new Object[][]{
             {"testclass1_default-options", TestClass1.class, neutralModule},
             {"testclass1_no-getters", TestClass1.class, excludingGetters},
@@ -125,7 +126,9 @@ public class SchemaGeneratorTest {
             {"testclass3_field-attributes", TestClass3.class, fieldModule},
             {"testclass3_fields-only", TestClass3.class, fieldsOnlyModule},
             {"testclass3_method-attributes", TestClass3.class, methodModule},
-            {"testclass3_methods-only", TestClass3.class, methodsOnlyModule}
+            {"testclass3_methods-only", TestClass3.class, methodsOnlyModule},
+            {"options_enum_string", Option.class, neutralModule},
+            {"options_enum_object", Option.class, enumsAsObjectsModule}
         };
     }
 
@@ -142,7 +145,7 @@ public class SchemaGeneratorTest {
         JSONAssert.assertEquals(loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 
-    private static final String loadResource(String resourcePath) throws IOException {
+    private static String loadResource(String resourcePath) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         try (InputStream inputStream = SchemaGeneratorTest.class
                 .getResourceAsStream(resourcePath);

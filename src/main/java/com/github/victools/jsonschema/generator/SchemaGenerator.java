@@ -67,7 +67,9 @@ public class SchemaGenerator {
         this.traverseGenericType(mainType, null, false, generationContext);
 
         ObjectNode jsonSchemaResult = this.config.createObjectNode();
-        jsonSchemaResult.put(SchemaConstants.TAG_SCHEMA, SchemaConstants.TAG_SCHEMA_DRAFT7);
+        if (this.config.shouldIncludeSchemaVersionIndicator()) {
+            jsonSchemaResult.put(SchemaConstants.TAG_SCHEMA, SchemaConstants.TAG_SCHEMA_DRAFT7);
+        }
         ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(mainType, generationContext);
         if (definitionsNode.size() > 0) {
             jsonSchemaResult.set(SchemaConstants.TAG_DEFINITIONS, definitionsNode);
@@ -162,23 +164,9 @@ public class SchemaGenerator {
 
                 final Map<String, JsonNode> targetFields = new TreeMap<>();
                 final Map<String, JsonNode> targetMethods = new TreeMap<>();
-                TypeVariableContext targetTypeVariables;
-                JavaType currentTargetType = targetType;
-                do {
-                    targetTypeVariables = TypeVariableContext.forType(currentTargetType);
-                    final TypeVariableContext currentTypeVariableScope = targetTypeVariables;
-                    final Class<?> currentTargetClass = ReflectionTypeUtils.getRawType(currentTargetType.getResolvedType());
-                    logger.debug("iterating over declared fields from {}", currentTargetClass);
-                    Stream.of(currentTargetClass.getDeclaredFields())
-                            .filter(declaredField -> !this.config.shouldIgnore(declaredField))
-                            .forEach(field -> this.populateField(field, targetFields, currentTypeVariableScope, generationContext));
-                    logger.debug("iterating over declared public methods from {}", currentTargetClass);
-                    Stream.of(currentTargetClass.getDeclaredMethods())
-                            .filter(declaredMethod -> (declaredMethod.getModifiers() & Modifier.PUBLIC) == Modifier.PUBLIC)
-                            .filter(declaredMethod -> !this.config.shouldIgnore(declaredMethod))
-                            .forEach(method -> this.populateMethod(method, targetMethods, currentTypeVariableScope, generationContext));
-                    currentTargetType = new JavaType(currentTargetClass.getGenericSuperclass(), currentTypeVariableScope);
-                } while (currentTargetType.getResolvedType() != null && currentTargetType.getResolvedType() != Object.class);
+
+                this.collectObjectProperties(targetType, targetFields, targetMethods, generationContext);
+
                 if (!targetFields.isEmpty() || !targetMethods.isEmpty()) {
                     ObjectNode propertiesNode = this.config.createObjectNode();
                     propertiesNode.setAll(targetFields);
@@ -190,6 +178,37 @@ public class SchemaGenerator {
                 definition.setAll(customDefinition.getValue());
             }
         }
+    }
+
+    /**
+     * Recursively collect all properties of the given object type and add them to the respective maps.
+     *
+     * @param targetType the type for which to collect fields and methods
+     * @param targetFields map of named JSON schema nodes representing individual fields
+     * @param targetMethods map of named JSON schema nodes representing individual methods
+     * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
+     */
+    private void collectObjectProperties(JavaType targetType, Map<String, JsonNode> targetFields, Map<String, JsonNode> targetMethods,
+            SchemaGenerationContext generationContext) {
+        TypeVariableContext targetTypeVariables = TypeVariableContext.forType(targetType);
+        final Class<?> currentTargetClass = ReflectionTypeUtils.getRawType(targetType.getResolvedType());
+        logger.debug("iterating over declared fields from {}", currentTargetClass);
+        Stream.of(currentTargetClass.getDeclaredFields())
+                .filter(declaredField -> !this.config.shouldIgnore(declaredField))
+                .forEach(field -> this.populateField(field, targetFields, targetTypeVariables, generationContext));
+        logger.debug("iterating over declared public methods from {}", currentTargetClass);
+        Stream.of(currentTargetClass.getDeclaredMethods())
+                .filter(declaredMethod -> (declaredMethod.getModifiers() & Modifier.PUBLIC) == Modifier.PUBLIC)
+                .filter(declaredMethod -> !this.config.shouldIgnore(declaredMethod))
+                .forEach(method -> this.populateMethod(method, targetMethods, targetTypeVariables, generationContext));
+        JavaType superType = new JavaType(currentTargetClass.getGenericSuperclass(), targetTypeVariables);
+        if (superType.getResolvedType() != null && superType.getResolvedType() != Object.class) {
+            this.collectObjectProperties(superType, targetFields, targetMethods, generationContext);
+        }
+        // alsp include methods that only have default implementations
+        Stream.of(currentTargetClass.getGenericInterfaces())
+                .map(superInterface -> new JavaType(superInterface, targetTypeVariables))
+                .forEach(superInterface -> this.collectObjectProperties(superInterface, targetFields, targetMethods, generationContext));
     }
 
     /**
@@ -205,6 +224,7 @@ public class SchemaGenerator {
         String defaultName = field.getName();
         String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(field, defaultName)).orElse(defaultName);
         if (parentProperties.containsKey(propertyName)) {
+            logger.debug("ignoring overridden {}.{}", field.getDeclaringClass(), defaultName);
             return;
         }
         ObjectNode subSchema = this.config.createObjectNode();
@@ -239,7 +259,7 @@ public class SchemaGenerator {
                 .collect(Collectors.joining(", ", "(", ")"));
         String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(method, defaultName)).orElse(defaultName);
         if (parentProperties.containsKey(propertyName)) {
-            logger.debug("ignoring {}.{}", method.getDeclaringClass(), method);
+            logger.debug("ignoring overridden {}.{}", method.getDeclaringClass(), defaultName);
             return;
         }
 
