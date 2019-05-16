@@ -19,7 +19,6 @@ package com.github.victools.jsonschema.generator.impl.module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -53,7 +52,7 @@ public class FieldWithoutGetterExclusionModuleTest {
 
         Mockito.verify(this.builder).forFields();
         Mockito.verifyNoMoreInteractions(this.builder);
-        Mockito.verify(this.fieldConfigPart).addIgnoreCheck(Mockito.any());
+        Mockito.verify(this.fieldConfigPart).withIgnoreCheck(Mockito.any());
         Mockito.verifyNoMoreInteractions(this.fieldConfigPart);
     }
 

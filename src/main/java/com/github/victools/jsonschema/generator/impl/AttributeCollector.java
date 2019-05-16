@@ -16,6 +16,8 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.JavaType;
@@ -25,11 +27,27 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper class for looking-up various attribute values for a field or method via a given configuration instance.
  */
 public class AttributeCollector {
+
+    private static final Logger logger = LoggerFactory.getLogger(AttributeCollector.class);
+
+    private final ObjectMapper objectMapper;
+
+    /**
+     * Constructor accepting the object mapper to use.
+     *
+     * @param objectMapper object mapper
+     */
+    public AttributeCollector(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     /**
      * Collect a field's contextual attributes (i.e. everything not related to the structure).
@@ -41,7 +59,7 @@ public class AttributeCollector {
      */
     public static ObjectNode collectFieldAttributes(Field field, JavaType type, SchemaGeneratorConfig config) {
         ObjectNode node = config.createObjectNode();
-        AttributeCollector collector = new AttributeCollector();
+        AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
         collector.setTitle(node, config.resolveTitle(field, type));
         collector.setDescription(node, config.resolveDescription(field, type));
         collector.setEnum(node, config.resolveEnum(field, type));
@@ -56,6 +74,8 @@ public class AttributeCollector {
         collector.setArrayMinItems(node, config.resolveArrayMinItems(field, type));
         collector.setArrayMaxItems(node, config.resolveArrayMaxItems(field, type));
         collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(field, type));
+        config.getFieldAttributeOverrides()
+                .forEach(override -> override.overrideInstanceAttributes(node, field, type, config));
         return node;
     }
 
@@ -69,7 +89,7 @@ public class AttributeCollector {
      */
     public static ObjectNode collectMethodAttributes(Method method, JavaType returnType, SchemaGeneratorConfig config) {
         ObjectNode node = config.createObjectNode();
-        AttributeCollector collector = new AttributeCollector();
+        AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
         collector.setTitle(node, config.resolveTitle(method, returnType));
         collector.setDescription(node, config.resolveDescription(method, returnType));
         collector.setEnum(node, config.resolveEnum(method, returnType));
@@ -84,6 +104,8 @@ public class AttributeCollector {
         collector.setArrayMinItems(node, config.resolveArrayMinItems(method, returnType));
         collector.setArrayMaxItems(node, config.resolveArrayMaxItems(method, returnType));
         collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(method, returnType));
+        config.getMethodAttributeOverrides()
+                .forEach(override -> override.overrideInstanceAttributes(node, method, returnType, config));
         return node;
     }
 
@@ -124,26 +146,32 @@ public class AttributeCollector {
      */
     public AttributeCollector setEnum(ObjectNode node, Collection<?> enumValues) {
         if (enumValues != null && !enumValues.isEmpty()) {
+            Stream<String> valueStream = enumValues.stream().map(this::convertObjectToString);
             if (enumValues.size() == 1) {
-                Object singleValue = enumValues.iterator().next();
-                if (singleValue instanceof String) {
-                    node.put(SchemaConstants.TAG_CONST, (String) singleValue);
-                } else {
-                    node.putPOJO(SchemaConstants.TAG_CONST, singleValue);
-                }
+                String singleValue = valueStream.findFirst().get();
+                node.putPOJO(SchemaConstants.TAG_CONST, singleValue);
             } else {
                 ArrayNode array = node.arrayNode();
-                for (Object singleValue : enumValues) {
-                    if (singleValue instanceof String) {
-                        array.add((String) singleValue);
-                    } else {
-                        array.addPOJO(singleValue);
-                    }
-                }
+                valueStream.forEach(array::addPOJO);
                 node.set(SchemaConstants.TAG_ENUM, array);
             }
         }
         return this;
+    }
+
+    /**
+     * Call {@link ObjectMapper#writeValueAsString(Object)} on the given object – ignoring any occurring {@link JsonProcessingException}.
+     *
+     * @param target object to convert
+     * @return converted object
+     */
+    private String convertObjectToString(Object target) {
+        try {
+            return this.objectMapper.writeValueAsString(target);
+        } catch (JsonProcessingException ex) {
+            logger.warn("Failed to convert value to string via ObjectMapper: {}", target, ex);
+            return target == null ? null : ('"' + target.toString() + '"');
+        }
     }
 
     /**

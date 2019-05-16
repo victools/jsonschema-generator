@@ -27,6 +27,6 @@ public class VoidMethodExclusionModule implements Module {
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         builder.forMethods()
-                .addIgnoreCheck(method -> method.getReturnType() == void.class);
+                .withIgnoreCheck(method -> method.getReturnType() == void.class);
     }
 }

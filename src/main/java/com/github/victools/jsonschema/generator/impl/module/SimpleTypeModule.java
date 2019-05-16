@@ -181,8 +181,8 @@ public class SimpleTypeModule implements Module {
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
-        builder.forFields().addNullableCheck(this::isNullableType);
-        builder.forMethods().addNullableCheck(this::isNullableType);
+        builder.forFields().withNullableCheck(this::isNullableType);
+        builder.forMethods().withNullableCheck(this::isNullableType);
 
         builder.with(new SimpleTypeDefinitionProvider(builder.getObjectMapper()));
     }

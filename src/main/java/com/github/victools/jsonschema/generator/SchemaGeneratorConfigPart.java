@@ -100,7 +100,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param check how to determine whether a given reference should be ignored
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addIgnoreCheck(Predicate<O> check) {
+    public SchemaGeneratorConfigPart<O> withIgnoreCheck(Predicate<O> check) {
         this.ignoreChecks.add(check);
         return this;
     }
@@ -121,7 +121,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param check how to determine whether a given reference should be nullable
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addNullableCheck(BiFunction<O, JavaType, Boolean> check) {
+    public SchemaGeneratorConfigPart<O> withNullableCheck(BiFunction<O, JavaType, Boolean> check) {
         this.nullableChecks.add(check);
         return this;
     }
@@ -147,7 +147,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the alternative target type
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addTargetTypeOverrideResolver(BiFunction<O, JavaType, JavaType> resolver) {
+    public SchemaGeneratorConfigPart<O> withTargetTypeOverrideResolver(BiFunction<O, JavaType, JavaType> resolver) {
         this.targetTypeOverrideResolvers.add(resolver);
         return this;
     }
@@ -169,7 +169,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the alternative name in a parent JSON Schema's "properties"
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addPropertyNameOverrideResolver(BiFunction<O, String, String> resolver) {
+    public SchemaGeneratorConfigPart<O> withPropertyNameOverrideResolver(BiFunction<O, String, String> resolver) {
         this.propertyNameOverrideResolvers.add(resolver);
         return this;
     }
@@ -191,7 +191,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "title" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addTitleResolver(BiFunction<O, JavaType, String> resolver) {
+    public SchemaGeneratorConfigPart<O> withTitleResolver(BiFunction<O, JavaType, String> resolver) {
         this.titleResolvers.add(resolver);
         return this;
     }
@@ -213,7 +213,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "description" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addDescriptionResolver(BiFunction<O, JavaType, String> resolver) {
+    public SchemaGeneratorConfigPart<O> withDescriptionResolver(BiFunction<O, JavaType, String> resolver) {
         this.descriptionResolvers.add(resolver);
         return this;
     }
@@ -235,7 +235,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "enum"/"const" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addEnumResolver(BiFunction<O, JavaType, Collection<?>> resolver) {
+    public SchemaGeneratorConfigPart<O> withEnumResolver(BiFunction<O, JavaType, Collection<?>> resolver) {
         this.enumResolvers.add(resolver);
         return this;
     }
@@ -257,7 +257,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "minLength" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addStringMinLengthResolver(BiFunction<O, JavaType, Integer> resolver) {
+    public SchemaGeneratorConfigPart<O> withStringMinLengthResolver(BiFunction<O, JavaType, Integer> resolver) {
         this.stringMinLengthResolvers.add(resolver);
         return this;
     }
@@ -279,7 +279,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "maxLength" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addStringMaxLengthResolver(BiFunction<O, JavaType, Integer> resolver) {
+    public SchemaGeneratorConfigPart<O> withStringMaxLengthResolver(BiFunction<O, JavaType, Integer> resolver) {
         this.stringMaxLengthResolvers.add(resolver);
         return this;
     }
@@ -301,7 +301,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "format" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addStringFormatResolver(BiFunction<O, JavaType, String> resolver) {
+    public SchemaGeneratorConfigPart<O> withStringFormatResolver(BiFunction<O, JavaType, String> resolver) {
         this.stringFormatResolvers.add(resolver);
         return this;
     }
@@ -323,7 +323,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "minimum" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addNumberInclusiveMinimumResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
+    public SchemaGeneratorConfigPart<O> withNumberInclusiveMinimumResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
         this.numberInclusiveMinimumResolvers.add(resolver);
         return this;
     }
@@ -345,7 +345,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "exclusiveMinimum" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addNumberExclusiveMinimumResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
+    public SchemaGeneratorConfigPart<O> withNumberExclusiveMinimumResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
         this.numberExclusiveMinimumResolvers.add(resolver);
         return this;
     }
@@ -367,7 +367,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "maximum" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addNumberInclusiveMaximumResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
+    public SchemaGeneratorConfigPart<O> withNumberInclusiveMaximumResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
         this.numberInclusiveMaximumResolvers.add(resolver);
         return this;
     }
@@ -389,7 +389,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "exclusiveMaximum" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addNumberExclusiveMaximumResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
+    public SchemaGeneratorConfigPart<O> withNumberExclusiveMaximumResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
         this.numberExclusiveMaximumResolvers.add(resolver);
         return this;
     }
@@ -411,7 +411,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "multipleOf" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addNumberMultipleOfResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
+    public SchemaGeneratorConfigPart<O> withNumberMultipleOfResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
         this.numberMultipleOfResolvers.add(resolver);
         return this;
     }
@@ -433,7 +433,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "minItems" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addArrayMinItemsResolver(BiFunction<O, JavaType, Integer> resolver) {
+    public SchemaGeneratorConfigPart<O> withArrayMinItemsResolver(BiFunction<O, JavaType, Integer> resolver) {
         this.arrayMinItemsResolvers.add(resolver);
         return this;
     }
@@ -455,7 +455,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "maxItems" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addArrayMaxItemsResolver(BiFunction<O, JavaType, Integer> resolver) {
+    public SchemaGeneratorConfigPart<O> withArrayMaxItemsResolver(BiFunction<O, JavaType, Integer> resolver) {
         this.arrayMaxItemsResolvers.add(resolver);
         return this;
     }
@@ -477,7 +477,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "uniqueItems" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> addArrayUniqueItemsResolver(BiFunction<O, JavaType, Boolean> resolver) {
+    public SchemaGeneratorConfigPart<O> withArrayUniqueItemsResolver(BiFunction<O, JavaType, Boolean> resolver) {
         this.arrayUniqueItemsResolvers.add(resolver);
         return this;
     }

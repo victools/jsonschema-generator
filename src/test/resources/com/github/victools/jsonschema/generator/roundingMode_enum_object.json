@@ -1,0 +1,34 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "CEILING": {
+            "$ref": "#"
+        },
+        "DOWN": {
+            "$ref": "#"
+        },
+        "FLOOR": {
+            "$ref": "#"
+        },
+        "HALF_DOWN": {
+            "$ref": "#"
+        },
+        "HALF_EVEN": {
+            "$ref": "#"
+        },
+        "HALF_UP": {
+            "$ref": "#"
+        },
+        "UNNECESSARY": {
+            "$ref": "#"
+        },
+        "UP": {
+            "$ref": "#"
+        },
+        "name()": {
+            "type": "string",
+            "enum": ["UP", "DOWN", "CEILING", "FLOOR", "HALF_UP", "HALF_DOWN", "HALF_EVEN", "UNNECESSARY"]
+        }
+    }
+}

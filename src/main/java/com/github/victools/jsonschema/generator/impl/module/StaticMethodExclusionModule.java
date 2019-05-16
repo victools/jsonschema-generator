@@ -28,6 +28,6 @@ public class StaticMethodExclusionModule implements Module {
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         builder.forMethods()
-                .addIgnoreCheck(method -> (method.getModifiers() & Modifier.STATIC) == Modifier.STATIC);
+                .withIgnoreCheck(method -> (method.getModifiers() & Modifier.STATIC) == Modifier.STATIC);
     }
 }

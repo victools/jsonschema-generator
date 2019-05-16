@@ -21,9 +21,11 @@ import com.github.victools.jsonschema.generator.impl.ReflectionTypeUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -82,23 +84,23 @@ public class SchemaGeneratorTest {
 
     private static void populateConfigPart(SchemaGeneratorConfigPart<?> configPart, String descriptionPrefix) {
         configPart
-                .addArrayMinItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type) ? 0 : null)
-                .addArrayMaxItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type) ? Integer.MAX_VALUE : null)
-                .addArrayUniqueItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type) ? false : null)
-                .addDescriptionResolver((field, type) -> descriptionPrefix + type.toString())
-                .addEnumResolver((field, type) -> isTypeOf(type, Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
-                .addEnumResolver((field, type) -> isTypeOf(type, String.class) ? Arrays.asList("constant string value") : null)
-                .addNullableCheck((field, type) -> Boolean.TRUE)
-                .addNumberExclusiveMaximumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
-                .addNumberExclusiveMinimumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ZERO : null)
-                .addNumberInclusiveMaximumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.TEN : null)
-                .addNumberInclusiveMinimumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ONE : null)
-                .addNumberMultipleOfResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ONE : null)
-                .addPropertyNameOverrideResolver((field, defaultName) -> "_" + defaultName)
-                .addStringFormatResolver((field, type) -> isTypeOf(type, String.class) ? "date" : null)
-                .addStringMaxLengthResolver((field, type) -> isTypeOf(type, String.class) ? 256 : null)
-                .addStringMinLengthResolver((field, type) -> isTypeOf(type, String.class) ? 1 : null)
-                .addTitleResolver((field, type) -> type.toString());
+                .withArrayMinItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type) ? 0 : null)
+                .withArrayMaxItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type) ? Integer.MAX_VALUE : null)
+                .withArrayUniqueItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type) ? false : null)
+                .withDescriptionResolver((field, type) -> descriptionPrefix + type.toString())
+                .withEnumResolver((field, type) -> isTypeOf(type, Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
+                .withEnumResolver((field, type) -> isTypeOf(type, String.class) ? Arrays.asList("constant string value") : null)
+                .withNullableCheck((field, type) -> Boolean.TRUE)
+                .withNumberExclusiveMaximumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
+                .withNumberExclusiveMinimumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ZERO : null)
+                .withNumberInclusiveMaximumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.TEN : null)
+                .withNumberInclusiveMinimumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ONE : null)
+                .withNumberMultipleOfResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ONE : null)
+                .withPropertyNameOverrideResolver((field, defaultName) -> "_" + defaultName)
+                .withStringFormatResolver((field, type) -> isTypeOf(type, String.class) ? "date" : null)
+                .withStringMaxLengthResolver((field, type) -> isTypeOf(type, String.class) ? 256 : null)
+                .withStringMinLengthResolver((field, type) -> isTypeOf(type, String.class) ? 1 : null)
+                .withTitleResolver((field, type) -> type.toString());
     }
 
     Object parametersForTestGenerateSchema() {
@@ -111,10 +113,10 @@ public class SchemaGeneratorTest {
         Module methodModule = configBuilder -> populateConfigPart(configBuilder.forMethods(), "looked-up from method: ");
         Module fieldsOnlyModule = configBuilder -> configBuilder.with(methodModule)
                 .with(Option.GETTER_ATTRIBUTES_FOR_FIELDS, Option.DEFINITIONS_FOR_ALL_OBJECTS)
-                .forMethods().addIgnoreCheck(method -> true);
+                .forMethods().withIgnoreCheck(method -> true);
         Module methodsOnlyModule = configBuilder -> configBuilder.with(fieldModule)
                 .with(Option.FIELD_ATTRIBUTES_FOR_GETTERS, Option.DEFINITIONS_FOR_ALL_OBJECTS)
-                .forFields().addIgnoreCheck(field -> true);
+                .forFields().withIgnoreCheck(field -> true);
         Module enumsAsObjectsModule = configBuilder -> configBuilder.without(Option.ENUM_AS_STRING);
         return new Object[][]{
             {"testclass1_default-options", TestClass1.class, neutralModule},
@@ -127,8 +129,8 @@ public class SchemaGeneratorTest {
             {"testclass3_fields-only", TestClass3.class, fieldsOnlyModule},
             {"testclass3_method-attributes", TestClass3.class, methodModule},
             {"testclass3_methods-only", TestClass3.class, methodsOnlyModule},
-            {"options_enum_string", Option.class, neutralModule},
-            {"options_enum_object", Option.class, enumsAsObjectsModule}
+            {"roundingMode_enum_string", RoundingMode.class, neutralModule},
+            {"roundingMode_enum_object", RoundingMode.class, enumsAsObjectsModule}
         };
     }
 
@@ -141,8 +143,7 @@ public class SchemaGeneratorTest {
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(targetType);
-        // System.out.println(caseTitle + "\n" + result.toString());
-        JSONAssert.assertEquals(loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(result.toString() + '\n', loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 
     private static String loadResource(String resourcePath) throws IOException {

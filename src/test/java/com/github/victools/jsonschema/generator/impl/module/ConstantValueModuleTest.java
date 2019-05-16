@@ -54,8 +54,8 @@ public class ConstantValueModuleTest {
 
         Mockito.verify(this.builder).forFields();
         Mockito.verifyNoMoreInteractions(this.builder);
-        Mockito.verify(this.fieldConfigPart).addEnumResolver(Mockito.any());
-        Mockito.verify(this.fieldConfigPart).addNullableCheck(Mockito.any());
+        Mockito.verify(this.fieldConfigPart).withEnumResolver(Mockito.any());
+        Mockito.verify(this.fieldConfigPart).withNullableCheck(Mockito.any());
         Mockito.verifyNoMoreInteractions(this.fieldConfigPart);
     }
 

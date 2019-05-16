@@ -28,6 +28,6 @@ public class GetterMethodExclusionModule implements Module {
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         builder.forMethods()
-                .addIgnoreCheck(ReflectionGetterUtils::isGetter);
+                .withIgnoreCheck(ReflectionGetterUtils::isGetter);
     }
 }

@@ -33,7 +33,7 @@ public class ConstantValueModule implements Module {
      * Look-up the given field's constant (i.e. final static) value, or return null.
      *
      * @param field targeted field
-     * @param fieldType targeted field's type
+     * @param fieldType targeted field's type (ignored here)
      * @return collection containing single constant value; returning null if field has no constant value
      */
     private static List<?> extractConstantFieldValue(Field field, JavaType fieldType) {
@@ -54,7 +54,7 @@ public class ConstantValueModule implements Module {
      * Determine whether the given field is a constant (i.e. static and final) and if so, indicant whether the constant value is null.
      *
      * @param field targeted field
-     * @param fieldType targeted field's type
+     * @param fieldType targeted field's type (ignored here)
      * @return true/false depending on constant value being null; otherwise returning null if field is not a constant
      */
     private static Boolean isNullableConstantField(Field field, JavaType fieldType) {
@@ -68,7 +68,7 @@ public class ConstantValueModule implements Module {
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         builder.forFields()
-                .addEnumResolver(ConstantValueModule::extractConstantFieldValue)
-                .addNullableCheck(ConstantValueModule::isNullableConstantField);
+                .withEnumResolver(ConstantValueModule::extractConstantFieldValue)
+                .withNullableCheck(ConstantValueModule::isNullableConstantField);
     }
 }

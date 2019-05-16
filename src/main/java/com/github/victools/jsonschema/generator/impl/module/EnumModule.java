@@ -74,8 +74,8 @@ public class EnumModule implements Module {
         } else {
             // ignore all direct enum methods but name() - methods declared by a specific enum sub type are not ignored
             builder.forMethods()
-                    .addIgnoreCheck(method -> method.getDeclaringClass() == Enum.class && !"name".equals(method.getName()))
-                    .addEnumResolver(EnumModule::extractEnumValues);
+                    .withIgnoreCheck(method -> method.getDeclaringClass() == Enum.class && !"name".equals(method.getName()))
+                    .withEnumResolver(EnumModule::extractEnumValues);
         }
     }
 
@@ -132,7 +132,8 @@ public class EnumModule implements Module {
             if (rawType != null && rawType.isEnum()) {
                 ObjectNode customNode = this.objectMapper.createObjectNode()
                         .put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_STRING);
-                new AttributeCollector().setEnum(customNode, EnumModule.extractEnumValues(rawType));
+                new AttributeCollector(this.objectMapper)
+                        .setEnum(customNode, EnumModule.extractEnumValues(rawType));
                 return new CustomDefinition(customNode);
             }
             return null;

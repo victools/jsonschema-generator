@@ -87,13 +87,20 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public ObjectMapper getObjectMapper() {
+        return this.objectMapper;
+    }
+
+    @Override
     public ObjectNode createObjectNode() {
         return this.objectMapper.createObjectNode();
+        return this.getObjectMapper().createObjectNode();
     }
 
     @Override
     public ArrayNode createArrayNode() {
         return this.objectMapper.createArrayNode();
+        return this.getObjectMapper().createArrayNode();
     }
 
     @Override

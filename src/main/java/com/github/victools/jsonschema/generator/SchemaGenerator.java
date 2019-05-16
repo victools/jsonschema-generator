@@ -199,6 +199,7 @@ public class SchemaGenerator {
         logger.debug("iterating over declared public methods from {}", currentTargetClass);
         Stream.of(currentTargetClass.getDeclaredMethods())
                 .filter(declaredMethod -> (declaredMethod.getModifiers() & Modifier.PUBLIC) == Modifier.PUBLIC)
+                .filter(declaredMethod -> !currentTargetClass.isInterface() || declaredMethod.isDefault())
                 .filter(declaredMethod -> !this.config.shouldIgnore(declaredMethod))
                 .forEach(method -> this.populateMethod(method, targetMethods, targetTypeVariables, generationContext));
         JavaType superType = new JavaType(currentTargetClass.getGenericSuperclass(), targetTypeVariables);
@@ -231,9 +232,9 @@ public class SchemaGenerator {
         parentProperties.put(propertyName, subSchema);
 
         JavaType fieldType = typeVariables.resolveGenericTypePlaceholder(field.getGenericType());
+        boolean isNullable = this.config.isNullable(field, fieldType);
         fieldType = Optional.ofNullable(this.config.resolveTargetTypeOverride(field, fieldType))
                 .orElse(fieldType);
-        boolean isNullable = this.config.isNullable(field, fieldType);
         ObjectNode fieldAttributes = AttributeCollector.collectFieldAttributes(field, fieldType, this.config);
 
         this.populateSchema(fieldType, subSchema, isNullable, fieldAttributes, generationContext);
@@ -251,6 +252,7 @@ public class SchemaGenerator {
             SchemaGenerationContext generationContext) {
         TypeVariableContext extendedTypeVariables = TypeVariableContext.forMethod(method, parentTypeVariables);
         JavaType returnValueType = extendedTypeVariables.resolveGenericTypePlaceholder(method.getGenericReturnType());
+        final boolean isNullable = this.config.isNullable(method, returnValueType);
         returnValueType = Optional.ofNullable(this.config.resolveTargetTypeOverride(method, returnValueType))
                 .orElse(returnValueType);
 
@@ -269,7 +271,6 @@ public class SchemaGenerator {
             ObjectNode subSchema = this.config.createObjectNode();
             parentProperties.put(propertyName, subSchema);
 
-            boolean isNullable = this.config.isNullable(method, returnValueType);
             ObjectNode methodAttributes = AttributeCollector.collectMethodAttributes(method, returnValueType, this.config);
 
             this.populateSchema(returnValueType, subSchema, isNullable, methodAttributes, generationContext);

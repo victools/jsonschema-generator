@@ -44,12 +44,12 @@ public class SimpleTypeModuleTest {
         this.instance.applyToConfigBuilder(this.builder);
 
         SchemaGeneratorConfigPart<Field> fieldConfigPart = this.builder.forFields();
-        Mockito.verify(fieldConfigPart).addNullableCheck(Mockito.any());
+        Mockito.verify(fieldConfigPart).withNullableCheck(Mockito.any());
         Mockito.verifyNoMoreInteractions(fieldConfigPart);
         Mockito.verify(this.builder, Mockito.times(2)).forFields();
 
         SchemaGeneratorConfigPart<Method> methodConfigPart = this.builder.forMethods();
-        Mockito.verify(methodConfigPart).addNullableCheck(Mockito.any());
+        Mockito.verify(methodConfigPart).withNullableCheck(Mockito.any());
         Mockito.verifyNoMoreInteractions(methodConfigPart);
         Mockito.verify(this.builder, Mockito.times(2)).forMethods();
 

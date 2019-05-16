@@ -52,7 +52,7 @@ public class GetterMethodExclusionModuleTest {
 
         Mockito.verify(this.builder).forMethods();
         Mockito.verifyNoMoreInteractions(this.builder);
-        Mockito.verify(this.methodConfigPart).addIgnoreCheck(Mockito.any());
+        Mockito.verify(this.methodConfigPart).withIgnoreCheck(Mockito.any());
         Mockito.verifyNoMoreInteractions(this.methodConfigPart);
     }
 

@@ -45,11 +45,11 @@ public class SchemaGeneratorConfigPartTest {
     public void testIgnoreCheck() {
         Assert.assertFalse(this.instance.shouldIgnore(ORIGIN1));
 
-        this.instance.addIgnoreCheck(origin -> ORIGIN1.equals(origin));
+        Assert.assertSame(this.instance, this.instance.withIgnoreCheck(origin -> ORIGIN1.equals(origin)));
         Assert.assertTrue(this.instance.shouldIgnore(ORIGIN1));
         Assert.assertFalse(this.instance.shouldIgnore(ORIGIN2));
 
-        this.instance.addIgnoreCheck(origin -> ORIGIN2.equals(origin));
+        Assert.assertSame(this.instance, this.instance.withIgnoreCheck(origin -> ORIGIN2.equals(origin)));
         Assert.assertTrue(this.instance.shouldIgnore(ORIGIN1));
         Assert.assertTrue(this.instance.shouldIgnore(ORIGIN2));
         Assert.assertFalse(this.instance.shouldIgnore(ORIGIN3));
@@ -59,21 +59,21 @@ public class SchemaGeneratorConfigPartTest {
     public void testNullableCheck() {
         Assert.assertNull(this.instance.isNullable(ORIGIN1, null));
 
-        Assert.assertSame(this.instance, this.instance.addNullableCheck((origin, type) -> ORIGIN1.equals(origin) ? true : null));
+        Assert.assertSame(this.instance, this.instance.withNullableCheck((origin, type) -> ORIGIN1.equals(origin) ? true : null));
         Assert.assertTrue(this.instance.isNullable(ORIGIN1, null));
         Assert.assertNull(this.instance.isNullable(ORIGIN2, null));
 
-        Assert.assertSame(this.instance, this.instance.addNullableCheck((origin, type) -> ORIGIN2.equals(origin) ? false : null));
+        Assert.assertSame(this.instance, this.instance.withNullableCheck((origin, type) -> ORIGIN2.equals(origin) ? false : null));
         Assert.assertTrue(this.instance.isNullable(ORIGIN1, null));
         Assert.assertFalse(this.instance.isNullable(ORIGIN2, null));
         Assert.assertNull(this.instance.isNullable(ORIGIN3, null));
 
-        Assert.assertSame(this.instance, this.instance.addNullableCheck((origin, type) -> ORIGIN1.equals(origin)));
+        Assert.assertSame(this.instance, this.instance.withNullableCheck((origin, type) -> ORIGIN1.equals(origin)));
         Assert.assertTrue(this.instance.isNullable(ORIGIN1, null));
         Assert.assertFalse(this.instance.isNullable(ORIGIN2, null));
         Assert.assertFalse(this.instance.isNullable(ORIGIN3, null));
 
-        Assert.assertSame(this.instance, this.instance.addNullableCheck((origin, type) -> ORIGIN2.equals(origin)));
+        Assert.assertSame(this.instance, this.instance.withNullableCheck((origin, type) -> ORIGIN2.equals(origin)));
         Assert.assertTrue(this.instance.isNullable(ORIGIN1, null));
         Assert.assertTrue(this.instance.isNullable(ORIGIN2, null));
         Assert.assertFalse(this.instance.isNullable(ORIGIN3, null));
@@ -88,21 +88,21 @@ public class SchemaGeneratorConfigPartTest {
         Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN1, type1));
 
         BiFunction<String, JavaType, JavaType> resolver1 = (origin, type) -> ORIGIN1.equals(origin) && type == type1 ? type2 : null;
-        Assert.assertSame(this.instance, this.instance.addTargetTypeOverrideResolver(resolver1));
+        Assert.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver1));
         Assert.assertSame(type2, this.instance.resolveTargetTypeOverride(ORIGIN1, type1));
         Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN1, type2));
         Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type1));
         Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type2));
 
         BiFunction<String, JavaType, JavaType> resolver2 = (origin, type) -> ORIGIN1.equals(origin) && type == type1 ? type3 : null;
-        Assert.assertSame(this.instance, this.instance.addTargetTypeOverrideResolver(resolver2));
+        Assert.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver2));
         Assert.assertSame(type2, this.instance.resolveTargetTypeOverride(ORIGIN1, type1));
         Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN1, type2));
         Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type1));
         Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type2));
 
         BiFunction<String, JavaType, JavaType> resolver3 = (origin, type) -> ORIGIN2.equals(origin) && type == type2 ? type1 : null;
-        Assert.assertSame(this.instance, this.instance.addTargetTypeOverrideResolver(resolver3));
+        Assert.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver3));
         Assert.assertSame(type2, this.instance.resolveTargetTypeOverride(ORIGIN1, type1));
         Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN1, type2));
         Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type1));
@@ -117,21 +117,21 @@ public class SchemaGeneratorConfigPartTest {
         Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN1, name1));
 
         BiFunction<String, String, String> resolver1 = (origin, defaultName) -> ORIGIN1.equals(origin) && defaultName.equals(name1) ? name2 : null;
-        Assert.assertSame(this.instance, this.instance.addPropertyNameOverrideResolver(resolver1));
+        Assert.assertSame(this.instance, this.instance.withPropertyNameOverrideResolver(resolver1));
         Assert.assertSame(name2, this.instance.resolvePropertyNameOverride(ORIGIN1, name1));
         Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN1, name2));
         Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name1));
         Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name2));
 
         BiFunction<String, String, String> resolver2 = (origin, defaultName) -> ORIGIN1.equals(origin) && defaultName.equals(name1) ? "name3" : null;
-        Assert.assertSame(this.instance, this.instance.addPropertyNameOverrideResolver(resolver2));
+        Assert.assertSame(this.instance, this.instance.withPropertyNameOverrideResolver(resolver2));
         Assert.assertSame(name2, this.instance.resolvePropertyNameOverride(ORIGIN1, name1));
         Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN1, name2));
         Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name1));
         Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name2));
 
         BiFunction<String, String, String> resolver3 = (origin, defaultName) -> ORIGIN2.equals(origin) && defaultName.equals(name2) ? name1 : null;
-        Assert.assertSame(this.instance, this.instance.addPropertyNameOverrideResolver(resolver3));
+        Assert.assertSame(this.instance, this.instance.withPropertyNameOverrideResolver(resolver3));
         Assert.assertSame(name2, this.instance.resolvePropertyNameOverride(ORIGIN1, name1));
         Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN1, name2));
         Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name1));
@@ -141,85 +141,85 @@ public class SchemaGeneratorConfigPartTest {
     @Test
     public void testTitle() {
         this.testFirstDefinedValueConfig("title1", "title2",
-                this.instance::addTitleResolver, this.instance::resolveTitle);
+                this.instance::withTitleResolver, this.instance::resolveTitle);
     }
 
     @Test
     public void testDescription() {
         this.testFirstDefinedValueConfig("description1", "description2",
-                this.instance::addDescriptionResolver, this.instance::resolveDescription);
+                this.instance::withDescriptionResolver, this.instance::resolveDescription);
     }
 
     @Test
     public void testEnum() {
         this.testFirstDefinedValueConfig(Arrays.asList("val1", "val2"), Arrays.asList("val3"),
-                this.instance::addEnumResolver, this.instance::resolveEnum);
+                this.instance::withEnumResolver, this.instance::resolveEnum);
     }
 
     @Test
     public void testStringMinLength() {
         this.testFirstDefinedValueConfig(1, 2,
-                this.instance::addStringMinLengthResolver, this.instance::resolveStringMinLength);
+                this.instance::withStringMinLengthResolver, this.instance::resolveStringMinLength);
     }
 
     @Test
     public void testStringMaxLength() {
         this.testFirstDefinedValueConfig(3, 4,
-                this.instance::addStringMaxLengthResolver, this.instance::resolveStringMaxLength);
+                this.instance::withStringMaxLengthResolver, this.instance::resolveStringMaxLength);
     }
 
     @Test
     public void testStringFormat() {
         this.testFirstDefinedValueConfig("uri", "uri-reference",
-                this.instance::addStringFormatResolver, this.instance::resolveStringFormat);
+                this.instance::withStringFormatResolver, this.instance::resolveStringFormat);
     }
 
     @Test
     public void testNumberInclusiveMinimum() {
         this.testFirstDefinedValueConfig(BigDecimal.ONE, BigDecimal.TEN,
-                this.instance::addNumberInclusiveMinimumResolver, this.instance::resolveNumberInclusiveMinimum);
+                this.instance::withNumberInclusiveMinimumResolver, this.instance::resolveNumberInclusiveMinimum);
     }
 
     @Test
     public void testNumberExclusiveMinimum() {
         this.testFirstDefinedValueConfig(BigDecimal.ONE, BigDecimal.TEN,
-                this.instance::addNumberExclusiveMinimumResolver, this.instance::resolveNumberExclusiveMinimum);
+                this.instance::withNumberExclusiveMinimumResolver, this.instance::resolveNumberExclusiveMinimum);
     }
 
     @Test
     public void testNumberInclusiveMaximum() {
         this.testFirstDefinedValueConfig(BigDecimal.ONE, BigDecimal.TEN,
-                this.instance::addNumberInclusiveMaximumResolver, this.instance::resolveNumberInclusiveMaximum);
+                this.instance::withNumberInclusiveMaximumResolver, this.instance::resolveNumberInclusiveMaximum);
     }
 
     @Test
     public void testNumberExclusiveMaximum() {
         this.testFirstDefinedValueConfig(BigDecimal.ONE, BigDecimal.TEN,
-                this.instance::addNumberExclusiveMaximumResolver, this.instance::resolveNumberExclusiveMaximum);
+                this.instance::withNumberExclusiveMaximumResolver, this.instance::resolveNumberExclusiveMaximum);
     }
 
     @Test
     public void testNumberMultipleOf() {
         this.testFirstDefinedValueConfig(BigDecimal.ONE, BigDecimal.TEN,
-                this.instance::addNumberMultipleOfResolver, this.instance::resolveNumberMultipleOf);
+                this.instance::withNumberMultipleOfResolver, this.instance::resolveNumberMultipleOf);
     }
 
     @Test
     public void testArrayMinItems() {
         this.testFirstDefinedValueConfig(1, 2,
-                this.instance::addArrayMinItemsResolver, this.instance::resolveArrayMinItems);
+                this.instance::withArrayMinItemsResolver, this.instance::resolveArrayMinItems);
     }
 
     @Test
     public void testArrayMaxItems() {
         this.testFirstDefinedValueConfig(1, 2,
-                this.instance::addArrayMaxItemsResolver, this.instance::resolveArrayMaxItems);
+                this.instance::withArrayMaxItemsResolver, this.instance::resolveArrayMaxItems);
     }
 
     @Test
     public void testArrayUniqueItems() {
         this.testFirstDefinedValueConfig(Boolean.TRUE, Boolean.FALSE,
-                this.instance::addArrayUniqueItemsResolver, this.instance::resolveArrayUniqueItems);
+                this.instance::withArrayUniqueItemsResolver, this.instance::resolveArrayUniqueItems);
     }
 
     private <R> void testFirstDefinedValueConfig(R value1, R value2, Function<BiFunction<String, JavaType, R>, SchemaGeneratorConfigPart<String>> addConfig, BiFunction<String, JavaType, R> resolveValue) {

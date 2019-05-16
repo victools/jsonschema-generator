@@ -48,21 +48,21 @@ public class FieldAttributesForGetterModule implements Module {
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         SchemaGeneratorConfigPart<Field> fieldConfigPart = builder.forFields();
         builder.forMethods()
-                .addArrayMaxItemsResolver(resolveForField(fieldConfigPart::resolveArrayMaxItems))
-                .addArrayMinItemsResolver(resolveForField(fieldConfigPart::resolveArrayMinItems))
-                .addArrayUniqueItemsResolver(resolveForField(fieldConfigPart::resolveArrayUniqueItems))
-                .addDescriptionResolver(resolveForField(fieldConfigPart::resolveDescription))
-                .addEnumResolver(resolveForField(fieldConfigPart::resolveEnum))
-                .addNullableCheck(resolveForField(fieldConfigPart::isNullable))
-                .addNumberExclusiveMaximumResolver(resolveForField(fieldConfigPart::resolveNumberExclusiveMaximum))
-                .addNumberExclusiveMinimumResolver(resolveForField(fieldConfigPart::resolveNumberExclusiveMinimum))
-                .addNumberInclusiveMaximumResolver(resolveForField(fieldConfigPart::resolveNumberInclusiveMaximum))
-                .addNumberInclusiveMinimumResolver(resolveForField(fieldConfigPart::resolveNumberInclusiveMinimum))
-                .addNumberMultipleOfResolver(resolveForField(fieldConfigPart::resolveNumberMultipleOf))
-                .addStringFormatResolver(resolveForField(fieldConfigPart::resolveStringFormat))
-                .addStringMaxLengthResolver(resolveForField(fieldConfigPart::resolveStringMaxLength))
-                .addStringMinLengthResolver(resolveForField(fieldConfigPart::resolveStringMinLength))
-                .addTargetTypeOverrideResolver(resolveForField(fieldConfigPart::resolveTargetTypeOverride))
-                .addTitleResolver(resolveForField(fieldConfigPart::resolveTitle));
+                .withArrayMaxItemsResolver(resolveForField(fieldConfigPart::resolveArrayMaxItems))
+                .withArrayMinItemsResolver(resolveForField(fieldConfigPart::resolveArrayMinItems))
+                .withArrayUniqueItemsResolver(resolveForField(fieldConfigPart::resolveArrayUniqueItems))
+                .withDescriptionResolver(resolveForField(fieldConfigPart::resolveDescription))
+                .withEnumResolver(resolveForField(fieldConfigPart::resolveEnum))
+                .withNullableCheck(resolveForField(fieldConfigPart::isNullable))
+                .withNumberExclusiveMaximumResolver(resolveForField(fieldConfigPart::resolveNumberExclusiveMaximum))
+                .withNumberExclusiveMinimumResolver(resolveForField(fieldConfigPart::resolveNumberExclusiveMinimum))
+                .withNumberInclusiveMaximumResolver(resolveForField(fieldConfigPart::resolveNumberInclusiveMaximum))
+                .withNumberInclusiveMinimumResolver(resolveForField(fieldConfigPart::resolveNumberInclusiveMinimum))
+                .withNumberMultipleOfResolver(resolveForField(fieldConfigPart::resolveNumberMultipleOf))
+                .withStringFormatResolver(resolveForField(fieldConfigPart::resolveStringFormat))
+                .withStringMaxLengthResolver(resolveForField(fieldConfigPart::resolveStringMaxLength))
+                .withStringMinLengthResolver(resolveForField(fieldConfigPart::resolveStringMinLength))
+                .withTargetTypeOverrideResolver(resolveForField(fieldConfigPart::resolveTargetTypeOverride))
+                .withTitleResolver(resolveForField(fieldConfigPart::resolveTitle));
     }
 }

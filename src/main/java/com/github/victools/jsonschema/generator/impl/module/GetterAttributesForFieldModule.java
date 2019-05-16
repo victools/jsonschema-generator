@@ -48,21 +48,21 @@ public class GetterAttributesForFieldModule implements Module {
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         SchemaGeneratorConfigPart<Method> methodConfigPart = builder.forMethods();
         builder.forFields()
-                .addArrayMaxItemsResolver(resolveForGetter(methodConfigPart::resolveArrayMaxItems))
-                .addArrayMinItemsResolver(resolveForGetter(methodConfigPart::resolveArrayMinItems))
-                .addArrayUniqueItemsResolver(resolveForGetter(methodConfigPart::resolveArrayUniqueItems))
-                .addDescriptionResolver(resolveForGetter(methodConfigPart::resolveDescription))
-                .addEnumResolver(resolveForGetter(methodConfigPart::resolveEnum))
-                .addNullableCheck(resolveForGetter(methodConfigPart::isNullable))
-                .addNumberExclusiveMaximumResolver(resolveForGetter(methodConfigPart::resolveNumberExclusiveMaximum))
-                .addNumberExclusiveMinimumResolver(resolveForGetter(methodConfigPart::resolveNumberExclusiveMinimum))
-                .addNumberInclusiveMaximumResolver(resolveForGetter(methodConfigPart::resolveNumberInclusiveMaximum))
-                .addNumberInclusiveMinimumResolver(resolveForGetter(methodConfigPart::resolveNumberInclusiveMinimum))
-                .addNumberMultipleOfResolver(resolveForGetter(methodConfigPart::resolveNumberMultipleOf))
-                .addStringFormatResolver(resolveForGetter(methodConfigPart::resolveStringFormat))
-                .addStringMaxLengthResolver(resolveForGetter(methodConfigPart::resolveStringMaxLength))
-                .addStringMinLengthResolver(resolveForGetter(methodConfigPart::resolveStringMinLength))
-                .addTargetTypeOverrideResolver(resolveForGetter(methodConfigPart::resolveTargetTypeOverride))
-                .addTitleResolver(resolveForGetter(methodConfigPart::resolveTitle));
+                .withArrayMaxItemsResolver(resolveForGetter(methodConfigPart::resolveArrayMaxItems))
+                .withArrayMinItemsResolver(resolveForGetter(methodConfigPart::resolveArrayMinItems))
+                .withArrayUniqueItemsResolver(resolveForGetter(methodConfigPart::resolveArrayUniqueItems))
+                .withDescriptionResolver(resolveForGetter(methodConfigPart::resolveDescription))
+                .withEnumResolver(resolveForGetter(methodConfigPart::resolveEnum))
+                .withNullableCheck(resolveForGetter(methodConfigPart::isNullable))
+                .withNumberExclusiveMaximumResolver(resolveForGetter(methodConfigPart::resolveNumberExclusiveMaximum))
+                .withNumberExclusiveMinimumResolver(resolveForGetter(methodConfigPart::resolveNumberExclusiveMinimum))
+                .withNumberInclusiveMaximumResolver(resolveForGetter(methodConfigPart::resolveNumberInclusiveMaximum))
+                .withNumberInclusiveMinimumResolver(resolveForGetter(methodConfigPart::resolveNumberInclusiveMinimum))
+                .withNumberMultipleOfResolver(resolveForGetter(methodConfigPart::resolveNumberMultipleOf))
+                .withStringFormatResolver(resolveForGetter(methodConfigPart::resolveStringFormat))
+                .withStringMaxLengthResolver(resolveForGetter(methodConfigPart::resolveStringMaxLength))
+                .withStringMinLengthResolver(resolveForGetter(methodConfigPart::resolveStringMinLength))
+                .withTargetTypeOverrideResolver(resolveForGetter(methodConfigPart::resolveTargetTypeOverride))
+                .withTitleResolver(resolveForGetter(methodConfigPart::resolveTitle));
     }
 }

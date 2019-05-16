@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Field;
@@ -43,7 +44,16 @@ public interface SchemaGeneratorConfig {
     boolean shouldIncludeSchemaVersionIndicator();
 
     /**
+     * Getter for the underlying object mapper.
+     *
+     * @return object mapper being used for generating JSON Schema structure
+     */
+    ObjectMapper getObjectMapper();
+
+    /**
      * Generate an empty JSON node representing an object (which will subsequently be filled by the generator).
+     * <br>
+     * This is equivalent to calling {@code getObjectMapper().createObjectNode()}
      *
      * @return JSON object node
      */
@@ -51,6 +61,8 @@ public interface SchemaGeneratorConfig {
 
     /**
      * Generate an empty JSON node representing an array (which will subsequently be filled by the generator).
+     * <br>
+     * This is equivalent to calling {@code getObjectMapper().createArrayNode()}
      *
      * @return JSON array node
      */

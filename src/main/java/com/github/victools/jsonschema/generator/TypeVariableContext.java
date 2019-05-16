@@ -192,6 +192,6 @@ public final class TypeVariableContext {
             logger.debug("looking-up type variable {} in parent context", variableName);
             return this.parentContext.resolveGenericTypePlaceholder(typeVariable);
         }
-        throw new IllegalStateException(variableName + "is an undefined variable in this context. Maybe wrong context was applied?");
+        throw new IllegalStateException(variableName + " is an undefined variable in this context. Maybe wrong context was applied?");
     }
 }
