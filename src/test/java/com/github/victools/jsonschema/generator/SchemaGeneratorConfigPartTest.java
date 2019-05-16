@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.generator;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import org.junit.Assert;
@@ -39,6 +40,16 @@ public class SchemaGeneratorConfigPartTest {
     @Before
     public void setUp() {
         this.instance = new SchemaGeneratorConfigPart<>();
+    }
+
+    @Test
+    public void testInstanceAttributeOverride() {
+        InstanceAttributeOverride<String> instanceOverride = (node, reference, t, c) -> node.put("$comment", reference);
+        Assert.assertSame(this.instance, this.instance.withInstanceAttributeOverride(instanceOverride));
+
+        List<InstanceAttributeOverride<String>> instanceOverrideList = this.instance.getInstanceAttributeOverrides();
+        Assert.assertEquals(1, instanceOverrideList.size());
+        Assert.assertSame(instanceOverride, instanceOverrideList.get(0));
     }
 
     @Test

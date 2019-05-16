@@ -21,13 +21,16 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.InstanceAttributeOverride;
 import com.github.victools.jsonschema.generator.JavaType;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.TypeAttributeOverride;
 import com.github.victools.jsonschema.generator.TypeVariableContext;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +54,7 @@ public class SchemaGeneratorConfigImplTest {
     private SchemaGeneratorConfigPart<Field> fieldConfigPart;
     private SchemaGeneratorConfigPart<Method> methodConfigPart;
     private List<CustomDefinitionProvider> customDefinitions;
+    private List<TypeAttributeOverride> typeAttributeOverrides;
 
     @Before
     @SuppressWarnings("unchecked")
@@ -60,8 +64,9 @@ public class SchemaGeneratorConfigImplTest {
         this.fieldConfigPart = Mockito.mock(SchemaGeneratorConfigPart.class);
         this.methodConfigPart = Mockito.mock(SchemaGeneratorConfigPart.class);
         this.customDefinitions = new ArrayList<>();
+        this.typeAttributeOverrides = new ArrayList<>();
         this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, this.options,
-                this.fieldConfigPart, this.methodConfigPart, this.customDefinitions);
+                this.fieldConfigPart, this.methodConfigPart, this.customDefinitions, this.typeAttributeOverrides);
     }
 
     @Test
@@ -170,6 +175,36 @@ public class SchemaGeneratorConfigImplTest {
         }
         boolean result = this.instance.isNullable(method, null);
         Assert.assertEquals(expectedResult, result);
+    }
+
+    @Test
+    public void testGetTypeAttributeOverrides() {
+        TypeAttributeOverride typeOverride = (typeNode, javaType, c) -> typeNode.put("$comment", javaType.getResolvedType().getTypeName());
+        this.typeAttributeOverrides.add(typeOverride);
+
+        List<TypeAttributeOverride> result = this.instance.getTypeAttributeOverrides();
+        Assert.assertEquals(1, result.size());
+        Assert.assertSame(typeOverride, result.get(0));
+    }
+
+    @Test
+    public void testGetFieldAttributeOverrides() {
+        InstanceAttributeOverride<Field> instanceOverride = (node, field, t, c) -> node.put("$comment", field.getName());
+        Mockito.when(this.fieldConfigPart.getInstanceAttributeOverrides()).thenReturn(Collections.singletonList(instanceOverride));
+
+        List<InstanceAttributeOverride<Field>> result = this.instance.getFieldAttributeOverrides();
+        Assert.assertEquals(1, result.size());
+        Assert.assertSame(instanceOverride, result.get(0));
+    }
+
+    @Test
+    public void testGetMethodAttributeOverrides() {
+        InstanceAttributeOverride<Method> instanceOverride = (node, method, t, c) -> node.put("$comment", method.getName() + "()");
+        Mockito.when(this.methodConfigPart.getInstanceAttributeOverrides()).thenReturn(Collections.singletonList(instanceOverride));
+
+        List<InstanceAttributeOverride<Method>> result = this.instance.getMethodAttributeOverrides();
+        Assert.assertEquals(1, result.size());
+        Assert.assertSame(instanceOverride, result.get(0));
     }
 
     private static class TestClass {

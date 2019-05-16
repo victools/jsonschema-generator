@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.generator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -51,6 +52,8 @@ public class SchemaGeneratorConfigPart<O> {
                 .findFirst()
                 .orElse(null);
     }
+
+    private final List<InstanceAttributeOverride<O>> instanceAttributeOverrides = new ArrayList<>();
 
     /*
      * Customising options for properties in a schema with "type": object; either skipping them completely or also allowing for "type": "null".
@@ -93,6 +96,26 @@ public class SchemaGeneratorConfigPart<O> {
     private final List<BiFunction<O, JavaType, Integer>> arrayMinItemsResolvers = new ArrayList<>();
     private final List<BiFunction<O, JavaType, Integer>> arrayMaxItemsResolvers = new ArrayList<>();
     private final List<BiFunction<O, JavaType, Boolean>> arrayUniqueItemsResolvers = new ArrayList<>();
+
+    /**
+     * Setter for override of attributes on a given JSON Schema node in the respective reference/context.
+     *
+     * @param override override of a given JSON Schema node's instance attributes
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorConfigPart<O> withInstanceAttributeOverride(InstanceAttributeOverride<O> override) {
+        this.instanceAttributeOverrides.add(override);
+        return this;
+    }
+
+    /**
+     * Getter for the applicable instance attribute overrides.
+     *
+     * @return overrides of a given JSON Schema node's instance attributes
+     */
+    public List<InstanceAttributeOverride<O>> getInstanceAttributeOverrides() {
+        return Collections.unmodifiableList(this.instanceAttributeOverrides);
+    }
 
     /**
      * Setter for ignore check.

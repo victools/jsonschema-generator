@@ -21,14 +21,17 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.InstanceAttributeOverride;
 import com.github.victools.jsonschema.generator.JavaType;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.TypeAttributeOverride;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,6 +47,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     private final SchemaGeneratorConfigPart<Field> fieldConfigPart;
     private final SchemaGeneratorConfigPart<Method> methodConfigPart;
     private final List<CustomDefinitionProvider> customDefinitions;
+    private final List<TypeAttributeOverride> typeAttributeOverrides;
 
     /**
      * Constructor of a configuration instance.
@@ -53,17 +57,20 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      * @param fieldConfigPart configuration part for fields
      * @param methodConfigPart configuration part for methods
      * @param customDefinitions custom suppliers for a type's schema definition
+     * @param typeAttributeOverrides applicable type attribute overrides
      */
     public SchemaGeneratorConfigImpl(ObjectMapper objectMapper,
             Map<Option, Boolean> options,
             SchemaGeneratorConfigPart<Field> fieldConfigPart,
             SchemaGeneratorConfigPart<Method> methodConfigPart,
-            List<CustomDefinitionProvider> customDefinitions) {
+            List<CustomDefinitionProvider> customDefinitions,
+            List<TypeAttributeOverride> typeAttributeOverrides) {
         this.objectMapper = objectMapper;
         this.options = options;
         this.fieldConfigPart = fieldConfigPart;
         this.methodConfigPart = methodConfigPart;
         this.customDefinitions = customDefinitions;
+        this.typeAttributeOverrides = typeAttributeOverrides;
     }
 
     /**
@@ -93,13 +100,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
 
     @Override
     public ObjectNode createObjectNode() {
-        return this.objectMapper.createObjectNode();
         return this.getObjectMapper().createObjectNode();
     }
 
     @Override
     public ArrayNode createArrayNode() {
-        return this.objectMapper.createArrayNode();
         return this.getObjectMapper().createArrayNode();
     }
 
@@ -111,6 +116,21 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
                 .findFirst()
                 .orElse(null);
         return result;
+    }
+
+    @Override
+    public List<TypeAttributeOverride> getTypeAttributeOverrides() {
+        return Collections.unmodifiableList(this.typeAttributeOverrides);
+    }
+
+    @Override
+    public List<InstanceAttributeOverride<Field>> getFieldAttributeOverrides() {
+        return this.fieldConfigPart.getInstanceAttributeOverrides();
+    }
+
+    @Override
+    public List<InstanceAttributeOverride<Method>> getMethodAttributeOverrides() {
+        return this.methodConfigPart.getInstanceAttributeOverrides();
     }
 
     @Override

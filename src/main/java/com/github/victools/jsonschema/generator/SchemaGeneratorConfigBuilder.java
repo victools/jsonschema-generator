@@ -37,6 +37,7 @@ public class SchemaGeneratorConfigBuilder {
     private final SchemaGeneratorConfigPart<Field> fieldConfigPart = new SchemaGeneratorConfigPart<>();
     private final SchemaGeneratorConfigPart<Method> methodConfigPart = new SchemaGeneratorConfigPart<>();
     private final List<CustomDefinitionProvider> customDefinitions = new ArrayList<>();
+    private final List<TypeAttributeOverride> typeAttributeOverrides = new ArrayList<>();
 
     /**
      * Constructor of an empty configuration builder.
@@ -63,7 +64,8 @@ public class SchemaGeneratorConfigBuilder {
                 this.options,
                 this.fieldConfigPart,
                 this.methodConfigPart,
-                this.customDefinitions);
+                this.customDefinitions,
+                this.typeAttributeOverrides);
     }
 
     /**
@@ -124,6 +126,17 @@ public class SchemaGeneratorConfigBuilder {
      */
     public SchemaGeneratorConfigBuilder with(CustomDefinitionProvider definitionProvider) {
         this.customDefinitions.add(definitionProvider);
+        return this;
+    }
+
+    /**
+     * Adding an override for type attributes – all of the registered overrides will be applied in the order of having been added.
+     *
+     * @param override adding/removing attributes on a JSON Schema node – specifically intended for attributes relating to the type in general.
+     * @return this builder instance (for chaining)
+     */
+    public SchemaGeneratorConfigBuilder with(TypeAttributeOverride override) {
+        this.typeAttributeOverrides.add(override);
         return this;
     }
 

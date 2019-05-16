@@ -93,11 +93,16 @@ public class SchemaGenerator {
             logger.debug("adding reference to existing definition of {}", targetType);
             generationContext.addReference(targetType, targetNode, isNullable);
             // nothing more to be done
-        } else if (ReflectionTypeUtils.isArrayType(targetType)) {
-            this.traverseArrayType(targetType, targetNode, isNullable, generationContext);
-        } else {
-            this.traverseObjectType(targetType, targetNode, isNullable, generationContext);
+            return;
         }
+        final ObjectNode definition;
+        if (ReflectionTypeUtils.isArrayType(targetType)) {
+            definition = this.traverseArrayType(targetType, targetNode, isNullable, generationContext);
+        } else {
+            definition = this.traverseObjectType(targetType, targetNode, isNullable, generationContext);
+        }
+        this.config.getTypeAttributeOverrides()
+                .forEach(override -> override.overrideTypeAttributes(definition, targetType, this.config));
     }
 
     /**
@@ -107,10 +112,11 @@ public class SchemaGenerator {
      * @param targetNode node in the JSON schema to which all collected attributes should be added
      * @param isNullable whether the field/method's return value the targetType refers to is allowed to be null in the declaring type
      * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
+     * @return the created array node containing the array type's definition
      */
-    private void traverseArrayType(JavaType targetType, ObjectNode targetNode, boolean isNullable,
+    private ObjectNode traverseArrayType(JavaType targetType, ObjectNode targetNode, boolean isNullable,
             SchemaGenerationContext generationContext) {
-        ObjectNode definition;
+        final ObjectNode definition;
         if (targetNode == null) {
             // only if the main target schema is an array, do we need to store this node as definition
             definition = this.config.createObjectNode();
@@ -129,6 +135,7 @@ public class SchemaGenerator {
         JavaType itemType = ReflectionTypeUtils.getArrayComponentType(targetType);
         logger.debug("resolved array component type {}", itemType);
         this.traverseGenericType(itemType, arrayItemTypeRef, false, generationContext);
+        return definition;
     }
 
     /**
@@ -138,21 +145,25 @@ public class SchemaGenerator {
      * @param targetNode node in the JSON schema to which all collected attributes should be added
      * @param isNullable whether the field/method's return value the targetType refers to is allowed to be null in the declaring type
      * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
+     * @return the created node containing the object type's definition
      */
-    private void traverseObjectType(JavaType targetType, ObjectNode targetNode, boolean isNullable,
+    private ObjectNode traverseObjectType(JavaType targetType, ObjectNode targetNode, boolean isNullable,
             SchemaGenerationContext generationContext) {
+        final ObjectNode definition;
         CustomDefinition customDefinition = this.config.getCustomDefinition(targetType);
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
             if (targetNode == null) {
                 logger.debug("storing configured custom inline type for {} as definition (since it is the main schema \"#\")", targetType);
-                generationContext.putDefinition(targetType, customDefinition.getValue());
+                definition = customDefinition.getValue();
+                generationContext.putDefinition(targetType, definition);
                 // targetNode will be populated at the end, in buildDefinitionsAndResolveReferences()
             } else {
                 logger.debug("directly applying configured custom inline type for {}", targetType);
                 targetNode.setAll(customDefinition.getValue());
+                definition = targetNode;
             }
         } else {
-            ObjectNode definition = this.config.createObjectNode();
+            definition = this.config.createObjectNode();
             generationContext.putDefinition(targetType, definition);
             if (targetNode != null) {
                 // targetNode is only null for the main class for which the schema is being generated
@@ -178,6 +189,7 @@ public class SchemaGenerator {
                 definition.setAll(customDefinition.getValue());
             }
         }
+        return definition;
     }
 
     /**

@@ -23,6 +23,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Default implementation of a schema generator's configuration.
@@ -75,6 +76,27 @@ public interface SchemaGeneratorConfig {
      * @return non-standard JSON schema definition (may be null)
      */
     CustomDefinition getCustomDefinition(JavaType javaType);
+
+    /**
+     * Getter for the applicable type attribute overrides.
+     *
+     * @return overrides of a given JSON Schema node's type attributes
+     */
+    List<TypeAttributeOverride> getTypeAttributeOverrides();
+
+    /**
+     * Getter for the applicable instance attribute overrides for fields.
+     *
+     * @return overrides of a given JSON Schema node's instance attributes
+     */
+    List<InstanceAttributeOverride<Field>> getFieldAttributeOverrides();
+
+    /**
+     * Getter for the applicable instance attribute overrides for methods.
+     *
+     * @return overrides of a given JSON Schema node's instance attributes
+     */
+    List<InstanceAttributeOverride<Method>> getMethodAttributeOverrides();
 
     /**
      * Check whether a field/property is nullable.
