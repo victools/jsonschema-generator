@@ -113,6 +113,9 @@
                 "class2OfClass2OfT": {
                     "$ref": "#/definitions/TestClass2<TestClass2<String>>"
                 },
+                "optionalT": {
+                    "type": ["string", "null"]
+                },
                 "getClass2OfClass2OfT()": {
                     "$ref": "#/definitions/TestClass2<TestClass2<String>>"
                 }

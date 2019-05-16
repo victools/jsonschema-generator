@@ -20,6 +20,7 @@ import com.github.victools.jsonschema.generator.impl.module.ConstantValueModule;
 import com.github.victools.jsonschema.generator.impl.module.EnumModule;
 import com.github.victools.jsonschema.generator.impl.module.FieldAttributesForGetterModule;
 import com.github.victools.jsonschema.generator.impl.module.FieldWithoutGetterExclusionModule;
+import com.github.victools.jsonschema.generator.impl.module.FlattenedOptionalModule;
 import com.github.victools.jsonschema.generator.impl.module.GetterAttributesForFieldModule;
 import com.github.victools.jsonschema.generator.impl.module.GetterMethodExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
@@ -51,6 +52,12 @@ public enum Option {
      * Default: true (enabled)
      */
     ENUM_AS_STRING(true, EnumModule::asStrings, EnumModule::asObjects),
+    /**
+     * Whether any {@link java.util.Optional Optional} instance should be treated as nullable value of the wrapped type.
+     * <br>
+     * Default: true (enabled)
+     */
+    FLATTENED_OPTIONALS(true, FlattenedOptionalModule::new, null),
     /**
      * Whether the constant values of static final fields should be included.
      * <br>

@@ -146,6 +146,9 @@
                 "class2OfClass2OfT": {
                     "$ref": "#/definitions/TestClass2<TestClass2<String>>"
                 },
+                "optionalT": {
+                    "type": ["string", "null"]
+                },
                 "_getClass2OfClass2OfT()": {
                     "allOf": [{
                             "oneOf": [{

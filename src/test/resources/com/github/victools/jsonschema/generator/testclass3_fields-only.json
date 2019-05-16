@@ -134,6 +134,9 @@
                             "title": "TestClass2<TestClass2<String>>",
                             "description": "looked-up from method: TestClass2<TestClass2<String>>"
                         }]
+                },
+                "optionalT": {
+                    "type": ["string", "null"]
                 }
             }
         }

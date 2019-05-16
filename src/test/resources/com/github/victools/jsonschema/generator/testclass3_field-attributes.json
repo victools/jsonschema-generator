@@ -161,6 +161,15 @@
                             "description": "looked-up from field: TestClass2<TestClass2<String>>"
                         }]
                 },
+                "_optionalT": {
+                    "type": ["string", "null"],
+                    "title": "String",
+                    "description": "looked-up from field: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date"
+                },
                 "getClass2OfClass2OfT()": {
                     "$ref": "#/definitions/TestClass2<TestClass2<String>>"
                 }

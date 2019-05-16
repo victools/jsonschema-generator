@@ -22,6 +22,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -97,23 +98,69 @@ public final class ReflectionTypeUtils {
                 componentType = ((Class<?>) genericType).getComponentType();
             } else if (genericType instanceof ParameterizedType) {
                 // an implementation of the Collection interface
-                ParameterizedType parameterizedTargetType = (ParameterizedType) genericType;
-                Class<?> rawTargetType = (Class<?>) parameterizedTargetType.getRawType();
-                while (rawTargetType != Collection.class) {
-                    componentTypeVariables = TypeVariableContext.forType(parameterizedTargetType, componentTypeVariables);
-                    Type collectionSuperType = Stream.of(rawTargetType.getGenericInterfaces())
-                            .filter(interfaceType -> Collection.class.isAssignableFrom(ReflectionTypeUtils.getRawType(interfaceType)))
-                            .findFirst()
-                            .orElse(rawTargetType.getGenericSuperclass());
-                    parameterizedTargetType = (ParameterizedType) collectionSuperType;
-                    rawTargetType = (Class<?>) parameterizedTargetType.getRawType();
-                }
-                componentType = parameterizedTargetType.getActualTypeArguments()[0];
+                JavaType collectionType = ReflectionTypeUtils.getParameterizedBaseType(arrayType, Collection.class);
+                componentType = ((ParameterizedType) collectionType.getResolvedType()).getActualTypeArguments()[0];
+                componentTypeVariables = collectionType.getParentTypeVariables();
             }
         }
         if (componentType == null) {
             throw new UnsupportedOperationException("Cannot determine array component type for target: " + arrayType);
         }
         return componentTypeVariables.resolveGenericTypePlaceholder(componentType);
+    }
+
+    /**
+     * Determine whether the given type is an {@link Optional}.
+     *
+     * @param javaType type to check
+     * @return whether the given type represents an {@link Optional} (or a sub class of it)
+     */
+    public static boolean isOptionalType(JavaType javaType) {
+        Type resolvedType = javaType.getResolvedType();
+        Class<?> rawTargetClass = ReflectionTypeUtils.getRawType(resolvedType);
+        return rawTargetClass != null && Optional.class.isAssignableFrom(rawTargetClass);
+    }
+
+    /**
+     * Determine the type of the item/component wrapped in the given {@link Optional} type.
+     *
+     * @param optionalType target type to unwrap component type from
+     * @return the wrapped component type
+     * @see #isOptionalType(JavaType)
+     */
+    public static JavaType getOptionalComponentType(JavaType optionalType) {
+        if (ReflectionTypeUtils.isOptionalType(optionalType)) {
+            JavaType optionalBaseType = ReflectionTypeUtils.getParameterizedBaseType(optionalType, Optional.class);
+            Type componentType = ((ParameterizedType) optionalBaseType.getResolvedType()).getActualTypeArguments()[0];
+            return optionalBaseType.getParentTypeVariables().resolveGenericTypePlaceholder(componentType);
+        }
+        throw new UnsupportedOperationException("Cannot determine optional component type for target: " + optionalType);
+    }
+
+    /**
+     * Determine the type variable context for a given parameterized type down to its base class.
+     *
+     * @param type parameterized type to resolve down to its base class
+     * @param baseClass assumed base class
+     * @return base type with the applicable type variable context
+     */
+    public static JavaType getParameterizedBaseType(JavaType type, Class<?> baseClass) {
+        Type genericType = type.getResolvedType();
+        Class<?> rawTargetType = ReflectionTypeUtils.getRawType(genericType);
+        if (!baseClass.isAssignableFrom(rawTargetType) || !(genericType instanceof ParameterizedType)) {
+            throw new UnsupportedOperationException("Cannot resolve " + genericType + " to the base class: " + baseClass);
+        }
+        ParameterizedType parameterizedTargetType = (ParameterizedType) genericType;
+        TypeVariableContext componentTypeVariables = TypeVariableContext.forType(type);
+        while (rawTargetType != baseClass) {
+            componentTypeVariables = TypeVariableContext.forType(parameterizedTargetType, componentTypeVariables);
+            Type collectionSuperType = Stream.of(rawTargetType.getGenericInterfaces())
+                    .filter(interfaceType -> baseClass.isAssignableFrom(ReflectionTypeUtils.getRawType(interfaceType)))
+                    .findFirst()
+                    .orElse(rawTargetType.getGenericSuperclass());
+            parameterizedTargetType = (ParameterizedType) collectionSuperType;
+            rawTargetType = (Class<?>) parameterizedTargetType.getRawType();
+        }
+        return new JavaType(parameterizedTargetType, componentTypeVariables);
     }
 }

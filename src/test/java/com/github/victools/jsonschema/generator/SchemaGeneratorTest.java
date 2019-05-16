@@ -217,6 +217,7 @@ public class SchemaGeneratorTest {
     private static class TestClass4<T> {
 
         private TestClass2<TestClass2<T>> class2OfClass2OfT;
+        public Optional<T> optionalT;
 
         public TestClass2<TestClass2<T>> getClass2OfClass2OfT() {
             return this.class2OfClass2OfT;
