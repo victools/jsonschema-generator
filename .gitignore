@@ -3,3 +3,4 @@ target
 
 # IDE configuration (NetBeans)
 nb-configuration.xml
+nbactions.xml
