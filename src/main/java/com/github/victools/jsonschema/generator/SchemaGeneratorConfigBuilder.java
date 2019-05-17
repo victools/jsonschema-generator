@@ -21,11 +21,12 @@ import com.github.victools.jsonschema.generator.impl.SchemaGeneratorConfigImpl;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
  * Builder class for creating a configuration object to be passed into the SchemaGenerator's constructor.
@@ -33,6 +34,8 @@ import java.util.stream.Stream;
 public class SchemaGeneratorConfigBuilder {
 
     private final ObjectMapper objectMapper;
+    private final OptionPreset preset;
+
     private final Map<Option, Boolean> options = new HashMap<>();
     private final SchemaGeneratorConfigPart<Field> fieldConfigPart = new SchemaGeneratorConfigPart<>();
     private final SchemaGeneratorConfigPart<Method> methodConfigPart = new SchemaGeneratorConfigPart<>();
@@ -40,12 +43,25 @@ public class SchemaGeneratorConfigBuilder {
     private final List<TypeAttributeOverride> typeAttributeOverrides = new ArrayList<>();
 
     /**
+     * Constructor of an empty configuration builder. This is equivalent to calling:<br>
+     * {@code new SchemaGeneratorConfigBuilder(objectMapper, OptionPreset.FULL_DOCUMENTATION)}
+     *
+     * @param objectMapper supplier for object and array nodes for the JSON structure being generated
+     * @see #SchemaGeneratorConfigBuilder(ObjectMapper, OptionPreset)
+     */
+    public SchemaGeneratorConfigBuilder(ObjectMapper objectMapper) {
+        this(objectMapper, OptionPreset.FULL_DOCUMENTATION);
+    }
+
+    /**
      * Constructor of an empty configuration builder.
      *
      * @param objectMapper supplier for object and array nodes for the JSON structure being generated
+     * @param preset default settings for standard {@link Option} values
      */
-    public SchemaGeneratorConfigBuilder(ObjectMapper objectMapper) {
+    public SchemaGeneratorConfigBuilder(ObjectMapper objectMapper, OptionPreset preset) {
         this.objectMapper = objectMapper;
+        this.preset = preset;
     }
 
     /**
@@ -54,14 +70,19 @@ public class SchemaGeneratorConfigBuilder {
      * @return successfully created/initialised generator instance
      */
     public SchemaGeneratorConfig build() {
-        // apply the configurations associated with enabled settings/options
-        Stream.of(Option.values())
-                .map(setting -> setting.getModule(this.options.getOrDefault(setting, setting.isEnabledByDefault())))
+        // apply the configurations associated with enabled/disabled options
+        Map<Option, Boolean> completeSetOfOptions = EnumSet.allOf(Option.class).stream()
+                .collect(Collectors.toMap(
+                        option -> option,
+                        option -> this.options.getOrDefault(option, this.preset.isOptionEnabledByDefault(option))));
+        completeSetOfOptions.entrySet()
+                .stream()
+                .map(setting -> setting.getKey().getModule(setting.getValue()))
                 .filter(Objects::nonNull)
                 .forEach(this::with);
         // construct the actual configuration instance
         return new SchemaGeneratorConfigImpl(this.objectMapper,
-                this.options,
+                completeSetOfOptions,
                 this.fieldConfigPart,
                 this.methodConfigPart,
                 this.customDefinitions,

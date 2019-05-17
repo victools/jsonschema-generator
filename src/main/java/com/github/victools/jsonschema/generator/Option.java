@@ -19,13 +19,12 @@ package com.github.victools.jsonschema.generator;
 import com.github.victools.jsonschema.generator.impl.module.ConstantValueModule;
 import com.github.victools.jsonschema.generator.impl.module.EnumModule;
 import com.github.victools.jsonschema.generator.impl.module.FieldAttributesForGetterModule;
-import com.github.victools.jsonschema.generator.impl.module.FieldWithoutGetterExclusionModule;
+import com.github.victools.jsonschema.generator.impl.module.FieldExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.FlattenedOptionalModule;
 import com.github.victools.jsonschema.generator.impl.module.GetterAttributesForFieldModule;
-import com.github.victools.jsonschema.generator.impl.module.GetterMethodExclusionModule;
+import com.github.victools.jsonschema.generator.impl.module.MethodExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
-import com.github.victools.jsonschema.generator.impl.module.StaticMethodExclusionModule;
-import com.github.victools.jsonschema.generator.impl.module.VoidMethodExclusionModule;
+import com.github.victools.jsonschema.generator.impl.module.SimplifiedOptionalModule;
 import java.util.function.Supplier;
 
 /**
@@ -34,60 +33,135 @@ import java.util.function.Supplier;
 public enum Option {
     /**
      * Whether the "{@value SchemaConstants#TAG_SCHEMA}" attribute with value "{@value SchemaConstants#TAG_SCHEMA_DRAFT7}" should be included.
-     * <br>
-     * Default: true (enabled)
      */
-    SCHEMA_VERSION_INDICATOR(true, null, null),
+    SCHEMA_VERSION_INDICATOR(null, null),
     /**
      * Whether additional types (and not just primitives and their associated classes should be included as fixed schema with a "type" attribute of
      * "string"/"boolean"/"integer"/"number".
-     * <br>
-     * Default: true (enabled)
      */
-    ADDITIONAL_FIXED_TYPES(true, SimpleTypeModule::forPrimitiveAndAdditionalTypes, SimpleTypeModule::forPrimitiveTypes),
+    ADDITIONAL_FIXED_TYPES(SimpleTypeModule::forPrimitiveAndAdditionalTypes, SimpleTypeModule::forPrimitiveTypes),
     /**
-     * Whether enums should be treated as plain "{@value SchemaConstants#TAG_TYPE_STRING}" values, otherwise they are treated as
-     * "{@value SchemaConstants#TAG_TYPE_OBJECT}", with all methods but {@link Enum#name() name()} being excluded.
-     * <br>
-     * Default: true (enabled)
+     * Whether enums should be treated as plain "{@value SchemaConstants#TAG_TYPE_STRING}" values.
+     *
+     * @see Option#SIMPLIFIED_ENUMS
      */
-    ENUM_AS_STRING(true, EnumModule::asStrings, EnumModule::asObjects),
+    FLATTENED_ENUMS(EnumModule::asStrings, null),
+    /**
+     * Whether enums should be treated as "{@value SchemaConstants#TAG_TYPE_OBJECT}", with all methods but {@link Enum#name() name()} being excluded.
+     * <br>
+     * This only takes effect if {@link Option#FLATTENED_ENUMS} is disabled.
+     */
+    SIMPLIFIED_ENUMS(EnumModule::asObjects, null),
     /**
      * Whether any {@link java.util.Optional Optional} instance should be treated as nullable value of the wrapped type.
-     * <br>
-     * Default: true (enabled)
+     *
+     * @see Option#SIMPLIFIED_OPTIONALS
      */
-    FLATTENED_OPTIONALS(true, FlattenedOptionalModule::new, null),
+    FLATTENED_OPTIONALS(FlattenedOptionalModule::new, null),
+    /**
+     * Whether any {@link java.util.Optional Optional} instance should be reduced to an object with only three methods.
+     * <br>
+     * This only takes effect if {@link Option#FLATTENED_OPTIONALS} is disabled.
+     *
+     * @see SimplifiedOptionalModule#DEFAULT_INCLUDED_METHOD_NAMES
+     */
+    SIMPLIFIED_OPTIONALS(SimplifiedOptionalModule::new, null),
     /**
      * Whether the constant values of static final fields should be included.
-     * <br>
-     * Default: false (disabled)
      */
-    VALUES_FROM_CONSTANT_FIELDS(false, ConstantValueModule::new, null),
+    VALUES_FROM_CONSTANT_FIELDS(ConstantValueModule::new, null),
     /**
-     * Whether all fields with private/package/protected visibility and no accompanying getter method should be included.
-     * <br>
-     * Default: false (disabled)
+     * Whether {@code static} fields with public visibility should be included.
+     *
+     * @see Option#PUBLIC_NONSTATIC_FIELDS
+     * @see Option#NONPUBLIC_STATIC_FIELDS
+     * @see Option#NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS
+     * @see Option#NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS
+     * @see Option#TRANSIENT_FIELDS
      */
-    NONPUBLIC_FIELDS_WITHOUT_GETTERS(false, null, FieldWithoutGetterExclusionModule::new),
+    PUBLIC_STATIC_FIELDS(null, FieldExclusionModule::forPublicStaticFields),
+    /**
+     * Whether {@code static} fields with public visibility should be included.
+     *
+     * @see Option#PUBLIC_STATIC_FIELDS
+     * @see Option#NONPUBLIC_STATIC_FIELDS
+     * @see Option#NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS
+     * @see Option#NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS
+     * @see Option#TRANSIENT_FIELDS
+     */
+    PUBLIC_NONSTATIC_FIELDS(null, FieldExclusionModule::forPublicNonStaticFields),
+    /**
+     * Whether {@code static} fields with private/package/protected visibility should be included.
+     *
+     * @see Option#PUBLIC_STATIC_FIELDS
+     * @see Option#PUBLIC_NONSTATIC_FIELDS
+     * @see Option#NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS
+     * @see Option#NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS
+     * @see Option#TRANSIENT_FIELDS
+     */
+    NONPUBLIC_STATIC_FIELDS(null, FieldExclusionModule::forNonPublicStaticFields),
+    /**
+     * Whether fields with private/package/protected visibility, for which a respective getter method can be found, should be included.
+     *
+     * @see Option#PUBLIC_STATIC_FIELDS
+     * @see Option#PUBLIC_NONSTATIC_FIELDS
+     * @see Option#NONPUBLIC_STATIC_FIELDS
+     * @see Option#NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS
+     * @see Option#TRANSIENT_FIELDS
+     */
+    NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS(null, FieldExclusionModule::forNonPublicNonStaticFieldsWithGetter),
+    /**
+     * Whether fields with private/package/protected visibility and no accompanying getter method should be included.
+     *
+     * @see Option#PUBLIC_STATIC_FIELDS
+     * @see Option#PUBLIC_NONSTATIC_FIELDS
+     * @see Option#NONPUBLIC_STATIC_FIELDS
+     * @see Option#NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS
+     * @see Option#TRANSIENT_FIELDS
+     */
+    NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS(null, FieldExclusionModule::forNonPublicNonStaticFieldsWithoutGetter),
+    /**
+     * Whether {@code transient} fields should be included.
+     *
+     * @see Option#PUBLIC_STATIC_FIELDS
+     * @see Option#PUBLIC_NONSTATIC_FIELDS
+     * @see Option#NONPUBLIC_STATIC_FIELDS
+     * @see Option#NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS
+     * @see Option#NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS
+     */
+    TRANSIENT_FIELDS(null, FieldExclusionModule::forTransientFields),
+    /**
+     * Whether methods that are {@code static} should be included.
+     *
+     * @see Option#VOID_METHODS
+     * @see Option#GETTER_METHODS
+     * @see Option#NONSTATIC_NONVOID_NONGETTER_METHODS
+     */
+    STATIC_METHODS(null, MethodExclusionModule::forStaticMethods),
     /**
      * Whether methods without return value (e.g. setters) should be included.
-     * <br>
-     * Default: false (disabled)
+     *
+     * @see Option#STATIC_METHODS
+     * @see Option#GETTER_METHODS
+     * @see Option#NONSTATIC_NONVOID_NONGETTER_METHODS
      */
-    VOID_METHODS(false, null, VoidMethodExclusionModule::new),
-    /**
-     * Whether static methods should be included.
-     * <br>
-     * Default: false (disabled)
-     */
-    STATIC_METHODS(false, null, StaticMethodExclusionModule::new),
+    VOID_METHODS(null, MethodExclusionModule::forVoidMethods),
     /**
      * Whether getter methods should be included (assuming their fields are not included).
-     * <br>
-     * Default: false (disabled)
+     *
+     * @see Option#STATIC_METHODS
+     * @see Option#VOID_METHODS
+     * @see Option#NONSTATIC_NONVOID_NONGETTER_METHODS
      */
-    GETTER_METHODS(true, null, GetterMethodExclusionModule::new),
+    GETTER_METHODS(null, MethodExclusionModule::forGetterMethods),
+    /**
+     * Whether methods that are (1) not {@code static}, (2) have a specific return value and (3) are not getters, should be included.
+     *
+     * @see Option#STATIC_METHODS
+     * @see Option#VOID_METHODS
+     * @see Option#GETTER_METHODS
+     */
+    NONSTATIC_NONVOID_NONGETTER_METHODS(null, MethodExclusionModule::forNonStaticNonVoidNonGetterMethods),
     /**
      * Whether attributes collected for a field's getter method should be associated with the field directly (assuming the getters are excluded).
      * <br>
@@ -95,7 +169,7 @@ public enum Option {
      * <br>
      * Default: false (disabled)
      */
-    GETTER_ATTRIBUTES_FOR_FIELDS(false, GetterAttributesForFieldModule::new, null),
+    GETTER_ATTRIBUTES_FOR_FIELDS(GetterAttributesForFieldModule::new, null),
     /**
      * Whether attributes collected for a field should be associated with its getter method directly (assuming the fields are excluded).
      * <br>
@@ -103,30 +177,26 @@ public enum Option {
      * <br>
      * Default: false (disabled)
      */
-    FIELD_ATTRIBUTES_FOR_GETTERS(false, FieldAttributesForGetterModule::new, null),
+    FIELD_ATTRIBUTES_FOR_GETTERS(FieldAttributesForGetterModule::new, null),
     /**
      * Whether an object's field/property should be deemed to be nullable if no specific check says otherwise.
      * <br>
      * Default: false (disabled)
      */
-    NULLABLE_FIELDS_BY_DEFAULT(false, null, null),
+    NULLABLE_FIELDS_BY_DEFAULT(null, null),
     /**
      * Whether a method's return value should be deemed to be nullable if no specific check says otherwise.
      * <br>
      * Default: false (disabled)
      */
-    NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT(false, null, null),
+    NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT(null, null),
     /**
      * Whether all referenced objects should be listed in the schema's "definitions", otherwise single occurrences are defined in-line.
      * <br>
      * Default: false (disabled)
      */
-    DEFINITIONS_FOR_ALL_OBJECTS(false, null, null);
+    DEFINITIONS_FOR_ALL_OBJECTS(null, null);
 
-    /**
-     * Whether the setting is enabled by default.
-     */
-    private final boolean enabledByDefault;
     /**
      * Optional: the module realising the setting/option if it is enabled.
      */
@@ -139,23 +209,12 @@ public enum Option {
     /**
      * Constructor.
      *
-     * @param defaultValue whether the setting is enabled by default
      * @param enabledModuleProvider type of the module realising this setting/option if it is enabled
      * @param disabledModuleProvider type of the module realising this setting/option if it is disabled
      */
-    private Option(boolean defaultValue, Supplier<Module> enabledModuleProvider, Supplier<Module> disabledModuleProvider) {
-        this.enabledByDefault = defaultValue;
+    private Option(Supplier<Module> enabledModuleProvider, Supplier<Module> disabledModuleProvider) {
         this.enabledModuleProvider = enabledModuleProvider;
         this.disabledModuleProvider = disabledModuleProvider;
-    }
-
-    /**
-     * Whether this setting should be enabled if no specific check says otherwise.
-     *
-     * @return default flag
-     */
-    public boolean isEnabledByDefault() {
-        return this.enabledByDefault;
     }
 
     /**

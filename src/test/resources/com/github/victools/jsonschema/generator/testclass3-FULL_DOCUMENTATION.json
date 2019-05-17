@@ -1,0 +1,234 @@
+{
+    "definitions": {
+        "Optional<String> (nullable)": {
+            "type": ["object", "null"],
+            "properties": {
+                "get()": {
+                    "type": ["string", "null"]
+                },
+                "isPresent()": {
+                    "type": "boolean"
+                },
+                "orElse(String)": {
+                    "type": ["string", "null"]
+                }
+            }
+        },
+        "RoundingMode": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": ["string", "null"]
+                },
+                "oldMode": {
+                    "type": "integer"
+                },
+                "ordinal": {
+                    "type": "integer"
+                },
+                "name()": {
+                    "type": "string",
+                    "enum": ["UP", "DOWN", "CEILING", "FLOOR", "HALF_UP", "HALF_DOWN", "HALF_EVEN", "UNNECESSARY"]
+                },
+                "valueOf(String)": {
+                    "$ref": "#/definitions/RoundingMode (nullable)"
+                },
+                "valueOf(int)": {
+                    "$ref": "#/definitions/RoundingMode (nullable)"
+                },
+                "values()": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/RoundingMode"
+                    }
+                }
+            }
+        },
+        "RoundingMode (nullable)": {
+            "oneOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/RoundingMode"
+                }]
+        },
+        "TestClass1": {
+            "type": "object",
+            "properties": {
+                "CONSTANT": {
+                    "type": "integer",
+                    "const": 5
+                },
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "genericValue": {
+                    "type": ["string", "null"]
+                },
+                "ignoredInternalValue": {
+                    "type": ["integer", "null"]
+                },
+                "primitiveValue": {
+                    "type": "integer"
+                },
+                "calculateSomething(Number, Number)": false,
+                "getGenericValue()": {
+                    "type": ["string", "null"]
+                },
+                "getPrimitiveValue()": {
+                    "type": "integer"
+                },
+                "isSimpleTestClass()": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "TestClass2<Long>": {
+            "type": "object",
+            "properties": {
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "genericValue": {
+                    "type": ["integer", "null"]
+                },
+                "getGenericValue()": {
+                    "type": ["integer", "null"]
+                }
+            }
+        },
+        "TestClass2<Long> (nullable)": {
+            "oneOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestClass2<Long>"
+                }]
+        },
+        "TestClass2<String>": {
+            "type": "object",
+            "properties": {
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "genericValue": {
+                    "type": ["string", "null"]
+                },
+                "getGenericValue()": {
+                    "type": ["string", "null"]
+                }
+            }
+        },
+        "TestClass2<String> (nullable)": {
+            "oneOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestClass2<String>"
+                }]
+        },
+        "TestClass2<TestClass1[]> (nullable)": {
+            "type": ["object", "null"],
+            "properties": {
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/TestClass1"
+                        }
+                    }
+                },
+                "genericValue": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/TestClass1"
+                    }
+                },
+                "getGenericValue()": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/TestClass1"
+                    }
+                }
+            }
+        },
+        "TestClass2<TestClass2<String>> (nullable)": {
+            "type": ["object", "null"],
+            "properties": {
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/TestClass2<String>"
+                    }
+                },
+                "genericValue": {
+                    "$ref": "#/definitions/TestClass2<String> (nullable)"
+                },
+                "getGenericValue()": {
+                    "$ref": "#/definitions/TestClass2<String> (nullable)"
+                }
+            }
+        },
+        "TestClass4<String> (nullable)": {
+            "type": ["object", "null"],
+            "properties": {
+                "DEFAULT_ROUNDING_MODE": {
+                    "allOf": [{
+                            "$ref": "#/definitions/RoundingMode"
+                        }, {
+                            "const": "HALF_UP"
+                        }]
+                },
+                "class2OfClass2OfT": {
+                    "$ref": "#/definitions/TestClass2<TestClass2<String>> (nullable)"
+                },
+                "optionalT": {
+                    "$ref": "#/definitions/Optional<String> (nullable)"
+                },
+                "getClass2OfClass2OfT()": {
+                    "$ref": "#/definitions/TestClass2<TestClass2<String>> (nullable)"
+                }
+            }
+        }
+    },
+    "type": "object",
+    "properties": {
+        "class4": {
+            "$ref": "#/definitions/TestClass4<String> (nullable)"
+        },
+        "nestedClass1Array": {
+            "$ref": "#/definitions/TestClass2<TestClass1[]> (nullable)"
+        },
+        "nestedLong": {
+            "$ref": "#/definitions/TestClass2<Long> (nullable)"
+        },
+        "nestedLongList": {
+            "type": ["array", "null"],
+            "items": {
+                "$ref": "#/definitions/TestClass2<Long>"
+            }
+        },
+        "getClass4()": {
+            "$ref": "#/definitions/TestClass4<String> (nullable)"
+        },
+        "getNestedClass1Array()": {
+            "$ref": "#/definitions/TestClass2<TestClass1[]> (nullable)"
+        },
+        "getNestedLong()": {
+            "$ref": "#/definitions/TestClass2<Long> (nullable)"
+        },
+        "getNestedLongList()": {
+            "type": ["array", "null"],
+            "items": {
+                "$ref": "#/definitions/TestClass2<Long>"
+            }
+        }
+    }
+}

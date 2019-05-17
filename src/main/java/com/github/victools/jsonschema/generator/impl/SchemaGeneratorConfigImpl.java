@@ -80,7 +80,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      * @return whether the given generator option is enabled
      */
     private boolean isOptionEnabled(Option setting) {
-        return this.options.getOrDefault(setting, setting.isEnabledByDefault());
+        return this.options.getOrDefault(setting, false);
     }
 
     @Override

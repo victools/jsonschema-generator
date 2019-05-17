@@ -72,8 +72,7 @@ public class SchemaGeneratorTest {
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper()).build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(targetType);
-        Assert.assertEquals(2, result.size());
-        Assert.assertNotNull(result.get("$schema"));
+        Assert.assertEquals(1, result.size());
         Assert.assertEquals(expectedJsonSchemaType, result.get(SchemaConstants.TAG_TYPE).asText());
     }
 
@@ -96,7 +95,6 @@ public class SchemaGeneratorTest {
                 .withNumberInclusiveMaximumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.TEN : null)
                 .withNumberInclusiveMinimumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ONE : null)
                 .withNumberMultipleOfResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ONE : null)
-                .withPropertyNameOverrideResolver((field, defaultName) -> "_" + defaultName)
                 .withStringFormatResolver((field, type) -> isTypeOf(type, String.class) ? "date" : null)
                 .withStringMaxLengthResolver((field, type) -> isTypeOf(type, String.class) ? 256 : null)
                 .withStringMinLengthResolver((field, type) -> isTypeOf(type, String.class) ? 1 : null)
@@ -106,44 +104,29 @@ public class SchemaGeneratorTest {
     Object parametersForTestGenerateSchema() {
         Module neutralModule = configBuilder -> {
         };
-        Module excludingGetters = configBuilder -> configBuilder.without(Option.GETTER_METHODS, Option.SCHEMA_VERSION_INDICATOR);
-        Module nullableFields = configBuilder -> configBuilder.with(Option.NULLABLE_FIELDS_BY_DEFAULT);
-        Module includingVoidMethods = configBuilder -> configBuilder.with(Option.VOID_METHODS);
-        Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields(), "looked-up from field: ");
         Module methodModule = configBuilder -> populateConfigPart(configBuilder.forMethods(), "looked-up from method: ");
-        Module fieldsOnlyModule = configBuilder -> configBuilder.with(methodModule)
-                .with(Option.GETTER_ATTRIBUTES_FOR_FIELDS, Option.DEFINITIONS_FOR_ALL_OBJECTS)
-                .forMethods().withIgnoreCheck(method -> true);
-        Module methodsOnlyModule = configBuilder -> configBuilder.with(fieldModule)
-                .with(Option.FIELD_ATTRIBUTES_FOR_GETTERS, Option.DEFINITIONS_FOR_ALL_OBJECTS)
-                .forFields().withIgnoreCheck(field -> true);
-        Module enumsAsObjectsModule = configBuilder -> configBuilder.without(Option.ENUM_AS_STRING);
+        Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields(), "looked-up from field: ");
         return new Object[][]{
-            {"testclass1_default-options", TestClass1.class, neutralModule},
-            {"testclass1_no-getters", TestClass1.class, excludingGetters},
-            {"testclass1_nullable-fields", TestClass1.class, nullableFields},
-            {"testclass1_with-void-methods", TestClass1.class, includingVoidMethods},
-            {"testclass2_array", TestClass2[].class, neutralModule},
-            {"testclass3_default-options", TestClass3.class, neutralModule},
-            {"testclass3_field-attributes", TestClass3.class, fieldModule},
-            {"testclass3_fields-only", TestClass3.class, fieldsOnlyModule},
-            {"testclass3_method-attributes", TestClass3.class, methodModule},
-            {"testclass3_methods-only", TestClass3.class, methodsOnlyModule},
-            {"roundingMode_enum_string", RoundingMode.class, neutralModule},
-            {"roundingMode_enum_object", RoundingMode.class, enumsAsObjectsModule}
+            {"testclass1-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, neutralModule},
+            {"testclass1-JAVA_OBJECT-method-attributes", OptionPreset.JAVA_OBJECT, TestClass1.class, methodModule},
+            {"testclass1-PLAIN_JSON-field-attributes", OptionPreset.PLAIN_JSON, TestClass1.class, fieldModule},
+            {"testclass2-array", OptionPreset.FULL_DOCUMENTATION, TestClass2[].class, neutralModule},
+            {"testclass3-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, neutralModule},
+            {"testclass3-JAVA_OBJECT-field-attributes", OptionPreset.JAVA_OBJECT, TestClass3.class, fieldModule},
+            {"testclass3-PLAIN_JSON-method-attributes", OptionPreset.PLAIN_JSON, TestClass3.class, methodModule}
         };
     }
 
     @Test
     @Parameters
     @TestCaseName(value = "{method}({0}) [{index}]")
-    public void testGenerateSchema(String caseTitle, Class<?> targetType, Module testModule) throws Exception {
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper());
+    public void testGenerateSchema(String caseTitle, OptionPreset preset, Class<?> targetType, Module testModule) throws Exception {
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), preset);
         configBuilder.with(testModule);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(targetType);
-        JSONAssert.assertEquals(result.toString() + '\n', loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
+        JSONAssert.assertEquals('\n' + result.toString() + '\n', loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 
     private static String loadResource(String resourcePath) throws IOException {
@@ -218,6 +201,7 @@ public class SchemaGeneratorTest {
 
         private TestClass2<TestClass2<T>> class2OfClass2OfT;
         public Optional<T> optionalT;
+        public static final RoundingMode DEFAULT_ROUNDING_MODE = RoundingMode.HALF_UP;
 
         public TestClass2<TestClass2<T>> getClass2OfClass2OfT() {
             return this.class2OfClass2OfT;

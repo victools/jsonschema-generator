@@ -4,9 +4,6 @@
         "TestClass1": {
             "type": "object",
             "properties": {
-                "CONSTANT": {
-                    "type": "integer"
-                },
                 "genericArray": {
                     "type": "array",
                     "items": {
@@ -21,6 +18,9 @@
                     "minLength": 1,
                     "maxLength": 256,
                     "format": "date"
+                },
+                "ignoredInternalValue": {
+                    "type": "integer"
                 },
                 "primitiveValue": {
                     "type": ["integer", "null"],
@@ -51,13 +51,6 @@
                 }
             }
         },
-        "TestClass2<Long> (nullable)": {
-            "oneOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/TestClass2<Long>"
-                }]
-        },
         "TestClass2<String>": {
             "type": "object",
             "properties": {
@@ -77,75 +70,46 @@
                     "format": "date"
                 }
             }
-        },
-        "TestClass2<String> (nullable)": {
-            "oneOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/TestClass2<String>"
-                }]
-        },
-        "TestClass2<TestClass1[]> (nullable)": {
-            "type": ["object", "null"],
-            "properties": {
-                "genericArray": {
-                    "type": "array",
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/TestClass1"
-                        }
-                    }
-                },
-                "genericValue": {
-                    "type": ["array", "null"],
-                    "items": {
-                        "$ref": "#/definitions/TestClass1"
-                    }
-                }
-            }
-        },
-        "TestClass2<TestClass2<String>> (nullable)": {
-            "type": ["object", "null"],
-            "properties": {
-                "genericArray": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/TestClass2<String>"
-                    }
-                },
-                "genericValue": {
-                    "allOf": [{
-                            "$ref": "#/definitions/TestClass2<String> (nullable)"
-                        }, {
-                            "title": "TestClass2<String>",
-                            "description": "looked-up from method: TestClass2<String>"
-                        }]
-                }
-            }
-        },
-        "TestClass4<String> (nullable)": {
-            "type": ["object", "null"],
-            "properties": {
-                "class2OfClass2OfT": {
-                    "allOf": [{
-                            "$ref": "#/definitions/TestClass2<TestClass2<String>> (nullable)"
-                        }, {
-                            "title": "TestClass2<TestClass2<String>>",
-                            "description": "looked-up from method: TestClass2<TestClass2<String>>"
-                        }]
-                },
-                "optionalT": {
-                    "type": ["string", "null"]
-                }
-            }
         }
     },
     "type": "object",
     "properties": {
         "class4": {
             "allOf": [{
-                    "$ref": "#/definitions/TestClass4<String> (nullable)"
+                    "type": ["object", "null"],
+                    "properties": {
+                        "class2OfClass2OfT": {
+                            "allOf": [{
+                                    "type": ["object", "null"],
+                                    "properties": {
+                                        "genericArray": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/TestClass2<String>"
+                                            }
+                                        },
+                                        "genericValue": {
+                                            "allOf": [{
+                                                    "oneOf": [{
+                                                            "type": "null"
+                                                        }, {
+                                                            "$ref": "#/definitions/TestClass2<String>"
+                                                        }]
+                                                }, {
+                                                    "title": "TestClass2<String>",
+                                                    "description": "looked-up from method: TestClass2<String>"
+                                                }]
+                                        }
+                                    }
+                                }, {
+                                    "title": "TestClass2<TestClass2<String>>",
+                                    "description": "looked-up from method: TestClass2<TestClass2<String>>"
+                                }]
+                        },
+                        "optionalT": {
+                            "type": ["string", "null"]
+                        }
+                    }
                 }, {
                     "title": "TestClass4<String>",
                     "description": "looked-up from method: TestClass4<String>"
@@ -153,7 +117,24 @@
         },
         "nestedClass1Array": {
             "allOf": [{
-                    "$ref": "#/definitions/TestClass2<TestClass1[]> (nullable)"
+                    "type": ["object", "null"],
+                    "properties": {
+                        "genericArray": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/TestClass1"
+                                }
+                            }
+                        },
+                        "genericValue": {
+                            "type": ["array", "null"],
+                            "items": {
+                                "$ref": "#/definitions/TestClass1"
+                            }
+                        }
+                    }
                 }, {
                     "title": "TestClass2<TestClass1[]>",
                     "description": "looked-up from method: TestClass2<TestClass1[]>"
@@ -161,7 +142,11 @@
         },
         "nestedLong": {
             "allOf": [{
-                    "$ref": "#/definitions/TestClass2<Long> (nullable)"
+                    "oneOf": [{
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/TestClass2<Long>"
+                        }]
                 }, {
                     "title": "TestClass2<Long>",
                     "description": "looked-up from method: TestClass2<Long>"

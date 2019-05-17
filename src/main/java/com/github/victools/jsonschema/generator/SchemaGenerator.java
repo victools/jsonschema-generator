@@ -206,11 +206,11 @@ public class SchemaGenerator {
         final Class<?> currentTargetClass = ReflectionTypeUtils.getRawType(targetType.getResolvedType());
         logger.debug("iterating over declared fields from {}", currentTargetClass);
         Stream.of(currentTargetClass.getDeclaredFields())
-                .filter(declaredField -> !this.config.shouldIgnore(declaredField))
+                .filter(declaredField -> !declaredField.isSynthetic() && !this.config.shouldIgnore(declaredField))
                 .forEach(field -> this.populateField(field, targetFields, targetTypeVariables, generationContext));
         logger.debug("iterating over declared public methods from {}", currentTargetClass);
         Stream.of(currentTargetClass.getDeclaredMethods())
-                .filter(declaredMethod -> (declaredMethod.getModifiers() & Modifier.PUBLIC) == Modifier.PUBLIC)
+                .filter(declaredMethod -> (declaredMethod.getModifiers() & Modifier.PUBLIC) == Modifier.PUBLIC && !declaredMethod.isSynthetic())
                 .filter(declaredMethod -> !currentTargetClass.isInterface() || declaredMethod.isDefault())
                 .filter(declaredMethod -> !this.config.shouldIgnore(declaredMethod))
                 .forEach(method -> this.populateMethod(method, targetMethods, targetTypeVariables, generationContext));
@@ -244,7 +244,7 @@ public class SchemaGenerator {
         parentProperties.put(propertyName, subSchema);
 
         JavaType fieldType = typeVariables.resolveGenericTypePlaceholder(field.getGenericType());
-        boolean isNullable = this.config.isNullable(field, fieldType);
+        boolean isNullable = !field.isEnumConstant() && this.config.isNullable(field, fieldType);
         fieldType = Optional.ofNullable(this.config.resolveTargetTypeOverride(field, fieldType))
                 .orElse(fieldType);
         ObjectNode fieldAttributes = AttributeCollector.collectFieldAttributes(field, fieldType, this.config);

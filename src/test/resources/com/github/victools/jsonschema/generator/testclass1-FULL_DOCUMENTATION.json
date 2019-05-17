@@ -1,25 +1,28 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
         "CONSTANT": {
-            "type": "integer"
+            "type": "integer",
+            "const": 5
         },
         "genericArray": {
-            "type": "array",
+            "type": ["array", "null"],
             "items": {
                 "type": "string"
             }
         },
         "genericValue": {
-            "type": "string"
+            "type": ["string", "null"]
+        },
+        "ignoredInternalValue": {
+            "type": ["integer", "null"]
         },
         "primitiveValue": {
             "type": "integer"
         },
         "calculateSomething(Number, Number)": false,
         "getGenericValue()": {
-            "type": "string"
+            "type": ["string", "null"]
         },
         "getPrimitiveValue()": {
             "type": "integer"

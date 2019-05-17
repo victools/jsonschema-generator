@@ -1,0 +1,25 @@
+{
+    "definitions": {
+        "TestClass2": {
+            "type": "object",
+            "properties": {
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "genericValue": {
+                    "type": ["object", "null"]
+                },
+                "getGenericValue()": {
+                    "type": ["object", "null"]
+                }
+            }
+        }
+    },
+    "type": "array",
+    "items": {
+        "$ref": "#/definitions/TestClass2"
+    }
+}

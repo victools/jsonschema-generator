@@ -38,7 +38,7 @@ public class ConstantValueModule implements Module {
      */
     private static List<?> extractConstantFieldValue(Field field, JavaType fieldType) {
         int staticAndFinal = Modifier.STATIC | Modifier.FINAL;
-        if ((field.getModifiers() & staticAndFinal) == staticAndFinal) {
+        if ((field.getModifiers() & staticAndFinal) == staticAndFinal && !field.isEnumConstant()) {
             field.setAccessible(true);
             try {
                 return Collections.singletonList(field.get(null));

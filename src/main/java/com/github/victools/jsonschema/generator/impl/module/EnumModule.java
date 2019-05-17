@@ -75,7 +75,10 @@ public class EnumModule implements Module {
             // ignore all direct enum methods but name() - methods declared by a specific enum sub type are not ignored
             builder.forMethods()
                     .withIgnoreCheck(method -> method.getDeclaringClass() == Enum.class && !"name".equals(method.getName()))
+                    .withNullableCheck((method, type) -> method.getDeclaringClass() == Enum.class ? Boolean.FALSE : null)
                     .withEnumResolver(EnumModule::extractEnumValues);
+            builder.forFields()
+                    .withIgnoreCheck(field -> field.isEnumConstant());
         }
     }
 

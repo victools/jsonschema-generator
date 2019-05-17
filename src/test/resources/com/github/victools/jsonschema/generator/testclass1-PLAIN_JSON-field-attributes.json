@@ -1,0 +1,37 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "genericArray": {
+            "type": ["array", "null"],
+            "items": {
+                "type": "string"
+            }
+        },
+        "genericValue": {
+            "type": ["string", "null"],
+            "title": "String",
+            "description": "looked-up from field: String",
+            "const": "constant string value",
+            "minLength": 1,
+            "maxLength": 256,
+            "format": "date"
+        },
+        "ignoredInternalValue": {
+            "type": ["integer", "null"],
+            "title": "Integer",
+            "description": "looked-up from field: Integer",
+            "enum": [1, 2, 3, 4, 5],
+            "minimum": 1,
+            "exclusiveMinimum": 0,
+            "maximum": 1E+1,
+            "exclusiveMaximum": 11,
+            "multipleOf": 1
+        },
+        "primitiveValue": {
+            "type": ["integer", "null"],
+            "title": "int",
+            "description": "looked-up from field: int"
+        }
+    }
+}

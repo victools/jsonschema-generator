@@ -1,5 +1,0 @@
-{
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "string",
-    "enum": ["UP", "DOWN", "CEILING", "FLOOR", "HALF_UP", "HALF_DOWN", "HALF_EVEN", "UNNECESSARY"]
-}

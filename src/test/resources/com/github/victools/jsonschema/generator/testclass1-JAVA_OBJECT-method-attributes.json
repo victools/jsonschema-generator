@@ -1,0 +1,35 @@
+{
+    "type": "object",
+    "properties": {
+        "CONSTANT": {
+            "type": "integer",
+            "const": 5
+        },
+        "genericArray": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "calculateSomething(Number, Number)": false,
+        "getGenericValue()": {
+            "type": ["string", "null"],
+            "title": "String",
+            "description": "looked-up from method: String",
+            "const": "constant string value",
+            "minLength": 1,
+            "maxLength": 256,
+            "format": "date"
+        },
+        "getPrimitiveValue()": {
+            "type": ["integer", "null"],
+            "title": "int",
+            "description": "looked-up from method: int"
+        },
+        "isSimpleTestClass()": {
+            "type": ["boolean", "null"],
+            "title": "boolean",
+            "description": "looked-up from method: boolean"
+        }
+    }
+}
