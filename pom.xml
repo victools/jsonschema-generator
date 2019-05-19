@@ -8,7 +8,7 @@
 
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <licenses>
@@ -126,6 +126,7 @@
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
             <version>${version.jsonassert}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
