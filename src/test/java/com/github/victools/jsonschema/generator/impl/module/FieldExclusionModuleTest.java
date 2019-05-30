@@ -16,10 +16,13 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.introspect.AnnotatedField;
+import com.github.victools.jsonschema.generator.AbstractAnnotationAwareTest;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import java.lang.reflect.Field;
-import java.util.function.Predicate;
+import java.util.Map;
+import java.util.function.BiPredicate;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.naming.TestCaseName;
@@ -33,10 +36,10 @@ import org.mockito.Mockito;
  * Test for the {@link FieldExclusionModule} class.
  */
 @RunWith(JUnitParamsRunner.class)
-public class FieldExclusionModuleTest {
+public class FieldExclusionModuleTest extends AbstractAnnotationAwareTest {
 
     private SchemaGeneratorConfigBuilder builder;
-    private SchemaGeneratorConfigPart<Field> fieldConfigPart;
+    private SchemaGeneratorConfigPart<AnnotatedField> fieldConfigPart;
 
     @Before
     public void setUp() {
@@ -48,7 +51,7 @@ public class FieldExclusionModuleTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testApplyToConfigBuilder() {
-        Predicate<Field> ignoreCheck = field -> true;
+        BiPredicate<AnnotatedField, BeanDescription> ignoreCheck = (field, context) -> true;
         FieldExclusionModule module = new FieldExclusionModule(ignoreCheck);
         module.applyToConfigBuilder(this.builder);
 
@@ -80,13 +83,13 @@ public class FieldExclusionModuleTest {
 
     @Test
     @Parameters
-    @TestCaseName("{method}({{1}: {0} => {2}) [{index}]")
+    @TestCaseName("{method}({1}: {0} => {2}) [{index}]")
     public void testIgnoreCheck(String testFieldName, String supplierMethodName, boolean ignored) throws Exception {
         FieldExclusionModule moduleInstance = (FieldExclusionModule) FieldExclusionModule.class.getMethod(supplierMethodName).invoke(null);
         moduleInstance.applyToConfigBuilder(this.builder);
 
-        Field field = TestClass.class.getDeclaredField(testFieldName);
-        Assert.assertEquals(ignored, this.fieldConfigPart.shouldIgnore(field));
+        Map.Entry<AnnotatedField, BeanDescription> annotatedField = this.wrapField(TestClass.class.getDeclaredField(testFieldName));
+        Assert.assertEquals(ignored, this.fieldConfigPart.shouldIgnore(annotatedField.getKey(), annotatedField.getValue()));
     }
 
     private static class TestClass {

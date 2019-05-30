@@ -17,17 +17,19 @@
 package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotatedField;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.JavaType;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,58 +56,62 @@ public class AttributeCollector {
      *
      * @param field the field for which to collect JSON schema attributes
      * @param type associated field type
+     * @param declaringContext the declaring type's description
      * @param config configuration to apply when looking-up attribute values
      * @return node holding all collected attributes (possibly empty)
      */
-    public static ObjectNode collectFieldAttributes(Field field, JavaType type, SchemaGeneratorConfig config) {
+    public static ObjectNode collectFieldAttributes(AnnotatedField field, JavaType type, BeanDescription declaringContext,
+            SchemaGeneratorConfig config) {
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
-        collector.setTitle(node, config.resolveTitle(field, type));
-        collector.setDescription(node, config.resolveDescription(field, type));
-        collector.setEnum(node, config.resolveEnum(field, type));
-        collector.setStringMinLength(node, config.resolveStringMinLength(field, type));
-        collector.setStringMaxLength(node, config.resolveStringMaxLength(field, type));
-        collector.setStringFormat(node, config.resolveStringFormat(field, type));
-        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(field, type));
-        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(field, type));
-        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(field, type));
-        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(field, type));
-        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(field, type));
-        collector.setArrayMinItems(node, config.resolveArrayMinItems(field, type));
-        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(field, type));
-        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(field, type));
+        collector.setTitle(node, config.resolveTitle(field, type, declaringContext));
+        collector.setDescription(node, config.resolveDescription(field, type, declaringContext));
+        collector.setEnum(node, config.resolveEnum(field, type, declaringContext));
+        collector.setStringMinLength(node, config.resolveStringMinLength(field, type, declaringContext));
+        collector.setStringMaxLength(node, config.resolveStringMaxLength(field, type, declaringContext));
+        collector.setStringFormat(node, config.resolveStringFormat(field, type, declaringContext));
+        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(field, type, declaringContext));
+        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(field, type, declaringContext));
+        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(field, type, declaringContext));
+        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(field, type, declaringContext));
+        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(field, type, declaringContext));
+        collector.setArrayMinItems(node, config.resolveArrayMinItems(field, type, declaringContext));
+        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(field, type, declaringContext));
+        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(field, type, declaringContext));
         config.getFieldAttributeOverrides()
-                .forEach(override -> override.overrideInstanceAttributes(node, field, type, config));
+                .forEach(override -> override.overrideInstanceAttributes(node, field, type, declaringContext, config));
         return node;
     }
 
     /**
-     * Collect a method's contextual attributes (i.e. everything not related to the structure).
+     * Collect a method's contextual attributes (i.e.everything not related to the structure).
      *
      * @param method the method for which to collect JSON schema attributes
      * @param returnType associated return value type
+     * @param declaringContext the declaring type's description
      * @param config configuration to apply when looking-up attribute values
      * @return node holding all collected attributes (possibly empty)
      */
-    public static ObjectNode collectMethodAttributes(Method method, JavaType returnType, SchemaGeneratorConfig config) {
+    public static ObjectNode collectMethodAttributes(AnnotatedMethod method, JavaType returnType, BeanDescription declaringContext,
+            SchemaGeneratorConfig config) {
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
-        collector.setTitle(node, config.resolveTitle(method, returnType));
-        collector.setDescription(node, config.resolveDescription(method, returnType));
-        collector.setEnum(node, config.resolveEnum(method, returnType));
-        collector.setStringMinLength(node, config.resolveStringMinLength(method, returnType));
-        collector.setStringMaxLength(node, config.resolveStringMaxLength(method, returnType));
-        collector.setStringFormat(node, config.resolveStringFormat(method, returnType));
-        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(method, returnType));
-        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(method, returnType));
-        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(method, returnType));
-        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(method, returnType));
-        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(method, returnType));
-        collector.setArrayMinItems(node, config.resolveArrayMinItems(method, returnType));
-        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(method, returnType));
-        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(method, returnType));
+        collector.setTitle(node, config.resolveTitle(method, returnType, declaringContext));
+        collector.setDescription(node, config.resolveDescription(method, returnType, declaringContext));
+        collector.setEnum(node, config.resolveEnum(method, returnType, declaringContext));
+        collector.setStringMinLength(node, config.resolveStringMinLength(method, returnType, declaringContext));
+        collector.setStringMaxLength(node, config.resolveStringMaxLength(method, returnType, declaringContext));
+        collector.setStringFormat(node, config.resolveStringFormat(method, returnType, declaringContext));
+        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(method, returnType, declaringContext));
+        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(method, returnType, declaringContext));
+        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(method, returnType, declaringContext));
+        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(method, returnType, declaringContext));
+        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(method, returnType, declaringContext));
+        collector.setArrayMinItems(node, config.resolveArrayMinItems(method, returnType, declaringContext));
+        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(method, returnType, declaringContext));
+        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(method, returnType, declaringContext));
         config.getMethodAttributeOverrides()
-                .forEach(override -> override.overrideInstanceAttributes(node, method, returnType, config));
+                .forEach(override -> override.overrideInstanceAttributes(node, method, returnType, declaringContext, config));
         return node;
     }
 
@@ -145,18 +151,32 @@ public class AttributeCollector {
      * @return this instance (for chaining)
      */
     public AttributeCollector setEnum(ObjectNode node, Collection<?> enumValues) {
-        if (enumValues != null && !enumValues.isEmpty()) {
-            Stream<String> valueStream = enumValues.stream().map(this::convertObjectToString);
-            if (enumValues.size() == 1) {
-                String singleValue = valueStream.findFirst().get();
+        if (enumValues != null) {
+            List<String> valuesAsString = enumValues.stream()
+                    .filter(this::isSupportedEnumValue)
+                    .map(this::convertObjectToString)
+                    .collect(Collectors.toList());
+            if (valuesAsString.size() == 1) {
+                String singleValue = valuesAsString.get(0);
                 node.putPOJO(SchemaConstants.TAG_CONST, singleValue);
-            } else {
+            } else if (!valuesAsString.isEmpty()) {
                 ArrayNode array = node.arrayNode();
-                valueStream.forEach(array::addPOJO);
+                valuesAsString.forEach(array::addPOJO);
                 node.set(SchemaConstants.TAG_ENUM, array);
             }
         }
         return this;
+    }
+
+    private boolean isSupportedEnumValue(Object target) {
+        if (target == null) {
+            return true;
+        }
+        Class<?> targetType = target.getClass();
+        return targetType.isPrimitive()
+                || Number.class.isAssignableFrom(targetType)
+                || CharSequence.class.isAssignableFrom(targetType)
+                || Enum.class.isAssignableFrom(targetType);
     }
 
     /**

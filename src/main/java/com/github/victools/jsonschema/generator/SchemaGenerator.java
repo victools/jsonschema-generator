@@ -16,24 +16,33 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.introspect.AnnotatedField;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
+import com.fasterxml.jackson.databind.introspect.TypeResolutionContext;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.github.victools.jsonschema.generator.impl.AnnotatedFieldCollector;
+import com.github.victools.jsonschema.generator.impl.AnnotatedMethodCollector;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
-import com.github.victools.jsonschema.generator.impl.ReflectionTypeUtils;
+import com.github.victools.jsonschema.generator.impl.ReflectionToStringUtils;
 import com.github.victools.jsonschema.generator.impl.SchemaGenerationContext;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +72,7 @@ public class SchemaGenerator {
      */
     public JsonNode generateSchema(Class<?> mainTargetType) {
         SchemaGenerationContext generationContext = new SchemaGenerationContext();
-        JavaType mainType = new JavaType(mainTargetType, TypeVariableContext.EMPTY_SCOPE);
+        JavaType mainType = this.config.getObjectMapper().getTypeFactory().constructType(mainTargetType);
         this.traverseGenericType(mainType, null, false, generationContext);
 
         ObjectNode jsonSchemaResult = this.config.createObjectNode();
@@ -96,8 +105,8 @@ public class SchemaGenerator {
             return;
         }
         final ObjectNode definition;
-        if (ReflectionTypeUtils.isArrayType(targetType)) {
-            definition = this.traverseArrayType(targetType, targetNode, isNullable, generationContext);
+        if (targetType.isContainerType()) {
+            definition = this.traverseContainerType(targetType, targetNode, isNullable, generationContext);
         } else {
             definition = this.traverseObjectType(targetType, targetNode, isNullable, generationContext);
         }
@@ -114,7 +123,7 @@ public class SchemaGenerator {
      * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      * @return the created array node containing the array type's definition
      */
-    private ObjectNode traverseArrayType(JavaType targetType, ObjectNode targetNode, boolean isNullable,
+    private ObjectNode traverseContainerType(JavaType targetType, ObjectNode targetNode, boolean isNullable,
             SchemaGenerationContext generationContext) {
         final ObjectNode definition;
         if (targetNode == null) {
@@ -132,9 +141,7 @@ public class SchemaGenerator {
         }
         ObjectNode arrayItemTypeRef = this.config.createObjectNode();
         definition.set(SchemaConstants.TAG_ITEMS, arrayItemTypeRef);
-        JavaType itemType = ReflectionTypeUtils.getArrayComponentType(targetType);
-        logger.debug("resolved array component type {}", itemType);
-        this.traverseGenericType(itemType, arrayItemTypeRef, false, generationContext);
+        this.traverseGenericType(targetType.getContentType(), arrayItemTypeRef, false, generationContext);
         return definition;
     }
 
@@ -176,8 +183,9 @@ public class SchemaGenerator {
                 final Map<String, JsonNode> targetFields = new TreeMap<>();
                 final Map<String, JsonNode> targetMethods = new TreeMap<>();
 
-                this.collectObjectProperties(targetType, targetFields, targetMethods, generationContext);
-
+                if (targetType.getRawClass() != Object.class) {
+                    this.collectObjectProperties(targetType, targetFields, targetMethods, generationContext);
+                }
                 if (!targetFields.isEmpty() || !targetMethods.isEmpty()) {
                     ObjectNode propertiesNode = this.config.createObjectNode();
                     propertiesNode.setAll(targetFields);
@@ -202,25 +210,33 @@ public class SchemaGenerator {
      */
     private void collectObjectProperties(JavaType targetType, Map<String, JsonNode> targetFields, Map<String, JsonNode> targetMethods,
             SchemaGenerationContext generationContext) {
-        TypeVariableContext targetTypeVariables = TypeVariableContext.forType(targetType);
-        final Class<?> currentTargetClass = ReflectionTypeUtils.getRawType(targetType.getResolvedType());
+        final Class<?> currentTargetClass = targetType.getRawClass();
+        SerializationConfig serializationConfig = this.config.getObjectMapper().getSerializationConfig();
+        BeanDescription targetTypeDescription = serializationConfig.introspect(targetType);
+        AnnotationIntrospector annotationIntrospector = serializationConfig.getAnnotationIntrospector();
+        TypeFactory typeFactory = serializationConfig.getTypeFactory();
+        TypeResolutionContext.Basic typeResolutionContext = new TypeResolutionContext.Basic(typeFactory, targetType.getBindings());
+
         logger.debug("iterating over declared fields from {}", currentTargetClass);
-        Stream.of(currentTargetClass.getDeclaredFields())
-                .filter(declaredField -> !declaredField.isSynthetic() && !this.config.shouldIgnore(declaredField))
-                .forEach(field -> this.populateField(field, targetFields, targetTypeVariables, generationContext));
+        List<AnnotatedField> declaredFields = AnnotatedFieldCollector.collectFields(annotationIntrospector,
+                typeResolutionContext, targetType);
+        declaredFields.stream()
+                .filter(field -> !this.config.shouldIgnore(field, targetTypeDescription))
+                .forEach(field -> this.populateField(field, targetFields, targetTypeDescription, generationContext));
+
         logger.debug("iterating over declared public methods from {}", currentTargetClass);
-        Stream.of(currentTargetClass.getDeclaredMethods())
-                .filter(declaredMethod -> (declaredMethod.getModifiers() & Modifier.PUBLIC) == Modifier.PUBLIC && !declaredMethod.isSynthetic())
-                .filter(declaredMethod -> !currentTargetClass.isInterface() || declaredMethod.isDefault())
-                .filter(declaredMethod -> !this.config.shouldIgnore(declaredMethod))
-                .forEach(method -> this.populateMethod(method, targetMethods, targetTypeVariables, generationContext));
-        JavaType superType = new JavaType(currentTargetClass.getGenericSuperclass(), targetTypeVariables);
-        if (superType.getResolvedType() != null && superType.getResolvedType() != Object.class) {
+        Collection<AnnotatedMethod> declaredMethods = AnnotatedMethodCollector.collectMethods(annotationIntrospector,
+                typeResolutionContext, typeFactory, targetType);
+        declaredMethods.stream()
+                .filter(method -> !this.config.shouldIgnore(method, targetTypeDescription))
+                .forEach(method -> this.populateMethod(method, targetMethods, targetTypeDescription, generationContext));
+
+        JavaType superType = targetType.getSuperClass();
+        if (superType != null && superType.getRawClass() != Object.class) {
             this.collectObjectProperties(superType, targetFields, targetMethods, generationContext);
         }
         // alsp include methods that only have default implementations
-        Stream.of(currentTargetClass.getGenericInterfaces())
-                .map(superInterface -> new JavaType(superInterface, targetTypeVariables))
+        targetType.getInterfaces()
                 .forEach(superInterface -> this.collectObjectProperties(superInterface, targetFields, targetMethods, generationContext));
     }
 
@@ -229,13 +245,14 @@ public class SchemaGenerator {
      *
      * @param field declared field that should be added to the specified node
      * @param parentProperties node in the JSON schema to which the field's sub schema should be added as property
-     * @param typeVariables mapping of generic type variables to their actual types (according the declaring type's type arguments)
+     * @param declaringTypeDescription mapping of generic type variables to their actual types (according the declaring type's type arguments)
      * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
-    private void populateField(Field field, Map<String, JsonNode> parentProperties, TypeVariableContext typeVariables,
+    private void populateField(AnnotatedField field, Map<String, JsonNode> parentProperties, BeanDescription declaringTypeDescription,
             SchemaGenerationContext generationContext) {
         String defaultName = field.getName();
-        String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(field, defaultName)).orElse(defaultName);
+        String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(field, defaultName, declaringTypeDescription))
+                .orElse(defaultName);
         if (parentProperties.containsKey(propertyName)) {
             logger.debug("ignoring overridden {}.{}", field.getDeclaringClass(), defaultName);
             return;
@@ -243,12 +260,13 @@ public class SchemaGenerator {
         ObjectNode subSchema = this.config.createObjectNode();
         parentProperties.put(propertyName, subSchema);
 
-        JavaType fieldType = typeVariables.resolveGenericTypePlaceholder(field.getGenericType());
-        boolean isNullable = !field.isEnumConstant() && this.config.isNullable(field, fieldType);
-        fieldType = Optional.ofNullable(this.config.resolveTargetTypeOverride(field, fieldType))
+        JavaType fieldType = field.getType();
+        fieldType = Optional.ofNullable(this.config.resolveTargetTypeOverride(field, fieldType, declaringTypeDescription))
                 .orElse(fieldType);
-        ObjectNode fieldAttributes = AttributeCollector.collectFieldAttributes(field, fieldType, this.config);
+        ObjectNode fieldAttributes = AttributeCollector.collectFieldAttributes(field, fieldType, declaringTypeDescription, this.config);
 
+        // determine null-ability based on original/declared type and not on overridden one
+        boolean isNullable = !field.getAnnotated().isEnumConstant() && this.config.isNullable(field, field.getType(), declaringTypeDescription);
         this.populateSchema(fieldType, subSchema, isNullable, fieldAttributes, generationContext);
     }
 
@@ -257,35 +275,33 @@ public class SchemaGenerator {
      *
      * @param method declared method that should be added to the specified node
      * @param parentProperties node in the JSON schema to which the method's (and its return value's) sub schema should be added as property
-     * @param parentTypeVariables mapping of generic type variables to their actual types (according the declaring type's type arguments)
+     * @param declaringTypeDescription mapping of generic type variables to their actual types (according the declaring type's type arguments)
      * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
-    private void populateMethod(Method method, Map<String, JsonNode> parentProperties, TypeVariableContext parentTypeVariables,
+    private void populateMethod(AnnotatedMethod method, Map<String, JsonNode> parentProperties, BeanDescription declaringTypeDescription,
             SchemaGenerationContext generationContext) {
-        TypeVariableContext extendedTypeVariables = TypeVariableContext.forMethod(method, parentTypeVariables);
-        JavaType returnValueType = extendedTypeVariables.resolveGenericTypePlaceholder(method.getGenericReturnType());
-        final boolean isNullable = this.config.isNullable(method, returnValueType);
-        returnValueType = Optional.ofNullable(this.config.resolveTargetTypeOverride(method, returnValueType))
+        JavaType returnValueType = method.getType();
+        returnValueType = Optional.ofNullable(this.config.resolveTargetTypeOverride(method, returnValueType, declaringTypeDescription))
                 .orElse(returnValueType);
 
-        String defaultName = method.getName() + Stream.of(method.getGenericParameterTypes())
-                .map(parameter -> extendedTypeVariables.resolveGenericTypePlaceholder(parameter).toString())
-                .collect(Collectors.joining(", ", "(", ")"));
-        String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(method, defaultName)).orElse(defaultName);
+        String defaultName = ReflectionToStringUtils.createStringRepresentation(method);
+        String propertyName = Optional.ofNullable(this.config.resolvePropertyNameOverride(method, defaultName, declaringTypeDescription))
+                .orElse(defaultName);
         if (parentProperties.containsKey(propertyName)) {
             logger.debug("ignoring overridden {}.{}", method.getDeclaringClass(), defaultName);
             return;
         }
 
-        if (returnValueType.getResolvedType() == void.class || returnValueType.getResolvedType() == Void.class) {
-            parentProperties.put(propertyName, BooleanNode.FALSE);
-        } else {
+        if (method.hasReturnType()) {
             ObjectNode subSchema = this.config.createObjectNode();
             parentProperties.put(propertyName, subSchema);
+            ObjectNode methodAttributes = AttributeCollector.collectMethodAttributes(method, returnValueType, declaringTypeDescription, this.config);
 
-            ObjectNode methodAttributes = AttributeCollector.collectMethodAttributes(method, returnValueType, this.config);
-
+            // determine null-ability based on original/declared type and not on overridden one
+            boolean isNullable = this.config.isNullable(method, method.getType(), declaringTypeDescription);
             this.populateSchema(returnValueType, subSchema, isNullable, methodAttributes, generationContext);
+        } else {
+            parentProperties.put(propertyName, BooleanNode.FALSE);
         }
     }
 
@@ -308,7 +324,7 @@ public class SchemaGenerator {
         if (collectedAttributes == null
                 || collectedAttributes.size() == 0
                 || (customDefinition != null && customDefinition.isMeantToBeInline())
-                || ReflectionTypeUtils.isArrayType(javaType)) {
+                || javaType.isContainerType()) {
             // no need for the allOf, can use the sub-schema instance directly as reference
             referenceContainer = targetNode;
         } else {
@@ -391,7 +407,7 @@ public class SchemaGenerator {
     private ObjectNode buildDefinitionsAndResolveReferences(JavaType mainSchemaTarget, SchemaGenerationContext generationContext) {
         // determine short names to be used as definition names
         Map<String, List<JavaType>> aliases = generationContext.getDefinedTypes().stream()
-                .collect(Collectors.groupingBy(type -> type.toString(), TreeMap::new, Collectors.toList()));
+                .collect(Collectors.groupingBy(ReflectionToStringUtils::createStringRepresentation, TreeMap::new, Collectors.toList()));
         // create the "definitions" node with the respective aliases as keys
         ObjectNode definitionsNode = this.config.createObjectNode();
         boolean createDefinitionsForAll = this.config.shouldCreateDefinitionsForAllObjects();

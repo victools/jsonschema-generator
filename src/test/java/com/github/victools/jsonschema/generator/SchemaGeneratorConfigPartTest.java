@@ -16,15 +16,19 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 /**
  * Test for the {@link SchemaGeneratorConfigPart} class.
@@ -44,7 +48,7 @@ public class SchemaGeneratorConfigPartTest {
 
     @Test
     public void testInstanceAttributeOverride() {
-        InstanceAttributeOverride<String> instanceOverride = (node, reference, t, c) -> node.put("$comment", reference);
+        InstanceAttributeOverride<String> instanceOverride = (node, reference, t, context, config) -> node.put("$comment", reference);
         Assert.assertSame(this.instance, this.instance.withInstanceAttributeOverride(instanceOverride));
 
         List<InstanceAttributeOverride<String>> instanceOverrideList = this.instance.getInstanceAttributeOverrides();
@@ -54,99 +58,104 @@ public class SchemaGeneratorConfigPartTest {
 
     @Test
     public void testIgnoreCheck() {
-        Assert.assertFalse(this.instance.shouldIgnore(ORIGIN1));
+        BeanDescription context = Mockito.mock(BeanDescription.class);
+        Assert.assertFalse(this.instance.shouldIgnore(ORIGIN1, context));
 
-        Assert.assertSame(this.instance, this.instance.withIgnoreCheck(origin -> ORIGIN1.equals(origin)));
-        Assert.assertTrue(this.instance.shouldIgnore(ORIGIN1));
-        Assert.assertFalse(this.instance.shouldIgnore(ORIGIN2));
+        Assert.assertSame(this.instance, this.instance.withIgnoreCheck((origin, c) -> ORIGIN1.equals(origin)));
+        Assert.assertTrue(this.instance.shouldIgnore(ORIGIN1, context));
+        Assert.assertFalse(this.instance.shouldIgnore(ORIGIN2, context));
 
-        Assert.assertSame(this.instance, this.instance.withIgnoreCheck(origin -> ORIGIN2.equals(origin)));
-        Assert.assertTrue(this.instance.shouldIgnore(ORIGIN1));
-        Assert.assertTrue(this.instance.shouldIgnore(ORIGIN2));
-        Assert.assertFalse(this.instance.shouldIgnore(ORIGIN3));
+        Assert.assertSame(this.instance, this.instance.withIgnoreCheck((origin, c) -> ORIGIN2.equals(origin)));
+        Assert.assertTrue(this.instance.shouldIgnore(ORIGIN1, context));
+        Assert.assertTrue(this.instance.shouldIgnore(ORIGIN2, context));
+        Assert.assertFalse(this.instance.shouldIgnore(ORIGIN3, context));
     }
 
     @Test
     public void testNullableCheck() {
-        Assert.assertNull(this.instance.isNullable(ORIGIN1, null));
+        BeanDescription context = Mockito.mock(BeanDescription.class);
+        Assert.assertNull(this.instance.isNullable(ORIGIN1, null, context));
 
-        Assert.assertSame(this.instance, this.instance.withNullableCheck((origin, type) -> ORIGIN1.equals(origin) ? true : null));
-        Assert.assertTrue(this.instance.isNullable(ORIGIN1, null));
-        Assert.assertNull(this.instance.isNullable(ORIGIN2, null));
+        Assert.assertSame(this.instance, this.instance.withNullableCheck((origin, type, c) -> ORIGIN1.equals(origin) ? true : null));
+        Assert.assertTrue(this.instance.isNullable(ORIGIN1, null, context));
+        Assert.assertNull(this.instance.isNullable(ORIGIN2, null, context));
 
-        Assert.assertSame(this.instance, this.instance.withNullableCheck((origin, type) -> ORIGIN2.equals(origin) ? false : null));
-        Assert.assertTrue(this.instance.isNullable(ORIGIN1, null));
-        Assert.assertFalse(this.instance.isNullable(ORIGIN2, null));
-        Assert.assertNull(this.instance.isNullable(ORIGIN3, null));
+        Assert.assertSame(this.instance, this.instance.withNullableCheck((origin, type, c) -> ORIGIN2.equals(origin) ? false : null));
+        Assert.assertTrue(this.instance.isNullable(ORIGIN1, null, context));
+        Assert.assertFalse(this.instance.isNullable(ORIGIN2, null, context));
+        Assert.assertNull(this.instance.isNullable(ORIGIN3, null, context));
 
-        Assert.assertSame(this.instance, this.instance.withNullableCheck((origin, type) -> ORIGIN1.equals(origin)));
-        Assert.assertTrue(this.instance.isNullable(ORIGIN1, null));
-        Assert.assertFalse(this.instance.isNullable(ORIGIN2, null));
-        Assert.assertFalse(this.instance.isNullable(ORIGIN3, null));
+        Assert.assertSame(this.instance, this.instance.withNullableCheck((origin, type, c) -> ORIGIN1.equals(origin)));
+        Assert.assertTrue(this.instance.isNullable(ORIGIN1, null, context));
+        Assert.assertFalse(this.instance.isNullable(ORIGIN2, null, context));
+        Assert.assertFalse(this.instance.isNullable(ORIGIN3, null, context));
 
-        Assert.assertSame(this.instance, this.instance.withNullableCheck((origin, type) -> ORIGIN2.equals(origin)));
-        Assert.assertTrue(this.instance.isNullable(ORIGIN1, null));
-        Assert.assertTrue(this.instance.isNullable(ORIGIN2, null));
-        Assert.assertFalse(this.instance.isNullable(ORIGIN3, null));
+        Assert.assertSame(this.instance, this.instance.withNullableCheck((origin, type, c) -> ORIGIN2.equals(origin)));
+        Assert.assertTrue(this.instance.isNullable(ORIGIN1, null, context));
+        Assert.assertTrue(this.instance.isNullable(ORIGIN2, null, context));
+        Assert.assertFalse(this.instance.isNullable(ORIGIN3, null, context));
     }
 
     @Test
     public void testTargetTypeOverride() {
-        JavaType type1 = new JavaType(Number.class, TypeVariableContext.EMPTY_SCOPE);
-        JavaType type2 = new JavaType(BigDecimal.class, TypeVariableContext.EMPTY_SCOPE);
-        JavaType type3 = new JavaType(BigInteger.class, TypeVariableContext.EMPTY_SCOPE);
+        TypeFactory typeFactory = new ObjectMapper().getSerializationConfig().getTypeFactory();
+        JavaType type1 = typeFactory.constructType(Number.class);
+        JavaType type2 = typeFactory.constructType(BigDecimal.class);
+        JavaType type3 = typeFactory.constructType(BigInteger.class);
+        BeanDescription context = Mockito.mock(BeanDescription.class);
 
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN1, type1));
+        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN1, type1, context));
 
-        BiFunction<String, JavaType, JavaType> resolver1 = (origin, type) -> ORIGIN1.equals(origin) && type == type1 ? type2 : null;
+        ConfigFunction<String, JavaType, JavaType> resolver1 = (origin, type, c) -> ORIGIN1.equals(origin) && type == type1 ? type2 : null;
         Assert.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver1));
-        Assert.assertSame(type2, this.instance.resolveTargetTypeOverride(ORIGIN1, type1));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN1, type2));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type1));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type2));
+        Assert.assertSame(type2, this.instance.resolveTargetTypeOverride(ORIGIN1, type1, context));
+        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN1, type2, context));
+        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type1, context));
+        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type2, context));
 
-        BiFunction<String, JavaType, JavaType> resolver2 = (origin, type) -> ORIGIN1.equals(origin) && type == type1 ? type3 : null;
+        ConfigFunction<String, JavaType, JavaType> resolver2 = (origin, type, c) -> ORIGIN1.equals(origin) && type == type1 ? type3 : null;
         Assert.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver2));
-        Assert.assertSame(type2, this.instance.resolveTargetTypeOverride(ORIGIN1, type1));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN1, type2));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type1));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type2));
+        Assert.assertSame(type2, this.instance.resolveTargetTypeOverride(ORIGIN1, type1, context));
+        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN1, type2, context));
+        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type1, context));
+        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type2, context));
 
-        BiFunction<String, JavaType, JavaType> resolver3 = (origin, type) -> ORIGIN2.equals(origin) && type == type2 ? type1 : null;
+        ConfigFunction<String, JavaType, JavaType> resolver3 = (origin, type, c) -> ORIGIN2.equals(origin) && type == type2 ? type1 : null;
         Assert.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver3));
-        Assert.assertSame(type2, this.instance.resolveTargetTypeOverride(ORIGIN1, type1));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN1, type2));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type1));
-        Assert.assertSame(type1, this.instance.resolveTargetTypeOverride(ORIGIN2, type2));
+        Assert.assertSame(type2, this.instance.resolveTargetTypeOverride(ORIGIN1, type1, context));
+        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN1, type2, context));
+        Assert.assertNull(this.instance.resolveTargetTypeOverride(ORIGIN2, type1, context));
+        Assert.assertSame(type1, this.instance.resolveTargetTypeOverride(ORIGIN2, type2, context));
     }
 
     @Test
     public void testPropertyNameOverride() {
         String name1 = "name1";
         String name2 = "name2";
+        BeanDescription context = Mockito.mock(BeanDescription.class);
 
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN1, name1));
+        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN1, name1, context));
 
-        BiFunction<String, String, String> resolver1 = (origin, defaultName) -> ORIGIN1.equals(origin) && defaultName.equals(name1) ? name2 : null;
+        ConfigFunction<String, String, String> resolver1 = (origin, dn, c) -> ORIGIN1.equals(origin) && dn.equals(name1) ? name2 : null;
         Assert.assertSame(this.instance, this.instance.withPropertyNameOverrideResolver(resolver1));
-        Assert.assertSame(name2, this.instance.resolvePropertyNameOverride(ORIGIN1, name1));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN1, name2));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name1));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name2));
+        Assert.assertSame(name2, this.instance.resolvePropertyNameOverride(ORIGIN1, name1, context));
+        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN1, name2, context));
+        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name1, context));
+        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name2, context));
 
-        BiFunction<String, String, String> resolver2 = (origin, defaultName) -> ORIGIN1.equals(origin) && defaultName.equals(name1) ? "name3" : null;
+        ConfigFunction<String, String, String> resolver2 = (origin, dn, c) -> ORIGIN1.equals(origin) && dn.equals(name1) ? "name3" : null;
         Assert.assertSame(this.instance, this.instance.withPropertyNameOverrideResolver(resolver2));
-        Assert.assertSame(name2, this.instance.resolvePropertyNameOverride(ORIGIN1, name1));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN1, name2));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name1));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name2));
+        Assert.assertSame(name2, this.instance.resolvePropertyNameOverride(ORIGIN1, name1, context));
+        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN1, name2, context));
+        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name1, context));
+        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name2, context));
 
-        BiFunction<String, String, String> resolver3 = (origin, defaultName) -> ORIGIN2.equals(origin) && defaultName.equals(name2) ? name1 : null;
+        ConfigFunction<String, String, String> resolver3 = (origin, dn, c) -> ORIGIN2.equals(origin) && dn.equals(name2) ? name1 : null;
         Assert.assertSame(this.instance, this.instance.withPropertyNameOverrideResolver(resolver3));
-        Assert.assertSame(name2, this.instance.resolvePropertyNameOverride(ORIGIN1, name1));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN1, name2));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name1));
-        Assert.assertSame(name1, this.instance.resolvePropertyNameOverride(ORIGIN2, name2));
+        Assert.assertSame(name2, this.instance.resolvePropertyNameOverride(ORIGIN1, name1, context));
+        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN1, name2, context));
+        Assert.assertNull(this.instance.resolvePropertyNameOverride(ORIGIN2, name1, context));
+        Assert.assertSame(name1, this.instance.resolvePropertyNameOverride(ORIGIN2, name2, context));
     }
 
     @Test
@@ -233,21 +242,23 @@ public class SchemaGeneratorConfigPartTest {
                 this.instance::withArrayUniqueItemsResolver, this.instance::resolveArrayUniqueItems);
     }
 
-    private <R> void testFirstDefinedValueConfig(R value1, R value2, Function<BiFunction<String, JavaType, R>, SchemaGeneratorConfigPart<String>> addConfig, BiFunction<String, JavaType, R> resolveValue) {
-        Assert.assertNull(resolveValue.apply(ORIGIN1, null));
+    private <R> void testFirstDefinedValueConfig(R value1, R value2,
+            Function<ConfigFunction<String, JavaType, R>, SchemaGeneratorConfigPart<String>> addConfig,
+            ConfigFunction<String, JavaType, R> resolveValue) {
+        Assert.assertNull(resolveValue.apply(ORIGIN1, null, null));
 
-        Assert.assertSame(this.instance, addConfig.apply((origin, type) -> ORIGIN1.equals(origin) ? value1 : null));
-        Assert.assertEquals(value1, resolveValue.apply(ORIGIN1, null));
-        Assert.assertNull(resolveValue.apply(ORIGIN2, null));
+        Assert.assertSame(this.instance, addConfig.apply((origin, type, c) -> ORIGIN1.equals(origin) ? value1 : null));
+        Assert.assertEquals(value1, resolveValue.apply(ORIGIN1, null, null));
+        Assert.assertNull(resolveValue.apply(ORIGIN2, null, null));
 
-        Assert.assertSame(this.instance, addConfig.apply((origin, type) -> ORIGIN1.equals(origin) ? value2 : null));
-        Assert.assertEquals(value1, resolveValue.apply(ORIGIN1, null));
-        Assert.assertNull(resolveValue.apply(ORIGIN2, null));
-        Assert.assertNull(resolveValue.apply(ORIGIN3, null));
+        Assert.assertSame(this.instance, addConfig.apply((origin, type, c) -> ORIGIN1.equals(origin) ? value2 : null));
+        Assert.assertEquals(value1, resolveValue.apply(ORIGIN1, null, null));
+        Assert.assertNull(resolveValue.apply(ORIGIN2, null, null));
+        Assert.assertNull(resolveValue.apply(ORIGIN3, null, null));
 
-        Assert.assertSame(this.instance, addConfig.apply((origin, type) -> ORIGIN2.equals(origin) ? value2 : null));
-        Assert.assertEquals(value1, resolveValue.apply(ORIGIN1, null));
-        Assert.assertEquals(value2, resolveValue.apply(ORIGIN2, null));
-        Assert.assertNull(resolveValue.apply(ORIGIN3, null));
+        Assert.assertSame(this.instance, addConfig.apply((origin, type, c) -> ORIGIN2.equals(origin) ? value2 : null));
+        Assert.assertEquals(value1, resolveValue.apply(ORIGIN1, null, null));
+        Assert.assertEquals(value2, resolveValue.apply(ORIGIN2, null, null));
+        Assert.assertNull(resolveValue.apply(ORIGIN3, null, null));
     }
 }

@@ -16,6 +16,8 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.jackson.databind.JavaType;
+
 /**
  * Provider of non-standard JSON schema definitions.
  */

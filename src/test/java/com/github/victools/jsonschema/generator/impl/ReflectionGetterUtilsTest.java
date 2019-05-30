@@ -16,8 +16,11 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.introspect.AnnotatedField;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
+import com.github.victools.jsonschema.generator.AbstractAnnotationAwareTest;
+import java.util.Map;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -28,7 +31,7 @@ import org.junit.runner.RunWith;
  * Test for the {@link ReflectionUtils} class.
  */
 @RunWith(JUnitParamsRunner.class)
-public class ReflectionGetterUtilsTest {
+public class ReflectionGetterUtilsTest extends AbstractAnnotationAwareTest {
 
     Object parametersForTestFindGetterForField() {
         return new String[][]{
@@ -41,8 +44,8 @@ public class ReflectionGetterUtilsTest {
     @Test
     @Parameters
     public void testFindGetterForField(String fieldName, String methodName) throws Exception {
-        Field field = TestClass.class.getDeclaredField(fieldName);
-        Method getter = ReflectionGetterUtils.findGetterForField(field);
+        Map.Entry<AnnotatedField, BeanDescription> annotatedField = this.wrapField(TestClass.class.getDeclaredField(fieldName));
+        AnnotatedMethod getter = ReflectionGetterUtils.findGetterForField(annotatedField.getKey(), annotatedField.getValue());
 
         if (methodName == null) {
             Assert.assertNull(getter);
@@ -60,8 +63,8 @@ public class ReflectionGetterUtilsTest {
         "fieldWithPublicBooleanGetter, true"
     })
     public void testHasGetter(String fieldName, boolean expectedResult) throws Exception {
-        Field field = TestClass.class.getDeclaredField(fieldName);
-        boolean result = ReflectionGetterUtils.hasGetter(field);
+        Map.Entry<AnnotatedField, BeanDescription> annotatedField = this.wrapField(TestClass.class.getDeclaredField(fieldName));
+        boolean result = ReflectionGetterUtils.hasGetter(annotatedField.getKey(), annotatedField.getValue());
 
         Assert.assertEquals(expectedResult, result);
     }
@@ -81,8 +84,8 @@ public class ReflectionGetterUtilsTest {
     @Test
     @Parameters
     public void testFindFieldForGetter(String methodName, String fieldName) throws Exception {
-        Method method = TestClass.class.getDeclaredMethod(methodName);
-        Field field = ReflectionGetterUtils.findFieldForGetter(method);
+        Map.Entry<AnnotatedMethod, BeanDescription> annotatedMethod = this.wrapMethod(TestClass.class.getDeclaredMethod(methodName));
+        AnnotatedField field = ReflectionGetterUtils.findFieldForGetter(annotatedMethod.getKey(), annotatedMethod.getValue());
 
         if (fieldName == null) {
             Assert.assertNull(field);
@@ -104,8 +107,8 @@ public class ReflectionGetterUtilsTest {
         "calculateSomething, false"
     })
     public void testIsGetter(String methodName, boolean expectedResult) throws Exception {
-        Method method = TestClass.class.getDeclaredMethod(methodName);
-        boolean result = ReflectionGetterUtils.isGetter(method);
+        Map.Entry<AnnotatedMethod, BeanDescription> annotatedMethod = this.wrapMethod(TestClass.class.getDeclaredMethod(methodName));
+        boolean result = ReflectionGetterUtils.isGetter(annotatedMethod.getKey(), annotatedMethod.getValue());
 
         Assert.assertEquals(expectedResult, result);
     }

@@ -16,9 +16,8 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.JavaType;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import org.junit.Assert;
@@ -50,7 +49,7 @@ public class SchemaGenerationContextTest {
 
         Assert.assertFalse(context.containsDefinition(javaType));
         Assert.assertNull(context.getDefinition(javaType));
-        Assert.assertEquals(Collections.<Type>emptySet(), context.getDefinedTypes());
+        Assert.assertEquals(Collections.<JavaType>emptySet(), context.getDefinedTypes());
     }
 
     @Test

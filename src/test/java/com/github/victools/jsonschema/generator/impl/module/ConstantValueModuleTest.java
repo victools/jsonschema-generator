@@ -16,11 +16,14 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.introspect.AnnotatedField;
+import com.github.victools.jsonschema.generator.AbstractAnnotationAwareTest;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -33,11 +36,11 @@ import org.mockito.Mockito;
  * Test for the {@link ConstantValueModule} class.
  */
 @RunWith(JUnitParamsRunner.class)
-public class ConstantValueModuleTest {
+public class ConstantValueModuleTest extends AbstractAnnotationAwareTest {
 
     private ConstantValueModule instance;
     private SchemaGeneratorConfigBuilder builder;
-    private SchemaGeneratorConfigPart<Field> fieldConfigPart;
+    private SchemaGeneratorConfigPart<AnnotatedField> fieldConfigPart;
 
     @Before
     public void setUp() {
@@ -74,8 +77,8 @@ public class ConstantValueModuleTest {
     public void testEnumResolver(String fieldName, Collection<?> expectedResult) throws Exception {
         this.instance.applyToConfigBuilder(this.builder);
 
-        Field field = TestClass.class.getDeclaredField(fieldName);
-        Collection<?> result = this.fieldConfigPart.resolveEnum(field, null);
+        Map.Entry<AnnotatedField, BeanDescription> annotatedField = this.wrapField(TestClass.class.getDeclaredField(fieldName));
+        Collection<?> result = this.fieldConfigPart.resolveEnum(annotatedField.getKey(), null, annotatedField.getValue());
         Assert.assertEquals(expectedResult, result);
     }
 
@@ -95,8 +98,8 @@ public class ConstantValueModuleTest {
         ConstantValueModule instance = new ConstantValueModule();
         instance.applyToConfigBuilder(this.builder);
 
-        Field field = TestClass.class.getDeclaredField(fieldName);
-        Boolean result = this.fieldConfigPart.isNullable(field, null);
+        Map.Entry<AnnotatedField, BeanDescription> annotatedField = this.wrapField(TestClass.class.getDeclaredField(fieldName));
+        Boolean result = this.fieldConfigPart.isNullable(annotatedField.getKey(), null, annotatedField.getValue());
         Assert.assertEquals(expectedResult, result);
     }
 

@@ -16,15 +16,25 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
-import com.github.victools.jsonschema.generator.JavaType;
+import com.fasterxml.jackson.databind.JavaType;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.impl.ReflectionTypeUtils;
+import java.util.Optional;
 
 /**
  * Default module being included if {@code Option.FLATTENED_OPTIONALS} is enabled.
  */
 public class FlattenedOptionalModule implements Module {
+
+    /**
+     * Check whether the given type represents an {@link Optional}.
+     *
+     * @param javaType type to check
+     * @return whether the given type's raw class is {@link Optional}
+     */
+    private boolean isOptionalType(JavaType javaType) {
+        return javaType.hasRawClass(Optional.class);
+    }
 
     /**
      * Determine the type of the item/component wrapped in the given {@link Optional} type.
@@ -33,8 +43,8 @@ public class FlattenedOptionalModule implements Module {
      * @return the wrapped component type (or null if it is not an {@link Optional} (sub) type
      */
     private JavaType resolveOptionalComponentType(JavaType javaType) {
-        if (ReflectionTypeUtils.isOptionalType(javaType)) {
-            return ReflectionTypeUtils.getOptionalComponentType(javaType);
+        if (this.isOptionalType(javaType)) {
+            return javaType.containedType(0);
         }
         return null;
     }
@@ -42,10 +52,10 @@ public class FlattenedOptionalModule implements Module {
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         builder.forFields()
-                .withNullableCheck((field, javaType) -> ReflectionTypeUtils.isOptionalType(javaType) ? Boolean.TRUE : null)
-                .withTargetTypeOverrideResolver((field, javaType) -> this.resolveOptionalComponentType(javaType));
+                .withNullableCheck((field, javaType, context) -> this.isOptionalType(javaType) ? Boolean.TRUE : null)
+                .withTargetTypeOverrideResolver((field, javaType, context) -> this.resolveOptionalComponentType(javaType));
         builder.forMethods()
-                .withNullableCheck((method, javaType) -> ReflectionTypeUtils.isOptionalType(javaType) ? Boolean.TRUE : null)
-                .withTargetTypeOverrideResolver((method, javaType) -> this.resolveOptionalComponentType(javaType));
+                .withNullableCheck((method, javaType, context) -> this.isOptionalType(javaType) ? Boolean.TRUE : null)
+                .withTargetTypeOverrideResolver((method, javaType, context) -> this.resolveOptionalComponentType(javaType));
     }
 }

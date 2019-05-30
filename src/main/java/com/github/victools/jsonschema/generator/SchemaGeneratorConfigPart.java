@@ -16,6 +16,8 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JavaType;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,8 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 /**
@@ -45,9 +46,9 @@ public class SchemaGeneratorConfigPart<O> {
      * @param secondParameter second parameter to forward (e.g. indicating the standard value to be applied if not overridden)
      * @return return value of successfully invoked function or null
      */
-    private static <O, P, R> R getFirstDefinedValue(List<BiFunction<O, P, R>> resolvers, O origin, P secondParameter) {
+    private static <O, P, R> R getFirstDefinedValue(List<ConfigFunction<O, P, R>> resolvers, O origin, P secondParameter, BeanDescription context) {
         return resolvers.stream()
-                .map(resolver -> resolver.apply(origin, secondParameter))
+                .map(resolver -> resolver.apply(origin, secondParameter, context))
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
@@ -58,44 +59,44 @@ public class SchemaGeneratorConfigPart<O> {
     /*
      * Customising options for properties in a schema with "type": object; either skipping them completely or also allowing for "type": "null".
      */
-    private final List<Predicate<O>> ignoreChecks = new ArrayList<>();
-    private final List<BiFunction<O, JavaType, Boolean>> nullableChecks = new ArrayList<>();
+    private final List<BiPredicate<O, BeanDescription>> ignoreChecks = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, Boolean>> nullableChecks = new ArrayList<>();
 
     /*
      * Customising options for the names of properties in a schema with "type": "object".
      */
-    private final List<BiFunction<O, JavaType, JavaType>> targetTypeOverrideResolvers = new ArrayList<>();
-    private final List<BiFunction<O, String, String>> propertyNameOverrideResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, JavaType>> targetTypeOverrideResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, String, String>> propertyNameOverrideResolvers = new ArrayList<>();
 
     /*
      * General fields independent of "type".
      */
-    private final List<BiFunction<O, JavaType, String>> titleResolvers = new ArrayList<>();
-    private final List<BiFunction<O, JavaType, String>> descriptionResolvers = new ArrayList<>();
-    private final List<BiFunction<O, JavaType, Collection<?>>> enumResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, String>> titleResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, String>> descriptionResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, Collection<?>>> enumResolvers = new ArrayList<>();
 
     /*
      * Validation fields relating to a schema with "type": "string".
      */
-    private final List<BiFunction<O, JavaType, Integer>> stringMinLengthResolvers = new ArrayList<>();
-    private final List<BiFunction<O, JavaType, Integer>> stringMaxLengthResolvers = new ArrayList<>();
-    private final List<BiFunction<O, JavaType, String>> stringFormatResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, Integer>> stringMinLengthResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, Integer>> stringMaxLengthResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, String>> stringFormatResolvers = new ArrayList<>();
 
     /*
      * Validation fields relating to a schema with "type": "integer" or "number".
      */
-    private final List<BiFunction<O, JavaType, BigDecimal>> numberInclusiveMinimumResolvers = new ArrayList<>();
-    private final List<BiFunction<O, JavaType, BigDecimal>> numberExclusiveMinimumResolvers = new ArrayList<>();
-    private final List<BiFunction<O, JavaType, BigDecimal>> numberInclusiveMaximumResolvers = new ArrayList<>();
-    private final List<BiFunction<O, JavaType, BigDecimal>> numberExclusiveMaximumResolvers = new ArrayList<>();
-    private final List<BiFunction<O, JavaType, BigDecimal>> numberMultipleOfResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, BigDecimal>> numberInclusiveMinimumResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, BigDecimal>> numberExclusiveMinimumResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, BigDecimal>> numberInclusiveMaximumResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, BigDecimal>> numberExclusiveMaximumResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, BigDecimal>> numberMultipleOfResolvers = new ArrayList<>();
 
     /*
      * Validation fields relating to a schema with "type": "array".
      */
-    private final List<BiFunction<O, JavaType, Integer>> arrayMinItemsResolvers = new ArrayList<>();
-    private final List<BiFunction<O, JavaType, Integer>> arrayMaxItemsResolvers = new ArrayList<>();
-    private final List<BiFunction<O, JavaType, Boolean>> arrayUniqueItemsResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, Integer>> arrayMinItemsResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, Integer>> arrayMaxItemsResolvers = new ArrayList<>();
+    private final List<ConfigFunction<O, JavaType, Boolean>> arrayUniqueItemsResolvers = new ArrayList<>();
 
     /**
      * Setter for override of attributes on a given JSON Schema node in the respective reference/context.
@@ -123,7 +124,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param check how to determine whether a given reference should be ignored
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withIgnoreCheck(Predicate<O> check) {
+    public SchemaGeneratorConfigPart<O> withIgnoreCheck(BiPredicate<O, BeanDescription> check) {
         this.ignoreChecks.add(check);
         return this;
     }
@@ -132,10 +133,11 @@ public class SchemaGeneratorConfigPart<O> {
      * Determine whether a given reference/context should be ignored.
      *
      * @param origin reference/context to check
+     * @param declaringContext the declaring type's description
      * @return whether the reference/context should be ignored (defaults to false)
      */
-    public boolean shouldIgnore(O origin) {
-        return this.ignoreChecks.stream().anyMatch(check -> check.test(origin));
+    public boolean shouldIgnore(O origin, BeanDescription declaringContext) {
+        return this.ignoreChecks.stream().anyMatch(check -> check.test(origin, declaringContext));
     }
 
     /**
@@ -144,7 +146,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param check how to determine whether a given reference should be nullable
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withNullableCheck(BiFunction<O, JavaType, Boolean> check) {
+    public SchemaGeneratorConfigPart<O> withNullableCheck(ConfigFunction<O, JavaType, Boolean> check) {
         this.nullableChecks.add(check);
         return this;
     }
@@ -154,11 +156,12 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to check
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+      * @param declaringContext the declaring type's description
      * @return whether the reference/context is nullable (may be null if not specified)
      */
-    public Boolean isNullable(O origin, JavaType originType) {
+    public Boolean isNullable(O origin, JavaType originType, BeanDescription declaringContext) {
         Set<Boolean> result = this.nullableChecks.stream()
-                .map(check -> check.apply(origin, originType))
+                .map(check -> check.apply(origin, originType, declaringContext))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         return result.isEmpty() ? null : result.stream().anyMatch(value -> value);
@@ -170,7 +173,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the alternative target type
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withTargetTypeOverrideResolver(BiFunction<O, JavaType, JavaType> resolver) {
+    public SchemaGeneratorConfigPart<O> withTargetTypeOverrideResolver(ConfigFunction<O, JavaType, JavaType> resolver) {
         this.targetTypeOverrideResolvers.add(resolver);
         return this;
     }
@@ -180,10 +183,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine the target type for
      * @param defaultType default type to be used if no override value is being provided
+     * @param declaringContext the declaring type's description
      * @return target type of reference/context (may be null)
      */
-    public JavaType resolveTargetTypeOverride(O origin, JavaType defaultType) {
-        return getFirstDefinedValue(this.targetTypeOverrideResolvers, origin, defaultType);
+    public JavaType resolveTargetTypeOverride(O origin, JavaType defaultType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.targetTypeOverrideResolvers, origin, defaultType, declaringContext);
     }
 
     /**
@@ -192,7 +196,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the alternative name in a parent JSON Schema's "properties"
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withPropertyNameOverrideResolver(BiFunction<O, String, String> resolver) {
+    public SchemaGeneratorConfigPart<O> withPropertyNameOverrideResolver(ConfigFunction<O, String, String> resolver) {
         this.propertyNameOverrideResolvers.add(resolver);
         return this;
     }
@@ -202,10 +206,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine the property name for
      * @param defaultName default name to be set if no override value is being provided
+     * @param declaringContext the declaring type's description
      * @return name in a parent JSON Schema's "properties" (may be null, thereby falling back on the default value)
      */
-    public String resolvePropertyNameOverride(O origin, String defaultName) {
-        return getFirstDefinedValue(this.propertyNameOverrideResolvers, origin, defaultName);
+    public String resolvePropertyNameOverride(O origin, String defaultName, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.propertyNameOverrideResolvers, origin, defaultName, declaringContext);
     }
 
     /**
@@ -214,7 +219,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "title" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withTitleResolver(BiFunction<O, JavaType, String> resolver) {
+    public SchemaGeneratorConfigPart<O> withTitleResolver(ConfigFunction<O, JavaType, String> resolver) {
         this.titleResolvers.add(resolver);
         return this;
     }
@@ -224,10 +229,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "title" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "title" in a JSON Schema (may be null)
      */
-    public String resolveTitle(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.titleResolvers, origin, originType);
+    public String resolveTitle(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.titleResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -236,7 +242,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "description" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withDescriptionResolver(BiFunction<O, JavaType, String> resolver) {
+    public SchemaGeneratorConfigPart<O> withDescriptionResolver(ConfigFunction<O, JavaType, String> resolver) {
         this.descriptionResolvers.add(resolver);
         return this;
     }
@@ -246,10 +252,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "description" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "description" in a JSON Schema (may be null)
      */
-    public String resolveDescription(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.descriptionResolvers, origin, originType);
+    public String resolveDescription(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.descriptionResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -258,7 +265,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "enum"/"const" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withEnumResolver(BiFunction<O, JavaType, Collection<?>> resolver) {
+    public SchemaGeneratorConfigPart<O> withEnumResolver(ConfigFunction<O, JavaType, Collection<?>> resolver) {
         this.enumResolvers.add(resolver);
         return this;
     }
@@ -268,10 +275,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "enum"/"const" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "enum"/"const" in a JSON Schema (may be null)
      */
-    public Collection<?> resolveEnum(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.enumResolvers, origin, originType);
+    public Collection<?> resolveEnum(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.enumResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -280,7 +288,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "minLength" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withStringMinLengthResolver(BiFunction<O, JavaType, Integer> resolver) {
+    public SchemaGeneratorConfigPart<O> withStringMinLengthResolver(ConfigFunction<O, JavaType, Integer> resolver) {
         this.stringMinLengthResolvers.add(resolver);
         return this;
     }
@@ -290,10 +298,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "minLength" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "minLength" in a JSON Schema (may be null)
      */
-    public Integer resolveStringMinLength(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.stringMinLengthResolvers, origin, originType);
+    public Integer resolveStringMinLength(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.stringMinLengthResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -302,7 +311,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "maxLength" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withStringMaxLengthResolver(BiFunction<O, JavaType, Integer> resolver) {
+    public SchemaGeneratorConfigPart<O> withStringMaxLengthResolver(ConfigFunction<O, JavaType, Integer> resolver) {
         this.stringMaxLengthResolvers.add(resolver);
         return this;
     }
@@ -312,10 +321,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "maxLength" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+      * @param declaringContext the declaring type's description
      * @return "maxLength" in a JSON Schema (may be null)
      */
-    public Integer resolveStringMaxLength(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.stringMaxLengthResolvers, origin, originType);
+    public Integer resolveStringMaxLength(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.stringMaxLengthResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -324,7 +334,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "format" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withStringFormatResolver(BiFunction<O, JavaType, String> resolver) {
+    public SchemaGeneratorConfigPart<O> withStringFormatResolver(ConfigFunction<O, JavaType, String> resolver) {
         this.stringFormatResolvers.add(resolver);
         return this;
     }
@@ -334,10 +344,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "format" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "format" in a JSON Schema (may be null)
      */
-    public String resolveStringFormat(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.stringFormatResolvers, origin, originType);
+    public String resolveStringFormat(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.stringFormatResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -346,7 +357,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "minimum" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withNumberInclusiveMinimumResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
+    public SchemaGeneratorConfigPart<O> withNumberInclusiveMinimumResolver(ConfigFunction<O, JavaType, BigDecimal> resolver) {
         this.numberInclusiveMinimumResolvers.add(resolver);
         return this;
     }
@@ -356,10 +367,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "minimum" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "minimum" in a JSON Schema (may be null)
      */
-    public BigDecimal resolveNumberInclusiveMinimum(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.numberInclusiveMinimumResolvers, origin, originType);
+    public BigDecimal resolveNumberInclusiveMinimum(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.numberInclusiveMinimumResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -368,7 +380,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "exclusiveMinimum" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withNumberExclusiveMinimumResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
+    public SchemaGeneratorConfigPart<O> withNumberExclusiveMinimumResolver(ConfigFunction<O, JavaType, BigDecimal> resolver) {
         this.numberExclusiveMinimumResolvers.add(resolver);
         return this;
     }
@@ -378,10 +390,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "exclusiveMinimum" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "exclusiveMinimum" in a JSON Schema (may be null)
      */
-    public BigDecimal resolveNumberExclusiveMinimum(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.numberExclusiveMinimumResolvers, origin, originType);
+    public BigDecimal resolveNumberExclusiveMinimum(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.numberExclusiveMinimumResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -390,7 +403,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "maximum" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withNumberInclusiveMaximumResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
+    public SchemaGeneratorConfigPart<O> withNumberInclusiveMaximumResolver(ConfigFunction<O, JavaType, BigDecimal> resolver) {
         this.numberInclusiveMaximumResolvers.add(resolver);
         return this;
     }
@@ -400,10 +413,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "maximum" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "maximum" in a JSON Schema (may be null)
      */
-    public BigDecimal resolveNumberInclusiveMaximum(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.numberInclusiveMaximumResolvers, origin, originType);
+    public BigDecimal resolveNumberInclusiveMaximum(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.numberInclusiveMaximumResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -412,7 +426,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "exclusiveMaximum" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withNumberExclusiveMaximumResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
+    public SchemaGeneratorConfigPart<O> withNumberExclusiveMaximumResolver(ConfigFunction<O, JavaType, BigDecimal> resolver) {
         this.numberExclusiveMaximumResolvers.add(resolver);
         return this;
     }
@@ -422,10 +436,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "exclusiveMaximum" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "exclusiveMaximum" in a JSON Schema (may be null)
      */
-    public BigDecimal resolveNumberExclusiveMaximum(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.numberExclusiveMaximumResolvers, origin, originType);
+    public BigDecimal resolveNumberExclusiveMaximum(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.numberExclusiveMaximumResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -434,7 +449,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "multipleOf" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withNumberMultipleOfResolver(BiFunction<O, JavaType, BigDecimal> resolver) {
+    public SchemaGeneratorConfigPart<O> withNumberMultipleOfResolver(ConfigFunction<O, JavaType, BigDecimal> resolver) {
         this.numberMultipleOfResolvers.add(resolver);
         return this;
     }
@@ -444,10 +459,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "multipleOf" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "multipleOf" in a JSON Schema (may be null)
      */
-    public BigDecimal resolveNumberMultipleOf(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.numberMultipleOfResolvers, origin, originType);
+    public BigDecimal resolveNumberMultipleOf(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.numberMultipleOfResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -456,7 +472,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "minItems" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withArrayMinItemsResolver(BiFunction<O, JavaType, Integer> resolver) {
+    public SchemaGeneratorConfigPart<O> withArrayMinItemsResolver(ConfigFunction<O, JavaType, Integer> resolver) {
         this.arrayMinItemsResolvers.add(resolver);
         return this;
     }
@@ -466,10 +482,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "minItems" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "minItems" in a JSON Schema (may be null)
      */
-    public Integer resolveArrayMinItems(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.arrayMinItemsResolvers, origin, originType);
+    public Integer resolveArrayMinItems(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.arrayMinItemsResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -478,7 +495,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "maxItems" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withArrayMaxItemsResolver(BiFunction<O, JavaType, Integer> resolver) {
+    public SchemaGeneratorConfigPart<O> withArrayMaxItemsResolver(ConfigFunction<O, JavaType, Integer> resolver) {
         this.arrayMaxItemsResolvers.add(resolver);
         return this;
     }
@@ -488,10 +505,11 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "maxItems" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "maxItems" in a JSON Schema (may be null)
      */
-    public Integer resolveArrayMaxItems(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.arrayMaxItemsResolvers, origin, originType);
+    public Integer resolveArrayMaxItems(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.arrayMaxItemsResolvers, origin, originType, declaringContext);
     }
 
     /**
@@ -500,7 +518,7 @@ public class SchemaGeneratorConfigPart<O> {
      * @param resolver how to determine the "uniqueItems" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<O> withArrayUniqueItemsResolver(BiFunction<O, JavaType, Boolean> resolver) {
+    public SchemaGeneratorConfigPart<O> withArrayUniqueItemsResolver(ConfigFunction<O, JavaType, Boolean> resolver) {
         this.arrayUniqueItemsResolvers.add(resolver);
         return this;
     }
@@ -510,9 +528,10 @@ public class SchemaGeneratorConfigPart<O> {
      *
      * @param origin reference/context to determine "uniqueItems" value for
      * @param originType associated type (affected by {@link #resolveTargetTypeOverride(Object, JavaType) resolveTargetTypeOverride(O, JavaType)})
+     * @param declaringContext the declaring type's description
      * @return "uniqueItems" in a JSON Schema (may be null)
      */
-    public Boolean resolveArrayUniqueItems(O origin, JavaType originType) {
-        return getFirstDefinedValue(this.arrayUniqueItemsResolvers, origin, originType);
+    public Boolean resolveArrayUniqueItems(O origin, JavaType originType, BeanDescription declaringContext) {
+        return getFirstDefinedValue(this.arrayUniqueItemsResolvers, origin, originType, declaringContext);
     }
 }

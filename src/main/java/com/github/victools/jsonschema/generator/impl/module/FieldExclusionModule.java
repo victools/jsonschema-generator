@@ -16,13 +16,14 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.introspect.AnnotatedField;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.impl.ReflectionGetterUtils;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 
 /**
  * Default module for excluding fields.
@@ -35,7 +36,7 @@ public class FieldExclusionModule implements Module {
      * @return created module instance
      */
     public static FieldExclusionModule forPublicStaticFields() {
-        return new FieldExclusionModule(field -> isFieldPublic(field) && isFieldStatic(field));
+        return new FieldExclusionModule((field, context) -> field.isPublic() && isFieldStatic(field));
     }
 
     /**
@@ -44,7 +45,7 @@ public class FieldExclusionModule implements Module {
      * @return created module instance
      */
     public static FieldExclusionModule forPublicNonStaticFields() {
-        return new FieldExclusionModule(field -> isFieldPublic(field) && !isFieldStatic(field));
+        return new FieldExclusionModule((field, context) -> field.isPublic() && !isFieldStatic(field));
     }
 
     /**
@@ -53,7 +54,7 @@ public class FieldExclusionModule implements Module {
      * @return created module instance
      */
     public static FieldExclusionModule forNonPublicStaticFields() {
-        return new FieldExclusionModule(field -> !isFieldPublic(field) && isFieldStatic(field));
+        return new FieldExclusionModule((field, context) -> !field.isPublic() && isFieldStatic(field));
     }
 
     /**
@@ -63,7 +64,8 @@ public class FieldExclusionModule implements Module {
      * @return created module instance
      */
     public static FieldExclusionModule forNonPublicNonStaticFieldsWithGetter() {
-        return new FieldExclusionModule(field -> !isFieldPublic(field) && !isFieldStatic(field) && ReflectionGetterUtils.hasGetter(field));
+        return new FieldExclusionModule((field, context) -> !field.isPublic() && !isFieldStatic(field)
+                && ReflectionGetterUtils.hasGetter(field, context));
     }
 
     /**
@@ -73,7 +75,8 @@ public class FieldExclusionModule implements Module {
      * @return created module instance
      */
     public static FieldExclusionModule forNonPublicNonStaticFieldsWithoutGetter() {
-        return new FieldExclusionModule(field -> !isFieldPublic(field) && !isFieldStatic(field) && !ReflectionGetterUtils.hasGetter(field));
+        return new FieldExclusionModule((field, context) -> !field.isPublic() && !isFieldStatic(field)
+                && !ReflectionGetterUtils.hasGetter(field, context));
     }
 
     /**
@@ -82,17 +85,7 @@ public class FieldExclusionModule implements Module {
      * @return created module instance
      */
     public static FieldExclusionModule forTransientFields() {
-        return new FieldExclusionModule(FieldExclusionModule::isFieldTransient);
-    }
-
-    /**
-     * Check whether a given field is of {@code public} visibility.
-     *
-     * @param field field to check
-     * @return whether the visibility is {@code public}
-     */
-    private static boolean isFieldPublic(Field field) {
-        return (field.getModifiers() & Modifier.PUBLIC) == Modifier.PUBLIC;
+        return new FieldExclusionModule((field, context) -> field.isTransient());
     }
 
     /**
@@ -101,30 +94,20 @@ public class FieldExclusionModule implements Module {
      * @param field field to check
      * @return whether the {@code static} modifier is present
      */
-    private static boolean isFieldStatic(Field field) {
-        return (field.getModifiers() & Modifier.STATIC) == Modifier.STATIC;
+    private static boolean isFieldStatic(AnnotatedField field) {
+        return Modifier.isStatic(field.getModifiers());
     }
 
-    /**
-     * Check whether a given fiald has the {@code transient} modifier.
-     *
-     * @param field field to check
-     * @return whether the {@code transient} modifier is present
-     */
-    private static boolean isFieldTransient(Field field) {
-        return (field.getModifiers() & Modifier.TRANSIENT) == Modifier.TRANSIENT;
-    }
-
-    private final Predicate<Field> shouldExcludeFieldsMatching;
+    private final BiPredicate<AnnotatedField, BeanDescription> shouldExcludeFieldsMatching;
 
     /**
-     * Constructor setting the underlying check to be set via {@link SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)}.
+     * Constructor setting the underlying check to be set via {@link SchemaGeneratorConfigPart#withIgnoreCheck(BiPredicate)}.
      *
      * @param shouldExcludeFieldsMatching check to identify fields to be excluded
      * @see SchemaGeneratorConfigBuilder#forFields()
-     * @see SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)
+     * @see SchemaGeneratorConfigPart#withIgnoreCheck(BiPredicate)
      */
-    public FieldExclusionModule(Predicate<Field> shouldExcludeFieldsMatching) {
+    public FieldExclusionModule(BiPredicate<AnnotatedField, BeanDescription> shouldExcludeFieldsMatching) {
         this.shouldExcludeFieldsMatching = shouldExcludeFieldsMatching;
     }
 

@@ -16,6 +16,8 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
@@ -33,7 +35,8 @@ public interface InstanceAttributeOverride<O> {
      * @param jsonSchemaAttributesNode node to modify
      * @param origin reference/context to which the collected attributes in the JSON Schema node are referring
      * @param javaType the type associated with the reference/context (e.g. field value or method's return value)
+     * @param declaringContext the declaring type's description
      * @param config applicable configuration
      */
-    void overrideInstanceAttributes(ObjectNode jsonSchemaAttributesNode, O origin, JavaType javaType, SchemaGeneratorConfig config);
+    void overrideInstanceAttributes(ObjectNode jsonSchemaAttributesNode, O origin, JavaType javaType, BeanDescription declaringContext, SchemaGeneratorConfig config);
 }

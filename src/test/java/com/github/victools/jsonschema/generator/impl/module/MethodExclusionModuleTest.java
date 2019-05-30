@@ -16,10 +16,13 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
+import com.github.victools.jsonschema.generator.AbstractAnnotationAwareTest;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import java.lang.reflect.Method;
-import java.util.function.Predicate;
+import java.util.Map;
+import java.util.function.BiPredicate;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.naming.TestCaseName;
@@ -33,10 +36,10 @@ import org.mockito.Mockito;
  * Test for the {@link MethodExclusionModule} class.
  */
 @RunWith(JUnitParamsRunner.class)
-public class MethodExclusionModuleTest {
+public class MethodExclusionModuleTest extends AbstractAnnotationAwareTest {
 
     private SchemaGeneratorConfigBuilder builder;
-    private SchemaGeneratorConfigPart<Method> methodConfigPart;
+    private SchemaGeneratorConfigPart<AnnotatedMethod> methodConfigPart;
 
     @Before
     public void setUp() {
@@ -48,7 +51,7 @@ public class MethodExclusionModuleTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testApplyToConfigBuilder() {
-        Predicate<Method> ignoreCheck = method -> true;
+        BiPredicate<AnnotatedMethod, BeanDescription> ignoreCheck = (method, context) -> true;
         MethodExclusionModule module = new MethodExclusionModule(ignoreCheck);
         module.applyToConfigBuilder(this.builder);
 
@@ -98,8 +101,8 @@ public class MethodExclusionModuleTest {
         MethodExclusionModule moduleInstance = (MethodExclusionModule) MethodExclusionModule.class.getMethod(supplierMethodName).invoke(null);
         moduleInstance.applyToConfigBuilder(this.builder);
 
-        Method method = TestClass.class.getDeclaredMethod(testMethodName);
-        Assert.assertEquals(ignored, this.methodConfigPart.shouldIgnore(method));
+        Map.Entry<AnnotatedMethod, BeanDescription> annotatedMethod = this.wrapMethod(TestClass.class.getDeclaredMethod(testMethodName));
+        Assert.assertEquals(ignored, this.methodConfigPart.shouldIgnore(annotatedMethod.getKey(), annotatedMethod.getValue()));
     }
 
     private static class TestClass {

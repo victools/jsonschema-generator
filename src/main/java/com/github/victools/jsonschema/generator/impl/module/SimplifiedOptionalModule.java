@@ -56,8 +56,8 @@ public class SimplifiedOptionalModule implements Module {
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         builder.forFields()
-                .withIgnoreCheck(field -> field.getDeclaringClass() == Optional.class);
+                .withIgnoreCheck((field, context) -> field.getDeclaringClass() == Optional.class);
         builder.forMethods()
-                .withIgnoreCheck(method -> method.getDeclaringClass() == Optional.class && !this.includedMethodNames.contains(method.getName()));
+                .withIgnoreCheck((method, context) -> method.getDeclaringClass() == Optional.class && !this.includedMethodNames.contains(method.getName()));
     }
 }

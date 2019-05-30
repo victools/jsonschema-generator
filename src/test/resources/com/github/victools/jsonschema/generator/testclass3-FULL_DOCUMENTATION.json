@@ -17,18 +17,8 @@
         "RoundingMode": {
             "type": "object",
             "properties": {
-                "name": {
-                    "type": ["string", "null"]
-                },
                 "oldMode": {
                     "type": "integer"
-                },
-                "ordinal": {
-                    "type": "integer"
-                },
-                "name()": {
-                    "type": "string",
-                    "enum": ["UP", "DOWN", "CEILING", "FLOOR", "HALF_UP", "HALF_DOWN", "HALF_EVEN", "UNNECESSARY"]
                 },
                 "valueOf(String)": {
                     "$ref": "#/definitions/RoundingMode (nullable)"
@@ -42,7 +32,8 @@
                         "$ref": "#/definitions/RoundingMode"
                     }
                 }
-            }
+            },
+            "enum": ["UP", "DOWN", "CEILING", "FLOOR", "HALF_UP", "HALF_DOWN", "HALF_EVEN", "UNNECESSARY"]
         },
         "RoundingMode (nullable)": {
             "oneOf": [{

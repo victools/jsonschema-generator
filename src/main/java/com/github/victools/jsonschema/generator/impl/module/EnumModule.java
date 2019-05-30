@@ -16,21 +16,21 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
-import com.github.victools.jsonschema.generator.JavaType;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaConstants;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.TypeAttributeOverride;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
-import com.github.victools.jsonschema.generator.impl.ReflectionTypeUtils;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.EnumSet;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Default module being included for the {@code Option.ENUM_AS_STRING}.
@@ -72,31 +72,17 @@ public class EnumModule implements Module {
         if (this.treatAsString) {
             builder.with(new EnumAsStringDefinitionProvider(builder.getObjectMapper()));
         } else {
-            // ignore all direct enum methods but name() - methods declared by a specific enum sub type are not ignored
             builder.forMethods()
-                    .withIgnoreCheck(method -> method.getDeclaringClass() == Enum.class && !"name".equals(method.getName()))
-                    .withNullableCheck((method, type) -> method.getDeclaringClass() == Enum.class ? Boolean.FALSE : null)
-                    .withEnumResolver(EnumModule::extractEnumValues);
+                    .withIgnoreCheck((method, declaringContext) -> declaringContext.getType().hasRawClass(Enum.class));
             builder.forFields()
-                    .withIgnoreCheck(field -> field.isEnumConstant());
+                    .withIgnoreCheck((field, declaringContext) -> field.getAnnotated().isEnumConstant());
+
+            builder.with(new EnumAsObjectTypeAttributeOverride(builder.getObjectMapper()));
         }
     }
 
-    /**
-     * Look-up the given enum type's constant values.
-     *
-     * @param method targeted method
-     * @param returnType method's return type
-     * @return collection containing constant enum values
-     */
-    private static List<String> extractEnumValues(Method method, JavaType returnType) {
-        if (method.getDeclaringClass() == Enum.class) {
-            Type actualEnumType = returnType.getParentTypeVariables()
-                    .resolveGenericTypePlaceholder(Enum.class.getTypeParameters()[0])
-                    .getResolvedType();
-            return EnumModule.extractEnumValues((Class) actualEnumType);
-        }
-        return null;
+    private static boolean isEnumType(JavaType type) {
+        return type.hasRawClass(Enum.class);
     }
 
     /**
@@ -106,10 +92,11 @@ public class EnumModule implements Module {
      * @param enumType targeted enum type
      * @return collection containing constant enum values
      */
-    private static <E extends Enum<E>> List<String> extractEnumValues(Class<E> enumType) {
-        return EnumSet.allOf(enumType)
-                .stream()
-                .map(Enum::name)
+    private static List<String> extractEnumValues(Class<?> enumType) {
+        System.out.println("parent of " + enumType.getSimpleName() + " is " + enumType.getGenericSuperclass().getTypeName());
+        return Stream.of(enumType.getDeclaredFields())
+                .filter(Field::isEnumConstant)
+                .map(Field::getName)
                 .collect(Collectors.toList());
     }
 
@@ -121,7 +108,7 @@ public class EnumModule implements Module {
         private final ObjectMapper objectMapper;
 
         /**
-         * Constructor setting the given object mapper for later use as ObjectNode prodiver.
+         * Constructor setting the given object mapper for later use as ObjectNode provider.
          *
          * @param objectMapper object node provider
          */
@@ -130,16 +117,40 @@ public class EnumModule implements Module {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public CustomDefinition provideCustomSchemaDefinition(JavaType javaType) {
-            Class rawType = ReflectionTypeUtils.getRawType(javaType.getResolvedType());
-            if (rawType != null && rawType.isEnum()) {
+            if (javaType.isTypeOrSubTypeOf(Enum.class)) {
                 ObjectNode customNode = this.objectMapper.createObjectNode()
                         .put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_STRING);
                 new AttributeCollector(this.objectMapper)
-                        .setEnum(customNode, EnumModule.extractEnumValues(rawType));
+                        .setEnum(customNode, EnumModule.extractEnumValues(javaType.getRawClass()));
                 return new CustomDefinition(customNode);
             }
             return null;
+        }
+    }
+
+    private static class EnumAsObjectTypeAttributeOverride implements TypeAttributeOverride {
+
+        private final ObjectMapper objectMapper;
+
+        /**
+         * Constructor setting the given object mapper for later use as ObjectNode provider.
+         *
+         * @param objectMapper object node provider
+         */
+        EnumAsObjectTypeAttributeOverride(ObjectMapper objectMapper) {
+            this.objectMapper = objectMapper;
+        }
+
+        @Override
+        public void overrideTypeAttributes(ObjectNode jsonSchemaTypeNode, JavaType javaType, SchemaGeneratorConfig config) {
+            if (javaType.isTypeOrSubTypeOf(Enum.class)
+                    && jsonSchemaTypeNode.get(SchemaConstants.TAG_CONST) == null
+                    && jsonSchemaTypeNode.get(SchemaConstants.TAG_ENUM) == null) {
+                new AttributeCollector(this.objectMapper)
+                        .setEnum(jsonSchemaTypeNode, EnumModule.extractEnumValues(javaType.getRawClass()));
+            }
         }
     }
 }

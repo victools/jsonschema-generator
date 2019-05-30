@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**

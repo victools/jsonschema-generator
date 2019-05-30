@@ -16,8 +16,8 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.JavaType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
