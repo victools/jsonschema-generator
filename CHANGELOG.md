@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2019-05-30
+### Fixed
+- Increase dependency version for jackson-databind to resolve security alert.
+
 ## [1.0.1] - 2019-05-19
 ### Fixed
 - Specified "test" scope for dependency on jsonassert.
@@ -23,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Specific handling of optionals (two alternatives via standard options).
 - Pre-defined sets of standard options to cover different use-cases and simplify library usage.
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/victools/jsonschema-generator/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/victools/jsonschema-generator/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/victools/jsonschema-generator/releases/tag/v1.0.0
