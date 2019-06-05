@@ -16,6 +16,8 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.classmate.ResolvedType;
+
 /**
  * Provider of non-standard JSON schema definitions.
  */
@@ -27,5 +29,5 @@ public interface CustomDefinitionProvider {
      * @param javaType generic type to provide custom definition for
      * @return non-standard JSON schema definition (may be null)
      */
-    CustomDefinition provideCustomSchemaDefinition(JavaType javaType);
+    CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType);
 }

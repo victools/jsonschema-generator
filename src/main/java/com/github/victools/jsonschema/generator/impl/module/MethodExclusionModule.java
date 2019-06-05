@@ -16,12 +16,14 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.classmate.ResolvedTypeWithMembers;
+import com.fasterxml.classmate.members.ResolvedMethod;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.impl.ReflectionGetterUtils;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 /**
@@ -30,21 +32,12 @@ import java.util.function.Predicate;
 public class MethodExclusionModule implements Module {
 
     /**
-     * Factory method: creating a {@link MethodExclusionModule} instance that excludes all {@code static} methods.
-     *
-     * @return created module instance
-     */
-    public static MethodExclusionModule forStaticMethods() {
-        return new MethodExclusionModule(MethodExclusionModule::isMethodStatic);
-    }
-
-    /**
      * Factory method: creating a {@link MethodExclusionModule} instance that excludes all methods with a {@code void} return type.
      *
      * @return created module instance
      */
     public static MethodExclusionModule forVoidMethods() {
-        return new MethodExclusionModule(MethodExclusionModule::isMethodVoid);
+        return new MethodExclusionModule((method, declaringType) -> MethodExclusionModule.isMethodVoid(method));
     }
 
     /**
@@ -65,17 +58,8 @@ public class MethodExclusionModule implements Module {
      * @see MethodExclusionModule#forGetterMethods()
      */
     public static MethodExclusionModule forNonStaticNonVoidNonGetterMethods() {
-        return new MethodExclusionModule(method -> !isMethodStatic(method) && !isMethodVoid(method) && !ReflectionGetterUtils.isGetter(method));
-    }
-
-    /**
-     * Check whether a given method has the {@code static} modifier.
-     *
-     * @param method method to check
-     * @return whether the {@code static} modifier is present
-     */
-    private static boolean isMethodStatic(Method method) {
-        return (method.getModifiers() & Modifier.STATIC) == Modifier.STATIC;
+        return new MethodExclusionModule(
+                (method, declaringType) -> !method.isStatic() && !isMethodVoid(method) && !ReflectionGetterUtils.isGetter(method, declaringType));
     }
 
     /**
@@ -84,12 +68,12 @@ public class MethodExclusionModule implements Module {
      * @param method method to check
      * @return whether the return type is {@code void}
      */
-    private static boolean isMethodVoid(Method method) {
-        Class<?> returnType = method.getReturnType();
-        return returnType == void.class || returnType == Void.class;
+    private static boolean isMethodVoid(ResolvedMethod method) {
+        ResolvedType returnType = method.getReturnType();
+        return returnType == null;
     }
 
-    private final Predicate<Method> shouldExcludeMethodsMatching;
+    private final BiPredicate<ResolvedMethod, ResolvedTypeWithMembers> shouldExcludeMethodsMatching;
 
     /**
      * Constructor setting the underlying check to be set via {@link SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)}.
@@ -98,7 +82,7 @@ public class MethodExclusionModule implements Module {
      * @see SchemaGeneratorConfigBuilder#forMethods()
      * @see SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)
      */
-    public MethodExclusionModule(Predicate<Method> shouldExcludeMethodsMatching) {
+    public MethodExclusionModule(BiPredicate<ResolvedMethod, ResolvedTypeWithMembers> shouldExcludeMethodsMatching) {
         this.shouldExcludeMethodsMatching = shouldExcludeMethodsMatching;
     }
 

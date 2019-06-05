@@ -16,6 +16,8 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
@@ -32,6 +34,6 @@ public interface TypeAttributeOverride {
      * @param javaType the type associated with the JSON Schema node
      * @param config applicable configuration
      */
-    void overrideTypeAttributes(ObjectNode jsonSchemaTypeNode, JavaType javaType, SchemaGeneratorConfig config);
+    void overrideTypeAttributes(ObjectNode jsonSchemaTypeNode, ResolvedType javaType, SchemaGeneratorConfig config);
 
 }

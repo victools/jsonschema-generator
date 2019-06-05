@@ -79,7 +79,7 @@ public enum Option {
      * @see Option#NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS
      * @see Option#TRANSIENT_FIELDS
      */
-    PUBLIC_STATIC_FIELDS(null, FieldExclusionModule::forPublicStaticFields),
+    PUBLIC_STATIC_FIELDS(null, null),
     /**
      * Whether {@code static} fields with public visibility should be included.
      *
@@ -99,7 +99,7 @@ public enum Option {
      * @see Option#NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS
      * @see Option#TRANSIENT_FIELDS
      */
-    NONPUBLIC_STATIC_FIELDS(null, FieldExclusionModule::forNonPublicStaticFields),
+    NONPUBLIC_STATIC_FIELDS(null, null),
     /**
      * Whether fields with private/package/protected visibility, for which a respective getter method can be found, should be included.
      *
@@ -137,7 +137,7 @@ public enum Option {
      * @see Option#GETTER_METHODS
      * @see Option#NONSTATIC_NONVOID_NONGETTER_METHODS
      */
-    STATIC_METHODS(null, MethodExclusionModule::forStaticMethods),
+    STATIC_METHODS(null, null),
     /**
      * Whether methods without return value (e.g. setters) should be included.
      *

@@ -16,19 +16,20 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.classmate.ResolvedTypeWithMembers;
+import com.fasterxml.classmate.members.ResolvedField;
+import com.fasterxml.classmate.members.ResolvedMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
 import com.github.victools.jsonschema.generator.InstanceAttributeOverride;
-import com.github.victools.jsonschema.generator.JavaType;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.TypeAttributeOverride;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,8 +45,8 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
 
     private final ObjectMapper objectMapper;
     private final Map<Option, Boolean> options;
-    private final SchemaGeneratorConfigPart<Field> fieldConfigPart;
-    private final SchemaGeneratorConfigPart<Method> methodConfigPart;
+    private final SchemaGeneratorConfigPart<ResolvedField> fieldConfigPart;
+    private final SchemaGeneratorConfigPart<ResolvedMethod> methodConfigPart;
     private final List<CustomDefinitionProvider> customDefinitions;
     private final List<TypeAttributeOverride> typeAttributeOverrides;
 
@@ -61,8 +62,8 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      */
     public SchemaGeneratorConfigImpl(ObjectMapper objectMapper,
             Map<Option, Boolean> options,
-            SchemaGeneratorConfigPart<Field> fieldConfigPart,
-            SchemaGeneratorConfigPart<Method> methodConfigPart,
+            SchemaGeneratorConfigPart<ResolvedField> fieldConfigPart,
+            SchemaGeneratorConfigPart<ResolvedMethod> methodConfigPart,
             List<CustomDefinitionProvider> customDefinitions,
             List<TypeAttributeOverride> typeAttributeOverrides) {
         this.objectMapper = objectMapper;
@@ -89,6 +90,16 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldIncludeStaticFields() {
+        return this.isOptionEnabled(Option.PUBLIC_STATIC_FIELDS) || this.isOptionEnabled(Option.NONPUBLIC_STATIC_FIELDS);
+    }
+
+    @Override
+    public boolean shouldIncludeStaticMethods() {
+        return this.isOptionEnabled(Option.STATIC_METHODS);
+    }
+
+    @Override
     public boolean shouldIncludeSchemaVersionIndicator() {
         return this.isOptionEnabled(Option.SCHEMA_VERSION_INDICATOR);
     }
@@ -109,7 +120,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public CustomDefinition getCustomDefinition(JavaType javaType) {
+    public CustomDefinition getCustomDefinition(ResolvedType javaType) {
         CustomDefinition result = this.customDefinitions.stream()
                 .map(provider -> provider.provideCustomSchemaDefinition(javaType))
                 .filter(Objects::nonNull)
@@ -124,194 +135,194 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public List<InstanceAttributeOverride<Field>> getFieldAttributeOverrides() {
+    public List<InstanceAttributeOverride<ResolvedField>> getFieldAttributeOverrides() {
         return this.fieldConfigPart.getInstanceAttributeOverrides();
     }
 
     @Override
-    public List<InstanceAttributeOverride<Method>> getMethodAttributeOverrides() {
+    public List<InstanceAttributeOverride<ResolvedMethod>> getMethodAttributeOverrides() {
         return this.methodConfigPart.getInstanceAttributeOverrides();
     }
 
     @Override
-    public boolean isNullable(Field field, JavaType fieldType) {
-        return Optional.ofNullable(this.fieldConfigPart.isNullable(field, fieldType))
+    public boolean isNullable(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return Optional.ofNullable(this.fieldConfigPart.isNullable(field, fieldType, declaringType))
                 .orElseGet(() -> this.isOptionEnabled(Option.NULLABLE_FIELDS_BY_DEFAULT));
     }
 
     @Override
-    public boolean isNullable(Method method, JavaType returnValueType) {
-        return Optional.ofNullable(this.methodConfigPart.isNullable(method, returnValueType))
+    public boolean isNullable(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return Optional.ofNullable(this.methodConfigPart.isNullable(method, returnValueType, declaringType))
                 .orElseGet(() -> this.isOptionEnabled(Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT));
     }
 
     @Override
-    public boolean shouldIgnore(Field field) {
-        return this.fieldConfigPart.shouldIgnore(field);
+    public boolean shouldIgnore(ResolvedField field, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.shouldIgnore(field, declaringType);
     }
 
     @Override
-    public boolean shouldIgnore(Method method) {
-        return this.methodConfigPart.shouldIgnore(method);
+    public boolean shouldIgnore(ResolvedMethod method, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.shouldIgnore(method, declaringType);
     }
 
     @Override
-    public JavaType resolveTargetTypeOverride(Field field, JavaType defaultType) {
-        return this.fieldConfigPart.resolveTargetTypeOverride(field, defaultType);
+    public ResolvedType resolveTargetTypeOverride(ResolvedField field, ResolvedType defaultType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveTargetTypeOverride(field, defaultType, declaringType);
     }
 
     @Override
-    public JavaType resolveTargetTypeOverride(Method method, JavaType defaultType) {
-        return this.methodConfigPart.resolveTargetTypeOverride(method, defaultType);
+    public ResolvedType resolveTargetTypeOverride(ResolvedMethod method, ResolvedType defaultType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveTargetTypeOverride(method, defaultType, declaringType);
     }
 
     @Override
-    public String resolvePropertyNameOverride(Field field, String defaultName) {
-        return this.fieldConfigPart.resolvePropertyNameOverride(field, defaultName);
+    public String resolvePropertyNameOverride(ResolvedField field, String defaultName, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolvePropertyNameOverride(field, defaultName, declaringType);
     }
 
     @Override
-    public String resolvePropertyNameOverride(Method method, String defaultName) {
-        return this.methodConfigPart.resolvePropertyNameOverride(method, defaultName);
+    public String resolvePropertyNameOverride(ResolvedMethod method, String defaultName, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolvePropertyNameOverride(method, defaultName, declaringType);
     }
 
     @Override
-    public String resolveTitle(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveTitle(field, fieldType);
+    public String resolveTitle(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveTitle(field, fieldType, declaringType);
     }
 
     @Override
-    public String resolveTitle(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveTitle(method, returnValueType);
+    public String resolveTitle(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveTitle(method, returnValueType, declaringType);
     }
 
     @Override
-    public String resolveDescription(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveDescription(field, fieldType);
+    public String resolveDescription(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveDescription(field, fieldType, declaringType);
     }
 
     @Override
-    public String resolveDescription(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveDescription(method, returnValueType);
+    public String resolveDescription(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveDescription(method, returnValueType, declaringType);
     }
 
     @Override
-    public Collection<?> resolveEnum(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveEnum(field, fieldType);
+    public Collection<?> resolveEnum(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveEnum(field, fieldType, declaringType);
     }
 
     @Override
-    public Collection<?> resolveEnum(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveEnum(method, returnValueType);
+    public Collection<?> resolveEnum(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveEnum(method, returnValueType, declaringType);
     }
 
     @Override
-    public Integer resolveStringMinLength(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveStringMinLength(field, fieldType);
+    public Integer resolveStringMinLength(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveStringMinLength(field, fieldType, declaringType);
     }
 
     @Override
-    public Integer resolveStringMinLength(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveStringMinLength(method, returnValueType);
+    public Integer resolveStringMinLength(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveStringMinLength(method, returnValueType, declaringType);
     }
 
     @Override
-    public Integer resolveStringMaxLength(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveStringMaxLength(field, fieldType);
+    public Integer resolveStringMaxLength(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveStringMaxLength(field, fieldType, declaringType);
     }
 
     @Override
-    public Integer resolveStringMaxLength(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveStringMaxLength(method, returnValueType);
+    public Integer resolveStringMaxLength(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveStringMaxLength(method, returnValueType, declaringType);
     }
 
     @Override
-    public String resolveStringFormat(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveStringFormat(field, fieldType);
+    public String resolveStringFormat(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveStringFormat(field, fieldType, declaringType);
     }
 
     @Override
-    public String resolveStringFormat(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveStringFormat(method, returnValueType);
+    public String resolveStringFormat(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveStringFormat(method, returnValueType, declaringType);
     }
 
     @Override
-    public BigDecimal resolveNumberInclusiveMinimum(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveNumberInclusiveMinimum(field, fieldType);
+    public BigDecimal resolveNumberInclusiveMinimum(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveNumberInclusiveMinimum(field, fieldType, declaringType);
     }
 
     @Override
-    public BigDecimal resolveNumberInclusiveMinimum(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveNumberInclusiveMinimum(method, returnValueType);
+    public BigDecimal resolveNumberInclusiveMinimum(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveNumberInclusiveMinimum(method, returnValueType, declaringType);
     }
 
     @Override
-    public BigDecimal resolveNumberExclusiveMinimum(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveNumberExclusiveMinimum(field, fieldType);
+    public BigDecimal resolveNumberExclusiveMinimum(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveNumberExclusiveMinimum(field, fieldType, declaringType);
     }
 
     @Override
-    public BigDecimal resolveNumberExclusiveMinimum(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveNumberExclusiveMinimum(method, returnValueType);
+    public BigDecimal resolveNumberExclusiveMinimum(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveNumberExclusiveMinimum(method, returnValueType, declaringType);
     }
 
     @Override
-    public BigDecimal resolveNumberInclusiveMaximum(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveNumberInclusiveMaximum(field, fieldType);
+    public BigDecimal resolveNumberInclusiveMaximum(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveNumberInclusiveMaximum(field, fieldType, declaringType);
     }
 
     @Override
-    public BigDecimal resolveNumberInclusiveMaximum(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveNumberInclusiveMaximum(method, returnValueType);
+    public BigDecimal resolveNumberInclusiveMaximum(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveNumberInclusiveMaximum(method, returnValueType, declaringType);
     }
 
     @Override
-    public BigDecimal resolveNumberExclusiveMaximum(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveNumberExclusiveMaximum(field, fieldType);
+    public BigDecimal resolveNumberExclusiveMaximum(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveNumberExclusiveMaximum(field, fieldType, declaringType);
     }
 
     @Override
-    public BigDecimal resolveNumberExclusiveMaximum(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveNumberExclusiveMaximum(method, returnValueType);
+    public BigDecimal resolveNumberExclusiveMaximum(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveNumberExclusiveMaximum(method, returnValueType, declaringType);
     }
 
     @Override
-    public BigDecimal resolveNumberMultipleOf(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveNumberMultipleOf(field, fieldType);
+    public BigDecimal resolveNumberMultipleOf(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveNumberMultipleOf(field, fieldType, declaringType);
     }
 
     @Override
-    public BigDecimal resolveNumberMultipleOf(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveNumberMultipleOf(method, returnValueType);
+    public BigDecimal resolveNumberMultipleOf(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveNumberMultipleOf(method, returnValueType, declaringType);
     }
 
     @Override
-    public Integer resolveArrayMinItems(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveArrayMinItems(field, fieldType);
+    public Integer resolveArrayMinItems(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveArrayMinItems(field, fieldType, declaringType);
     }
 
     @Override
-    public Integer resolveArrayMinItems(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveArrayMinItems(method, returnValueType);
+    public Integer resolveArrayMinItems(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveArrayMinItems(method, returnValueType, declaringType);
     }
 
     @Override
-    public Integer resolveArrayMaxItems(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveArrayMaxItems(field, fieldType);
+    public Integer resolveArrayMaxItems(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveArrayMaxItems(field, fieldType, declaringType);
     }
 
     @Override
-    public Integer resolveArrayMaxItems(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveArrayMaxItems(method, returnValueType);
+    public Integer resolveArrayMaxItems(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveArrayMaxItems(method, returnValueType, declaringType);
     }
 
     @Override
-    public Boolean resolveArrayUniqueItems(Field field, JavaType fieldType) {
-        return this.fieldConfigPart.resolveArrayUniqueItems(field, fieldType);
+    public Boolean resolveArrayUniqueItems(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        return this.fieldConfigPart.resolveArrayUniqueItems(field, fieldType, declaringType);
     }
 
     @Override
-    public Boolean resolveArrayUniqueItems(Method method, JavaType returnValueType) {
-        return this.methodConfigPart.resolveArrayUniqueItems(method, returnValueType);
+    public Boolean resolveArrayUniqueItems(ResolvedMethod method, ResolvedType returnValueType, ResolvedTypeWithMembers declaringType) {
+        return this.methodConfigPart.resolveArrayUniqueItems(method, returnValueType, declaringType);
     }
 }

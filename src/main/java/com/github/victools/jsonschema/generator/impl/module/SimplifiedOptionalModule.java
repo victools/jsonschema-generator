@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.classmate.ResolvedType;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import java.util.Arrays;
@@ -56,8 +57,12 @@ public class SimplifiedOptionalModule implements Module {
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         builder.forFields()
-                .withIgnoreCheck(field -> field.getDeclaringClass() == Optional.class);
+                .withIgnoreCheck((field, parent) -> isOptional(field.getDeclaringType()));
         builder.forMethods()
-                .withIgnoreCheck(method -> method.getDeclaringClass() == Optional.class && !this.includedMethodNames.contains(method.getName()));
+                .withIgnoreCheck((method, parent) -> isOptional(method.getDeclaringType()) && !this.includedMethodNames.contains(method.getName()));
+    }
+
+    private static boolean isOptional(ResolvedType type) {
+        return type.getErasedType() == Optional.class;
     }
 }

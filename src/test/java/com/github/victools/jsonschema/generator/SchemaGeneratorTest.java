@@ -17,13 +17,14 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.victools.jsonschema.generator.impl.ReflectionTypeUtils;
+import com.github.victools.jsonschema.generator.impl.ReflectionToStringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -76,29 +77,24 @@ public class SchemaGeneratorTest {
         Assert.assertEquals(expectedJsonSchemaType, result.get(SchemaConstants.TAG_TYPE).asText());
     }
 
-    private static boolean isTypeOf(JavaType type, Class<?> rawSuperType) {
-        Class<?> rawType = ReflectionTypeUtils.getRawType(type.getResolvedType());
-        return rawType != null && rawSuperType.isAssignableFrom(rawType);
-    }
-
     private static void populateConfigPart(SchemaGeneratorConfigPart<?> configPart, String descriptionPrefix) {
         configPart
-                .withArrayMinItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type) ? 0 : null)
-                .withArrayMaxItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type) ? Integer.MAX_VALUE : null)
-                .withArrayUniqueItemsResolver((field, type) -> ReflectionTypeUtils.isArrayType(type) ? false : null)
-                .withDescriptionResolver((field, type) -> descriptionPrefix + type.toString())
-                .withEnumResolver((field, type) -> isTypeOf(type, Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
-                .withEnumResolver((field, type) -> isTypeOf(type, String.class) ? Arrays.asList("constant string value") : null)
-                .withNullableCheck((field, type) -> Boolean.TRUE)
-                .withNumberExclusiveMaximumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
-                .withNumberExclusiveMinimumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ZERO : null)
-                .withNumberInclusiveMaximumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.TEN : null)
-                .withNumberInclusiveMinimumResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ONE : null)
-                .withNumberMultipleOfResolver((field, type) -> isTypeOf(type, Number.class) ? BigDecimal.ONE : null)
-                .withStringFormatResolver((field, type) -> isTypeOf(type, String.class) ? "date" : null)
-                .withStringMaxLengthResolver((field, type) -> isTypeOf(type, String.class) ? 256 : null)
-                .withStringMinLengthResolver((field, type) -> isTypeOf(type, String.class) ? 1 : null)
-                .withTitleResolver((field, type) -> type.toString());
+                .withArrayMinItemsResolver((f, type, p) -> type.isArray() || type.isInstanceOf(Collection.class) ? 0 : null)
+                .withArrayMaxItemsResolver((f, type, p) -> type.isArray() || type.isInstanceOf(Collection.class) ? Integer.MAX_VALUE : null)
+                .withArrayUniqueItemsResolver((f, type, p) -> type.isArray() || type.isInstanceOf(Collection.class) ? false : null)
+                .withDescriptionResolver((f, type, p) -> descriptionPrefix + ReflectionToStringUtils.createStringRepresentation(type))
+                .withEnumResolver((f, type, p) -> type.isInstanceOf(Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
+                .withEnumResolver((f, type, p) -> type.isInstanceOf(String.class) ? Arrays.asList("constant string value") : null)
+                .withNullableCheck((f, type, p) -> Boolean.TRUE)
+                .withNumberExclusiveMaximumResolver((f, type, p) -> type.isInstanceOf(Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
+                .withNumberExclusiveMinimumResolver((f, type, p) -> type.isInstanceOf(Number.class) ? BigDecimal.ZERO : null)
+                .withNumberInclusiveMaximumResolver((f, type, p) -> type.isInstanceOf(Number.class) ? BigDecimal.TEN : null)
+                .withNumberInclusiveMinimumResolver((f, type, p) -> type.isInstanceOf(Number.class) ? BigDecimal.ONE : null)
+                .withNumberMultipleOfResolver((f, type, p) -> type.isInstanceOf(Number.class) ? BigDecimal.ONE : null)
+                .withStringFormatResolver((f, type, p) -> type.isInstanceOf(String.class) ? "date" : null)
+                .withStringMaxLengthResolver((f, type, p) -> type.isInstanceOf(String.class) ? 256 : null)
+                .withStringMinLengthResolver((f, type, p) -> type.isInstanceOf(String.class) ? 1 : null)
+                .withTitleResolver((f, type, p) -> ReflectionToStringUtils.createStringRepresentation(type));
     }
 
     Object parametersForTestGenerateSchema() {

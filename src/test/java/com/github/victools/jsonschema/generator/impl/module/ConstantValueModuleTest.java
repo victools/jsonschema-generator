@@ -16,9 +16,10 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.classmate.members.ResolvedField;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import java.lang.reflect.Field;
+import com.github.victools.jsonschema.generator.impl.AbstractTypeAwareTest;
 import java.util.Collection;
 import java.util.Collections;
 import junitparams.JUnitParamsRunner;
@@ -33,11 +34,15 @@ import org.mockito.Mockito;
  * Test for the {@link ConstantValueModule} class.
  */
 @RunWith(JUnitParamsRunner.class)
-public class ConstantValueModuleTest {
+public class ConstantValueModuleTest extends AbstractTypeAwareTest {
 
     private ConstantValueModule instance;
     private SchemaGeneratorConfigBuilder builder;
-    private SchemaGeneratorConfigPart<Field> fieldConfigPart;
+    private SchemaGeneratorConfigPart<ResolvedField> fieldConfigPart;
+
+    public ConstantValueModuleTest() {
+        super(TestClass.class);
+    }
 
     @Before
     public void setUp() {
@@ -74,8 +79,8 @@ public class ConstantValueModuleTest {
     public void testEnumResolver(String fieldName, Collection<?> expectedResult) throws Exception {
         this.instance.applyToConfigBuilder(this.builder);
 
-        Field field = TestClass.class.getDeclaredField(fieldName);
-        Collection<?> result = this.fieldConfigPart.resolveEnum(field, null);
+        ResolvedField field = this.getTestClassField(fieldName);
+        Collection<?> result = this.fieldConfigPart.resolveEnum(field, null, this.testClassMembers);
         Assert.assertEquals(expectedResult, result);
     }
 
@@ -95,8 +100,8 @@ public class ConstantValueModuleTest {
         ConstantValueModule instance = new ConstantValueModule();
         instance.applyToConfigBuilder(this.builder);
 
-        Field field = TestClass.class.getDeclaredField(fieldName);
-        Boolean result = this.fieldConfigPart.isNullable(field, null);
+        ResolvedField field = this.getTestClassField(fieldName);
+        Boolean result = this.fieldConfigPart.isNullable(field, null, this.testClassMembers);
         Assert.assertEquals(expectedResult, result);
     }
 

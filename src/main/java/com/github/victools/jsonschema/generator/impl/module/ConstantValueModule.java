@@ -16,11 +16,11 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
-import com.github.victools.jsonschema.generator.JavaType;
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.classmate.ResolvedTypeWithMembers;
+import com.fasterxml.classmate.members.ResolvedField;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,14 +34,14 @@ public class ConstantValueModule implements Module {
      *
      * @param field targeted field
      * @param fieldType targeted field's type (ignored here)
+     * @param declaringType field's declaring type (ignored here)
      * @return collection containing single constant value; returning null if field has no constant value
      */
-    private static List<?> extractConstantFieldValue(Field field, JavaType fieldType) {
-        int staticAndFinal = Modifier.STATIC | Modifier.FINAL;
-        if ((field.getModifiers() & staticAndFinal) == staticAndFinal && !field.isEnumConstant()) {
-            field.setAccessible(true);
+    private static List<?> extractConstantFieldValue(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        if (field.isStatic() && field.isFinal() && !field.getRawMember().isEnumConstant()) {
+            field.getRawMember().setAccessible(true);
             try {
-                return Collections.singletonList(field.get(null));
+                return Collections.singletonList(field.getRawMember().get(null));
             } catch (IllegalAccessException ex) {
                 // exception should never be thrown (due to calling setAccessible(true) before)
                 throw new RuntimeException(ex);
@@ -55,10 +55,11 @@ public class ConstantValueModule implements Module {
      *
      * @param field targeted field
      * @param fieldType targeted field's type (ignored here)
+     * @param declaringType field's declaring type (ignored here)
      * @return true/false depending on constant value being null; otherwise returning null if field is not a constant
      */
-    private static Boolean isNullableConstantField(Field field, JavaType fieldType) {
-        List<?> constantValues = extractConstantFieldValue(field, fieldType);
+    private static Boolean isNullableConstantField(ResolvedField field, ResolvedType fieldType, ResolvedTypeWithMembers declaringType) {
+        List<?> constantValues = extractConstantFieldValue(field, fieldType, declaringType);
         if (constantValues == null) {
             return null;
         }

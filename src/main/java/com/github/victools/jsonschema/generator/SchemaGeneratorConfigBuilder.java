@@ -16,10 +16,10 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.classmate.members.ResolvedField;
+import com.fasterxml.classmate.members.ResolvedMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.impl.SchemaGeneratorConfigImpl;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -37,8 +37,8 @@ public class SchemaGeneratorConfigBuilder {
     private final OptionPreset preset;
 
     private final Map<Option, Boolean> options = new HashMap<>();
-    private final SchemaGeneratorConfigPart<Field> fieldConfigPart = new SchemaGeneratorConfigPart<>();
-    private final SchemaGeneratorConfigPart<Method> methodConfigPart = new SchemaGeneratorConfigPart<>();
+    private final SchemaGeneratorConfigPart<ResolvedField> fieldConfigPart = new SchemaGeneratorConfigPart<>();
+    private final SchemaGeneratorConfigPart<ResolvedMethod> methodConfigPart = new SchemaGeneratorConfigPart<>();
     private final List<CustomDefinitionProvider> customDefinitions = new ArrayList<>();
     private final List<TypeAttributeOverride> typeAttributeOverrides = new ArrayList<>();
 
@@ -94,7 +94,7 @@ public class SchemaGeneratorConfigBuilder {
      *
      * @return configuration part responsible for handling of fields
      */
-    public SchemaGeneratorConfigPart<Field> forFields() {
+    public SchemaGeneratorConfigPart<ResolvedField> forFields() {
         return this.fieldConfigPart;
     }
 
@@ -103,7 +103,7 @@ public class SchemaGeneratorConfigBuilder {
      *
      * @return configuration part responsible for handling of methods
      */
-    public SchemaGeneratorConfigPart<Method> forMethods() {
+    public SchemaGeneratorConfigPart<ResolvedMethod> forMethods() {
         return this.methodConfigPart;
     }
 
