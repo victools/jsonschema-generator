@@ -20,7 +20,6 @@ import com.fasterxml.classmate.AnnotationConfiguration;
 import com.fasterxml.classmate.MemberResolver;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
-import com.fasterxml.classmate.TypeBindings;
 import com.fasterxml.classmate.TypeResolver;
 import com.fasterxml.classmate.members.RawField;
 import com.fasterxml.classmate.members.RawMethod;
@@ -33,62 +32,86 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 /**
- *
+ * Context in which types can be resolved (as well as their declared fields and methods).
  */
 public abstract class TypeContext {
 
     private final TypeResolver typeResolver;
     private final MemberResolver memberResolver;
     private final AnnotationConfiguration annotationConfig;
-    private final SchemaGeneratorConfig generatorConfig;
 
-    protected TypeContext(TypeResolver typeResolver, AnnotationConfiguration annotationConfig, SchemaGeneratorConfig generatorConfig) {
+    /**
+     * Constructor.
+     *
+     * @param typeResolver instance for resolving java types (singleton being re-used to leverage contained caching mechanism)
+     * @param annotationConfig annotation configuration to apply when collecting resolved fields and methods
+     */
+    protected TypeContext(TypeResolver typeResolver, AnnotationConfiguration annotationConfig) {
         this.typeResolver = typeResolver;
         this.memberResolver = new MemberResolver(typeResolver);
         this.annotationConfig = annotationConfig;
-        this.generatorConfig = generatorConfig;
     }
 
-    public SchemaGeneratorConfig getGeneratorConfig() {
-        return this.generatorConfig;
-    }
-
+    /**
+     * Resolve actual type (mostly relevant for parameterised types, type variables and such.
+     *
+     * @param type java type to resolve
+     * @return resolved type
+     */
     public ResolvedType resolve(Type type) {
         return this.typeResolver.resolve(type);
     }
 
-    public ResolvedType resolve(Type jdkType, TypeBindings typeBindings) {
-        return this.typeResolver.resolve(typeBindings, jdkType);
-    }
-
+    /**
+     * Collect a given type's declared fields and methods.
+     *
+     * @param mainType type for which to collect declared fields and methods
+     * @return collection of (resolved) fields and methods
+     */
     public ResolvedTypeWithMembers resolveWithMembers(ResolvedType mainType) {
         return this.memberResolver.resolve(mainType, this.annotationConfig, null);
     }
 
-    public ResolvedTypeWithMembers resolveWithMembers(Type javaType) {
-        ResolvedType resolvedType = this.resolve(javaType);
-        return this.resolveWithMembers(resolvedType);
-    }
-
-    public ResolvedTypeWithMembers resolveWithMembers(Type javaType, TypeBindings bindings) {
-        ResolvedType resolvedType = this.resolve(javaType, bindings);
-        return this.resolveWithMembers(resolvedType);
-    }
-
+    /**
+     * Resolve a given field's type.
+     *
+     * @param rawField raw field to resolve type for
+     * @return resolved field
+     */
     public ResolvedField resolveMember(RawField rawField) {
         return this.resolveMember(rawField, this.resolveWithMembers(rawField.getDeclaringType()));
     }
 
+    /**
+     * Resolve a given field's type.
+     *
+     * @param rawField raw field to resolve type for
+     * @param declaringType collection of resolved fields and methods of the raw field's declaring type
+     * @return resolved field
+     */
     public ResolvedField resolveMember(RawField rawField, ResolvedTypeWithMembers declaringType) {
         ResolvedField[] resolvedFields = rawField.isStatic() ? declaringType.getStaticFields() : declaringType.getMemberFields();
         ResolvedField result = this.findMember(resolvedFields, rawField.getRawMember());
         return result;
     }
 
+    /**
+     * Resolve a given method's return (and argument) type(s).
+     *
+     * @param rawMethod raw method to resolve return and argument types for
+     * @return resolved method
+     */
     public ResolvedMethod resolveMember(RawMethod rawMethod) {
         return this.resolveMember(rawMethod, this.resolveWithMembers(rawMethod.getDeclaringType()));
     }
 
+    /**
+     * Resolve a given method's return (and argument) type(s).
+     *
+     * @param rawMethod raw method to resolve return and argument types for
+     * @param declaringType collection of resolved fields and methods of the raw method's declaring type
+     * @return resolved method
+     */
     public ResolvedMethod resolveMember(RawMethod rawMethod, ResolvedTypeWithMembers declaringType) {
         ResolvedMethod[] resolvedMethods = rawMethod.isStatic() ? declaringType.getStaticMethods() : declaringType.getMemberMethods();
         ResolvedMethod result = this.findMember(resolvedMethods, rawMethod.getRawMember());

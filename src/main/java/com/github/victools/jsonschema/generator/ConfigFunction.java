@@ -20,6 +20,7 @@ import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedMember;
 
 /**
+ * Functional interface for realising one of various configurations.
  *
  * @param <O> type of reference/context the configuration applies to
  * @param <P> type of additional argument expected to be provided (e.g. associated type of origin or default value that may be overridden)

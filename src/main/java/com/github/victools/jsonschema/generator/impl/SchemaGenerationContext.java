@@ -38,6 +38,7 @@ public class SchemaGenerationContext extends TypeContext {
     private final Map<ResolvedType, ObjectNode> definitions = new HashMap<>();
     private final Map<ResolvedType, List<ObjectNode>> references = new HashMap<>();
     private final Map<ResolvedType, List<ObjectNode>> nullableReferences = new HashMap<>();
+    private final SchemaGeneratorConfig generatorConfig;
 
     /**
      * Constructor initialising type resolution context.
@@ -45,9 +46,17 @@ public class SchemaGenerationContext extends TypeContext {
      * @param generatorConfig applicable configuration(s)
      */
     public SchemaGenerationContext(SchemaGeneratorConfig generatorConfig) {
-        super(new TypeResolver(),
-                new AnnotationConfiguration.StdConfiguration(AnnotationInclusion.INCLUDE_AND_INHERIT_IF_INHERITED),
-                generatorConfig);
+        super(new TypeResolver(), new AnnotationConfiguration.StdConfiguration(AnnotationInclusion.INCLUDE_AND_INHERIT_IF_INHERITED));
+        this.generatorConfig = generatorConfig;
+    }
+
+    /**
+     * Getter for the applicable configuration object.
+     *
+     * @return applicable configuration
+     */
+    public SchemaGeneratorConfig getGeneratorConfig() {
+        return this.generatorConfig;
     }
 
     /**

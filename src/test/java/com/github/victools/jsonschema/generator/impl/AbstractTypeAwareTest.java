@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import org.junit.Before;
 
 /**
- *
+ * Abstract test class catering for the type resolution of a dummy/test class to perform tests against introspected fields/methods.
  */
 public class AbstractTypeAwareTest {
 
