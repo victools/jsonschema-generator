@@ -24,7 +24,6 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.impl.ReflectionGetterUtils;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 
 /**
  * Default module for excluding methods.
@@ -53,7 +52,6 @@ public class MethodExclusionModule implements Module {
      * Factory method: creating a {@link MethodExclusionModule} instance that excludes all methods that don't fall in any of the other categories.
      *
      * @return created module instance
-     * @see MethodExclusionModule#forStaticMethods()
      * @see MethodExclusionModule#forVoidMethods()
      * @see MethodExclusionModule#forGetterMethods()
      */
@@ -76,11 +74,11 @@ public class MethodExclusionModule implements Module {
     private final BiPredicate<ResolvedMethod, ResolvedTypeWithMembers> shouldExcludeMethodsMatching;
 
     /**
-     * Constructor setting the underlying check to be set via {@link SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)}.
+     * Constructor setting the underlying check to be set via {@link SchemaGeneratorConfigPart#withIgnoreCheck(BiPredicate)}.
      *
      * @param shouldExcludeMethodsMatching check to identify methods to be excluded
      * @see SchemaGeneratorConfigBuilder#forMethods()
-     * @see SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)
+     * @see SchemaGeneratorConfigPart#withIgnoreCheck(BiPredicate)
      */
     public MethodExclusionModule(BiPredicate<ResolvedMethod, ResolvedTypeWithMembers> shouldExcludeMethodsMatching) {
         this.shouldExcludeMethodsMatching = shouldExcludeMethodsMatching;

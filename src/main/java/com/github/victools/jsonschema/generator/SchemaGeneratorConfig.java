@@ -118,7 +118,7 @@ public interface SchemaGeneratorConfig {
      * Check whether a field/property is nullable.
      *
      * @param field object's field/property to check
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return whether the field/property is nullable
      */
@@ -128,7 +128,8 @@ public interface SchemaGeneratorConfig {
      * Check whether a method's return value is nullable.
      *
      * @param method method to check
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return whether the method's return value is nullable
      */
@@ -196,7 +197,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "title" of an object's field/property.
      *
      * @param field object's field/property to determine "title" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "title" in a JSON Schema (may be null)
      */
@@ -206,7 +207,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "title" of a method's return value.
      *
      * @param method method for whose return value to determine "title" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "title" in a JSON Schema (may be null)
      */
@@ -216,7 +218,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "description" of an object's field/property.
      *
      * @param field object's field/property to determine "description" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "description" in a JSON Schema (may be null)
      */
@@ -226,7 +228,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "description" of a method's return value.
      *
      * @param method method for whose return value to determine "description" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "description" in a JSON Schema (may be null)
      */
@@ -236,7 +239,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "enum"/"const" of an object's field/property.
      *
      * @param field object's field/property to determine "enum"/"const" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "enum"/"const" in a JSON Schema (may be null)
      */
@@ -246,7 +249,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "enum"/"const" of a method's return value.
      *
      * @param method method for whose return value to determine "enum"/"const" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "enum"/"const" in a JSON Schema (may be null)
      */
@@ -256,7 +260,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "minLength" of an object's field/property.
      *
      * @param field object's field/property to determine "minLength" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "minLength" in a JSON Schema (may be null)
      */
@@ -266,7 +270,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "minLength" of a method's return value.
      *
      * @param method method for whose return value to determine "minLength" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "minLength" in a JSON Schema (may be null)
      */
@@ -276,7 +281,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "maxLength" of an object's field/property.
      *
      * @param field object's field/property to determine "maxLength" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "maxLength" in a JSON Schema (may be null)
      */
@@ -286,7 +291,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "maxLength" of a method's return value.
      *
      * @param method method for whose return value to determine "maxLength" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "maxLength" in a JSON Schema (may be null)
      */
@@ -296,7 +302,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "format" of an object's field/property.
      *
      * @param field object's field/property to determine "format" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "format" in a JSON Schema (may be null)
      */
@@ -306,7 +312,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "format" of a method's return value.
      *
      * @param method method for whose return value to determine "format" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "format" in a JSON Schema (may be null)
      */
@@ -316,7 +323,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "minimum" of an object's field/property.
      *
      * @param field object's field/property to determine "minimum" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "minimum" in a JSON Schema (may be null)
      */
@@ -326,7 +333,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "minimum" of a method's return value.
      *
      * @param method method for whose return value to determine "minimum" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "minimum" in a JSON Schema (may be null)
      */
@@ -336,7 +344,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "exclusiveMinimum" of an object's field/property.
      *
      * @param field object's field/property to determine "exclusiveMinimum" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "exclusiveMinimum" in a JSON Schema (may be null)
      */
@@ -346,7 +354,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "exclusiveMinimum" of a method's return value.
      *
      * @param method method for whose return value to determine "exclusiveMinimum" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "exclusiveMinimum" in a JSON Schema (may be null)
      */
@@ -356,7 +365,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "maximum" of an object's field/property.
      *
      * @param field object's field/property to determine "maximum" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "maximum" in a JSON Schema (may be null)
      */
@@ -366,7 +375,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "maximum" of a method's return value.
      *
      * @param method method for whose return value to determine "maximum" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "maximum" in a JSON Schema (may be null)
      */
@@ -376,7 +386,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "exclusiveMaximum" of an object's field/property.
      *
      * @param field object's field/property to determine "exclusiveMaximum" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "exclusiveMaximum" in a JSON Schema (may be null)
      */
@@ -386,7 +396,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "exclusiveMaximum" of a method's return value.
      *
      * @param method method for whose return value to determine "exclusiveMaximum" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "exclusiveMaximum" in a JSON Schema (may be null)
      */
@@ -396,7 +407,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "multipleOf" of an object's field/property.
      *
      * @param field object's field/property to determine "multipleOf" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "multipleOf" in a JSON Schema (may be null)
      */
@@ -406,7 +417,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "multipleOf" of a method's return value.
      *
      * @param method method for whose return value to determine "multipleOf" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "multipleOf" in a JSON Schema (may be null)
      */
@@ -416,7 +428,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "minItems" of an object's field/property.
      *
      * @param field object's field/property to determine "minItems" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "minItems" in a JSON Schema (may be null)
      */
@@ -426,7 +438,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "minItems" of a method's return value.
      *
      * @param method method for whose return value to determine "minItems" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "minItems" in a JSON Schema (may be null)
      */
@@ -436,7 +449,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "maxItems" of an object's field/property.
      *
      * @param field object's field/property to determine "maxItems" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "maxItems" in a JSON Schema (may be null)
      */
@@ -446,7 +459,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "maxItems" of a method's return value.
      *
      * @param method method for whose return value to determine "maxItems" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "maxItems" in a JSON Schema (may be null)
      */
@@ -456,7 +470,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "uniqueItems" of an object's field/property.
      *
      * @param field object's field/property to determine "uniqueItems" value for
-     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType)})
+     * @param fieldType associated field type (affected by {@link #resolveTargetTypeOverride(ResolvedField, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType field's declaring type
      * @return "uniqueItems" in a JSON Schema (may be null)
      */
@@ -466,7 +480,8 @@ public interface SchemaGeneratorConfig {
      * Determine the "uniqueItems" of a method's return value.
      *
      * @param method method for whose return value to determine "uniqueItems" value for
-     * @param returnValueType associated return value type (affected by {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType)})
+     * @param returnValueType associated return value type (affected by
+     * {@link #resolveTargetTypeOverride(ResolvedMethod, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType method's declaring type
      * @return "uniqueItems" in a JSON Schema (may be null)
      */

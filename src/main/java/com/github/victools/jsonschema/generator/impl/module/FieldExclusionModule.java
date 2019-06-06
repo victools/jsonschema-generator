@@ -23,7 +23,6 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.impl.ReflectionGetterUtils;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 
 /**
  * Default module for excluding fields.
@@ -74,11 +73,11 @@ public class FieldExclusionModule implements Module {
     private final BiPredicate<ResolvedField, ResolvedTypeWithMembers> shouldExcludeFieldsMatching;
 
     /**
-     * Constructor setting the underlying check to be set via {@link SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)}.
+     * Constructor setting the underlying check to be set via {@link SchemaGeneratorConfigPart#withIgnoreCheck(BiPredicate)}.
      *
      * @param shouldExcludeFieldsMatching check to identify fields to be excluded
      * @see SchemaGeneratorConfigBuilder#forFields()
-     * @see SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)
+     * @see SchemaGeneratorConfigPart#withIgnoreCheck(BiPredicate)
      */
     public FieldExclusionModule(BiPredicate<ResolvedField, ResolvedTypeWithMembers> shouldExcludeFieldsMatching) {
         this.shouldExcludeFieldsMatching = shouldExcludeFieldsMatching;

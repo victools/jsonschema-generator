@@ -158,7 +158,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine whether a given reference/context is nullable.
      *
      * @param origin reference/context to check
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return whether the reference/context is nullable (may be null if not specified)
      */
@@ -231,7 +231,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "title" of a given reference/context.
      *
      * @param origin reference/context to determine "title" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "title" in a JSON Schema (may be null)
      */
@@ -254,7 +254,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "description" of a given reference/context.
      *
      * @param origin reference/context to determine "description" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "description" in a JSON Schema (may be null)
      */
@@ -277,7 +277,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "enum"/"const" of a given reference/context.
      *
      * @param origin reference/context to determine "enum"/"const" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "enum"/"const" in a JSON Schema (may be null)
      */
@@ -300,7 +300,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "minLength" of a given reference/context.
      *
      * @param origin reference/context to determine "minLength" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "minLength" in a JSON Schema (may be null)
      */
@@ -323,7 +323,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "maxLength" of a given reference/context.
      *
      * @param origin reference/context to determine "maxLength" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "maxLength" in a JSON Schema (may be null)
      */
@@ -346,7 +346,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "format" of a given reference/context.
      *
      * @param origin reference/context to determine "format" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "format" in a JSON Schema (may be null)
      */
@@ -369,7 +369,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "minimum" of a given reference/context.
      *
      * @param origin reference/context to determine "minimum" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "minimum" in a JSON Schema (may be null)
      */
@@ -392,7 +392,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "exclusiveMinimum" of a given reference/context.
      *
      * @param origin reference/context to determine "exclusiveMinimum" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "exclusiveMinimum" in a JSON Schema (may be null)
      */
@@ -415,7 +415,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "maximum" of a given reference/context.
      *
      * @param origin reference/context to determine "maximum" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "maximum" in a JSON Schema (may be null)
      */
@@ -438,7 +438,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "exclusiveMaximum" of a given reference/context.
      *
      * @param origin reference/context to determine "exclusiveMaximum" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "exclusiveMaximum" in a JSON Schema (may be null)
      */
@@ -461,7 +461,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "multipleOf" of a given reference/context.
      *
      * @param origin reference/context to determine "multipleOf" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "multipleOf" in a JSON Schema (may be null)
      */
@@ -484,7 +484,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "minItems" of a given reference/context.
      *
      * @param origin reference/context to determine "minItems" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "minItems" in a JSON Schema (may be null)
      */
@@ -507,7 +507,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "maxItems" of a given reference/context.
      *
      * @param origin reference/context to determine "maxItems" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "maxItems" in a JSON Schema (may be null)
      */
@@ -530,7 +530,7 @@ public class SchemaGeneratorConfigPart<O extends ResolvedMember<?>> {
      * Determine the "uniqueItems" of a given reference/context.
      *
      * @param origin reference/context to determine "uniqueItems" value for
-     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType)})
+     * @param originType associated type (affected by {@link #resolveTargetTypeOverride(ResolvedMember, ResolvedType, ResolvedTypeWithMembers)})
      * @param declaringType origin's declaring type
      * @return "uniqueItems" in a JSON Schema (may be null)
      */
