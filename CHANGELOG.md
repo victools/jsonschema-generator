@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Removed type resolution and replaced it with `org.fasterxml:classmate` dependency.
+- Adjusting configuration API to use `classmate` references for types/fields/methods.
+
+### Fixed
+- Ignore complex constant values that may not be properly representable as JSON.
 
 ## [1.0.2] - 2019-05-30
 ### Fixed

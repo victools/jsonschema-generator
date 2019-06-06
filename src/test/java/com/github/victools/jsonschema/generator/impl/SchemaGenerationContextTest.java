@@ -16,12 +16,14 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
+import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.JavaType;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -30,77 +32,81 @@ import org.mockito.Mockito;
  */
 public class SchemaGenerationContextTest {
 
+    private SchemaGenerationContext context;
+
+    @Before
+    public void setUp() {
+        SchemaGeneratorConfig config = Mockito.mock(SchemaGeneratorConfig.class);
+        this.context = new SchemaGenerationContext(config);
+    }
+
     @Test
     public void testHandlingDefinition_ExistentNode() {
-        SchemaGenerationContext context = new SchemaGenerationContext();
-        JavaType javaType = Mockito.mock(JavaType.class);
+        ResolvedType javaType = Mockito.mock(ResolvedType.class);
         ObjectNode definitionInput = Mockito.mock(ObjectNode.class);
-        SchemaGenerationContext returnValue = context.putDefinition(javaType, definitionInput);
+        SchemaGenerationContext returnValue = this.context.putDefinition(javaType, definitionInput);
 
-        Assert.assertSame(context, returnValue);
-        Assert.assertTrue(context.containsDefinition(javaType));
-        Assert.assertSame(definitionInput, context.getDefinition(javaType));
-        Assert.assertEquals(Collections.singleton(javaType), context.getDefinedTypes());
+        Assert.assertSame(this.context, returnValue);
+        Assert.assertTrue(this.context.containsDefinition(javaType));
+        Assert.assertSame(definitionInput, this.context.getDefinition(javaType));
+        Assert.assertEquals(Collections.singleton(javaType), this.context.getDefinedTypes());
     }
 
     @Test
     public void testHandlingDefinition_EmptyContext() {
-        SchemaGenerationContext context = new SchemaGenerationContext();
-        JavaType javaType = Mockito.mock(JavaType.class);
+        ResolvedType javaType = Mockito.mock(ResolvedType.class);
 
-        Assert.assertFalse(context.containsDefinition(javaType));
-        Assert.assertNull(context.getDefinition(javaType));
-        Assert.assertEquals(Collections.<Type>emptySet(), context.getDefinedTypes());
+        Assert.assertFalse(this.context.containsDefinition(javaType));
+        Assert.assertNull(this.context.getDefinition(javaType));
+        Assert.assertEquals(Collections.<Type>emptySet(), this.context.getDefinedTypes());
     }
 
     @Test
     public void testReference_SameType() {
-        SchemaGenerationContext context = new SchemaGenerationContext();
-        JavaType javaType = Mockito.mock(JavaType.class);
+        ResolvedType javaType = Mockito.mock(ResolvedType.class);
 
         // initially, all lists are empty
-        Assert.assertEquals(Collections.<ObjectNode>emptyList(), context.getReferences(javaType));
-        Assert.assertEquals(Collections.<ObjectNode>emptyList(), context.getNullableReferences(javaType));
+        Assert.assertEquals(Collections.<ObjectNode>emptyList(), this.context.getReferences(javaType));
+        Assert.assertEquals(Collections.<ObjectNode>emptyList(), this.context.getNullableReferences(javaType));
 
         // adding a not-nullable entry creates the "references" list
         ObjectNode referenceInputOne = Mockito.mock(ObjectNode.class);
-        SchemaGenerationContext returnValue = context.addReference(javaType, referenceInputOne, false);
-        Assert.assertSame(context, returnValue);
-        Assert.assertEquals(Collections.singletonList(referenceInputOne), context.getReferences(javaType));
-        Assert.assertEquals(Collections.<ObjectNode>emptyList(), context.getNullableReferences(javaType));
+        SchemaGenerationContext returnValue = this.context.addReference(javaType, referenceInputOne, false);
+        Assert.assertSame(this.context, returnValue);
+        Assert.assertEquals(Collections.singletonList(referenceInputOne), this.context.getReferences(javaType));
+        Assert.assertEquals(Collections.<ObjectNode>emptyList(), this.context.getNullableReferences(javaType));
 
         // adding another not-nullable entry adds it to the existing "references" list
         ObjectNode referenceInputTwo = Mockito.mock(ObjectNode.class);
-        returnValue = context.addReference(javaType, referenceInputTwo, false);
-        Assert.assertSame(context, returnValue);
-        Assert.assertEquals(Arrays.asList(referenceInputOne, referenceInputTwo), context.getReferences(javaType));
-        Assert.assertEquals(Collections.<ObjectNode>emptyList(), context.getNullableReferences(javaType));
+        returnValue = this.context.addReference(javaType, referenceInputTwo, false);
+        Assert.assertSame(this.context, returnValue);
+        Assert.assertEquals(Arrays.asList(referenceInputOne, referenceInputTwo), this.context.getReferences(javaType));
+        Assert.assertEquals(Collections.<ObjectNode>emptyList(), this.context.getNullableReferences(javaType));
 
         // adding a nullable entry creates the "nullableReferences" list
         ObjectNode referenceInputThree = Mockito.mock(ObjectNode.class);
-        returnValue = context.addReference(javaType, referenceInputThree, true);
-        Assert.assertSame(context, returnValue);
-        Assert.assertEquals(Arrays.asList(referenceInputOne, referenceInputTwo), context.getReferences(javaType));
-        Assert.assertEquals(Collections.singletonList(referenceInputThree), context.getNullableReferences(javaType));
+        returnValue = this.context.addReference(javaType, referenceInputThree, true);
+        Assert.assertSame(this.context, returnValue);
+        Assert.assertEquals(Arrays.asList(referenceInputOne, referenceInputTwo), this.context.getReferences(javaType));
+        Assert.assertEquals(Collections.singletonList(referenceInputThree), this.context.getNullableReferences(javaType));
     }
 
     @Test
     public void testReference_DifferentTypes() {
-        SchemaGenerationContext context = new SchemaGenerationContext();
-        JavaType javaTypeOne = Mockito.mock(JavaType.class);
-        JavaType javaTypeTwo = Mockito.mock(JavaType.class);
+        ResolvedType javaTypeOne = Mockito.mock(ResolvedType.class);
+        ResolvedType javaTypeTwo = Mockito.mock(ResolvedType.class);
 
         // adding an entry creates the "references" list for that type
         ObjectNode referenceInputOne = Mockito.mock(ObjectNode.class);
-        context.addReference(javaTypeOne, referenceInputOne, false);
-        Assert.assertEquals(Collections.singletonList(referenceInputOne), context.getReferences(javaTypeOne));
-        Assert.assertEquals(Collections.<ObjectNode>emptyList(), context.getReferences(javaTypeTwo));
+        this.context.addReference(javaTypeOne, referenceInputOne, false);
+        Assert.assertEquals(Collections.singletonList(referenceInputOne), this.context.getReferences(javaTypeOne));
+        Assert.assertEquals(Collections.<ObjectNode>emptyList(), this.context.getReferences(javaTypeTwo));
 
         // adding an entry for another type creates a separate "references" list for this other type
         ObjectNode referenceInputTwo = Mockito.mock(ObjectNode.class);
-        context.addReference(javaTypeTwo, referenceInputTwo, false);
-        Assert.assertEquals(Collections.singletonList(referenceInputOne), context.getReferences(javaTypeOne));
-        Assert.assertEquals(Collections.singletonList(referenceInputTwo), context.getReferences(javaTypeTwo));
+        this.context.addReference(javaTypeTwo, referenceInputTwo, false);
+        Assert.assertEquals(Collections.singletonList(referenceInputOne), this.context.getReferences(javaTypeOne));
+        Assert.assertEquals(Collections.singletonList(referenceInputTwo), this.context.getReferences(javaTypeTwo));
 
     }
 }

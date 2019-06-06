@@ -16,14 +16,14 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.classmate.members.ResolvedField;
+import com.fasterxml.classmate.members.ResolvedMethod;
+import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.impl.ReflectionGetterUtils;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 /**
  * Default module being included if {@code Option.GETTER_ATTRIBUTES_FOR_FIELDS} is enabled.
@@ -38,15 +38,15 @@ public class GetterAttributesForFieldModule implements Module {
      * @param resolver resolver for a method to be applied on a field's getter (if there is one)
      * @return generated resolver for a field
      */
-    private static <D, R> BiFunction<Field, D, R> resolveForGetter(BiFunction<Method, D, R> resolver) {
-        return (field, defaultValue) -> Optional.ofNullable(ReflectionGetterUtils.findGetterForField(field))
-                .map(method -> resolver.apply(method, defaultValue))
+    private static <D, R> ConfigFunction<ResolvedField, D, R> resolveForGetter(ConfigFunction<ResolvedMethod, D, R> resolver) {
+        return (field, defaultValue, declaringType) -> Optional.ofNullable(ReflectionGetterUtils.findGetterForField(field, declaringType))
+                .map(method -> resolver.apply(method, defaultValue, declaringType))
                 .orElse(null);
     }
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
-        SchemaGeneratorConfigPart<Method> methodConfigPart = builder.forMethods();
+        SchemaGeneratorConfigPart<ResolvedMethod> methodConfigPart = builder.forMethods();
         builder.forFields()
                 .withArrayMaxItemsResolver(resolveForGetter(methodConfigPart::resolveArrayMaxItems))
                 .withArrayMinItemsResolver(resolveForGetter(methodConfigPart::resolveArrayMinItems))

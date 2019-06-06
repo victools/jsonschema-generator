@@ -16,8 +16,13 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
+import com.fasterxml.classmate.AnnotationConfiguration;
+import com.fasterxml.classmate.AnnotationInclusion;
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.classmate.TypeResolver;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.JavaType;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
+import com.github.victools.jsonschema.generator.TypeContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,11 +33,31 @@ import java.util.Set;
 /**
  * Generation context in which to collect definitions of traversed types and remember where they are being referenced.
  */
-public class SchemaGenerationContext {
+public class SchemaGenerationContext extends TypeContext {
 
-    private final Map<JavaType, ObjectNode> definitions = new HashMap<>();
-    private final Map<JavaType, List<ObjectNode>> references = new HashMap<>();
-    private final Map<JavaType, List<ObjectNode>> nullableReferences = new HashMap<>();
+    private final Map<ResolvedType, ObjectNode> definitions = new HashMap<>();
+    private final Map<ResolvedType, List<ObjectNode>> references = new HashMap<>();
+    private final Map<ResolvedType, List<ObjectNode>> nullableReferences = new HashMap<>();
+    private final SchemaGeneratorConfig generatorConfig;
+
+    /**
+     * Constructor initialising type resolution context.
+     *
+     * @param generatorConfig applicable configuration(s)
+     */
+    public SchemaGenerationContext(SchemaGeneratorConfig generatorConfig) {
+        super(new TypeResolver(), new AnnotationConfiguration.StdConfiguration(AnnotationInclusion.INCLUDE_AND_INHERIT_IF_INHERITED));
+        this.generatorConfig = generatorConfig;
+    }
+
+    /**
+     * Getter for the applicable configuration object.
+     *
+     * @return applicable configuration
+     */
+    public SchemaGeneratorConfig getGeneratorConfig() {
+        return this.generatorConfig;
+    }
 
     /**
      * Add the given type's definition to this context.
@@ -41,7 +66,7 @@ public class SchemaGenerationContext {
      * @param definitionNode definition to remember
      * @return this context (for chaining)
      */
-    public SchemaGenerationContext putDefinition(JavaType javaType, ObjectNode definitionNode) {
+    public SchemaGenerationContext putDefinition(ResolvedType javaType, ObjectNode definitionNode) {
         this.definitions.put(javaType, definitionNode);
         return this;
     }
@@ -52,7 +77,7 @@ public class SchemaGenerationContext {
      * @param javaType type to check for
      * @return whether a definition for the given type is already present
      */
-    public boolean containsDefinition(JavaType javaType) {
+    public boolean containsDefinition(ResolvedType javaType) {
         return this.definitions.containsKey(javaType);
     }
 
@@ -61,9 +86,9 @@ public class SchemaGenerationContext {
      *
      * @param javaType type for which to retrieve the stored definition
      * @return JSON schema definition (or null if none is present)
-     * @see #putDefinition(JavaType, ObjectNode)
+     * @see #putDefinition(ResolvedType, ObjectNode)
      */
-    public ObjectNode getDefinition(JavaType javaType) {
+    public ObjectNode getDefinition(ResolvedType javaType) {
         return this.definitions.get(javaType);
     }
 
@@ -72,7 +97,7 @@ public class SchemaGenerationContext {
      *
      * @return types for which a definition is present
      */
-    public Set<JavaType> getDefinedTypes() {
+    public Set<ResolvedType> getDefinedTypes() {
         return Collections.unmodifiableSet(this.definitions.keySet());
     }
 
@@ -84,8 +109,8 @@ public class SchemaGenerationContext {
      * @param isNullable whether the reference may be null
      * @return this context (for chaining)
      */
-    public SchemaGenerationContext addReference(JavaType javaType, ObjectNode referencingNode, boolean isNullable) {
-        Map<JavaType, List<ObjectNode>> targetMap = isNullable ? this.nullableReferences : this.references;
+    public SchemaGenerationContext addReference(ResolvedType javaType, ObjectNode referencingNode, boolean isNullable) {
+        Map<ResolvedType, List<ObjectNode>> targetMap = isNullable ? this.nullableReferences : this.references;
         List<ObjectNode> valueList = targetMap.get(javaType);
         if (valueList == null) {
             valueList = new ArrayList<>();
@@ -101,7 +126,7 @@ public class SchemaGenerationContext {
      * @param javaType target type
      * @return not-nullable nodes to be populated with the schema of the given type
      */
-    public List<ObjectNode> getReferences(JavaType javaType) {
+    public List<ObjectNode> getReferences(ResolvedType javaType) {
         return Collections.unmodifiableList(this.references.getOrDefault(javaType, Collections.emptyList()));
     }
 
@@ -111,7 +136,7 @@ public class SchemaGenerationContext {
      * @param javaType target type
      * @return nullable nodes to be populated with the schema of the given type
      */
-    public List<ObjectNode> getNullableReferences(JavaType javaType) {
+    public List<ObjectNode> getNullableReferences(ResolvedType javaType) {
         return Collections.unmodifiableList(this.nullableReferences.getOrDefault(javaType, Collections.emptyList()));
     }
 }

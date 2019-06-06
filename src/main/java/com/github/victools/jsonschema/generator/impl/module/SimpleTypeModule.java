@@ -16,16 +16,15 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
-import com.github.victools.jsonschema.generator.JavaType;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.impl.ReflectionTypeUtils;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -168,15 +167,12 @@ public class SimpleTypeModule implements Module {
      * @param <F> either method or field
      * @param fieldOrMethod reference to the method/field (which is being ignored here)
      * @param type method return value's or field's type
+     * @param declaringType method/field's declaring type (ignored here)
      * @return false if type is a primitive, otherwise null
      */
-    private <F> Boolean isNullableType(F fieldOrMethod, JavaType type) {
+    private <F> Boolean isNullableType(F fieldOrMethod, ResolvedType type, ResolvedTypeWithMembers declaringType) {
         // no need to resolve the JavaType, as generics cannot contain primitive types
-        Class<?> rawType = ReflectionTypeUtils.getRawType(type.getResolvedType());
-        if (rawType != null && rawType.isPrimitive()) {
-            return Boolean.FALSE;
-        }
-        return null;
+        return type.isPrimitive() ? Boolean.FALSE : null;
     }
 
     @Override
@@ -204,12 +200,12 @@ public class SimpleTypeModule implements Module {
         }
 
         @Override
-        public CustomDefinition provideCustomSchemaDefinition(JavaType javaType) {
-            Type genericType = javaType.getResolvedType();
-            if (!(genericType instanceof Class<?>)) {
+        public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType) {
+
+            if (!javaType.getTypeParameters().isEmpty()) {
                 return null;
             }
-            String jsonSchemaTypeValue = SimpleTypeModule.this.fixedJsonSchemaTypes.get(genericType);
+            String jsonSchemaTypeValue = SimpleTypeModule.this.fixedJsonSchemaTypes.get(javaType.getErasedType());
             if (jsonSchemaTypeValue == null) {
                 return null;
             }

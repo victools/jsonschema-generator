@@ -16,6 +16,9 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.classmate.ResolvedTypeWithMembers;
+import com.fasterxml.classmate.members.ResolvedMember;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
@@ -23,7 +26,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *
  * @param <O> type of the reference/context to modify
  */
-public interface InstanceAttributeOverride<O> {
+public interface InstanceAttributeOverride<O extends ResolvedMember<?>> {
 
     /**
      * Add/remove attributes on the given JSON Schema node – this is specifically intended for attributes relating to a particular instance.
@@ -33,7 +36,9 @@ public interface InstanceAttributeOverride<O> {
      * @param jsonSchemaAttributesNode node to modify
      * @param origin reference/context to which the collected attributes in the JSON Schema node are referring
      * @param javaType the type associated with the reference/context (e.g. field value or method's return value)
+     * @param declaringType origin's declaring type
      * @param config applicable configuration
      */
-    void overrideInstanceAttributes(ObjectNode jsonSchemaAttributesNode, O origin, JavaType javaType, SchemaGeneratorConfig config);
+    void overrideInstanceAttributes(ObjectNode jsonSchemaAttributesNode, O origin, ResolvedType javaType,
+            ResolvedTypeWithMembers declaringType, SchemaGeneratorConfig config);
 }

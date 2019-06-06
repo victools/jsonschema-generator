@@ -16,14 +16,14 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.classmate.members.ResolvedField;
+import com.fasterxml.classmate.members.ResolvedMethod;
+import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.impl.ReflectionGetterUtils;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 /**
  * Default module being included if {@code Option.FIELD_ATTRIBUTES_FOR_GETTERS} is enabled.
@@ -38,15 +38,15 @@ public class FieldAttributesForGetterModule implements Module {
      * @param resolver resolver for a field to be applied on a getter method's associated field (if there is one)
      * @return generated resolver for a getter method
      */
-    private static <D, R> BiFunction<Method, D, R> resolveForField(BiFunction<Field, D, R> resolver) {
-        return (method, defaultValue) -> Optional.ofNullable(ReflectionGetterUtils.findFieldForGetter(method))
-                .map(field -> resolver.apply(field, defaultValue))
+    private static <D, R> ConfigFunction<ResolvedMethod, D, R> resolveForField(ConfigFunction<ResolvedField, D, R> resolver) {
+        return (method, defaultValue, declaringType) -> Optional.ofNullable(ReflectionGetterUtils.findFieldForGetter(method, declaringType))
+                .map(field -> resolver.apply(field, defaultValue, declaringType))
                 .orElse(null);
     }
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
-        SchemaGeneratorConfigPart<Field> fieldConfigPart = builder.forFields();
+        SchemaGeneratorConfigPart<ResolvedField> fieldConfigPart = builder.forFields();
         builder.forMethods()
                 .withArrayMaxItemsResolver(resolveForField(fieldConfigPart::resolveArrayMaxItems))
                 .withArrayMinItemsResolver(resolveForField(fieldConfigPart::resolveArrayMinItems))

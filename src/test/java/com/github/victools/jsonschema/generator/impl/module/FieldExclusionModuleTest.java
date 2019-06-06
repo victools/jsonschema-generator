@@ -16,10 +16,12 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.classmate.ResolvedTypeWithMembers;
+import com.fasterxml.classmate.members.ResolvedField;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import java.lang.reflect.Field;
-import java.util.function.Predicate;
+import com.github.victools.jsonschema.generator.impl.AbstractTypeAwareTest;
+import java.util.function.BiPredicate;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.naming.TestCaseName;
@@ -33,10 +35,14 @@ import org.mockito.Mockito;
  * Test for the {@link FieldExclusionModule} class.
  */
 @RunWith(JUnitParamsRunner.class)
-public class FieldExclusionModuleTest {
+public class FieldExclusionModuleTest extends AbstractTypeAwareTest {
 
     private SchemaGeneratorConfigBuilder builder;
-    private SchemaGeneratorConfigPart<Field> fieldConfigPart;
+    private SchemaGeneratorConfigPart<ResolvedField> fieldConfigPart;
+
+    public FieldExclusionModuleTest() {
+        super(TestClass.class);
+    }
 
     @Before
     public void setUp() {
@@ -48,7 +54,7 @@ public class FieldExclusionModuleTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testApplyToConfigBuilder() {
-        Predicate<Field> ignoreCheck = field -> true;
+        BiPredicate<ResolvedField, ResolvedTypeWithMembers> ignoreCheck = (field, declaringType) -> true;
         FieldExclusionModule module = new FieldExclusionModule(ignoreCheck);
         module.applyToConfigBuilder(this.builder);
 
@@ -60,14 +66,8 @@ public class FieldExclusionModuleTest {
 
     Object parametersForTestIgnoreCheck() {
         return new Object[][]{
-            {"publicStaticField", "forPublicStaticFields", true},
-            {"publicStaticField", "forNonPublicStaticFields", false},
             {"publicStaticField", "forPublicNonStaticFields", false},
-            {"nonPublicStaticField", "forPublicStaticFields", false},
-            {"nonPublicStaticField", "forNonPublicStaticFields", true},
             {"nonPublicStaticField", "forPublicNonStaticFields", false},
-            {"publicNonStaticField", "forPublicStaticFields", false},
-            {"publicNonStaticField", "forNonPublicStaticFields", false},
             {"publicNonStaticField", "forPublicNonStaticFields", true},
             {"nonPublicNonStaticFieldWithGetter", "forNonPublicNonStaticFieldsWithGetter", true},
             {"nonPublicNonStaticFieldWithGetter", "forNonPublicNonStaticFieldsWithoutGetter", false},
@@ -80,13 +80,13 @@ public class FieldExclusionModuleTest {
 
     @Test
     @Parameters
-    @TestCaseName("{method}({{1}: {0} => {2}) [{index}]")
+    @TestCaseName("{method}({1}: {0} => {2}) [{index}]")
     public void testIgnoreCheck(String testFieldName, String supplierMethodName, boolean ignored) throws Exception {
         FieldExclusionModule moduleInstance = (FieldExclusionModule) FieldExclusionModule.class.getMethod(supplierMethodName).invoke(null);
         moduleInstance.applyToConfigBuilder(this.builder);
 
-        Field field = TestClass.class.getDeclaredField(testFieldName);
-        Assert.assertEquals(ignored, this.fieldConfigPart.shouldIgnore(field));
+        ResolvedField field = this.getTestClassField(testFieldName);
+        Assert.assertEquals(ignored, this.fieldConfigPart.shouldIgnore(field, this.testClassMembers));
     }
 
     private static class TestClass {

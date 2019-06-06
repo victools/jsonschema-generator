@@ -3,6 +3,9 @@
         "RoundingMode": {
             "type": "object",
             "properties": {
+                "compareTo(RoundingMode)": {
+                    "type": "integer"
+                },
                 "name()": {
                     "type": "string",
                     "enum": ["UP", "DOWN", "CEILING", "FLOOR", "HALF_UP", "HALF_DOWN", "HALF_EVEN", "UNNECESSARY"]

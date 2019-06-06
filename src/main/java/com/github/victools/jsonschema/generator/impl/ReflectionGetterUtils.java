@@ -16,9 +16,10 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import com.fasterxml.classmate.ResolvedTypeWithMembers;
+import com.fasterxml.classmate.members.ResolvedField;
+import com.fasterxml.classmate.members.ResolvedMethod;
+import java.util.stream.Stream;
 
 /**
  * Helper functions related to reflections, for identifying getters and their associated fields.
@@ -33,26 +34,23 @@ public final class ReflectionGetterUtils {
     }
 
     /**
-     * Given a field, return the conventional getter method (if one exists). E.g. for field named "foo", look-up either "getFoo()" or "isFoo()".
+     * Given a field, return the conventional getter method (if one exists).E.g. for field named "foo", look-up either "getFoo()" or "isFoo()".
      *
      * @param field targeted field
+     * @param declaringType field's declaring type
      * @return public getter from within the field's declaring class (i.e. ignoring getters in sub classes)
      */
-    public static Method findGetterForField(Field field) {
+    public static ResolvedMethod findGetterForField(ResolvedField field, ResolvedTypeWithMembers declaringType) {
         String capitalisedFieldName = field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1);
-        Method getter = null;
-        try {
-            getter = field.getDeclaringClass().getDeclaredMethod("get" + capitalisedFieldName);
-        } catch (NoSuchMethodException ex1) {
-            try {
-                getter = field.getDeclaringClass().getDeclaredMethod("is" + capitalisedFieldName);
-            } catch (NoSuchMethodException ex2) {
-                return null;
-            }
-        }
-        if (getter == null || (getter.getModifiers() & Modifier.PUBLIC) == 0) {
-            return null;
-        }
+        String getterName1 = "get" + capitalisedFieldName;
+        String getterName2 = "is" + capitalisedFieldName;
+        ResolvedMethod[] methods = declaringType.getMemberMethods();
+        ResolvedMethod getter = Stream.of(methods)
+                .filter(method -> method.getRawMember().getParameterCount() == 0)
+                .filter(method -> method.getName().equals(getterName1) || method.getName().equals(getterName2))
+                .filter(ResolvedMethod::isPublic)
+                .findFirst()
+                .orElse(null);
         return getter;
     }
 
@@ -60,21 +58,23 @@ public final class ReflectionGetterUtils {
      * Determine whether a given field's declaring class contains a matching method starting with "get" or "is".
      *
      * @param field targeted field
+     * @param declaringType field's declaring type
      * @return whether a matching getter exists in the field's declaring class (i.e. ignoring getters in sub classes)
      */
-    public static boolean hasGetter(Field field) {
-        return ReflectionGetterUtils.findGetterForField(field) != null;
+    public static boolean hasGetter(ResolvedField field, ResolvedTypeWithMembers declaringType) {
+        return ReflectionGetterUtils.findGetterForField(field, declaringType) != null;
     }
 
     /**
      * Look-up the field associated with a given a method if that is deemed to be a getter by convention.
      *
      * @param method targeted method
+     * @param declaringType method's declaring type
      * @return associated field
      */
-    public static Field findFieldForGetter(Method method) {
-        if ((method.getModifiers() & Modifier.PUBLIC) == 0) {
-            // non-public methods are not deemed to be getters
+    public static ResolvedField findFieldForGetter(ResolvedMethod method, ResolvedTypeWithMembers declaringType) {
+        if (method.getReturnType() == null || !method.isPublic()) {
+            // void and non-public methods are not deemed to be getters
             return null;
         }
         String methodName = method.getName();
@@ -89,25 +89,25 @@ public final class ReflectionGetterUtils {
             // method name does not fall into getter conventions
             fieldName = null;
         }
-        if (fieldName != null) {
-            // method name matched getter conventions
-            try {
-                // check whether a matching field exists
-                return method.getDeclaringClass().getDeclaredField(fieldName);
-            } catch (NoSuchFieldException ex) {
-                // that means "no" then
-            }
+        if (fieldName == null) {
+            return null;
         }
-        return null;
+        // method name matched getter conventions
+        // check whether a matching field exists
+        return Stream.of(declaringType.getMemberFields())
+                .filter(memberField -> memberField.getName().equals(fieldName))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
      * Determine whether the given method's name matches the getter naming convention ("getFoo()"/"isFoo()") and a respective field ("foo") exists.
      *
      * @param method targeted method
+     * @param declaringType method's declaring type
      * @return whether method name starts with "get"/"is" and rest matches name of field in declaring class (i.e. ignoring fields in super classes)
      */
-    public static boolean isGetter(Method method) {
-        return ReflectionGetterUtils.findFieldForGetter(method) != null;
+    public static boolean isGetter(ResolvedMethod method, ResolvedTypeWithMembers declaringType) {
+        return ReflectionGetterUtils.findFieldForGetter(method, declaringType) != null;
     }
 }

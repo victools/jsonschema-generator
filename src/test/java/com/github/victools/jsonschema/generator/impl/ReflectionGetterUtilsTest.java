@@ -16,8 +16,8 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import com.fasterxml.classmate.members.ResolvedField;
+import com.fasterxml.classmate.members.ResolvedMethod;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -28,7 +28,11 @@ import org.junit.runner.RunWith;
  * Test for the {@link ReflectionUtils} class.
  */
 @RunWith(JUnitParamsRunner.class)
-public class ReflectionGetterUtilsTest {
+public class ReflectionGetterUtilsTest extends AbstractTypeAwareTest {
+
+    public ReflectionGetterUtilsTest() {
+        super(TestClass.class);
+    }
 
     Object parametersForTestFindGetterForField() {
         return new String[][]{
@@ -41,8 +45,8 @@ public class ReflectionGetterUtilsTest {
     @Test
     @Parameters
     public void testFindGetterForField(String fieldName, String methodName) throws Exception {
-        Field field = TestClass.class.getDeclaredField(fieldName);
-        Method getter = ReflectionGetterUtils.findGetterForField(field);
+        ResolvedField field = this.getTestClassField(fieldName);
+        ResolvedMethod getter = ReflectionGetterUtils.findGetterForField(field, this.testClassMembers);
 
         if (methodName == null) {
             Assert.assertNull(getter);
@@ -60,8 +64,8 @@ public class ReflectionGetterUtilsTest {
         "fieldWithPublicBooleanGetter, true"
     })
     public void testHasGetter(String fieldName, boolean expectedResult) throws Exception {
-        Field field = TestClass.class.getDeclaredField(fieldName);
-        boolean result = ReflectionGetterUtils.hasGetter(field);
+        ResolvedField field = this.getTestClassField(fieldName);
+        boolean result = ReflectionGetterUtils.hasGetter(field, this.testClassMembers);
 
         Assert.assertEquals(expectedResult, result);
     }
@@ -81,8 +85,8 @@ public class ReflectionGetterUtilsTest {
     @Test
     @Parameters
     public void testFindFieldForGetter(String methodName, String fieldName) throws Exception {
-        Method method = TestClass.class.getDeclaredMethod(methodName);
-        Field field = ReflectionGetterUtils.findFieldForGetter(method);
+        ResolvedMethod method = this.getTestClassMethod(methodName);
+        ResolvedField field = ReflectionGetterUtils.findFieldForGetter(method, this.testClassMembers);
 
         if (fieldName == null) {
             Assert.assertNull(field);
@@ -104,8 +108,8 @@ public class ReflectionGetterUtilsTest {
         "calculateSomething, false"
     })
     public void testIsGetter(String methodName, boolean expectedResult) throws Exception {
-        Method method = TestClass.class.getDeclaredMethod(methodName);
-        boolean result = ReflectionGetterUtils.isGetter(method);
+        ResolvedMethod method = this.getTestClassMethod(methodName);
+        boolean result = ReflectionGetterUtils.isGetter(method, this.testClassMembers);
 
         Assert.assertEquals(expectedResult, result);
     }
