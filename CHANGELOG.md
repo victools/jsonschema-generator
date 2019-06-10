@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [3.0.0] – 2019-06-10
 ### Changed
 - Simplify configuration API to be based on `FieldScope`/`MethodScope` respectively.
 - Consolidate some utility functions into `FieldScope`/`MethodScope`.
@@ -48,7 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Specific handling of optionals (two alternatives via standard options).
 - Pre-defined sets of standard options to cover different use-cases and simplify library usage.
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/victools/jsonschema-generator/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/victools/jsonschema-generator/compare/v1.0.2...v2.0.0
 [1.0.2]: https://github.com/victools/jsonschema-generator/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/victools/jsonschema-generator/compare/v1.0.0...v1.0.1

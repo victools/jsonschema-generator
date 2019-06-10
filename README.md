@@ -10,7 +10,7 @@ Creating JSON Schema (Draft 7) from your Java classes utilising Jackson (inspire
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>2.0.0</version>
+    <version>3.0.0</version>
 </dependency>
 ```
 
@@ -70,4 +70,16 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 Module separateModule = new YourSeparateModule();
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper)
     .with(separateModule);
+```
+
+#### Defining Desired Behaviour via individual configurations
+```java
+import com.github.victools.jsonschema.generator.FieldScope;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+```
+```java
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper);
+configBuilder.forFields()
+    // populate the "title" of all fields with a description of the field's type
+    .withTitleResolver(FieldScope::getSimpleTypeDescription);
 ```
