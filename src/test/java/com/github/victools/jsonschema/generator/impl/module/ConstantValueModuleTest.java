@@ -16,10 +16,10 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
-import com.fasterxml.classmate.members.ResolvedField;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.impl.AbstractTypeAwareTest;
+import com.github.victools.jsonschema.generator.FieldScope;
 import java.util.Collection;
 import java.util.Collections;
 import junitparams.JUnitParamsRunner;
@@ -38,7 +38,7 @@ public class ConstantValueModuleTest extends AbstractTypeAwareTest {
 
     private ConstantValueModule instance;
     private SchemaGeneratorConfigBuilder builder;
-    private SchemaGeneratorConfigPart<ResolvedField> fieldConfigPart;
+    private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
 
     public ConstantValueModuleTest() {
         super(TestClass.class);
@@ -79,8 +79,8 @@ public class ConstantValueModuleTest extends AbstractTypeAwareTest {
     public void testEnumResolver(String fieldName, Collection<?> expectedResult) throws Exception {
         this.instance.applyToConfigBuilder(this.builder);
 
-        ResolvedField field = this.getTestClassField(fieldName);
-        Collection<?> result = this.fieldConfigPart.resolveEnum(field, null, this.testClassMembers);
+        FieldScope field = this.getTestClassField(fieldName);
+        Collection<?> result = this.fieldConfigPart.resolveEnum(field);
         Assert.assertEquals(expectedResult, result);
     }
 
@@ -97,20 +97,19 @@ public class ConstantValueModuleTest extends AbstractTypeAwareTest {
     @Test
     @Parameters
     public void testNullableCheck(String fieldName, Boolean expectedResult) throws Exception {
-        ConstantValueModule instance = new ConstantValueModule();
-        instance.applyToConfigBuilder(this.builder);
+        this.instance.applyToConfigBuilder(this.builder);
 
-        ResolvedField field = this.getTestClassField(fieldName);
-        Boolean result = this.fieldConfigPart.isNullable(field, null, this.testClassMembers);
+        FieldScope field = this.getTestClassField(fieldName);
+        Boolean result = this.fieldConfigPart.isNullable(field);
         Assert.assertEquals(expectedResult, result);
     }
 
     private static class TestClass {
 
-        private static final int staticFinalValueField = 42;
-        private static final Object staticFinalNullField = null;
-        private static String staticField = "value";
-        private final long finalField = 21L;
-        private double normalField = 10.5;
+        static final int staticFinalValueField = 42;
+        static final Object staticFinalNullField = null;
+        static String staticField = "value";
+        final long finalField = 21L;
+        double normalField = 10.5;
     }
 }

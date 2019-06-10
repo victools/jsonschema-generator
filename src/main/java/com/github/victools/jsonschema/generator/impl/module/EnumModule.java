@@ -17,16 +17,16 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.RawField;
-import com.fasterxml.classmate.members.ResolvedMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,11 +73,11 @@ public class EnumModule implements Module {
         } else {
             // ignore all direct enum methods but name() - methods declared by a specific enum sub type are not ignored
             builder.forMethods()
-                    .withIgnoreCheck((method, declaringType) -> EnumModule.isEnum(method.getDeclaringType()) && !"name".equals(method.getName()))
-                    .withNullableCheck((method, returnType, declaringType) -> EnumModule.isEnum(method.getDeclaringType()) ? Boolean.FALSE : null)
+                    .withIgnoreCheck(method -> EnumModule.isEnum(method.getDeclaringType()) && !"name".equals(method.getName()))
+                    .withNullableCheck(method -> EnumModule.isEnum(method.getDeclaringType()) ? Boolean.FALSE : null)
                     .withEnumResolver(EnumModule::extractEnumValues);
             builder.forFields()
-                    .withIgnoreCheck((field, declaringType) -> field.getRawMember().isEnumConstant());
+                    .withIgnoreCheck(field -> field.getRawMember().isEnumConstant());
         }
     }
 
@@ -89,13 +89,12 @@ public class EnumModule implements Module {
      * Look-up the given enum type's constant values.
      *
      * @param method targeted method
-     * @param returnType method's return type
-     * @param declaringType field's declaring type (ignored here)
      * @return collection containing constant enum values
      */
-    private static List<String> extractEnumValues(ResolvedMethod method, ResolvedType returnType, ResolvedTypeWithMembers declaringType) {
-        if (EnumModule.isEnum(method.getDeclaringType())) {
-            return EnumModule.extractEnumValues(method.getDeclaringType().getTypeParameters().get(0));
+    private static List<String> extractEnumValues(MethodScope method) {
+        ResolvedType declaringType = method.getDeclaringType();
+        if (EnumModule.isEnum(declaringType)) {
+            return EnumModule.extractEnumValues(declaringType.getTypeParameters().get(0));
         }
         return null;
     }
@@ -132,7 +131,7 @@ public class EnumModule implements Module {
         }
 
         @Override
-        public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType) {
+        public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, TypeContext context) {
             if (javaType.isInstanceOf(Enum.class)) {
                 ObjectNode customNode = this.objectMapper.createObjectNode()
                         .put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_STRING);

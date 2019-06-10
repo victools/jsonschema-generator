@@ -37,7 +37,7 @@ public class SchemaGenerationContextTest {
     @Before
     public void setUp() {
         SchemaGeneratorConfig config = Mockito.mock(SchemaGeneratorConfig.class);
-        this.context = new SchemaGenerationContext(config);
+        this.context = new SchemaGenerationContext(config, TypeContextFactory.createDefaultTypeContext());
     }
 
     @Test

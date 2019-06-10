@@ -16,14 +16,11 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
-import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
-import com.fasterxml.classmate.members.ResolvedMethod;
+import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.impl.ReflectionGetterUtils;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 /**
  * Default module for excluding methods.
@@ -36,7 +33,7 @@ public class MethodExclusionModule implements Module {
      * @return created module instance
      */
     public static MethodExclusionModule forVoidMethods() {
-        return new MethodExclusionModule((method, declaringType) -> MethodExclusionModule.isMethodVoid(method));
+        return new MethodExclusionModule(MethodScope::isVoid);
     }
 
     /**
@@ -45,7 +42,7 @@ public class MethodExclusionModule implements Module {
      * @return created module instance
      */
     public static MethodExclusionModule forGetterMethods() {
-        return new MethodExclusionModule(ReflectionGetterUtils::isGetter);
+        return new MethodExclusionModule(MethodScope::isGetter);
     }
 
     /**
@@ -57,30 +54,19 @@ public class MethodExclusionModule implements Module {
      */
     public static MethodExclusionModule forNonStaticNonVoidNonGetterMethods() {
         return new MethodExclusionModule(
-                (method, declaringType) -> !method.isStatic() && !isMethodVoid(method) && !ReflectionGetterUtils.isGetter(method, declaringType));
+                method -> !method.isStatic() && !method.isVoid() && !method.isGetter());
     }
 
-    /**
-     * Check whether a given method has a {@code void} return type.
-     *
-     * @param method method to check
-     * @return whether the return type is {@code void}
-     */
-    private static boolean isMethodVoid(ResolvedMethod method) {
-        ResolvedType returnType = method.getReturnType();
-        return returnType == null;
-    }
-
-    private final BiPredicate<ResolvedMethod, ResolvedTypeWithMembers> shouldExcludeMethodsMatching;
+    private final Predicate<MethodScope> shouldExcludeMethodsMatching;
 
     /**
-     * Constructor setting the underlying check to be set via {@link SchemaGeneratorConfigPart#withIgnoreCheck(BiPredicate)}.
+     * Constructor setting the underlying check to be set via {@link SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)}.
      *
      * @param shouldExcludeMethodsMatching check to identify methods to be excluded
      * @see SchemaGeneratorConfigBuilder#forMethods()
-     * @see SchemaGeneratorConfigPart#withIgnoreCheck(BiPredicate)
+     * @see SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)
      */
-    public MethodExclusionModule(BiPredicate<ResolvedMethod, ResolvedTypeWithMembers> shouldExcludeMethodsMatching) {
+    public MethodExclusionModule(Predicate<MethodScope> shouldExcludeMethodsMatching) {
         this.shouldExcludeMethodsMatching = shouldExcludeMethodsMatching;
     }
 

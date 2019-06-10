@@ -17,7 +17,7 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
+import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import java.util.Optional;
@@ -34,23 +34,23 @@ public class FlattenedOptionalModule implements Module {
     /**
      * Determine the type of the item/component wrapped in the given {@link Optional} type.
      *
-     * @param <F> either method or field
      * @param fieldOrMethod reference to the method/field (which is being ignored here)
-     * @param javaType (possible) optional type of the field or being returned by the method
-     * @param declaringType method/field's declaring type (ignored here)
      * @return the wrapped component type (or null if it is not an {@link Optional} (sub) type
      */
-    private <F> ResolvedType resolveOptionalComponentType(F fieldOrMethod, ResolvedType javaType, ResolvedTypeWithMembers declaringType) {
-        return isOptional(javaType) ? javaType.typeParametersFor(Optional.class).get(0) : null;
+    private ResolvedType resolveOptionalComponentType(MemberScope<?, ?> fieldOrMethod) {
+        ResolvedType javaType = fieldOrMethod.getType();
+        return FlattenedOptionalModule.isOptional(javaType) ? javaType.typeParametersFor(Optional.class).get(0) : null;
     }
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         builder.forFields()
-                .withNullableCheck((field, javaType, declaringType) -> isOptional(javaType) ? Boolean.TRUE : null)
-                .withTargetTypeOverrideResolver(this::resolveOptionalComponentType);
+                .withTargetTypeOverrideResolver(this::resolveOptionalComponentType)
+                // need to getDeclaredType() to avoid the above override
+                .withNullableCheck(field -> FlattenedOptionalModule.isOptional(field.getDeclaredType()) ? Boolean.TRUE : null);
         builder.forMethods()
-                .withNullableCheck((method, javaType, declaringType) -> isOptional(javaType) ? Boolean.TRUE : null)
-                .withTargetTypeOverrideResolver(this::resolveOptionalComponentType);
+                .withTargetTypeOverrideResolver(this::resolveOptionalComponentType)
+                // need to getDeclaredType() to avoid the above override
+                .withNullableCheck(method -> FlattenedOptionalModule.isOptional(method.getDeclaredType()) ? Boolean.TRUE : null);
     }
 }

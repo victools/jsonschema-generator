@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.generator.impl;
+package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.classmate.members.ResolvedField;
-import com.fasterxml.classmate.members.ResolvedMethod;
+import com.github.victools.jsonschema.generator.impl.AbstractTypeAwareTest;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -28,49 +27,13 @@ import org.junit.runner.RunWith;
  * Test for the {@link ReflectionUtils} class.
  */
 @RunWith(JUnitParamsRunner.class)
-public class ReflectionGetterUtilsTest extends AbstractTypeAwareTest {
+public class MethodScopeTest extends AbstractTypeAwareTest {
 
-    public ReflectionGetterUtilsTest() {
+    public MethodScopeTest() {
         super(TestClass.class);
     }
 
-    Object parametersForTestFindGetterForField() {
-        return new String[][]{
-            {"fieldWithoutGetter", null},
-            {"fieldWithPrivateGetter", null},
-            {"fieldWithPublicGetter", "getFieldWithPublicGetter"},
-            {"fieldWithPublicBooleanGetter", "isFieldWithPublicBooleanGetter"}};
-    }
-
-    @Test
-    @Parameters
-    public void testFindGetterForField(String fieldName, String methodName) throws Exception {
-        ResolvedField field = this.getTestClassField(fieldName);
-        ResolvedMethod getter = ReflectionGetterUtils.findGetterForField(field, this.testClassMembers);
-
-        if (methodName == null) {
-            Assert.assertNull(getter);
-        } else {
-            Assert.assertNotNull(getter);
-            Assert.assertEquals(methodName, getter.getName());
-        }
-    }
-
-    @Test
-    @Parameters({
-        "fieldWithoutGetter, false",
-        "fieldWithPrivateGetter, false",
-        "fieldWithPublicGetter, true",
-        "fieldWithPublicBooleanGetter, true"
-    })
-    public void testHasGetter(String fieldName, boolean expectedResult) throws Exception {
-        ResolvedField field = this.getTestClassField(fieldName);
-        boolean result = ReflectionGetterUtils.hasGetter(field, this.testClassMembers);
-
-        Assert.assertEquals(expectedResult, result);
-    }
-
-    Object parametersForTestFindFieldForGetter() {
+    Object parametersForTestFindGetterField() {
         return new String[][]{
             {"getFieldWithPrivateGetter", null},
             {"getFieldWithPublicGetter", "fieldWithPublicGetter"},
@@ -84,9 +47,9 @@ public class ReflectionGetterUtilsTest extends AbstractTypeAwareTest {
 
     @Test
     @Parameters
-    public void testFindFieldForGetter(String methodName, String fieldName) throws Exception {
-        ResolvedMethod method = this.getTestClassMethod(methodName);
-        ResolvedField field = ReflectionGetterUtils.findFieldForGetter(method, this.testClassMembers);
+    public void testFindGetterField(String methodName, String fieldName) throws Exception {
+        MethodScope method = this.getTestClassMethod(methodName);
+        FieldScope field = method.findGetterField();
 
         if (fieldName == null) {
             Assert.assertNull(field);
@@ -108,15 +71,14 @@ public class ReflectionGetterUtilsTest extends AbstractTypeAwareTest {
         "calculateSomething, false"
     })
     public void testIsGetter(String methodName, boolean expectedResult) throws Exception {
-        ResolvedMethod method = this.getTestClassMethod(methodName);
-        boolean result = ReflectionGetterUtils.isGetter(method, this.testClassMembers);
+        MethodScope method = this.getTestClassMethod(methodName);
+        boolean result = method.isGetter();
 
         Assert.assertEquals(expectedResult, result);
     }
 
     private static class TestClass {
 
-        private String fieldWithoutGetter;
         private int fieldWithPrivateGetter;
         private long fieldWithPublicGetter;
         private boolean fieldWithPublicBooleanGetter;

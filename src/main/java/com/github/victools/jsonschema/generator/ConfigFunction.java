@@ -16,26 +16,20 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
-import com.fasterxml.classmate.members.ResolvedMember;
-
 /**
  * Functional interface for realising one of various configurations.
  *
- * @param <O> type of reference/context the configuration applies to
- * @param <P> type of additional argument expected to be provided (e.g. associated type of origin or default value that may be overridden)
+ * @param <M> type of member the configuration applies to
  * @param <R> type of the configuration result
  */
 @FunctionalInterface
-public interface ConfigFunction<O extends ResolvedMember<?>, P, R> {
+public interface ConfigFunction<M extends MemberScope<?, ?>, R> {
 
     /**
      * Applies this function to the given arguments.
      *
-     * @param origin the reference/context the configuration applies to
-     * @param secondArg additional argument expected to be provided (e.g. associated type of origin or default value that may be overridden)
-     * @param declaringType the origin's parent type
+     * @param member the member the configuration applies to
      * @return the function result (may be null to indicate no specific configuration applies)
      */
-    R apply(O origin, P secondArg, ResolvedTypeWithMembers declaringType);
+    R apply(M member);
 }

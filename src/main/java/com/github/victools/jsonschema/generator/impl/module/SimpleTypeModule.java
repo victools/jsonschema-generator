@@ -17,14 +17,15 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.TypeContext;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -164,21 +165,20 @@ public class SimpleTypeModule implements Module {
     /**
      * Determine whether a given type is nullable – returning false if the type refers to a primitive type.
      *
-     * @param <F> either method or field
      * @param fieldOrMethod reference to the method/field (which is being ignored here)
-     * @param type method return value's or field's type
-     * @param declaringType method/field's declaring type (ignored here)
      * @return false if type is a primitive, otherwise null
      */
-    private <F> Boolean isNullableType(F fieldOrMethod, ResolvedType type, ResolvedTypeWithMembers declaringType) {
+    private Boolean isNullableType(MemberScope<?, ?> fieldOrMethod) {
         // no need to resolve the JavaType, as generics cannot contain primitive types
-        return type.isPrimitive() ? Boolean.FALSE : null;
+        return fieldOrMethod.getType().isPrimitive() ? Boolean.FALSE : null;
     }
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
-        builder.forFields().withNullableCheck(this::isNullableType);
-        builder.forMethods().withNullableCheck(this::isNullableType);
+        builder.forFields()
+                .withNullableCheck(this::isNullableType);
+        builder.forMethods()
+                .withNullableCheck(this::isNullableType);
 
         builder.with(new SimpleTypeDefinitionProvider(builder.getObjectMapper()));
     }
@@ -200,7 +200,7 @@ public class SimpleTypeModule implements Module {
         }
 
         @Override
-        public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType) {
+        public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, TypeContext context) {
 
             if (!javaType.getTypeParameters().isEmpty()) {
                 return null;

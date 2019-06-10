@@ -59,8 +59,7 @@ public class OptionPreset {
             Option.VALUES_FROM_CONSTANT_FIELDS,
             Option.PUBLIC_NONSTATIC_FIELDS,
             Option.NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS,
-            Option.NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS,
-            Option.GETTER_ATTRIBUTES_FOR_FIELDS
+            Option.NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS
     );
 
     /**
@@ -76,8 +75,7 @@ public class OptionPreset {
             Option.GETTER_METHODS,
             Option.NONSTATIC_NONVOID_NONGETTER_METHODS,
             Option.SIMPLIFIED_ENUMS,
-            Option.SIMPLIFIED_OPTIONALS,
-            Option.FIELD_ATTRIBUTES_FOR_GETTERS
+            Option.SIMPLIFIED_OPTIONALS
     );
 
     private final Set<Option> defaultEnabledOptions;

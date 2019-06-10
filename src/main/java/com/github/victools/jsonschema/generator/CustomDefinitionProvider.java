@@ -27,7 +27,8 @@ public interface CustomDefinitionProvider {
      * Look-up the non-standard JSON schema definition for a given type. If it returns null, the next definition provider is expected to be applied.
      *
      * @param javaType generic type to provide custom definition for
+     * @param context overall type resolution context being used
      * @return non-standard JSON schema definition (may be null)
      */
-    CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType);
+    CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, TypeContext context);
 }

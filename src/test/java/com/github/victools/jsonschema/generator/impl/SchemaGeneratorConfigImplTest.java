@@ -16,11 +16,7 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import com.fasterxml.classmate.MemberResolver;
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.TypeResolver;
-import com.fasterxml.classmate.members.ResolvedField;
-import com.fasterxml.classmate.members.ResolvedMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -30,6 +26,8 @@ import com.github.victools.jsonschema.generator.InstanceAttributeOverride;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.TypeAttributeOverride;
+import com.github.victools.jsonschema.generator.FieldScope;
+import com.github.victools.jsonschema.generator.MethodScope;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,8 +50,8 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     private SchemaGeneratorConfigImpl instance;
     private ObjectMapper objectMapper;
     private Map<Option, Boolean> options;
-    private SchemaGeneratorConfigPart<ResolvedField> fieldConfigPart;
-    private SchemaGeneratorConfigPart<ResolvedMethod> methodConfigPart;
+    private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
+    private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
     private List<CustomDefinitionProvider> customDefinitions;
     private List<TypeAttributeOverride> typeAttributeOverrides;
 
@@ -70,12 +68,9 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
         this.methodConfigPart = Mockito.mock(SchemaGeneratorConfigPart.class);
         this.customDefinitions = new ArrayList<>();
         this.typeAttributeOverrides = new ArrayList<>();
+
         this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, this.options,
                 this.fieldConfigPart, this.methodConfigPart, this.customDefinitions, this.typeAttributeOverrides);
-        TypeResolver typeResolver = new TypeResolver();
-        MemberResolver memberResolver = new MemberResolver(typeResolver);
-        ResolvedType resolvedTestClass = typeResolver.resolve(TestClass.class);
-        this.testClassMembers = memberResolver.resolve(resolvedTestClass, null, null);
     }
 
     @Test
@@ -116,7 +111,7 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     @Test
     public void testGetCustomDefinition_noMapping() {
-        Assert.assertNull(this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class)));
+        Assert.assertNull(this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class), this.getContext()));
     }
 
     @Test
@@ -124,28 +119,28 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
         CustomDefinitionProvider provider = Mockito.mock(CustomDefinitionProvider.class);
         this.customDefinitions.add(provider);
         ResolvedType javaType = Mockito.mock(ResolvedType.class);
-        Assert.assertNull(this.instance.getCustomDefinition(javaType));
+        Assert.assertNull(this.instance.getCustomDefinition(javaType, this.getContext()));
 
         // ensure that the provider has been called and the given java type and type variable context were forward accordingly
-        Mockito.verify(provider).provideCustomSchemaDefinition(javaType);
+        Mockito.verify(provider).provideCustomSchemaDefinition(javaType, this.getContext());
     }
 
     @Test
     public void testGetCustomDefinition_withMappingReturningValue() {
         CustomDefinition value = Mockito.mock(CustomDefinition.class);
-        this.customDefinitions.add(_input -> value);
-        Assert.assertSame(value, this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class)));
+        this.customDefinitions.add((type, typeContext) -> value);
+        Assert.assertSame(value, this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class), this.getContext()));
     }
 
     @Test
     public void testGetCustomDefinition_withMultipleMappings() {
         CustomDefinition valueOne = Mockito.mock(CustomDefinition.class);
         CustomDefinition valueTwo = Mockito.mock(CustomDefinition.class);
-        this.customDefinitions.add(_input -> null);
-        this.customDefinitions.add(_input -> valueOne);
-        this.customDefinitions.add(_input -> valueTwo);
+        this.customDefinitions.add((type, typeContext) -> null);
+        this.customDefinitions.add((type, typeContext) -> valueOne);
+        this.customDefinitions.add((type, typeContext) -> valueTwo);
         // ignoring definition look-ups that return null, but taking the first non-null definition
-        Assert.assertSame(valueOne, this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class)));
+        Assert.assertSame(valueOne, this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class), this.getContext()));
     }
 
     Object parametersForTestIsNullable() {
@@ -165,24 +160,24 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     @Test
     @Parameters(method = "parametersForTestIsNullable")
     public void testIsNullableField(Boolean configResult, Boolean optionEnabled, boolean expectedResult) throws Exception {
-        ResolvedField field = this.getTestClassField("field");
-        Mockito.when(this.fieldConfigPart.isNullable(field, null, this.testClassMembers)).thenReturn(configResult);
+        FieldScope field = this.getTestClassField("field");
+        Mockito.when(this.fieldConfigPart.isNullable(field)).thenReturn(configResult);
         if (optionEnabled != null) {
             this.options.put(Option.NULLABLE_FIELDS_BY_DEFAULT, optionEnabled);
         }
-        boolean result = this.instance.isNullable(field, null, this.testClassMembers);
+        boolean result = this.instance.isNullable(field);
         Assert.assertEquals(expectedResult, result);
     }
 
     @Test
     @Parameters(method = "parametersForTestIsNullable")
     public void testIsNullableMethod(Boolean configResult, Boolean optionEnabled, boolean expectedResult) throws Exception {
-        ResolvedMethod method = this.getTestClassMethod("getField");
-        Mockito.when(this.methodConfigPart.isNullable(method, null, this.testClassMembers)).thenReturn(configResult);
+        MethodScope method = this.getTestClassMethod("getField");
+        Mockito.when(this.methodConfigPart.isNullable(method)).thenReturn(configResult);
         if (optionEnabled != null) {
             this.options.put(Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT, optionEnabled);
         }
-        boolean result = this.instance.isNullable(method, null, this.testClassMembers);
+        boolean result = this.instance.isNullable(method);
         Assert.assertEquals(expectedResult, result);
     }
 
@@ -198,20 +193,20 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     @Test
     public void testGetFieldAttributeOverrides() {
-        InstanceAttributeOverride<ResolvedField> instanceOverride = (node, field, t, p, c) -> node.put("$comment", field.getName());
+        InstanceAttributeOverride<FieldScope> instanceOverride = (node, field) -> node.put("$comment", field.getName());
         Mockito.when(this.fieldConfigPart.getInstanceAttributeOverrides()).thenReturn(Collections.singletonList(instanceOverride));
 
-        List<InstanceAttributeOverride<ResolvedField>> result = this.instance.getFieldAttributeOverrides();
+        List<InstanceAttributeOverride<FieldScope>> result = this.instance.getFieldAttributeOverrides();
         Assert.assertEquals(1, result.size());
         Assert.assertSame(instanceOverride, result.get(0));
     }
 
     @Test
     public void testGetMethodAttributeOverrides() {
-        InstanceAttributeOverride<ResolvedMethod> instanceOverride = (node, method, t, p, c) -> node.put("$comment", method.getName() + "()");
+        InstanceAttributeOverride<MethodScope> instanceOverride = (node, method) -> node.put("$comment", method.getName() + "()");
         Mockito.when(this.methodConfigPart.getInstanceAttributeOverrides()).thenReturn(Collections.singletonList(instanceOverride));
 
-        List<InstanceAttributeOverride<ResolvedMethod>> result = this.instance.getMethodAttributeOverrides();
+        List<InstanceAttributeOverride<MethodScope>> result = this.instance.getMethodAttributeOverrides();
         Assert.assertEquals(1, result.size());
         Assert.assertSame(instanceOverride, result.get(0));
     }

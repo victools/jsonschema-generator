@@ -17,14 +17,12 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.victools.jsonschema.generator.impl.ReflectionToStringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -79,22 +77,22 @@ public class SchemaGeneratorTest {
 
     private static void populateConfigPart(SchemaGeneratorConfigPart<?> configPart, String descriptionPrefix) {
         configPart
-                .withArrayMinItemsResolver((f, type, p) -> type.isArray() || type.isInstanceOf(Collection.class) ? 0 : null)
-                .withArrayMaxItemsResolver((f, type, p) -> type.isArray() || type.isInstanceOf(Collection.class) ? Integer.MAX_VALUE : null)
-                .withArrayUniqueItemsResolver((f, type, p) -> type.isArray() || type.isInstanceOf(Collection.class) ? false : null)
-                .withDescriptionResolver((f, type, p) -> descriptionPrefix + ReflectionToStringUtils.createStringRepresentation(type))
-                .withEnumResolver((f, type, p) -> type.isInstanceOf(Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
-                .withEnumResolver((f, type, p) -> type.isInstanceOf(String.class) ? Arrays.asList("constant string value") : null)
-                .withNullableCheck((f, type, p) -> Boolean.TRUE)
-                .withNumberExclusiveMaximumResolver((f, type, p) -> type.isInstanceOf(Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
-                .withNumberExclusiveMinimumResolver((f, type, p) -> type.isInstanceOf(Number.class) ? BigDecimal.ZERO : null)
-                .withNumberInclusiveMaximumResolver((f, type, p) -> type.isInstanceOf(Number.class) ? BigDecimal.TEN : null)
-                .withNumberInclusiveMinimumResolver((f, type, p) -> type.isInstanceOf(Number.class) ? BigDecimal.ONE : null)
-                .withNumberMultipleOfResolver((f, type, p) -> type.isInstanceOf(Number.class) ? BigDecimal.ONE : null)
-                .withStringFormatResolver((f, type, p) -> type.isInstanceOf(String.class) ? "date" : null)
-                .withStringMaxLengthResolver((f, type, p) -> type.isInstanceOf(String.class) ? 256 : null)
-                .withStringMinLengthResolver((f, type, p) -> type.isInstanceOf(String.class) ? 1 : null)
-                .withTitleResolver((f, type, p) -> ReflectionToStringUtils.createStringRepresentation(type));
+                .withArrayMinItemsResolver(member -> member.isContainerType() ? 0 : null)
+                .withArrayMaxItemsResolver(member -> member.isContainerType() ? Integer.MAX_VALUE : null)
+                .withArrayUniqueItemsResolver(member -> member.isContainerType() ? false : null)
+                .withDescriptionResolver(member -> descriptionPrefix + member.getContext().getSimpleTypeDescription(member.getType()))
+                .withEnumResolver(member -> member.getType().isInstanceOf(Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
+                .withEnumResolver(member -> member.getType().isInstanceOf(String.class) ? Arrays.asList("constant string value") : null)
+                .withNullableCheck(member -> Boolean.TRUE)
+                .withNumberExclusiveMaximumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
+                .withNumberExclusiveMinimumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.ZERO : null)
+                .withNumberInclusiveMaximumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.TEN : null)
+                .withNumberInclusiveMinimumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.ONE : null)
+                .withNumberMultipleOfResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.ONE : null)
+                .withStringFormatResolver(member -> member.getType().isInstanceOf(String.class) ? "date" : null)
+                .withStringMaxLengthResolver(member -> member.getType().isInstanceOf(String.class) ? 256 : null)
+                .withStringMinLengthResolver(member -> member.getType().isInstanceOf(String.class) ? 1 : null)
+                .withTitleResolver(member -> member.getContext().getSimpleTypeDescription(member.getType()));
     }
 
     Object parametersForTestGenerateSchema() {
@@ -104,12 +102,12 @@ public class SchemaGeneratorTest {
         Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields(), "looked-up from field: ");
         return new Object[][]{
             {"testclass1-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, neutralModule},
-            {"testclass1-JAVA_OBJECT-method-attributes", OptionPreset.JAVA_OBJECT, TestClass1.class, methodModule},
-            {"testclass1-PLAIN_JSON-field-attributes", OptionPreset.PLAIN_JSON, TestClass1.class, fieldModule},
+            {"testclass1-JAVA_OBJECT-attributes", OptionPreset.JAVA_OBJECT, TestClass1.class, methodModule},
+            {"testclass1-PLAIN_JSON-attributes", OptionPreset.PLAIN_JSON, TestClass1.class, fieldModule},
             {"testclass2-array", OptionPreset.FULL_DOCUMENTATION, TestClass2[].class, neutralModule},
             {"testclass3-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, neutralModule},
-            {"testclass3-JAVA_OBJECT-field-attributes", OptionPreset.JAVA_OBJECT, TestClass3.class, fieldModule},
-            {"testclass3-PLAIN_JSON-method-attributes", OptionPreset.PLAIN_JSON, TestClass3.class, methodModule}
+            {"testclass3-JAVA_OBJECT-attributes", OptionPreset.JAVA_OBJECT, TestClass3.class, methodModule},
+            {"testclass3-PLAIN_JSON-attributes", OptionPreset.PLAIN_JSON, TestClass3.class, fieldModule}
         };
     }
 
@@ -122,7 +120,8 @@ public class SchemaGeneratorTest {
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(targetType);
-        JSONAssert.assertEquals('\n' + result.toString() + '\n', loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
+        JSONAssert.assertEquals('\n' + result.toString() + '\n',
+                loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 
     private static String loadResource(String resourcePath) throws IOException {

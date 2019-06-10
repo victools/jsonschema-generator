@@ -16,13 +16,11 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
-import com.fasterxml.classmate.members.ResolvedField;
+import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.impl.ReflectionGetterUtils;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 /**
  * Default module for excluding fields.
@@ -36,7 +34,7 @@ public class FieldExclusionModule implements Module {
      */
     public static FieldExclusionModule forPublicNonStaticFields() {
         return new FieldExclusionModule(
-                (field, declaringType) -> field.isPublic() && !field.isStatic());
+                field -> field.isPublic() && !field.isStatic());
     }
 
     /**
@@ -47,7 +45,7 @@ public class FieldExclusionModule implements Module {
      */
     public static FieldExclusionModule forNonPublicNonStaticFieldsWithGetter() {
         return new FieldExclusionModule(
-                (field, declaringType) -> !field.isPublic() && !field.isStatic() && ReflectionGetterUtils.hasGetter(field, declaringType));
+                field -> !field.isPublic() && !field.isStatic() && field.hasGetter());
     }
 
     /**
@@ -58,7 +56,7 @@ public class FieldExclusionModule implements Module {
      */
     public static FieldExclusionModule forNonPublicNonStaticFieldsWithoutGetter() {
         return new FieldExclusionModule(
-                (field, declaringType) -> !field.isPublic() && !field.isStatic() && !ReflectionGetterUtils.hasGetter(field, declaringType));
+                field -> !field.isPublic() && !field.isStatic() && !field.hasGetter());
     }
 
     /**
@@ -67,19 +65,19 @@ public class FieldExclusionModule implements Module {
      * @return created module instance
      */
     public static FieldExclusionModule forTransientFields() {
-        return new FieldExclusionModule((field, declaringType) -> field.isTransient());
+        return new FieldExclusionModule(FieldScope::isTransient);
     }
 
-    private final BiPredicate<ResolvedField, ResolvedTypeWithMembers> shouldExcludeFieldsMatching;
+    private final Predicate<FieldScope> shouldExcludeFieldsMatching;
 
     /**
-     * Constructor setting the underlying check to be set via {@link SchemaGeneratorConfigPart#withIgnoreCheck(BiPredicate)}.
+     * Constructor setting the underlying check to be set via {@link SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)}.
      *
      * @param shouldExcludeFieldsMatching check to identify fields to be excluded
      * @see SchemaGeneratorConfigBuilder#forFields()
-     * @see SchemaGeneratorConfigPart#withIgnoreCheck(BiPredicate)
+     * @see SchemaGeneratorConfigPart#withIgnoreCheck(Predicate)
      */
-    public FieldExclusionModule(BiPredicate<ResolvedField, ResolvedTypeWithMembers> shouldExcludeFieldsMatching) {
+    public FieldExclusionModule(Predicate<FieldScope> shouldExcludeFieldsMatching) {
         this.shouldExcludeFieldsMatching = shouldExcludeFieldsMatching;
     }
 

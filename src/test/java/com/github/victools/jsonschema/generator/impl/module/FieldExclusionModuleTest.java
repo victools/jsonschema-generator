@@ -16,12 +16,11 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
-import com.fasterxml.classmate.members.ResolvedField;
+import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.impl.AbstractTypeAwareTest;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.naming.TestCaseName;
@@ -38,7 +37,7 @@ import org.mockito.Mockito;
 public class FieldExclusionModuleTest extends AbstractTypeAwareTest {
 
     private SchemaGeneratorConfigBuilder builder;
-    private SchemaGeneratorConfigPart<ResolvedField> fieldConfigPart;
+    private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
 
     public FieldExclusionModuleTest() {
         super(TestClass.class);
@@ -54,7 +53,7 @@ public class FieldExclusionModuleTest extends AbstractTypeAwareTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testApplyToConfigBuilder() {
-        BiPredicate<ResolvedField, ResolvedTypeWithMembers> ignoreCheck = (field, declaringType) -> true;
+        Predicate<FieldScope> ignoreCheck = field -> true;
         FieldExclusionModule module = new FieldExclusionModule(ignoreCheck);
         module.applyToConfigBuilder(this.builder);
 
@@ -85,8 +84,8 @@ public class FieldExclusionModuleTest extends AbstractTypeAwareTest {
         FieldExclusionModule moduleInstance = (FieldExclusionModule) FieldExclusionModule.class.getMethod(supplierMethodName).invoke(null);
         moduleInstance.applyToConfigBuilder(this.builder);
 
-        ResolvedField field = this.getTestClassField(testFieldName);
-        Assert.assertEquals(ignored, this.fieldConfigPart.shouldIgnore(field, this.testClassMembers));
+        FieldScope field = this.getTestClassField(testFieldName);
+        Assert.assertEquals(ignored, this.fieldConfigPart.shouldIgnore(field));
     }
 
     private static class TestClass {

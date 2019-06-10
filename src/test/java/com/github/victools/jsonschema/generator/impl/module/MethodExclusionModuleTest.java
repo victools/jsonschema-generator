@@ -16,12 +16,11 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
-import com.fasterxml.classmate.members.ResolvedMethod;
+import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.impl.AbstractTypeAwareTest;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.naming.TestCaseName;
@@ -38,7 +37,7 @@ import org.mockito.Mockito;
 public class MethodExclusionModuleTest extends AbstractTypeAwareTest {
 
     private SchemaGeneratorConfigBuilder builder;
-    private SchemaGeneratorConfigPart<ResolvedMethod> methodConfigPart;
+    private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
 
     public MethodExclusionModuleTest() {
         super(TestClass.class);
@@ -54,7 +53,7 @@ public class MethodExclusionModuleTest extends AbstractTypeAwareTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testApplyToConfigBuilder() {
-        BiPredicate<ResolvedMethod, ResolvedTypeWithMembers> ignoreCheck = (method, declaringType) -> true;
+        Predicate<MethodScope> ignoreCheck = method -> true;
         MethodExclusionModule module = new MethodExclusionModule(ignoreCheck);
         module.applyToConfigBuilder(this.builder);
 
@@ -97,8 +96,8 @@ public class MethodExclusionModuleTest extends AbstractTypeAwareTest {
         MethodExclusionModule moduleInstance = (MethodExclusionModule) MethodExclusionModule.class.getMethod(supplierMethodName).invoke(null);
         moduleInstance.applyToConfigBuilder(this.builder);
 
-        ResolvedMethod method = this.getTestClassMethod(testMethodName);
-        Assert.assertEquals(ignored, this.methodConfigPart.shouldIgnore(method, this.testClassMembers));
+        MethodScope method = this.getTestClassMethod(testMethodName);
+        Assert.assertEquals(ignored, this.methodConfigPart.shouldIgnore(method));
     }
 
     private static class TestClass {

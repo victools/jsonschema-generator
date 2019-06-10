@@ -16,16 +16,14 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
-import com.fasterxml.classmate.members.ResolvedField;
-import com.fasterxml.classmate.members.ResolvedMethod;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
+import com.github.victools.jsonschema.generator.FieldScope;
+import com.github.victools.jsonschema.generator.MethodScope;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
@@ -55,31 +53,28 @@ public class AttributeCollector {
      * Collect a field's contextual attributes (i.e. everything not related to the structure).
      *
      * @param field the field for which to collect JSON schema attributes
-     * @param type associated field type
-     * @param declaringType origin's declaring type
      * @param config configuration to apply when looking-up attribute values
      * @return node holding all collected attributes (possibly empty)
      */
-    public static ObjectNode collectFieldAttributes(ResolvedField field, ResolvedType type, ResolvedTypeWithMembers declaringType,
-            SchemaGeneratorConfig config) {
+    public static ObjectNode collectFieldAttributes(FieldScope field, SchemaGeneratorConfig config) {
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
-        collector.setTitle(node, config.resolveTitle(field, type, declaringType));
-        collector.setDescription(node, config.resolveDescription(field, type, declaringType));
-        collector.setEnum(node, config.resolveEnum(field, type, declaringType));
-        collector.setStringMinLength(node, config.resolveStringMinLength(field, type, declaringType));
-        collector.setStringMaxLength(node, config.resolveStringMaxLength(field, type, declaringType));
-        collector.setStringFormat(node, config.resolveStringFormat(field, type, declaringType));
-        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(field, type, declaringType));
-        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(field, type, declaringType));
-        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(field, type, declaringType));
-        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(field, type, declaringType));
-        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(field, type, declaringType));
-        collector.setArrayMinItems(node, config.resolveArrayMinItems(field, type, declaringType));
-        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(field, type, declaringType));
-        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(field, type, declaringType));
+        collector.setTitle(node, config.resolveTitle(field));
+        collector.setDescription(node, config.resolveDescription(field));
+        collector.setEnum(node, config.resolveEnum(field));
+        collector.setStringMinLength(node, config.resolveStringMinLength(field));
+        collector.setStringMaxLength(node, config.resolveStringMaxLength(field));
+        collector.setStringFormat(node, config.resolveStringFormat(field));
+        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(field));
+        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(field));
+        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(field));
+        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(field));
+        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(field));
+        collector.setArrayMinItems(node, config.resolveArrayMinItems(field));
+        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(field));
+        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(field));
         config.getFieldAttributeOverrides()
-                .forEach(override -> override.overrideInstanceAttributes(node, field, type, declaringType, config));
+                .forEach(override -> override.overrideInstanceAttributes(node, field));
         return node;
     }
 
@@ -87,31 +82,28 @@ public class AttributeCollector {
      * Collect a method's contextual attributes (i.e. everything not related to the structure).
      *
      * @param method the method for which to collect JSON schema attributes
-     * @param returnType associated return value type
-     * @param declaringType origin's declaring type
      * @param config configuration to apply when looking-up attribute values
      * @return node holding all collected attributes (possibly empty)
      */
-    public static ObjectNode collectMethodAttributes(ResolvedMethod method, ResolvedType returnType, ResolvedTypeWithMembers declaringType,
-            SchemaGeneratorConfig config) {
+    public static ObjectNode collectMethodAttributes(MethodScope method, SchemaGeneratorConfig config) {
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
-        collector.setTitle(node, config.resolveTitle(method, returnType, declaringType));
-        collector.setDescription(node, config.resolveDescription(method, returnType, declaringType));
-        collector.setEnum(node, config.resolveEnum(method, returnType, declaringType));
-        collector.setStringMinLength(node, config.resolveStringMinLength(method, returnType, declaringType));
-        collector.setStringMaxLength(node, config.resolveStringMaxLength(method, returnType, declaringType));
-        collector.setStringFormat(node, config.resolveStringFormat(method, returnType, declaringType));
-        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(method, returnType, declaringType));
-        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(method, returnType, declaringType));
-        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(method, returnType, declaringType));
-        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(method, returnType, declaringType));
-        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(method, returnType, declaringType));
-        collector.setArrayMinItems(node, config.resolveArrayMinItems(method, returnType, declaringType));
-        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(method, returnType, declaringType));
-        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(method, returnType, declaringType));
+        collector.setTitle(node, config.resolveTitle(method));
+        collector.setDescription(node, config.resolveDescription(method));
+        collector.setEnum(node, config.resolveEnum(method));
+        collector.setStringMinLength(node, config.resolveStringMinLength(method));
+        collector.setStringMaxLength(node, config.resolveStringMaxLength(method));
+        collector.setStringFormat(node, config.resolveStringFormat(method));
+        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(method));
+        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(method));
+        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(method));
+        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(method));
+        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(method));
+        collector.setArrayMinItems(node, config.resolveArrayMinItems(method));
+        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(method));
+        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(method));
         config.getMethodAttributeOverrides()
-                .forEach(override -> override.overrideInstanceAttributes(node, method, returnType, declaringType, config));
+                .forEach(override -> override.overrideInstanceAttributes(node, method));
         return node;
     }
 

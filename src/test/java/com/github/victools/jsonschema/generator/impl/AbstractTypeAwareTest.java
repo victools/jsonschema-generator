@@ -16,12 +16,13 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import com.fasterxml.classmate.MemberResolver;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
-import com.fasterxml.classmate.TypeResolver;
 import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.classmate.members.ResolvedMethod;
+import com.github.victools.jsonschema.generator.FieldScope;
+import com.github.victools.jsonschema.generator.MethodScope;
+import com.github.victools.jsonschema.generator.TypeContext;
 import java.util.stream.Stream;
 import org.junit.Before;
 
@@ -31,8 +32,8 @@ import org.junit.Before;
 public class AbstractTypeAwareTest {
 
     private final Class<?> testClass;
-
-    protected ResolvedTypeWithMembers testClassMembers;
+    protected TypeContext context;
+    private ResolvedTypeWithMembers testClassMembers;
 
     protected AbstractTypeAwareTest(Class<?> testClass) {
         this.testClass = testClass;
@@ -40,14 +41,17 @@ public class AbstractTypeAwareTest {
 
     @Before
     public final void abstractSetUp() {
-        TypeResolver typeResolver = new TypeResolver();
-        MemberResolver memberResolver = new MemberResolver(typeResolver);
-        ResolvedType resolvedTestClass = typeResolver.resolve(this.testClass);
-        this.testClassMembers = memberResolver.resolve(resolvedTestClass, null, null);
+        this.context = TypeContextFactory.createDefaultTypeContext();
+        ResolvedType resolvedTestClass = this.context.resolve(this.testClass);
+        this.testClassMembers = this.context.resolveWithMembers(resolvedTestClass);
     }
 
-    protected ResolvedField getTestClassField(String fieldName) {
-        return Stream.of(this.testClassMembers.getMemberFields())
+    protected TypeContext getContext() {
+        return this.context;
+    }
+
+    protected FieldScope getTestClassField(String fieldName) {
+        ResolvedField resolvedField = Stream.of(this.testClassMembers.getMemberFields())
                 .filter(field -> fieldName.equals(field.getName()))
                 .findAny()
                 .orElseGet(
@@ -55,10 +59,11 @@ public class AbstractTypeAwareTest {
                                 .filter(field -> fieldName.equals(field.getName()))
                                 .findAny()
                                 .get());
+        return this.context.createFieldScope(resolvedField, this.testClassMembers);
     }
 
-    protected ResolvedMethod getTestClassMethod(String methodName) {
-        return Stream.of(this.testClassMembers.getMemberMethods())
+    protected MethodScope getTestClassMethod(String methodName) {
+        ResolvedMethod resolvedMethod = Stream.of(this.testClassMembers.getMemberMethods())
                 .filter(method -> methodName.equals(method.getName()))
                 .findAny()
                 .orElseGet(
@@ -66,5 +71,6 @@ public class AbstractTypeAwareTest {
                                 .filter(method -> methodName.equals(method.getName()))
                                 .findAny()
                                 .get());
+        return this.context.createMethodScope(resolvedMethod, this.testClassMembers);
     }
 }

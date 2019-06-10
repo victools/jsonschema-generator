@@ -16,10 +16,7 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import com.fasterxml.classmate.AnnotationConfiguration;
-import com.fasterxml.classmate.AnnotationInclusion;
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.TypeResolver;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.TypeContext;
@@ -33,21 +30,23 @@ import java.util.Set;
 /**
  * Generation context in which to collect definitions of traversed types and remember where they are being referenced.
  */
-public class SchemaGenerationContext extends TypeContext {
+public class SchemaGenerationContext {
 
+    private final SchemaGeneratorConfig generatorConfig;
+    private final TypeContext typeContext;
     private final Map<ResolvedType, ObjectNode> definitions = new HashMap<>();
     private final Map<ResolvedType, List<ObjectNode>> references = new HashMap<>();
     private final Map<ResolvedType, List<ObjectNode>> nullableReferences = new HashMap<>();
-    private final SchemaGeneratorConfig generatorConfig;
 
     /**
      * Constructor initialising type resolution context.
      *
      * @param generatorConfig applicable configuration(s)
+     * @param typeContext type resolution/introspection context to be used
      */
-    public SchemaGenerationContext(SchemaGeneratorConfig generatorConfig) {
-        super(new TypeResolver(), new AnnotationConfiguration.StdConfiguration(AnnotationInclusion.INCLUDE_AND_INHERIT_IF_INHERITED));
+    public SchemaGenerationContext(SchemaGeneratorConfig generatorConfig, TypeContext typeContext) {
         this.generatorConfig = generatorConfig;
+        this.typeContext = typeContext;
     }
 
     /**
@@ -57,6 +56,15 @@ public class SchemaGenerationContext extends TypeContext {
      */
     public SchemaGeneratorConfig getGeneratorConfig() {
         return this.generatorConfig;
+    }
+
+    /**
+     * Getter for the applicable type resolution context.
+     *
+     * @return type resolution context
+     */
+    public TypeContext getTypeContext() {
+        return this.typeContext;
     }
 
     /**

@@ -16,9 +16,9 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
-import com.fasterxml.classmate.members.ResolvedField;
-import com.fasterxml.classmate.members.ResolvedMethod;
 import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.FieldScope;
+import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import org.junit.Before;
@@ -43,12 +43,12 @@ public class SimpleTypeModuleTest {
     public void testApplyToConfigBuilder() {
         this.instance.applyToConfigBuilder(this.builder);
 
-        SchemaGeneratorConfigPart<ResolvedField> fieldConfigPart = this.builder.forFields();
+        SchemaGeneratorConfigPart<FieldScope> fieldConfigPart = this.builder.forFields();
         Mockito.verify(fieldConfigPart).withNullableCheck(Mockito.any());
         Mockito.verifyNoMoreInteractions(fieldConfigPart);
         Mockito.verify(this.builder, Mockito.times(2)).forFields();
 
-        SchemaGeneratorConfigPart<ResolvedMethod> methodConfigPart = this.builder.forMethods();
+        SchemaGeneratorConfigPart<MethodScope> methodConfigPart = this.builder.forMethods();
         Mockito.verify(methodConfigPart).withNullableCheck(Mockito.any());
         Mockito.verifyNoMoreInteractions(methodConfigPart);
         Mockito.verify(this.builder, Mockito.times(2)).forMethods();

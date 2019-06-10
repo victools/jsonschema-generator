@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Simplify configuration API to be based on `FieldScope`/`MethodScope` respectively.
+- Consolidate some utility functions into `FieldScope`/`MethodScope`.
+- Consolidate logic for determining whether a type is a container into `TypeContext`.
+- Consolidate naming logic for schema "definitions" into `TypeContext`.
+- Add `TypeContext` argument to `CustomDefinitionProvider` interface.
+- Remove `SchemaGeneratorConfig` argument from `InstanceAttributeOverride` interface.
+
+### Added
+- Allow for sub-typing of `FieldScope`/`MethodScope` and `TypeContext` (in case offered configuration options are insufficient).
+
+### Removed
+- Remove support for `Option.GETTER_ATTRIBUTES_FOR_FIELDS` and `Option.FIELD_ATTRIBUTES_FOR_GETTERS`, rather let configurations/modules decide individually and avoid potential endless loop.
 
 ## [2.0.0] – 2019-06-07
 ### Changed

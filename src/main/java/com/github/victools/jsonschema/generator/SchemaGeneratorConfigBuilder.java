@@ -16,8 +16,6 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.classmate.members.ResolvedField;
-import com.fasterxml.classmate.members.ResolvedMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.impl.SchemaGeneratorConfigImpl;
 import java.util.ArrayList;
@@ -37,8 +35,8 @@ public class SchemaGeneratorConfigBuilder {
     private final OptionPreset preset;
 
     private final Map<Option, Boolean> options = new HashMap<>();
-    private final SchemaGeneratorConfigPart<ResolvedField> fieldConfigPart = new SchemaGeneratorConfigPart<>();
-    private final SchemaGeneratorConfigPart<ResolvedMethod> methodConfigPart = new SchemaGeneratorConfigPart<>();
+    private final SchemaGeneratorConfigPart<FieldScope> fieldConfigPart = new SchemaGeneratorConfigPart<>();
+    private final SchemaGeneratorConfigPart<MethodScope> methodConfigPart = new SchemaGeneratorConfigPart<>();
     private final List<CustomDefinitionProvider> customDefinitions = new ArrayList<>();
     private final List<TypeAttributeOverride> typeAttributeOverrides = new ArrayList<>();
 
@@ -94,7 +92,7 @@ public class SchemaGeneratorConfigBuilder {
      *
      * @return configuration part responsible for handling of fields
      */
-    public SchemaGeneratorConfigPart<ResolvedField> forFields() {
+    public SchemaGeneratorConfigPart<FieldScope> forFields() {
         return this.fieldConfigPart;
     }
 
@@ -103,7 +101,7 @@ public class SchemaGeneratorConfigBuilder {
      *
      * @return configuration part responsible for handling of methods
      */
-    public SchemaGeneratorConfigPart<ResolvedMethod> forMethods() {
+    public SchemaGeneratorConfigPart<MethodScope> forMethods() {
         return this.methodConfigPart;
     }
 

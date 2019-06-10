@@ -18,10 +18,8 @@ package com.github.victools.jsonschema.generator;
 
 import com.github.victools.jsonschema.generator.impl.module.ConstantValueModule;
 import com.github.victools.jsonschema.generator.impl.module.EnumModule;
-import com.github.victools.jsonschema.generator.impl.module.FieldAttributesForGetterModule;
 import com.github.victools.jsonschema.generator.impl.module.FieldExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.FlattenedOptionalModule;
-import com.github.victools.jsonschema.generator.impl.module.GetterAttributesForFieldModule;
 import com.github.victools.jsonschema.generator.impl.module.MethodExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
 import com.github.victools.jsonschema.generator.impl.module.SimplifiedOptionalModule;
@@ -162,22 +160,6 @@ public enum Option {
      * @see Option#GETTER_METHODS
      */
     NONSTATIC_NONVOID_NONGETTER_METHODS(null, MethodExclusionModule::forNonStaticNonVoidNonGetterMethods),
-    /**
-     * Whether attributes collected for a field's getter method should be associated with the field directly (assuming the getters are excluded).
-     * <br>
-     * Beware: this should NOT be enabled at the same time as {@link #FIELD_ATTRIBUTES_FOR_GETTERS}
-     * <br>
-     * Default: false (disabled)
-     */
-    GETTER_ATTRIBUTES_FOR_FIELDS(GetterAttributesForFieldModule::new, null),
-    /**
-     * Whether attributes collected for a field should be associated with its getter method directly (assuming the fields are excluded).
-     * <br>
-     * Beware: this should NOT be enabled at the same time as {@link #GETTER_ATTRIBUTES_FOR_FIELDS}
-     * <br>
-     * Default: false (disabled)
-     */
-    FIELD_ATTRIBUTES_FOR_GETTERS(FieldAttributesForGetterModule::new, null),
     /**
      * Whether an object's field/property should be deemed to be nullable if no specific check says otherwise.
      * <br>

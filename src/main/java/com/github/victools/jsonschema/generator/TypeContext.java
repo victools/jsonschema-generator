@@ -21,20 +21,17 @@ import com.fasterxml.classmate.MemberResolver;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.TypeResolver;
-import com.fasterxml.classmate.members.RawField;
-import com.fasterxml.classmate.members.RawMethod;
 import com.fasterxml.classmate.members.ResolvedField;
-import com.fasterxml.classmate.members.ResolvedMember;
 import com.fasterxml.classmate.members.ResolvedMethod;
-import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Context in which types can be resolved (as well as their declared fields and methods).
  */
-public abstract class TypeContext {
+public class TypeContext {
 
     private final TypeResolver typeResolver;
     private final MemberResolver memberResolver;
@@ -43,12 +40,11 @@ public abstract class TypeContext {
     /**
      * Constructor.
      *
-     * @param typeResolver instance for resolving java types (singleton being re-used to leverage contained caching mechanism)
      * @param annotationConfig annotation configuration to apply when collecting resolved fields and methods
      */
-    protected TypeContext(TypeResolver typeResolver, AnnotationConfiguration annotationConfig) {
-        this.typeResolver = typeResolver;
-        this.memberResolver = new MemberResolver(typeResolver);
+    public TypeContext(AnnotationConfiguration annotationConfig) {
+        this.typeResolver = new TypeResolver();
+        this.memberResolver = new MemberResolver(this.typeResolver);
         this.annotationConfig = annotationConfig;
     }
 
@@ -58,80 +54,40 @@ public abstract class TypeContext {
      * @param type java type to resolve
      * @return resolved type
      */
-    public ResolvedType resolve(Type type) {
+    public final ResolvedType resolve(Type type) {
         return this.typeResolver.resolve(type);
     }
 
     /**
      * Collect a given type's declared fields and methods.
      *
-     * @param mainType type for which to collect declared fields and methods
+     * @param resolvedType type for which to collect declared fields and methods
      * @return collection of (resolved) fields and methods
      */
-    public ResolvedTypeWithMembers resolveWithMembers(ResolvedType mainType) {
-        return this.memberResolver.resolve(mainType, this.annotationConfig, null);
+    public final ResolvedTypeWithMembers resolveWithMembers(ResolvedType resolvedType) {
+        return this.memberResolver.resolve(resolvedType, this.annotationConfig, null);
     }
 
     /**
-     * Resolve a given field's type.
+     * Construct a {@link FieldScope} instance for the given field.
      *
-     * @param rawField raw field to resolve type for
-     * @return resolved field
+     * @param field targeted field
+     * @param declaringTypeMembers collection of the declaring type's (other) fields and methods
+     * @return created {@link FieldScope} instance
      */
-    public ResolvedField resolveMember(RawField rawField) {
-        return this.resolveMember(rawField, this.resolveWithMembers(rawField.getDeclaringType()));
+    public FieldScope createFieldScope(ResolvedField field, ResolvedTypeWithMembers declaringTypeMembers) {
+        return new FieldScope(field, declaringTypeMembers, this);
     }
 
     /**
-     * Resolve a given field's type.
+     * Construct a {@link MethodScope} instance for the given method.
      *
-     * @param rawField raw field to resolve type for
-     * @param declaringType collection of resolved fields and methods of the raw field's declaring type
-     * @return resolved field
+     * @param method targeted method
+     * @param declaringTypeMembers collection of the declaring type's fields and (other) methods
+     * @return created {@link MethodScope} instance
      */
-    public ResolvedField resolveMember(RawField rawField, ResolvedTypeWithMembers declaringType) {
-        ResolvedField[] resolvedFields = rawField.isStatic() ? declaringType.getStaticFields() : declaringType.getMemberFields();
-        ResolvedField result = this.findMember(resolvedFields, rawField.getRawMember());
-        return result;
-    }
-
-    /**
-     * Resolve a given method's return (and argument) type(s).
-     *
-     * @param rawMethod raw method to resolve return and argument types for
-     * @return resolved method
-     */
-    public ResolvedMethod resolveMember(RawMethod rawMethod) {
-        return this.resolveMember(rawMethod, this.resolveWithMembers(rawMethod.getDeclaringType()));
-    }
-
-    /**
-     * Resolve a given method's return (and argument) type(s).
-     *
-     * @param rawMethod raw method to resolve return and argument types for
-     * @param declaringType collection of resolved fields and methods of the raw method's declaring type
-     * @return resolved method
-     */
-    public ResolvedMethod resolveMember(RawMethod rawMethod, ResolvedTypeWithMembers declaringType) {
-        ResolvedMethod[] resolvedMethods = rawMethod.isStatic() ? declaringType.getStaticMethods() : declaringType.getMemberMethods();
-        ResolvedMethod result = this.findMember(resolvedMethods, rawMethod.getRawMember());
-        return result;
-    }
-
-    /**
-     * Select the single matching resolved member from the given array that matches the specified raw member.
-     *
-     * @param <R> type of resolved member (i.e. field or method)
-     * @param <J> type of raw member
-     * @param resolvedMembers array of resolved members from which to select
-     * @param javaMember unresolved/raw member to look-up
-     * @return matching resolved member
-     */
-    private <R extends ResolvedMember<? extends J>, J extends Member> R findMember(R[] resolvedMembers, J javaMember) {
-        return Stream.of(resolvedMembers)
-                .filter(resolvedMethod -> resolvedMethod.getRawMember().equals(javaMember))
-                .findAny()
-                .orElse(null);
+    public MethodScope createMethodScope(ResolvedMethod method, ResolvedTypeWithMembers declaringTypeMembers) {
+        return new MethodScope(method, declaringTypeMembers, this);
     }
 
     /**
@@ -153,9 +109,76 @@ public abstract class TypeContext {
      */
     public ResolvedType getContainerItemType(ResolvedType containerType) {
         ResolvedType itemType = containerType.getArrayElementType();
-        if (itemType == null) {
+        if (itemType == null && this.isContainerType(containerType)) {
             itemType = containerType.typeParametersFor(Collection.class).get(0);
         }
         return itemType;
+    }
+
+    /**
+     * Constructing a string that represents the given type (including possible type parameters and their actual types).
+     * <br>
+     * This calls {@link Class#getSimpleName()} for a single erased type – i.e. excluding package names.
+     *
+     * @param type the type to represent
+     * @return resulting string
+     */
+    public final String getSimpleTypeDescription(ResolvedType type) {
+        return this.getTypeDescription(type, true);
+    }
+
+    /**
+     * Constructing a string that fully represents the given type (including possible type parameters and their actual types).
+     * <br>
+     * This calls {@link Class#getName()} for a single erased type.
+     *
+     * @param type the type to represent
+     * @return resulting string
+     */
+    public final String getFullTypeDescription(ResolvedType type) {
+        return this.getTypeDescription(type, false);
+    }
+
+    /**
+     * Constructing a string that fully represents the given type (including possible type parameters and their actual types).
+     *
+     * @param type the type to represent
+     * @param simpleClassNames whether simple class names should be used (otherwise: full package names are included)
+     * @return resulting string
+     */
+    private String getTypeDescription(ResolvedType type, boolean simpleClassNames) {
+        Class<?> erasedType = type.getErasedType();
+        String result = simpleClassNames ? erasedType.getSimpleName() : erasedType.getName();
+        List<ResolvedType> typeParameters = type.getTypeParameters();
+        if (!typeParameters.isEmpty()) {
+            result += typeParameters.stream()
+                    .map(parameterType -> this.getTypeDescription(parameterType, simpleClassNames))
+                    .collect(Collectors.joining(", ", "<", ">"));
+        }
+        return result;
+    }
+
+    /**
+     * Returns the name to be associated with an entry in the generated schema's list of "definitions".
+     * <br>
+     * Beware: if multiple types have the same name, only one of them will be included in the schema's "definitions"
+     *
+     * @param type the type to be represented in the generated schema's "definitions"
+     * @return name in "definitions"
+     */
+    public String getSchemaDefinitionName(ResolvedType type) {
+        // known limitation: if two types have the same name and the only difference is their package, the resulting schema will only contain one
+        // using getFullTypeDescription() instead would avoid that issue, but the resulting schema does not look as nice
+        return this.getSimpleTypeDescription(type);
+    }
+
+    /**
+     * Returns the type description for an argument in a method's property name.
+     *
+     * @param type method argument's type to represent
+     * @return argument type description
+     */
+    public String getMethodPropertyArgumentTypeDescription(ResolvedType type) {
+        return this.getSimpleTypeDescription(type);
     }
 }
