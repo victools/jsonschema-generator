@@ -1,0 +1,11 @@
+language: java
+install:
+  - mvn install -DskipTests=true -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dgpg.skip=true -B -V
+script:
+  - mvn test -B
+  - mvn verify -DskipTests=true -Dmaven.javadoc.skip=true -Dgpg.skip=true -B
+  - mvn javadoc:javadoc -B
+branches:
+  only:
+  - master
+  - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
