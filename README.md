@@ -73,6 +73,11 @@ SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(ob
     .with(separateModule);
 ```
 
+Some available modules are:
+- [victools/jsonschema-module-jackson](https://github.com/victools/jsonschema-module-jackson) – deriving JSON Schema attributes from `jackson` annotations (e.g. "description", property name overrides, what properties to ignore).
+- [victools/jsonschema-module-javax-validation](https://github.com/victools/jsonschema-module-javax-validation) – deriving JSON Schema attributes from `javax.validation` annotations (e.g. which properties are nullable or not, their "minimum"/"maximum", "minItems"/"maxItems", "minLength"/"maxLength").
+- [victools/jsonschema-module-swagger-1.5](https://github.com/victools/jsonschema-module-swagger-1.5) – deriving JSON Schema attributes from `swagger` (1.5.x) annotations (e.g. "description", property name overrides, what properties to ignore, their "minimum"/"maximum", "const"/"enum").
+
 #### Defining Desired Behaviour via individual configurations
 ```java
 import com.github.victools.jsonschema.generator.FieldScope;
