@@ -69,7 +69,6 @@ public class OptionPreset {
             Option.VALUES_FROM_CONSTANT_FIELDS,
             Option.PUBLIC_STATIC_FIELDS,
             Option.PUBLIC_NONSTATIC_FIELDS,
-            Option.PUBLIC_NONSTATIC_FIELDS,
             Option.STATIC_METHODS,
             Option.VOID_METHODS,
             Option.GETTER_METHODS,
