@@ -256,7 +256,8 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @return whether this member's type is an array or sub type of {@link java.util.Collection Collection}
      */
     public boolean isContainerType() {
-        return this.getContext().isContainerType(this.getType());
+        ResolvedType type = this.getType();
+        return type != null && this.getContext().isContainerType(type);
     }
 
     /**
@@ -267,7 +268,8 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @return type of elements/items
      */
     public ResolvedType getContainerItemType() {
-        return this.getContext().getContainerItemType(this.getType());
+        ResolvedType type = this.getType();
+        return type == null ? null : this.getContext().getContainerItemType(type);
     }
 
     /**
@@ -280,7 +282,8 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @see TypeContext#getSimpleTypeDescription(ResolvedType)
      */
     public String getSimpleTypeDescription() {
-        return this.getContext().getSimpleTypeDescription(this.getType());
+        ResolvedType type = this.getType();
+        return type == null ? "void" : this.getContext().getSimpleTypeDescription(type);
     }
 
     /**
@@ -293,7 +296,8 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @see TypeContext#getFullTypeDescription(ResolvedType)
      */
     public String getFullTypeDescription() {
-        return this.getContext().getFullTypeDescription(this.getType());
+        ResolvedType type = this.getType();
+        return type == null ? "void" : this.getContext().getFullTypeDescription(type);
     }
 
     /**

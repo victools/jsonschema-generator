@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - In `TypeContext.resolve(Type)` also allow passing type parameters via `TypeContext.resolve(Type, Type...)`.
 
+### Fixed
+- `NullPointerException` on `MemberScope` representing `void` methods.
+
 ## [3.0.0] – 2019-06-10
 ### Changed
 - Simplify configuration API to be based on `FieldScope`/`MethodScope` respectively.
