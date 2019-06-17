@@ -52,10 +52,12 @@ public class TypeContext {
      * Resolve actual type (mostly relevant for parameterised types, type variables and such.
      *
      * @param type java type to resolve
+     * @param typeParameters (optional) type parameters to pass on
      * @return resolved type
+     * @see TypeResolver#resolve(Type, Type...)
      */
-    public final ResolvedType resolve(Type type) {
-        return this.typeResolver.resolve(type);
+    public final ResolvedType resolve(Type type, Type... typeParameters) {
+        return this.typeResolver.resolve(type, typeParameters);
     }
 
     /**
