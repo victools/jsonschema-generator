@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
+import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;

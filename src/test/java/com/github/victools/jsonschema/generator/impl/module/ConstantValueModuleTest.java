@@ -18,7 +18,7 @@ package com.github.victools.jsonschema.generator.impl.module;
 
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.impl.AbstractTypeAwareTest;
+import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.github.victools.jsonschema.generator.FieldScope;
 import java.util.Collection;
 import java.util.Collections;

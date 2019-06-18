@@ -16,7 +16,6 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.github.victools.jsonschema.generator.impl.AbstractTypeAwareTest;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -24,7 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Test for the {@link ReflectionUtils} class.
+ * Test for the {@link FieldScope} class.
  */
 @RunWith(JUnitParamsRunner.class)
 public class FieldScopeTest extends AbstractTypeAwareTest {

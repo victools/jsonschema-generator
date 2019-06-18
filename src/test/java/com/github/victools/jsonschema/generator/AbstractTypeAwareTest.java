@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.generator.impl;
+package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
@@ -23,6 +23,7 @@ import com.fasterxml.classmate.members.ResolvedMethod;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.TypeContext;
+import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.util.stream.Stream;
 import org.junit.Before;
 

@@ -19,7 +19,7 @@ package com.github.victools.jsonschema.generator.impl.module;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.impl.AbstractTypeAwareTest;
+import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import java.util.function.Predicate;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
