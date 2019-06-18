@@ -112,7 +112,7 @@ public class TypeContext {
     public ResolvedType getContainerItemType(ResolvedType containerType) {
         ResolvedType itemType = containerType.getArrayElementType();
         if (itemType == null && this.isContainerType(containerType)) {
-            itemType = containerType.typeParametersFor(Collection.class).get(0);
+            itemType = containerType.typeParametersFor(Iterable.class).get(0);
         }
         return itemType;
     }

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - `NullPointerException` on `MemberScope` representing `void` methods.
+- `IndexOutOfBoundsException` when determining container item type of raw `Collection`.
 
 ## [3.0.0] – 2019-06-10
 ### Changed
