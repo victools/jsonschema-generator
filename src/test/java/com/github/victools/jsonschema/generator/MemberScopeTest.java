@@ -64,9 +64,9 @@ public class MemberScopeTest extends AbstractTypeAwareTest {
 
     Object parametersForTestTypeDescription() {
         return new Object[][]{
-            {"getStringArray", "String[]", "[Ljava.lang.String;"},
+            {"getStringArray", "String[]", "java.lang.String[]"},
             {"getRawCollection", "Collection", "java.util.Collection"},
-            {"getListOfIntArrays", "List<int[]>", "java.util.List<[I>"},
+            {"getListOfIntArrays", "List<int[]>", "java.util.List<int[]>"},
             {"getMapWithNestedGenerics", "Map<String, Map<String, List<Set<Class<Object>>>>>",
                 "java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.util.List<java.util.Set<java.lang.Class<java.lang.Object>>>>>"},
             {"getBooleanField", "Boolean", "java.lang.Boolean"},
@@ -83,6 +83,11 @@ public class MemberScopeTest extends AbstractTypeAwareTest {
     }
 
     private static class TestClass {
+
+        private Object privateVisibleField;
+        Object packageVisibleField;
+        protected Object protectedVisibleField;
+        public Object publicVisibleField;
 
         public String[] getStringArray() {
             return null;

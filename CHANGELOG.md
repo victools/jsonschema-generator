@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - In `TypeContext.resolve(Type)` also allow passing type parameters via `TypeContext.resolve(Type, Type...)`.
 
+### Changed
+- Use `Class.getTypeName()` instead of `Class.getName()` in `TypeContext.getFullTypeDescription()`.
+
 ### Fixed
 - `NullPointerException` on `MemberScope` representing `void` methods.
 - `IndexOutOfBoundsException` when determining container item type of raw `Collection`.

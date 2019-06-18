@@ -150,7 +150,7 @@ public class TypeContext {
      */
     private String getTypeDescription(ResolvedType type, boolean simpleClassNames) {
         Class<?> erasedType = type.getErasedType();
-        String result = simpleClassNames ? erasedType.getSimpleName() : erasedType.getName();
+        String result = simpleClassNames ? erasedType.getSimpleName() : erasedType.getTypeName();
         List<ResolvedType> typeParameters = type.getTypeParameters();
         if (!typeParameters.isEmpty()) {
             result += typeParameters.stream()
