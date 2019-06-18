@@ -37,6 +37,21 @@ public class MemberScopeTest extends AbstractTypeAwareTest {
         super(TestClass.class);
     }
 
+    @Test
+    @Parameters({
+        "privateVisibleField, true, false, false",
+        "packageVisibleField, false, false, false",
+        "protectedVisibleField, false, true, false",
+        "publicVisibleField, false, false, true"
+    })
+    public void testGetVisibility(String fieldName, boolean isPrivate, boolean isProtected, boolean isPublic) {
+        FieldScope field = this.getTestClassField(fieldName);
+
+        Assert.assertEquals(isPrivate, field.isPrivate());
+        Assert.assertEquals(isProtected, field.isProtected());
+        Assert.assertEquals(isPublic, field.isPublic());
+    }
+
     Object parametersForTestContainerType() {
         return new Object[][]{
             {"getStringArray", true, String.class},
