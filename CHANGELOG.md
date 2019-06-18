@@ -5,11 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Added
-- In `TypeContext.resolve(Type)` also allow passing type parameters via `TypeContext.resolve(Type, Type...)`.
 
+## [3.1.0] – 2019-06-18
 ### Changed
 - Use `Class.getTypeName()` instead of `Class.getName()` in `TypeContext.getFullTypeDescription()`.
+
+### Added
+- In `TypeContext.resolve(Type)` also allow passing type parameters via `TypeContext.resolve(Type, Type...)`.
 
 ### Fixed
 - `NullPointerException` on `MemberScope` representing `void` methods.
@@ -59,7 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Specific handling of optionals (two alternatives via standard options).
 - Pre-defined sets of standard options to cover different use-cases and simplify library usage.
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/victools/jsonschema-generator/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/victools/jsonschema-generator/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/victools/jsonschema-generator/compare/v1.0.2...v2.0.0
 [1.0.2]: https://github.com/victools/jsonschema-generator/compare/v1.0.1...v1.0.2
