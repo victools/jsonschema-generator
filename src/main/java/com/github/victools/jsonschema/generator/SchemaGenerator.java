@@ -75,11 +75,12 @@ public class SchemaGenerator {
      * Generate a {@link JsonNode} containing the JSON Schema representation of the given type.
      *
      * @param mainTargetType type for which to generate the JSON Schema
+     * @param typeParameters optional type parameters (in case of the {@code mainTargetType} being a parameterised type)
      * @return generated JSON Schema
      */
-    public JsonNode generateSchema(Class<?> mainTargetType) {
+    public JsonNode generateSchema(Type mainTargetType, Type... typeParameters) {
         SchemaGenerationContext generationContext = new SchemaGenerationContext(this.config, this.typeContext);
-        ResolvedType mainType = generationContext.getTypeContext().resolve(mainTargetType);
+        ResolvedType mainType = generationContext.getTypeContext().resolve(mainTargetType, typeParameters);
         this.traverseGenericType(mainType, null, false, generationContext);
 
         ObjectNode jsonSchemaResult = this.config.createObjectNode();
