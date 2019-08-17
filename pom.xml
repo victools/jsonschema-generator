@@ -59,7 +59,8 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <version.classmate>1.5.0</version.classmate>
-        <version.jackson>2.9.9.2</version.jackson>
+        <version.jackson-core>2.9.9</version.jackson-core>
+        <version.jackson-databind>2.9.9.3</version.jackson-databind>
         <version.jsonassert>1.5.0</version.jsonassert>
         <version.junit>4.12</version.junit>
         <version.junitparams>1.1.1</version.junitparams>
@@ -77,12 +78,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${version.jackson}</version>
+            <version>${version.jackson-core}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${version.jackson}</version>
+            <version>${version.jackson-databind}</version>
         </dependency>
         <!-- log4j implementation is optional and left up to the library users to determine whether it is desired -->
         <dependency>
