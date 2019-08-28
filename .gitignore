@@ -1,6 +1,61 @@
-# compiled project
-target
+######################
+# Eclipse
+######################
+.project
+.metadata
+/bin/**
+/tmp/**
+/tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/**
+.loadpath
 
-# IDE configuration (NetBeans)
+######################
+# Intellij
+######################
+.idea/**
+*.iml
+*.iws
+*.ipr
+*.ids
+*.orig
+
+
+######################
+# NetBeans
+######################
 nb-configuration.xml
 nbactions.xml
+
+######################
+# Maven
+######################
+/log/**
+/target/**
+./pom.xml.releaseBackup
+./release.properties
+
+######################
+# Gradle
+######################
+.gradle/**
+
+######################
+# Package Files
+######################
+*.war
+*.ear
+*.db
+
+######################
+# Directories
+######################
+/build/**
+/bin/**
+/deploy/**
+/target/
