@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - In `SchemaGenerator.generateSchema(Type)` also allow passing type parameters via `SchemaGenerator.generateSchema(Type, Type...)`.
+- Support for "required" property via `SchemaGeneratorConfigPart.withRequiredCheck()` (PR #5).
+- Support for "default" property via `SchemaGeneratorConfigPart.withDefaultResolver()` (PR #5).
 
 ## [3.1.0] – 2019-06-18
 ### Changed

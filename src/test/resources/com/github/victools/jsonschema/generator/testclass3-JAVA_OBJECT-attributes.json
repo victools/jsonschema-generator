@@ -96,6 +96,7 @@
                     "type": ["integer", "null"],
                     "title": "Long",
                     "description": "looked-up from method: Long",
+                    "default": 1,
                     "enum": [1, 2, 3, 4, 5],
                     "minimum": 1,
                     "exclusiveMinimum": 0,

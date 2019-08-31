@@ -27,7 +27,7 @@
         <connection>scm:git:ssh://github.com/victools/jsonschema-generator.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/victools/jsonschema-generator.git</developerConnection>
         <url>https://github.com/victools/jsonschema-generator</url>
-        <tag>v3.1.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <organization>
@@ -41,7 +41,17 @@
             <name>Carsten Wickner</name>
         </developer>
     </developers>
-    
+
+    <contributors>
+        <contributor>
+            <name>Florian Didier</name>
+            <url>https://github.com/imIfOu</url>
+            <roles>
+                <role>Provided PR #5 (support for "required" and "default" properties)</role>
+            </roles>
+        </contributor>
+    </contributors>
+
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>

@@ -70,6 +70,20 @@ public class SchemaGeneratorConfigPartTest {
     }
 
     @Test
+    public void testRequiredCheck() {
+        Assert.assertFalse(this.instance.isRequired(this.field1));
+
+        Assert.assertSame(this.instance, this.instance.withRequiredCheck(member -> member == this.field1));
+        Assert.assertTrue(this.instance.isRequired(this.field1));
+        Assert.assertFalse(this.instance.isRequired(this.field2));
+
+        Assert.assertSame(this.instance, this.instance.withRequiredCheck(member -> member == this.field2));
+        Assert.assertTrue(this.instance.isRequired(this.field1));
+        Assert.assertTrue(this.instance.isRequired(this.field2));
+        Assert.assertFalse(this.instance.isRequired(this.field3));
+    }
+
+    @Test
     public void testNullableCheck() {
         Assert.assertNull(this.instance.isNullable(this.field1));
 

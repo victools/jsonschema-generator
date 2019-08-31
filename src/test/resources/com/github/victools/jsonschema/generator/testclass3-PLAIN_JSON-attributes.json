@@ -23,6 +23,7 @@
                     "type": ["integer", "null"],
                     "title": "Integer",
                     "description": "looked-up from field: Integer",
+                    "default": 1,
                     "enum": [1, 2, 3, 4, 5],
                     "minimum": 1,
                     "exclusiveMinimum": 0,
@@ -50,6 +51,7 @@
                     "type": ["integer", "null"],
                     "title": "Long",
                     "description": "looked-up from field: Long",
+                    "default": 1,
                     "enum": [1, 2, 3, 4, 5],
                     "minimum": 1,
                     "exclusiveMinimum": 0,
@@ -131,7 +133,7 @@
         },
         "nestedClass1Array": {
             "allOf": [{
-                    "type": ["object", "null"],
+                    "type": "object",
                     "properties": {
                         "genericArray": {
                             "type": ["array", "null"],
@@ -156,21 +158,18 @@
         },
         "nestedLong": {
             "allOf": [{
-                    "oneOf": [{
-                            "type": "null"
-                        }, {
-                            "$ref": "#/definitions/TestClass2<Long>"
-                        }]
+                    "$ref": "#/definitions/TestClass2<Long>"
                 }, {
                     "title": "TestClass2<Long>",
                     "description": "looked-up from field: TestClass2<Long>"
                 }]
         },
         "nestedLongList": {
-            "type": ["array", "null"],
+            "type": "array",
             "items": {
                 "$ref": "#/definitions/TestClass2<Long>"
             }
         }
-    }
+    },
+    "required": ["nestedLongList", "nestedLong", "nestedClass1Array"]
 }

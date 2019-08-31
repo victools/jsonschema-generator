@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,10 +55,11 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
     private final List<InstanceAttributeOverride<M>> instanceAttributeOverrides = new ArrayList<>();
 
     /*
-     * Customising options for properties in a schema with "type": object; either skipping them completely or also allowing for "type": "null".
+     * Customising options for properties in a schema with "type": object;
+     * either skipping them completely, marking them as required or also allowing for "type": "null".
      */
     private final List<Predicate<M>> ignoreChecks = new ArrayList<>();
-    private final List<Predicate<M>> requiredValue = new ArrayList<>();
+    private final List<Predicate<M>> requiredChecks = new ArrayList<>();
     private final List<ConfigFunction<M, Boolean>> nullableChecks = new ArrayList<>();
 
     /*
@@ -73,7 +73,7 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
      */
     private final List<ConfigFunction<M, String>> titleResolvers = new ArrayList<>();
     private final List<ConfigFunction<M, String>> descriptionResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, String>> defaultResolvers = new ArrayList<>();
+    private final List<ConfigFunction<M, Object>> defaultResolvers = new ArrayList<>();
     private final List<ConfigFunction<M, Collection<?>>> enumResolvers = new ArrayList<>();
     private final List<ConfigFunction<M, Map<String, String>>> metadatas = new ArrayList<>();
 
@@ -139,6 +139,27 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
      */
     public boolean shouldIgnore(M member) {
         return this.ignoreChecks.stream().anyMatch(check -> check.test(member));
+    }
+
+    /**
+     * Setter for required check.
+     *
+     * @param check how to determine whether a given reference should have required value
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorConfigPart<M> withRequiredCheck(Predicate<M> check) {
+        this.requiredChecks.add(check);
+        return this;
+    }
+
+    /**
+     * Determine whether a given member should be indicated as being required in its declaring type.
+     *
+     * @param member member to check
+     * @return whether the member is required (defaults to false)
+     */
+    public boolean isRequired(M member) {
+        return this.requiredChecks.stream().anyMatch(check -> check.test(member));
     }
 
     /**
@@ -258,7 +279,7 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
      * @param resolver how to determine the "default" of a JSON Schema
      * @return this config part (for chaining)
      */
-    public SchemaGeneratorConfigPart<M> withDefaultResolver(ConfigFunction<M, String> resolver) {
+    public SchemaGeneratorConfigPart<M> withDefaultResolver(ConfigFunction<M, Object> resolver) {
         this.defaultResolvers.add(resolver);
         return this;
     }
@@ -269,10 +290,9 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
      * @param member member to determine "default" value for
      * @return "default" in a JSON Schema (may be null)
      */
-    public String resolveDefault(M member) {
+    public Object resolveDefault(M member) {
         return getFirstDefinedValue(this.defaultResolvers, member);
     }
-
 
     /**
      * Setter for "enum"/"const" resolver.
@@ -524,47 +544,5 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
      */
     public Boolean resolveArrayUniqueItems(M member) {
         return getFirstDefinedValue(this.arrayUniqueItemsResolvers, member);
-    }
-
-    /**
-     * Setter for required value.
-     *
-     * @param check how to determine whether a given reference should have required value
-     * @return this config part (for chaining)
-     */
-    public SchemaGeneratorConfigPart<M> withRequired(Predicate<M> check) {
-        this.requiredValue.add(check);
-        return this;
-    }
-
-    /**
-     * Determine whether a given member should have required value.
-     *
-     * @param member member to check
-     * @return whether the member should have required value (defaults to false)
-     */
-    public boolean isRequired(M member) {
-        return this.requiredValue.stream().anyMatch(check -> check.test(member));
-    }
-
-    /**
-     * Setter for metadata resolver.
-     *
-     * @param resolver how to determine the "enum"/"const" of a JSON Schema
-     * @return this config part (for chaining)
-     */
-    public SchemaGeneratorConfigPart<M> withMetadata(ConfigFunction<M, Map<String, String>> resolver) {
-        this.metadatas.add(resolver);
-        return this;
-    }
-
-    /**
-     * Determine the metadata of a given member.
-     *
-     * @param member member to determine metadata values for
-     * @return Map of metadata in a JSON Schema
-     */
-    public Map<String, String> resolveMetadata(M member) {
-        return getFirstDefinedValue(this.metadatas, member);
     }
 }

@@ -20,11 +20,9 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Default implementation of a schema generator's configuration.
@@ -131,6 +129,22 @@ public interface SchemaGeneratorConfig {
     boolean isNullable(MethodScope method);
 
     /**
+     * Check whether a field/property value is required.
+     *
+     * @param field object's field/property to check
+     * @return whether the field/property value should be required
+     */
+    boolean isRequired(FieldScope field);
+
+    /**
+     * Check whether a method value is required.
+     *
+     * @param method method to check
+     * @return whether the method value should be required
+     */
+    boolean isRequired(MethodScope method);
+
+    /**
      * Check whether a field/property should be ignored.
      *
      * @param field object's field/property to check
@@ -216,7 +230,7 @@ public interface SchemaGeneratorConfig {
      * @param method method for whose return value to determine "default" value for
      * @return "default" in a JSON Schema (may be null)
      */
-    String resolveDefault(MethodScope method);
+    Object resolveDefault(MethodScope method);
 
     /**
      * Determine the "default" value of an object's field/property.
@@ -224,7 +238,7 @@ public interface SchemaGeneratorConfig {
      * @param field object's field/property to determine "default" value for
      * @return "default" in a JSON Schema (may be null)
      */
-    String resolveDefault(FieldScope field);
+    Object resolveDefault(FieldScope field);
 
     /**
      * Determine the "enum"/"const" of an object's field/property.
@@ -417,37 +431,4 @@ public interface SchemaGeneratorConfig {
      * @return "uniqueItems" in a JSON Schema (may be null)
      */
     Boolean resolveArrayUniqueItems(MethodScope method);
-
-
-    /**
-     * Check whether a field/property value is required.
-     *
-     * @param field object's field/property to check
-     * @return whether the field/property value should be required
-     */
-    boolean isRequired(FieldScope field);
-
-    /**
-     * Check whether a method value is required.
-     *
-     * @param method method to check
-     * @return whether the method value should be required
-     */
-    boolean isRequired(MethodScope method);
-
-    /**
-     * Determine the metadata of an object's field/property.
-     *
-     * @param field object's field/property to determine metadata value for
-     * @return "enum"/"const" in a JSON Schema (may be null)
-     */
-    Map<String, String> resolveMetadata(FieldScope field);
-
-    /**
-     * Determine the metadata of a method's return value.
-     *
-     * @param method method for whose return value to determine metadata value for
-     * @return metadata in a JSON Schema (may be null)
-     */
-    Map<String, String> resolveMetadata(MethodScope method);
 }

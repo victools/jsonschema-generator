@@ -29,9 +29,6 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import com.github.victools.jsonschema.generator.impl.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +38,8 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generator for JSON Schema definitions via reflection based analysis of a given class.
@@ -64,7 +63,7 @@ public class SchemaGenerator {
     /**
      * Constructor.
      *
-     * @param config  configuration to be applied
+     * @param config configuration to be applied
      * @param context type resolution/introspection context to be used during schema generations (across multiple schema generations)
      */
     public SchemaGenerator(SchemaGeneratorConfig config, TypeContext context) {
@@ -208,7 +207,6 @@ public class SchemaGenerator {
                         definition.set(SchemaConstants.TAG_REQUIRED, requiredNode);
                     }
                 }
-
             } else {
                 logger.debug("applying configured custom definition for {}", targetType);
                 definition.setAll(customDefinition.getValue());
@@ -224,7 +222,7 @@ public class SchemaGenerator {
      * @param targetFields map of named JSON schema nodes representing individual fields
      * @param targetMethods map of named JSON schema nodes representing individual methods
      * @param requiredProperties set of properties value required
-     * @param generationContext  context to add type definitions and their references to (to be resolved at the end of the schema generation)
+     * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
     private void collectObjectProperties(ResolvedType targetType, Map<String, JsonNode> targetFields, Map<String, JsonNode> targetMethods,
             Set<String> requiredProperties, SchemaGenerationContext generationContext) {

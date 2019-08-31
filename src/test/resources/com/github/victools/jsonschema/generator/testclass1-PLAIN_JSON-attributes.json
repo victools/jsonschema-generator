@@ -21,6 +21,7 @@
             "type": ["integer", "null"],
             "title": "Integer",
             "description": "looked-up from field: Integer",
+            "default": 1,
             "enum": [1, 2, 3, 4, 5],
             "minimum": 1,
             "exclusiveMinimum": 0,
