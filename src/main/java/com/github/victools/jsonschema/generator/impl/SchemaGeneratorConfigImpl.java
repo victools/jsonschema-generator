@@ -267,6 +267,16 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public String resolveStringPattern(FieldScope field) {
+        return this.fieldConfigPart.resolveStringPattern(field);
+    }
+
+    @Override
+    public String resolveStringPattern(MethodScope method) {
+        return this.methodConfigPart.resolveStringPattern(method);
+    }
+
+    @Override
     public BigDecimal resolveNumberInclusiveMinimum(FieldScope field) {
         return this.fieldConfigPart.resolveNumberInclusiveMinimum(field);
     }

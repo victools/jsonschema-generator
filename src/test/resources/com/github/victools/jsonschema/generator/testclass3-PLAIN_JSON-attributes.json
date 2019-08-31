@@ -17,7 +17,8 @@
                     "const": "constant string value",
                     "minLength": 1,
                     "maxLength": 256,
-                    "format": "date"
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
                 },
                 "ignoredInternalValue": {
                     "type": ["integer", "null"],
@@ -77,7 +78,8 @@
                     "const": "constant string value",
                     "minLength": 1,
                     "maxLength": 256,
-                    "format": "date"
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
                 }
             }
         }
@@ -123,7 +125,8 @@
                             "const": "constant string value",
                             "minLength": 1,
                             "maxLength": 256,
-                            "format": "date"
+                            "format": "date",
+                            "pattern": "^.{1,256}$"
                         }
                     }
                 }, {

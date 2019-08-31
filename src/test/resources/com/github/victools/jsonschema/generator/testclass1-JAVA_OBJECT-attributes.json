@@ -19,7 +19,8 @@
             "const": "constant string value",
             "minLength": 1,
             "maxLength": 256,
-            "format": "date"
+            "format": "date",
+            "pattern": "^.{1,256}$"
         },
         "getPrimitiveValue()": {
             "type": ["integer", "null"],

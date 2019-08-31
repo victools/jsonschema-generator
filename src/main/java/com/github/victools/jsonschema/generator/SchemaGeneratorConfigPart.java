@@ -83,6 +83,7 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
     private final List<ConfigFunction<M, Integer>> stringMinLengthResolvers = new ArrayList<>();
     private final List<ConfigFunction<M, Integer>> stringMaxLengthResolvers = new ArrayList<>();
     private final List<ConfigFunction<M, String>> stringFormatResolvers = new ArrayList<>();
+    private final List<ConfigFunction<M, String>> stringPatternResolvers = new ArrayList<>();
 
     /*
      * Validation fields relating to a schema with "type": "integer" or "number".
@@ -376,6 +377,27 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
      */
     public String resolveStringFormat(M member) {
         return getFirstDefinedValue(this.stringFormatResolvers, member);
+    }
+
+    /**
+     * Setter for "format" resolver.
+     *
+     * @param resolver how to determine the "format" of a JSON Schema
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorConfigPart<M> withStringPatternResolver(ConfigFunction<M, String> resolver) {
+        this.stringPatternResolvers.add(resolver);
+        return this;
+    }
+
+    /**
+     * Determine the "format" of a given member.
+     *
+     * @param member member to determine "format" value for
+     * @return "format" in a JSON Schema (may be null)
+     */
+    public String resolveStringPattern(M member) {
+        return getFirstDefinedValue(this.stringPatternResolvers, member);
     }
 
     /**
