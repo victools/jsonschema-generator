@@ -17,11 +17,13 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -57,6 +59,7 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
      * Customising options for properties in a schema with "type": object; either skipping them completely or also allowing for "type": "null".
      */
     private final List<Predicate<M>> ignoreChecks = new ArrayList<>();
+    private final List<Predicate<M>> requiredValue = new ArrayList<>();
     private final List<ConfigFunction<M, Boolean>> nullableChecks = new ArrayList<>();
 
     /*
@@ -70,7 +73,9 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
      */
     private final List<ConfigFunction<M, String>> titleResolvers = new ArrayList<>();
     private final List<ConfigFunction<M, String>> descriptionResolvers = new ArrayList<>();
+    private final List<ConfigFunction<M, String>> defaultResolvers = new ArrayList<>();
     private final List<ConfigFunction<M, Collection<?>>> enumResolvers = new ArrayList<>();
+    private final List<ConfigFunction<M, Map<String, String>>> metadatas = new ArrayList<>();
 
     /*
      * Validation fields relating to a schema with "type": "string".
@@ -246,6 +251,28 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
     public String resolveDescription(M member) {
         return getFirstDefinedValue(this.descriptionResolvers, member);
     }
+
+    /**
+     * Setter for "default" resolver.
+     *
+     * @param resolver how to determine the "default" of a JSON Schema
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorConfigPart<M> withDefaultResolver(ConfigFunction<M, String> resolver) {
+        this.defaultResolvers.add(resolver);
+        return this;
+    }
+
+    /**
+     * Determine the "default" of a given member.
+     *
+     * @param member member to determine "default" value for
+     * @return "default" in a JSON Schema (may be null)
+     */
+    public String resolveDefault(M member) {
+        return getFirstDefinedValue(this.defaultResolvers, member);
+    }
+
 
     /**
      * Setter for "enum"/"const" resolver.
@@ -497,5 +524,47 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
      */
     public Boolean resolveArrayUniqueItems(M member) {
         return getFirstDefinedValue(this.arrayUniqueItemsResolvers, member);
+    }
+
+    /**
+     * Setter for required value.
+     *
+     * @param check how to determine whether a given reference should have required value
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorConfigPart<M> withRequired(Predicate<M> check) {
+        this.requiredValue.add(check);
+        return this;
+    }
+
+    /**
+     * Determine whether a given member should have required value.
+     *
+     * @param member member to check
+     * @return whether the member should have required value (defaults to false)
+     */
+    public boolean isRequired(M member) {
+        return this.requiredValue.stream().anyMatch(check -> check.test(member));
+    }
+
+    /**
+     * Setter for metadata resolver.
+     *
+     * @param resolver how to determine the "enum"/"const" of a JSON Schema
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorConfigPart<M> withMetadata(ConfigFunction<M, Map<String, String>> resolver) {
+        this.metadatas.add(resolver);
+        return this;
+    }
+
+    /**
+     * Determine the metadata of a given member.
+     *
+     * @param member member to determine metadata values for
+     * @return Map of metadata in a JSON Schema
+     */
+    public Map<String, String> resolveMetadata(M member) {
+        return getFirstDefinedValue(this.metadatas, member);
     }
 }
