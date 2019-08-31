@@ -39,6 +39,7 @@ public interface SchemaConstants {
 
     String TAG_PROPERTIES = "properties";
     String TAG_ITEMS = "items";
+    String TAG_REQUIRED = "required";
 
     String TAG_ALLOF = "allOf";
     String TAG_ANYOF = "anyOf";
@@ -48,6 +49,7 @@ public interface SchemaConstants {
     String TAG_DESCRIPTION = "description";
     String TAG_CONST = "const";
     String TAG_ENUM = "enum";
+    String TAG_DEFAULT = "default";
 
     String TAG_LENGTH_MIN = "minLength";
     String TAG_LENGTH_MAX = "maxLength";

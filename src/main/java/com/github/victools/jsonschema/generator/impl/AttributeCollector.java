@@ -20,16 +20,18 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.SchemaConstants;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
+import com.github.victools.jsonschema.generator.SchemaConstants;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Helper class for looking-up various attribute values for a field or method via a given configuration instance.
@@ -61,6 +63,7 @@ public class AttributeCollector {
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
         collector.setTitle(node, config.resolveTitle(field));
         collector.setDescription(node, config.resolveDescription(field));
+        collector.setDefault(node, config.resolveDefault(field));
         collector.setEnum(node, config.resolveEnum(field));
         collector.setStringMinLength(node, config.resolveStringMinLength(field));
         collector.setStringMaxLength(node, config.resolveStringMaxLength(field));
@@ -73,6 +76,7 @@ public class AttributeCollector {
         collector.setArrayMinItems(node, config.resolveArrayMinItems(field));
         collector.setArrayMaxItems(node, config.resolveArrayMaxItems(field));
         collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(field));
+        collector.setMetadata(node, config.resolveMetadata(field));
         config.getFieldAttributeOverrides()
                 .forEach(override -> override.overrideInstanceAttributes(node, field));
         return node;
@@ -90,6 +94,7 @@ public class AttributeCollector {
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
         collector.setTitle(node, config.resolveTitle(method));
         collector.setDescription(node, config.resolveDescription(method));
+        collector.setDefault(node, config.resolveDefault(method));
         collector.setEnum(node, config.resolveEnum(method));
         collector.setStringMinLength(node, config.resolveStringMinLength(method));
         collector.setStringMaxLength(node, config.resolveStringMaxLength(method));
@@ -102,6 +107,7 @@ public class AttributeCollector {
         collector.setArrayMinItems(node, config.resolveArrayMinItems(method));
         collector.setArrayMaxItems(node, config.resolveArrayMaxItems(method));
         collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(method));
+        collector.setMetadata(node, config.resolveMetadata(method));
         config.getMethodAttributeOverrides()
                 .forEach(override -> override.overrideInstanceAttributes(node, method));
         return node;
@@ -131,6 +137,20 @@ public class AttributeCollector {
     public AttributeCollector setDescription(ObjectNode node, String description) {
         if (description != null) {
             node.put(SchemaConstants.TAG_DESCRIPTION, description);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@value SchemaConstants#TAG_DEFAULT}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param format attribute value to set
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setDefault(ObjectNode node, String format) {
+        if (format != null) {
+            node.put(SchemaConstants.TAG_DEFAULT, format);
         }
         return this;
     }
@@ -342,6 +362,20 @@ public class AttributeCollector {
     public AttributeCollector setArrayUniqueItems(ObjectNode node, Boolean uniqueItems) {
         if (uniqueItems != null) {
             node.put(SchemaConstants.TAG_ITEMS_UNIQUE, uniqueItems);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for metadata attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param metadata metadata attribute value to set
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setMetadata(ObjectNode node, Map<String, String> metadata) {
+        if (metadata != null && !metadata.isEmpty()) {
+            metadata.entrySet().forEach(x -> node.put(x.getKey(), x.getValue()));
         }
         return this;
     }

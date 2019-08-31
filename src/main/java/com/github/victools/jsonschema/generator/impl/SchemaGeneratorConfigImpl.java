@@ -30,6 +30,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.TypeAttributeOverride;
 import com.github.victools.jsonschema.generator.TypeContext;
+
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
@@ -207,6 +208,16 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public String resolveDefault(MethodScope method) {
+        return this.methodConfigPart.resolveDefault(method);
+    }
+
+    @Override
+    public String resolveDefault(FieldScope field) {
+        return this.fieldConfigPart.resolveDefault(field);
+    }
+
+    @Override
     public Collection<?> resolveEnum(FieldScope field) {
         return this.fieldConfigPart.resolveEnum(field);
     }
@@ -324,5 +335,25 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public Boolean resolveArrayUniqueItems(MethodScope method) {
         return this.methodConfigPart.resolveArrayUniqueItems(method);
+    }
+
+    @Override
+    public boolean isRequired(FieldScope field) {
+        return this.fieldConfigPart.isRequired(field);
+    }
+
+    @Override
+    public boolean isRequired(MethodScope method) {
+        return this.methodConfigPart.isRequired(method);
+    }
+
+    @Override
+    public Map<String, String> resolveMetadata(FieldScope field) {
+        return this.fieldConfigPart.resolveMetadata(field);
+    }
+
+    @Override
+    public Map<String, String> resolveMetadata(MethodScope method) {
+        return this.methodConfigPart.resolveMetadata(method);
     }
 }
