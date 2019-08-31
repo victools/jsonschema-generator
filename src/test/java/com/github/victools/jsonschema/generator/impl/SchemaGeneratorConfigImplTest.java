@@ -16,19 +16,19 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.InstanceAttributeOverride;
+import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.TypeAttributeOverride;
-import com.github.victools.jsonschema.generator.FieldScope;
-import com.github.victools.jsonschema.generator.MethodScope;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -180,6 +180,24 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
         }
         boolean result = this.instance.isNullable(method);
         Assert.assertEquals(expectedResult, result);
+    }
+
+    @Test
+    @Parameters({"true", "false"})
+    public void testIsRequiredField(boolean configuredAndExpectedResult) throws Exception {
+        FieldScope field = this.getTestClassField("field");
+        Mockito.when(this.fieldConfigPart.isRequired(field)).thenReturn(configuredAndExpectedResult);
+        boolean result = this.instance.isRequired(field);
+        Assert.assertEquals(configuredAndExpectedResult, result);
+    }
+
+    @Test
+    @Parameters({"true", "false"})
+    public void testIsRequiredMethod(boolean configuredAndExpectedResult) throws Exception {
+        MethodScope method = this.getTestClassMethod("getField");
+        Mockito.when(this.methodConfigPart.isRequired(method)).thenReturn(configuredAndExpectedResult);
+        boolean result = this.instance.isRequired(method);
+        Assert.assertEquals(configuredAndExpectedResult, result);
     }
 
     @Test

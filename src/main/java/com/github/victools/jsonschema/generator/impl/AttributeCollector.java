@@ -24,14 +24,13 @@ import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper class for looking-up various attribute values for a field or method via a given configuration instance.
@@ -76,7 +75,6 @@ public class AttributeCollector {
         collector.setArrayMinItems(node, config.resolveArrayMinItems(field));
         collector.setArrayMaxItems(node, config.resolveArrayMaxItems(field));
         collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(field));
-        collector.setMetadata(node, config.resolveMetadata(field));
         config.getFieldAttributeOverrides()
                 .forEach(override -> override.overrideInstanceAttributes(node, field));
         return node;
@@ -107,7 +105,6 @@ public class AttributeCollector {
         collector.setArrayMinItems(node, config.resolveArrayMinItems(method));
         collector.setArrayMaxItems(node, config.resolveArrayMaxItems(method));
         collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(method));
-        collector.setMetadata(node, config.resolveMetadata(method));
         config.getMethodAttributeOverrides()
                 .forEach(override -> override.overrideInstanceAttributes(node, method));
         return node;
@@ -145,12 +142,30 @@ public class AttributeCollector {
      * Setter for "{@value SchemaConstants#TAG_DEFAULT}" attribute.
      *
      * @param node schema node to set attribute on
-     * @param format attribute value to set
+     * @param defaultValue attribute value to set
      * @return this instance (for chaining)
      */
-    public AttributeCollector setDefault(ObjectNode node, String format) {
-        if (format != null) {
-            node.put(SchemaConstants.TAG_DEFAULT, format);
+    public AttributeCollector setDefault(ObjectNode node, Object defaultValue) {
+        if (defaultValue != null) {
+            // need to specifically add simple/primitive values by type
+            if (defaultValue instanceof String) {
+                node.put(SchemaConstants.TAG_DEFAULT, (String) defaultValue);
+            } else if (defaultValue instanceof BigDecimal) {
+                node.put(SchemaConstants.TAG_DEFAULT, (BigDecimal) defaultValue);
+            } else if (defaultValue instanceof BigInteger) {
+                node.put(SchemaConstants.TAG_DEFAULT, (BigInteger) defaultValue);
+            } else if (defaultValue instanceof Boolean) {
+                node.put(SchemaConstants.TAG_DEFAULT, (Boolean) defaultValue);
+            } else if (defaultValue instanceof Double) {
+                node.put(SchemaConstants.TAG_DEFAULT, (Double) defaultValue);
+            } else if (defaultValue instanceof Float) {
+                node.put(SchemaConstants.TAG_DEFAULT, (Float) defaultValue);
+            } else if (defaultValue instanceof Integer) {
+                node.put(SchemaConstants.TAG_DEFAULT, (Integer) defaultValue);
+            } else {
+                // everything else is simply forwarded as-is to the JSON Schema, it's up to the configurator to ensure the value's correctness
+                node.putPOJO(SchemaConstants.TAG_DEFAULT, defaultValue);
+            }
         }
         return this;
     }
@@ -362,20 +377,6 @@ public class AttributeCollector {
     public AttributeCollector setArrayUniqueItems(ObjectNode node, Boolean uniqueItems) {
         if (uniqueItems != null) {
             node.put(SchemaConstants.TAG_ITEMS_UNIQUE, uniqueItems);
-        }
-        return this;
-    }
-
-    /**
-     * Setter for metadata attribute.
-     *
-     * @param node schema node to set attribute on
-     * @param metadata metadata attribute value to set
-     * @return this instance (for chaining)
-     */
-    public AttributeCollector setMetadata(ObjectNode node, Map<String, String> metadata) {
-        if (metadata != null && !metadata.isEmpty()) {
-            metadata.entrySet().forEach(x -> node.put(x.getKey(), x.getValue()));
         }
         return this;
     }
