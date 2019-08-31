@@ -94,6 +94,7 @@ public class SchemaGeneratorTest {
                 .withStringFormatResolver(member -> member.getType().isInstanceOf(String.class) ? "date" : null)
                 .withStringMaxLengthResolver(member -> member.getType().isInstanceOf(String.class) ? 256 : null)
                 .withStringMinLengthResolver(member -> member.getType().isInstanceOf(String.class) ? 1 : null)
+                .withStringPatternResolver(member -> member.getType().isInstanceOf(String.class) ? "^.{1,256}$" : null)
                 .withTitleResolver(member -> member.getContext().getSimpleTypeDescription(member.getType()));
     }
 

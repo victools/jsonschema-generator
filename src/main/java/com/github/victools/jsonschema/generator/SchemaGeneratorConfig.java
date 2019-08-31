@@ -305,6 +305,22 @@ public interface SchemaGeneratorConfig {
     String resolveStringFormat(MethodScope method);
 
     /**
+     * Determine the "pattern" of an object's field/property.
+     *
+     * @param field object's field/property to determine "pattern" value for
+     * @return "pattern" in a JSON Schema (may be null)
+     */
+    String resolveStringPattern(FieldScope field);
+
+    /**
+     * Determine the "pattern" of a method's return value.
+     *
+     * @param method method for whose return value to determine "pattern" value for
+     * @return "pattern" in a JSON Schema (may be null)
+     */
+    String resolveStringPattern(MethodScope method);
+
+    /**
      * Determine the "minimum" of an object's field/property.
      *
      * @param field object's field/property to determine "minimum" value for

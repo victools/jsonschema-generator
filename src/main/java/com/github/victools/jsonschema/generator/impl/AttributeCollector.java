@@ -67,6 +67,7 @@ public class AttributeCollector {
         collector.setStringMinLength(node, config.resolveStringMinLength(field));
         collector.setStringMaxLength(node, config.resolveStringMaxLength(field));
         collector.setStringFormat(node, config.resolveStringFormat(field));
+        collector.setStringPattern(node, config.resolveStringPattern(field));
         collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(field));
         collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(field));
         collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(field));
@@ -97,6 +98,7 @@ public class AttributeCollector {
         collector.setStringMinLength(node, config.resolveStringMinLength(method));
         collector.setStringMaxLength(node, config.resolveStringMaxLength(method));
         collector.setStringFormat(node, config.resolveStringFormat(method));
+        collector.setStringPattern(node, config.resolveStringPattern(method));
         collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(method));
         collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(method));
         collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(method));
@@ -265,6 +267,20 @@ public class AttributeCollector {
     public AttributeCollector setStringFormat(ObjectNode node, String format) {
         if (format != null) {
             node.put(SchemaConstants.TAG_FORMAT, format);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@value SchemaConstants#TAG_PATTERN}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param pattern attribute value to set
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setStringPattern(ObjectNode node, String pattern) {
+        if (pattern != null) {
+            node.put(SchemaConstants.TAG_PATTERN, pattern);
         }
         return this;
     }
