@@ -31,6 +31,8 @@ nb-configuration.xml
 nbactions.xml
 
 ######################
-# Build Directories
+# Maven
 ######################
 target
+release.properties
+pom.xml.releaseBackup
