@@ -98,7 +98,7 @@ configBuilder.forFields()
 |    2 | `definitions` | Filled with sub-schemas to support circular references – via `Option.DEFINITIONS_FOR_ALL_OBJECTS` it can be configured whether only sub-schemas appearing more than once are included or all. |
 |    3 | `$ref` | Used with relative references to sub-schemas in `definitions`. |
 |    4 | `type` | Differentiating between `boolean`/`string`/`integer`/`number` for primitive/known types. `null` is added if a property is deemed nullable according to configuration (`SchemaGeneratorConfigPart.withNullableCheck()`). Arrays and sub-types of `Collection<?>` are treated as `array`, everything else as `object`. A declared type may be interpreted as another type according to configuration (`SchemaGeneratorConfigPart.withTargetTypeOverrideResolver()`). |
-|    5 | `properties` | Listing all detected fields and/or methods in an `object`. Which ones are being included can be steered by various `Option`s or via one of the provided `OptionPreset`s. Names can be altered via configuration (`SchemaGeneratorConfigPart.withPropertyNameOverrideResolver()`). |
+|    5 | `properties` | Listing all detected fields and/or methods in an `object`. Which ones are being included can be steered by various `Option`s or via one of the provided `OptionPreset`s as well as by ignoring individual ones via configuration (`SchemaGeneratorConfigPart.withIgnoreCheck()`). Names can be altered via configuration (`SchemaGeneratorConfigPart.withPropertyNameOverrideResolver()`). |
 |    6 | `items` | Indicating the type of `array`/`Collection` elements. |
 |    7 | `required` | Listing the names of fields/methods that are deemed mandatory according to configuration (`SchemaGeneratorConfigPart.withRequiredCheck()`). |
 |    8 | `allOf` | Used to combine general attributes derived from the type itself with attributes collected in the respective context of the associated field/method. |
@@ -120,3 +120,4 @@ configBuilder.forFields()
 |   24 | `minItems` | Collected value according to configuration (`SchemaGeneratorConfigPart.withArrayMinItemsResolver()`). |
 |   25 | `maxItems` | Collected value according to configuration (`SchemaGeneratorConfigPart.withArrayMaxItemsResolver()`). |
 |   26 | `uniqueItems` | Collected value according to configuration (`SchemaGeneratorConfigPart.withArrayUniqueItemsResolver()`). |
+|   27 | any other | You can directly manipulate the generated `ObjectNode` of a sub-schema – e.g. setting additional attributes – via configuration based on a given type in general (`SchemaGeneratorConfigBuilder.with(TypeAttributeOverride)`) and/or in the context of a particular field/method (`SchemaGeneratorConfigPart.withInstanceAttributeOverride()`). |
