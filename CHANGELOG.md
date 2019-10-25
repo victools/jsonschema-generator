@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ### Fixed
 - Increase dependency version for jackson-databind (and jackson-core) to resolve security alerts.
+- Avoid unnecessary quotes when representing constant string values (due to changed jackson behaviour)
 
 ## [3.2.0] – 2019-09-01
 ### Added
