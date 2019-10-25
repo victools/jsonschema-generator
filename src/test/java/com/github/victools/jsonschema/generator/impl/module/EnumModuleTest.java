@@ -31,18 +31,15 @@ import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import junitparams.JUnitParamsRunner;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 /**
  * Test for the {@link EnumModule} class.
  */
-@RunWith(JUnitParamsRunner.class)
 public class EnumModuleTest extends AbstractTypeAwareTest {
 
     private EnumModule instanceAsStrings;
