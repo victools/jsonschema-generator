@@ -181,16 +181,26 @@ public class AttributeCollector {
      */
     public AttributeCollector setEnum(ObjectNode node, Collection<?> enumValues) {
         if (enumValues != null) {
-            List<String> valuesAsString = enumValues.stream()
+            List<Object> values = enumValues.stream()
                     .filter(this::isSupportedEnumValue)
-                    .map(this::convertObjectToString)
+                    .filter(this::canBeConvertedToString)
                     .collect(Collectors.toList());
-            if (valuesAsString.size() == 1) {
-                String singleValue = valuesAsString.get(0);
-                node.putPOJO(SchemaConstants.TAG_CONST, singleValue);
-            } else if (!valuesAsString.isEmpty()) {
+            if (values.size() == 1) {
+                Object singleValue = values.get(0);
+                if (singleValue instanceof String) {
+                    node.put(SchemaConstants.TAG_CONST, (String) singleValue);
+                } else {
+                    node.putPOJO(SchemaConstants.TAG_CONST, singleValue);
+                }
+            } else if (!values.isEmpty()) {
                 ArrayNode array = node.arrayNode();
-                valuesAsString.forEach(array::addPOJO);
+                for (Object singleValue : values) {
+                    if (singleValue instanceof String) {
+                        array.add((String) singleValue);
+                    } else {
+                        array.addPOJO(singleValue);
+                    }
+                }
                 node.set(SchemaConstants.TAG_ENUM, array);
             }
         }
@@ -215,17 +225,17 @@ public class AttributeCollector {
     }
 
     /**
-     * Call {@link ObjectMapper#writeValueAsString(Object)} on the given object – ignoring any occurring {@link JsonProcessingException}.
+     * Call {@link ObjectMapper#writeValueAsString(Object)} on the given object and determining whether any {@link JsonProcessingException} occurs.
      *
      * @param target object to convert
-     * @return converted object
+     * @return whether the underlying ObjectMapper is able to convert the given object without encountering an exception
      */
-    private String convertObjectToString(Object target) {
+    private boolean canBeConvertedToString(Object target) {
         try {
-            return this.objectMapper.writeValueAsString(target);
+            return target == null || this.objectMapper.writeValueAsString(target) != null;
         } catch (JsonProcessingException ex) {
             logger.warn("Failed to convert value to string via ObjectMapper: {}", target, ex);
-            return target == null ? null : ('"' + target.toString() + '"');
+            return false;
         }
     }
 
