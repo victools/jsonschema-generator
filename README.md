@@ -11,7 +11,7 @@ Creating JSON Schema (Draft 7) from your Java classes utilising Jackson (inspire
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>3.2.0</version>
+    <version>3.3.0</version>
 </dependency>
 ```
 
@@ -60,6 +60,17 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper)
     .with(Option.FLATTENED_ENUMS)
     .without(Option.NULLABLE_FIELDS_BY_DEFAULT, Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT);
+```
+
+You can also define your own `OptionPreset` or provide an empty one and then build your desired configuration from there:
+```java
+import com.github.victools.jsonschema.generator.Option;
+import com.github.victools.jsonschema.generator.OptionPreset;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+```
+```java
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper, new OptionPreset())
+    .with(Option.ADDITIONAL_FIXED_TYPES, Option.PUBLIC_NONSTATIC_FIELDS);
 ```
 
 #### Adding Separate Modules (e.g. from another library)
