@@ -16,7 +16,10 @@
 
 package com.github.victools.jsonschema.generator;
 
-import javax.xml.bind.annotation.XmlValue;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -78,7 +81,7 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
     })
     public void testGetAnnotationConsideringFieldAndGetter(String fieldName, boolean annotationExpectedToBeFound) {
         FieldScope field = this.getTestClassField(fieldName);
-        XmlValue annotation = field.getAnnotationConsideringFieldAndGetter(XmlValue.class);
+        TestAnnotation annotation = field.getAnnotationConsideringFieldAndGetter(TestAnnotation.class);
 
         if (annotationExpectedToBeFound) {
             Assert.assertNotNull(annotation);
@@ -90,7 +93,7 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
     private static class TestClass {
 
         private String fieldWithoutGetter;
-        @XmlValue
+        @TestAnnotation
         private int fieldWithPrivateGetter;
         private long fieldWithPublicGetter;
         private boolean fieldWithPublicBooleanGetter;
@@ -103,9 +106,14 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
             return this.fieldWithPublicGetter;
         }
 
-        @XmlValue
+        @TestAnnotation
         public boolean isFieldWithPublicBooleanGetter() {
             return this.fieldWithPublicBooleanGetter;
         }
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD, ElementType.METHOD})
+    private static @interface TestAnnotation {
     }
 }
