@@ -20,6 +20,7 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.classmate.members.ResolvedMethod;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
@@ -111,5 +112,15 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
      */
     public boolean hasGetter() {
         return this.findGetter() != null;
+    }
+
+    @Override
+    public <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass) {
+        A annotation = this.getAnnotation(annotationClass);
+        if (annotation == null) {
+            MemberScope<?, ?> associatedGetter = this.findGetter();
+            annotation = associatedGetter == null ? null : associatedGetter.getAnnotation(annotationClass);
+        }
+        return annotation;
     }
 }

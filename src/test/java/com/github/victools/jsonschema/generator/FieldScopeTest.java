@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator;
 
+import javax.xml.bind.annotation.XmlValue;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -68,9 +69,28 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
         Assert.assertEquals(expectedResult, result);
     }
 
+    @Test
+    @Parameters({
+        "fieldWithoutGetter, false",
+        "fieldWithPrivateGetter, true",
+        "fieldWithPublicGetter, false",
+        "fieldWithPublicBooleanGetter, true"
+    })
+    public void testGetAnnotationConsideringFieldAndGetter(String fieldName, boolean annotationExpectedToBeFound) {
+        FieldScope field = this.getTestClassField(fieldName);
+        XmlValue annotation = field.getAnnotationConsideringFieldAndGetter(XmlValue.class);
+
+        if (annotationExpectedToBeFound) {
+            Assert.assertNotNull(annotation);
+        } else {
+            Assert.assertNull(annotation);
+        }
+    }
+
     private static class TestClass {
 
         private String fieldWithoutGetter;
+        @XmlValue
         private int fieldWithPrivateGetter;
         private long fieldWithPublicGetter;
         private boolean fieldWithPublicBooleanGetter;
@@ -83,6 +103,7 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
             return this.fieldWithPublicGetter;
         }
 
+        @XmlValue
         public boolean isFieldWithPublicBooleanGetter() {
             return this.fieldWithPublicBooleanGetter;
         }
