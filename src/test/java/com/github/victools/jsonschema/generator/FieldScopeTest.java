@@ -16,6 +16,10 @@
 
 package com.github.victools.jsonschema.generator;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -68,9 +72,28 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
         Assert.assertEquals(expectedResult, result);
     }
 
+    @Test
+    @Parameters({
+        "fieldWithoutGetter, false",
+        "fieldWithPrivateGetter, true",
+        "fieldWithPublicGetter, false",
+        "fieldWithPublicBooleanGetter, true"
+    })
+    public void testGetAnnotationConsideringFieldAndGetter(String fieldName, boolean annotationExpectedToBeFound) {
+        FieldScope field = this.getTestClassField(fieldName);
+        TestAnnotation annotation = field.getAnnotationConsideringFieldAndGetter(TestAnnotation.class);
+
+        if (annotationExpectedToBeFound) {
+            Assert.assertNotNull(annotation);
+        } else {
+            Assert.assertNull(annotation);
+        }
+    }
+
     private static class TestClass {
 
         private String fieldWithoutGetter;
+        @TestAnnotation
         private int fieldWithPrivateGetter;
         private long fieldWithPublicGetter;
         private boolean fieldWithPublicBooleanGetter;
@@ -83,8 +106,14 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
             return this.fieldWithPublicGetter;
         }
 
+        @TestAnnotation
         public boolean isFieldWithPublicBooleanGetter() {
             return this.fieldWithPublicBooleanGetter;
         }
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD, ElementType.METHOD})
+    private static @interface TestAnnotation {
     }
 }

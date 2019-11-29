@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedMethod;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -136,6 +137,16 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
      */
     public boolean isGetter() {
         return this.findGetterField() != null;
+    }
+
+    @Override
+    public <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass) {
+        A annotation = this.getAnnotation(annotationClass);
+        if (annotation == null) {
+            MemberScope<?, ?> associatedField = this.findGetterField();
+            annotation = associatedField == null ? null : associatedField.getAnnotation(annotationClass);
+        }
+        return annotation;
     }
 
     /**

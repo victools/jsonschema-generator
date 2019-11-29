@@ -17,6 +17,7 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -99,8 +100,15 @@ public class SchemaGeneratorTest {
     }
 
     Object parametersForTestGenerateSchema() {
-        Module neutralModule = configBuilder -> {
-        };
+        Module neutralModule = configBuilder -> configBuilder.with((javaType, context) -> {
+            if (Integer.class == javaType.getErasedType()) {
+                ObjectNode customNode = configBuilder.getObjectMapper()
+                        .createObjectNode()
+                        .put("$comment", "custom definition for Integer.class");
+                return new CustomDefinition(customNode, false);
+            }
+            return null;
+        });
         Module methodModule = configBuilder -> populateConfigPart(configBuilder.forMethods(), "looked-up from method: ");
         Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields(), "looked-up from field: ");
         return new Object[][]{
