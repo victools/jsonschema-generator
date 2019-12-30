@@ -3,6 +3,11 @@
     "type": "object",
     "properties": {
         "genericArray": {
+            "title": "String[]<String>",
+            "description": "looked-up from field: String[]<String>",
+            "minItems": 2,
+            "maxItems": 100,
+            "uniqueItems": false,
             "type": ["array", "null"],
             "items": {
                 "type": "string"

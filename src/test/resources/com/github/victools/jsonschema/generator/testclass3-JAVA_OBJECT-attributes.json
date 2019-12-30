@@ -35,6 +35,11 @@
                         }]
                 },
                 "values()": {
+                    "title": "RoundingMode[]",
+                    "description": "looked-up from method: RoundingMode[]",
+                    "minItems": 2,
+                    "maxItems": 100,
+                    "uniqueItems": false,
                     "type": ["array", "null"],
                     "items": {
                         "$ref": "#/definitions/RoundingMode"
@@ -221,6 +226,11 @@
                             }
                         },
                         "getGenericValue()": {
+                            "title": "TestClass1[]",
+                            "description": "looked-up from method: TestClass1[]",
+                            "minItems": 2,
+                            "maxItems": 100,
+                            "uniqueItems": false,
                             "type": ["array", "null"],
                             "items": {
                                 "$ref": "#/definitions/TestClass1"
@@ -245,6 +255,11 @@
                 }]
         },
         "getNestedLongList()": {
+            "title": "List<TestClass2<Long>>",
+            "description": "looked-up from method: List<TestClass2<Long>>",
+            "minItems": 2,
+            "maxItems": 100,
+            "uniqueItems": false,
             "type": ["array", "null"],
             "items": {
                 "$ref": "#/definitions/TestClass2<Long>"

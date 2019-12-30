@@ -386,10 +386,13 @@ public class SchemaGenerator {
         CustomDefinition customDefinition = this.config.getCustomDefinition(javaType, generationContext.getTypeContext());
         if (collectedAttributes == null
                 || collectedAttributes.size() == 0
-                || (customDefinition != null && customDefinition.isMeantToBeInline())
-                || generationContext.getTypeContext().isContainerType(javaType)) {
+                || (customDefinition != null && customDefinition.isMeantToBeInline())) {
             // no need for the allOf, can use the sub-schema instance directly as reference
             referenceContainer = targetNode;
+        } else if (generationContext.getTypeContext().isContainerType(javaType)) {
+            // same as above, but the collected attributes should be applied also for containers/arrays
+            referenceContainer = targetNode;
+            referenceContainer.setAll(collectedAttributes);
         } else {
             // avoid mixing potential "$ref" element with contextual attributes by introducing an "allOf" wrapper
             referenceContainer = this.config.createObjectNode();

@@ -78,8 +78,8 @@ public class SchemaGeneratorTest {
 
     private static void populateConfigPart(SchemaGeneratorConfigPart<?> configPart, String descriptionPrefix) {
         configPart
-                .withArrayMinItemsResolver(member -> member.isContainerType() ? 0 : null)
-                .withArrayMaxItemsResolver(member -> member.isContainerType() ? Integer.MAX_VALUE : null)
+                .withArrayMinItemsResolver(member -> member.isContainerType() ? 2 : null)
+                .withArrayMaxItemsResolver(member -> member.isContainerType() ? 100 : null)
                 .withArrayUniqueItemsResolver(member -> member.isContainerType() ? false : null)
                 .withDefaultResolver(member -> member.getType().isInstanceOf(Number.class) ? 1 : null)
                 .withDescriptionResolver(member -> descriptionPrefix + member.getContext().getSimpleTypeDescription(member.getType()))
