@@ -104,67 +104,13 @@ public class SchemaGenerator {
      * @param isNullable whether the field/method's return value is allowed to be null in the declaringType in this particular scenario
      * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
-    private void traverseGenericType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable,
-            SchemaGenerationContext generationContext) {
+    private void traverseGenericType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable, SchemaGenerationContext generationContext) {
         if (generationContext.containsDefinition(targetType)) {
             logger.debug("adding reference to existing definition of {}", targetType);
             generationContext.addReference(targetType, targetNode, isNullable);
             // nothing more to be done
             return;
         }
-        final ObjectNode definition;
-        if (generationContext.getTypeContext().isContainerType(targetType)) {
-            definition = this.traverseArrayType(targetType, targetNode, isNullable, generationContext);
-        } else {
-            definition = this.traverseObjectType(targetType, targetNode, isNullable, generationContext);
-        }
-        this.config.getTypeAttributeOverrides()
-                .forEach(override -> override.overrideTypeAttributes(definition, targetType, this.config));
-    }
-
-    /**
-     * Preparation Step: add the given targetType (which was previously determined to be an array type) to the generation context.
-     *
-     * @param targetType (possibly generic) array type to add to the generation context
-     * @param targetNode node in the JSON schema to which all collected attributes should be added
-     * @param isNullable whether the field/method's return value the targetType refers to is allowed to be null in the declaring type
-     * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
-     * @return the created array node containing the array type's definition
-     */
-    private ObjectNode traverseArrayType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable,
-            SchemaGenerationContext generationContext) {
-        final ObjectNode definition;
-        if (targetNode == null) {
-            // only if the main target schema is an array, do we need to store this node as definition
-            definition = this.config.createObjectNode();
-            generationContext.putDefinition(targetType, definition);
-        } else {
-            definition = targetNode;
-        }
-        if (isNullable) {
-            definition.set(SchemaConstants.TAG_TYPE,
-                    this.config.createArrayNode().add(SchemaConstants.TAG_TYPE_ARRAY).add(SchemaConstants.TAG_TYPE_NULL));
-        } else {
-            definition.put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_ARRAY);
-        }
-        ObjectNode arrayItemTypeRef = this.config.createObjectNode();
-        definition.set(SchemaConstants.TAG_ITEMS, arrayItemTypeRef);
-        ResolvedType itemType = generationContext.getTypeContext().getContainerItemType(targetType);
-        this.traverseGenericType(itemType, arrayItemTypeRef, false, generationContext);
-        return definition;
-    }
-
-    /**
-     * Preparation Step: add the given targetType (which was previously determined to be anything but an array type) to the generation context.
-     *
-     * @param targetType object type to add to the generation context
-     * @param targetNode node in the JSON schema to which all collected attributes should be added
-     * @param isNullable whether the field/method's return value the targetType refers to is allowed to be null in the declaring type
-     * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
-     * @return the created node containing the object type's definition
-     */
-    private ObjectNode traverseObjectType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable,
-            SchemaGenerationContext generationContext) {
         final ObjectNode definition;
         CustomDefinition customDefinition = this.config.getCustomDefinition(targetType, generationContext.getTypeContext());
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
@@ -179,40 +125,83 @@ public class SchemaGenerator {
                 definition = targetNode;
             }
         } else {
-            definition = this.config.createObjectNode();
-            generationContext.putDefinition(targetType, definition);
-            if (targetNode != null) {
-                // targetNode is only null for the main class for which the schema is being generated
-                generationContext.addReference(targetType, targetNode, isNullable);
-            }
-            if (customDefinition == null) {
-                logger.debug("generating definition for {}", targetType);
-                definition.put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_OBJECT);
-
-                final Map<String, JsonNode> targetFields = new TreeMap<>();
-                final Map<String, JsonNode> targetMethods = new TreeMap<>();
-                final Set<String> requiredProperties = new HashSet<>();
-
-                this.collectObjectProperties(targetType, targetFields, targetMethods, requiredProperties, generationContext);
-
-                if (!targetFields.isEmpty() || !targetMethods.isEmpty()) {
-                    ObjectNode propertiesNode = this.config.createObjectNode();
-                    propertiesNode.setAll(targetFields);
-                    propertiesNode.setAll(targetMethods);
-                    definition.set(SchemaConstants.TAG_PROPERTIES, propertiesNode);
-
-                    if (!requiredProperties.isEmpty()) {
-                        ArrayNode requiredNode = this.config.createArrayNode();
-                        requiredProperties.forEach(requiredNode::add);
-                        definition.set(SchemaConstants.TAG_REQUIRED, requiredNode);
-                    }
-                }
+            boolean isContainerType = generationContext.getTypeContext().isContainerType(targetType);
+            if (isContainerType && targetNode != null) {
+                // always inline array types
+                definition = targetNode;
             } else {
+                definition = this.config.createObjectNode();
+                generationContext.putDefinition(targetType, definition);
+                if (targetNode != null) {
+                    // targetNode is only null for the main class for which the schema is being generated
+                    generationContext.addReference(targetType, targetNode, isNullable);
+                }
+            }
+            if (customDefinition != null) {
                 logger.debug("applying configured custom definition for {}", targetType);
                 definition.setAll(customDefinition.getValue());
+            } else if (isContainerType) {
+                logger.debug("generating definition for {}", targetType);
+                this.generateArrayDefinition(targetType, definition, isNullable, generationContext);
+            } else {
+                logger.debug("generating definition for {}", targetType);
+                this.generateObjectDefinition(targetType, definition, generationContext);
             }
         }
-        return definition;
+        this.config.getTypeAttributeOverrides()
+                .forEach(override -> override.overrideTypeAttributes(definition, targetType, this.config));
+    }
+
+    /**
+     * Preparation Step: add the given targetType (which was previously determined to be an array type) to the generation context.
+     *
+     * @param targetType (possibly generic) array type to add to the generation context
+     * @param definition node in the JSON schema to which all collected attributes should be added
+     * @param isNullable whether the field/method's return value the targetType refers to is allowed to be null in the declaring type
+     * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
+     */
+    private void generateArrayDefinition(ResolvedType targetType, ObjectNode definition, boolean isNullable,
+            SchemaGenerationContext generationContext) {
+        if (isNullable) {
+            definition.set(SchemaConstants.TAG_TYPE,
+                    this.config.createArrayNode().add(SchemaConstants.TAG_TYPE_ARRAY).add(SchemaConstants.TAG_TYPE_NULL));
+        } else {
+            definition.put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_ARRAY);
+        }
+        ObjectNode arrayItemTypeRef = this.config.createObjectNode();
+        definition.set(SchemaConstants.TAG_ITEMS, arrayItemTypeRef);
+        ResolvedType itemType = generationContext.getTypeContext().getContainerItemType(targetType);
+        this.traverseGenericType(itemType, arrayItemTypeRef, false, generationContext);
+    }
+
+    /**
+     * Preparation Step: add the given targetType (which was previously determined to be anything but an array type) to the generation context.
+     *
+     * @param targetType object type to add to the generation context
+     * @param definition node in the JSON schema to which all collected attributes should be added
+     * @param generationContext context to add type definitions and their references to (to be resolved at the end of the schema generation)
+     */
+    private void generateObjectDefinition(ResolvedType targetType, ObjectNode definition, SchemaGenerationContext generationContext) {
+        definition.put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_OBJECT);
+
+        final Map<String, JsonNode> targetFields = new TreeMap<>();
+        final Map<String, JsonNode> targetMethods = new TreeMap<>();
+        final Set<String> requiredProperties = new HashSet<>();
+
+        this.collectObjectProperties(targetType, targetFields, targetMethods, requiredProperties, generationContext);
+
+        if (!targetFields.isEmpty() || !targetMethods.isEmpty()) {
+            ObjectNode propertiesNode = this.config.createObjectNode();
+            propertiesNode.setAll(targetFields);
+            propertiesNode.setAll(targetMethods);
+            definition.set(SchemaConstants.TAG_PROPERTIES, propertiesNode);
+
+            if (!requiredProperties.isEmpty()) {
+                ArrayNode requiredNode = this.config.createArrayNode();
+                requiredProperties.forEach(requiredNode::add);
+                definition.set(SchemaConstants.TAG_REQUIRED, requiredNode);
+            }
+        }
     }
 
     /**
