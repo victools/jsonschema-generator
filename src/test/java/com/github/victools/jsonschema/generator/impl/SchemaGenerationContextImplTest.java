@@ -19,7 +19,6 @@ package com.github.victools.jsonschema.generator.impl;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import org.junit.Assert;
@@ -28,23 +27,23 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 /**
- * Test for the {@link SchemaGenerationContext} class.
+ * Test for the {@link SchemaGenerationContextImpl} class.
  */
-public class SchemaGenerationContextTest {
+public class SchemaGenerationContextImplTest {
 
-    private SchemaGenerationContext context;
+    private SchemaGenerationContextImpl context;
 
     @Before
     public void setUp() {
         SchemaGeneratorConfig config = Mockito.mock(SchemaGeneratorConfig.class);
-        this.context = new SchemaGenerationContext(config, TypeContextFactory.createDefaultTypeContext());
+        this.context = new SchemaGenerationContextImpl(config, TypeContextFactory.createDefaultTypeContext());
     }
 
     @Test
     public void testHandlingDefinition_ExistentNode() {
         ResolvedType javaType = Mockito.mock(ResolvedType.class);
         ObjectNode definitionInput = Mockito.mock(ObjectNode.class);
-        SchemaGenerationContext returnValue = this.context.putDefinition(javaType, definitionInput);
+        SchemaGenerationContextImpl returnValue = this.context.putDefinition(javaType, definitionInput);
 
         Assert.assertSame(this.context, returnValue);
         Assert.assertTrue(this.context.containsDefinition(javaType));
@@ -58,7 +57,7 @@ public class SchemaGenerationContextTest {
 
         Assert.assertFalse(this.context.containsDefinition(javaType));
         Assert.assertNull(this.context.getDefinition(javaType));
-        Assert.assertEquals(Collections.<Type>emptySet(), this.context.getDefinedTypes());
+        Assert.assertEquals(Collections.<ResolvedType>emptySet(), this.context.getDefinedTypes());
     }
 
     @Test
@@ -71,7 +70,7 @@ public class SchemaGenerationContextTest {
 
         // adding a not-nullable entry creates the "references" list
         ObjectNode referenceInputOne = Mockito.mock(ObjectNode.class);
-        SchemaGenerationContext returnValue = this.context.addReference(javaType, referenceInputOne, false);
+        SchemaGenerationContextImpl returnValue = this.context.addReference(javaType, referenceInputOne, false);
         Assert.assertSame(this.context, returnValue);
         Assert.assertEquals(Collections.singletonList(referenceInputOne), this.context.getReferences(javaType));
         Assert.assertEquals(Collections.<ObjectNode>emptyList(), this.context.getNullableReferences(javaType));

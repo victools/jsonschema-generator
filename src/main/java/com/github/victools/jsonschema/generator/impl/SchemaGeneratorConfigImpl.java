@@ -21,15 +21,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
-import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.InstanceAttributeOverride;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Option;
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.TypeAttributeOverride;
-import com.github.victools.jsonschema.generator.TypeContext;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,7 +47,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     private final Map<Option, Boolean> options;
     private final SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
     private final SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
-    private final List<CustomDefinitionProvider> customDefinitions;
+    private final List<CustomDefinitionProviderV2> customDefinitions;
     private final List<TypeAttributeOverride> typeAttributeOverrides;
 
     /**
@@ -64,7 +64,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
             Map<Option, Boolean> options,
             SchemaGeneratorConfigPart<FieldScope> fieldConfigPart,
             SchemaGeneratorConfigPart<MethodScope> methodConfigPart,
-            List<CustomDefinitionProvider> customDefinitions,
+            List<CustomDefinitionProviderV2> customDefinitions,
             List<TypeAttributeOverride> typeAttributeOverrides) {
         this.objectMapper = objectMapper;
         this.options = options;
@@ -120,13 +120,20 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public CustomDefinition getCustomDefinition(ResolvedType javaType, TypeContext context) {
-        CustomDefinition result = this.customDefinitions.stream()
+    public CustomDefinition getCustomDefinition(ResolvedType javaType, SchemaGenerationContext context,
+            CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        final List<CustomDefinitionProviderV2> relevantCustomDefinitions;
+        if (ignoredDefinitionProvider == null) {
+            relevantCustomDefinitions = this.customDefinitions;
+        } else {
+            int firstRelevantProviderIndex = 1 + this.customDefinitions.indexOf(ignoredDefinitionProvider);
+            relevantCustomDefinitions = this.customDefinitions.subList(firstRelevantProviderIndex, this.customDefinitions.size());
+        }
+        return relevantCustomDefinitions.stream()
                 .map(provider -> provider.provideCustomSchemaDefinition(javaType, context))
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
-        return result;
     }
 
     @Override

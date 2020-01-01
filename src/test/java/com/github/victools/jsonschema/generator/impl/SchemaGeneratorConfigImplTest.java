@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.github.victools.jsonschema.generator.CustomDefinition;
-import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.InstanceAttributeOverride;
 import com.github.victools.jsonschema.generator.MethodScope;
@@ -53,7 +53,7 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     private Map<Option, Boolean> options;
     private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
     private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
-    private List<CustomDefinitionProvider> customDefinitions;
+    private List<CustomDefinitionProviderV2> customDefinitions;
     private List<TypeAttributeOverride> typeAttributeOverrides;
 
     public SchemaGeneratorConfigImplTest() {
@@ -112,15 +112,15 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     @Test
     public void testGetCustomDefinition_noMapping() {
-        Assert.assertNull(this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class), this.getContext()));
+        Assert.assertNull(this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class), this.getContext(), null));
     }
 
     @Test
     public void testGetCustomDefinition_withMappingReturningNull() {
-        CustomDefinitionProvider provider = Mockito.mock(CustomDefinitionProvider.class);
+        CustomDefinitionProviderV2 provider = Mockito.mock(CustomDefinitionProviderV2.class);
         this.customDefinitions.add(provider);
         ResolvedType javaType = Mockito.mock(ResolvedType.class);
-        Assert.assertNull(this.instance.getCustomDefinition(javaType, this.getContext()));
+        Assert.assertNull(this.instance.getCustomDefinition(javaType, this.getContext(), null));
 
         // ensure that the provider has been called and the given java type and type variable context were forward accordingly
         Mockito.verify(provider).provideCustomSchemaDefinition(javaType, this.getContext());
@@ -129,19 +129,19 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     @Test
     public void testGetCustomDefinition_withMappingReturningValue() {
         CustomDefinition value = Mockito.mock(CustomDefinition.class);
-        this.customDefinitions.add((type, typeContext) -> value);
-        Assert.assertSame(value, this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class), this.getContext()));
+        this.customDefinitions.add((type, context) -> value);
+        Assert.assertSame(value, this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class), this.getContext(), null));
     }
 
     @Test
     public void testGetCustomDefinition_withMultipleMappings() {
         CustomDefinition valueOne = Mockito.mock(CustomDefinition.class);
         CustomDefinition valueTwo = Mockito.mock(CustomDefinition.class);
-        this.customDefinitions.add((type, typeContext) -> null);
-        this.customDefinitions.add((type, typeContext) -> valueOne);
-        this.customDefinitions.add((type, typeContext) -> valueTwo);
+        this.customDefinitions.add((type, context) -> null);
+        this.customDefinitions.add((type, context) -> valueOne);
+        this.customDefinitions.add((type, context) -> valueTwo);
         // ignoring definition look-ups that return null, but taking the first non-null definition
-        Assert.assertSame(valueOne, this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class), this.getContext()));
+        Assert.assertSame(valueOne, this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class), this.getContext(), null));
     }
 
     Object parametersForTestIsNullable() {

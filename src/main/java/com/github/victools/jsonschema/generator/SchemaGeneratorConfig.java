@@ -86,10 +86,12 @@ public interface SchemaGeneratorConfig {
      * Look-up the non-standard JSON schema definition for a given type. If this returns null, the standard behaviour is expected to be applied.
      *
      * @param javaType generic type to provide custom definition for
-     * @param context overall type resolution context being used
+     * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
+     * @param ignoredDefinitionProvider custom definition provider to ignore
      * @return non-standard JSON schema definition (may be null)
      */
-    CustomDefinition getCustomDefinition(ResolvedType javaType, TypeContext context);
+    CustomDefinition getCustomDefinition(ResolvedType javaType, SchemaGenerationContext context,
+            CustomDefinitionProviderV2 ignoredDefinitionProvider);
 
     /**
      * Getter for the applicable type attribute overrides.

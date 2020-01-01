@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.github.victools.jsonschema.generator.CustomDefinition;
-import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.OptionPreset;
@@ -69,7 +69,7 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         this.instanceAsStrings.applyToConfigBuilder(this.builder);
 
         Mockito.verify(this.builder).getObjectMapper();
-        Mockito.verify(this.builder).with(Mockito.any(CustomDefinitionProvider.class));
+        Mockito.verify(this.builder).with(Mockito.any(CustomDefinitionProviderV2.class));
         Mockito.verifyNoMoreInteractions(this.builder);
     }
 
@@ -92,10 +92,10 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
     @Test
     public void testCustomSchemaDefinition_asStrings() {
         this.instanceAsStrings.applyToConfigBuilder(this.builder);
-        ArgumentCaptor<CustomDefinitionProvider> captor = ArgumentCaptor.forClass(CustomDefinitionProvider.class);
+        ArgumentCaptor<CustomDefinitionProviderV2> captor = ArgumentCaptor.forClass(CustomDefinitionProviderV2.class);
         Mockito.verify(this.builder).with(captor.capture());
 
-        ResolvedType testEnumType = this.getContext().resolve(TestEnum.class);
+        ResolvedType testEnumType = this.getContext().getTypeContext().resolve(TestEnum.class);
         CustomDefinition schemaDefinition = captor.getValue().provideCustomSchemaDefinition(testEnumType, this.getContext());
         Assert.assertFalse(schemaDefinition.isMeantToBeInline());
         ObjectNode node = schemaDefinition.getValue();

@@ -37,7 +37,7 @@ public class SchemaGeneratorConfigBuilder {
     private final Map<Option, Boolean> options = new HashMap<>();
     private final SchemaGeneratorConfigPart<FieldScope> fieldConfigPart = new SchemaGeneratorConfigPart<>();
     private final SchemaGeneratorConfigPart<MethodScope> methodConfigPart = new SchemaGeneratorConfigPart<>();
-    private final List<CustomDefinitionProvider> customDefinitions = new ArrayList<>();
+    private final List<CustomDefinitionProviderV2> customDefinitions = new ArrayList<>();
     private final List<TypeAttributeOverride> typeAttributeOverrides = new ArrayList<>();
 
     /**
@@ -143,7 +143,7 @@ public class SchemaGeneratorConfigBuilder {
      * @param definitionProvider provider of a custom definition to register, which may return null
      * @return this builder instance (for chaining)
      */
-    public SchemaGeneratorConfigBuilder with(CustomDefinitionProvider definitionProvider) {
+    public SchemaGeneratorConfigBuilder with(CustomDefinitionProviderV2 definitionProvider) {
         this.customDefinitions.add(definitionProvider);
         return this;
     }

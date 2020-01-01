@@ -23,6 +23,7 @@ import com.fasterxml.classmate.members.ResolvedMethod;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.util.stream.Stream;
 import org.junit.Before;
+import org.mockito.Mockito;
 
 /**
  * Abstract test class catering for the type resolution of a dummy/test class to perform tests against introspected fields/methods.
@@ -30,7 +31,7 @@ import org.junit.Before;
 public class AbstractTypeAwareTest {
 
     private final Class<?> testClass;
-    protected TypeContext context;
+    private SchemaGenerationContext context;
     private ResolvedTypeWithMembers testClassMembers;
 
     protected AbstractTypeAwareTest(Class<?> testClass) {
@@ -39,12 +40,14 @@ public class AbstractTypeAwareTest {
 
     @Before
     public final void abstractSetUp() {
-        this.context = TypeContextFactory.createDefaultTypeContext();
-        ResolvedType resolvedTestClass = this.context.resolve(this.testClass);
-        this.testClassMembers = this.context.resolveWithMembers(resolvedTestClass);
+        TypeContext typeContext = TypeContextFactory.createDefaultTypeContext();
+        ResolvedType resolvedTestClass = typeContext.resolve(this.testClass);
+        this.testClassMembers = typeContext.resolveWithMembers(resolvedTestClass);
+        this.context = Mockito.mock(SchemaGenerationContext.class);
+        Mockito.when(this.context.getTypeContext()).thenReturn(typeContext);
     }
 
-    protected TypeContext getContext() {
+    protected SchemaGenerationContext getContext() {
         return this.context;
     }
 
@@ -57,7 +60,7 @@ public class AbstractTypeAwareTest {
                                 .filter(field -> fieldName.equals(field.getName()))
                                 .findAny()
                                 .get());
-        return this.context.createFieldScope(resolvedField, this.testClassMembers);
+        return this.context.getTypeContext().createFieldScope(resolvedField, this.testClassMembers);
     }
 
     protected MethodScope getTestClassMethod(String methodName) {
@@ -69,6 +72,6 @@ public class AbstractTypeAwareTest {
                                 .filter(method -> methodName.equals(method.getName()))
                                 .findAny()
                                 .get());
-        return this.context.createMethodScope(resolvedMethod, this.testClassMembers);
+        return this.context.getTypeContext().createMethodScope(resolvedMethod, this.testClassMembers);
     }
 }
