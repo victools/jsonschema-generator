@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 VicTools.
+ * Copyright 2020 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,15 @@ import com.fasterxml.classmate.ResolvedType;
 
 /**
  * Provider of non-standard JSON schema definitions.
- *
- * @deprecated use {@link CustomDefinitionProviderV2} instead
  */
-@Deprecated
-public interface CustomDefinitionProvider extends CustomDefinitionProviderV2 {
+public interface CustomDefinitionProviderV2 {
 
     /**
      * Look-up the non-standard JSON schema definition for a given type. If it returns null, the next definition provider is expected to be applied.
      *
      * @param javaType generic type to provide custom definition for
-     * @param context overall type resolution context being used
+     * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
      * @return non-standard JSON schema definition (may be null)
      */
-    CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, TypeContext context);
-
-    @Override
-    default CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
-        return this.provideCustomSchemaDefinition(javaType, context.getTypeContext());
-    }
+    CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context);
 }

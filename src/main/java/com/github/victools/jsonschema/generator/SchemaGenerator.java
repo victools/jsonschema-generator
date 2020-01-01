@@ -19,7 +19,7 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.impl.SchemaGenerationContext;
+import com.github.victools.jsonschema.generator.impl.SchemaGenerationContextImpl;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -63,8 +63,8 @@ public class SchemaGenerator {
      * @return generated JSON Schema
      */
     public JsonNode generateSchema(Type mainTargetType, Type... typeParameters) {
-        SchemaGenerationContext generationContext = new SchemaGenerationContext(this.config, this.typeContext);
-        ResolvedType mainType = generationContext.getTypeContext().resolve(mainTargetType, typeParameters);
+        SchemaGenerationContextImpl generationContext = new SchemaGenerationContextImpl(this.config, this.typeContext);
+        ResolvedType mainType = this.typeContext.resolve(mainTargetType, typeParameters);
         generationContext.parseType(mainType);
 
         ObjectNode jsonSchemaResult = this.config.createObjectNode();
@@ -88,10 +88,10 @@ public class SchemaGenerator {
      * @param generationContext context containing all definitions of (sub) schemas and the list of references to them
      * @return node representing the main schema's "definitions" (may be empty)
      */
-    private ObjectNode buildDefinitionsAndResolveReferences(ResolvedType mainSchemaTarget, SchemaGenerationContext generationContext) {
+    private ObjectNode buildDefinitionsAndResolveReferences(ResolvedType mainSchemaTarget, SchemaGenerationContextImpl generationContext) {
         // determine short names to be used as definition names
         Map<String, List<ResolvedType>> aliases = generationContext.getDefinedTypes().stream()
-                .collect(Collectors.groupingBy(generationContext.getTypeContext()::getSchemaDefinitionName, TreeMap::new, Collectors.toList()));
+                .collect(Collectors.groupingBy(this.typeContext::getSchemaDefinitionName, TreeMap::new, Collectors.toList()));
         // create the "definitions" node with the respective aliases as keys
         ObjectNode definitionsNode = this.config.createObjectNode();
         boolean createDefinitionsForAll = this.config.shouldCreateDefinitionsForAllObjects();

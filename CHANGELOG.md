@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- `CustomDefinitionProviderV2` with access to `SchemaGenerationContext`, e.g. to allow continuing normal schema generation for nested properties
+
+### Deprecated
+- `CustomDefinitionProvider` receiving only the `TypeContext` as parameter
+
 ### Fixed
 - Possible `IllegalAccess` when loading constant values should just be ignored
 

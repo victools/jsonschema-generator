@@ -15,6 +15,7 @@
  */
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -74,6 +75,44 @@ public class SchemaGeneratorTest {
         JsonNode result = generator.generateSchema(targetType);
         Assert.assertEquals(1, result.size());
         Assert.assertEquals(expectedJsonSchemaType, result.get(SchemaConstants.TAG_TYPE).asText());
+    }
+
+    @Test
+    public void testGenerateSchema_CustomDefinition() throws Exception {
+        CustomDefinitionProviderV2 customDefinitionProvider = (javaType, context) -> javaType.getErasedType() == Integer.class
+                ? new CustomDefinition(context.createDefinition(context.getTypeContext().resolve(String.class)))
+                : null;
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper())
+                .with(customDefinitionProvider)
+                .build();
+        SchemaGenerator generator = new SchemaGenerator(config);
+        JsonNode result = generator.generateSchema(Integer.class);
+        Assert.assertEquals(1, result.size());
+        Assert.assertEquals(SchemaConstants.TAG_TYPE_STRING, result.get(SchemaConstants.TAG_TYPE).asText());
+    }
+
+    @Test
+    public void testGenerateSchema_CustomStandardDefinition() throws Exception {
+        CustomDefinitionProviderV2 customDefinitionProvider = new CustomDefinitionProviderV2() {
+            @Override
+            public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
+                if (javaType.getErasedType() == Integer.class) {
+                    // using SchemaGenerationContext.createStandardDefinition() to avoid endless loop with this custom definition
+                    ObjectNode standardDefinition = context.createStandardDefinition(context.getTypeContext().resolve(Integer.class), this);
+                    standardDefinition.put("$comment", "custom override of Integer");
+                    return new CustomDefinition(standardDefinition);
+                }
+                return null;
+            }
+        };
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper())
+                .with(customDefinitionProvider)
+                .build();
+        SchemaGenerator generator = new SchemaGenerator(config);
+        JsonNode result = generator.generateSchema(Integer.class);
+        Assert.assertEquals(2, result.size());
+        Assert.assertEquals(SchemaConstants.TAG_TYPE_INTEGER, result.get(SchemaConstants.TAG_TYPE).asText());
+        Assert.assertEquals("custom override of Integer", result.get("$comment").asText());
     }
 
     private static void populateConfigPart(SchemaGeneratorConfigPart<?> configPart, String descriptionPrefix) {

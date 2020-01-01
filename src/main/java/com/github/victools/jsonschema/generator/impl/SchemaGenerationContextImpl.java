@@ -27,9 +27,11 @@ import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
+import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaConstants;
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.TypeContext;
 import java.util.ArrayList;
@@ -48,9 +50,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Generation context in which to collect definitions of traversed types and remember where they are being referenced.
  */
-public class SchemaGenerationContext {
+public class SchemaGenerationContextImpl implements SchemaGenerationContext {
 
-    private static final Logger logger = LoggerFactory.getLogger(SchemaGenerationContext.class);
+    private static final Logger logger = LoggerFactory.getLogger(SchemaGenerationContextImpl.class);
 
     private final SchemaGeneratorConfig generatorConfig;
     private final TypeContext typeContext;
@@ -64,9 +66,14 @@ public class SchemaGenerationContext {
      * @param generatorConfig applicable configuration(s)
      * @param typeContext type resolution/introspection context to be used
      */
-    public SchemaGenerationContext(SchemaGeneratorConfig generatorConfig, TypeContext typeContext) {
+    public SchemaGenerationContextImpl(SchemaGeneratorConfig generatorConfig, TypeContext typeContext) {
         this.generatorConfig = generatorConfig;
         this.typeContext = typeContext;
+    }
+
+    @Override
+    public TypeContext getTypeContext() {
+        return this.typeContext;
     }
 
     /**
@@ -79,22 +86,13 @@ public class SchemaGenerationContext {
     }
 
     /**
-     * Getter for the applicable type resolution context.
-     *
-     * @return type resolution context
-     */
-    public TypeContext getTypeContext() {
-        return this.typeContext;
-    }
-
-    /**
      * Add the given type's definition to this context.
      *
      * @param javaType type to which the definition belongs
      * @param definitionNode definition to remember
      * @return this context (for chaining)
      */
-    SchemaGenerationContext putDefinition(ResolvedType javaType, ObjectNode definitionNode) {
+    SchemaGenerationContextImpl putDefinition(ResolvedType javaType, ObjectNode definitionNode) {
         this.definitions.put(javaType, definitionNode);
         return this;
     }
@@ -137,7 +135,7 @@ public class SchemaGenerationContext {
      * @param isNullable whether the reference may be null
      * @return this context (for chaining)
      */
-    SchemaGenerationContext addReference(ResolvedType javaType, ObjectNode referencingNode, boolean isNullable) {
+    SchemaGenerationContextImpl addReference(ResolvedType javaType, ObjectNode referencingNode, boolean isNullable) {
         Map<ResolvedType, List<ObjectNode>> targetMap = isNullable ? this.nullableReferences : this.references;
         List<ObjectNode> valueList = targetMap.get(javaType);
         if (valueList == null) {
@@ -171,23 +169,50 @@ public class SchemaGenerationContext {
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
      * Here comes the logic for traversing types and populating this context *
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+    @Override
+    public ObjectNode createDefinition(ResolvedType targetType) {
+        ObjectNode definition = this.generatorConfig.createObjectNode();
+        this.traverseGenericType(targetType, definition, false, true, null);
+        return definition;
+    }
+
+    @Override
+    public ObjectNode createStandardDefinition(ResolvedType targetType, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        ObjectNode definition = this.generatorConfig.createObjectNode();
+        this.traverseGenericType(targetType, definition, false, true, ignoredDefinitionProvider);
+        return definition;
+    }
 
     /**
-     * Preparation Step: add the given targetType to the generation context.
+     * Preparation Step: add the given targetType.
      *
-     * @param targetType (possibly generic) type to add to the generation context
-     * @param targetNode node in the JSON schema to which all collected attributes should be added
+     * @param targetType (possibly generic) type to add
+     * @param targetNode node in the JSON schema that should represent the targetType
      * @param isNullable whether the field/method's return value is allowed to be null in the declaringType in this particular scenario
      */
-    void traverseGenericType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable) {
-        if (this.containsDefinition(targetType)) {
+    private void traverseGenericType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable) {
+        this.traverseGenericType(targetType, targetNode, isNullable, false, null);
+    }
+
+    /**
+     * Preparation Step: add the given targetType. Also catering for forced inline-definitions and ignoring custom definitions
+       *
+     * @param targetType (possibly generic) type to add
+     * @param targetNode node in the JSON schema that should represent the targetType
+     * @param isNullable whether the field/method's return value is allowed to be null in the declaringType in this particular scenario
+     * @param forceInlineDefinition whether to generate an inline definition without registering it in this context
+     * @param ignoredDefinitionProvider custom definition provider to ignore
+     */
+    private void traverseGenericType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable, boolean forceInlineDefinition,
+            CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        if (!forceInlineDefinition && this.containsDefinition(targetType)) {
             logger.debug("adding reference to existing definition of {}", targetType);
             this.addReference(targetType, targetNode, isNullable);
             // nothing more to be done
             return;
         }
         final ObjectNode definition;
-        CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(targetType, this.typeContext);
+        final CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(targetType, this, ignoredDefinitionProvider);
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
             if (targetNode == null) {
                 logger.debug("storing configured custom inline type for {} as definition (since it is the main schema \"#\")", targetType);
@@ -199,9 +224,12 @@ public class SchemaGenerationContext {
                 targetNode.setAll(customDefinition.getValue());
                 definition = targetNode;
             }
+            if (isNullable) {
+                this.makeNullable(definition);
+            }
         } else {
             boolean isContainerType = this.typeContext.isContainerType(targetType);
-            if (isContainerType && targetNode != null) {
+            if (forceInlineDefinition || isContainerType && targetNode != null && customDefinition == null) {
                 // always inline array types
                 definition = targetNode;
             } else {
@@ -228,12 +256,11 @@ public class SchemaGenerationContext {
     }
 
     /**
-     * Preparation Step: add the given targetType (which was previously determined to be an array type) to the generation context.
+     * Preparation Step: add the given targetType (which was previously determined to be an array type).
      *
-     * @param targetType (possibly generic) array type to add to the generation context
+     * @param targetType (possibly generic) array type to add
      * @param definition node in the JSON schema to which all collected attributes should be added
      * @param isNullable whether the field/method's return value the targetType refers to is allowed to be null in the declaring type
-     * @param this context to add type definitions and their references to (to be resolved at the end of the schema generation)
      */
     private void generateArrayDefinition(ResolvedType targetType, ObjectNode definition, boolean isNullable) {
         if (isNullable) {
@@ -249,9 +276,9 @@ public class SchemaGenerationContext {
     }
 
     /**
-     * Preparation Step: add the given targetType (which was previously determined to be anything but an array type) to the generation context.
+     * Preparation Step: add the given targetType (which was previously determined to be anything but an array type).
      *
-     * @param targetType object type to add to the generation context
+     * @param targetType object type to add
      * @param definition node in the JSON schema to which all collected attributes should be added
      */
     private void generateObjectDefinition(ResolvedType targetType, ObjectNode definition) {
@@ -432,34 +459,32 @@ public class SchemaGenerationContext {
      * @see #populateMethod(MethodScope, Map, Set)
      */
     private void populateSchema(ResolvedType javaType, ObjectNode targetNode, boolean isNullable, ObjectNode collectedAttributes) {
-        // create an "allOf" wrapper for the attributes related to this particular field and its general type
-        ObjectNode referenceContainer;
-        CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(javaType, this.typeContext);
-        if (collectedAttributes == null
-                || collectedAttributes.size() == 0
-                || (customDefinition != null && customDefinition.isMeantToBeInline())) {
-            // no need for the allOf, can use the sub-schema instance directly as reference
-            referenceContainer = targetNode;
-        } else if (this.typeContext.isContainerType(javaType)) {
-            // same as above, but the collected attributes should be applied also for containers/arrays
-            referenceContainer = targetNode;
-            referenceContainer.setAll(collectedAttributes);
-        } else {
-            // avoid mixing potential "$ref" element with contextual attributes by introducing an "allOf" wrapper
-            referenceContainer = this.generatorConfig.createObjectNode();
-            targetNode.set(SchemaConstants.TAG_ALLOF, this.generatorConfig.createArrayNode()
-                    .add(referenceContainer)
-                    .add(collectedAttributes));
-        }
+        final CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(javaType, this, null);
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
-            referenceContainer.setAll(customDefinition.getValue());
+            targetNode.setAll(customDefinition.getValue());
             if (collectedAttributes != null && collectedAttributes.size() > 0) {
-                referenceContainer.setAll(collectedAttributes);
+                targetNode.setAll(collectedAttributes);
             }
             if (isNullable) {
-                this.makeNullable(referenceContainer);
+                this.makeNullable(targetNode);
             }
         } else {
+            // create an "allOf" wrapper for the attributes related to this particular field and its general type
+            final ObjectNode referenceContainer;
+            if (collectedAttributes == null || collectedAttributes.size() == 0) {
+                // no need for the allOf, can use the sub-schema instance directly as reference
+                referenceContainer = targetNode;
+            } else if (customDefinition == null && this.typeContext.isContainerType(javaType)) {
+                // same as above, but the collected attributes should be applied also for containers/arrays
+                referenceContainer = targetNode;
+                referenceContainer.setAll(collectedAttributes);
+            } else {
+                // avoid mixing potential "$ref" element with contextual attributes by introducing an "allOf" wrapper
+                referenceContainer = this.generatorConfig.createObjectNode();
+                targetNode.set(SchemaConstants.TAG_ALLOF, this.generatorConfig.createArrayNode()
+                        .add(referenceContainer)
+                        .add(collectedAttributes));
+            }
             // only add reference for separate definition if it is not a fixed type that should be in-lined
             try {
                 this.traverseGenericType(javaType, referenceContainer, isNullable);
@@ -469,11 +494,7 @@ public class SchemaGenerationContext {
         }
     }
 
-    /**
-     * Ensure that the JSON schema represented by the given node allows for it to be of "type" "null".
-     *
-     * @param node representation of a JSON schema (part) that should allow a value of "type" "null"
-     */
+    @Override
     public void makeNullable(ObjectNode node) {
         if (node.has(SchemaConstants.TAG_REF)
                 || node.has(SchemaConstants.TAG_ALLOF)
