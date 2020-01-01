@@ -37,7 +37,7 @@ public interface SchemaGenerationContext {
      * @param targetType type to create definition (reference) node for
      * @return designated definition (reference) node for the targetType
      *
-     * @see #createStandardDefinition(ResolvedType, boolean)
+     * @see #createStandardDefinition(ResolvedType, CustomDefinitionProviderV2)
      */
     ObjectNode createDefinition(ResolvedType targetType);
 
@@ -48,7 +48,7 @@ public interface SchemaGenerationContext {
      * @param ignoredDefinitionProvider custom definition provider to ignore
      * @return designated definition (reference) node for the targetType
      *
-     * @see #createDefinition(ResolvedType, boolean)
+     * @see #createDefinition(ResolvedType)
      */
     ObjectNode createStandardDefinition(ResolvedType targetType, CustomDefinitionProviderV2 ignoredDefinitionProvider);
 
@@ -56,6 +56,7 @@ public interface SchemaGenerationContext {
      * Ensure that the JSON schema represented by the given node allows for it to be of "type" "null".
      *
      * @param node representation of a JSON schema (part) that should allow a value of "type" "null"
+     * @return reference to the given parameter node
      */
-    void makeNullable(ObjectNode node);
+    ObjectNode makeNullable(ObjectNode node);
 }

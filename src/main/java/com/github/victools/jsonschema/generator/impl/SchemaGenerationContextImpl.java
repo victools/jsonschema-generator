@@ -495,7 +495,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     }
 
     @Override
-    public void makeNullable(ObjectNode node) {
+    public ObjectNode makeNullable(ObjectNode node) {
         if (node.has(SchemaConstants.TAG_REF)
                 || node.has(SchemaConstants.TAG_ALLOF)
                 || node.has(SchemaConstants.TAG_ANYOF)
@@ -534,5 +534,6 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             }
             // if no "type" is specified, null is allowed already
         }
+        return node;
     }
 }
