@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.generator.impl.module;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,7 +36,15 @@ public class ConstantValueModule implements Module {
      */
     private static List<?> extractConstantFieldValue(FieldScope field) {
         if (field.isStatic() && field.isFinal() && !field.getRawMember().isEnumConstant()) {
-            field.getRawMember().setAccessible(true);
+            Field rawField = field.getRawMember();
+            if (!rawField.canAccess(null)) {
+                try {
+                    rawField.setAccessible(true);
+                } catch (Exception ex) {
+                    // if the field cannot be accessed, we just can't extract any constant value
+                    return null;
+                }
+            }
             try {
                 return Collections.singletonList(field.getRawMember().get(null));
             } catch (IllegalAccessException ex) {
