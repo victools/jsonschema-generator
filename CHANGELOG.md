@@ -4,14 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.0.0] - 2020-01-03
 ### Added
 - Extended API for defining context independent collection of schema attributes (for array/collection items that are not directly under a member)
 
 ### Changed
 - BREAKING CHANGE: `TypeAttributeOverride`'s second parameter is now the new `TypeScope` wrapper instead of just a `ResolvedType`
 
-## [3.5.0]
+## [3.5.0] - 2020-01-01
 ### Added
 - `CustomDefinitionProviderV2` with access to `SchemaGenerationContext`, e.g. to allow continuing normal schema generation for nested properties
 
@@ -96,7 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Specific handling of optionals (two alternatives via standard options).
 - Pre-defined sets of standard options to cover different use-cases and simplify library usage.
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v3.5.0...HEAD
+[4.0.0]: https://github.com/victools/jsonschema-generator/compare/v3.5.0...v4.0.0
 [3.5.0]: https://github.com/victools/jsonschema-generator/compare/v3.4.1...v3.5.0
 [3.4.1]: https://github.com/victools/jsonschema-generator/compare/v3.4.0...v3.4.1
 [3.4.0]: https://github.com/victools/jsonschema-generator/compare/v3.3.0...v3.4.0
