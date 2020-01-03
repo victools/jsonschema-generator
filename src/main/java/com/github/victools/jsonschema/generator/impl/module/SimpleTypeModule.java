@@ -20,12 +20,12 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
-import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaConstants;
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.TypeContext;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -186,7 +186,7 @@ public class SimpleTypeModule implements Module {
     /**
      * Implementation of the {@link CustomDefinitionProvider} interface for applying fixed schema definitions for simple java types.
      */
-    private class SimpleTypeDefinitionProvider implements CustomDefinitionProvider {
+    private class SimpleTypeDefinitionProvider implements CustomDefinitionProviderV2 {
 
         private final ObjectMapper objectMapper;
 
@@ -200,7 +200,7 @@ public class SimpleTypeModule implements Module {
         }
 
         @Override
-        public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, TypeContext context) {
+        public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
 
             if (!javaType.getTypeParameters().isEmpty()) {
                 return null;

@@ -21,12 +21,12 @@ import com.fasterxml.classmate.members.RawField;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
-import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaConstants;
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -117,7 +117,7 @@ public class EnumModule implements Module {
     /**
      * Implementation of the {@link CustomDefinitionProvider} interface for treating enum types as plain strings.
      */
-    private static class EnumAsStringDefinitionProvider implements CustomDefinitionProvider {
+    private static class EnumAsStringDefinitionProvider implements CustomDefinitionProviderV2 {
 
         private final ObjectMapper objectMapper;
 
@@ -131,7 +131,7 @@ public class EnumModule implements Module {
         }
 
         @Override
-        public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, TypeContext context) {
+        public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
             if (javaType.isInstanceOf(Enum.class)) {
                 ObjectNode customNode = this.objectMapper.createObjectNode()
                         .put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_STRING);
