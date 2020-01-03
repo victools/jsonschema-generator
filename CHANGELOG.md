@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Extended API for defining context independent collection of schema attributes (for array/collection items that are not directly under a member)
 
+### Changed
+- BREAKING CHANGE: `TypeAttributeOverride`'s second parameter is now the new `TypeScope` wrapper instead of just a `ResolvedType`
+
 ## [3.5.0]
 ### Added
 - `CustomDefinitionProviderV2` with access to `SchemaGenerationContext`, e.g. to allow continuing normal schema generation for nested properties
