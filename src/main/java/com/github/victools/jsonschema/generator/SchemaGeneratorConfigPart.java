@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -33,24 +32,7 @@ import java.util.stream.Collectors;
  *
  * @param <M> type of the (resolved) member to analyse
  */
-public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
-
-    /**
-     * Helper function for invoking a given function with the provided inputs or returning null no function returning anything but null themselves.
-     *
-     * @param <M> type of the provided member (to be forwarded as parameter to the given function)
-     * @param <R> type of the expected return value (of the given function)
-     * @param resolvers functions to invoke and return the first non-null result from
-     * @param member member (to be forwarded as first argument to a given function)
-     * @return return value of successfully invoked function or null
-     */
-    private static <M extends MemberScope<?, ?>, R> R getFirstDefinedValue(List<ConfigFunction<M, R>> resolvers, M member) {
-        return resolvers.stream()
-                .map(resolver -> resolver.apply(member))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
-    }
+public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends SchemaGeneratorTypeConfigPart<M> {
 
     private final List<InstanceAttributeOverride<M>> instanceAttributeOverrides = new ArrayList<>();
 
@@ -67,39 +49,6 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
      */
     private final List<ConfigFunction<M, ResolvedType>> targetTypeOverrideResolvers = new ArrayList<>();
     private final List<ConfigFunction<M, String>> propertyNameOverrideResolvers = new ArrayList<>();
-
-    /*
-     * General fields independent of "type".
-     */
-    private final List<ConfigFunction<M, String>> titleResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, String>> descriptionResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, Object>> defaultResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, Collection<?>>> enumResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, Map<String, String>>> metadatas = new ArrayList<>();
-
-    /*
-     * Validation fields relating to a schema with "type": "string".
-     */
-    private final List<ConfigFunction<M, Integer>> stringMinLengthResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, Integer>> stringMaxLengthResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, String>> stringFormatResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, String>> stringPatternResolvers = new ArrayList<>();
-
-    /*
-     * Validation fields relating to a schema with "type": "integer" or "number".
-     */
-    private final List<ConfigFunction<M, BigDecimal>> numberInclusiveMinimumResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, BigDecimal>> numberExclusiveMinimumResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, BigDecimal>> numberInclusiveMaximumResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, BigDecimal>> numberExclusiveMaximumResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, BigDecimal>> numberMultipleOfResolvers = new ArrayList<>();
-
-    /*
-     * Validation fields relating to a schema with "type": "array".
-     */
-    private final List<ConfigFunction<M, Integer>> arrayMinItemsResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, Integer>> arrayMaxItemsResolvers = new ArrayList<>();
-    private final List<ConfigFunction<M, Boolean>> arrayUniqueItemsResolvers = new ArrayList<>();
 
     /**
      * Setter for override of attributes on a given JSON Schema node in the respective member.
@@ -232,339 +181,83 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> {
         return getFirstDefinedValue(this.propertyNameOverrideResolvers, member);
     }
 
-    /**
-     * Setter for "title" resolver.
-     *
-     * @param resolver how to determine the "title" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withTitleResolver(ConfigFunction<M, String> resolver) {
-        this.titleResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withTitleResolver(resolver);
     }
 
-    /**
-     * Determine the "title" of a given member.
-     *
-     * @param member member to determine "title" value for
-     * @return "title" in a JSON Schema (may be null)
-     */
-    public String resolveTitle(M member) {
-        return getFirstDefinedValue(this.titleResolvers, member);
-    }
-
-    /**
-     * Setter for "description" resolver.
-     *
-     * @param resolver how to determine the "description" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withDescriptionResolver(ConfigFunction<M, String> resolver) {
-        this.descriptionResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withDescriptionResolver(resolver);
     }
 
-    /**
-     * Determine the "description" of a given member.
-     *
-     * @param member member to determine "description" value for
-     * @return "description" in a JSON Schema (may be null)
-     */
-    public String resolveDescription(M member) {
-        return getFirstDefinedValue(this.descriptionResolvers, member);
-    }
-
-    /**
-     * Setter for "default" resolver.
-     *
-     * @param resolver how to determine the "default" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withDefaultResolver(ConfigFunction<M, Object> resolver) {
-        this.defaultResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withDefaultResolver(resolver);
     }
 
-    /**
-     * Determine the "default" of a given member.
-     *
-     * @param member member to determine "default" value for
-     * @return "default" in a JSON Schema (may be null)
-     */
-    public Object resolveDefault(M member) {
-        return getFirstDefinedValue(this.defaultResolvers, member);
-    }
-
-    /**
-     * Setter for "enum"/"const" resolver.
-     *
-     * @param resolver how to determine the "enum"/"const" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withEnumResolver(ConfigFunction<M, Collection<?>> resolver) {
-        this.enumResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withEnumResolver(resolver);
     }
 
-    /**
-     * Determine the "enum"/"const" of a given member.
-     *
-     * @param member member to determine "enum"/"const" value for
-     * @return "enum"/"const" in a JSON Schema (may be null)
-     */
-    public Collection<?> resolveEnum(M member) {
-        return getFirstDefinedValue(this.enumResolvers, member);
-    }
-
-    /**
-     * Setter for "minLength" resolver.
-     *
-     * @param resolver how to determine the "minLength" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withStringMinLengthResolver(ConfigFunction<M, Integer> resolver) {
-        this.stringMinLengthResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withStringMinLengthResolver(resolver);
     }
 
-    /**
-     * Determine the "minLength" of a given member.
-     *
-     * @param member member to determine "minLength" value for
-     * @return "minLength" in a JSON Schema (may be null)
-     */
-    public Integer resolveStringMinLength(M member) {
-        return getFirstDefinedValue(this.stringMinLengthResolvers, member);
-    }
-
-    /**
-     * Setter for "maxLength" resolver.
-     *
-     * @param resolver how to determine the "maxLength" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withStringMaxLengthResolver(ConfigFunction<M, Integer> resolver) {
-        this.stringMaxLengthResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withStringMaxLengthResolver(resolver);
     }
 
-    /**
-     * Determine the "maxLength" of a given member.
-     *
-     * @param member member to determine "maxLength" value for
-     * @return "maxLength" in a JSON Schema (may be null)
-     */
-    public Integer resolveStringMaxLength(M member) {
-        return getFirstDefinedValue(this.stringMaxLengthResolvers, member);
-    }
-
-    /**
-     * Setter for "format" resolver.
-     *
-     * @param resolver how to determine the "format" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withStringFormatResolver(ConfigFunction<M, String> resolver) {
-        this.stringFormatResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withStringFormatResolver(resolver);
     }
 
-    /**
-     * Determine the "format" of a given member.
-     *
-     * @param member member to determine "format" value for
-     * @return "format" in a JSON Schema (may be null)
-     */
-    public String resolveStringFormat(M member) {
-        return getFirstDefinedValue(this.stringFormatResolvers, member);
-    }
-
-    /**
-     * Setter for "format" resolver.
-     *
-     * @param resolver how to determine the "format" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withStringPatternResolver(ConfigFunction<M, String> resolver) {
-        this.stringPatternResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withStringPatternResolver(resolver);
     }
 
-    /**
-     * Determine the "format" of a given member.
-     *
-     * @param member member to determine "format" value for
-     * @return "format" in a JSON Schema (may be null)
-     */
-    public String resolveStringPattern(M member) {
-        return getFirstDefinedValue(this.stringPatternResolvers, member);
-    }
-
-    /**
-     * Setter for "minimum" resolver.
-     *
-     * @param resolver how to determine the "minimum" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withNumberInclusiveMinimumResolver(ConfigFunction<M, BigDecimal> resolver) {
-        this.numberInclusiveMinimumResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withNumberInclusiveMinimumResolver(resolver);
     }
 
-    /**
-     * Determine the "minimum" of a given member.
-     *
-     * @param member member to determine "minimum" value for
-     * @return "minimum" in a JSON Schema (may be null)
-     */
-    public BigDecimal resolveNumberInclusiveMinimum(M member) {
-        return getFirstDefinedValue(this.numberInclusiveMinimumResolvers, member);
-    }
-
-    /**
-     * Setter for "exclusiveMinimum" resolver.
-     *
-     * @param resolver how to determine the "exclusiveMinimum" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withNumberExclusiveMinimumResolver(ConfigFunction<M, BigDecimal> resolver) {
-        this.numberExclusiveMinimumResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withNumberExclusiveMinimumResolver(resolver);
     }
 
-    /**
-     * Determine the "exclusiveMinimum" of a given member.
-     *
-     * @param member member to determine "exclusiveMinimum" value for
-     * @return "exclusiveMinimum" in a JSON Schema (may be null)
-     */
-    public BigDecimal resolveNumberExclusiveMinimum(M member) {
-        return getFirstDefinedValue(this.numberExclusiveMinimumResolvers, member);
-    }
-
-    /**
-     * Setter for "maximum" resolver.
-     *
-     * @param resolver how to determine the "maximum" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withNumberInclusiveMaximumResolver(ConfigFunction<M, BigDecimal> resolver) {
-        this.numberInclusiveMaximumResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withNumberInclusiveMaximumResolver(resolver);
     }
 
-    /**
-     * Determine the "maximum" of a given member.
-     *
-     * @param member member to determine "maximum" value for
-     * @return "maximum" in a JSON Schema (may be null)
-     */
-    public BigDecimal resolveNumberInclusiveMaximum(M member) {
-        return getFirstDefinedValue(this.numberInclusiveMaximumResolvers, member);
-    }
-
-    /**
-     * Setter for "exclusiveMaximum" resolver.
-     *
-     * @param resolver how to determine the "exclusiveMaximum" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withNumberExclusiveMaximumResolver(ConfigFunction<M, BigDecimal> resolver) {
-        this.numberExclusiveMaximumResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withNumberExclusiveMaximumResolver(resolver);
     }
 
-    /**
-     * Determine the "exclusiveMaximum" of a given member.
-     *
-     * @param member member to determine "exclusiveMaximum" value for
-     * @return "exclusiveMaximum" in a JSON Schema (may be null)
-     */
-    public BigDecimal resolveNumberExclusiveMaximum(M member) {
-        return getFirstDefinedValue(this.numberExclusiveMaximumResolvers, member);
-    }
-
-    /**
-     * Setter for "multipleOf" resolver.
-     *
-     * @param resolver how to determine the "multipleOf" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withNumberMultipleOfResolver(ConfigFunction<M, BigDecimal> resolver) {
-        this.numberMultipleOfResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withNumberMultipleOfResolver(resolver);
     }
 
-    /**
-     * Determine the "multipleOf" of a given member.
-     *
-     * @param member member to determine "multipleOf" value for
-     * @return "multipleOf" in a JSON Schema (may be null)
-     */
-    public BigDecimal resolveNumberMultipleOf(M member) {
-        return getFirstDefinedValue(this.numberMultipleOfResolvers, member);
-    }
-
-    /**
-     * Setter for "minItems" resolver.
-     *
-     * @param resolver how to determine the "minItems" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withArrayMinItemsResolver(ConfigFunction<M, Integer> resolver) {
-        this.arrayMinItemsResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withArrayMinItemsResolver(resolver);
     }
 
-    /**
-     * Determine the "minItems" of a given member.
-     *
-     * @param member member to determine "minItems" value for
-     * @return "minItems" in a JSON Schema (may be null)
-     */
-    public Integer resolveArrayMinItems(M member) {
-        return getFirstDefinedValue(this.arrayMinItemsResolvers, member);
-    }
-
-    /**
-     * Setter for "maxItems" resolver.
-     *
-     * @param resolver how to determine the "maxItems" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withArrayMaxItemsResolver(ConfigFunction<M, Integer> resolver) {
-        this.arrayMaxItemsResolvers.add(resolver);
-        return this;
+        return (SchemaGeneratorConfigPart<M>) super.withArrayMaxItemsResolver(resolver);
     }
 
-    /**
-     * Determine the "maxItems" of a given member.
-     *
-     * @param member member to determine "maxItems" value for
-     * @return "maxItems" in a JSON Schema (may be null)
-     */
-    public Integer resolveArrayMaxItems(M member) {
-        return getFirstDefinedValue(this.arrayMaxItemsResolvers, member);
-    }
-
-    /**
-     * Setter for "uniqueItems" resolver.
-     *
-     * @param resolver how to determine the "uniqueItems" of a JSON Schema
-     * @return this config part (for chaining)
-     */
+    @Override
     public SchemaGeneratorConfigPart<M> withArrayUniqueItemsResolver(ConfigFunction<M, Boolean> resolver) {
-        this.arrayUniqueItemsResolvers.add(resolver);
-        return this;
-    }
-
-    /**
-     * Determine the "uniqueItems" of a given member.
-     *
-     * @param member member to determine "uniqueItems" value for
-     * @return "uniqueItems" in a JSON Schema (may be null)
-     */
-    public Boolean resolveArrayUniqueItems(M member) {
-        return getFirstDefinedValue(this.arrayUniqueItemsResolvers, member);
+        return (SchemaGeneratorConfigPart<M>) super.withArrayUniqueItemsResolver(resolver);
     }
 }

@@ -31,7 +31,7 @@ import java.util.Optional;
  * @param <M> type of member in scope (i.e. {@link ResolvedField} or {@link ResolvedMethod}).
  * @param <T> type of java/reflection member in scope (i.e. {@link java.lang.reflect.Field FIeld} or {@link java.lang.reflect.Method Nethod}
  */
-public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member> {
+public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member> extends TypeScope {
 
     private final M member;
     private final ResolvedType overriddenType;
@@ -50,6 +50,7 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      */
     protected MemberScope(M member, ResolvedType overriddenType, String overriddenName,
             ResolvedTypeWithMembers declaringTypeMembers, TypeContext context) {
+        super(Optional.ofNullable(overriddenType).orElseGet(member::getType), context);
         this.member = member;
         this.overriddenType = overriddenType;
         this.overriddenName = overriddenName;
@@ -96,15 +97,6 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
     }
 
     /**
-     * Getter for the overall type resolution context.
-     *
-     * @return type resolution context
-     */
-    public TypeContext getContext() {
-        return this.context;
-    }
-
-    /**
      * Returns the type declared as the field's or method return value's type.
      *
      * @return declared type
@@ -122,18 +114,6 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      */
     public ResolvedType getOverriddenType() {
         return this.overriddenType;
-    }
-
-    /**
-     * Returns type of this member; if it has one, for methods this is the return type and for fields their field type.
-     *
-     * @return method return type or field type
-     * @see #getDeclaredType()
-     * @see #getOverriddenType()
-     */
-    public ResolvedType getType() {
-        return Optional.ofNullable(this.getOverriddenType())
-                .orElseGet(this::getDeclaredType);
     }
 
     /**
@@ -253,61 +233,6 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @return annotation instance (or {@code null} if no annotation of the given type is present)
      */
     public abstract <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass);
-
-    /* ============================================== *
-     * Convenience methods for member in this context *
-     * ============================================== */
-    /**
-     * Determine whether this member's type should be treated as "{@value SchemaConstants#TAG_TYPE_ARRAY}" in the generated schema.
-     * <br>
-     * This is equivalent to calling: {@code scope.getContext().isContainerType(scope.getType())}
-     *
-     * @return whether this member's type is an array or sub type of {@link java.util.Collection Collection}
-     */
-    public boolean isContainerType() {
-        ResolvedType type = this.getType();
-        return type != null && this.getContext().isContainerType(type);
-    }
-
-    /**
-     * Identify the element/item type of the given "{@value SchemaConstants#TAG_TYPE_ARRAY}".
-     * <br>
-     * This is equivalent to calling: {@code scope.getContext().getContainerItemType(scope.getType())}
-     *
-     * @return type of elements/items
-     */
-    public ResolvedType getContainerItemType() {
-        ResolvedType type = this.getType();
-        return type == null ? null : this.getContext().getContainerItemType(type);
-    }
-
-    /**
-     * Constructing a string that represents this member's type (including possible type parameters and their actual types).
-     * <br>
-     * This is equivalent to calling: {@code scope.getContext().getSimpleTypeDescription(scope.getType())}
-     *
-     * @return resulting string
-     * @see #getType()
-     * @see TypeContext#getSimpleTypeDescription(ResolvedType)
-     */
-    public String getSimpleTypeDescription() {
-        ResolvedType type = this.getType();
-        return type == null ? "void" : this.getContext().getSimpleTypeDescription(type);
-    }
-
-    /**
-     * Constructing a string that fully represents this member's type (including possible type parameters and their actual types).
-     * <br>
-     * This is equivalent to calling: {@code scope.getContext().getFullTypeDescription(scope.getType())}
-     *
-     * @return resulting string
-     * @see #getType()
-     * @see TypeContext#getFullTypeDescription(ResolvedType)
-     */
-    public String getFullTypeDescription() {
-        ResolvedType type = this.getType();
-        return type == null ? "void" : this.getContext().getFullTypeDescription(type);
-    }
 
     /**
      * Returns the name to be used to reference this member in its parent's "properties".
