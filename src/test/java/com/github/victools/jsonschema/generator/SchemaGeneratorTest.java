@@ -146,27 +146,32 @@ public class SchemaGeneratorTest {
         Assert.assertEquals("custom override of Integer", result.get("$comment").asText());
     }
 
-    private static void populateConfigPart(SchemaGeneratorConfigPart<?> configPart, String descriptionPrefix) {
+    private static void populateTypeConfigPart(SchemaGeneratorTypeConfigPart<?> configPart, String descriptionPrefix) {
         configPart
                 .withArrayMinItemsResolver(member -> member.isContainerType() ? 2 : null)
                 .withArrayMaxItemsResolver(member -> member.isContainerType() ? 100 : null)
                 .withArrayUniqueItemsResolver(member -> member.isContainerType() ? false : null)
                 .withDefaultResolver(member -> member.getType().isInstanceOf(Number.class) ? 1 : null)
-                .withDescriptionResolver(member -> descriptionPrefix + member.getContext().getSimpleTypeDescription(member.getType()))
+                .withDescriptionResolver(member -> descriptionPrefix + member.getSimpleTypeDescription())
                 .withEnumResolver(member -> member.getType().isInstanceOf(Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
                 .withEnumResolver(member -> member.getType().isInstanceOf(String.class) ? Arrays.asList("constant string value") : null)
-                .withNullableCheck(member -> !member.getName().startsWith("nested"))
                 .withNumberExclusiveMaximumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
                 .withNumberExclusiveMinimumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.ZERO : null)
                 .withNumberInclusiveMaximumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.TEN : null)
                 .withNumberInclusiveMinimumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.ONE : null)
                 .withNumberMultipleOfResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.ONE : null)
-                .withRequiredCheck(member -> member.getName().startsWith("nested"))
                 .withStringFormatResolver(member -> member.getType().isInstanceOf(String.class) ? "date" : null)
                 .withStringMaxLengthResolver(member -> member.getType().isInstanceOf(String.class) ? 256 : null)
                 .withStringMinLengthResolver(member -> member.getType().isInstanceOf(String.class) ? 1 : null)
                 .withStringPatternResolver(member -> member.getType().isInstanceOf(String.class) ? "^.{1,256}$" : null)
-                .withTitleResolver(member -> member.getContext().getSimpleTypeDescription(member.getType()));
+                .withTitleResolver(member -> member.getSimpleTypeDescription());
+    }
+
+    private static void populateConfigPart(SchemaGeneratorConfigPart<? extends MemberScope<?, ?>> configPart, String descriptionPrefix) {
+        populateTypeConfigPart(configPart, descriptionPrefix);
+        configPart
+                .withNullableCheck(member -> !member.getName().startsWith("nested"))
+                .withRequiredCheck(member -> member.getName().startsWith("nested"));
     }
 
     Object parametersForTestGenerateSchema() {
@@ -179,14 +184,17 @@ public class SchemaGeneratorTest {
             }
             return null;
         });
+        Module typeInGeneralModule = configBuilder -> populateTypeConfigPart(configBuilder.forTypesInGeneral(), "for type in general: ");
         Module methodModule = configBuilder -> populateConfigPart(configBuilder.forMethods(), "looked-up from method: ");
         Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields(), "looked-up from field: ");
         return new Object[][]{
             {"testclass1-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, neutralModule},
+            {"testclass1-FULL_DOCUMENTATION-attributes", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, typeInGeneralModule},
             {"testclass1-JAVA_OBJECT-attributes", OptionPreset.JAVA_OBJECT, TestClass1.class, methodModule},
             {"testclass1-PLAIN_JSON-attributes", OptionPreset.PLAIN_JSON, TestClass1.class, fieldModule},
             {"testclass2-array", OptionPreset.FULL_DOCUMENTATION, TestClass2[].class, neutralModule},
             {"testclass3-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, neutralModule},
+            {"testclass3-FULL_DOCUMENTATION-attributes", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, typeInGeneralModule},
             {"testclass3-JAVA_OBJECT-attributes", OptionPreset.JAVA_OBJECT, TestClass3.class, methodModule},
             {"testclass3-PLAIN_JSON-attributes", OptionPreset.PLAIN_JSON, TestClass3.class, fieldModule}
         };

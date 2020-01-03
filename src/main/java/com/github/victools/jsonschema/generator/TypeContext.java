@@ -93,6 +93,16 @@ public class TypeContext {
     }
 
     /**
+     * Construct a {@link TypeScope} instance for the type.
+     *
+     * @param type targeted type
+     * @return created {@link TypeScope} instance
+     */
+    public TypeScope createTypeScope(ResolvedType type) {
+        return new TypeScope(type, this);
+    }
+
+    /**
      * Determine whether a given type should be treated as "{@value SchemaConstants#TAG_TYPE_ARRAY}" in the generated schema.
      *
      * @param type type to check

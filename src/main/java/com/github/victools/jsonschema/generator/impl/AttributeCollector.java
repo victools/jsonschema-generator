@@ -24,6 +24,7 @@ import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
+import com.github.victools.jsonschema.generator.TypeScope;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -109,6 +110,35 @@ public class AttributeCollector {
         collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(method));
         config.getMethodAttributeOverrides()
                 .forEach(override -> override.overrideInstanceAttributes(node, method));
+        return node;
+    }
+
+    /**
+     * Collect a given scope's general type attributes (i.e. everything not related to the structure).
+     *
+     * @param scope the scope/type representation for which to collect JSON schema attributes
+     * @param config configuration to apply when looking-up attribute values
+     * @return node holding all collected attributes (possibly empty)
+     */
+    public static ObjectNode collectTypeAttributes(TypeScope scope, SchemaGeneratorConfig config) {
+        ObjectNode node = config.createObjectNode();
+        AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
+        collector.setTitle(node, config.resolveTitleForType(scope));
+        collector.setDescription(node, config.resolveDescriptionForType(scope));
+        collector.setDefault(node, config.resolveDefaultForType(scope));
+        collector.setEnum(node, config.resolveEnumForType(scope));
+        collector.setStringMinLength(node, config.resolveStringMinLengthForType(scope));
+        collector.setStringMaxLength(node, config.resolveStringMaxLengthForType(scope));
+        collector.setStringFormat(node, config.resolveStringFormatForType(scope));
+        collector.setStringPattern(node, config.resolveStringPatternForType(scope));
+        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimumForType(scope));
+        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimumForType(scope));
+        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximumForType(scope));
+        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximumForType(scope));
+        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOfForType(scope));
+        collector.setArrayMinItems(node, config.resolveArrayMinItemsForType(scope));
+        collector.setArrayMaxItems(node, config.resolveArrayMaxItemsForType(scope));
+        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItemsForType(scope));
         return node;
     }
 

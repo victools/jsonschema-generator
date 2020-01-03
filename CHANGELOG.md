@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Extended API for defining context independent collection of schema attributes (for array/collection items that are not directly under a member)
+
+### Changed
+- BREAKING CHANGE: `TypeAttributeOverride`'s second parameter is now the new `TypeScope` wrapper instead of just a `ResolvedType`
 
 ## [3.5.0]
 ### Added

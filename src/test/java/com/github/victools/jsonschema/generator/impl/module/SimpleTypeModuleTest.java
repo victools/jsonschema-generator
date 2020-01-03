@@ -16,7 +16,7 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
-import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
+import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
@@ -54,7 +54,7 @@ public class SimpleTypeModuleTest {
         Mockito.verify(this.builder, Mockito.times(2)).forMethods();
 
         Mockito.verify(this.builder).getObjectMapper();
-        Mockito.verify(this.builder).with(Mockito.any(CustomDefinitionProvider.class));
+        Mockito.verify(this.builder).with(Mockito.any(CustomDefinitionProviderV2.class));
 
         Mockito.verifyNoMoreInteractions(this.builder);
     }

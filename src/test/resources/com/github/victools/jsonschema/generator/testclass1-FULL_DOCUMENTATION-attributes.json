@@ -1,0 +1,48 @@
+{
+    "type": "object",
+    "properties": {
+        "CONSTANT": {
+            "type": "integer",
+            "const": 5
+        },
+        "genericArray": {
+            "type": ["array", "null"],
+            "items": {
+                "type": "string",
+                "title": "String",
+                "description": "for type in general: String",
+                "const": "constant string value",
+                "minLength": 1,
+                "maxLength": 256,
+                "format": "date",
+                "pattern": "^.{1,256}$"
+            },
+            "title": "String[]<String>",
+            "description": "for type in general: String[]<String>",
+            "minItems": 2,
+            "maxItems": 100,
+            "uniqueItems": false
+        },
+        "genericValue": {
+            "type": ["string", "null"]
+        },
+        "ignoredInternalValue": {
+            "type": ["integer", "null"]
+        },
+        "primitiveValue": {
+            "type": "integer"
+        },
+        "calculateSomething(Number, Number)": false,
+        "getGenericValue()": {
+            "type": ["string", "null"]
+        },
+        "getPrimitiveValue()": {
+            "type": "integer"
+        },
+        "isSimpleTestClass()": {
+            "type": "boolean"
+        }
+    },
+    "title": "TestClass1",
+    "description": "for type in general: TestClass1"
+}

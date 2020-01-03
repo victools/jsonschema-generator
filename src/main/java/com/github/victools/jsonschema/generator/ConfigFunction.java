@@ -19,17 +19,17 @@ package com.github.victools.jsonschema.generator;
 /**
  * Functional interface for realising one of various configurations.
  *
- * @param <M> type of member the configuration applies to
+ * @param <S> type of scope/type representation the configuration applies to
  * @param <R> type of the configuration result
  */
 @FunctionalInterface
-public interface ConfigFunction<M extends MemberScope<?, ?>, R> {
+public interface ConfigFunction<S extends TypeScope, R> {
 
     /**
      * Applies this function to the given arguments.
      *
-     * @param member the member the configuration applies to
+     * @param target the targeted type representation the configuration applies to
      * @return the function result (may be null to indicate no specific configuration applies)
      */
-    R apply(M member);
+    R apply(S target);
 }
