@@ -35,6 +35,7 @@ public class SchemaGeneratorConfigBuilder {
     private final OptionPreset preset;
 
     private final Map<Option, Boolean> options = new HashMap<>();
+    private final SchemaGeneratorTypeConfigPart<TypeScope> typesInGeneralConfigPart = new SchemaGeneratorTypeConfigPart<>();
     private final SchemaGeneratorConfigPart<FieldScope> fieldConfigPart = new SchemaGeneratorConfigPart<>();
     private final SchemaGeneratorConfigPart<MethodScope> methodConfigPart = new SchemaGeneratorConfigPart<>();
     private final List<CustomDefinitionProviderV2> customDefinitions = new ArrayList<>();
@@ -81,6 +82,7 @@ public class SchemaGeneratorConfigBuilder {
         // construct the actual configuration instance
         return new SchemaGeneratorConfigImpl(this.objectMapper,
                 completeSetOfOptions,
+                this.typesInGeneralConfigPart,
                 this.fieldConfigPart,
                 this.methodConfigPart,
                 this.customDefinitions,
@@ -88,9 +90,20 @@ public class SchemaGeneratorConfigBuilder {
     }
 
     /**
+     * Get the part of this configuration builder dedicated to custom attribute look-ups for types in general, independent of the declaration context.
+     *
+     * @return configuration part responsible for handling types regardless of their declaration context
+     */
+    public SchemaGeneratorTypeConfigPart<TypeScope> forTypesInGeneral() {
+        return this.typesInGeneralConfigPart;
+    }
+
+    /**
      * Get the part of this configuration builder dedicated to custom attribute look-ups for fields.
      *
      * @return configuration part responsible for handling of fields
+     * @see #forTypesInGeneral() : holding configurations also applying to methods or types that are not declared as member directly
+     * @see #forMethods() : holding configuration applying to methods
      */
     public SchemaGeneratorConfigPart<FieldScope> forFields() {
         return this.fieldConfigPart;
@@ -100,6 +113,8 @@ public class SchemaGeneratorConfigBuilder {
      * Get the part of this configuration builder dedicated to custom attribute look-ups for methods.
      *
      * @return configuration part responsible for handling of methods
+     * @see #forTypesInGeneral() : holding configurations also applying to fields or types that are not declared as member directly
+     * @see #forFields() : holding configuration applying to fields
      */
     public SchemaGeneratorConfigPart<MethodScope> forMethods() {
         return this.methodConfigPart;

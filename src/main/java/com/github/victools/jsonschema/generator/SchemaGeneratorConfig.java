@@ -211,6 +211,14 @@ public interface SchemaGeneratorConfig {
     String resolveTitle(MethodScope method);
 
     /**
+     * Determine the "title" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "title" value for
+     * @return "title" in a JSON Schema (may be null)
+     */
+    String resolveTitleForType(TypeScope scope);
+
+    /**
      * Determine the "description" of an object's field/property.
      *
      * @param field object's field/property to determine "description" value for
@@ -227,12 +235,12 @@ public interface SchemaGeneratorConfig {
     String resolveDescription(MethodScope method);
 
     /**
-     * Determine the "default" value of a method's return value.
+     * Determine the "description" of a context-independent type representation.
      *
-     * @param method method for whose return value to determine "default" value for
-     * @return "default" in a JSON Schema (may be null)
+     * @param scope context-independent type representation to determine "description" value for
+     * @return "description" in a JSON Schema (may be null)
      */
-    Object resolveDefault(MethodScope method);
+    String resolveDescriptionForType(TypeScope scope);
 
     /**
      * Determine the "default" value of an object's field/property.
@@ -241,6 +249,22 @@ public interface SchemaGeneratorConfig {
      * @return "default" in a JSON Schema (may be null)
      */
     Object resolveDefault(FieldScope field);
+
+    /**
+     * Determine the "default" value of a method's return value.
+     *
+     * @param method method for whose return value to determine "default" value for
+     * @return "default" in a JSON Schema (may be null)
+     */
+    Object resolveDefault(MethodScope method);
+
+    /**
+     * Determine the "default" value of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "default" value for
+     * @return "default" in a JSON Schema (may be null)
+     */
+    Object resolveDefaultForType(TypeScope scope);
 
     /**
      * Determine the "enum"/"const" of an object's field/property.
@@ -259,6 +283,14 @@ public interface SchemaGeneratorConfig {
     Collection<?> resolveEnum(MethodScope method);
 
     /**
+     * Determine the "enum"/"const" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "enum"/"const" value for
+     * @return "enum"/"const" in a JSON Schema (may be null)
+     */
+    Collection<?> resolveEnumForType(TypeScope scope);
+
+    /**
      * Determine the "minLength" of an object's field/property.
      *
      * @param field object's field/property to determine "minLength" value for
@@ -273,6 +305,14 @@ public interface SchemaGeneratorConfig {
      * @return "minLength" in a JSON Schema (may be null)
      */
     Integer resolveStringMinLength(MethodScope method);
+
+    /**
+     * Determine the "minLength" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "minLength" value for
+     * @return "minLength" in a JSON Schema (may be null)
+     */
+    Integer resolveStringMinLengthForType(TypeScope scope);
 
     /**
      * Determine the "maxLength" of an object's field/property.
@@ -291,6 +331,14 @@ public interface SchemaGeneratorConfig {
     Integer resolveStringMaxLength(MethodScope method);
 
     /**
+     * Determine the "maxLength" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "maxLength" value for
+     * @return "maxLength" in a JSON Schema (may be null)
+     */
+    Integer resolveStringMaxLengthForType(TypeScope scope);
+
+    /**
      * Determine the "format" of an object's field/property.
      *
      * @param field object's field/property to determine "format" value for
@@ -305,6 +353,14 @@ public interface SchemaGeneratorConfig {
      * @return "format" in a JSON Schema (may be null)
      */
     String resolveStringFormat(MethodScope method);
+
+    /**
+     * Determine the "format" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "format" value for
+     * @return "format" in a JSON Schema (may be null)
+     */
+    String resolveStringFormatForType(TypeScope scope);
 
     /**
      * Determine the "pattern" of an object's field/property.
@@ -323,6 +379,14 @@ public interface SchemaGeneratorConfig {
     String resolveStringPattern(MethodScope method);
 
     /**
+     * Determine the "pattern" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "pattern" value for
+     * @return "pattern" in a JSON Schema (may be null)
+     */
+    String resolveStringPatternForType(TypeScope scope);
+
+    /**
      * Determine the "minimum" of an object's field/property.
      *
      * @param field object's field/property to determine "minimum" value for
@@ -337,6 +401,14 @@ public interface SchemaGeneratorConfig {
      * @return "minimum" in a JSON Schema (may be null)
      */
     BigDecimal resolveNumberInclusiveMinimum(MethodScope method);
+
+    /**
+     * Determine the "minimum" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "minimum" value for
+     * @return "minimum" in a JSON Schema (may be null)
+     */
+    BigDecimal resolveNumberInclusiveMinimumForType(TypeScope scope);
 
     /**
      * Determine the "exclusiveMinimum" of an object's field/property.
@@ -355,6 +427,14 @@ public interface SchemaGeneratorConfig {
     BigDecimal resolveNumberExclusiveMinimum(MethodScope method);
 
     /**
+     * Determine the "exclusiveMinimum" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "exclusiveMinimum" value for
+     * @return "exclusiveMinimum" in a JSON Schema (may be null)
+     */
+    BigDecimal resolveNumberExclusiveMinimumForType(TypeScope scope);
+
+    /**
      * Determine the "maximum" of an object's field/property.
      *
      * @param field object's field/property to determine "maximum" value for
@@ -369,6 +449,14 @@ public interface SchemaGeneratorConfig {
      * @return "maximum" in a JSON Schema (may be null)
      */
     BigDecimal resolveNumberInclusiveMaximum(MethodScope method);
+
+    /**
+     * Determine the "maximum" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "maximum" value for
+     * @return "maximum" in a JSON Schema (may be null)
+     */
+    BigDecimal resolveNumberInclusiveMaximumForType(TypeScope scope);
 
     /**
      * Determine the "exclusiveMaximum" of an object's field/property.
@@ -387,6 +475,14 @@ public interface SchemaGeneratorConfig {
     BigDecimal resolveNumberExclusiveMaximum(MethodScope method);
 
     /**
+     * Determine the "exclusiveMaximum" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "exclusiveMaximum" value for
+     * @return "exclusiveMaximum" in a JSON Schema (may be null)
+     */
+    BigDecimal resolveNumberExclusiveMaximumForType(TypeScope scope);
+
+    /**
      * Determine the "multipleOf" of an object's field/property.
      *
      * @param field object's field/property to determine "multipleOf" value for
@@ -401,6 +497,14 @@ public interface SchemaGeneratorConfig {
      * @return "multipleOf" in a JSON Schema (may be null)
      */
     BigDecimal resolveNumberMultipleOf(MethodScope method);
+
+    /**
+     * Determine the "multipleOf" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "multipleOf" value for
+     * @return "multipleOf" in a JSON Schema (may be null)
+     */
+    BigDecimal resolveNumberMultipleOfForType(TypeScope scope);
 
     /**
      * Determine the "minItems" of an object's field/property.
@@ -419,6 +523,14 @@ public interface SchemaGeneratorConfig {
     Integer resolveArrayMinItems(MethodScope method);
 
     /**
+     * Determine the "minItems" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "minItems" value for
+     * @return "minItems" in a JSON Schema (may be null)
+     */
+    Integer resolveArrayMinItemsForType(TypeScope scope);
+
+    /**
      * Determine the "maxItems" of an object's field/property.
      *
      * @param field object's field/property to determine "maxItems" value for
@@ -435,6 +547,14 @@ public interface SchemaGeneratorConfig {
     Integer resolveArrayMaxItems(MethodScope method);
 
     /**
+     * Determine the "maxItems" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "maxItems" value for
+     * @return "maxItems" in a JSON Schema (may be null)
+     */
+    Integer resolveArrayMaxItemsForType(TypeScope scope);
+
+    /**
      * Determine the "uniqueItems" of an object's field/property.
      *
      * @param field object's field/property to determine "uniqueItems" value for
@@ -449,4 +569,12 @@ public interface SchemaGeneratorConfig {
      * @return "uniqueItems" in a JSON Schema (may be null)
      */
     Boolean resolveArrayUniqueItems(MethodScope method);
+
+    /**
+     * Determine the "uniqueItems" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "uniqueItems" value for
+     * @return "uniqueItems" in a JSON Schema (may be null)
+     */
+    Boolean resolveArrayUniqueItemsForType(TypeScope scope);
 }

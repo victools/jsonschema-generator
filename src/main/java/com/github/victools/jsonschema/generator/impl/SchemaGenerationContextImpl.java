@@ -34,6 +34,7 @@ import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.TypeContext;
+import com.github.victools.jsonschema.generator.TypeScope;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -251,8 +252,15 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 this.generateObjectDefinition(targetType, definition);
             }
         }
+        TypeScope scope = this.typeContext.createTypeScope(targetType);
+        ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this.generatorConfig);
+        // ensure no existing attributes in the 'definition' are replaced, by way of first overriding any conflicts the other way around
+        typeAttributes.setAll(definition);
+        // apply merged attributes
+        definition.setAll(typeAttributes);
+        // apply overrides as the very last step
         this.generatorConfig.getTypeAttributeOverrides()
-                .forEach(override -> override.overrideTypeAttributes(definition, targetType, this.generatorConfig));
+                .forEach(override -> override.overrideTypeAttributes(definition, scope, this.generatorConfig));
     }
 
     /**

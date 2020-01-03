@@ -28,7 +28,9 @@ import com.github.victools.jsonschema.generator.InstanceAttributeOverride;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.SchemaGeneratorTypeConfigPart;
 import com.github.victools.jsonschema.generator.TypeAttributeOverride;
+import com.github.victools.jsonschema.generator.TypeScope;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,6 +53,7 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     private SchemaGeneratorConfigImpl instance;
     private ObjectMapper objectMapper;
     private Map<Option, Boolean> options;
+    private SchemaGeneratorTypeConfigPart<TypeScope> typesInGeneralConfigPart;
     private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
     private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
     private List<CustomDefinitionProviderV2> customDefinitions;
@@ -65,12 +68,13 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     public void setUp() {
         this.objectMapper = Mockito.mock(ObjectMapper.class);
         this.options = new HashMap<>();
+        this.typesInGeneralConfigPart = Mockito.mock(SchemaGeneratorTypeConfigPart.class);
         this.fieldConfigPart = Mockito.mock(SchemaGeneratorConfigPart.class);
         this.methodConfigPart = Mockito.mock(SchemaGeneratorConfigPart.class);
         this.customDefinitions = new ArrayList<>();
         this.typeAttributeOverrides = new ArrayList<>();
 
-        this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, this.options,
+        this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, this.options, this.typesInGeneralConfigPart,
                 this.fieldConfigPart, this.methodConfigPart, this.customDefinitions, this.typeAttributeOverrides);
     }
 
@@ -202,7 +206,7 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     @Test
     public void testGetTypeAttributeOverrides() {
-        TypeAttributeOverride typeOverride = (typeNode, javaType, c) -> typeNode.put("$comment", javaType.getTypeName());
+        TypeAttributeOverride typeOverride = (typeNode, type, c) -> typeNode.put("$comment", type.getSimpleTypeDescription());
         this.typeAttributeOverrides.add(typeOverride);
 
         List<TypeAttributeOverride> result = this.instance.getTypeAttributeOverrides();

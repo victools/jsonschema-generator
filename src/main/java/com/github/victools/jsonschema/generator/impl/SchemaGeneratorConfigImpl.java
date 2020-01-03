@@ -29,7 +29,9 @@ import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.SchemaGeneratorTypeConfigPart;
 import com.github.victools.jsonschema.generator.TypeAttributeOverride;
+import com.github.victools.jsonschema.generator.TypeScope;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,6 +47,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
 
     private final ObjectMapper objectMapper;
     private final Map<Option, Boolean> options;
+    private final SchemaGeneratorTypeConfigPart<TypeScope> typesInGeneralConfigPart;
     private final SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
     private final SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
     private final List<CustomDefinitionProviderV2> customDefinitions;
@@ -55,6 +58,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      *
      * @param objectMapper supplier for object and array nodes for the JSON structure being generated
      * @param options specifically configured settings/options (thereby overriding the default enabled/disabled flag)
+     * @param typesInGeneralConfigPart configuration part for context-independent attribute collection
      * @param fieldConfigPart configuration part for fields
      * @param methodConfigPart configuration part for methods
      * @param customDefinitions custom suppliers for a type's schema definition
@@ -62,12 +66,14 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      */
     public SchemaGeneratorConfigImpl(ObjectMapper objectMapper,
             Map<Option, Boolean> options,
+            SchemaGeneratorTypeConfigPart<TypeScope> typesInGeneralConfigPart,
             SchemaGeneratorConfigPart<FieldScope> fieldConfigPart,
             SchemaGeneratorConfigPart<MethodScope> methodConfigPart,
             List<CustomDefinitionProviderV2> customDefinitions,
             List<TypeAttributeOverride> typeAttributeOverrides) {
         this.objectMapper = objectMapper;
         this.options = options;
+        this.typesInGeneralConfigPart = typesInGeneralConfigPart;
         this.fieldConfigPart = fieldConfigPart;
         this.methodConfigPart = methodConfigPart;
         this.customDefinitions = customDefinitions;
@@ -214,6 +220,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public String resolveTitleForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveTitle(scope);
+    }
+
+    @Override
     public String resolveDescription(FieldScope field) {
         return this.fieldConfigPart.resolveDescription(field);
     }
@@ -224,13 +235,23 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public Object resolveDefault(MethodScope method) {
-        return this.methodConfigPart.resolveDefault(method);
+    public String resolveDescriptionForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveDescription(scope);
     }
 
     @Override
     public Object resolveDefault(FieldScope field) {
         return this.fieldConfigPart.resolveDefault(field);
+    }
+
+    @Override
+    public Object resolveDefault(MethodScope method) {
+        return this.methodConfigPart.resolveDefault(method);
+    }
+
+    @Override
+    public Object resolveDefaultForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveDefault(scope);
     }
 
     @Override
@@ -244,6 +265,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public Collection<?> resolveEnumForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveEnum(scope);
+    }
+
+    @Override
     public Integer resolveStringMinLength(FieldScope field) {
         return this.fieldConfigPart.resolveStringMinLength(field);
     }
@@ -251,6 +277,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public Integer resolveStringMinLength(MethodScope method) {
         return this.methodConfigPart.resolveStringMinLength(method);
+    }
+
+    @Override
+    public Integer resolveStringMinLengthForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveStringMinLength(scope);
     }
 
     @Override
@@ -264,6 +295,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public Integer resolveStringMaxLengthForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveStringMaxLength(scope);
+    }
+
+    @Override
     public String resolveStringFormat(FieldScope field) {
         return this.fieldConfigPart.resolveStringFormat(field);
     }
@@ -271,6 +307,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public String resolveStringFormat(MethodScope method) {
         return this.methodConfigPart.resolveStringFormat(method);
+    }
+
+    @Override
+    public String resolveStringFormatForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveStringFormat(scope);
     }
 
     @Override
@@ -284,6 +325,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public String resolveStringPatternForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveStringPattern(scope);
+    }
+
+    @Override
     public BigDecimal resolveNumberInclusiveMinimum(FieldScope field) {
         return this.fieldConfigPart.resolveNumberInclusiveMinimum(field);
     }
@@ -291,6 +337,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public BigDecimal resolveNumberInclusiveMinimum(MethodScope method) {
         return this.methodConfigPart.resolveNumberInclusiveMinimum(method);
+    }
+
+    @Override
+    public BigDecimal resolveNumberInclusiveMinimumForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveNumberInclusiveMinimum(scope);
     }
 
     @Override
@@ -304,6 +355,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public BigDecimal resolveNumberExclusiveMinimumForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveNumberExclusiveMinimum(scope);
+    }
+
+    @Override
     public BigDecimal resolveNumberInclusiveMaximum(FieldScope field) {
         return this.fieldConfigPart.resolveNumberInclusiveMaximum(field);
     }
@@ -311,6 +367,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public BigDecimal resolveNumberInclusiveMaximum(MethodScope method) {
         return this.methodConfigPart.resolveNumberInclusiveMaximum(method);
+    }
+
+    @Override
+    public BigDecimal resolveNumberInclusiveMaximumForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveNumberInclusiveMaximum(scope);
     }
 
     @Override
@@ -324,6 +385,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public BigDecimal resolveNumberExclusiveMaximumForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveNumberExclusiveMaximum(scope);
+    }
+
+    @Override
     public BigDecimal resolveNumberMultipleOf(FieldScope field) {
         return this.fieldConfigPart.resolveNumberMultipleOf(field);
     }
@@ -331,6 +397,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public BigDecimal resolveNumberMultipleOf(MethodScope method) {
         return this.methodConfigPart.resolveNumberMultipleOf(method);
+    }
+
+    @Override
+    public BigDecimal resolveNumberMultipleOfForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveNumberMultipleOf(scope);
     }
 
     @Override
@@ -344,6 +415,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public Integer resolveArrayMinItemsForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveArrayMinItems(scope);
+    }
+
+    @Override
     public Integer resolveArrayMaxItems(FieldScope field) {
         return this.fieldConfigPart.resolveArrayMaxItems(field);
     }
@@ -354,6 +430,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public Integer resolveArrayMaxItemsForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveArrayMaxItems(scope);
+    }
+
+    @Override
     public Boolean resolveArrayUniqueItems(FieldScope field) {
         return this.fieldConfigPart.resolveArrayUniqueItems(field);
     }
@@ -361,5 +442,10 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public Boolean resolveArrayUniqueItems(MethodScope method) {
         return this.methodConfigPart.resolveArrayUniqueItems(method);
+    }
+
+    @Override
+    public Boolean resolveArrayUniqueItemsForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveArrayUniqueItems(scope);
     }
 }
