@@ -103,7 +103,7 @@ public class SchemaGenerator {
             List<ObjectNode> nullableReferences = types.stream()
                     .flatMap(type -> generationContext.getNullableReferences(type).stream())
                     .collect(Collectors.toList());
-            String alias = aliasEntry.getKey();
+            String alias = aliasEntry.getKey().replaceAll("[ ]+", "");
             final String referenceKey;
             boolean referenceInline = !types.contains(mainSchemaTarget)
                     && (referencingNodes.isEmpty() || (!createDefinitionsForAll && (referencingNodes.size() + nullableReferences.size()) < 2));
@@ -131,7 +131,7 @@ public class SchemaGenerator {
                 }
                 generationContext.makeNullable(definition);
                 if (createDefinitionsForAll || nullableReferences.size() > 1) {
-                    String nullableAlias = alias + " (nullable)";
+                    String nullableAlias = alias + "(nullable)";
                     String nullableReferenceKey = SchemaConstants.TAG_REF_PREFIX + nullableAlias;
                     definitionsNode.set(nullableAlias, definition);
                     nullableReferences.forEach(referenceNode -> referenceNode.put(SchemaConstants.TAG_REF, nullableReferenceKey));

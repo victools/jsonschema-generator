@@ -138,20 +138,22 @@
                                     "description": "looked-up from field: TestClass2<TestClass2<String>>"
                                 }]
                         },
-                        "optionalT": {
-                            "type": ["string", "null"],
-                            "title": "String",
-                            "description": "looked-up from field: String",
-                            "const": "constant string value",
-                            "minLength": 1,
-                            "maxLength": 256,
-                            "format": "date",
-                            "pattern": "^.{1,256}$"
+                        "optionalS": {
+                            "type": ["integer", "null"],
+                            "title": "Integer",
+                            "description": "looked-up from field: Integer",
+                            "default": 1,
+                            "enum": [1, 2, 3, 4, 5],
+                            "minimum": 1,
+                            "exclusiveMinimum": 0,
+                            "maximum": 1E+1,
+                            "exclusiveMaximum": 11,
+                            "multipleOf": 1
                         }
                     }
                 }, {
-                    "title": "TestClass4<String>",
-                    "description": "looked-up from field: TestClass4<String>"
+                    "title": "TestClass4<Integer, String>",
+                    "description": "looked-up from field: TestClass4<Integer, String>"
                 }]
         },
         "nestedClass1Array": {
