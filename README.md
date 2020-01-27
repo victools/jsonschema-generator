@@ -11,7 +11,7 @@ Creating JSON Schema (Draft 7) from your Java classes utilising Jackson (inspire
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1</version>
 </dependency>
 ```
 
