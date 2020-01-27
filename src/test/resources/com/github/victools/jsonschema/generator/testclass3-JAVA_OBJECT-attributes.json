@@ -20,7 +20,7 @@
                 },
                 "valueOf(String)": {
                     "allOf": [{
-                            "$ref": "#/definitions/RoundingMode (nullable)"
+                            "$ref": "#/definitions/RoundingMode(nullable)"
                         }, {
                             "title": "RoundingMode",
                             "description": "looked-up from method: RoundingMode"
@@ -28,7 +28,7 @@
                 },
                 "valueOf(int)": {
                     "allOf": [{
-                            "$ref": "#/definitions/RoundingMode (nullable)"
+                            "$ref": "#/definitions/RoundingMode(nullable)"
                         }, {
                             "title": "RoundingMode",
                             "description": "looked-up from method: RoundingMode"
@@ -47,7 +47,7 @@
                 }
             }
         },
-        "RoundingMode (nullable)": {
+        "RoundingMode(nullable)": {
             "oneOf": [{
                     "type": "null"
                 }, {
@@ -148,33 +148,37 @@
                                     "const": "HALF_UP"
                                 }]
                         },
-                        "optionalT": {
+                        "optionalS": {
                             "type": "object",
                             "properties": {
                                 "get()": {
-                                    "type": ["string", "null"],
-                                    "title": "String",
-                                    "description": "looked-up from method: String",
-                                    "const": "constant string value",
-                                    "minLength": 1,
-                                    "maxLength": 256,
-                                    "format": "date",
-                                    "pattern": "^.{1,256}$"
+                                    "type": ["integer", "null"],
+                                    "title": "Integer",
+                                    "description": "looked-up from method: Integer",
+                                    "default": 1,
+                                    "enum": [1, 2, 3, 4, 5],
+                                    "minimum": 1,
+                                    "exclusiveMinimum": 0,
+                                    "maximum": 1E+1,
+                                    "exclusiveMaximum": 11,
+                                    "multipleOf": 1
                                 },
                                 "isPresent()": {
                                     "type": ["boolean", "null"],
                                     "title": "boolean",
                                     "description": "looked-up from method: boolean"
                                 },
-                                "orElse(String)": {
-                                    "type": ["string", "null"],
-                                    "title": "String",
-                                    "description": "looked-up from method: String",
-                                    "const": "constant string value",
-                                    "minLength": 1,
-                                    "maxLength": 256,
-                                    "format": "date",
-                                    "pattern": "^.{1,256}$"
+                                "orElse(Integer)": {
+                                    "type": ["integer", "null"],
+                                    "title": "Integer",
+                                    "description": "looked-up from method: Integer",
+                                    "default": 1,
+                                    "enum": [1, 2, 3, 4, 5],
+                                    "minimum": 1,
+                                    "exclusiveMinimum": 0,
+                                    "maximum": 1E+1,
+                                    "exclusiveMaximum": 11,
+                                    "multipleOf": 1
                                 }
                             }
                         },
@@ -208,8 +212,8 @@
                         }
                     }
                 }, {
-                    "title": "TestClass4<String>",
-                    "description": "looked-up from method: TestClass4<String>"
+                    "title": "TestClass4<Integer, String>",
+                    "description": "looked-up from method: TestClass4<Integer, String>"
                 }]
         },
         "getNestedClass1Array()": {
