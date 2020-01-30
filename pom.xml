@@ -8,7 +8,7 @@
 
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>4.0.2-SNAPSHOT</version>
+    <version>4.0.2</version>
     <packaging>jar</packaging>
 
     <licenses>
@@ -27,7 +27,7 @@
         <connection>scm:git:https://github.com/victools/jsonschema-generator.git</connection>
         <developerConnection>scm:git:https://github.com/victools/jsonschema-generator.git</developerConnection>
         <url>https://github.com/victools/jsonschema-generator</url>
-        <tag>HEAD</tag>
+        <tag>v4.0.2</tag>
     </scm>
 
     <organization>
@@ -48,6 +48,12 @@
             <url>https://github.com/imIfOu</url>
             <roles>
                 <role>Provided PR #5 (support for "required" and "default" properties)</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <url>https://github.com/ALEUT</url>
+            <roles>
+                <role>Reporting issue #19 (requirement for "$ref" to be URI-compatible)</role>
             </roles>
         </contributor>
     </contributors>
