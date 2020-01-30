@@ -23,10 +23,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -209,6 +211,15 @@ public class SchemaGeneratorTest {
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(targetType);
+        // ensure that the generated definition keys are valid URIs without any characters requiring encoding
+        JsonNode definitions = result.get(SchemaConstants.TAG_DEFINITIONS);
+        if (definitions instanceof ObjectNode) {
+            Iterator<String> definitionKeys = ((ObjectNode) definitions).fieldNames();
+            while (definitionKeys.hasNext()) {
+                String key = definitionKeys.next();
+                Assert.assertEquals(key, new URI(key).toASCIIString());
+            }
+        }
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
                 loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
     }

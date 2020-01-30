@@ -1,19 +1,19 @@
 {
     "definitions": {
-        "Integer(nullable)": {
+        "Integer-nullable": {
             "$comment": "custom definition for Integer.class"
         },
-        "Optional<Integer>(nullable)": {
+        "Optional(Integer)-nullable": {
             "type": ["object", "null"],
             "properties": {
                 "get()": {
-                    "$ref": "#/definitions/Integer(nullable)"
+                    "$ref": "#/definitions/Integer-nullable"
                 },
                 "isPresent()": {
                     "type": "boolean"
                 },
                 "orElse(Integer)": {
-                    "$ref": "#/definitions/Integer(nullable)"
+                    "$ref": "#/definitions/Integer-nullable"
                 }
             }
         },
@@ -37,10 +37,10 @@
                     "enum": ["UP", "DOWN", "CEILING", "FLOOR", "HALF_UP", "HALF_DOWN", "HALF_EVEN", "UNNECESSARY"]
                 },
                 "valueOf(String)": {
-                    "$ref": "#/definitions/RoundingMode(nullable)"
+                    "$ref": "#/definitions/RoundingMode-nullable"
                 },
                 "valueOf(int)": {
-                    "$ref": "#/definitions/RoundingMode(nullable)"
+                    "$ref": "#/definitions/RoundingMode-nullable"
                 },
                 "values()": {
                     "type": ["array", "null"],
@@ -50,7 +50,7 @@
                 }
             }
         },
-        "RoundingMode(nullable)": {
+        "RoundingMode-nullable": {
             "oneOf": [{
                     "type": "null"
                 }, {
@@ -74,7 +74,7 @@
                     "type": ["string", "null"]
                 },
                 "ignoredInternalValue": {
-                    "$ref": "#/definitions/Integer(nullable)"
+                    "$ref": "#/definitions/Integer-nullable"
                 },
                 "primitiveValue": {
                     "type": "integer"
@@ -91,7 +91,7 @@
                 }
             }
         },
-        "TestClass2<Long>": {
+        "TestClass2(Long)": {
             "type": "object",
             "properties": {
                 "genericArray": {
@@ -108,14 +108,14 @@
                 }
             }
         },
-        "TestClass2<Long>(nullable)": {
+        "TestClass2(Long)-nullable": {
             "oneOf": [{
                     "type": "null"
                 }, {
-                    "$ref": "#/definitions/TestClass2<Long>"
+                    "$ref": "#/definitions/TestClass2(Long)"
                 }]
         },
-        "TestClass2<String>": {
+        "TestClass2(String)": {
             "type": "object",
             "properties": {
                 "genericArray": {
@@ -132,14 +132,14 @@
                 }
             }
         },
-        "TestClass2<String>(nullable)": {
+        "TestClass2(String)-nullable": {
             "oneOf": [{
                     "type": "null"
                 }, {
-                    "$ref": "#/definitions/TestClass2<String>"
+                    "$ref": "#/definitions/TestClass2(String)"
                 }]
         },
-        "TestClass2<TestClass1[]>(nullable)": {
+        "TestClass2(TestClass1*)-nullable": {
             "type": ["object", "null"],
             "properties": {
                 "genericArray": {
@@ -165,24 +165,24 @@
                 }
             }
         },
-        "TestClass2<TestClass2<String>>(nullable)": {
+        "TestClass2(TestClass2(String))-nullable": {
             "type": ["object", "null"],
             "properties": {
                 "genericArray": {
                     "type": ["array", "null"],
                     "items": {
-                        "$ref": "#/definitions/TestClass2<String>"
+                        "$ref": "#/definitions/TestClass2(String)"
                     }
                 },
                 "genericValue": {
-                    "$ref": "#/definitions/TestClass2<String>(nullable)"
+                    "$ref": "#/definitions/TestClass2(String)-nullable"
                 },
                 "getGenericValue()": {
-                    "$ref": "#/definitions/TestClass2<String>(nullable)"
+                    "$ref": "#/definitions/TestClass2(String)-nullable"
                 }
             }
         },
-        "TestClass4<Integer,String>(nullable)": {
+        "TestClass4(Integer,String)-nullable": {
             "type": ["object", "null"],
             "properties": {
                 "DEFAULT_ROUNDING_MODE": {
@@ -193,13 +193,13 @@
                         }]
                 },
                 "class2OfClass2OfT": {
-                    "$ref": "#/definitions/TestClass2<TestClass2<String>>(nullable)"
+                    "$ref": "#/definitions/TestClass2(TestClass2(String))-nullable"
                 },
                 "optionalS": {
-                    "$ref": "#/definitions/Optional<Integer>(nullable)"
+                    "$ref": "#/definitions/Optional(Integer)-nullable"
                 },
                 "getClass2OfClass2OfT()": {
-                    "$ref": "#/definitions/TestClass2<TestClass2<String>>(nullable)"
+                    "$ref": "#/definitions/TestClass2(TestClass2(String))-nullable"
                 }
             }
         }
@@ -207,33 +207,33 @@
     "type": "object",
     "properties": {
         "class4": {
-            "$ref": "#/definitions/TestClass4<Integer,String>(nullable)"
+            "$ref": "#/definitions/TestClass4(Integer,String)-nullable"
         },
         "nestedClass1Array": {
-            "$ref": "#/definitions/TestClass2<TestClass1[]>(nullable)"
+            "$ref": "#/definitions/TestClass2(TestClass1*)-nullable"
         },
         "nestedLong": {
-            "$ref": "#/definitions/TestClass2<Long>(nullable)"
+            "$ref": "#/definitions/TestClass2(Long)-nullable"
         },
         "nestedLongList": {
             "type": ["array", "null"],
             "items": {
-                "$ref": "#/definitions/TestClass2<Long>"
+                "$ref": "#/definitions/TestClass2(Long)"
             }
         },
         "getClass4()": {
-            "$ref": "#/definitions/TestClass4<Integer,String>(nullable)"
+            "$ref": "#/definitions/TestClass4(Integer,String)-nullable"
         },
         "getNestedClass1Array()": {
-            "$ref": "#/definitions/TestClass2<TestClass1[]>(nullable)"
+            "$ref": "#/definitions/TestClass2(TestClass1*)-nullable"
         },
         "getNestedLong()": {
-            "$ref": "#/definitions/TestClass2<Long>(nullable)"
+            "$ref": "#/definitions/TestClass2(Long)-nullable"
         },
         "getNestedLongList()": {
             "type": ["array", "null"],
             "items": {
-                "$ref": "#/definitions/TestClass2<Long>"
+                "$ref": "#/definitions/TestClass2(Long)"
             }
         }
     }

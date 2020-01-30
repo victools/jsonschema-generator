@@ -1,6 +1,6 @@
 {
     "definitions": {
-        "Integer(nullable)": {
+        "Integer-nullable": {
             "$comment": "custom definition for Integer.class"
         }
     },
@@ -20,7 +20,7 @@
             "type": ["string", "null"]
         },
         "ignoredInternalValue": {
-            "$ref": "#/definitions/Integer(nullable)"
+            "$ref": "#/definitions/Integer-nullable"
         },
         "primitiveValue": {
             "type": "integer"

@@ -44,7 +44,7 @@
                 }
             }
         },
-        "TestClass2<Long>": {
+        "TestClass2(Long)": {
             "type": "object",
             "properties": {
                 "genericArray": {
@@ -72,7 +72,7 @@
                 }
             }
         },
-        "TestClass2<String>": {
+        "TestClass2(String)": {
             "type": "object",
             "properties": {
                 "genericArray": {
@@ -117,7 +117,7 @@
                                             "uniqueItems": false,
                                             "type": ["array", "null"],
                                             "items": {
-                                                "$ref": "#/definitions/TestClass2<String>"
+                                                "$ref": "#/definitions/TestClass2(String)"
                                             }
                                         },
                                         "genericValue": {
@@ -125,7 +125,7 @@
                                                     "oneOf": [{
                                                             "type": "null"
                                                         }, {
-                                                            "$ref": "#/definitions/TestClass2<String>"
+                                                            "$ref": "#/definitions/TestClass2(String)"
                                                         }]
                                                 }, {
                                                     "title": "TestClass2<String>",
@@ -193,7 +193,7 @@
         },
         "nestedLong": {
             "allOf": [{
-                    "$ref": "#/definitions/TestClass2<Long>"
+                    "$ref": "#/definitions/TestClass2(Long)"
                 }, {
                     "title": "TestClass2<Long>",
                     "description": "looked-up from field: TestClass2<Long>"
@@ -207,7 +207,7 @@
             "uniqueItems": false,
             "type": "array",
             "items": {
-                "$ref": "#/definitions/TestClass2<Long>"
+                "$ref": "#/definitions/TestClass2(Long)"
             }
         }
     },
