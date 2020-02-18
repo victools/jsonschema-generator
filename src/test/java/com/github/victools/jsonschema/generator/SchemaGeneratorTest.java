@@ -189,6 +189,7 @@ public class SchemaGeneratorTest {
         Module typeInGeneralModule = configBuilder -> populateTypeConfigPart(configBuilder.forTypesInGeneral(), "for type in general: ");
         Module methodModule = configBuilder -> populateConfigPart(configBuilder.forMethods(), "looked-up from method: ");
         Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields(), "looked-up from field: ");
+        Module enumToStringModule = configBuilder -> configBuilder.with(Option.FLATTENED_ENUMS_FROM_TOSTRING);
         return new Object[][]{
             {"testclass1-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, neutralModule},
             {"testclass1-FULL_DOCUMENTATION-attributes", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, typeInGeneralModule},
@@ -198,7 +199,10 @@ public class SchemaGeneratorTest {
             {"testclass3-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, neutralModule},
             {"testclass3-FULL_DOCUMENTATION-attributes", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, typeInGeneralModule},
             {"testclass3-JAVA_OBJECT-attributes", OptionPreset.JAVA_OBJECT, TestClass3.class, methodModule},
-            {"testclass3-PLAIN_JSON-attributes", OptionPreset.PLAIN_JSON, TestClass3.class, fieldModule}
+            {"testclass3-PLAIN_JSON-attributes", OptionPreset.PLAIN_JSON, TestClass3.class, fieldModule},
+            {"testenum-PLAIN_JSON-default", OptionPreset.PLAIN_JSON, TestEnum.class, neutralModule},
+            {"testenum-FULL_DOCUMENTATION-default", OptionPreset.FULL_DOCUMENTATION, TestEnum.class, neutralModule},
+            {"testenum-PLAIN_JSON-viaToString", OptionPreset.PLAIN_JSON, TestEnum.class, enumToStringModule}
         };
     }
 
@@ -300,6 +304,15 @@ public class SchemaGeneratorTest {
 
         public TestClass2<TestClass2<T>> getClass2OfClass2OfT() {
             return this.class2OfClass2OfT;
+        }
+    }
+
+    private static enum TestEnum {
+        VALUE1, VALUE2, VALUE3;
+
+        @Override
+        public String toString() {
+            return "toString_" + this.name();
         }
     }
 }

@@ -23,7 +23,11 @@ import com.github.victools.jsonschema.generator.impl.module.FlattenedOptionalMod
 import com.github.victools.jsonschema.generator.impl.module.MethodExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
 import com.github.victools.jsonschema.generator.impl.module.SimplifiedOptionalModule;
+import java.util.Collections;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Configuration options to be set on a {@link SchemaGeneratorConfigBuilder} instance.
@@ -39,23 +43,32 @@ public enum Option {
      */
     ADDITIONAL_FIXED_TYPES(SimpleTypeModule::forPrimitiveAndAdditionalTypes, SimpleTypeModule::forPrimitiveTypes),
     /**
-     * Whether enums should be treated as plain "{@value SchemaConstants#TAG_TYPE_STRING}" values.
-     *
-     * @see Option#SIMPLIFIED_ENUMS
-     */
-    FLATTENED_ENUMS(EnumModule::asStrings, null),
-    /**
      * Whether enums should be treated as "{@value SchemaConstants#TAG_TYPE_OBJECT}", with all methods but {@link Enum#name() name()} being excluded.
      * <br>
-     * This only takes effect if {@link Option#FLATTENED_ENUMS} is disabled.
+     * This only takes effect if {@link Option#FLATTENED_ENUMS} and {@link Option#FLATTENED_ENUMS_FROM_TOSTRING} are disabled.
+     *
+     * @see Option#FLATTENED_ENUMS
+     * @see Option#FLATTENED_ENUMS_FROM_TOSTRING
      */
     SIMPLIFIED_ENUMS(EnumModule::asObjects, null),
     /**
-     * Whether any {@link java.util.Optional Optional} instance should be treated as nullable value of the wrapped type.
+     * Whether enums should be treated as plain "{@value SchemaConstants#TAG_TYPE_STRING}" values – derived from their respective constant name.
+     * <br>
+     * This only takes effect if {@link Option#FLATTENED_ENUMS_FROM_TOSTRING} is disabled but takes priority over {@link Option#SIMPLIFIED_ENUMS}.
      *
-     * @see Option#SIMPLIFIED_OPTIONALS
+     * @see Option#FLATTENED_ENUMS_FROM_TOSTRING
+     * @see Option#SIMPLIFIED_ENUMS
      */
-    FLATTENED_OPTIONALS(FlattenedOptionalModule::new, null),
+    FLATTENED_ENUMS(EnumModule::asStringsFromName, null, Option.SIMPLIFIED_ENUMS),
+    /**
+     * Whether enums should be treated as plain "{@value SchemaConstants#TAG_TYPE_STRING}" values – derived from their respective {@code toString()}.
+     * <br>
+     * This takes priority over both {@link Option#FLATTENED_ENUMS} and {@link Option#SIMPLIFIED_ENUMS}.
+     *
+     * @see Option#FLATTENED_ENUMS
+     * @see Option#SIMPLIFIED_ENUMS
+     */
+    FLATTENED_ENUMS_FROM_TOSTRING(EnumModule::asStringsFromToString, null, Option.FLATTENED_ENUMS, Option.SIMPLIFIED_ENUMS),
     /**
      * Whether any {@link java.util.Optional Optional} instance should be reduced to an object with only three methods.
      * <br>
@@ -64,6 +77,14 @@ public enum Option {
      * @see SimplifiedOptionalModule#DEFAULT_INCLUDED_METHOD_NAMES
      */
     SIMPLIFIED_OPTIONALS(SimplifiedOptionalModule::new, null),
+    /**
+     * Whether any {@link java.util.Optional Optional} instance should be treated as nullable value of the wrapped type.
+     * <br>
+     * This takes priority over {@link Option#SIMPLIFIED_OPTIONALS}.
+     *
+     * @see Option#SIMPLIFIED_OPTIONALS
+     */
+    FLATTENED_OPTIONALS(FlattenedOptionalModule::new, null, Option.SIMPLIFIED_OPTIONALS),
     /**
      * Whether the constant values of static final fields should be included.
      */
@@ -187,16 +208,36 @@ public enum Option {
      * Optional: the module realising the setting/option if it is disabled.
      */
     private final Supplier<Module> disabledModuleProvider;
+    /**
+     * Other options being ignored if this one is enabled.
+     */
+    private final Set<Option> overriddenOptions;
 
     /**
      * Constructor.
      *
      * @param enabledModuleProvider type of the module realising this setting/option if it is enabled
      * @param disabledModuleProvider type of the module realising this setting/option if it is disabled
+     * @param overriddenOptions other options being ignored if this one is enabled
      */
-    private Option(Supplier<Module> enabledModuleProvider, Supplier<Module> disabledModuleProvider) {
+    private Option(Supplier<Module> enabledModuleProvider, Supplier<Module> disabledModuleProvider, Option... overriddenOptions) {
         this.enabledModuleProvider = enabledModuleProvider;
         this.disabledModuleProvider = disabledModuleProvider;
+        if (overriddenOptions == null || overriddenOptions.length == 0) {
+            this.overriddenOptions = Collections.emptySet();
+        } else {
+            this.overriddenOptions = Stream.of(overriddenOptions).collect(Collectors.toSet());
+        }
+    }
+
+    /**
+     * Check whether the given option is being ignored if this one enabled.
+     *
+     * @param otherOption option that may be ignored
+     * @return whether the given option is being ignored in case of this one being enabled
+     */
+    public boolean isOverriding(Option otherOption) {
+        return this.overriddenOptions.contains(otherOption);
     }
 
     /**
