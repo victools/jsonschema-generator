@@ -42,7 +42,8 @@ import org.mockito.Mockito;
  */
 public class EnumModuleTest extends AbstractTypeAwareTest {
 
-    private EnumModule instanceAsStrings;
+    private EnumModule instanceAsStringsFromName;
+    private EnumModule instanceAsStringsFromToString;
     private EnumModule instanceAsObjects;
     private SchemaGeneratorConfigBuilder builder;
     private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
@@ -54,7 +55,8 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
 
     @Before
     public void setUp() {
-        this.instanceAsStrings = EnumModule.asStrings();
+        this.instanceAsStringsFromName = EnumModule.asStringsFromName();
+        this.instanceAsStringsFromToString = EnumModule.asStringsFromToString();
         this.instanceAsObjects = EnumModule.asObjects();
         this.builder = Mockito.spy(new SchemaGeneratorConfigBuilder(new ObjectMapper(), new OptionPreset()));
         this.fieldConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
@@ -65,8 +67,18 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testApplyToConfigBuilder_asStrings() {
-        this.instanceAsStrings.applyToConfigBuilder(this.builder);
+    public void testApplyToConfigBuilder_asStringsFromName() {
+        this.instanceAsStringsFromName.applyToConfigBuilder(this.builder);
+
+        Mockito.verify(this.builder).getObjectMapper();
+        Mockito.verify(this.builder).with(Mockito.any(CustomDefinitionProviderV2.class));
+        Mockito.verifyNoMoreInteractions(this.builder);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testApplyToConfigBuilder_asStringsFromToString() {
+        this.instanceAsStringsFromToString.applyToConfigBuilder(this.builder);
 
         Mockito.verify(this.builder).getObjectMapper();
         Mockito.verify(this.builder).with(Mockito.any(CustomDefinitionProviderV2.class));
@@ -90,8 +102,8 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
     }
 
     @Test
-    public void testCustomSchemaDefinition_asStrings() {
-        this.instanceAsStrings.applyToConfigBuilder(this.builder);
+    public void testCustomSchemaDefinition_asStringsFromName() {
+        this.instanceAsStringsFromName.applyToConfigBuilder(this.builder);
         ArgumentCaptor<CustomDefinitionProviderV2> captor = ArgumentCaptor.forClass(CustomDefinitionProviderV2.class);
         Mockito.verify(this.builder).with(captor.capture());
 
@@ -116,7 +128,39 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         Assert.assertEquals("VALUE3", enumNode.get(2).textValue());
     }
 
+    @Test
+    public void testCustomSchemaDefinition_asStringsFromToString() {
+        this.instanceAsStringsFromToString.applyToConfigBuilder(this.builder);
+        ArgumentCaptor<CustomDefinitionProviderV2> captor = ArgumentCaptor.forClass(CustomDefinitionProviderV2.class);
+        Mockito.verify(this.builder).with(captor.capture());
+
+        ResolvedType testEnumType = this.getContext().getTypeContext().resolve(TestEnum.class);
+        CustomDefinition schemaDefinition = captor.getValue().provideCustomSchemaDefinition(testEnumType, this.getContext());
+        Assert.assertFalse(schemaDefinition.isMeantToBeInline());
+        ObjectNode node = schemaDefinition.getValue();
+        Assert.assertEquals(2, node.size());
+
+        JsonNode typeNode = node.get(SchemaConstants.TAG_TYPE);
+        Assert.assertEquals(JsonNodeType.STRING, typeNode.getNodeType());
+        Assert.assertEquals(SchemaConstants.TAG_TYPE_STRING, typeNode.textValue());
+
+        JsonNode enumNode = node.get(SchemaConstants.TAG_ENUM);
+        Assert.assertEquals(JsonNodeType.ARRAY, enumNode.getNodeType());
+        Assert.assertEquals(3, ((ArrayNode) enumNode).size());
+        Assert.assertEquals(JsonNodeType.STRING, enumNode.get(0).getNodeType());
+        Assert.assertEquals("value1_toString", enumNode.get(0).textValue());
+        Assert.assertEquals(JsonNodeType.STRING, enumNode.get(1).getNodeType());
+        Assert.assertEquals("value2_toString", enumNode.get(1).textValue());
+        Assert.assertEquals(JsonNodeType.STRING, enumNode.get(2).getNodeType());
+        Assert.assertEquals("value3_toString", enumNode.get(2).textValue());
+    }
+
     private static enum TestEnum {
         VALUE1, VALUE2, VALUE3;
+
+        @Override
+        public String toString() {
+            return this.name().toLowerCase() + "_toString";
+        }
     }
 }

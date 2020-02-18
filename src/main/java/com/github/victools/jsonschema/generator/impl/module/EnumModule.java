@@ -17,10 +17,10 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.members.RawField;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
+import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
@@ -29,7 +29,9 @@ import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Default module being included for the {@code Option.ENUM_AS_STRING}.
@@ -37,12 +39,21 @@ import java.util.stream.Collectors;
 public class EnumModule implements Module {
 
     /**
-     * Factory method: creating an {@link EnumModule} instance that treats all enums as plain strings.
+     * Factory method: creating an {@link EnumModule} instance that treats all enums as plain strings (derived from their constant value names).
      *
      * @return created module instance
      */
-    public static EnumModule asStrings() {
-        return new EnumModule(true);
+    public static EnumModule asStringsFromName() {
+        return new EnumModule(Enum::name);
+    }
+
+    /**
+     * Factory method: creating an {@link EnumModule} instance that treats all enums as plain strings (derived from each value's toString()).
+     *
+     * @return created module instance
+     */
+    public static EnumModule asStringsFromToString() {
+        return new EnumModule(Enum::toString);
     }
 
     /**
@@ -52,25 +63,23 @@ public class EnumModule implements Module {
      * @return created module instance
      */
     public static EnumModule asObjects() {
-        return new EnumModule(false);
+        return new EnumModule(null);
     }
 
-    private final boolean treatAsString;
+    private final Function<Enum<?>, String> enumConstantToString;
 
     /**
      * Constructor remembering whether to treat enums as plain strings or as objects.
      *
-     * @param treatAsString whether to treat enums as plain strings
+     * @param enumConstantToString how to derive a plain string representation from an enum constant value, may be null to treat them as objects
      */
-    public EnumModule(boolean treatAsString) {
-        this.treatAsString = treatAsString;
+    public EnumModule(Function<Enum<?>, String> enumConstantToString) {
+        this.enumConstantToString = enumConstantToString;
     }
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
-        if (this.treatAsString) {
-            builder.with(new EnumAsStringDefinitionProvider(builder.getObjectMapper()));
-        } else {
+        if (this.enumConstantToString == null) {
             // ignore all direct enum methods but name() - methods declared by a specific enum sub type are not ignored
             builder.forMethods()
                     .withIgnoreCheck(method -> EnumModule.isEnum(method.getDeclaringType()) && !"name".equals(method.getName()))
@@ -78,6 +87,8 @@ public class EnumModule implements Module {
                     .withEnumResolver(EnumModule::extractEnumValues);
             builder.forFields()
                     .withIgnoreCheck(field -> field.getRawMember().isEnumConstant());
+        } else {
+            builder.with(new EnumAsStringDefinitionProvider(builder.getObjectMapper(), this.enumConstantToString));
         }
     }
 
@@ -94,7 +105,7 @@ public class EnumModule implements Module {
     private static List<String> extractEnumValues(MethodScope method) {
         ResolvedType declaringType = method.getDeclaringType();
         if (EnumModule.isEnum(declaringType)) {
-            return EnumModule.extractEnumValues(declaringType.getTypeParameters().get(0));
+            return EnumModule.extractEnumValues(declaringType.getTypeParameters().get(0), Enum::name);
         }
         return null;
     }
@@ -102,15 +113,13 @@ public class EnumModule implements Module {
     /**
      * Look-up the given enum type's constant values.
      *
-     * @param <E> specific enum type
      * @param enumType targeted enum type
+     * @param enumConstantToString how to derive a plain string representation from an enum constant value
      * @return collection containing constant enum values
      */
-    private static <E extends Enum<E>> List<String> extractEnumValues(ResolvedType enumType) {
-        return enumType.getStaticFields()
-                .stream()
-                .filter(field -> field.getRawMember().isEnumConstant())
-                .map(RawField::getName)
+    private static List<String> extractEnumValues(ResolvedType enumType, Function<Enum<?>, String> enumConstantToString) {
+        return Stream.of(enumType.getErasedType().getEnumConstants())
+                .map(enumConstant -> enumConstantToString.apply((Enum<?>) enumConstant))
                 .collect(Collectors.toList());
     }
 
@@ -120,14 +129,17 @@ public class EnumModule implements Module {
     private static class EnumAsStringDefinitionProvider implements CustomDefinitionProviderV2 {
 
         private final ObjectMapper objectMapper;
+        private final Function<Enum<?>, String> enumConstantToString;
 
         /**
          * Constructor setting the given object mapper for later use as ObjectNode prodiver.
          *
          * @param objectMapper object node provider
+         * @param enumConstantToString how to derive a plain string representation from an enum constant value
          */
-        EnumAsStringDefinitionProvider(ObjectMapper objectMapper) {
+        EnumAsStringDefinitionProvider(ObjectMapper objectMapper, Function<Enum<?>, String> enumConstantToString) {
             this.objectMapper = objectMapper;
+            this.enumConstantToString = enumConstantToString;
         }
 
         @Override
@@ -136,7 +148,7 @@ public class EnumModule implements Module {
                 ObjectNode customNode = this.objectMapper.createObjectNode()
                         .put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_STRING);
                 new AttributeCollector(this.objectMapper)
-                        .setEnum(customNode, EnumModule.extractEnumValues(javaType));
+                        .setEnum(customNode, EnumModule.extractEnumValues(javaType, this.enumConstantToString));
                 return new CustomDefinition(customNode);
             }
             return null;

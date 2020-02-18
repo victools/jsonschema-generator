@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -74,8 +76,15 @@ public class SchemaGeneratorConfigBuilder {
                 .collect(Collectors.toMap(
                         option -> option,
                         option -> this.options.getOrDefault(option, this.preset.isOptionEnabledByDefault(option))));
+        Set<Option> enabledOptions = completeSetOfOptions.entrySet()
+                .stream()
+                .filter(Map.Entry::getValue)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+        Predicate<Option> isValid = (configuredOption) -> enabledOptions.stream().noneMatch(enabledOne -> enabledOne.isOverriding(configuredOption));
         completeSetOfOptions.entrySet()
                 .stream()
+                .filter(setting -> !setting.getValue() || isValid.test(setting.getKey()))
                 .map(setting -> setting.getKey().getModule(setting.getValue()))
                 .filter(Objects::nonNull)
                 .forEach(this::with);
