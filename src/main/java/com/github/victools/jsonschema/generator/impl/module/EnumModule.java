@@ -118,7 +118,11 @@ public class EnumModule implements Module {
      * @return collection containing constant enum values
      */
     private static List<String> extractEnumValues(ResolvedType enumType, Function<Enum<?>, String> enumConstantToString) {
-        return Stream.of(enumType.getErasedType().getEnumConstants())
+        Class<?> erasedType = enumType.getErasedType();
+        if (erasedType.getEnumConstants() == null) {
+            return null;
+        }
+        return Stream.of(erasedType.getEnumConstants())
                 .map(enumConstant -> enumConstantToString.apply((Enum<?>) enumConstant))
                 .collect(Collectors.toList());
     }
