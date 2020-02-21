@@ -157,6 +157,8 @@ public class SchemaGeneratorTest {
                 .withDescriptionResolver(member -> descriptionPrefix + member.getSimpleTypeDescription())
                 .withEnumResolver(member -> member.getType().isInstanceOf(Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
                 .withEnumResolver(member -> member.getType().isInstanceOf(String.class) ? Arrays.asList("constant string value") : null)
+                .withAdditionalPropertiesResolver(
+                        member -> member.isContainerType() || member.getType().isInstanceOf(Number.class) || member.getType().isInstanceOf(String.class) || member.getType().isPrimitive() ? null : (member.getType().getErasedType() == TestClass4.class ? String.class : Void.class))
                 .withNumberExclusiveMaximumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
                 .withNumberExclusiveMinimumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.ZERO : null)
                 .withNumberInclusiveMaximumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.TEN : null)
@@ -192,14 +194,14 @@ public class SchemaGeneratorTest {
         Module enumToStringModule = configBuilder -> configBuilder.with(Option.FLATTENED_ENUMS_FROM_TOSTRING);
         return new Object[][]{
             {"testclass1-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, neutralModule},
-            {"testclass1-FULL_DOCUMENTATION-attributes", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, typeInGeneralModule},
-            {"testclass1-JAVA_OBJECT-attributes", OptionPreset.JAVA_OBJECT, TestClass1.class, methodModule},
-            {"testclass1-PLAIN_JSON-attributes", OptionPreset.PLAIN_JSON, TestClass1.class, fieldModule},
+            {"testclass1-FULL_DOCUMENTATION-typeattributes", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, typeInGeneralModule},
+            {"testclass1-JAVA_OBJECT-methodattributes", OptionPreset.JAVA_OBJECT, TestClass1.class, methodModule},
+            {"testclass1-PLAIN_JSON-fieldattributes", OptionPreset.PLAIN_JSON, TestClass1.class, fieldModule},
             {"testclass2-array", OptionPreset.FULL_DOCUMENTATION, TestClass2[].class, neutralModule},
             {"testclass3-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, neutralModule},
-            {"testclass3-FULL_DOCUMENTATION-attributes", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, typeInGeneralModule},
-            {"testclass3-JAVA_OBJECT-attributes", OptionPreset.JAVA_OBJECT, TestClass3.class, methodModule},
-            {"testclass3-PLAIN_JSON-attributes", OptionPreset.PLAIN_JSON, TestClass3.class, fieldModule},
+            {"testclass3-FULL_DOCUMENTATION-typeattributes", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, typeInGeneralModule},
+            {"testclass3-JAVA_OBJECT-methodattributes", OptionPreset.JAVA_OBJECT, TestClass3.class, methodModule},
+            {"testclass3-PLAIN_JSON-fieldattributes", OptionPreset.PLAIN_JSON, TestClass3.class, fieldModule},
             {"testenum-PLAIN_JSON-default", OptionPreset.PLAIN_JSON, TestEnum.class, neutralModule},
             {"testenum-FULL_DOCUMENTATION-default", OptionPreset.FULL_DOCUMENTATION, TestEnum.class, neutralModule},
             {"testenum-PLAIN_JSON-viaToString", OptionPreset.PLAIN_JSON, TestEnum.class, enumToStringModule}

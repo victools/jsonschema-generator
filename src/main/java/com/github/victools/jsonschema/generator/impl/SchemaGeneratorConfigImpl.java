@@ -270,6 +270,21 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public Class<?> resolveAdditionalProperties(FieldScope field) {
+        return this.fieldConfigPart.resolveAdditionalProperties(field);
+    }
+
+    @Override
+    public Class<?> resolveAdditionalProperties(MethodScope method) {
+        return this.methodConfigPart.resolveAdditionalProperties(method);
+    }
+
+    @Override
+    public Class<?> resolveAdditionalPropertiesForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveAdditionalProperties(scope);
+    }
+
+    @Override
     public Integer resolveStringMinLength(FieldScope field) {
         return this.fieldConfigPart.resolveStringMinLength(field);
     }

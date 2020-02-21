@@ -291,6 +291,30 @@ public interface SchemaGeneratorConfig {
     Collection<?> resolveEnumForType(TypeScope scope);
 
     /**
+     * Determine the "additionalProperties" of an object's field/property.
+     *
+     * @param field object's field/property to determine "additionalProperties" value for
+     * @return "additionalProperties" in a JSON Schema (may be {@link Void) to indicate no additional properties being allowed or may be null)
+     */
+    Class<?> resolveAdditionalProperties(FieldScope field);
+
+    /**
+     * Determine the "additionalProperties" of a method's return value.
+     *
+     * @param method method for whose return value to determine "additionalProperties" value for
+     * @return "additionalProperties" in a JSON Schema (may be {@link Void) to indicate no additional properties being allowed or may be null)
+     */
+    Class<?> resolveAdditionalProperties(MethodScope method);
+
+    /**
+     * Determine the "additionalProperties" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "additionalProperties" value for
+     * @return "additionalProperties" in a JSON Schema (may be {@link Void) to indicate no additional properties being allowed or may be null)
+     */
+    Class<?> resolveAdditionalPropertiesForType(TypeScope scope);
+
+    /**
      * Determine the "minLength" of an object's field/property.
      *
      * @param field object's field/property to determine "minLength" value for

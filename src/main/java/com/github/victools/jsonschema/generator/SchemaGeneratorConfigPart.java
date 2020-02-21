@@ -202,6 +202,11 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
     }
 
     @Override
+    public SchemaGeneratorConfigPart<M> withAdditionalPropertiesResolver(ConfigFunction<M, Class<?>> resolver) {
+        return (SchemaGeneratorConfigPart<M>) super.withAdditionalPropertiesResolver(resolver);
+    }
+
+    @Override
     public SchemaGeneratorConfigPart<M> withStringMinLengthResolver(ConfigFunction<M, Integer> resolver) {
         return (SchemaGeneratorConfigPart<M>) super.withStringMinLengthResolver(resolver);
     }

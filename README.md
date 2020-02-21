@@ -123,16 +123,17 @@ configBuilder.forFields()
 |   12 | `const` | Collected value according to configuration (`SchemaGeneratorConfigPart.withEnumResolver()`) if only a single value was found. |
 |   13 | `enum` | Collected value according to configuration (`SchemaGeneratorConfigPart.withEnumResolver()`) if multiple values were found. |
 |   14 | `default` | Collected value according to configuration (`SchemaGeneratorConfigPart.withDefaultResolver()`). |
-|   15 | `minLength` | Collected value according to configuration (`SchemaGeneratorConfigPart.withStringMinLengthResolver()`). |
-|   16 | `maxLength` | Collected value according to configuration (`SchemaGeneratorConfigPart.withStringMaxLengthResolver()`). |
-|   17 | `format` | Collected value according to configuration (`SchemaGeneratorConfigPart.withStringFormatResolver()`). |
-|   18 | `pattern` | Collected value according to configuration (`SchemaGeneratorConfigPart.withStringPatternResolver()`). |
-|   19 | `minimum` | Collected value according to configuration (`SchemaGeneratorConfigPart.withNumberInclusiveMinimumResolver()`). |
-|   20 | `exclusiveMinimum` | Collected value according to configuration (`SchemaGeneratorConfigPart.withNumberExclusiveMinimumResolver()`). |
-|   21 | `maximum` | Collected value according to configuration (`SchemaGeneratorConfigPart.withNumberInclusiveMaximumResolver()`). |
-|   22 | `exclusiveMaximum` | Collected value according to configuration (`SchemaGeneratorConfigPart.withNumberExclusiveMaximumResolver()`). |
-|   23 | `multipleOf` | Collected value according to configuration (`SchemaGeneratorConfigPart.withNumberMultipleOfResolver()`). |
-|   24 | `minItems` | Collected value according to configuration (`SchemaGeneratorConfigPart.withArrayMinItemsResolver()`). |
-|   25 | `maxItems` | Collected value according to configuration (`SchemaGeneratorConfigPart.withArrayMaxItemsResolver()`). |
-|   26 | `uniqueItems` | Collected value according to configuration (`SchemaGeneratorConfigPart.withArrayUniqueItemsResolver()`). |
-|   27 | any other | You can directly manipulate the generated `ObjectNode` of a sub-schema – e.g. setting additional attributes – via configuration based on a given type in general (`SchemaGeneratorConfigBuilder.with(TypeAttributeOverride)`) and/or in the context of a particular field/method (`SchemaGeneratorConfigPart.withInstanceAttributeOverride()`). |
+|   15 | `additionalProperties` | Defining whether additional properties are allowed according to configuration (`SchemaGeneratorConfigPart.withAdditionalPropertiesResolver()`). |
+|   16 | `minLength` | Collected value according to configuration (`SchemaGeneratorConfigPart.withStringMinLengthResolver()`). |
+|   17 | `maxLength` | Collected value according to configuration (`SchemaGeneratorConfigPart.withStringMaxLengthResolver()`). |
+|   18 | `format` | Collected value according to configuration (`SchemaGeneratorConfigPart.withStringFormatResolver()`). |
+|   19 | `pattern` | Collected value according to configuration (`SchemaGeneratorConfigPart.withStringPatternResolver()`). |
+|   20 | `minimum` | Collected value according to configuration (`SchemaGeneratorConfigPart.withNumberInclusiveMinimumResolver()`). |
+|   21 | `exclusiveMinimum` | Collected value according to configuration (`SchemaGeneratorConfigPart.withNumberExclusiveMinimumResolver()`). |
+|   22 | `maximum` | Collected value according to configuration (`SchemaGeneratorConfigPart.withNumberInclusiveMaximumResolver()`). |
+|   23 | `exclusiveMaximum` | Collected value according to configuration (`SchemaGeneratorConfigPart.withNumberExclusiveMaximumResolver()`). |
+|   24 | `multipleOf` | Collected value according to configuration (`SchemaGeneratorConfigPart.withNumberMultipleOfResolver()`). |
+|   25 | `minItems` | Collected value according to configuration (`SchemaGeneratorConfigPart.withArrayMinItemsResolver()`). |
+|   26 | `maxItems` | Collected value according to configuration (`SchemaGeneratorConfigPart.withArrayMaxItemsResolver()`). |
+|   27 | `uniqueItems` | Collected value according to configuration (`SchemaGeneratorConfigPart.withArrayUniqueItemsResolver()`). |
+|   28 | any other | You can directly manipulate the generated `ObjectNode` of a sub-schema – e.g. setting additional attributes – via configuration based on a given type in general (`SchemaGeneratorConfigBuilder.with(TypeAttributeOverride)`) and/or in the context of a particular field/method (`SchemaGeneratorConfigPart.withInstanceAttributeOverride()`). |

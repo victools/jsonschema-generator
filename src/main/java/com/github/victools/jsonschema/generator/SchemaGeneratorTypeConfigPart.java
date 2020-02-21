@@ -53,6 +53,7 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
     private final List<ConfigFunction<S, String>> descriptionResolvers = new ArrayList<>();
     private final List<ConfigFunction<S, Object>> defaultResolvers = new ArrayList<>();
     private final List<ConfigFunction<S, Collection<?>>> enumResolvers = new ArrayList<>();
+    private final List<ConfigFunction<S, Class<?>>> additionalPropertiesResolvers = new ArrayList<>();
 
     /*
      * Validation fields relating to a schema with "type": "string".
@@ -160,6 +161,27 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
      */
     public Collection<?> resolveEnum(S scope) {
         return getFirstDefinedValue(this.enumResolvers, scope);
+    }
+
+    /**
+     * Setter for "additionalProperties" resolver.
+     *
+     * @param resolver how to determine the "additionalProperties" of a JSON Schema, returning {@link Void} will result in "false"
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorTypeConfigPart<S> withAdditionalPropertiesResolver(ConfigFunction<S, Class<?>> resolver) {
+        this.additionalPropertiesResolvers.add(resolver);
+        return this;
+    }
+
+    /**
+     * Determine the "additionalProperties" of a given scope/type representation.
+     *
+     * @param scope scope to determine "additionalProperties" value for
+     * @return "additionalProperties" in a JSON Schema (may be null)
+     */
+    public Class<?> resolveAdditionalProperties(S scope) {
+        return getFirstDefinedValue(this.additionalPropertiesResolvers, scope);
     }
 
     /**

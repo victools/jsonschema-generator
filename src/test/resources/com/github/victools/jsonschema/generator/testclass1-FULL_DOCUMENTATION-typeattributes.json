@@ -44,5 +44,6 @@
         }
     },
     "title": "TestClass1",
-    "description": "for type in general: TestClass1"
+    "description": "for type in general: TestClass1",
+    "additionalProperties": false
 }
