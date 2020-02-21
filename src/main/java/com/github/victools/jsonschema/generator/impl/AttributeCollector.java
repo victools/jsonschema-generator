@@ -26,6 +26,7 @@ import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.TypeScope;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -284,7 +285,7 @@ public class AttributeCollector {
      * @param generationContext generation context allowing for standard definitions to be included as attributes
      * @return this instance (for chaining)
      */
-    public AttributeCollector setAdditionalProperties(ObjectNode node, Class<?> additionalProperties, SchemaGenerationContextImpl generationContext) {
+    public AttributeCollector setAdditionalProperties(ObjectNode node, Type additionalProperties, SchemaGenerationContextImpl generationContext) {
         if (additionalProperties == Void.class || additionalProperties == Void.TYPE) {
             node.put(SchemaConstants.TAG_ADDITIONAL_PROPERTIES, false);
         } else if (additionalProperties != null && additionalProperties != Object.class) {

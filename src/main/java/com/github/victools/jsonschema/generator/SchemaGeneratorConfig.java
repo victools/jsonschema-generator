@@ -20,6 +20,7 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
@@ -296,7 +297,7 @@ public interface SchemaGeneratorConfig {
      * @param field object's field/property to determine "additionalProperties" value for
      * @return "additionalProperties" in a JSON Schema (may be {@link Void) to indicate no additional properties being allowed or may be null)
      */
-    Class<?> resolveAdditionalProperties(FieldScope field);
+    Type resolveAdditionalProperties(FieldScope field);
 
     /**
      * Determine the "additionalProperties" of a method's return value.
@@ -304,7 +305,7 @@ public interface SchemaGeneratorConfig {
      * @param method method for whose return value to determine "additionalProperties" value for
      * @return "additionalProperties" in a JSON Schema (may be {@link Void) to indicate no additional properties being allowed or may be null)
      */
-    Class<?> resolveAdditionalProperties(MethodScope method);
+    Type resolveAdditionalProperties(MethodScope method);
 
     /**
      * Determine the "additionalProperties" of a context-independent type representation.
@@ -312,7 +313,7 @@ public interface SchemaGeneratorConfig {
      * @param scope context-independent type representation to determine "additionalProperties" value for
      * @return "additionalProperties" in a JSON Schema (may be {@link Void) to indicate no additional properties being allowed or may be null)
      */
-    Class<?> resolveAdditionalPropertiesForType(TypeScope scope);
+    Type resolveAdditionalPropertiesForType(TypeScope scope);
 
     /**
      * Determine the "minLength" of an object's field/property.

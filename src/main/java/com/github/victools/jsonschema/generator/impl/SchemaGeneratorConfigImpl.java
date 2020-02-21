@@ -32,6 +32,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorTypeConfigPart;
 import com.github.victools.jsonschema.generator.TypeAttributeOverride;
 import com.github.victools.jsonschema.generator.TypeScope;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
@@ -270,17 +271,17 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public Class<?> resolveAdditionalProperties(FieldScope field) {
+    public Type resolveAdditionalProperties(FieldScope field) {
         return this.fieldConfigPart.resolveAdditionalProperties(field);
     }
 
     @Override
-    public Class<?> resolveAdditionalProperties(MethodScope method) {
+    public Type resolveAdditionalProperties(MethodScope method) {
         return this.methodConfigPart.resolveAdditionalProperties(method);
     }
 
     @Override
-    public Class<?> resolveAdditionalPropertiesForType(TypeScope scope) {
+    public Type resolveAdditionalPropertiesForType(TypeScope scope) {
         return this.typesInGeneralConfigPart.resolveAdditionalProperties(scope);
     }
 
