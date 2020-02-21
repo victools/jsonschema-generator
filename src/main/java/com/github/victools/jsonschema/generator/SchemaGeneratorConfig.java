@@ -295,7 +295,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "additionalProperties" of an object's field/property.
      *
      * @param field object's field/property to determine "additionalProperties" value for
-     * @return "additionalProperties" in a JSON Schema (may be {@link Void) to indicate no additional properties being allowed or may be null)
+     * @return "additionalProperties" in a JSON Schema (may be {@link Void}) to indicate no additional properties being allowed or may be null)
      */
     Type resolveAdditionalProperties(FieldScope field);
 
@@ -303,7 +303,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "additionalProperties" of a method's return value.
      *
      * @param method method for whose return value to determine "additionalProperties" value for
-     * @return "additionalProperties" in a JSON Schema (may be {@link Void) to indicate no additional properties being allowed or may be null)
+     * @return "additionalProperties" in a JSON Schema (may be {@link Void}) to indicate no additional properties being allowed or may be null)
      */
     Type resolveAdditionalProperties(MethodScope method);
 
@@ -311,7 +311,7 @@ public interface SchemaGeneratorConfig {
      * Determine the "additionalProperties" of a context-independent type representation.
      *
      * @param scope context-independent type representation to determine "additionalProperties" value for
-     * @return "additionalProperties" in a JSON Schema (may be {@link Void) to indicate no additional properties being allowed or may be null)
+     * @return "additionalProperties" in a JSON Schema (may be {@link Void}) to indicate no additional properties being allowed or may be null)
      */
     Type resolveAdditionalPropertiesForType(TypeScope scope);
 
