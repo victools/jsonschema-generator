@@ -37,19 +37,16 @@ public class ConstantValueModule implements Module {
     private static List<?> extractConstantFieldValue(FieldScope field) {
         if (field.isStatic() && field.isFinal() && !field.getRawMember().isEnumConstant()) {
             Field rawField = field.getRawMember();
-            if (!rawField.canAccess(null)) {
-                try {
-                    rawField.setAccessible(true);
-                } catch (Exception ex) {
-                    // if the field cannot be accessed, we just can't extract any constant value
-                    return null;
-                }
+            try {
+                return Collections.singletonList(rawField.get(null));
+            } catch (IllegalAccessException ex) {
+                // let's try to make it accessible then
             }
             try {
-                return Collections.singletonList(field.getRawMember().get(null));
-            } catch (IllegalAccessException ex) {
-                // exception should never be thrown (due to calling setAccessible(true) before)
-                throw new RuntimeException(ex);
+                rawField.setAccessible(true);
+                return Collections.singletonList(rawField.get(null));
+            } catch (SecurityException | IllegalAccessException ex) {
+                // if the field cannot be accessed, we just can't extract any constant value
             }
         }
         return null;
