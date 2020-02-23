@@ -103,6 +103,30 @@ public class TypeContext {
     }
 
     /**
+     * Find type parameterization for the specified (super) type at return the type parameter at the given index.
+     *
+     * @param type type to find type parameter for
+     * @param erasedSuperType (super) type to find declared type parameter for
+     * @param parameterIndex index of the single type parameter's declared type to return
+     * @return declared parameter type; or Object.class if no parameters are defined; or null if the given type or index are invalid
+     * @see ResolvedType#typeParametersFor(Class)
+     */
+    public ResolvedType getTypeParameterFor(ResolvedType type, Class<?> erasedSuperType, int parameterIndex) {
+        List<ResolvedType> typeParameters = type.typeParametersFor(erasedSuperType);
+        if (typeParameters == null
+                || (!typeParameters.isEmpty() && typeParameters.size() <= parameterIndex)
+                || (typeParameters.isEmpty() && erasedSuperType.getTypeParameters().length <= parameterIndex)) {
+            // given type is not a super type of the type in scope or given index is out of bounds
+            return null;
+        }
+        if (typeParameters.isEmpty()) {
+            // no type parameters are defined, for simplicity's sake not trying to resolve declared boundaries
+            return this.resolve(Object.class);
+        }
+        return typeParameters.get(parameterIndex);
+    }
+
+    /**
      * Determine whether a given type should be treated as "{@value SchemaConstants#TAG_TYPE_ARRAY}" in the generated schema.
      *
      * @param type type to check
@@ -122,7 +146,7 @@ public class TypeContext {
     public ResolvedType getContainerItemType(ResolvedType containerType) {
         ResolvedType itemType = containerType.getArrayElementType();
         if (itemType == null && this.isContainerType(containerType)) {
-            itemType = containerType.typeParametersFor(Iterable.class).get(0);
+            itemType = this.getTypeParameterFor(containerType, Iterable.class, 0);
         }
         return itemType;
     }

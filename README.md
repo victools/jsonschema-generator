@@ -137,7 +137,7 @@ configBuilder.forTypesInGeneral()
     .withAdditionalPropertiesResolver((scope) -> {
         if (scope.getType().isInstanceOf(Map.class)) {
             // within a Map<Key, Value> allow additionalProperties of the Value type
-            return scope.getType().typeParametersFor(Map.class).get(1);
+            return scope.getTypeParameterFor(Map.class, 1);
         }
         if (scope.getType().isPrimitive()
                 || scope.getType().isInstanceOf(Number.class)

@@ -177,7 +177,7 @@ public class SchemaGeneratorTest {
             return Object.class;
         }
         if (scope.getType().isInstanceOf(TestClass4.class)) {
-            return scope.getType().typeParametersFor(TestClass4.class).get(1);
+            return scope.getTypeParameterFor(TestClass4.class, 1);
         }
         return Void.class;
     }

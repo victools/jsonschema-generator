@@ -59,6 +59,18 @@ public class TypeScope {
      * Convenience methods for targeted type *
      * ===================================== */
     /**
+     * Find type parameterization for the specified (super) type at return the type parameter at the given index.
+     *
+     * @param erasedSuperType (super) type to find declared type parameter for
+     * @param parameterIndex index of the single type parameter's declared type to return
+     * @return declared parameter type; or Object.class if no parameters are defined; or null if the given type or index are invalid
+     * @see TypeContext#getTypeParameterFor(ResolvedType, Class, int)
+     */
+    public ResolvedType getTypeParameterFor(Class<?> erasedSuperType, int parameterIndex) {
+        return this.context.getTypeParameterFor(this.type, erasedSuperType, parameterIndex);
+    }
+
+    /**
      * Determine whether this targeted type should be treated as "{@value SchemaConstants#TAG_TYPE_ARRAY}" in the generated schema.
      * <br>
      * This is equivalent to calling: {@code scope.getContext().isContainerType(scope.getType())}
