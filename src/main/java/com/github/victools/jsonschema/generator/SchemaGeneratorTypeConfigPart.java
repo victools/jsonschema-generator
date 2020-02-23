@@ -188,7 +188,7 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
     }
 
     /**
-     * Setter for "patternProperties" resolver, the map's keys representing the patterns and the mapped values their corresponding types
+     * Setter for "patternProperties" resolver. The map's keys are representing the patterns and the mapped values their corresponding types.
      *
      * @param resolver how to determine the "patternProperties" of a JSON Schema
      * @return this config part (for chaining)
