@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -55,6 +56,7 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
     private final List<ConfigFunction<S, Object>> defaultResolvers = new ArrayList<>();
     private final List<ConfigFunction<S, Collection<?>>> enumResolvers = new ArrayList<>();
     private final List<ConfigFunction<S, Type>> additionalPropertiesResolvers = new ArrayList<>();
+    private final List<ConfigFunction<S, Map<String, Type>>> patternPropertiesResolvers = new ArrayList<>();
 
     /*
      * Validation fields relating to a schema with "type": "string".
@@ -165,7 +167,7 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
     }
 
     /**
-     * Setter for "additionalProperties" resolver.
+     * Setter for "additionalProperties" resolver. If the returned type is {@link Void} "false" will be set, otherwise an appropriate sub-schema.
      *
      * @param resolver how to determine the "additionalProperties" of a JSON Schema, returning {@link Void} will result in "false"
      * @return this config part (for chaining)
@@ -183,6 +185,27 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
      */
     public Type resolveAdditionalProperties(S scope) {
         return getFirstDefinedValue(this.additionalPropertiesResolvers, scope);
+    }
+
+    /**
+     * Setter for "patternProperties" resolver. The map's keys are representing the patterns and the mapped values their corresponding types.
+     *
+     * @param resolver how to determine the "patternProperties" of a JSON Schema
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorTypeConfigPart<S> withPatternPropertiesResolver(ConfigFunction<S, Map<String, Type>> resolver) {
+        this.patternPropertiesResolvers.add(resolver);
+        return this;
+    }
+
+    /**
+     * Determine the "patternProperties" of a given scope/type representation.
+     *
+     * @param scope scope to determine "patternProperties" value for
+     * @return "patternProperties" in a JSON Schema (may be null), the keys representing the patterns and the mapped values their corresponding types
+     */
+    public Map<String, Type> resolvePatternProperties(S scope) {
+        return getFirstDefinedValue(this.patternPropertiesResolvers, scope);
     }
 
     /**

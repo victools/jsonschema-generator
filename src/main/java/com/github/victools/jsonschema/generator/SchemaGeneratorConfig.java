@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Default implementation of a schema generator's configuration.
@@ -314,6 +315,30 @@ public interface SchemaGeneratorConfig {
      * @return "additionalProperties" in a JSON Schema (may be {@link Void}) to indicate no additional properties being allowed or may be null)
      */
     Type resolveAdditionalPropertiesForType(TypeScope scope);
+
+    /**
+     * Determine the "patternProperties" of an object's field/property.
+     *
+     * @param field object's field/property to determine "patternProperties" value for
+     * @return "patternProperties" in a JSON Schema (may be null), the keys representing the patterns and the mapped values their corresponding types
+     */
+    Map<String, Type> resolvePatternProperties(FieldScope field);
+
+    /**
+     * Determine the "patternProperties" of a method's return value.
+     *
+     * @param method method for whose return value to determine "patternProperties" value for
+     * @return "patternProperties" in a JSON Schema (may be null), the keys representing the patterns and the mapped values their corresponding types
+     */
+    Map<String, Type> resolvePatternProperties(MethodScope method);
+
+    /**
+     * Determine the "patternProperties" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "patternProperties" value for
+     * @return "patternProperties" in a JSON Schema (may be null), the keys representing the patterns and the mapped values their corresponding types
+     */
+    Map<String, Type> resolvePatternPropertiesForType(TypeScope scope);
 
     /**
      * Determine the "minLength" of an object's field/property.

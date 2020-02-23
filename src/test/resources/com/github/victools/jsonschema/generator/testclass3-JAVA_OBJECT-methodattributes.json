@@ -204,14 +204,24 @@
                                                 }, {
                                                     "title": "TestClass2<String>",
                                                     "description": "looked-up from method: TestClass2<String>",
-                                                    "additionalProperties": false
+                                                    "additionalProperties": false,
+                                                    "patternProperties": {
+                                                        "^generic.+$": {
+                                                            "type": "string"
+                                                        }
+                                                    }
                                                 }]
                                         }
                                     }
                                 }, {
                                     "title": "TestClass2<TestClass2<String>>",
                                     "description": "looked-up from method: TestClass2<TestClass2<String>>",
-                                    "additionalProperties": false
+                                    "additionalProperties": false,
+                                    "patternProperties": {
+                                        "^generic.+$": {
+                                            "$ref": "#/definitions/TestClass2(String)"
+                                        }
+                                    }
                                 }]
                         }
                     }
@@ -251,7 +261,15 @@
                 }, {
                     "title": "TestClass2<TestClass1[]>",
                     "description": "looked-up from method: TestClass2<TestClass1[]>",
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "patternProperties": {
+                        "^generic.+$": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/TestClass1"
+                            }
+                        }
+                    }
                 }]
         },
         "getNestedLong()": {
@@ -264,7 +282,12 @@
                 }, {
                     "title": "TestClass2<Long>",
                     "description": "looked-up from method: TestClass2<Long>",
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "patternProperties": {
+                        "^generic.+$": {
+                            "type": "integer"
+                        }
+                    }
                 }]
         },
         "getNestedLongList()": {

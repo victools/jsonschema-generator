@@ -45,5 +45,17 @@
     },
     "title": "TestClass1",
     "description": "for type in general: TestClass1",
-    "additionalProperties": false
+    "additionalProperties": false,
+    "patternProperties": {
+        "^generic.+$": {
+            "type": "string",
+            "title": "String",
+            "description": "for type in general: String",
+            "const": "constant string value",
+            "minLength": 1,
+            "maxLength": 256,
+            "format": "date",
+            "pattern": "^.{1,256}$"
+        }
+    }
 }

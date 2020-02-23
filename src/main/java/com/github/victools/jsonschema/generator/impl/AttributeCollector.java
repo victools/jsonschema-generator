@@ -31,6 +31,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +70,7 @@ public class AttributeCollector {
         collector.setDefault(node, config.resolveDefault(field));
         collector.setEnum(node, config.resolveEnum(field));
         collector.setAdditionalProperties(node, config.resolveAdditionalProperties(field), generationContext);
+        collector.setPatternProperties(node, config.resolvePatternProperties(field), generationContext);
         collector.setStringMinLength(node, config.resolveStringMinLength(field));
         collector.setStringMaxLength(node, config.resolveStringMaxLength(field));
         collector.setStringFormat(node, config.resolveStringFormat(field));
@@ -102,6 +104,7 @@ public class AttributeCollector {
         collector.setDefault(node, config.resolveDefault(method));
         collector.setEnum(node, config.resolveEnum(method));
         collector.setAdditionalProperties(node, config.resolveAdditionalProperties(method), generationContext);
+        collector.setPatternProperties(node, config.resolvePatternProperties(method), generationContext);
         collector.setStringMinLength(node, config.resolveStringMinLength(method));
         collector.setStringMaxLength(node, config.resolveStringMaxLength(method));
         collector.setStringFormat(node, config.resolveStringFormat(method));
@@ -135,6 +138,7 @@ public class AttributeCollector {
         collector.setDefault(node, config.resolveDefaultForType(scope));
         collector.setEnum(node, config.resolveEnumForType(scope));
         collector.setAdditionalProperties(node, config.resolveAdditionalPropertiesForType(scope), generationContext);
+        collector.setPatternProperties(node, config.resolvePatternPropertiesForType(scope), generationContext);
         collector.setStringMinLength(node, config.resolveStringMinLengthForType(scope));
         collector.setStringMaxLength(node, config.resolveStringMaxLengthForType(scope));
         collector.setStringFormat(node, config.resolveStringFormatForType(scope));
@@ -293,6 +297,29 @@ public class AttributeCollector {
             ObjectNode additionalPropertiesSchema = generationContext.getGeneratorConfig().createObjectNode();
             generationContext.traverseGenericType(targetType, additionalPropertiesSchema, false);
             node.set(SchemaConstants.TAG_ADDITIONAL_PROPERTIES, additionalPropertiesSchema);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@value SchemaConstants#TAG_PATTERN_PROPERTIES}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param patternProperties resolved attribute value to set
+     * @param generationContext generation context allowing for standard definitions to be included as attributes
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setPatternProperties(ObjectNode node, Map<String, Type> patternProperties,
+            SchemaGenerationContextImpl generationContext) {
+        if (patternProperties != null && !patternProperties.isEmpty()) {
+            ObjectNode patternPropertiesNode = generationContext.getGeneratorConfig().createObjectNode();
+            for (Map.Entry<String, Type> entry : patternProperties.entrySet()) {
+                ObjectNode singlePatternSchema = generationContext.getGeneratorConfig().createObjectNode();
+                ResolvedType targetType = generationContext.getTypeContext().resolve(entry.getValue());
+                generationContext.traverseGenericType(targetType, singlePatternSchema, false);
+                patternPropertiesNode.set(entry.getKey(), singlePatternSchema);
+            }
+            node.set(SchemaConstants.TAG_PATTERN_PROPERTIES, patternPropertiesNode);
         }
         return this;
     }
