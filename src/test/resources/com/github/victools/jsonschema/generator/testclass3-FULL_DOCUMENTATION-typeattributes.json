@@ -112,7 +112,19 @@
             },
             "title": "TestClass1",
             "description": "for type in general: TestClass1",
-            "additionalProperties": false
+            "additionalProperties": false,
+            "patternProperties": {
+                "^generic.+$": {
+                    "type": "string",
+                    "title": "String",
+                    "description": "for type in general: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
+                }
+            }
         },
         "TestClass2(Long)": {
             "type": "object",
@@ -146,7 +158,21 @@
             },
             "title": "TestClass2<Long>",
             "description": "for type in general: TestClass2<Long>",
-            "additionalProperties": false
+            "additionalProperties": false,
+            "patternProperties": {
+                "^generic.+$": {
+                    "type": "integer",
+                    "title": "Long",
+                    "description": "for type in general: Long",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 1E+1,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
+                }
+            }
         },
         "TestClass2(Long)-nullable": {
             "oneOf": [{
@@ -185,7 +211,19 @@
             },
             "title": "TestClass2<String>",
             "description": "for type in general: TestClass2<String>",
-            "additionalProperties": false
+            "additionalProperties": false,
+            "patternProperties": {
+                "^generic.+$": {
+                    "type": "string",
+                    "title": "String",
+                    "description": "for type in general: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
+                }
+            }
         },
         "TestClass2(String)-nullable": {
             "oneOf": [{
@@ -241,7 +279,20 @@
             },
             "title": "TestClass2<TestClass1[]>",
             "description": "for type in general: TestClass2<TestClass1[]>",
-            "additionalProperties": false
+            "additionalProperties": false,
+            "patternProperties": {
+                "^generic.+$": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TestClass1"
+                    },
+                    "title": "TestClass1[]",
+                    "description": "for type in general: TestClass1[]",
+                    "minItems": 2,
+                    "maxItems": 100,
+                    "uniqueItems": false
+                }
+            }
         },
         "TestClass2(TestClass2(String))-nullable": {
             "type": ["object", "null"],
@@ -266,7 +317,12 @@
             },
             "title": "TestClass2<TestClass2<String>>",
             "description": "for type in general: TestClass2<TestClass2<String>>",
-            "additionalProperties": false
+            "additionalProperties": false,
+            "patternProperties": {
+                "^generic.+$": {
+                    "$ref": "#/definitions/TestClass2(String)"
+                }
+            }
         },
         "TestClass4(Integer,String)-nullable": {
             "type": ["object", "null"],

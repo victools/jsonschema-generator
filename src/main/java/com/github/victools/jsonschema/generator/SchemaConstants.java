@@ -41,6 +41,7 @@ public interface SchemaConstants {
     String TAG_ITEMS = "items";
     String TAG_REQUIRED = "required";
     String TAG_ADDITIONAL_PROPERTIES = "additionalProperties";
+    String TAG_PATTERN_PROPERTIES = "patternProperties";
 
     String TAG_ALLOF = "allOf";
     String TAG_ANYOF = "anyOf";

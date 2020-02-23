@@ -286,6 +286,21 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public Map<String, Type> resolvePatternProperties(FieldScope field) {
+        return this.fieldConfigPart.resolvePatternProperties(field);
+    }
+
+    @Override
+    public Map<String, Type> resolvePatternProperties(MethodScope method) {
+        return this.methodConfigPart.resolvePatternProperties(method);
+    }
+
+    @Override
+    public Map<String, Type> resolvePatternPropertiesForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolvePatternProperties(scope);
+    }
+
+    @Override
     public Integer resolveStringMinLength(FieldScope field) {
         return this.fieldConfigPart.resolveStringMinLength(field);
     }

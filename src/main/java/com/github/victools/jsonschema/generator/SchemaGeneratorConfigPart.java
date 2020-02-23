@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -205,6 +206,11 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
     @Override
     public SchemaGeneratorConfigPart<M> withAdditionalPropertiesResolver(ConfigFunction<M, Type> resolver) {
         return (SchemaGeneratorConfigPart<M>) super.withAdditionalPropertiesResolver(resolver);
+    }
+
+    @Override
+    public SchemaGeneratorConfigPart<M> withPatternPropertiesResolver(ConfigFunction<M, Map<String, Type>> resolver) {
+        return (SchemaGeneratorConfigPart<M>) super.withPatternPropertiesResolver(resolver);
     }
 
     @Override

@@ -29,8 +29,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 import junitparams.JUnitParamsRunner;
@@ -151,24 +153,25 @@ public class SchemaGeneratorTest {
 
     private static void populateTypeConfigPart(SchemaGeneratorTypeConfigPart<?> configPart, String descriptionPrefix) {
         configPart
-                .withArrayMinItemsResolver(member -> member.isContainerType() ? 2 : null)
-                .withArrayMaxItemsResolver(member -> member.isContainerType() ? 100 : null)
-                .withArrayUniqueItemsResolver(member -> member.isContainerType() ? false : null)
-                .withDefaultResolver(member -> member.getType().isInstanceOf(Number.class) ? 1 : null)
-                .withDescriptionResolver(member -> descriptionPrefix + member.getSimpleTypeDescription())
-                .withEnumResolver(member -> member.getType().isInstanceOf(Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
-                .withEnumResolver(member -> member.getType().isInstanceOf(String.class) ? Arrays.asList("constant string value") : null)
+                .withArrayMinItemsResolver(scope -> scope.isContainerType() ? 2 : null)
+                .withArrayMaxItemsResolver(scope -> scope.isContainerType() ? 100 : null)
+                .withArrayUniqueItemsResolver(scope -> scope.isContainerType() ? false : null)
+                .withDefaultResolver(scope -> scope.getType().isInstanceOf(Number.class) ? 1 : null)
+                .withDescriptionResolver(scope -> descriptionPrefix + scope.getSimpleTypeDescription())
+                .withEnumResolver(scope -> scope.getType().isInstanceOf(Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
+                .withEnumResolver(scope -> scope.getType().isInstanceOf(String.class) ? Arrays.asList("constant string value") : null)
                 .withAdditionalPropertiesResolver(SchemaGeneratorTest::resolveAdditionalProperties)
-                .withNumberExclusiveMaximumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
-                .withNumberExclusiveMinimumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.ZERO : null)
-                .withNumberInclusiveMaximumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.TEN : null)
-                .withNumberInclusiveMinimumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.ONE : null)
-                .withNumberMultipleOfResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.ONE : null)
-                .withStringFormatResolver(member -> member.getType().isInstanceOf(String.class) ? "date" : null)
-                .withStringMaxLengthResolver(member -> member.getType().isInstanceOf(String.class) ? 256 : null)
-                .withStringMinLengthResolver(member -> member.getType().isInstanceOf(String.class) ? 1 : null)
-                .withStringPatternResolver(member -> member.getType().isInstanceOf(String.class) ? "^.{1,256}$" : null)
-                .withTitleResolver(member -> member.getSimpleTypeDescription());
+                .withPatternPropertiesResolver(SchemaGeneratorTest::resolvePatternProperties)
+                .withNumberExclusiveMaximumResolver(scope -> scope.getType().isInstanceOf(Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
+                .withNumberExclusiveMinimumResolver(scope -> scope.getType().isInstanceOf(Number.class) ? BigDecimal.ZERO : null)
+                .withNumberInclusiveMaximumResolver(scope -> scope.getType().isInstanceOf(Number.class) ? BigDecimal.TEN : null)
+                .withNumberInclusiveMinimumResolver(scope -> scope.getType().isInstanceOf(Number.class) ? BigDecimal.ONE : null)
+                .withNumberMultipleOfResolver(scope -> scope.getType().isInstanceOf(Number.class) ? BigDecimal.ONE : null)
+                .withStringFormatResolver(scope -> scope.getType().isInstanceOf(String.class) ? "date" : null)
+                .withStringMaxLengthResolver(scope -> scope.getType().isInstanceOf(String.class) ? 256 : null)
+                .withStringMinLengthResolver(scope -> scope.getType().isInstanceOf(String.class) ? 1 : null)
+                .withStringPatternResolver(scope -> scope.getType().isInstanceOf(String.class) ? "^.{1,256}$" : null)
+                .withTitleResolver(scope -> scope.getSimpleTypeDescription());
     }
 
     private static Type resolveAdditionalProperties(TypeScope scope) {
@@ -180,6 +183,15 @@ public class SchemaGeneratorTest {
             return scope.getTypeParameterFor(TestClass4.class, 1);
         }
         return Void.class;
+    }
+
+    private static Map<String, Type> resolvePatternProperties(TypeScope scope) {
+        if (!scope.getType().isInstanceOf(TestClass2.class)) {
+            return null;
+        }
+        Map<String, Type> patternProperties = new HashMap<>();
+        patternProperties.put("^generic.+$", scope.getTypeParameterFor(TestClass2.class, 0));
+        return patternProperties;
     }
 
     private static void populateConfigPart(SchemaGeneratorConfigPart<? extends MemberScope<?, ?>> configPart, String descriptionPrefix) {
