@@ -129,13 +129,15 @@
                                                         }]
                                                 }, {
                                                     "title": "TestClass2<String>",
-                                                    "description": "looked-up from field: TestClass2<String>"
+                                                    "description": "looked-up from field: TestClass2<String>",
+                                                    "additionalProperties": false
                                                 }]
                                         }
                                     }
                                 }, {
                                     "title": "TestClass2<TestClass2<String>>",
-                                    "description": "looked-up from field: TestClass2<TestClass2<String>>"
+                                    "description": "looked-up from field: TestClass2<TestClass2<String>>",
+                                    "additionalProperties": false
                                 }]
                         },
                         "optionalS": {
@@ -153,7 +155,10 @@
                     }
                 }, {
                     "title": "TestClass4<Integer, String>",
-                    "description": "looked-up from field: TestClass4<Integer, String>"
+                    "description": "looked-up from field: TestClass4<Integer, String>",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }]
         },
         "nestedClass1Array": {
@@ -188,7 +193,8 @@
                     }
                 }, {
                     "title": "TestClass2<TestClass1[]>",
-                    "description": "looked-up from field: TestClass2<TestClass1[]>"
+                    "description": "looked-up from field: TestClass2<TestClass1[]>",
+                    "additionalProperties": false
                 }]
         },
         "nestedLong": {
@@ -196,7 +202,8 @@
                     "$ref": "#/definitions/TestClass2(Long)"
                 }, {
                     "title": "TestClass2<Long>",
-                    "description": "looked-up from field: TestClass2<Long>"
+                    "description": "looked-up from field: TestClass2<Long>",
+                    "additionalProperties": false
                 }]
         },
         "nestedLongList": {

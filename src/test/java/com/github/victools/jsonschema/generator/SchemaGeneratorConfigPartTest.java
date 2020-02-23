@@ -180,6 +180,12 @@ public class SchemaGeneratorConfigPartTest {
     }
 
     @Test
+    public void testAdditionalProperties() {
+        this.testFirstDefinedValueConfig(String.class, Void.TYPE,
+                this.instance::withAdditionalPropertiesResolver, this.instance::resolveAdditionalProperties);
+    }
+
+    @Test
     public void testStringMinLength() {
         this.testFirstDefinedValueConfig(1, 2,
                 this.instance::withStringMinLengthResolver, this.instance::resolveStringMinLength);

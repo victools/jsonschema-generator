@@ -23,7 +23,8 @@
                             "$ref": "#/definitions/RoundingMode-nullable"
                         }, {
                             "title": "RoundingMode",
-                            "description": "looked-up from method: RoundingMode"
+                            "description": "looked-up from method: RoundingMode",
+                            "additionalProperties": false
                         }]
                 },
                 "valueOf(int)": {
@@ -31,7 +32,8 @@
                             "$ref": "#/definitions/RoundingMode-nullable"
                         }, {
                             "title": "RoundingMode",
-                            "description": "looked-up from method: RoundingMode"
+                            "description": "looked-up from method: RoundingMode",
+                            "additionalProperties": false
                         }]
                 },
                 "values()": {
@@ -201,19 +203,24 @@
                                                         }]
                                                 }, {
                                                     "title": "TestClass2<String>",
-                                                    "description": "looked-up from method: TestClass2<String>"
+                                                    "description": "looked-up from method: TestClass2<String>",
+                                                    "additionalProperties": false
                                                 }]
                                         }
                                     }
                                 }, {
                                     "title": "TestClass2<TestClass2<String>>",
-                                    "description": "looked-up from method: TestClass2<TestClass2<String>>"
+                                    "description": "looked-up from method: TestClass2<TestClass2<String>>",
+                                    "additionalProperties": false
                                 }]
                         }
                     }
                 }, {
                     "title": "TestClass4<Integer, String>",
-                    "description": "looked-up from method: TestClass4<Integer, String>"
+                    "description": "looked-up from method: TestClass4<Integer, String>",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }]
         },
         "getNestedClass1Array()": {
@@ -243,7 +250,8 @@
                     }
                 }, {
                     "title": "TestClass2<TestClass1[]>",
-                    "description": "looked-up from method: TestClass2<TestClass1[]>"
+                    "description": "looked-up from method: TestClass2<TestClass1[]>",
+                    "additionalProperties": false
                 }]
         },
         "getNestedLong()": {
@@ -255,7 +263,8 @@
                         }]
                 }, {
                     "title": "TestClass2<Long>",
-                    "description": "looked-up from method: TestClass2<Long>"
+                    "description": "looked-up from method: TestClass2<Long>",
+                    "additionalProperties": false
                 }]
         },
         "getNestedLongList()": {

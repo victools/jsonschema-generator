@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -199,6 +200,11 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
     @Override
     public SchemaGeneratorConfigPart<M> withEnumResolver(ConfigFunction<M, Collection<?>> resolver) {
         return (SchemaGeneratorConfigPart<M>) super.withEnumResolver(resolver);
+    }
+
+    @Override
+    public SchemaGeneratorConfigPart<M> withAdditionalPropertiesResolver(ConfigFunction<M, Type> resolver) {
+        return (SchemaGeneratorConfigPart<M>) super.withAdditionalPropertiesResolver(resolver);
     }
 
     @Override

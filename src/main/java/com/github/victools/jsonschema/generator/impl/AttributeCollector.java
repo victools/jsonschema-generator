@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
+import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -25,6 +26,7 @@ import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.TypeScope;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -55,16 +57,18 @@ public class AttributeCollector {
      * Collect a field's contextual attributes (i.e. everything not related to the structure).
      *
      * @param field the field for which to collect JSON schema attributes
-     * @param config configuration to apply when looking-up attribute values
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
      * @return node holding all collected attributes (possibly empty)
      */
-    public static ObjectNode collectFieldAttributes(FieldScope field, SchemaGeneratorConfig config) {
+    public static ObjectNode collectFieldAttributes(FieldScope field, SchemaGenerationContextImpl generationContext) {
+        SchemaGeneratorConfig config = generationContext.getGeneratorConfig();
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
         collector.setTitle(node, config.resolveTitle(field));
         collector.setDescription(node, config.resolveDescription(field));
         collector.setDefault(node, config.resolveDefault(field));
         collector.setEnum(node, config.resolveEnum(field));
+        collector.setAdditionalProperties(node, config.resolveAdditionalProperties(field), generationContext);
         collector.setStringMinLength(node, config.resolveStringMinLength(field));
         collector.setStringMaxLength(node, config.resolveStringMaxLength(field));
         collector.setStringFormat(node, config.resolveStringFormat(field));
@@ -86,16 +90,18 @@ public class AttributeCollector {
      * Collect a method's contextual attributes (i.e. everything not related to the structure).
      *
      * @param method the method for which to collect JSON schema attributes
-     * @param config configuration to apply when looking-up attribute values
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
      * @return node holding all collected attributes (possibly empty)
      */
-    public static ObjectNode collectMethodAttributes(MethodScope method, SchemaGeneratorConfig config) {
+    public static ObjectNode collectMethodAttributes(MethodScope method, SchemaGenerationContextImpl generationContext) {
+        SchemaGeneratorConfig config = generationContext.getGeneratorConfig();
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
         collector.setTitle(node, config.resolveTitle(method));
         collector.setDescription(node, config.resolveDescription(method));
         collector.setDefault(node, config.resolveDefault(method));
         collector.setEnum(node, config.resolveEnum(method));
+        collector.setAdditionalProperties(node, config.resolveAdditionalProperties(method), generationContext);
         collector.setStringMinLength(node, config.resolveStringMinLength(method));
         collector.setStringMaxLength(node, config.resolveStringMaxLength(method));
         collector.setStringFormat(node, config.resolveStringFormat(method));
@@ -117,16 +123,18 @@ public class AttributeCollector {
      * Collect a given scope's general type attributes (i.e. everything not related to the structure).
      *
      * @param scope the scope/type representation for which to collect JSON schema attributes
-     * @param config configuration to apply when looking-up attribute values
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
      * @return node holding all collected attributes (possibly empty)
      */
-    public static ObjectNode collectTypeAttributes(TypeScope scope, SchemaGeneratorConfig config) {
+    public static ObjectNode collectTypeAttributes(TypeScope scope, SchemaGenerationContextImpl generationContext) {
+        SchemaGeneratorConfig config = generationContext.getGeneratorConfig();
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
         collector.setTitle(node, config.resolveTitleForType(scope));
         collector.setDescription(node, config.resolveDescriptionForType(scope));
         collector.setDefault(node, config.resolveDefaultForType(scope));
         collector.setEnum(node, config.resolveEnumForType(scope));
+        collector.setAdditionalProperties(node, config.resolveAdditionalPropertiesForType(scope), generationContext);
         collector.setStringMinLength(node, config.resolveStringMinLengthForType(scope));
         collector.setStringMaxLength(node, config.resolveStringMaxLengthForType(scope));
         collector.setStringFormat(node, config.resolveStringFormatForType(scope));
@@ -267,6 +275,26 @@ public class AttributeCollector {
             logger.warn("Failed to convert value to string via ObjectMapper: {}", target, ex);
             return false;
         }
+    }
+
+    /**
+     * Setter for "{@value SchemaConstants#TAG_ADDITIONAL_PROPERTIES}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param additionalProperties attribute value to set
+     * @param generationContext generation context allowing for standard definitions to be included as attributes
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setAdditionalProperties(ObjectNode node, Type additionalProperties, SchemaGenerationContextImpl generationContext) {
+        if (additionalProperties == Void.class || additionalProperties == Void.TYPE) {
+            node.put(SchemaConstants.TAG_ADDITIONAL_PROPERTIES, false);
+        } else if (additionalProperties != null && additionalProperties != Object.class) {
+            ResolvedType targetType = generationContext.getTypeContext().resolve(additionalProperties);
+            ObjectNode additionalPropertiesSchema = generationContext.getGeneratorConfig().createObjectNode();
+            generationContext.traverseGenericType(targetType, additionalPropertiesSchema, false);
+            node.set(SchemaConstants.TAG_ADDITIONAL_PROPERTIES, additionalPropertiesSchema);
+        }
+        return this;
     }
 
     /**

@@ -72,6 +72,15 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         this.typeContext = typeContext;
     }
 
+    /**
+     * Getter for the applicable configuration(s).
+     *
+     * @return configuration(s) defined for this context
+     */
+    protected SchemaGeneratorConfig getGeneratorConfig() {
+        return this.generatorConfig;
+    }
+
     @Override
     public TypeContext getTypeContext() {
         return this.typeContext;
@@ -191,7 +200,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @param targetNode node in the JSON schema that should represent the targetType
      * @param isNullable whether the field/method's return value is allowed to be null in the declaringType in this particular scenario
      */
-    private void traverseGenericType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable) {
+    protected void traverseGenericType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable) {
         this.traverseGenericType(targetType, targetNode, isNullable, false, null);
     }
 
@@ -253,7 +262,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             }
         }
         TypeScope scope = this.typeContext.createTypeScope(targetType);
-        ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this.generatorConfig);
+        ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this);
         // ensure no existing attributes in the 'definition' are replaced, by way of first overriding any conflicts the other way around
         typeAttributes.setAll(definition);
         // apply merged attributes
@@ -413,7 +422,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         ResolvedType typeOverride = this.generatorConfig.resolveTargetTypeOverride(fieldWithOverride);
         fieldWithOverride = typeOverride == null ? fieldWithOverride : fieldWithOverride.withOverriddenType(typeOverride);
 
-        ObjectNode fieldAttributes = AttributeCollector.collectFieldAttributes(fieldWithOverride, this.generatorConfig);
+        ObjectNode fieldAttributes = AttributeCollector.collectFieldAttributes(fieldWithOverride, this);
 
         // consider declared type (instead of overridden one) for determining null-ability
         boolean isNullable = !fieldWithOverride.getRawMember().isEnumConstant() && this.generatorConfig.isNullable(fieldWithOverride);
@@ -448,7 +457,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             ObjectNode subSchema = this.generatorConfig.createObjectNode();
             collectedMethods.put(propertyName, subSchema);
 
-            ObjectNode methodAttributes = AttributeCollector.collectMethodAttributes(methodWithOverride, this.generatorConfig);
+            ObjectNode methodAttributes = AttributeCollector.collectMethodAttributes(methodWithOverride, this);
 
             // consider declared type (instead of overridden one) for determining null-ability
             boolean isNullable = this.generatorConfig.isNullable(methodWithOverride);

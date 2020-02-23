@@ -14,7 +14,8 @@
                 }
             },
             "title": "Optional<Integer>",
-            "description": "for type in general: Optional<Integer>"
+            "description": "for type in general: Optional<Integer>",
+            "additionalProperties": false
         },
         "RoundingMode": {
             "type": "object",
@@ -54,7 +55,8 @@
                 }
             },
             "title": "RoundingMode",
-            "description": "for type in general: RoundingMode"
+            "description": "for type in general: RoundingMode",
+            "additionalProperties": false
         },
         "RoundingMode-nullable": {
             "oneOf": [{
@@ -109,7 +111,8 @@
                 }
             },
             "title": "TestClass1",
-            "description": "for type in general: TestClass1"
+            "description": "for type in general: TestClass1",
+            "additionalProperties": false
         },
         "TestClass2(Long)": {
             "type": "object",
@@ -142,7 +145,8 @@
                 }
             },
             "title": "TestClass2<Long>",
-            "description": "for type in general: TestClass2<Long>"
+            "description": "for type in general: TestClass2<Long>",
+            "additionalProperties": false
         },
         "TestClass2(Long)-nullable": {
             "oneOf": [{
@@ -180,7 +184,8 @@
                 }
             },
             "title": "TestClass2<String>",
-            "description": "for type in general: TestClass2<String>"
+            "description": "for type in general: TestClass2<String>",
+            "additionalProperties": false
         },
         "TestClass2(String)-nullable": {
             "oneOf": [{
@@ -235,7 +240,8 @@
                 }
             },
             "title": "TestClass2<TestClass1[]>",
-            "description": "for type in general: TestClass2<TestClass1[]>"
+            "description": "for type in general: TestClass2<TestClass1[]>",
+            "additionalProperties": false
         },
         "TestClass2(TestClass2(String))-nullable": {
             "type": ["object", "null"],
@@ -259,7 +265,8 @@
                 }
             },
             "title": "TestClass2<TestClass2<String>>",
-            "description": "for type in general: TestClass2<TestClass2<String>>"
+            "description": "for type in general: TestClass2<TestClass2<String>>",
+            "additionalProperties": false
         },
         "TestClass4(Integer,String)-nullable": {
             "type": ["object", "null"],
@@ -282,7 +289,17 @@
                 }
             },
             "title": "TestClass4<Integer, String>",
-            "description": "for type in general: TestClass4<Integer, String>"
+            "description": "for type in general: TestClass4<Integer, String>",
+            "additionalProperties": {
+                "type": "string",
+                "title": "String",
+                "description": "for type in general: String",
+                "const": "constant string value",
+                "minLength": 1,
+                "maxLength": 256,
+                "format": "date",
+                "pattern": "^.{1,256}$"
+            }
         }
     },
     "type": "object",
@@ -329,5 +346,6 @@
         }
     },
     "title": "TestClass3",
-    "description": "for type in general: TestClass3"
+    "description": "for type in general: TestClass3",
+    "additionalProperties": false
 }
