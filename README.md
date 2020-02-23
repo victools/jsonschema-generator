@@ -4,6 +4,19 @@
 
 Creating JSON Schema (Draft 7) from your Java classes utilising Jackson (inspired by JJSchema).
 
+Topics covered in this document are:
+- [Usage](#usage)
+  - [Dependency (Maven)](#dependency-maven)
+  - [Code](#code)
+    - [Complete/Minimal Example](#completeminimal-example)
+    - [Toggling Standard Options (via OptionPresets)](#toggling-standard-options-via-optionpresets)
+    - [Toggling Standard Options (individually)](#toggling-standard-options-individually)
+    - [Adding Separate Modules (e.g. from another library)](#adding-separate-modules-eg-from-another-library)
+    - [Defining Desired Behaviour via individual Configurations](#defining-desired-behaviour-via-individual-configurations)
+- [Supported JSON Schema attributes](#supported-json-schema-attributes)
+
+----
+
 ## Usage
 ### Dependency (Maven)
 
@@ -90,7 +103,7 @@ Some available modules are:
 - [victools/jsonschema-module-swagger-1.5](https://github.com/victools/jsonschema-module-swagger-1.5) – deriving JSON Schema attributes from `swagger` (1.5.x) annotations (e.g. "description", property name overrides, what properties to ignore, their "minimum"/"maximum", "const"/"enum").
 - [imIfOu/jsonschema-module-addon](https://github.com/imIfOu/jsonschema-module-addon) – deriving JSON Schema attributes from a custom annotation with various parameters, which is part of the module.
 
-#### Defining Desired Behaviour via individual configurations
+#### Defining Desired Behaviour via individual Configurations
 ```java
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
