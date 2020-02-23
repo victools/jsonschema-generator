@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URI;
@@ -157,16 +158,7 @@ public class SchemaGeneratorTest {
                 .withDescriptionResolver(member -> descriptionPrefix + member.getSimpleTypeDescription())
                 .withEnumResolver(member -> member.getType().isInstanceOf(Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
                 .withEnumResolver(member -> member.getType().isInstanceOf(String.class) ? Arrays.asList("constant string value") : null)
-                .withAdditionalPropertiesResolver((scope) -> {
-                    if (scope.isContainerType() || scope.getType().isPrimitive()
-                            || scope.getType().isInstanceOf(Number.class) || scope.getType().isInstanceOf(CharSequence.class)) {
-                        return Object.class;
-                    }
-                    if (scope.getType().getErasedType() == TestClass4.class) {
-                        return String.class;
-                    }
-                    return Void.class;
-                })
+                .withAdditionalPropertiesResolver(SchemaGeneratorTest::resolveAdditionalProperties)
                 .withNumberExclusiveMaximumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
                 .withNumberExclusiveMinimumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.ZERO : null)
                 .withNumberInclusiveMaximumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.TEN : null)
@@ -177,6 +169,17 @@ public class SchemaGeneratorTest {
                 .withStringMinLengthResolver(member -> member.getType().isInstanceOf(String.class) ? 1 : null)
                 .withStringPatternResolver(member -> member.getType().isInstanceOf(String.class) ? "^.{1,256}$" : null)
                 .withTitleResolver(member -> member.getSimpleTypeDescription());
+    }
+
+    private static Type resolveAdditionalProperties(TypeScope scope) {
+        if (scope.isContainerType() || scope.getType().isPrimitive()
+                || scope.getType().isInstanceOf(Number.class) || scope.getType().isInstanceOf(CharSequence.class)) {
+            return Object.class;
+        }
+        if (scope.getType().isInstanceOf(TestClass4.class)) {
+            return scope.getType().typeParametersFor(TestClass4.class).get(1);
+        }
+        return Void.class;
     }
 
     private static void populateConfigPart(SchemaGeneratorConfigPart<? extends MemberScope<?, ?>> configPart, String descriptionPrefix) {
