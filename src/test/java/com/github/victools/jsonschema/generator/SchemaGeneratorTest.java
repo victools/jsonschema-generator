@@ -157,8 +157,16 @@ public class SchemaGeneratorTest {
                 .withDescriptionResolver(member -> descriptionPrefix + member.getSimpleTypeDescription())
                 .withEnumResolver(member -> member.getType().isInstanceOf(Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
                 .withEnumResolver(member -> member.getType().isInstanceOf(String.class) ? Arrays.asList("constant string value") : null)
-                .withAdditionalPropertiesResolver(
-                        member -> member.isContainerType() || member.getType().isInstanceOf(Number.class) || member.getType().isInstanceOf(String.class) || member.getType().isPrimitive() ? null : (member.getType().getErasedType() == TestClass4.class ? String.class : Void.class))
+                .withAdditionalPropertiesResolver((scope) -> {
+                    if (scope.isContainerType() || scope.getType().isPrimitive()
+                            || scope.getType().isInstanceOf(Number.class) || scope.getType().isInstanceOf(CharSequence.class)) {
+                        return Object.class;
+                    }
+                    if (scope.getType().getErasedType() == TestClass4.class) {
+                        return String.class;
+                    }
+                    return Void.class;
+                })
                 .withNumberExclusiveMaximumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
                 .withNumberExclusiveMinimumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.ZERO : null)
                 .withNumberInclusiveMaximumResolver(member -> member.getType().isInstanceOf(Number.class) ? BigDecimal.TEN : null)

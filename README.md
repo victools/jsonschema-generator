@@ -13,6 +13,7 @@ Topics covered in this document are:
     - [Toggling Standard Options (individually)](#toggling-standard-options-individually)
     - [Adding Separate Modules (e.g. from another library)](#adding-separate-modules-eg-from-another-library)
     - [Defining Desired Behaviour via individual Configurations](#defining-desired-behaviour-via-individual-configurations)
+      - [Example: Dynamically setting the `additionalProperties` attribute](#example-dynamically-setting-the-additionalproperties-attribute)
 - [Supported JSON Schema attributes](#supported-json-schema-attributes)
 
 ----
@@ -117,6 +118,42 @@ configBuilder.forTypesInGeneral()
 configBuilder.forFields()
     // show the original field name as the "description" (may differ from the overridden property name in the schema)
     .withDescriptionResolver(FieldScope::getDeclaredName);
+```
+
+##### Example: Dynamically setting the `additionalProperties` attribute
+According to the [JSON Schema Specification](https://json-schema.org/understanding-json-schema/reference/object.html) (as of February 2020):
+> The `additionalProperties` keyword is used to control the handling of extra stuff, that is, properties whose names are not listed in the `properties` keyword. By default any additional properties are allowed.
+> The `additionalProperties` keyword may be either a boolean or an object. If `additionalProperties` is a boolean and set to false, no additional properties will be allowed.
+> If `additionalProperties` is an object, that object is a schema that will be used to validate any additional properties not listed in `properties`.
+
+While there are various ways to consider `additionalProperties`, the standard way could look like this (but may be simpler):
+```java
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import java.util.Map;
+```
+```java
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper);
+configBuilder.forTypesInGeneral()
+    .withAdditionalPropertiesResolver((scope) -> {
+        if (scope.getType().isInstanceOf(Map.class)) {
+            // within a Map<Key, Value> allow additionalProperties of the Value type
+            return scope.getType().typeParametersFor(Map.class).get(1);
+        }
+        if (scope.getType().isPrimitive()
+                || scope.getType().isInstanceOf(Number.class)
+                || scope.getType().isInstanceOf(CharSequence.class)) {
+            // explicitly cause the "additionalProperties" to be omitted for these non-object types – only do this if you are sure
+            // when in doubt: rather return null
+            return Object.class;
+        }
+        if (scope.isContainerType()) {
+            // mark this resolver as neutral, i.e. falling back on what the next resolver may decide
+            // if no other resolver provides a specific value, the default logic applies: omitting the "additionalProperties"
+            return null;
+        }
+        // set "additionalProperties" to "false" for all remaining objects
+        return Void.class;
+    });
 ```
 
 ## Supported JSON Schema attributes
