@@ -38,8 +38,7 @@ public class FlattenedOptionalModule implements Module {
      * @return the wrapped component type (or null if it is not an {@link Optional} (sub) type
      */
     private ResolvedType resolveOptionalComponentType(MemberScope<?, ?> fieldOrMethod) {
-        ResolvedType javaType = fieldOrMethod.getType();
-        return FlattenedOptionalModule.isOptional(javaType) ? javaType.typeParametersFor(Optional.class).get(0) : null;
+        return FlattenedOptionalModule.isOptional(fieldOrMethod.getType()) ? fieldOrMethod.getTypeParameterFor(Optional.class, 0) : null;
     }
 
     @Override

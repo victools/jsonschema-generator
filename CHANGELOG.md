@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Support for "additionalProperties" property via `SchemaGeneratorConfigPart.withAdditionalPropertiesResolver()`
+- Offer `TypeScope.getTypeParameterFor()` and `TypeContext.getTypeParameterFor()` convenience methods
 
 ## [4.1.0] - 2020-02-18
 ### Added
