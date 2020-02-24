@@ -21,11 +21,11 @@ import com.github.victools.jsonschema.generator.impl.SchemaGeneratorConfigImpl;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -72,25 +72,23 @@ public class SchemaGeneratorConfigBuilder {
      */
     public SchemaGeneratorConfig build() {
         // apply the configurations associated with enabled/disabled options
-        Map<Option, Boolean> completeSetOfOptions = EnumSet.allOf(Option.class).stream()
-                .collect(Collectors.toMap(
-                        option -> option,
-                        option -> this.options.getOrDefault(option, this.preset.isOptionEnabledByDefault(option))));
-        Set<Option> enabledOptions = completeSetOfOptions.entrySet()
-                .stream()
-                .filter(Map.Entry::getValue)
-                .map(Map.Entry::getKey)
+        EnumSet<Option> allOptions = EnumSet.allOf(Option.class);
+        Set<Option> enabledOptions = EnumSet.allOf(Option.class).stream()
+                .filter(option -> this.options.getOrDefault(option, this.preset.isOptionEnabledByDefault(option)))
                 .collect(Collectors.toSet());
-        Predicate<Option> isValid = (configuredOption) -> enabledOptions.stream().noneMatch(enabledOne -> enabledOne.isOverriding(configuredOption));
-        completeSetOfOptions.entrySet()
-                .stream()
-                .filter(setting -> !setting.getValue() || isValid.test(setting.getKey()))
+        Map<Option, Boolean> validOptions = allOptions.stream()
+                .filter((configuredOption) -> enabledOptions.stream().noneMatch(enabledOne -> enabledOne.isOverriding(configuredOption)))
+                .collect(Collectors.toMap(option -> option, enabledOptions::contains, (first, second) -> first, LinkedHashMap::new));
+
+        validOptions.entrySet().stream()
                 .map(setting -> setting.getKey().getModule(setting.getValue()))
                 .filter(Objects::nonNull)
                 .forEach(this::with);
+        // discard invalid enabled options
+        enabledOptions.retainAll(validOptions.keySet());
         // construct the actual configuration instance
         return new SchemaGeneratorConfigImpl(this.objectMapper,
-                completeSetOfOptions,
+                enabledOptions,
                 this.typesInGeneralConfigPart,
                 this.fieldConfigPart,
                 this.methodConfigPart,

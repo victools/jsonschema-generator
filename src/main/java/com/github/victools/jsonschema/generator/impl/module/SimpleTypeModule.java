@@ -26,6 +26,8 @@ import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.TypeScope;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -37,6 +39,7 @@ import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -179,12 +182,43 @@ public class SimpleTypeModule implements Module {
                 .withNullableCheck(this::isNullableType);
         builder.forMethods()
                 .withNullableCheck(this::isNullableType);
+        builder.forTypesInGeneral()
+                .withAdditionalPropertiesResolver(this::resolveAdditionalProperties)
+                .withPatternPropertiesResolver(this::resolvePatternProperties);
 
         builder.with(new SimpleTypeDefinitionProvider(builder.getObjectMapper()));
     }
 
     /**
-     * Implementation of the {@link CustomDefinitionProvider} interface for applying fixed schema definitions for simple java types.
+     * Specifically omit the "additionalProperties" keyword for non-object types.
+     *
+     * @param scope the scope to check for fixed non-object types
+     * @return either Object.class to cause omission of the "additonalProperties" keyword or null to leave it up to following configurations
+     */
+    private Type resolveAdditionalProperties(TypeScope scope) {
+        if (scope.getType().getTypeParameters().isEmpty() && this.fixedJsonSchemaTypes.containsKey(scope.getType().getErasedType())) {
+            // indicate no specific additionalProperties type - thereby causing it to be omitted from the generated schema
+            return Object.class;
+        }
+        return null;
+    }
+
+    /**
+     * Specifically omit the "patternProperties" keyword for non-object types.
+     *
+     * @param scope the scope to check for fixed non-object types
+     * @return either an empty map to cause omission of the "patternProperties" keyword or null to leave it up to following configurations
+     */
+    private Map<String, Type> resolvePatternProperties(TypeScope scope) {
+        if (scope.getType().getTypeParameters().isEmpty() && this.fixedJsonSchemaTypes.containsKey(scope.getType().getErasedType())) {
+            // indicate no specific patternProperties - thereby causing it to be omitted from the generated schema
+            return Collections.emptyMap();
+        }
+        return null;
+    }
+
+    /**
+     * Implementation of the {@link CustomDefinitionProviderV2} interface for applying fixed schema definitions for simple java types.
      */
     private class SimpleTypeDefinitionProvider implements CustomDefinitionProviderV2 {
 
@@ -201,7 +235,6 @@ public class SimpleTypeModule implements Module {
 
         @Override
         public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
-
             if (!javaType.getTypeParameters().isEmpty()) {
                 return null;
             }

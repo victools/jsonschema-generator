@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Default implementation of a schema generator's configuration.
@@ -47,7 +48,7 @@ import java.util.Optional;
 public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
 
     private final ObjectMapper objectMapper;
-    private final Map<Option, Boolean> options;
+    private final Set<Option> enabledOptions;
     private final SchemaGeneratorTypeConfigPart<TypeScope> typesInGeneralConfigPart;
     private final SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
     private final SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
@@ -58,7 +59,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      * Constructor of a configuration instance.
      *
      * @param objectMapper supplier for object and array nodes for the JSON structure being generated
-     * @param options specifically configured settings/options (thereby overriding the default enabled/disabled flag)
+     * @param enabledOptions enabled settings/options (either by default or explicitly set)
      * @param typesInGeneralConfigPart configuration part for context-independent attribute collection
      * @param fieldConfigPart configuration part for fields
      * @param methodConfigPart configuration part for methods
@@ -66,14 +67,14 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      * @param typeAttributeOverrides applicable type attribute overrides
      */
     public SchemaGeneratorConfigImpl(ObjectMapper objectMapper,
-            Map<Option, Boolean> options,
+            Set<Option> enabledOptions,
             SchemaGeneratorTypeConfigPart<TypeScope> typesInGeneralConfigPart,
             SchemaGeneratorConfigPart<FieldScope> fieldConfigPart,
             SchemaGeneratorConfigPart<MethodScope> methodConfigPart,
             List<CustomDefinitionProviderV2> customDefinitions,
             List<TypeAttributeOverride> typeAttributeOverrides) {
         this.objectMapper = objectMapper;
-        this.options = options;
+        this.enabledOptions = enabledOptions;
         this.typesInGeneralConfigPart = typesInGeneralConfigPart;
         this.fieldConfigPart = fieldConfigPart;
         this.methodConfigPart = methodConfigPart;
@@ -88,7 +89,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      * @return whether the given generator option is enabled
      */
     private boolean isOptionEnabled(Option setting) {
-        return this.options.getOrDefault(setting, false);
+        return this.enabledOptions.contains(setting);
     }
 
     @Override

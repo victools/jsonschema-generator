@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -78,6 +79,18 @@ public class SchemaGeneratorTest {
     @Parameters
     public void testGenerateSchema_SimpleType(Class<?> targetType, String expectedJsonSchemaType) throws Exception {
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper()).build();
+        SchemaGenerator generator = new SchemaGenerator(config);
+        JsonNode result = generator.generateSchema(targetType);
+        Assert.assertEquals(1, result.size());
+        Assert.assertEquals(expectedJsonSchemaType, result.get(SchemaConstants.TAG_TYPE).asText());
+    }
+
+    @Test
+    @Parameters(method = "parametersForTestGenerateSchema_SimpleType")
+    public void testGenerateSchema_SimpleType_withAdditionalPropertiesOption(Class<?> targetType, String expectedJsonSchemaType) throws Exception {
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper())
+                .with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT)
+                .build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(targetType);
         Assert.assertEquals(1, result.size());
@@ -175,23 +188,25 @@ public class SchemaGeneratorTest {
     }
 
     private static Type resolveAdditionalProperties(TypeScope scope) {
-        if (scope.isContainerType() || scope.getType().isPrimitive()
-                || scope.getType().isInstanceOf(Number.class) || scope.getType().isInstanceOf(CharSequence.class)) {
-            return Object.class;
+        if (scope.getType().isInstanceOf(TestClass2.class)) {
+            return Void.class;
         }
         if (scope.getType().isInstanceOf(TestClass4.class)) {
             return scope.getTypeParameterFor(TestClass4.class, 1);
         }
-        return Void.class;
+        return null;
     }
 
     private static Map<String, Type> resolvePatternProperties(TypeScope scope) {
-        if (!scope.getType().isInstanceOf(TestClass2.class)) {
-            return null;
+        if (scope.getType().isInstanceOf(TestClass2.class)) {
+            Map<String, Type> patternProperties = new HashMap<>();
+            patternProperties.put("^generic.+$", scope.getTypeParameterFor(TestClass2.class, 0));
+            return patternProperties;
         }
-        Map<String, Type> patternProperties = new HashMap<>();
-        patternProperties.put("^generic.+$", scope.getTypeParameterFor(TestClass2.class, 0));
-        return patternProperties;
+        if (scope.getType().isInstanceOf(TestClass4.class)) {
+            return Collections.emptyMap();
+        }
+        return null;
     }
 
     private static void populateConfigPart(SchemaGeneratorConfigPart<? extends MemberScope<?, ?>> configPart, String descriptionPrefix) {
@@ -211,7 +226,8 @@ public class SchemaGeneratorTest {
             }
             return null;
         });
-        Module typeInGeneralModule = configBuilder -> populateTypeConfigPart(configBuilder.forTypesInGeneral(), "for type in general: ");
+        Module typeInGeneralModule = configBuilder -> populateTypeConfigPart(
+                configBuilder.with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT).forTypesInGeneral(), "for type in general: ");
         Module methodModule = configBuilder -> populateConfigPart(configBuilder.forMethods(), "looked-up from method: ");
         Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields(), "looked-up from field: ");
         Module enumToStringModule = configBuilder -> configBuilder.with(Option.FLATTENED_ENUMS_FROM_TOSTRING);

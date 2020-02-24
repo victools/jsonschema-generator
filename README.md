@@ -132,27 +132,16 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import java.util.Map;
 ```
 ```java
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper);
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper)
+    .with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT);
 configBuilder.forTypesInGeneral()
     .withAdditionalPropertiesResolver((scope) -> {
         if (scope.getType().isInstanceOf(Map.class)) {
             // within a Map<Key, Value> allow additionalProperties of the Value type
+            // if no type parameters are defined, this will result in additionalProperties to be omitted (by way of return Object.class)
             return scope.getTypeParameterFor(Map.class, 1);
         }
-        if (scope.getType().isPrimitive()
-                || scope.getType().isInstanceOf(Number.class)
-                || scope.getType().isInstanceOf(CharSequence.class)) {
-            // explicitly cause the "additionalProperties" to be omitted for these non-object types – only do this if you are sure
-            // when in doubt: rather return null
-            return Object.class;
-        }
-        if (scope.isContainerType()) {
-            // mark this resolver as neutral, i.e. falling back on what the next resolver may decide
-            // if no other resolver provides a specific value, the default logic applies: omitting the "additionalProperties"
-            return null;
-        }
-        // set "additionalProperties" to "false" for all remaining objects
-        return Void.class;
+        return null;
     });
 ```
 
