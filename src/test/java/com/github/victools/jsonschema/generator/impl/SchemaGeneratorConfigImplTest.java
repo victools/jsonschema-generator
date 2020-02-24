@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.classmate.ResolvedType;
@@ -33,9 +32,9 @@ import com.github.victools.jsonschema.generator.TypeAttributeOverride;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -52,7 +51,7 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     private SchemaGeneratorConfigImpl instance;
     private ObjectMapper objectMapper;
-    private Map<Option, Boolean> options;
+    private Set<Option> enabledOptions;
     private SchemaGeneratorTypeConfigPart<TypeScope> typesInGeneralConfigPart;
     private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
     private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
@@ -67,14 +66,14 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     @SuppressWarnings("unchecked")
     public void setUp() {
         this.objectMapper = Mockito.mock(ObjectMapper.class);
-        this.options = new HashMap<>();
+        this.enabledOptions = new HashSet<>();
         this.typesInGeneralConfigPart = Mockito.mock(SchemaGeneratorTypeConfigPart.class);
         this.fieldConfigPart = Mockito.mock(SchemaGeneratorConfigPart.class);
         this.methodConfigPart = Mockito.mock(SchemaGeneratorConfigPart.class);
         this.customDefinitions = new ArrayList<>();
         this.typeAttributeOverrides = new ArrayList<>();
 
-        this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, this.options, this.typesInGeneralConfigPart,
+        this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, this.enabledOptions, this.typesInGeneralConfigPart,
                 this.fieldConfigPart, this.methodConfigPart, this.customDefinitions, this.typeAttributeOverrides);
     }
 
@@ -86,16 +85,9 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     @Test
     public void testShouldCreateDefinitionsForAllObjects_optionEnabled() {
-        this.options.put(Option.DEFINITIONS_FOR_ALL_OBJECTS, Boolean.TRUE);
+        this.enabledOptions.add(Option.DEFINITIONS_FOR_ALL_OBJECTS);
         boolean specificallyEnabled = this.instance.shouldCreateDefinitionsForAllObjects();
         Assert.assertTrue(specificallyEnabled);
-    }
-
-    @Test
-    public void testShouldCreateDefinitionsForAllObjects_optionDisabled() {
-        this.options.put(Option.DEFINITIONS_FOR_ALL_OBJECTS, Boolean.FALSE);
-        boolean specificallyDisabled = this.instance.shouldCreateDefinitionsForAllObjects();
-        Assert.assertFalse(specificallyDisabled);
     }
 
     @Test
@@ -150,25 +142,22 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     Object parametersForTestIsNullable() {
         return new Object[][]{
-            {null, null, false},
-            {null, Boolean.TRUE, true},
-            {null, Boolean.FALSE, false},
-            {Boolean.TRUE, null, true},
-            {Boolean.TRUE, Boolean.TRUE, true},
-            {Boolean.TRUE, Boolean.FALSE, true},
-            {Boolean.FALSE, null, false},
-            {Boolean.FALSE, Boolean.TRUE, false},
-            {Boolean.FALSE, Boolean.FALSE, false}
+            {null, true, true},
+            {null, false, false},
+            {Boolean.TRUE, true, true},
+            {Boolean.TRUE, false, true},
+            {Boolean.FALSE, true, false},
+            {Boolean.FALSE, false, false}
         };
     }
 
     @Test
     @Parameters(method = "parametersForTestIsNullable")
-    public void testIsNullableField(Boolean configResult, Boolean optionEnabled, boolean expectedResult) throws Exception {
+    public void testIsNullableField(Boolean configResult, boolean optionEnabled, boolean expectedResult) throws Exception {
         FieldScope field = this.getTestClassField("field");
         Mockito.when(this.fieldConfigPart.isNullable(field)).thenReturn(configResult);
-        if (optionEnabled != null) {
-            this.options.put(Option.NULLABLE_FIELDS_BY_DEFAULT, optionEnabled);
+        if (optionEnabled) {
+            this.enabledOptions.add(Option.NULLABLE_FIELDS_BY_DEFAULT);
         }
         boolean result = this.instance.isNullable(field);
         Assert.assertEquals(expectedResult, result);
@@ -176,11 +165,11 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     @Test
     @Parameters(method = "parametersForTestIsNullable")
-    public void testIsNullableMethod(Boolean configResult, Boolean optionEnabled, boolean expectedResult) throws Exception {
+    public void testIsNullableMethod(Boolean configResult, boolean optionEnabled, boolean expectedResult) throws Exception {
         MethodScope method = this.getTestClassMethod("getField");
         Mockito.when(this.methodConfigPart.isNullable(method)).thenReturn(configResult);
-        if (optionEnabled != null) {
-            this.options.put(Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT, optionEnabled);
+        if (optionEnabled) {
+            this.enabledOptions.add(Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT);
         }
         boolean result = this.instance.isNullable(method);
         Assert.assertEquals(expectedResult, result);

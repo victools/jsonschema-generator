@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.github.victools.jsonschema.generator.impl.module.AdditionalPropertiesModule;
 import com.github.victools.jsonschema.generator.impl.module.ConstantValueModule;
 import com.github.victools.jsonschema.generator.impl.module.EnumModule;
 import com.github.victools.jsonschema.generator.impl.module.FieldExclusionModule;
@@ -193,6 +194,12 @@ public enum Option {
      * Default: false (disabled)
      */
     NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT(null, null),
+    /**
+     * Whether a schema's "additionalProperties" should be set to "false" if no specific configuration says otherwise.
+     * <br>
+     * Default: false (omitting the "additionalProperties" keyword and thereby allowing any additional properties in an object schema)
+     */
+    FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT(AdditionalPropertiesModule::forbiddenForAllObjectsButContainers, null),
     /**
      * Whether all referenced objects should be listed in the schema's "definitions", otherwise single occurrences are defined in-line.
      * <br>

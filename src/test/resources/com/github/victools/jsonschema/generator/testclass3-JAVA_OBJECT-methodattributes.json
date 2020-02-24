@@ -23,8 +23,7 @@
                             "$ref": "#/definitions/RoundingMode-nullable"
                         }, {
                             "title": "RoundingMode",
-                            "description": "looked-up from method: RoundingMode",
-                            "additionalProperties": false
+                            "description": "looked-up from method: RoundingMode"
                         }]
                 },
                 "valueOf(int)": {
@@ -32,8 +31,7 @@
                             "$ref": "#/definitions/RoundingMode-nullable"
                         }, {
                             "title": "RoundingMode",
-                            "description": "looked-up from method: RoundingMode",
-                            "additionalProperties": false
+                            "description": "looked-up from method: RoundingMode"
                         }]
                 },
                 "values()": {
