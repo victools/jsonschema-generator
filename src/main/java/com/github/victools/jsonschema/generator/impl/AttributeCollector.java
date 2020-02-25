@@ -295,7 +295,7 @@ public class AttributeCollector {
         } else if (additionalProperties != null) {
             ResolvedType targetType = generationContext.getTypeContext().resolve(additionalProperties);
             if (targetType.getErasedType() != Object.class) {
-                ObjectNode additionalPropertiesSchema = generationContext.getGeneratorConfig().createObjectNode();
+                ObjectNode additionalPropertiesSchema = this.objectMapper.createObjectNode();
                 generationContext.traverseGenericType(targetType, additionalPropertiesSchema, false);
                 node.set(SchemaConstants.TAG_ADDITIONAL_PROPERTIES, additionalPropertiesSchema);
             }
@@ -314,9 +314,9 @@ public class AttributeCollector {
     public AttributeCollector setPatternProperties(ObjectNode node, Map<String, Type> patternProperties,
             SchemaGenerationContextImpl generationContext) {
         if (patternProperties != null && !patternProperties.isEmpty()) {
-            ObjectNode patternPropertiesNode = generationContext.getGeneratorConfig().createObjectNode();
+            ObjectNode patternPropertiesNode = this.objectMapper.createObjectNode();
             for (Map.Entry<String, Type> entry : patternProperties.entrySet()) {
-                ObjectNode singlePatternSchema = generationContext.getGeneratorConfig().createObjectNode();
+                ObjectNode singlePatternSchema = this.objectMapper.createObjectNode();
                 ResolvedType targetType = generationContext.getTypeContext().resolve(entry.getValue());
                 if (targetType.getErasedType() != Object.class) {
                     generationContext.traverseGenericType(targetType, singlePatternSchema, false);
