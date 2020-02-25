@@ -292,11 +292,13 @@ public class AttributeCollector {
     public AttributeCollector setAdditionalProperties(ObjectNode node, Type additionalProperties, SchemaGenerationContextImpl generationContext) {
         if (additionalProperties == Void.class || additionalProperties == Void.TYPE) {
             node.put(SchemaConstants.TAG_ADDITIONAL_PROPERTIES, false);
-        } else if (additionalProperties != null && additionalProperties != Object.class) {
+        } else if (additionalProperties != null) {
             ResolvedType targetType = generationContext.getTypeContext().resolve(additionalProperties);
-            ObjectNode additionalPropertiesSchema = generationContext.getGeneratorConfig().createObjectNode();
-            generationContext.traverseGenericType(targetType, additionalPropertiesSchema, false);
-            node.set(SchemaConstants.TAG_ADDITIONAL_PROPERTIES, additionalPropertiesSchema);
+            if (targetType.getErasedType() != Object.class) {
+                ObjectNode additionalPropertiesSchema = this.objectMapper.createObjectNode();
+                generationContext.traverseGenericType(targetType, additionalPropertiesSchema, false);
+                node.set(SchemaConstants.TAG_ADDITIONAL_PROPERTIES, additionalPropertiesSchema);
+            }
         }
         return this;
     }
@@ -312,11 +314,13 @@ public class AttributeCollector {
     public AttributeCollector setPatternProperties(ObjectNode node, Map<String, Type> patternProperties,
             SchemaGenerationContextImpl generationContext) {
         if (patternProperties != null && !patternProperties.isEmpty()) {
-            ObjectNode patternPropertiesNode = generationContext.getGeneratorConfig().createObjectNode();
+            ObjectNode patternPropertiesNode = this.objectMapper.createObjectNode();
             for (Map.Entry<String, Type> entry : patternProperties.entrySet()) {
-                ObjectNode singlePatternSchema = generationContext.getGeneratorConfig().createObjectNode();
+                ObjectNode singlePatternSchema = this.objectMapper.createObjectNode();
                 ResolvedType targetType = generationContext.getTypeContext().resolve(entry.getValue());
-                generationContext.traverseGenericType(targetType, singlePatternSchema, false);
+                if (targetType.getErasedType() != Object.class) {
+                    generationContext.traverseGenericType(targetType, singlePatternSchema, false);
+                }
                 patternPropertiesNode.set(entry.getKey(), singlePatternSchema);
             }
             node.set(SchemaConstants.TAG_PATTERN_PROPERTIES, patternPropertiesNode);
