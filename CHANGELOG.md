@@ -4,12 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.2.0] - 2020-02-27
 ### Added
 - Support for "additionalProperties" property via `SchemaGeneratorTypeConfigPart.withAdditionalPropertiesResolver()`
 - Support for "patternProperties" property via `SchemaGeneratorTypeConfigPart.withPatternPropertiesResolver()`
 - Introduce new `Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` for more convenient usage
 - Offer `TypeScope.getTypeParameterFor()` and `TypeContext.getTypeParameterFor()` convenience methods
+
+### Fixed
+- Possible exceptions in case of encountered collections without specific type parameters
 
 ## [4.1.0] - 2020-02-18
 ### Added
@@ -115,7 +118,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Specific handling of optionals (two alternatives via standard options).
 - Pre-defined sets of standard options to cover different use-cases and simplify library usage.
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.1.0...HEAD
+[4.2.0]: https://github.com/victools/jsonschema-generator/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/victools/jsonschema-generator/compare/v4.0.2...v4.1.0
 [4.0.2]: https://github.com/victools/jsonschema-generator/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/victools/jsonschema-generator/compare/v4.0.0...v4.0.1
