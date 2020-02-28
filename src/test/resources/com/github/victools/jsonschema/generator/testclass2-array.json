@@ -5,16 +5,10 @@
             "properties": {
                 "genericArray": {
                     "type": ["array", "null"],
-                    "items": {
-                        "type": "object"
-                    }
+                    "items": {}
                 },
-                "genericValue": {
-                    "type": ["object", "null"]
-                },
-                "getGenericValue()": {
-                    "type": ["object", "null"]
-                }
+                "genericValue": {},
+                "getGenericValue()": {}
             }
         }
     },

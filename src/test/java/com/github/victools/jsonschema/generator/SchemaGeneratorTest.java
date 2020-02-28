@@ -53,7 +53,7 @@ public class SchemaGeneratorTest {
 
     Object parametersForTestGenerateSchema_SimpleType() {
         return new Object[][]{
-            {Object.class, SchemaConstants.TAG_TYPE_OBJECT},
+            {Object.class, null},
             {String.class, SchemaConstants.TAG_TYPE_STRING},
             {Character.class, SchemaConstants.TAG_TYPE_STRING},
             {char.class, SchemaConstants.TAG_TYPE_STRING},
@@ -81,8 +81,12 @@ public class SchemaGeneratorTest {
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper()).build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(targetType);
-        Assert.assertEquals(1, result.size());
-        Assert.assertEquals(expectedJsonSchemaType, result.get(SchemaConstants.TAG_TYPE).asText());
+        if (expectedJsonSchemaType == null) {
+            Assert.assertTrue(result.isEmpty());
+        } else {
+            Assert.assertEquals(1, result.size());
+            Assert.assertEquals(expectedJsonSchemaType, result.get(SchemaConstants.TAG_TYPE).asText());
+        }
     }
 
     @Test
@@ -93,8 +97,12 @@ public class SchemaGeneratorTest {
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(targetType);
-        Assert.assertEquals(1, result.size());
-        Assert.assertEquals(expectedJsonSchemaType, result.get(SchemaConstants.TAG_TYPE).asText());
+        if (expectedJsonSchemaType == null) {
+            Assert.assertTrue(result.isEmpty());
+        } else {
+            Assert.assertEquals(1, result.size());
+            Assert.assertEquals(expectedJsonSchemaType, result.get(SchemaConstants.TAG_TYPE).asText());
+        }
     }
 
     @Test

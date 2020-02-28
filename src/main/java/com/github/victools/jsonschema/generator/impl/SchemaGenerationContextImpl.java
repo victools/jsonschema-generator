@@ -44,7 +44,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -262,7 +264,8 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             }
         }
         TypeScope scope = this.typeContext.createTypeScope(targetType);
-        ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this);
+        Set<String> allowedSchemaTypes = this.collectAllowedSchemaTypes(definition);
+        ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this, allowedSchemaTypes);
         // ensure no existing attributes in the 'definition' are replaced, by way of first overriding any conflicts the other way around
         typeAttributes.setAll(definition);
         // apply merged attributes
@@ -270,6 +273,27 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         // apply overrides as the very last step
         this.generatorConfig.getTypeAttributeOverrides()
                 .forEach(override -> override.overrideTypeAttributes(definition, scope, this.generatorConfig));
+    }
+
+    /**
+     * Collect the specified value(s) from the given definition's "{@value SchemaConstants#TAG_TYPE}" attribute.
+     *
+     * @param definition type definition to extract specified "{@value SchemaConstants#TAG_TYPE}" values from
+     * @return extracted "{@value SchemaConstants#TAG_TYPE}" values (may be empty)
+     */
+    private Set<String> collectAllowedSchemaTypes(ObjectNode definition) {
+        JsonNode declaredTypes = definition.get(SchemaConstants.TAG_TYPE);
+        final Set<String> allowedSchemaTypes;
+        if (declaredTypes == null) {
+            allowedSchemaTypes = Collections.emptySet();
+        } else if (declaredTypes.isTextual()) {
+            allowedSchemaTypes = Collections.singleton(declaredTypes.textValue());
+        } else {
+            allowedSchemaTypes = StreamSupport.stream(declaredTypes.spliterator(), false)
+                    .map(JsonNode::textValue)
+                    .collect(Collectors.toSet());
+        }
+        return allowedSchemaTypes;
     }
 
     /**
