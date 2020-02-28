@@ -32,6 +32,7 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,9 +128,11 @@ public class AttributeCollector {
      *
      * @param scope the scope/type representation for which to collect JSON schema attributes
      * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @param allowedSchemaTypes declared schema types determining which attributes are meaningful to be included
      * @return node holding all collected attributes (possibly empty)
      */
-    public static ObjectNode collectTypeAttributes(TypeScope scope, SchemaGenerationContextImpl generationContext) {
+    public static ObjectNode collectTypeAttributes(TypeScope scope, SchemaGenerationContextImpl generationContext,
+            Set<String> allowedSchemaTypes) {
         SchemaGeneratorConfig config = generationContext.getGeneratorConfig();
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
@@ -137,20 +140,29 @@ public class AttributeCollector {
         collector.setDescription(node, config.resolveDescriptionForType(scope));
         collector.setDefault(node, config.resolveDefaultForType(scope));
         collector.setEnum(node, config.resolveEnumForType(scope));
-        collector.setAdditionalProperties(node, config.resolveAdditionalPropertiesForType(scope), generationContext);
-        collector.setPatternProperties(node, config.resolvePatternPropertiesForType(scope), generationContext);
-        collector.setStringMinLength(node, config.resolveStringMinLengthForType(scope));
-        collector.setStringMaxLength(node, config.resolveStringMaxLengthForType(scope));
-        collector.setStringFormat(node, config.resolveStringFormatForType(scope));
-        collector.setStringPattern(node, config.resolveStringPatternForType(scope));
-        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimumForType(scope));
-        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimumForType(scope));
-        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximumForType(scope));
-        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximumForType(scope));
-        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOfForType(scope));
-        collector.setArrayMinItems(node, config.resolveArrayMinItemsForType(scope));
-        collector.setArrayMaxItems(node, config.resolveArrayMaxItemsForType(scope));
-        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItemsForType(scope));
+        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(SchemaConstants.TAG_TYPE_OBJECT)) {
+            collector.setAdditionalProperties(node, config.resolveAdditionalPropertiesForType(scope), generationContext);
+            collector.setPatternProperties(node, config.resolvePatternPropertiesForType(scope), generationContext);
+        }
+        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(SchemaConstants.TAG_TYPE_STRING)) {
+            collector.setStringMinLength(node, config.resolveStringMinLengthForType(scope));
+            collector.setStringMaxLength(node, config.resolveStringMaxLengthForType(scope));
+            collector.setStringFormat(node, config.resolveStringFormatForType(scope));
+            collector.setStringPattern(node, config.resolveStringPatternForType(scope));
+        }
+        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(SchemaConstants.TAG_TYPE_INTEGER)
+                || allowedSchemaTypes.contains(SchemaConstants.TAG_TYPE_NUMBER)) {
+            collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimumForType(scope));
+            collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimumForType(scope));
+            collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximumForType(scope));
+            collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximumForType(scope));
+            collector.setNumberMultipleOf(node, config.resolveNumberMultipleOfForType(scope));
+        }
+        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(SchemaConstants.TAG_TYPE_ARRAY)) {
+            collector.setArrayMinItems(node, config.resolveArrayMinItemsForType(scope));
+            collector.setArrayMaxItems(node, config.resolveArrayMaxItemsForType(scope));
+            collector.setArrayUniqueItems(node, config.resolveArrayUniqueItemsForType(scope));
+        }
         return node;
     }
 
