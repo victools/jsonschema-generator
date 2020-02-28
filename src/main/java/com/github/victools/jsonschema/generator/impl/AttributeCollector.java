@@ -318,9 +318,7 @@ public class AttributeCollector {
             for (Map.Entry<String, Type> entry : patternProperties.entrySet()) {
                 ObjectNode singlePatternSchema = this.objectMapper.createObjectNode();
                 ResolvedType targetType = generationContext.getTypeContext().resolve(entry.getValue());
-                if (targetType.getErasedType() != Object.class) {
-                    generationContext.traverseGenericType(targetType, singlePatternSchema, false);
-                }
+                generationContext.traverseGenericType(targetType, singlePatternSchema, false);
                 patternPropertiesNode.set(entry.getKey(), singlePatternSchema);
             }
             node.set(SchemaConstants.TAG_PATTERN_PROPERTIES, patternPropertiesNode);

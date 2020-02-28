@@ -128,7 +128,7 @@ public class AttributeCollectorTest {
         Assert.assertTrue(patternPropertiesNode.isObject());
         Assert.assertEquals(1, patternPropertiesNode.size());
         Assert.assertTrue(patternPropertiesNode.get("^objectClass.*$").isObject());
-        Assert.assertFalse(this.generationContext.containsDefinition(this.generationContext.getTypeContext().resolve(Object.class)));
+        Assert.assertTrue(this.generationContext.containsDefinition(this.generationContext.getTypeContext().resolve(Object.class)));
     }
 
     @Test
@@ -142,7 +142,7 @@ public class AttributeCollectorTest {
         Assert.assertTrue(patternPropertiesNode.isObject());
         Assert.assertEquals(1, patternPropertiesNode.size());
         Assert.assertTrue(patternPropertiesNode.get("^resolvedObjectClass.*$").isObject());
-        Assert.assertFalse(this.generationContext.containsDefinition(this.generationContext.getTypeContext().resolve(Object.class)));
+        Assert.assertTrue(this.generationContext.containsDefinition(this.generationContext.getTypeContext().resolve(Object.class)));
     }
 
     @Test
