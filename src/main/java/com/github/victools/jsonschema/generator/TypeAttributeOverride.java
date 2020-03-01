@@ -27,7 +27,7 @@ public interface TypeAttributeOverride {
     /**
      * Add/remove attributes on the given JSON Schema node – this is specifically intended for attributes relating to the type in general.
      * <br>
-     * E.g. "{@value SchemaConstants#TAG_FORMAT}", "pattern", "required"
+     * E.g. "{@value SchemaConstants#TAG_FORMAT}", "{@value SchemaConstants#TAG_PATTERN}", "{@value SchemaConstants#TAG_REQUIRED}"
      *
      * @param jsonSchemaTypeNode node to modify (the part that may be referenced multiple times)
      * @param scope the type representation associated with the JSON Schema node

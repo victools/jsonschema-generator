@@ -29,13 +29,12 @@ import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.SchemaGeneratorTypeConfigPart;
+import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.TypeAttributeOverride;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -49,11 +48,9 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
 
     private final ObjectMapper objectMapper;
     private final Set<Option> enabledOptions;
-    private final SchemaGeneratorTypeConfigPart<TypeScope> typesInGeneralConfigPart;
+    private final SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart;
     private final SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
     private final SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
-    private final List<CustomDefinitionProviderV2> customDefinitions;
-    private final List<TypeAttributeOverride> typeAttributeOverrides;
 
     /**
      * Constructor of a configuration instance.
@@ -63,23 +60,17 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      * @param typesInGeneralConfigPart configuration part for context-independent attribute collection
      * @param fieldConfigPart configuration part for fields
      * @param methodConfigPart configuration part for methods
-     * @param customDefinitions custom suppliers for a type's schema definition
-     * @param typeAttributeOverrides applicable type attribute overrides
      */
     public SchemaGeneratorConfigImpl(ObjectMapper objectMapper,
             Set<Option> enabledOptions,
-            SchemaGeneratorTypeConfigPart<TypeScope> typesInGeneralConfigPart,
+            SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart,
             SchemaGeneratorConfigPart<FieldScope> fieldConfigPart,
-            SchemaGeneratorConfigPart<MethodScope> methodConfigPart,
-            List<CustomDefinitionProviderV2> customDefinitions,
-            List<TypeAttributeOverride> typeAttributeOverrides) {
+            SchemaGeneratorConfigPart<MethodScope> methodConfigPart) {
         this.objectMapper = objectMapper;
         this.enabledOptions = enabledOptions;
         this.typesInGeneralConfigPart = typesInGeneralConfigPart;
         this.fieldConfigPart = fieldConfigPart;
         this.methodConfigPart = methodConfigPart;
-        this.customDefinitions = customDefinitions;
-        this.typeAttributeOverrides = typeAttributeOverrides;
     }
 
     /**
@@ -130,12 +121,13 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public CustomDefinition getCustomDefinition(ResolvedType javaType, SchemaGenerationContext context,
             CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        final List<CustomDefinitionProviderV2> customDefinitions = this.typesInGeneralConfigPart.getCustomDefinitionProviders();
         final List<CustomDefinitionProviderV2> relevantCustomDefinitions;
         if (ignoredDefinitionProvider == null) {
-            relevantCustomDefinitions = this.customDefinitions;
+            relevantCustomDefinitions = customDefinitions;
         } else {
-            int firstRelevantProviderIndex = 1 + this.customDefinitions.indexOf(ignoredDefinitionProvider);
-            relevantCustomDefinitions = this.customDefinitions.subList(firstRelevantProviderIndex, this.customDefinitions.size());
+            int firstRelevantProviderIndex = 1 + customDefinitions.indexOf(ignoredDefinitionProvider);
+            relevantCustomDefinitions = customDefinitions.subList(firstRelevantProviderIndex, customDefinitions.size());
         }
         return relevantCustomDefinitions.stream()
                 .map(provider -> provider.provideCustomSchemaDefinition(javaType, context))
@@ -146,7 +138,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
 
     @Override
     public List<TypeAttributeOverride> getTypeAttributeOverrides() {
-        return Collections.unmodifiableList(this.typeAttributeOverrides);
+        return this.typesInGeneralConfigPart.getTypeAttributeOverrides();
     }
 
     @Override

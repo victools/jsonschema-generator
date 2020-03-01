@@ -28,10 +28,9 @@ import com.github.victools.jsonschema.generator.InstanceAttributeOverride;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.SchemaGeneratorTypeConfigPart;
+import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.TypeAttributeOverride;
-import com.github.victools.jsonschema.generator.TypeScope;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -42,7 +41,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Test for the {@link SchemaGeneratorConfigImpl} class.
@@ -51,13 +52,15 @@ import org.mockito.Mockito;
 public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     private SchemaGeneratorConfigImpl instance;
+    @Mock
     private ObjectMapper objectMapper;
     private Set<Option> enabledOptions;
-    private SchemaGeneratorTypeConfigPart<TypeScope> typesInGeneralConfigPart;
+    @Mock
+    private SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart;
+    @Mock
     private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
+    @Mock
     private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
-    private List<CustomDefinitionProviderV2> customDefinitions;
-    private List<TypeAttributeOverride> typeAttributeOverrides;
 
     public SchemaGeneratorConfigImplTest() {
         super(TestClass.class);
@@ -66,16 +69,11 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     @Before
     @SuppressWarnings("unchecked")
     public void setUp() {
-        this.objectMapper = Mockito.mock(ObjectMapper.class);
+        MockitoAnnotations.initMocks(this);
         this.enabledOptions = new HashSet<>();
-        this.typesInGeneralConfigPart = Mockito.mock(SchemaGeneratorTypeConfigPart.class);
-        this.fieldConfigPart = Mockito.mock(SchemaGeneratorConfigPart.class);
-        this.methodConfigPart = Mockito.mock(SchemaGeneratorConfigPart.class);
-        this.customDefinitions = new ArrayList<>();
-        this.typeAttributeOverrides = new ArrayList<>();
 
         this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, this.enabledOptions, this.typesInGeneralConfigPart,
-                this.fieldConfigPart, this.methodConfigPart, this.customDefinitions, this.typeAttributeOverrides);
+                this.fieldConfigPart, this.methodConfigPart);
     }
 
     @Test
@@ -115,7 +113,7 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     @Test
     public void testGetCustomDefinition_withMappingReturningNull() {
         CustomDefinitionProviderV2 provider = Mockito.mock(CustomDefinitionProviderV2.class);
-        this.customDefinitions.add(provider);
+        Mockito.when(this.typesInGeneralConfigPart.getCustomDefinitionProviders()).thenReturn(Collections.singletonList(provider));
         ResolvedType javaType = Mockito.mock(ResolvedType.class);
         Assert.assertNull(this.instance.getCustomDefinition(javaType, this.getContext(), null));
 
@@ -126,7 +124,8 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     @Test
     public void testGetCustomDefinition_withMappingReturningValue() {
         CustomDefinition value = Mockito.mock(CustomDefinition.class);
-        this.customDefinitions.add((type, context) -> value);
+        Mockito.when(this.typesInGeneralConfigPart.getCustomDefinitionProviders())
+                .thenReturn(Collections.singletonList((type, context) -> value));
         Assert.assertSame(value, this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class), this.getContext(), null));
     }
 
@@ -134,9 +133,8 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     public void testGetCustomDefinition_withMultipleMappings() {
         CustomDefinition valueOne = Mockito.mock(CustomDefinition.class);
         CustomDefinition valueTwo = Mockito.mock(CustomDefinition.class);
-        this.customDefinitions.add((type, context) -> null);
-        this.customDefinitions.add((type, context) -> valueOne);
-        this.customDefinitions.add((type, context) -> valueTwo);
+        Mockito.when(this.typesInGeneralConfigPart.getCustomDefinitionProviders())
+                .thenReturn(Arrays.asList((type, context) -> null, (type, context) -> valueOne, (type, context) -> valueTwo));
         // ignoring definition look-ups that return null, but taking the first non-null definition
         Assert.assertSame(valueOne, this.instance.getCustomDefinition(Mockito.mock(ResolvedType.class), this.getContext(), null));
     }
@@ -197,7 +195,7 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     @Test
     public void testGetTypeAttributeOverrides() {
         TypeAttributeOverride typeOverride = (typeNode, type, c) -> typeNode.put("$comment", type.getSimpleTypeDescription());
-        this.typeAttributeOverrides.add(typeOverride);
+        Mockito.when(this.typesInGeneralConfigPart.getTypeAttributeOverrides()).thenReturn(Collections.singletonList(typeOverride));
 
         List<TypeAttributeOverride> result = this.instance.getTypeAttributeOverrides();
         Assert.assertEquals(1, result.size());

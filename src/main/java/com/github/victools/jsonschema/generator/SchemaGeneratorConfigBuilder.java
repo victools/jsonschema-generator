@@ -18,11 +18,9 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.impl.SchemaGeneratorConfigImpl;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -37,11 +35,9 @@ public class SchemaGeneratorConfigBuilder {
     private final OptionPreset preset;
 
     private final Map<Option, Boolean> options = new HashMap<>();
-    private final SchemaGeneratorTypeConfigPart<TypeScope> typesInGeneralConfigPart = new SchemaGeneratorTypeConfigPart<>();
+    private final SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart = new SchemaGeneratorGeneralConfigPart();
     private final SchemaGeneratorConfigPart<FieldScope> fieldConfigPart = new SchemaGeneratorConfigPart<>();
     private final SchemaGeneratorConfigPart<MethodScope> methodConfigPart = new SchemaGeneratorConfigPart<>();
-    private final List<CustomDefinitionProviderV2> customDefinitions = new ArrayList<>();
-    private final List<TypeAttributeOverride> typeAttributeOverrides = new ArrayList<>();
 
     /**
      * Constructor of an empty configuration builder. This is equivalent to calling:<br>
@@ -91,9 +87,7 @@ public class SchemaGeneratorConfigBuilder {
                 enabledOptions,
                 this.typesInGeneralConfigPart,
                 this.fieldConfigPart,
-                this.methodConfigPart,
-                this.customDefinitions,
-                this.typeAttributeOverrides);
+                this.methodConfigPart);
     }
 
     /**
@@ -166,7 +160,7 @@ public class SchemaGeneratorConfigBuilder {
      * @return this builder instance (for chaining)
      */
     public SchemaGeneratorConfigBuilder with(CustomDefinitionProviderV2 definitionProvider) {
-        this.customDefinitions.add(definitionProvider);
+        this.typesInGeneralConfigPart.withCustomDefinitionProvider(definitionProvider);
         return this;
     }
 
@@ -177,7 +171,7 @@ public class SchemaGeneratorConfigBuilder {
      * @return this builder instance (for chaining)
      */
     public SchemaGeneratorConfigBuilder with(TypeAttributeOverride override) {
-        this.typeAttributeOverrides.add(override);
+        this.typesInGeneralConfigPart.withTypeAttributeOverride(override);
         return this;
     }
 
