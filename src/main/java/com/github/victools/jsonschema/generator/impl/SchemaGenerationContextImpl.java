@@ -74,12 +74,8 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         this.typeContext = typeContext;
     }
 
-    /**
-     * Getter for the applicable configuration(s).
-     *
-     * @return configuration(s) defined for this context
-     */
-    protected SchemaGeneratorConfig getGeneratorConfig() {
+    @Override
+    public SchemaGeneratorConfig getGeneratorConfig() {
         return this.generatorConfig;
     }
 
