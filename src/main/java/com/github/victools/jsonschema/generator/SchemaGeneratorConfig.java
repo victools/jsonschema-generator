@@ -96,6 +96,15 @@ public interface SchemaGeneratorConfig {
             CustomDefinitionProviderV2 ignoredDefinitionProvider);
 
     /**
+     * Look-up a declared type's subtypes in order to list those specifically (in an "{@value SchemaConstants#TAG_ANYOF}").
+     *
+     * @param javaType declared type to look-up subtypes for
+     * @param context generation context (including a reference to the {@code TypeContext} for deriving a {@link ResolvedType} from a {@link Class})
+     * @return subtypes to list as possible alternatives for the declared type (may be empty)
+     */
+    List<ResolvedType> resolveSubtypes(ResolvedType javaType, SchemaGenerationContext context);
+
+    /**
      * Getter for the applicable type attribute overrides.
      *
      * @return overrides of a given JSON Schema node's type attributes

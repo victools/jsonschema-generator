@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.SchemaGeneratorTypeConfigPart;
+import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -47,11 +47,9 @@ public class AttributeCollectorTest {
         SchemaGeneratorConfigImpl generatorConfig = new SchemaGeneratorConfigImpl(
                 objectMapper,
                 Collections.emptySet(),
-                new SchemaGeneratorTypeConfigPart<>(),
+                new SchemaGeneratorGeneralConfigPart(),
                 new SchemaGeneratorConfigPart<>(),
-                new SchemaGeneratorConfigPart<>(),
-                Collections.emptyList(),
-                Collections.emptyList());
+                new SchemaGeneratorConfigPart<>());
         this.generationContext = new SchemaGenerationContextImpl(generatorConfig, TypeContextFactory.createDefaultTypeContext());
     }
 

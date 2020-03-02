@@ -21,8 +21,7 @@ import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.SchemaGeneratorTypeConfigPart;
-import com.github.victools.jsonschema.generator.TypeScope;
+import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +40,7 @@ public class SimpleTypeModuleTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private SchemaGeneratorConfigBuilder builder;
     @Mock(answer = Answers.RETURNS_SELF)
-    private SchemaGeneratorTypeConfigPart<TypeScope> typeConfigPart;
+    private SchemaGeneratorGeneralConfigPart typeConfigPart;
 
     @Before
     public void setUp() {

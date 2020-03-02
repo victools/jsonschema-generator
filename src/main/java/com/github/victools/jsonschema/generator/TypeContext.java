@@ -61,6 +61,18 @@ public class TypeContext {
     }
 
     /**
+     * Resolve subtype considering the given super-types (potentially) known type parameters.
+     *
+     * @param supertype already resolved super type
+     * @param subtype erased java subtype to resolve
+     * @return resolved subtype
+     * @see TypeResolver#resolveSubtype(ResolvedType, Class)
+     */
+    public final ResolvedType resolveSubtype(ResolvedType supertype, Class<?> subtype) {
+        return this.typeResolver.resolveSubtype(supertype, subtype);
+    }
+
+    /**
      * Collect a given type's declared fields and methods.
      *
      * @param resolvedType type for which to collect declared fields and methods

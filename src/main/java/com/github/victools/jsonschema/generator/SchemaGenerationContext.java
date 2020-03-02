@@ -25,6 +25,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public interface SchemaGenerationContext {
 
     /**
+     * Getter for the applicable configuration.
+     *
+     * @return configuration defined for this context
+     */
+    SchemaGeneratorConfig getGeneratorConfig();
+
+    /**
      * Getter for the type resolution/introspection context in use.
      *
      * @return type resolution/introspection context

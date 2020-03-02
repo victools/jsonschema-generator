@@ -141,9 +141,13 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
 
     /**
      * Setter for target type resolver, expecting the respective member and the default type as inputs.
+     * <br>
+     * For generally replacing one type with one or multiple of its subtypes, you may want to consider adding a {@link SubtypeResolver} via
+     * {@link SchemaGeneratorConfigBuilder#forTypesInGeneral() forTypesInGeneral()} instead.
      *
      * @param resolver how to determine the alternative target type
      * @return this config part (for chaining)
+     * @see SchemaGeneratorGeneralConfigPart#withSubtypeResolver(SubtypeResolver)
      */
     public SchemaGeneratorConfigPart<M> withTargetTypeOverrideResolver(ConfigFunction<M, ResolvedType> resolver) {
         this.targetTypeOverrideResolvers.add(resolver);
