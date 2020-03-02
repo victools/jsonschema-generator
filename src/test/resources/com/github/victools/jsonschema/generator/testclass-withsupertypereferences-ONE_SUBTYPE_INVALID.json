@@ -1,0 +1,44 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "TestSubClass3": {
+            "type": "object",
+            "properties": {
+                "fieldInSubtype": {
+                    "type": "integer"
+                },
+                "genericFieldInSupertype": {
+                    "type": ["string", "null"]
+                }
+            },
+            "title": "TestSubClass3"
+        },
+        "TestSuperClass(Boolean)-nullable": {
+            "type": ["object", "null"],
+            "properties": {
+                "genericFieldInSupertype": {
+                    "type": ["boolean", "null"]
+                }
+            },
+            "title": "TestSuperClass<Boolean>",
+            "description": "supertype-only description"
+        },
+        "TestSuperClass(String)-nullable": {
+            "oneOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestSubClass3"
+                }]
+        }
+    },
+    "type": "object",
+    "properties": {
+        "booleanSupertypeField": {
+            "$ref": "#/definitions/TestSuperClass(Boolean)-nullable"
+        },
+        "stringSupertypeField": {
+            "$ref": "#/definitions/TestSuperClass(String)-nullable"
+        }
+    },
+    "title": "TestClassWithSuperTypeReferences"
+}
