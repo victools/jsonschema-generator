@@ -95,7 +95,7 @@ public class SchemaGeneratorConfigBuilder {
      *
      * @return configuration part responsible for handling types regardless of their declaration context
      */
-    public SchemaGeneratorTypeConfigPart<TypeScope> forTypesInGeneral() {
+    public SchemaGeneratorGeneralConfigPart forTypesInGeneral() {
         return this.typesInGeneralConfigPart;
     }
 

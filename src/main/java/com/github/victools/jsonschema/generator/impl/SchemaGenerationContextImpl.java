@@ -204,7 +204,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
 
     /**
      * Preparation Step: add the given targetType. Also catering for forced inline-definitions and ignoring custom definitions
-       *
+     *
      * @param targetType (possibly generic) type to add
      * @param targetNode node in the JSON schema that should represent the targetType
      * @param isNullable whether the field/method's return value is allowed to be null in the declaringType in this particular scenario
@@ -220,6 +220,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             return;
         }
         final ObjectNode definition;
+        boolean includeTypeAttributes = true;
         final CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(targetType, this, ignoredDefinitionProvider);
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
             if (targetNode == null) {
@@ -256,19 +257,50 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 this.generateArrayDefinition(targetType, definition, isNullable);
             } else {
                 logger.debug("generating definition for {}", targetType);
-                this.generateObjectDefinition(targetType, definition);
+                includeTypeAttributes = !this.addSubtypeReferencesInDefinition(targetType, definition);
             }
         }
         TypeScope scope = this.typeContext.createTypeScope(targetType);
-        Set<String> allowedSchemaTypes = this.collectAllowedSchemaTypes(definition);
-        ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this, allowedSchemaTypes);
-        // ensure no existing attributes in the 'definition' are replaced, by way of first overriding any conflicts the other way around
-        typeAttributes.setAll(definition);
-        // apply merged attributes
-        definition.setAll(typeAttributes);
+        if (includeTypeAttributes) {
+            Set<String> allowedSchemaTypes = this.collectAllowedSchemaTypes(definition);
+            ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this, allowedSchemaTypes);
+            // ensure no existing attributes in the 'definition' are replaced, by way of first overriding any conflicts the other way around
+            typeAttributes.setAll(definition);
+            // apply merged attributes
+            definition.setAll(typeAttributes);
+        }
         // apply overrides as the very last step
         this.generatorConfig.getTypeAttributeOverrides()
                 .forEach(override -> override.overrideTypeAttributes(definition, scope, this.generatorConfig));
+    }
+
+    /**
+     * Check for any defined subtypes of the targeted java type to produce a definition for. If there are any configured subtypes, reference those
+     * from within the definition being generated.
+     *
+     * @param targetType (possibly generic) type to add
+     * @param definition node in the JSON schema to which all collected attributes should be added
+     * @return whether any subtypes were found for which references were added to the given definition
+     */
+    private boolean addSubtypeReferencesInDefinition(ResolvedType targetType, ObjectNode definition) {
+        List<ResolvedType> subtypes = this.generatorConfig.resolveSubtypes(targetType, this);
+        if (subtypes.isEmpty()) {
+            this.generateObjectDefinition(targetType, definition);
+            return false;
+        }
+        if (subtypes.size() == 1) {
+            // avoid unnecessary "anyOf" by making the definition a direct reference to the subtype's definition
+            this.traverseGenericType(subtypes.get(0), definition, false);
+        } else {
+            ArrayNode anyOfArrayNode = this.generatorConfig.createArrayNode();
+            for (ResolvedType subtype : subtypes) {
+                ObjectNode subtypeSchema = this.generatorConfig.createObjectNode();
+                this.traverseGenericType(subtype, subtypeSchema, false);
+                anyOfArrayNode.add(subtypeSchema);
+            }
+            definition.set(SchemaConstants.TAG_ANYOF, anyOfArrayNode);
+        }
+        return true;
     }
 
     /**

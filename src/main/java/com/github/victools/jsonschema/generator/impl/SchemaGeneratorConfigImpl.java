@@ -35,6 +35,7 @@ import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -134,6 +135,15 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Override
+    public List<ResolvedType> resolveSubtypes(ResolvedType javaType, SchemaGenerationContext context) {
+        return this.typesInGeneralConfigPart.getSubtypeResolvers().stream()
+                .map(resolver -> resolver.findSubtypes(javaType, context))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseGet(Collections::emptyList);
     }
 
     @Override

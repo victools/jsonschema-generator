@@ -30,6 +30,7 @@ import java.util.Map;
 public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigPart<TypeScope> {
 
     private final List<CustomDefinitionProviderV2> customDefinitionProviders = new ArrayList<>();
+    private final List<SubtypeResolver> subtypeResolvers = new ArrayList<>();
     private final List<TypeAttributeOverride> typeAttributeOverrides = new ArrayList<>();
 
     /**
@@ -52,6 +53,28 @@ public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigP
      */
     public List<CustomDefinitionProviderV2> getCustomDefinitionProviders() {
         return Collections.unmodifiableList(this.customDefinitionProviders);
+    }
+
+    /**
+     * Adding a subtype resolver – if it returns null for a given type, the next subtype resolver will be applied.
+     * <br>
+     * If all subtype resolvers return null, there is none or a resolver returns an empty list, then the standard behaviour applies.
+     *
+     * @param subtypeResolver resolver for looking up a declared type's subtypes in order to list those specifically
+     * @return this builder instance (for chaining)
+     */
+    public SchemaGeneratorGeneralConfigPart withSubtypeResolver(SubtypeResolver subtypeResolver) {
+        this.subtypeResolvers.add(subtypeResolver);
+        return this;
+    }
+
+    /**
+     * Getter for the applicable subtype resolvers.
+     *
+     * @return registered subtype resolvers
+     */
+    public List<SubtypeResolver> getSubtypeResolvers() {
+        return Collections.unmodifiableList(this.subtypeResolvers);
     }
 
     /**
