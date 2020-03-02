@@ -20,7 +20,6 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
-import com.github.victools.jsonschema.generator.CustomDefinitionProvider;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
@@ -128,7 +127,7 @@ public class EnumModule implements Module {
     }
 
     /**
-     * Implementation of the {@link CustomDefinitionProvider} interface for treating enum types as plain strings.
+     * Implementation of the {@link CustomDefinitionProviderV2} interface for treating enum types as plain strings.
      */
     private static class EnumAsStringDefinitionProvider implements CustomDefinitionProviderV2 {
 

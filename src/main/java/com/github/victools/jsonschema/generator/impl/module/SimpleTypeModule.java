@@ -61,7 +61,7 @@ public class SimpleTypeModule implements Module {
     public static SimpleTypeModule forPrimitiveTypes() {
         SimpleTypeModule module = new SimpleTypeModule();
 
-        module.withObjectType(Object.class);
+        module.withEmptySchema(Object.class);
 
         Stream.of(String.class, Character.class, char.class, CharSequence.class)
                 .forEach(module::withStringType);
@@ -116,11 +116,23 @@ public class SimpleTypeModule implements Module {
     }
 
     /**
-     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@value SchemaConstants#TAG_TYPE_OBJECT}".
+     * Add the given mapping for a (simple) java class that should be represented by an empty schema.
      *
      * @param javaType java class to map to a fixed JSON schema definition
      * @return this module instance (for chaining)
      */
+    public final SimpleTypeModule withEmptySchema(Class<?> javaType) {
+        return this.with(javaType, "");
+    }
+
+    /**
+     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@value SchemaConstants#TAG_TYPE_OBJECT}".
+     *
+     * @param javaType java class to map to a fixed JSON schema definition
+     * @return this module instance (for chaining)
+     * @deprecated rather use {@link SimpleTypeModule#withEmptySchema(Class)} instead to really allow any value
+     */
+    @Deprecated
     public final SimpleTypeModule withObjectType(Class<?> javaType) {
         return this.with(javaType, SchemaConstants.TAG_TYPE_OBJECT);
     }
@@ -196,7 +208,7 @@ public class SimpleTypeModule implements Module {
      * @return either Object.class to cause omission of the "additonalProperties" keyword or null to leave it up to following configurations
      */
     private Type resolveAdditionalProperties(TypeScope scope) {
-        if (scope.getType().getTypeParameters().isEmpty() && this.fixedJsonSchemaTypes.containsKey(scope.getType().getErasedType())) {
+        if (scope.getType().getTypeParameters().isEmpty() && "".equals(this.fixedJsonSchemaTypes.get(scope.getType().getErasedType()))) {
             // indicate no specific additionalProperties type - thereby causing it to be omitted from the generated schema
             return Object.class;
         }
@@ -210,7 +222,7 @@ public class SimpleTypeModule implements Module {
      * @return either an empty map to cause omission of the "patternProperties" keyword or null to leave it up to following configurations
      */
     private Map<String, Type> resolvePatternProperties(TypeScope scope) {
-        if (scope.getType().getTypeParameters().isEmpty() && this.fixedJsonSchemaTypes.containsKey(scope.getType().getErasedType())) {
+        if (scope.getType().getTypeParameters().isEmpty() && "".equals(this.fixedJsonSchemaTypes.get(scope.getType().getErasedType()))) {
             // indicate no specific patternProperties - thereby causing it to be omitted from the generated schema
             return Collections.emptyMap();
         }
@@ -243,8 +255,10 @@ public class SimpleTypeModule implements Module {
                 return null;
             }
             // create fixed JSON schema definition, containing only the corresponding "type" attribute
-            ObjectNode customSchema = this.objectMapper.createObjectNode()
-                    .put(SchemaConstants.TAG_TYPE, jsonSchemaTypeValue);
+            ObjectNode customSchema = this.objectMapper.createObjectNode();
+            if (!jsonSchemaTypeValue.isEmpty()) {
+                customSchema.put(SchemaConstants.TAG_TYPE, jsonSchemaTypeValue);
+            }
             // set true as second parameter to indicate simple types to be always in-lined (i.e. not put into definitions)
             return new CustomDefinition(customSchema, true);
         }
