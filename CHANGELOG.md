@@ -13,10 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.3.0] - 2020-02-28
 ### Changed
-- limit collected type attributes by declared "type" (prior to any `TypeAttributeOverride`!)
+- Limit collected type attributes by declared "type" (prior to any `TypeAttributeOverride`!)
 
 ### Fixed
-- not declare any "type" for `Object.class` by default
+- Not declare any "type" for `Object.class` by default
 
 ## [4.2.0] - 2020-02-27
 ### Added
@@ -30,15 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.1.0] - 2020-02-18
 ### Added
-- new `Option.FLATTENED_ENUMS_FROM_TOSTRING`, using `toString()` instead of `name()` as per `Option.FLATTENED_ENUMS`
+- New `Option.FLATTENED_ENUMS_FROM_TOSTRING`, using `toString()` instead of `name()` as per `Option.FLATTENED_ENUMS`
 
 ## [4.0.2] - 2020-01-30
 ### Fixed
-- avoid further characters in definition keys that are not URI-compatible (#19)
+- Avoid further characters in definition keys that are not URI-compatible (#19)
 
 ## [4.0.1] - 2020-01-29
 ### Fixed
-- avoid white-spaces in definition keys
+- Avoid white-spaces in definition keys
 
 ## [4.0.0] - 2020-01-03
 ### Added
