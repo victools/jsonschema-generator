@@ -4,11 +4,11 @@
     
     <name>Java JSON Schema Generator</name>
     <description>Java JSON Schema Generator – creating a JSON Schema (Draft 7) from your Java classes</description>
-    <url>https://github.com/victools/jsonschema-generator</url>
+    <url>https://github.com/janlabrie/jsonschema-generator</url>
 
-    <groupId>com.github.victools</groupId>
+    <groupId>com.github.janlabrie</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>4.3.1-SNAPSHOT</version>
+    <version>4.3.1</version>
     <packaging>jar</packaging>
 
     <licenses>
@@ -20,25 +20,29 @@
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/victools/jsonschema-generator/issues</url>
+        <url>https://github.com/janlabrie/jsonschema-generator/issues</url>
     </issueManagement>
 
     <scm>
-        <connection>scm:git:https://github.com/victools/jsonschema-generator.git</connection>
-        <developerConnection>scm:git:https://github.com/victools/jsonschema-generator.git</developerConnection>
-        <url>https://github.com/victools/jsonschema-generator</url>
+        <connection>scm:git:https://github.com/janlabrie/jsonschema-generator.git</connection>
+        <developerConnection>scm:git:https://github.com/janlabrie/jsonschema-generator.git</developerConnection>
+        <url>https://github.com/janlabrie/jsonschema-generator</url>
         <tag>HEAD</tag>
     </scm>
 
     <organization>
-        <name>VicTools</name>
-        <url>https://github.com/victools</url>
+        <name>JanLabrie</name>
+        <url>https://github.com/janlabrie</url>
     </organization>
 
     <developers>
         <developer>
             <id>CarstenWickner</id>
             <name>Carsten Wickner</name>
+        </developer>
+        <developer>
+            <id>JanLabrie</id>
+            <name>Jan Labrie</name>
         </developer>
     </developers>
 
@@ -165,7 +169,6 @@
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
                             <logViolationsToConsole>true</logViolationsToConsole>
-                            <linkXRef>false</linkXRef>
                         </configuration>
                         <goals>
                             <goal>check</goal>
