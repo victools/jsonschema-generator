@@ -40,24 +40,57 @@ public interface SchemaGenerationContext {
 
     /**
      * Create an inline definition for the given targetType. Also respecting any custom definition for the given targetType.
+     * <br>
+     * This is equivalent to calling {@code createStandardDefinition(targetType, null)}
      *
-     * @param targetType type to create definition (reference) node for
-     * @return designated definition (reference) node for the targetType
+     * @param targetType type to create definition node for
+     * @return designated definition node for the targetType
      *
+     * @see #createDefinitionReference(ResolvedType)
      * @see #createStandardDefinition(ResolvedType, CustomDefinitionProviderV2)
      */
     ObjectNode createDefinition(ResolvedType targetType);
 
     /**
+     * Create a definition for the given targetType. Also respecting any custom definition for the given targetType.
+     * <br>
+     * The returned node will be empty, but is being remembered internally and populated later, i.e. it should not be changed!
+     * <br>
+     * This is equivalent to calling {@code createStandardDefinitionReference(targetType, null)}
+     *
+     * @param targetType type to create definition (reference) node for
+     * @return (temporarily) empty reference node for the targetType that will only be populated at the very end of the schema generation
+     *
+     * @see #createDefinition(ResolvedType)
+     * @see #createStandardDefinitionReference(ResolvedType, CustomDefinitionProviderV2)
+     */
+    ObjectNode createDefinitionReference(ResolvedType targetType);
+
+    /**
      * Create an inline definition for the given targetType. Ignoring custom definitions up to the given one, but respecting others.
+     *
+     * @param targetType type to create definition node for
+     * @param ignoredDefinitionProvider custom definition provider to ignore
+     * @return designated definition node for the targetType
+     *
+     * @see #createDefinition(ResolvedType)
+     * @see #createStandardDefinitionReference(ResolvedType, CustomDefinitionProviderV2)
+     */
+    ObjectNode createStandardDefinition(ResolvedType targetType, CustomDefinitionProviderV2 ignoredDefinitionProvider);
+
+    /**
+     * Create a standard definition for the given targetType. Ignoring custom definitions up to the given one, but respecting others.
+     * <br>
+     * The returned node will be empty, but is being remembered internally and populated later, i.e. it should not be changed!
      *
      * @param targetType type to create definition (reference) node for
      * @param ignoredDefinitionProvider custom definition provider to ignore
-     * @return designated definition (reference) node for the targetType
+     * @return (temporarily) empty reference node for the targetType that will only be populated at the very end of the schema generation
      *
-     * @see #createDefinition(ResolvedType)
+     * @see #createDefinitionReference(ResolvedType)
+     * @see #createStandardDefinition(ResolvedType, CustomDefinitionProviderV2)
      */
-    ObjectNode createStandardDefinition(ResolvedType targetType, CustomDefinitionProviderV2 ignoredDefinitionProvider);
+    ObjectNode createStandardDefinitionReference(ResolvedType targetType, CustomDefinitionProviderV2 ignoredDefinitionProvider);
 
     /**
      * Ensure that the JSON schema represented by the given node allows for it to be of "type" "null".

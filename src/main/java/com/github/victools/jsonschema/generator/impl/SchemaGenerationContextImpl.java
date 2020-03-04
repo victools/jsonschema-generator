@@ -179,15 +179,25 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
     @Override
     public ObjectNode createDefinition(ResolvedType targetType) {
-        ObjectNode definition = this.generatorConfig.createObjectNode();
-        this.traverseGenericType(targetType, definition, false, true, null);
-        return definition;
+        return this.createStandardDefinition(targetType, null);
+    }
+
+    @Override
+    public ObjectNode createDefinitionReference(ResolvedType targetType) {
+        return this.createStandardDefinitionReference(targetType, null);
     }
 
     @Override
     public ObjectNode createStandardDefinition(ResolvedType targetType, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
         ObjectNode definition = this.generatorConfig.createObjectNode();
         this.traverseGenericType(targetType, definition, false, true, ignoredDefinitionProvider);
+        return definition;
+    }
+
+    @Override
+    public ObjectNode createStandardDefinitionReference(ResolvedType targetType, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        ObjectNode definition = this.generatorConfig.createObjectNode();
+        this.traverseGenericType(targetType, definition, false, false, ignoredDefinitionProvider);
         return definition;
     }
 

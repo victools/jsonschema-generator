@@ -20,10 +20,17 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Scanner;
 import org.junit.Assert;
 import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for {@link SchemaGenerator} class.
@@ -95,5 +102,52 @@ public class SchemaGeneratorCustomDefinitionsTest {
         Assert.assertEquals(2, result.size());
         Assert.assertEquals(SchemaConstants.TAG_TYPE_INTEGER, result.get(SchemaConstants.TAG_TYPE).asText());
         Assert.assertEquals("custom override of Integer", result.get("$comment").asText());
+    }
+
+    @Test
+    public void testGenerateSchema_CircularCustomStandardDefinition() throws Exception {
+        String accessProperty = "get(0)";
+        CustomDefinitionProviderV2 customDefinitionProvider = (javaType, context) -> {
+            if (!javaType.isInstanceOf(List.class)) {
+                return null;
+            }
+            ResolvedType generic = context.getTypeContext().getContainerItemType(javaType);
+            return new CustomDefinition(context.getGeneratorConfig().createObjectNode()
+                    .put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_OBJECT)
+                    .set(SchemaConstants.TAG_PROPERTIES, context.getGeneratorConfig().createObjectNode()
+                            .set(accessProperty, context.createDefinitionReference(generic))));
+        };
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper())
+                .with(customDefinitionProvider)
+                .build();
+        SchemaGenerator generator = new SchemaGenerator(config);
+        JsonNode result = generator.generateSchema(TestCircularClass1.class);
+        JSONAssert.assertEquals('\n' + result.toString() + '\n',
+                loadResource("circular-custom-definition.json"), result.toString(), JSONCompareMode.STRICT);
+    }
+
+    private static String loadResource(String resourcePath) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        try (InputStream inputStream = SchemaGeneratorComplexTypesTest.class
+                .getResourceAsStream(resourcePath);
+                Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
+            while (scanner.hasNext()) {
+                stringBuilder.append(scanner.nextLine()).append('\n');
+            }
+        }
+        String fileAsString = stringBuilder.toString();
+        return fileAsString;
+    }
+
+    private static class TestCircularClass1 {
+
+        public List<TestCircularClass2> list2;
+
+    }
+
+    private static class TestCircularClass2 {
+
+        public List<TestCircularClass1> list1;
+
     }
 }

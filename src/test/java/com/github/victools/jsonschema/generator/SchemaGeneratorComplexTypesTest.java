@@ -165,7 +165,6 @@ public class SchemaGeneratorComplexTypesTest {
         }
         String fileAsString = stringBuilder.toString();
         return fileAsString;
-
     }
 
     private static class TestClass1 extends TestClass2<String> {
