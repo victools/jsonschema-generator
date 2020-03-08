@@ -1,4 +1,4 @@
-name: Java ${{ matrix.java-version }} CI (Maven)
+name: Java CI (Maven)
 
 on:
   pull_request:
