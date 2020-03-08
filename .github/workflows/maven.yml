@@ -1,4 +1,4 @@
-name: Java CI (Maven)
+name: Java ${{ matrix.java-version }} CI (Maven)
 
 on:
   pull_request:
@@ -16,14 +16,14 @@ jobs:
 
     strategy:
       matrix:
-        java-version: [1.8, 11]
+        java-version: ['1.8', '11']
 
-  steps:
+    steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK ${{ matrix.node-version }}
+    - name: Set up JDK ${{ matrix.java-version }}
       uses: actions/setup-java@v1
       with:
-        java-version: ${{ matrix.node-version }}
+        java-version: ${{ matrix.java-version }}
     - name: Build
       run: mvn install -DskipTests=true -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dgpg.skip=true -B -V
       env:
