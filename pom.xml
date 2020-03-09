@@ -82,7 +82,7 @@
         <version.junitparams>1.1.1</version.junitparams>
         <version.log4j>2.11.2</version.log4j>
         <version.mockito>2.27.0</version.mockito>
-        <version.slf4j>1.7.26</version.slf4j>
+        <version.slf4j>1.7.30</version.slf4j>
     </properties>
 
     <dependencies>
