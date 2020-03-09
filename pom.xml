@@ -80,7 +80,7 @@
         <version.jsonassert>1.5.0</version.jsonassert>
         <version.junit>4.12</version.junit>
         <version.junitparams>1.1.1</version.junitparams>
-        <version.log4j>2.11.2</version.log4j>
+        <version.log4j>2.13.0</version.log4j>
         <version.mockito>2.27.0</version.mockito>
         <version.slf4j>1.7.26</version.slf4j>
     </properties>
