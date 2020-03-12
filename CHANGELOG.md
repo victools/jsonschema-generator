@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Explicit indication of targeted JSON Schema Draft (for now: Draft 7 or 2019-09)
+- Support for renamed keywords between Draft versions through new `SchemaKeyword` enum (replacing static `SchemaConstants` interface)
+
+### Deprecated
+- `SchemaConstants` interface containing static `String` constants for tag names/values
+- Internal `AttributeCollector` API without generation context as parameter
 
 ## [4.5.0] - 2020-03-05
 ### Added
