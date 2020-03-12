@@ -23,8 +23,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
-import com.github.victools.jsonschema.generator.SchemaConstants;
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -62,7 +64,7 @@ public class AttributeCollector {
      * @param generationContext generation context, including configuration to apply when looking-up attribute values
      * @return node holding all collected attributes (possibly empty)
      */
-    public static ObjectNode collectFieldAttributes(FieldScope field, SchemaGenerationContextImpl generationContext) {
+    public static ObjectNode collectFieldAttributes(FieldScope field, SchemaGenerationContext generationContext) {
         SchemaGeneratorConfig config = generationContext.getGeneratorConfig();
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
@@ -96,7 +98,7 @@ public class AttributeCollector {
      * @param generationContext generation context, including configuration to apply when looking-up attribute values
      * @return node holding all collected attributes (possibly empty)
      */
-    public static ObjectNode collectMethodAttributes(MethodScope method, SchemaGenerationContextImpl generationContext) {
+    public static ObjectNode collectMethodAttributes(MethodScope method, SchemaGenerationContext generationContext) {
         SchemaGeneratorConfig config = generationContext.getGeneratorConfig();
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
@@ -131,7 +133,7 @@ public class AttributeCollector {
      * @param allowedSchemaTypes declared schema types determining which attributes are meaningful to be included
      * @return node holding all collected attributes (possibly empty)
      */
-    public static ObjectNode collectTypeAttributes(TypeScope scope, SchemaGenerationContextImpl generationContext,
+    public static ObjectNode collectTypeAttributes(TypeScope scope, SchemaGenerationContext generationContext,
             Set<String> allowedSchemaTypes) {
         SchemaGeneratorConfig config = generationContext.getGeneratorConfig();
         ObjectNode node = config.createObjectNode();
@@ -140,25 +142,25 @@ public class AttributeCollector {
         collector.setDescription(node, config.resolveDescriptionForType(scope));
         collector.setDefault(node, config.resolveDefaultForType(scope));
         collector.setEnum(node, config.resolveEnumForType(scope));
-        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(SchemaConstants.TAG_TYPE_OBJECT)) {
+        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT))) {
             collector.setAdditionalProperties(node, config.resolveAdditionalPropertiesForType(scope), generationContext);
             collector.setPatternProperties(node, config.resolvePatternPropertiesForType(scope), generationContext);
         }
-        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(SchemaConstants.TAG_TYPE_STRING)) {
+        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_STRING))) {
             collector.setStringMinLength(node, config.resolveStringMinLengthForType(scope));
             collector.setStringMaxLength(node, config.resolveStringMaxLengthForType(scope));
             collector.setStringFormat(node, config.resolveStringFormatForType(scope));
             collector.setStringPattern(node, config.resolveStringPatternForType(scope));
         }
-        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(SchemaConstants.TAG_TYPE_INTEGER)
-                || allowedSchemaTypes.contains(SchemaConstants.TAG_TYPE_NUMBER)) {
+        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_INTEGER))
+                || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_NUMBER))) {
             collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimumForType(scope));
             collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimumForType(scope));
             collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximumForType(scope));
             collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximumForType(scope));
             collector.setNumberMultipleOf(node, config.resolveNumberMultipleOfForType(scope));
         }
-        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(SchemaConstants.TAG_TYPE_ARRAY)) {
+        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY))) {
             collector.setArrayMinItems(node, config.resolveArrayMinItemsForType(scope));
             collector.setArrayMaxItems(node, config.resolveArrayMaxItemsForType(scope));
             collector.setArrayUniqueItems(node, config.resolveArrayUniqueItemsForType(scope));
@@ -167,74 +169,148 @@ public class AttributeCollector {
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_TITLE}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_TITLE}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param title attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setTitle(ObjectNode, String, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setTitle(ObjectNode node, String title) {
         if (title != null) {
-            node.put(SchemaConstants.TAG_TITLE, title);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_TITLE), title);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_DESCRIPTION}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_TITLE}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param title attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setTitle(ObjectNode node, String title, SchemaGenerationContext generationContext) {
+        if (title != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_TITLE), title);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_DESCRIPTION}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param description attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setDescription(ObjectNode, String, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setDescription(ObjectNode node, String description) {
         if (description != null) {
-            node.put(SchemaConstants.TAG_DESCRIPTION, description);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_DESCRIPTION), description);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_DEFAULT}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_DESCRIPTION}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param description attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setDescription(ObjectNode node, String description, SchemaGenerationContext generationContext) {
+        if (description != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_DESCRIPTION), description);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_DEFAULT}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param defaultValue attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setDefault(ObjectNode, Object, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setDefault(ObjectNode node, Object defaultValue) {
         if (defaultValue != null) {
+            final String defaultTag = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_DEFAULT);
             // need to specifically add simple/primitive values by type
             if (defaultValue instanceof String) {
-                node.put(SchemaConstants.TAG_DEFAULT, (String) defaultValue);
+                node.put(defaultTag, (String) defaultValue);
             } else if (defaultValue instanceof BigDecimal) {
-                node.put(SchemaConstants.TAG_DEFAULT, (BigDecimal) defaultValue);
+                node.put(defaultTag, (BigDecimal) defaultValue);
             } else if (defaultValue instanceof BigInteger) {
-                node.put(SchemaConstants.TAG_DEFAULT, (BigInteger) defaultValue);
+                node.put(defaultTag, (BigInteger) defaultValue);
             } else if (defaultValue instanceof Boolean) {
-                node.put(SchemaConstants.TAG_DEFAULT, (Boolean) defaultValue);
+                node.put(defaultTag, (Boolean) defaultValue);
             } else if (defaultValue instanceof Double) {
-                node.put(SchemaConstants.TAG_DEFAULT, (Double) defaultValue);
+                node.put(defaultTag, (Double) defaultValue);
             } else if (defaultValue instanceof Float) {
-                node.put(SchemaConstants.TAG_DEFAULT, (Float) defaultValue);
+                node.put(defaultTag, (Float) defaultValue);
             } else if (defaultValue instanceof Integer) {
-                node.put(SchemaConstants.TAG_DEFAULT, (Integer) defaultValue);
+                node.put(defaultTag, (Integer) defaultValue);
             } else {
                 // everything else is simply forwarded as-is to the JSON Schema, it's up to the configurator to ensure the value's correctness
-                node.putPOJO(SchemaConstants.TAG_DEFAULT, defaultValue);
+                node.putPOJO(defaultTag, defaultValue);
             }
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_CONST}"/"{@value SchemaConstants#TAG_ENUM}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_DEFAULT}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param defaultValue attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setDefault(ObjectNode node, Object defaultValue, SchemaGenerationContext generationContext) {
+        if (defaultValue != null) {
+            final String defaultTag = generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_DEFAULT);
+            // need to specifically add simple/primitive values by type
+            if (defaultValue instanceof String) {
+                node.put(defaultTag, (String) defaultValue);
+            } else if (defaultValue instanceof BigDecimal) {
+                node.put(defaultTag, (BigDecimal) defaultValue);
+            } else if (defaultValue instanceof BigInteger) {
+                node.put(defaultTag, (BigInteger) defaultValue);
+            } else if (defaultValue instanceof Boolean) {
+                node.put(defaultTag, (Boolean) defaultValue);
+            } else if (defaultValue instanceof Double) {
+                node.put(defaultTag, (Double) defaultValue);
+            } else if (defaultValue instanceof Float) {
+                node.put(defaultTag, (Float) defaultValue);
+            } else if (defaultValue instanceof Integer) {
+                node.put(defaultTag, (Integer) defaultValue);
+            } else {
+                // everything else is simply forwarded as-is to the JSON Schema, it's up to the configurator to ensure the value's correctness
+                node.putPOJO(defaultTag, defaultValue);
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_CONST}"/"{@link SchemaKeyword#TAG_ENUM}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param enumValues attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setEnum(ObjectNode, Collection, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setEnum(ObjectNode node, Collection<?> enumValues) {
         if (enumValues != null) {
+            SchemaVersion schemaVersion = SchemaVersion.DRAFT_7;
             List<Object> values = enumValues.stream()
                     .filter(this::isSupportedEnumValue)
                     .filter(this::canBeConvertedToString)
@@ -242,9 +318,9 @@ public class AttributeCollector {
             if (values.size() == 1) {
                 Object singleValue = values.get(0);
                 if (singleValue instanceof String) {
-                    node.put(SchemaConstants.TAG_CONST, (String) singleValue);
+                    node.put(schemaVersion.get(SchemaKeyword.TAG_CONST), (String) singleValue);
                 } else {
-                    node.putPOJO(SchemaConstants.TAG_CONST, singleValue);
+                    node.putPOJO(schemaVersion.get(SchemaKeyword.TAG_CONST), singleValue);
                 }
             } else if (!values.isEmpty()) {
                 ArrayNode array = node.arrayNode();
@@ -255,14 +331,51 @@ public class AttributeCollector {
                         array.addPOJO(singleValue);
                     }
                 }
-                node.set(SchemaConstants.TAG_ENUM, array);
+                node.set(schemaVersion.get(SchemaKeyword.TAG_ENUM), array);
             }
         }
         return this;
     }
 
     /**
-     * Check whether the given object may be included in a "{@value SchemaConstants#TAG_CONST}"/"{@value SchemaConstants#TAG_ENUM}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_CONST}"/"{@link SchemaKeyword#TAG_ENUM}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param enumValues attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setEnum(ObjectNode node, Collection<?> enumValues, SchemaGenerationContext generationContext) {
+        if (enumValues != null) {
+            SchemaVersion schemaVersion = generationContext.getGeneratorConfig().getSchemaVersion();
+            List<Object> values = enumValues.stream()
+                    .filter(this::isSupportedEnumValue)
+                    .filter(this::canBeConvertedToString)
+                    .collect(Collectors.toList());
+            if (values.size() == 1) {
+                Object singleValue = values.get(0);
+                if (singleValue instanceof String) {
+                    node.put(schemaVersion.get(SchemaKeyword.TAG_CONST), (String) singleValue);
+                } else {
+                    node.putPOJO(schemaVersion.get(SchemaKeyword.TAG_CONST), singleValue);
+                }
+            } else if (!values.isEmpty()) {
+                ArrayNode array = node.arrayNode();
+                for (Object singleValue : values) {
+                    if (singleValue instanceof String) {
+                        array.add((String) singleValue);
+                    } else {
+                        array.addPOJO(singleValue);
+                    }
+                }
+                node.set(schemaVersion.get(SchemaKeyword.TAG_ENUM), array);
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Check whether the given object may be included in a "{@link SchemaKeyword#TAG_CONST}"/"{@link SchemaKeyword#TAG_ENUM}" attribute.
      *
      * @param target object to check
      * @return whether the given object may be included, otherwise it should be ignored
@@ -294,214 +407,417 @@ public class AttributeCollector {
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_ADDITIONAL_PROPERTIES}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_ADDITIONAL_PROPERTIES}" attribute.
      *
      * @param node schema node to set attribute on
      * @param additionalProperties attribute value to set
-     * @param generationContext generation context allowing for standard definitions to be included as attributes
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
      * @return this instance (for chaining)
      */
-    public AttributeCollector setAdditionalProperties(ObjectNode node, Type additionalProperties, SchemaGenerationContextImpl generationContext) {
+    public AttributeCollector setAdditionalProperties(ObjectNode node, Type additionalProperties, SchemaGenerationContext generationContext) {
         if (additionalProperties == Void.class || additionalProperties == Void.TYPE) {
-            node.put(SchemaConstants.TAG_ADDITIONAL_PROPERTIES, false);
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES), false);
         } else if (additionalProperties != null) {
             ResolvedType targetType = generationContext.getTypeContext().resolve(additionalProperties);
             if (targetType.getErasedType() != Object.class) {
-                ObjectNode additionalPropertiesSchema = this.objectMapper.createObjectNode();
-                generationContext.traverseGenericType(targetType, additionalPropertiesSchema, false);
-                node.set(SchemaConstants.TAG_ADDITIONAL_PROPERTIES, additionalPropertiesSchema);
+                ObjectNode additionalPropertiesSchema = generationContext.createDefinitionReference(targetType);
+                node.set(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES),
+                        additionalPropertiesSchema);
             }
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_PATTERN_PROPERTIES}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_PATTERN_PROPERTIES}" attribute.
      *
      * @param node schema node to set attribute on
      * @param patternProperties resolved attribute value to set
-     * @param generationContext generation context allowing for standard definitions to be included as attributes
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
      * @return this instance (for chaining)
      */
     public AttributeCollector setPatternProperties(ObjectNode node, Map<String, Type> patternProperties,
-            SchemaGenerationContextImpl generationContext) {
+            SchemaGenerationContext generationContext) {
         if (patternProperties != null && !patternProperties.isEmpty()) {
             ObjectNode patternPropertiesNode = this.objectMapper.createObjectNode();
             for (Map.Entry<String, Type> entry : patternProperties.entrySet()) {
-                ObjectNode singlePatternSchema = this.objectMapper.createObjectNode();
                 ResolvedType targetType = generationContext.getTypeContext().resolve(entry.getValue());
-                generationContext.traverseGenericType(targetType, singlePatternSchema, false);
+                ObjectNode singlePatternSchema = generationContext.createDefinitionReference(targetType);
                 patternPropertiesNode.set(entry.getKey(), singlePatternSchema);
             }
-            node.set(SchemaConstants.TAG_PATTERN_PROPERTIES, patternPropertiesNode);
+            node.set(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_PATTERN_PROPERTIES), patternPropertiesNode);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_LENGTH_MIN}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_LENGTH_MIN}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param minLength attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setStringMinLength(ObjectNode, Integer, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setStringMinLength(ObjectNode node, Integer minLength) {
         if (minLength != null) {
-            node.put(SchemaConstants.TAG_LENGTH_MIN, minLength);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_LENGTH_MIN), minLength);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_LENGTH_MAX}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_LENGTH_MIN}" attribute (considering Draft 7).
+     *
+     * @param node schema node to set attribute on
+     * @param minLength attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setStringMinLength(ObjectNode node, Integer minLength, SchemaGenerationContext generationContext) {
+        if (minLength != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_LENGTH_MIN), minLength);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_LENGTH_MAX}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param maxLength attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setStringMaxLength(ObjectNode, Integer, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setStringMaxLength(ObjectNode node, Integer maxLength) {
         if (maxLength != null) {
-            node.put(SchemaConstants.TAG_LENGTH_MAX, maxLength);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_LENGTH_MAX), maxLength);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_FORMAT}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_LENGTH_MAX}" attribute (considering Draft 7).
+     *
+     * @param node schema node to set attribute on
+     * @param maxLength attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setStringMaxLength(ObjectNode node, Integer maxLength, SchemaGenerationContext generationContext) {
+        if (maxLength != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_LENGTH_MAX), maxLength);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_FORMAT}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param format attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setStringFormat(ObjectNode, String, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setStringFormat(ObjectNode node, String format) {
         if (format != null) {
-            node.put(SchemaConstants.TAG_FORMAT, format);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_FORMAT), format);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_PATTERN}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_FORMAT}" attribute (considering Draft 7).
+     *
+     * @param node schema node to set attribute on
+     * @param format attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setStringFormat(ObjectNode node, String format, SchemaGenerationContext generationContext) {
+        if (format != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_FORMAT), format);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_PATTERN}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param pattern attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setStringPattern(ObjectNode, String, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setStringPattern(ObjectNode node, String pattern) {
         if (pattern != null) {
-            node.put(SchemaConstants.TAG_PATTERN, pattern);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_PATTERN), pattern);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_MINIMUM}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_PATTERN}" attribute (considering Draft 7).
+     *
+     * @param node schema node to set attribute on
+     * @param pattern attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setStringPattern(ObjectNode node, String pattern, SchemaGenerationContext generationContext) {
+        if (pattern != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_PATTERN), pattern);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_MINIMUM}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param inclusiveMinimum attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setNumberInclusiveMinimum(ObjectNode, BigDecimal, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setNumberInclusiveMinimum(ObjectNode node, BigDecimal inclusiveMinimum) {
         if (inclusiveMinimum != null) {
-            node.put(SchemaConstants.TAG_MINIMUM, inclusiveMinimum);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MINIMUM), inclusiveMinimum);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_MINIMUM_EXCLUSIVE}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_MINIMUM}" attribute (considering Draft 7).
+     *
+     * @param node schema node to set attribute on
+     * @param inclusiveMinimum attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setNumberInclusiveMinimum(ObjectNode node, BigDecimal inclusiveMinimum, SchemaGenerationContext generationContext) {
+        if (inclusiveMinimum != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_MINIMUM), inclusiveMinimum);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_MINIMUM_EXCLUSIVE}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param exclusiveMinimum attribute value to set
      * @return this instance (for chaining)
+     * @deprecated user {@link #setNumberExclusiveMinimum(ObjectNode, BigDecimal, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setNumberExclusiveMinimum(ObjectNode node, BigDecimal exclusiveMinimum) {
         if (exclusiveMinimum != null) {
-            node.put(SchemaConstants.TAG_MINIMUM_EXCLUSIVE, exclusiveMinimum);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MINIMUM_EXCLUSIVE), exclusiveMinimum);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_MAXIMUM}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_MINIMUM_EXCLUSIVE}" attribute (considering Draft 7).
+     *
+     * @param node schema node to set attribute on
+     * @param exclusiveMinimum attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setNumberExclusiveMinimum(ObjectNode node, BigDecimal exclusiveMinimum, SchemaGenerationContext generationContext) {
+        if (exclusiveMinimum != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_MINIMUM_EXCLUSIVE), exclusiveMinimum);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_MAXIMUM}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param inclusiveMaximum attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setNumberInclusiveMaximum(ObjectNode, BigDecimal, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setNumberInclusiveMaximum(ObjectNode node, BigDecimal inclusiveMaximum) {
         if (inclusiveMaximum != null) {
-            node.put(SchemaConstants.TAG_MAXIMUM, inclusiveMaximum);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MAXIMUM), inclusiveMaximum);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_MAXIMUM_EXCLUSIVE}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_MAXIMUM}" attribute (considering Draft 7).
+     *
+     * @param node schema node to set attribute on
+     * @param inclusiveMaximum attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setNumberInclusiveMaximum(ObjectNode node, BigDecimal inclusiveMaximum, SchemaGenerationContext generationContext) {
+        if (inclusiveMaximum != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_MAXIMUM), inclusiveMaximum);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_MAXIMUM_EXCLUSIVE}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param exclusiveMaximum attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setNumberExclusiveMaximum(ObjectNode, BigDecimal, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setNumberExclusiveMaximum(ObjectNode node, BigDecimal exclusiveMaximum) {
         if (exclusiveMaximum != null) {
-            node.put(SchemaConstants.TAG_MAXIMUM_EXCLUSIVE, exclusiveMaximum);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MAXIMUM_EXCLUSIVE), exclusiveMaximum);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_MULTIPLE_OF}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_MAXIMUM_EXCLUSIVE}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param exclusiveMaximum attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setNumberExclusiveMaximum(ObjectNode node, BigDecimal exclusiveMaximum, SchemaGenerationContext generationContext) {
+        if (exclusiveMaximum != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_MAXIMUM_EXCLUSIVE), exclusiveMaximum);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_MULTIPLE_OF}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param multipleOf attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setNumberMultipleOf(ObjectNode, BigDecimal, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setNumberMultipleOf(ObjectNode node, BigDecimal multipleOf) {
         if (multipleOf != null) {
-            node.put(SchemaConstants.TAG_MULTIPLE_OF, multipleOf);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MULTIPLE_OF), multipleOf);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_ITEMS_MIN}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_MULTIPLE_OF}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param multipleOf attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setNumberMultipleOf(ObjectNode node, BigDecimal multipleOf, SchemaGenerationContext generationContext) {
+        if (multipleOf != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_MULTIPLE_OF), multipleOf);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_ITEMS_MIN}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param minItemCount attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setArrayMinItems(ObjectNode, Integer, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setArrayMinItems(ObjectNode node, Integer minItemCount) {
         if (minItemCount != null) {
-            node.put(SchemaConstants.TAG_ITEMS_MIN, minItemCount);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ITEMS_MIN), minItemCount);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_ITEMS_MAX}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_ITEMS_MIN}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param minItemCount attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setArrayMinItems(ObjectNode node, Integer minItemCount, SchemaGenerationContext generationContext) {
+        if (minItemCount != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_ITEMS_MIN), minItemCount);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_ITEMS_MAX}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param maxItemCount attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setArrayMaxItems(ObjectNode, Integer, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setArrayMaxItems(ObjectNode node, Integer maxItemCount) {
         if (maxItemCount != null) {
-            node.put(SchemaConstants.TAG_ITEMS_MAX, maxItemCount);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ITEMS_MAX), maxItemCount);
         }
         return this;
     }
 
     /**
-     * Setter for "{@value SchemaConstants#TAG_ITEMS_UNIQUE}" attribute.
+     * Setter for "{@link SchemaKeyword#TAG_ITEMS_MAX}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param maxItemCount attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setArrayMaxItems(ObjectNode node, Integer maxItemCount, SchemaGenerationContext generationContext) {
+        if (maxItemCount != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_ITEMS_MAX), maxItemCount);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_ITEMS_UNIQUE}" attribute (considering Draft 7).
      *
      * @param node schema node to set attribute on
      * @param uniqueItems attribute value to set
      * @return this instance (for chaining)
+     * @deprecated use {@link #setArrayUniqueItems(ObjectNode, Boolean, SchemaGenerationContext)} instead
      */
+    @Deprecated
     public AttributeCollector setArrayUniqueItems(ObjectNode node, Boolean uniqueItems) {
         if (uniqueItems != null) {
-            node.put(SchemaConstants.TAG_ITEMS_UNIQUE, uniqueItems);
+            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ITEMS_UNIQUE), uniqueItems);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_ITEMS_UNIQUE}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param uniqueItems attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setArrayUniqueItems(ObjectNode node, Boolean uniqueItems, SchemaGenerationContext generationContext) {
+        if (uniqueItems != null) {
+            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_ITEMS_UNIQUE), uniqueItems);
         }
         return this;
     }

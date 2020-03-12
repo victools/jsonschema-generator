@@ -32,6 +32,23 @@ import java.util.Map;
 public interface SchemaGeneratorConfig {
 
     /**
+     * Getter for the designated JSON Schema version.
+     *
+     * @return target version of the JSON Schema to generate
+     */
+    SchemaVersion getSchemaVersion();
+
+    /**
+     * Getter for the indicated keyword's value in the designated JSON Schema version.
+     *
+     * @param keyword reference to a tag name or value
+     * @return referenced tag name/value in the designated schema version
+     * @see #getSchemaVersion()
+     * @see SchemaVersion#get(SchemaKeyword)
+     */
+    String getKeyword(SchemaKeyword keyword);
+
+    /**
      * Determine whether all referenced objects should be listed in the schema's "definitions", even if they only occur once.
      *
      * @return whether to add a definition even for objects occurring only once

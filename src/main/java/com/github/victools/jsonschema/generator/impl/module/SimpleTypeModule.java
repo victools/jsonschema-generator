@@ -23,9 +23,9 @@ import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.Module;
-import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -101,16 +101,16 @@ public class SimpleTypeModule implements Module {
         return module;
     }
 
-    private final Map<Class<?>, String> fixedJsonSchemaTypes = new HashMap<>();
+    private final Map<Class<?>, SchemaKeyword> fixedJsonSchemaTypes = new HashMap<>();
 
     /**
      * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute.
      *
      * @param javaType java class to map to a fixed JSON schema definition
-     * @param jsonSchemaTypeValue "type" attribute value to set
+     * @param jsonSchemaTypeValue "type" attribute value to set or {@link SchemaKeyword#TAG_TYPE_NULL} to indicate empty schema being desired
      * @return this module instance (for chaining)
      */
-    private SimpleTypeModule with(Class<?> javaType, String jsonSchemaTypeValue) {
+    private SimpleTypeModule with(Class<?> javaType, SchemaKeyword jsonSchemaTypeValue) {
         this.fixedJsonSchemaTypes.put(javaType, jsonSchemaTypeValue);
         return this;
     }
@@ -122,11 +122,11 @@ public class SimpleTypeModule implements Module {
      * @return this module instance (for chaining)
      */
     public final SimpleTypeModule withEmptySchema(Class<?> javaType) {
-        return this.with(javaType, "");
+        return this.with(javaType, SchemaKeyword.TAG_TYPE_NULL);
     }
 
     /**
-     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@value SchemaConstants#TAG_TYPE_OBJECT}".
+     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@link SchemaKeyword#TAG_TYPE_OBJECT}".
      *
      * @param javaType java class to map to a fixed JSON schema definition
      * @return this module instance (for chaining)
@@ -134,47 +134,47 @@ public class SimpleTypeModule implements Module {
      */
     @Deprecated
     public final SimpleTypeModule withObjectType(Class<?> javaType) {
-        return this.with(javaType, SchemaConstants.TAG_TYPE_OBJECT);
+        return this.with(javaType, SchemaKeyword.TAG_TYPE_OBJECT);
     }
 
     /**
-     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@value SchemaConstants#TAG_TYPE_STRING}".
+     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@link SchemaKeyword#TAG_TYPE_STRING}".
      *
      * @param javaType java class to map to a fixed JSON schema definition
      * @return this module instance (for chaining)
      */
     public final SimpleTypeModule withStringType(Class<?> javaType) {
-        return this.with(javaType, SchemaConstants.TAG_TYPE_STRING);
+        return this.with(javaType, SchemaKeyword.TAG_TYPE_STRING);
     }
 
     /**
-     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@value SchemaConstants#TAG_TYPE_BOOLEAN}".
+     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@link SchemaKeyword#TAG_TYPE_BOOLEAN}".
      *
      * @param javaType java class to map to a fixed JSON schema definition
      * @return this module instance (for chaining)
      */
     public final SimpleTypeModule withBooleanType(Class<?> javaType) {
-        return this.with(javaType, SchemaConstants.TAG_TYPE_BOOLEAN);
+        return this.with(javaType, SchemaKeyword.TAG_TYPE_BOOLEAN);
     }
 
     /**
-     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@value SchemaConstants#TAG_TYPE_INTEGER}".
+     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@link SchemaKeyword#TAG_TYPE_INTEGER}".
      *
      * @param javaType java class to map to a fixed JSON schema definition
      * @return this module instance (for chaining)
      */
     public final SimpleTypeModule withIntegerType(Class<?> javaType) {
-        return this.with(javaType, SchemaConstants.TAG_TYPE_INTEGER);
+        return this.with(javaType, SchemaKeyword.TAG_TYPE_INTEGER);
     }
 
     /**
-     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@value SchemaConstants#TAG_TYPE_NUMBER}".
+     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@link SchemaKeyword#TAG_TYPE_NUMBER}".
      *
      * @param javaType java class to map to a fixed JSON schema definition
      * @return this module instance (for chaining)
      */
     public final SimpleTypeModule withNumberType(Class<?> javaType) {
-        return this.with(javaType, SchemaConstants.TAG_TYPE_NUMBER);
+        return this.with(javaType, SchemaKeyword.TAG_TYPE_NUMBER);
     }
 
     /**
@@ -208,7 +208,8 @@ public class SimpleTypeModule implements Module {
      * @return either Object.class to cause omission of the "additonalProperties" keyword or null to leave it up to following configurations
      */
     private Type resolveAdditionalProperties(TypeScope scope) {
-        if (scope.getType().getTypeParameters().isEmpty() && "".equals(this.fixedJsonSchemaTypes.get(scope.getType().getErasedType()))) {
+        if (scope.getType().getTypeParameters().isEmpty()
+                && SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType())) {
             // indicate no specific additionalProperties type - thereby causing it to be omitted from the generated schema
             return Object.class;
         }
@@ -222,7 +223,8 @@ public class SimpleTypeModule implements Module {
      * @return either an empty map to cause omission of the "patternProperties" keyword or null to leave it up to following configurations
      */
     private Map<String, Type> resolvePatternProperties(TypeScope scope) {
-        if (scope.getType().getTypeParameters().isEmpty() && "".equals(this.fixedJsonSchemaTypes.get(scope.getType().getErasedType()))) {
+        if (scope.getType().getTypeParameters().isEmpty()
+                && SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType())) {
             // indicate no specific patternProperties - thereby causing it to be omitted from the generated schema
             return Collections.emptyMap();
         }
@@ -250,14 +252,15 @@ public class SimpleTypeModule implements Module {
             if (!javaType.getTypeParameters().isEmpty()) {
                 return null;
             }
-            String jsonSchemaTypeValue = SimpleTypeModule.this.fixedJsonSchemaTypes.get(javaType.getErasedType());
+            SchemaKeyword jsonSchemaTypeValue = SimpleTypeModule.this.fixedJsonSchemaTypes.get(javaType.getErasedType());
             if (jsonSchemaTypeValue == null) {
                 return null;
             }
             // create fixed JSON schema definition, containing only the corresponding "type" attribute
             ObjectNode customSchema = this.objectMapper.createObjectNode();
-            if (!jsonSchemaTypeValue.isEmpty()) {
-                customSchema.put(SchemaConstants.TAG_TYPE, jsonSchemaTypeValue);
+            if (jsonSchemaTypeValue != SchemaKeyword.TAG_TYPE_NULL) {
+                customSchema.put(context.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_TYPE),
+                        context.getGeneratorConfig().getKeyword(jsonSchemaTypeValue));
             }
             // set true as second parameter to indicate simple types to be always in-lined (i.e. not put into definitions)
             return new CustomDefinition(customSchema, true);

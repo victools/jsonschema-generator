@@ -29,6 +29,7 @@ import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeAttributeOverride;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,8 +73,8 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
         MockitoAnnotations.initMocks(this);
         this.enabledOptions = new HashSet<>();
 
-        this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, this.enabledOptions, this.typesInGeneralConfigPart,
-                this.fieldConfigPart, this.methodConfigPart);
+        this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, SchemaVersion.getLatest(), this.enabledOptions,
+                this.typesInGeneralConfigPart, this.fieldConfigPart, this.methodConfigPart);
     }
 
     @Test

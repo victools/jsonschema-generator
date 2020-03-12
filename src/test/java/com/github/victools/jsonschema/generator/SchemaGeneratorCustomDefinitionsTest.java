@@ -42,42 +42,45 @@ public class SchemaGeneratorCustomDefinitionsTest {
         CustomDefinitionProviderV2 customDefinitionProvider = (javaType, context) -> javaType.getErasedType() == Integer.class
                 ? new CustomDefinition(context.createDefinition(context.getTypeContext().resolve(String.class)))
                 : null;
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper())
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_7)
                 .with(customDefinitionProvider)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(Integer.class);
         Assert.assertEquals(1, result.size());
-        Assert.assertEquals(SchemaConstants.TAG_TYPE_STRING, result.get(SchemaConstants.TAG_TYPE).asText());
+        Assert.assertEquals(SchemaVersion.getLatest().get(SchemaKeyword.TAG_TYPE_STRING),
+                result.get(SchemaVersion.getLatest().get(SchemaKeyword.TAG_TYPE)).asText());
     }
 
     @Test
     public void testGenerateSchema_CustomCollectionDefinition() throws Exception {
-        final ObjectMapper objectMapper = new ObjectMapper();
         String accessProperty = "stream().findFirst().orElse(null)";
         CustomDefinitionProviderV2 customDefinitionProvider = (javaType, context) -> {
             if (!javaType.isInstanceOf(Collection.class)) {
                 return null;
             }
             ResolvedType generic = context.getTypeContext().getContainerItemType(javaType);
-            return new CustomDefinition(objectMapper.createObjectNode()
-                    .put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_OBJECT)
-                    .set(SchemaConstants.TAG_PROPERTIES, objectMapper.createObjectNode()
+            SchemaGeneratorConfig config = context.getGeneratorConfig();
+            return new CustomDefinition(context.getGeneratorConfig().createObjectNode()
+                    .put(config.getKeyword(SchemaKeyword.TAG_TYPE), config.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT))
+                    .set(config.getKeyword(SchemaKeyword.TAG_PROPERTIES), config.createObjectNode()
                             .set(accessProperty, context.makeNullable(context.createDefinition(generic)))));
         };
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(objectMapper)
+        final SchemaVersion schemaVersion = SchemaVersion.DRAFT_7;
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
                 .with(customDefinitionProvider)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(ArrayList.class, String.class);
         Assert.assertEquals(2, result.size());
-        Assert.assertEquals(SchemaConstants.TAG_TYPE_OBJECT, result.get(SchemaConstants.TAG_TYPE).asText());
-        Assert.assertNotNull(result.get(SchemaConstants.TAG_PROPERTIES));
-        Assert.assertNotNull(result.get(SchemaConstants.TAG_PROPERTIES).get(accessProperty));
-        JsonNode accessPropertyType = result.get(SchemaConstants.TAG_PROPERTIES).get(accessProperty).get(SchemaConstants.TAG_TYPE);
+        Assert.assertEquals(schemaVersion.get(SchemaKeyword.TAG_TYPE_OBJECT), result.get(schemaVersion.get(SchemaKeyword.TAG_TYPE)).asText());
+        Assert.assertNotNull(result.get(schemaVersion.get(SchemaKeyword.TAG_PROPERTIES)));
+        Assert.assertNotNull(result.get(schemaVersion.get(SchemaKeyword.TAG_PROPERTIES)).get(accessProperty));
+        JsonNode accessPropertyType = result.get(schemaVersion.get(SchemaKeyword.TAG_PROPERTIES))
+                .get(accessProperty).get(schemaVersion.get(SchemaKeyword.TAG_TYPE));
         Assert.assertNotNull(accessPropertyType);
-        Assert.assertEquals(SchemaConstants.TAG_TYPE_STRING, accessPropertyType.get(0).asText());
-        Assert.assertEquals(SchemaConstants.TAG_TYPE_NULL, accessPropertyType.get(1).asText());
+        Assert.assertEquals(schemaVersion.get(SchemaKeyword.TAG_TYPE_STRING), accessPropertyType.get(0).asText());
+        Assert.assertEquals(schemaVersion.get(SchemaKeyword.TAG_TYPE_NULL), accessPropertyType.get(1).asText());
     }
 
     @Test
@@ -94,13 +97,14 @@ public class SchemaGeneratorCustomDefinitionsTest {
                 return null;
             }
         };
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper())
+        final SchemaVersion schemaVersion = SchemaVersion.DRAFT_7;
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
                 .with(customDefinitionProvider)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(Integer.class);
         Assert.assertEquals(2, result.size());
-        Assert.assertEquals(SchemaConstants.TAG_TYPE_INTEGER, result.get(SchemaConstants.TAG_TYPE).asText());
+        Assert.assertEquals(schemaVersion.get(SchemaKeyword.TAG_TYPE_INTEGER), result.get(schemaVersion.get(SchemaKeyword.TAG_TYPE)).asText());
         Assert.assertEquals("custom override of Integer", result.get("$comment").asText());
     }
 
@@ -112,12 +116,13 @@ public class SchemaGeneratorCustomDefinitionsTest {
                 return null;
             }
             ResolvedType generic = context.getTypeContext().getContainerItemType(javaType);
+            SchemaGeneratorConfig config = context.getGeneratorConfig();
             return new CustomDefinition(context.getGeneratorConfig().createObjectNode()
-                    .put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_OBJECT)
-                    .set(SchemaConstants.TAG_PROPERTIES, context.getGeneratorConfig().createObjectNode()
+                    .put(config.getKeyword(SchemaKeyword.TAG_TYPE), config.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT))
+                    .set(config.getKeyword(SchemaKeyword.TAG_PROPERTIES), context.getGeneratorConfig().createObjectNode()
                             .set(accessProperty, context.createDefinitionReference(generic))));
         };
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper())
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_7)
                 .with(customDefinitionProvider)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);

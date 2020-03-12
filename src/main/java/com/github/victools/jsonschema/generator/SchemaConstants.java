@@ -18,53 +18,56 @@ package com.github.victools.jsonschema.generator;
 
 /**
  * JSON Schema properties and their values.
+ *
+ * @deprecated this only covers Draft 7; use {@link SchemaKeyword} instead
  */
+@Deprecated
 public interface SchemaConstants {
 
-    String TAG_SCHEMA = "$schema";
-    String TAG_SCHEMA_DRAFT7 = "http://json-schema.org/draft-07/schema#";
-    String TAG_DEFINITIONS = "definitions";
-    String TAG_REF = "$ref";
-    String TAG_REF_MAIN = "#";
-    String TAG_REF_PREFIX = "#/definitions/";
+    String TAG_SCHEMA = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_SCHEMA);
+    String TAG_SCHEMA_DRAFT7 = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_SCHEMA_VALUE);
+    String TAG_DEFINITIONS = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_DEFINITIONS);
+    String TAG_REF = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_REF);
+    String TAG_REF_MAIN = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_REF_MAIN);
+    String TAG_REF_PREFIX = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_REF_PREFIX);
 
-    String TAG_TYPE = "type";
-    String TAG_TYPE_NULL = "null";
-    String TAG_TYPE_ARRAY = "array";
-    String TAG_TYPE_OBJECT = "object";
-    String TAG_TYPE_BOOLEAN = "boolean";
-    String TAG_TYPE_STRING = "string";
-    String TAG_TYPE_INTEGER = "integer";
-    String TAG_TYPE_NUMBER = "number";
+    String TAG_TYPE = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_TYPE);
+    String TAG_TYPE_NULL = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_TYPE_NULL);
+    String TAG_TYPE_ARRAY = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_TYPE_ARRAY);
+    String TAG_TYPE_OBJECT = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_TYPE_OBJECT);
+    String TAG_TYPE_BOOLEAN = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_TYPE_BOOLEAN);
+    String TAG_TYPE_STRING = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_TYPE_STRING);
+    String TAG_TYPE_INTEGER = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_TYPE_INTEGER);
+    String TAG_TYPE_NUMBER = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_TYPE_NUMBER);
 
-    String TAG_PROPERTIES = "properties";
-    String TAG_ITEMS = "items";
-    String TAG_REQUIRED = "required";
-    String TAG_ADDITIONAL_PROPERTIES = "additionalProperties";
-    String TAG_PATTERN_PROPERTIES = "patternProperties";
+    String TAG_PROPERTIES = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_PROPERTIES);
+    String TAG_ITEMS = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ITEMS);
+    String TAG_REQUIRED = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_REQUIRED);
+    String TAG_ADDITIONAL_PROPERTIES = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES);
+    String TAG_PATTERN_PROPERTIES = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_PATTERN_PROPERTIES);
 
-    String TAG_ALLOF = "allOf";
-    String TAG_ANYOF = "anyOf";
-    String TAG_ONEOF = "oneOf";
+    String TAG_ALLOF = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ALLOF);
+    String TAG_ANYOF = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ANYOF);
+    String TAG_ONEOF = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ONEOF);
 
-    String TAG_TITLE = "title";
-    String TAG_DESCRIPTION = "description";
-    String TAG_CONST = "const";
-    String TAG_ENUM = "enum";
-    String TAG_DEFAULT = "default";
+    String TAG_TITLE = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_TITLE);
+    String TAG_DESCRIPTION = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_DESCRIPTION);
+    String TAG_CONST = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_CONST);
+    String TAG_ENUM = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ENUM);
+    String TAG_DEFAULT = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_DEFAULT);
 
-    String TAG_LENGTH_MIN = "minLength";
-    String TAG_LENGTH_MAX = "maxLength";
-    String TAG_FORMAT = "format";
-    String TAG_PATTERN = "pattern";
+    String TAG_LENGTH_MIN = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_LENGTH_MIN);
+    String TAG_LENGTH_MAX = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_LENGTH_MAX);
+    String TAG_FORMAT = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_FORMAT);
+    String TAG_PATTERN = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_PATTERN);
 
-    String TAG_MINIMUM = "minimum";
-    String TAG_MINIMUM_EXCLUSIVE = "exclusiveMinimum";
-    String TAG_MAXIMUM = "maximum";
-    String TAG_MAXIMUM_EXCLUSIVE = "exclusiveMaximum";
-    String TAG_MULTIPLE_OF = "multipleOf";
+    String TAG_MINIMUM = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MINIMUM);
+    String TAG_MINIMUM_EXCLUSIVE = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MINIMUM_EXCLUSIVE);
+    String TAG_MAXIMUM = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MAXIMUM);
+    String TAG_MAXIMUM_EXCLUSIVE = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MAXIMUM_EXCLUSIVE);
+    String TAG_MULTIPLE_OF = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MULTIPLE_OF);
 
-    String TAG_ITEMS_MIN = "minItems";
-    String TAG_ITEMS_MAX = "maxItems";
-    String TAG_ITEMS_UNIQUE = "uniqueItems";
+    String TAG_ITEMS_MIN = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ITEMS_MIN);
+    String TAG_ITEMS_MAX = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ITEMS_MAX);
+    String TAG_ITEMS_UNIQUE = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ITEMS_UNIQUE);
 }

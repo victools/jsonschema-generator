@@ -30,9 +30,9 @@ import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
-import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.util.ArrayList;
@@ -307,8 +307,9 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 ObjectNode subtypeSchema = this.generatorConfig.createObjectNode();
                 this.traverseGenericType(subtype, subtypeSchema, false);
                 anyOfArrayNode.add(subtypeSchema);
+
+                definition.set(this.getKeyword(SchemaKeyword.TAG_ANYOF), anyOfArrayNode);
             }
-            definition.set(SchemaConstants.TAG_ANYOF, anyOfArrayNode);
         }
         return true;
     }
@@ -320,7 +321,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @return extracted "{@value SchemaConstants#TAG_TYPE}" values (may be empty)
      */
     private Set<String> collectAllowedSchemaTypes(ObjectNode definition) {
-        JsonNode declaredTypes = definition.get(SchemaConstants.TAG_TYPE);
+        JsonNode declaredTypes = definition.get(this.getKeyword(SchemaKeyword.TAG_TYPE));
         final Set<String> allowedSchemaTypes;
         if (declaredTypes == null) {
             allowedSchemaTypes = Collections.emptySet();
@@ -343,13 +344,15 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      */
     private void generateArrayDefinition(ResolvedType targetType, ObjectNode definition, boolean isNullable) {
         if (isNullable) {
-            definition.set(SchemaConstants.TAG_TYPE,
-                    this.generatorConfig.createArrayNode().add(SchemaConstants.TAG_TYPE_ARRAY).add(SchemaConstants.TAG_TYPE_NULL));
+            ArrayNode typeArray = this.generatorConfig.createArrayNode()
+                    .add(this.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY))
+                    .add(this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
+            definition.set(this.getKeyword(SchemaKeyword.TAG_TYPE), typeArray);
         } else {
-            definition.put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_ARRAY);
+            definition.put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY));
         }
         ObjectNode arrayItemTypeRef = this.generatorConfig.createObjectNode();
-        definition.set(SchemaConstants.TAG_ITEMS, arrayItemTypeRef);
+        definition.set(this.getKeyword(SchemaKeyword.TAG_ITEMS), arrayItemTypeRef);
         ResolvedType itemType = this.typeContext.getContainerItemType(targetType);
         this.traverseGenericType(itemType, arrayItemTypeRef, false);
     }
@@ -361,7 +364,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @param definition node in the JSON schema to which all collected attributes should be added
      */
     private void generateObjectDefinition(ResolvedType targetType, ObjectNode definition) {
-        definition.put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_OBJECT);
+        definition.put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT));
 
         final Map<String, JsonNode> targetFields = new TreeMap<>();
         final Map<String, JsonNode> targetMethods = new TreeMap<>();
@@ -373,12 +376,12 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             ObjectNode propertiesNode = this.generatorConfig.createObjectNode();
             propertiesNode.setAll(targetFields);
             propertiesNode.setAll(targetMethods);
-            definition.set(SchemaConstants.TAG_PROPERTIES, propertiesNode);
+            definition.set(this.getKeyword(SchemaKeyword.TAG_PROPERTIES), propertiesNode);
 
             if (!requiredProperties.isEmpty()) {
                 ArrayNode requiredNode = this.generatorConfig.createArrayNode();
                 requiredProperties.forEach(requiredNode::add);
-                definition.set(SchemaConstants.TAG_REQUIRED, requiredNode);
+                definition.set(this.getKeyword(SchemaKeyword.TAG_REQUIRED), requiredNode);
             }
         }
     }
@@ -560,7 +563,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             } else {
                 // avoid mixing potential "$ref" element with contextual attributes by introducing an "allOf" wrapper
                 referenceContainer = this.generatorConfig.createObjectNode();
-                targetNode.set(SchemaConstants.TAG_ALLOF, this.generatorConfig.createArrayNode()
+                targetNode.set(this.getKeyword(SchemaKeyword.TAG_ALLOF), this.generatorConfig.createArrayNode()
                         .add(referenceContainer)
                         .add(collectedAttributes));
             }
@@ -575,12 +578,13 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
 
     @Override
     public ObjectNode makeNullable(ObjectNode node) {
-        if (node.has(SchemaConstants.TAG_REF)
-                || node.has(SchemaConstants.TAG_ALLOF)
-                || node.has(SchemaConstants.TAG_ANYOF)
-                || node.has(SchemaConstants.TAG_ONEOF)) {
+        if (node.has(this.getKeyword(SchemaKeyword.TAG_REF))
+                || node.has(this.getKeyword(SchemaKeyword.TAG_ALLOF))
+                || node.has(this.getKeyword(SchemaKeyword.TAG_ANYOF))
+                || node.has(this.getKeyword(SchemaKeyword.TAG_ONEOF))) {
             // cannot be sure what is specified in those other schema parts, instead simply create a oneOf wrapper
-            ObjectNode nullSchema = this.generatorConfig.createObjectNode().put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_NULL);
+            ObjectNode nullSchema = this.generatorConfig.createObjectNode()
+                    .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
             ArrayNode oneOf = this.generatorConfig.createArrayNode()
                     // one option in the oneOf should be null
                     .add(nullSchema)
@@ -588,31 +592,42 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                     .add(this.generatorConfig.createObjectNode().setAll(node));
             // replace all existing (and already copied properties with the oneOf wrapper
             node.removeAll();
-            node.set(SchemaConstants.TAG_ONEOF, oneOf);
+            node.set(this.getKeyword(SchemaKeyword.TAG_ONEOF), oneOf);
         } else {
             // given node is a simple schema, we can simply adjust its "type" attribute
-            JsonNode fixedJsonSchemaType = node.get(SchemaConstants.TAG_TYPE);
+            JsonNode fixedJsonSchemaType = node.get(this.getKeyword(SchemaKeyword.TAG_TYPE));
             if (fixedJsonSchemaType instanceof ArrayNode) {
                 // there are already multiple "type" values
                 ArrayNode arrayOfTypes = (ArrayNode) fixedJsonSchemaType;
                 // one of the existing "type" values could be null
                 boolean alreadyContainsNull = false;
                 for (JsonNode arrayEntry : arrayOfTypes) {
-                    alreadyContainsNull = alreadyContainsNull || SchemaConstants.TAG_TYPE_NULL.equals(arrayEntry.textValue());
+                    alreadyContainsNull = alreadyContainsNull || this.getKeyword(SchemaKeyword.TAG_TYPE_NULL).equals(arrayEntry.textValue());
                 }
 
                 if (!alreadyContainsNull) {
                     // null "type" was not mentioned before, we simply add it to the existing list
-                    arrayOfTypes.add(SchemaConstants.TAG_TYPE_NULL);
+                    arrayOfTypes.add(this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
                 }
-            } else if (fixedJsonSchemaType instanceof TextNode && !SchemaConstants.TAG_TYPE_NULL.equals(fixedJsonSchemaType.textValue())) {
+            } else if (fixedJsonSchemaType instanceof TextNode
+                    && !this.getKeyword(SchemaKeyword.TAG_TYPE_NULL).equals(fixedJsonSchemaType.textValue())) {
                 // add null as second "type" option
-                node.replace(SchemaConstants.TAG_TYPE, this.generatorConfig.createArrayNode()
+                node.replace(this.getKeyword(SchemaKeyword.TAG_TYPE), this.generatorConfig.createArrayNode()
                         .add(fixedJsonSchemaType)
-                        .add(SchemaConstants.TAG_TYPE_NULL));
+                        .add(this.getKeyword(SchemaKeyword.TAG_TYPE_NULL)));
             }
             // if no "type" is specified, null is allowed already
         }
         return node;
+    }
+
+    /**
+     * Look-up a given keyword's associated tag name or value for the designated JSON Schema version.
+     *
+     * @param keyword reference to a tag name or value
+     * @return specific tag name or value in the designated JSON Schema version
+     */
+    private String getKeyword(SchemaKeyword keyword) {
+        return this.generatorConfig.getKeyword(keyword);
     }
 }

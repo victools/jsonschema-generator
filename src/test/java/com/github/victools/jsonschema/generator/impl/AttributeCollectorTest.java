@@ -20,9 +20,10 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -46,6 +47,7 @@ public class AttributeCollectorTest {
         this.definitionNode = objectMapper.createObjectNode();
         SchemaGeneratorConfigImpl generatorConfig = new SchemaGeneratorConfigImpl(
                 objectMapper,
+                SchemaVersion.getLatest(),
                 Collections.emptySet(),
                 new SchemaGeneratorGeneralConfigPart(),
                 new SchemaGeneratorConfigPart<>(),
@@ -76,7 +78,7 @@ public class AttributeCollectorTest {
     public void testSetAdditionalProperties_VoidClass() {
         this.collector.setAdditionalProperties(this.definitionNode, Void.class, this.generationContext);
         Assert.assertEquals(1, this.definitionNode.size());
-        JsonNode additionalPropertiesNode = this.definitionNode.get(SchemaConstants.TAG_ADDITIONAL_PROPERTIES);
+        JsonNode additionalPropertiesNode = this.definitionNode.get(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES.forLatestVersion());
         Assert.assertNotNull(additionalPropertiesNode);
         Assert.assertTrue(additionalPropertiesNode.isBoolean());
         Assert.assertFalse(additionalPropertiesNode.asBoolean());
@@ -86,7 +88,7 @@ public class AttributeCollectorTest {
     public void testSetAdditionalProperties_VoidType() {
         this.collector.setAdditionalProperties(this.definitionNode, Void.TYPE, this.generationContext);
         Assert.assertEquals(1, this.definitionNode.size());
-        JsonNode additionalPropertiesNode = this.definitionNode.get(SchemaConstants.TAG_ADDITIONAL_PROPERTIES);
+        JsonNode additionalPropertiesNode = this.definitionNode.get(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES.forLatestVersion());
         Assert.assertNotNull(additionalPropertiesNode);
         Assert.assertTrue(additionalPropertiesNode.isBoolean());
         Assert.assertFalse(additionalPropertiesNode.asBoolean());
@@ -96,7 +98,7 @@ public class AttributeCollectorTest {
     public void testSetAdditionalProperties_SpecificClass() {
         this.collector.setAdditionalProperties(this.definitionNode, int.class, this.generationContext);
         Assert.assertEquals(1, this.definitionNode.size());
-        JsonNode additionalPropertiesNode = this.definitionNode.get(SchemaConstants.TAG_ADDITIONAL_PROPERTIES);
+        JsonNode additionalPropertiesNode = this.definitionNode.get(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES.forLatestVersion());
         Assert.assertNotNull(additionalPropertiesNode);
         Assert.assertTrue(additionalPropertiesNode.isObject());
         ResolvedType resolvedType = this.generationContext.getTypeContext().resolve(int.class);
@@ -121,7 +123,7 @@ public class AttributeCollectorTest {
         patterns.put("^objectClass.*$", Object.class);
         this.collector.setPatternProperties(this.definitionNode, patterns, this.generationContext);
         Assert.assertEquals(1, this.definitionNode.size());
-        JsonNode patternPropertiesNode = this.definitionNode.get(SchemaConstants.TAG_PATTERN_PROPERTIES);
+        JsonNode patternPropertiesNode = this.definitionNode.get(SchemaKeyword.TAG_PATTERN_PROPERTIES.forLatestVersion());
         Assert.assertNotNull(patternPropertiesNode);
         Assert.assertTrue(patternPropertiesNode.isObject());
         Assert.assertEquals(1, patternPropertiesNode.size());
@@ -135,7 +137,7 @@ public class AttributeCollectorTest {
         patterns.put("^resolvedObjectClass.*$", this.generationContext.getTypeContext().resolve(Object.class));
         this.collector.setPatternProperties(this.definitionNode, patterns, this.generationContext);
         Assert.assertEquals(1, this.definitionNode.size());
-        JsonNode patternPropertiesNode = this.definitionNode.get(SchemaConstants.TAG_PATTERN_PROPERTIES);
+        JsonNode patternPropertiesNode = this.definitionNode.get(SchemaKeyword.TAG_PATTERN_PROPERTIES.forLatestVersion());
         Assert.assertNotNull(patternPropertiesNode);
         Assert.assertTrue(patternPropertiesNode.isObject());
         Assert.assertEquals(1, patternPropertiesNode.size());
@@ -150,7 +152,7 @@ public class AttributeCollectorTest {
         patterns.put("^resolvedStringClass.*$", this.generationContext.getTypeContext().resolve(String.class));
         this.collector.setPatternProperties(this.definitionNode, patterns, this.generationContext);
         Assert.assertEquals(1, this.definitionNode.size());
-        JsonNode patternPropertiesNode = this.definitionNode.get(SchemaConstants.TAG_PATTERN_PROPERTIES);
+        JsonNode patternPropertiesNode = this.definitionNode.get(SchemaKeyword.TAG_PATTERN_PROPERTIES.forLatestVersion());
         Assert.assertNotNull(patternPropertiesNode);
         Assert.assertTrue(patternPropertiesNode.isObject());
         Assert.assertEquals(2, patternPropertiesNode.size());

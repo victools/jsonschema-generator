@@ -69,11 +69,12 @@ public class SchemaGenerator {
 
         ObjectNode jsonSchemaResult = this.config.createObjectNode();
         if (this.config.shouldIncludeSchemaVersionIndicator()) {
-            jsonSchemaResult.put(SchemaConstants.TAG_SCHEMA, SchemaConstants.TAG_SCHEMA_DRAFT7);
+            jsonSchemaResult.put(this.config.getKeyword(SchemaKeyword.TAG_SCHEMA),
+                    this.config.getKeyword(SchemaKeyword.TAG_SCHEMA_VALUE));
         }
         ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(mainType, generationContext);
         if (definitionsNode.size() > 0) {
-            jsonSchemaResult.set(SchemaConstants.TAG_DEFINITIONS, definitionsNode);
+            jsonSchemaResult.set(this.config.getKeyword(SchemaKeyword.TAG_DEFINITIONS), definitionsNode);
         }
         ObjectNode mainSchemaNode = generationContext.getDefinition(mainType);
         jsonSchemaResult.setAll(mainSchemaNode);
@@ -117,34 +118,34 @@ public class SchemaGenerator {
                     && (referencingNodes.isEmpty() || (!createDefinitionsForAll && (referencingNodes.size() + nullableReferences.size()) < 2));
             if (referenceInline) {
                 // it is a simple type, just in-line the sub-schema everywhere
-                referencingNodes.forEach(referenceNode -> referenceNode.setAll(generationContext.getDefinition(types.get(0))));
+                referencingNodes.forEach(node -> node.setAll(generationContext.getDefinition(types.get(0))));
                 referenceKey = null;
             } else {
                 // the same sub-schema is referenced in multiple places
                 if (types.contains(mainSchemaTarget)) {
-                    referenceKey = SchemaConstants.TAG_REF_MAIN;
+                    referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN);
                 } else {
                     // add it to the definitions (unless it is the main schema)
                     definitionsNode.set(alias, generationContext.getDefinition(types.get(0)));
-                    referenceKey = SchemaConstants.TAG_REF_PREFIX + alias;
+                    referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_PREFIX) + alias;
                 }
-                referencingNodes.forEach(referenceNode -> referenceNode.put(SchemaConstants.TAG_REF, referenceKey));
+                referencingNodes.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey));
             }
             if (!nullableReferences.isEmpty()) {
                 ObjectNode definition;
                 if (referenceInline) {
                     definition = generationContext.getDefinition(types.get(0));
                 } else {
-                    definition = this.config.createObjectNode().put(SchemaConstants.TAG_REF, referenceKey);
+                    definition = this.config.createObjectNode().put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey);
                 }
                 generationContext.makeNullable(definition);
                 if (createDefinitionsForAll || nullableReferences.size() > 1) {
                     String nullableAlias = alias + "-nullable";
-                    String nullableReferenceKey = SchemaConstants.TAG_REF_PREFIX + nullableAlias;
+                    String nullableReferenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_PREFIX) + nullableAlias;
                     definitionsNode.set(nullableAlias, definition);
-                    nullableReferences.forEach(referenceNode -> referenceNode.put(SchemaConstants.TAG_REF, nullableReferenceKey));
+                    nullableReferences.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF), nullableReferenceKey));
                 } else {
-                    nullableReferences.forEach(referenceNode -> referenceNode.setAll(definition));
+                    nullableReferences.forEach(node -> node.setAll(definition));
                 }
             }
         }

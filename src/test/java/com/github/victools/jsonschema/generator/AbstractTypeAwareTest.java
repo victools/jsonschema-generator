@@ -43,8 +43,11 @@ public class AbstractTypeAwareTest {
         TypeContext typeContext = TypeContextFactory.createDefaultTypeContext();
         ResolvedType resolvedTestClass = typeContext.resolve(this.testClass);
         this.testClassMembers = typeContext.resolveWithMembers(resolvedTestClass);
-        this.context = Mockito.mock(SchemaGenerationContext.class);
+        this.context = Mockito.mock(SchemaGenerationContext.class, Mockito.RETURNS_DEEP_STUBS);
         Mockito.when(this.context.getTypeContext()).thenReturn(typeContext);
+        Mockito.when(this.context.getGeneratorConfig().getSchemaVersion()).thenReturn(SchemaVersion.getLatest());
+        Mockito.when(this.context.getGeneratorConfig().getKeyword(Mockito.any()))
+                .thenAnswer(invocation -> SchemaVersion.getLatest().get(invocation.getArgument(0)));
     }
 
     protected SchemaGenerationContext getContext() {

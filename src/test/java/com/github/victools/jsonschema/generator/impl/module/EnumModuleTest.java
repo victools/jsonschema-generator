@@ -28,9 +28,10 @@ import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,9 +59,11 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         this.instanceAsStringsFromName = EnumModule.asStringsFromName();
         this.instanceAsStringsFromToString = EnumModule.asStringsFromToString();
         this.instanceAsObjects = EnumModule.asObjects();
-        this.builder = Mockito.spy(new SchemaGeneratorConfigBuilder(new ObjectMapper(), new OptionPreset()));
-        this.fieldConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
-        this.methodConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.getLatest(),
+                new OptionPreset());
+        this.fieldConfigPart = Mockito.spy(configBuilder.forFields());
+        this.methodConfigPart = Mockito.spy(configBuilder.forMethods());
+        this.builder = Mockito.spy(configBuilder);
         Mockito.when(this.builder.forFields()).thenReturn(this.fieldConfigPart);
         Mockito.when(this.builder.forMethods()).thenReturn(this.methodConfigPart);
     }
@@ -113,11 +116,11 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         ObjectNode node = schemaDefinition.getValue();
         Assert.assertEquals(2, node.size());
 
-        JsonNode typeNode = node.get(SchemaConstants.TAG_TYPE);
+        JsonNode typeNode = node.get(SchemaKeyword.TAG_TYPE.forLatestVersion());
         Assert.assertEquals(JsonNodeType.STRING, typeNode.getNodeType());
-        Assert.assertEquals(SchemaConstants.TAG_TYPE_STRING, typeNode.textValue());
+        Assert.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forLatestVersion(), typeNode.textValue());
 
-        JsonNode enumNode = node.get(SchemaConstants.TAG_ENUM);
+        JsonNode enumNode = node.get(SchemaKeyword.TAG_ENUM.forLatestVersion());
         Assert.assertEquals(JsonNodeType.ARRAY, enumNode.getNodeType());
         Assert.assertEquals(3, ((ArrayNode) enumNode).size());
         Assert.assertEquals(JsonNodeType.STRING, enumNode.get(0).getNodeType());
@@ -140,11 +143,11 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         ObjectNode node = schemaDefinition.getValue();
         Assert.assertEquals(2, node.size());
 
-        JsonNode typeNode = node.get(SchemaConstants.TAG_TYPE);
+        JsonNode typeNode = node.get(SchemaKeyword.TAG_TYPE.forLatestVersion());
         Assert.assertEquals(JsonNodeType.STRING, typeNode.getNodeType());
-        Assert.assertEquals(SchemaConstants.TAG_TYPE_STRING, typeNode.textValue());
+        Assert.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forLatestVersion(), typeNode.textValue());
 
-        JsonNode enumNode = node.get(SchemaConstants.TAG_ENUM);
+        JsonNode enumNode = node.get(SchemaKeyword.TAG_ENUM.forLatestVersion());
         Assert.assertEquals(JsonNodeType.ARRAY, enumNode.getNodeType());
         Assert.assertEquals(3, ((ArrayNode) enumNode).size());
         Assert.assertEquals(JsonNodeType.STRING, enumNode.get(0).getNodeType());
