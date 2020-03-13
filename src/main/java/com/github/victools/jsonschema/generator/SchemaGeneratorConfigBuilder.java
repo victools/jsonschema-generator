@@ -46,7 +46,9 @@ public class SchemaGeneratorConfigBuilder {
      *
      * @param objectMapper supplier for object and array nodes for the JSON structure being generated
      * @see #SchemaGeneratorConfigBuilder(ObjectMapper, SchemaVersion, OptionPreset)
+     * @deprecated use {@link #SchemaGeneratorConfigBuilder(ObjectMapper, SchemaVersion)} instead
      */
+    @Deprecated
     public SchemaGeneratorConfigBuilder(ObjectMapper objectMapper) {
         this(objectMapper, SchemaVersion.DRAFT_7, OptionPreset.FULL_DOCUMENTATION);
     }
@@ -69,8 +71,9 @@ public class SchemaGeneratorConfigBuilder {
      *
      * @param objectMapper supplier for object and array nodes for the JSON structure being generated
      * @param preset default settings for standard {@link Option} values
-     * @see #SchemaGeneratorConfigBuilder(ObjectMapper, SchemaVersion, OptionPreset)
+     * @deprecated use {@link #SchemaGeneratorConfigBuilder(ObjectMapper, SchemaVersion, OptionPreset)} instead
      */
+    @Deprecated
     public SchemaGeneratorConfigBuilder(ObjectMapper objectMapper, OptionPreset preset) {
         this(objectMapper, SchemaVersion.DRAFT_7, preset);
     }

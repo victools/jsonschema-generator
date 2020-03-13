@@ -56,7 +56,7 @@ public interface SchemaGeneratorConfig {
     boolean shouldCreateDefinitionsForAllObjects();
 
     /**
-     * Determine whether the "{@value SchemaConstants#TAG_SCHEMA}" attribute with value "{@value SchemaConstants#TAG_SCHEMA_DRAFT7}" should be added.
+     * Determine whether the {@link SchemaKeyword#TAG_SCHEMA} attribute with {@link SchemaKeyword#TAG_SCHEMA_VALUE} should be added.
      *
      * @return whether to add the schema version attribute
      */
@@ -113,7 +113,7 @@ public interface SchemaGeneratorConfig {
             CustomDefinitionProviderV2 ignoredDefinitionProvider);
 
     /**
-     * Look-up a declared type's subtypes in order to list those specifically (in an "{@value SchemaConstants#TAG_ANYOF}").
+     * Look-up a declared type's subtypes in order to list those specifically (in an {@link SchemaKeyword#TAG_ANYOF}).
      *
      * @param javaType declared type to look-up subtypes for
      * @param context generation context (including a reference to the {@code TypeContext} for deriving a {@link ResolvedType} from a {@link Class})

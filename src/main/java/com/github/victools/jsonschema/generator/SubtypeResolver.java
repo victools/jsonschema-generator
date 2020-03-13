@@ -20,11 +20,11 @@ import com.fasterxml.classmate.ResolvedType;
 import java.util.List;
 
 /**
- * Resolver for looking up a declared type's subtypes in order to list those specifically (in an "{@value SchemaConstants#TAG_ANYOF}").
+ * Resolver for looking up a declared type's subtypes in order to list those specifically (in an {@link SchemaKeyword#TAG_ANYOF}).
  * <br>
- * Assumption being that "{@value SchemaConstants#TAG_ONEOF}" would require a schema validator to unnecessarily check against all listed sub-schemas
- * to ensure that only a single one is matching a given JSON instance. By making the sub-schemas mutually exclusive, the same semantics can be
- * achieved, but allowing the schema validator to ignore any sub-schemas after the first match was found.
+ * Assumption being that {@link SchemaKeyword#TAG_ONEOF} would require a schema validator to unnecessarily check against all listed sub-schemas to
+ * ensure that only a single one is matching a given JSON instance. By making the sub-schemas mutually exclusive, the same semantics can be achieved,
+ * but allowing the schema validator to ignore any sub-schemas after the first match was found.
  */
 @FunctionalInterface
 public interface SubtypeResolver {
