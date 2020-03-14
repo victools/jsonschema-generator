@@ -98,14 +98,4 @@ public enum SchemaKeyword {
     public String forVersion(SchemaVersion version) {
         return this.valueProvider.apply(version);
     }
-
-    /**
-     * Provide the appropriate tag name/value, considering the latest schema version.
-     *
-     * @return corresponding tag name/value for this keyword in the latest JSON Schema version
-     * @see SchemaVersion#getLatest()
-     */
-    public String forLatestVersion() {
-        return this.forVersion(SchemaVersion.getLatest());
-    }
 }
