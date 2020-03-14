@@ -307,9 +307,8 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 ObjectNode subtypeSchema = this.generatorConfig.createObjectNode();
                 this.traverseGenericType(subtype, subtypeSchema, false);
                 anyOfArrayNode.add(subtypeSchema);
-
-                definition.set(this.getKeyword(SchemaKeyword.TAG_ANYOF), anyOfArrayNode);
             }
+            definition.set(this.getKeyword(SchemaKeyword.TAG_ANYOF), anyOfArrayNode);
         }
         return true;
     }
@@ -621,13 +620,8 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         return node;
     }
 
-    /**
-     * Look-up a given keyword's associated tag name or value for the designated JSON Schema version.
-     *
-     * @param keyword reference to a tag name or value
-     * @return specific tag name or value in the designated JSON Schema version
-     */
-    private String getKeyword(SchemaKeyword keyword) {
+    @Override
+    public String getKeyword(SchemaKeyword keyword) {
         return this.generatorConfig.getKeyword(keyword);
     }
 }

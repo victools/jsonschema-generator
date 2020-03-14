@@ -23,15 +23,6 @@ public enum SchemaVersion {
     DRAFT_7("http://json-schema.org/draft-07/schema#"),
     DRAFT_2019_09("https://json-schema.org/draft/2019-09/schema");
 
-    /**
-     * Getter for the most recent JSON Schema draft version.
-     *
-     * @return currently {@link #DRAFT_2019_09}
-     */
-    public static SchemaVersion getLatest() {
-        return DRAFT_2019_09;
-    }
-
     private final String identifier;
 
     /**

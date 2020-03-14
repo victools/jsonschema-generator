@@ -68,13 +68,13 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     }
 
     @Before
-    @SuppressWarnings("unchecked")
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         this.enabledOptions = new HashSet<>();
 
-        this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, SchemaVersion.getLatest(), this.enabledOptions,
+        this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, SchemaVersion.DRAFT_2019_09, this.enabledOptions,
                 this.typesInGeneralConfigPart, this.fieldConfigPart, this.methodConfigPart);
+        this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
     }
 
     @Test

@@ -32,6 +32,15 @@ public interface SchemaGenerationContext {
     SchemaGeneratorConfig getGeneratorConfig();
 
     /**
+     * Look-up a given keyword's associated tag name or value for the designated JSON Schema version.
+     *
+     * @param keyword reference to a tag name or value
+     * @return specific tag name or value in the designated JSON Schema version
+     * @see SchemaGeneratorConfig#getKeyword(SchemaKeyword)
+     */
+    String getKeyword(SchemaKeyword keyword);
+
+    /**
      * Getter for the type resolution/introspection context in use.
      *
      * @return type resolution/introspection context

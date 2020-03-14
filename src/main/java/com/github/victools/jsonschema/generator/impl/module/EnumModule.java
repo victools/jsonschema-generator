@@ -149,8 +149,7 @@ public class EnumModule implements Module {
         public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
             if (javaType.isInstanceOf(Enum.class)) {
                 ObjectNode customNode = this.objectMapper.createObjectNode()
-                        .put(context.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_TYPE),
-                                context.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_TYPE_STRING));
+                        .put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_STRING));
                 new AttributeCollector(this.objectMapper)
                         .setEnum(customNode, EnumModule.extractEnumValues(javaType, this.enumConstantToString), context);
                 return new CustomDefinition(customNode);

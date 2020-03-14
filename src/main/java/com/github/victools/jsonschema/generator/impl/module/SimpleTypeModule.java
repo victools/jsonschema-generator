@@ -259,8 +259,7 @@ public class SimpleTypeModule implements Module {
             // create fixed JSON schema definition, containing only the corresponding "type" attribute
             ObjectNode customSchema = this.objectMapper.createObjectNode();
             if (jsonSchemaTypeValue != SchemaKeyword.TAG_TYPE_NULL) {
-                customSchema.put(context.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_TYPE),
-                        context.getGeneratorConfig().getKeyword(jsonSchemaTypeValue));
+                customSchema.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(jsonSchemaTypeValue));
             }
             // set true as second parameter to indicate simple types to be always in-lined (i.e. not put into definitions)
             return new CustomDefinition(customSchema, true);

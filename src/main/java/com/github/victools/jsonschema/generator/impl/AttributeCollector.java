@@ -68,24 +68,24 @@ public class AttributeCollector {
         SchemaGeneratorConfig config = generationContext.getGeneratorConfig();
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
-        collector.setTitle(node, config.resolveTitle(field));
-        collector.setDescription(node, config.resolveDescription(field));
-        collector.setDefault(node, config.resolveDefault(field));
-        collector.setEnum(node, config.resolveEnum(field));
+        collector.setTitle(node, config.resolveTitle(field), generationContext);
+        collector.setDescription(node, config.resolveDescription(field), generationContext);
+        collector.setDefault(node, config.resolveDefault(field), generationContext);
+        collector.setEnum(node, config.resolveEnum(field), generationContext);
         collector.setAdditionalProperties(node, config.resolveAdditionalProperties(field), generationContext);
         collector.setPatternProperties(node, config.resolvePatternProperties(field), generationContext);
-        collector.setStringMinLength(node, config.resolveStringMinLength(field));
-        collector.setStringMaxLength(node, config.resolveStringMaxLength(field));
-        collector.setStringFormat(node, config.resolveStringFormat(field));
-        collector.setStringPattern(node, config.resolveStringPattern(field));
-        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(field));
-        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(field));
-        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(field));
-        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(field));
-        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(field));
-        collector.setArrayMinItems(node, config.resolveArrayMinItems(field));
-        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(field));
-        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(field));
+        collector.setStringMinLength(node, config.resolveStringMinLength(field), generationContext);
+        collector.setStringMaxLength(node, config.resolveStringMaxLength(field), generationContext);
+        collector.setStringFormat(node, config.resolveStringFormat(field), generationContext);
+        collector.setStringPattern(node, config.resolveStringPattern(field), generationContext);
+        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(field), generationContext);
+        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(field), generationContext);
+        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(field), generationContext);
+        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(field), generationContext);
+        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(field), generationContext);
+        collector.setArrayMinItems(node, config.resolveArrayMinItems(field), generationContext);
+        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(field), generationContext);
+        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(field), generationContext);
         config.getFieldAttributeOverrides()
                 .forEach(override -> override.overrideInstanceAttributes(node, field));
         return node;
@@ -102,24 +102,24 @@ public class AttributeCollector {
         SchemaGeneratorConfig config = generationContext.getGeneratorConfig();
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
-        collector.setTitle(node, config.resolveTitle(method));
-        collector.setDescription(node, config.resolveDescription(method));
-        collector.setDefault(node, config.resolveDefault(method));
-        collector.setEnum(node, config.resolveEnum(method));
+        collector.setTitle(node, config.resolveTitle(method), generationContext);
+        collector.setDescription(node, config.resolveDescription(method), generationContext);
+        collector.setDefault(node, config.resolveDefault(method), generationContext);
+        collector.setEnum(node, config.resolveEnum(method), generationContext);
         collector.setAdditionalProperties(node, config.resolveAdditionalProperties(method), generationContext);
         collector.setPatternProperties(node, config.resolvePatternProperties(method), generationContext);
-        collector.setStringMinLength(node, config.resolveStringMinLength(method));
-        collector.setStringMaxLength(node, config.resolveStringMaxLength(method));
-        collector.setStringFormat(node, config.resolveStringFormat(method));
-        collector.setStringPattern(node, config.resolveStringPattern(method));
-        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(method));
-        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(method));
-        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(method));
-        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(method));
-        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(method));
-        collector.setArrayMinItems(node, config.resolveArrayMinItems(method));
-        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(method));
-        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(method));
+        collector.setStringMinLength(node, config.resolveStringMinLength(method), generationContext);
+        collector.setStringMaxLength(node, config.resolveStringMaxLength(method), generationContext);
+        collector.setStringFormat(node, config.resolveStringFormat(method), generationContext);
+        collector.setStringPattern(node, config.resolveStringPattern(method), generationContext);
+        collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimum(method), generationContext);
+        collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimum(method), generationContext);
+        collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximum(method), generationContext);
+        collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximum(method), generationContext);
+        collector.setNumberMultipleOf(node, config.resolveNumberMultipleOf(method), generationContext);
+        collector.setArrayMinItems(node, config.resolveArrayMinItems(method), generationContext);
+        collector.setArrayMaxItems(node, config.resolveArrayMaxItems(method), generationContext);
+        collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(method), generationContext);
         config.getMethodAttributeOverrides()
                 .forEach(override -> override.overrideInstanceAttributes(node, method));
         return node;
@@ -138,32 +138,32 @@ public class AttributeCollector {
         SchemaGeneratorConfig config = generationContext.getGeneratorConfig();
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
-        collector.setTitle(node, config.resolveTitleForType(scope));
-        collector.setDescription(node, config.resolveDescriptionForType(scope));
-        collector.setDefault(node, config.resolveDefaultForType(scope));
-        collector.setEnum(node, config.resolveEnumForType(scope));
+        collector.setTitle(node, config.resolveTitleForType(scope), generationContext);
+        collector.setDescription(node, config.resolveDescriptionForType(scope), generationContext);
+        collector.setDefault(node, config.resolveDefaultForType(scope), generationContext);
+        collector.setEnum(node, config.resolveEnumForType(scope), generationContext);
         if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT))) {
             collector.setAdditionalProperties(node, config.resolveAdditionalPropertiesForType(scope), generationContext);
             collector.setPatternProperties(node, config.resolvePatternPropertiesForType(scope), generationContext);
         }
         if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_STRING))) {
-            collector.setStringMinLength(node, config.resolveStringMinLengthForType(scope));
-            collector.setStringMaxLength(node, config.resolveStringMaxLengthForType(scope));
-            collector.setStringFormat(node, config.resolveStringFormatForType(scope));
-            collector.setStringPattern(node, config.resolveStringPatternForType(scope));
+            collector.setStringMinLength(node, config.resolveStringMinLengthForType(scope), generationContext);
+            collector.setStringMaxLength(node, config.resolveStringMaxLengthForType(scope), generationContext);
+            collector.setStringFormat(node, config.resolveStringFormatForType(scope), generationContext);
+            collector.setStringPattern(node, config.resolveStringPatternForType(scope), generationContext);
         }
         if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_INTEGER))
                 || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_NUMBER))) {
-            collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimumForType(scope));
-            collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimumForType(scope));
-            collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximumForType(scope));
-            collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximumForType(scope));
-            collector.setNumberMultipleOf(node, config.resolveNumberMultipleOfForType(scope));
+            collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimumForType(scope), generationContext);
+            collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimumForType(scope), generationContext);
+            collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximumForType(scope), generationContext);
+            collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximumForType(scope), generationContext);
+            collector.setNumberMultipleOf(node, config.resolveNumberMultipleOfForType(scope), generationContext);
         }
         if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY))) {
-            collector.setArrayMinItems(node, config.resolveArrayMinItemsForType(scope));
-            collector.setArrayMaxItems(node, config.resolveArrayMaxItemsForType(scope));
-            collector.setArrayUniqueItems(node, config.resolveArrayUniqueItemsForType(scope));
+            collector.setArrayMinItems(node, config.resolveArrayMinItemsForType(scope), generationContext);
+            collector.setArrayMaxItems(node, config.resolveArrayMaxItemsForType(scope), generationContext);
+            collector.setArrayUniqueItems(node, config.resolveArrayUniqueItemsForType(scope), generationContext);
         }
         return node;
     }
@@ -194,7 +194,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setTitle(ObjectNode node, String title, SchemaGenerationContext generationContext) {
         if (title != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_TITLE), title);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_TITLE), title);
         }
         return this;
     }
@@ -225,7 +225,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setDescription(ObjectNode node, String description, SchemaGenerationContext generationContext) {
         if (description != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_DESCRIPTION), description);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_DESCRIPTION), description);
         }
         return this;
     }
@@ -275,7 +275,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setDefault(ObjectNode node, Object defaultValue, SchemaGenerationContext generationContext) {
         if (defaultValue != null) {
-            final String defaultTag = generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_DEFAULT);
+            final String defaultTag = generationContext.getKeyword(SchemaKeyword.TAG_DEFAULT);
             // need to specifically add simple/primitive values by type
             if (defaultValue instanceof String) {
                 node.put(defaultTag, (String) defaultValue);
@@ -347,7 +347,6 @@ public class AttributeCollector {
      */
     public AttributeCollector setEnum(ObjectNode node, Collection<?> enumValues, SchemaGenerationContext generationContext) {
         if (enumValues != null) {
-            SchemaVersion schemaVersion = generationContext.getGeneratorConfig().getSchemaVersion();
             List<Object> values = enumValues.stream()
                     .filter(this::isSupportedEnumValue)
                     .filter(this::canBeConvertedToString)
@@ -355,9 +354,9 @@ public class AttributeCollector {
             if (values.size() == 1) {
                 Object singleValue = values.get(0);
                 if (singleValue instanceof String) {
-                    node.put(schemaVersion.get(SchemaKeyword.TAG_CONST), (String) singleValue);
+                    node.put(generationContext.getKeyword(SchemaKeyword.TAG_CONST), (String) singleValue);
                 } else {
-                    node.putPOJO(schemaVersion.get(SchemaKeyword.TAG_CONST), singleValue);
+                    node.putPOJO(generationContext.getKeyword(SchemaKeyword.TAG_CONST), singleValue);
                 }
             } else if (!values.isEmpty()) {
                 ArrayNode array = node.arrayNode();
@@ -368,7 +367,7 @@ public class AttributeCollector {
                         array.addPOJO(singleValue);
                     }
                 }
-                node.set(schemaVersion.get(SchemaKeyword.TAG_ENUM), array);
+                node.set(generationContext.getKeyword(SchemaKeyword.TAG_ENUM), array);
             }
         }
         return this;
@@ -416,12 +415,12 @@ public class AttributeCollector {
      */
     public AttributeCollector setAdditionalProperties(ObjectNode node, Type additionalProperties, SchemaGenerationContext generationContext) {
         if (additionalProperties == Void.class || additionalProperties == Void.TYPE) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES), false);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES), false);
         } else if (additionalProperties != null) {
             ResolvedType targetType = generationContext.getTypeContext().resolve(additionalProperties);
             if (targetType.getErasedType() != Object.class) {
                 ObjectNode additionalPropertiesSchema = generationContext.createDefinitionReference(targetType);
-                node.set(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES),
+                node.set(generationContext.getKeyword(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES),
                         additionalPropertiesSchema);
             }
         }
@@ -445,7 +444,7 @@ public class AttributeCollector {
                 ObjectNode singlePatternSchema = generationContext.createDefinitionReference(targetType);
                 patternPropertiesNode.set(entry.getKey(), singlePatternSchema);
             }
-            node.set(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_PATTERN_PROPERTIES), patternPropertiesNode);
+            node.set(generationContext.getKeyword(SchemaKeyword.TAG_PATTERN_PROPERTIES), patternPropertiesNode);
         }
         return this;
     }
@@ -476,7 +475,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setStringMinLength(ObjectNode node, Integer minLength, SchemaGenerationContext generationContext) {
         if (minLength != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_LENGTH_MIN), minLength);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_LENGTH_MIN), minLength);
         }
         return this;
     }
@@ -507,7 +506,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setStringMaxLength(ObjectNode node, Integer maxLength, SchemaGenerationContext generationContext) {
         if (maxLength != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_LENGTH_MAX), maxLength);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_LENGTH_MAX), maxLength);
         }
         return this;
     }
@@ -538,7 +537,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setStringFormat(ObjectNode node, String format, SchemaGenerationContext generationContext) {
         if (format != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_FORMAT), format);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_FORMAT), format);
         }
         return this;
     }
@@ -569,7 +568,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setStringPattern(ObjectNode node, String pattern, SchemaGenerationContext generationContext) {
         if (pattern != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_PATTERN), pattern);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_PATTERN), pattern);
         }
         return this;
     }
@@ -600,7 +599,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setNumberInclusiveMinimum(ObjectNode node, BigDecimal inclusiveMinimum, SchemaGenerationContext generationContext) {
         if (inclusiveMinimum != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_MINIMUM), inclusiveMinimum);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_MINIMUM), inclusiveMinimum);
         }
         return this;
     }
@@ -631,7 +630,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setNumberExclusiveMinimum(ObjectNode node, BigDecimal exclusiveMinimum, SchemaGenerationContext generationContext) {
         if (exclusiveMinimum != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_MINIMUM_EXCLUSIVE), exclusiveMinimum);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_MINIMUM_EXCLUSIVE), exclusiveMinimum);
         }
         return this;
     }
@@ -662,7 +661,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setNumberInclusiveMaximum(ObjectNode node, BigDecimal inclusiveMaximum, SchemaGenerationContext generationContext) {
         if (inclusiveMaximum != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_MAXIMUM), inclusiveMaximum);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_MAXIMUM), inclusiveMaximum);
         }
         return this;
     }
@@ -693,7 +692,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setNumberExclusiveMaximum(ObjectNode node, BigDecimal exclusiveMaximum, SchemaGenerationContext generationContext) {
         if (exclusiveMaximum != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_MAXIMUM_EXCLUSIVE), exclusiveMaximum);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_MAXIMUM_EXCLUSIVE), exclusiveMaximum);
         }
         return this;
     }
@@ -724,7 +723,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setNumberMultipleOf(ObjectNode node, BigDecimal multipleOf, SchemaGenerationContext generationContext) {
         if (multipleOf != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_MULTIPLE_OF), multipleOf);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_MULTIPLE_OF), multipleOf);
         }
         return this;
     }
@@ -755,7 +754,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setArrayMinItems(ObjectNode node, Integer minItemCount, SchemaGenerationContext generationContext) {
         if (minItemCount != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_ITEMS_MIN), minItemCount);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_ITEMS_MIN), minItemCount);
         }
         return this;
     }
@@ -786,7 +785,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setArrayMaxItems(ObjectNode node, Integer maxItemCount, SchemaGenerationContext generationContext) {
         if (maxItemCount != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_ITEMS_MAX), maxItemCount);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_ITEMS_MAX), maxItemCount);
         }
         return this;
     }
@@ -817,7 +816,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setArrayUniqueItems(ObjectNode node, Boolean uniqueItems, SchemaGenerationContext generationContext) {
         if (uniqueItems != null) {
-            node.put(generationContext.getGeneratorConfig().getKeyword(SchemaKeyword.TAG_ITEMS_UNIQUE), uniqueItems);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_ITEMS_UNIQUE), uniqueItems);
         }
         return this;
     }

@@ -27,33 +27,38 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for {@link SchemaGenerator} class.
  */
+@RunWith(JUnitParamsRunner.class)
 public class SchemaGeneratorCustomDefinitionsTest {
 
     @Test
-    public void testGenerateSchema_CustomDefinition() throws Exception {
+    @Parameters(source = SchemaVersion.class)
+    public void testGenerateSchema_CustomDefinition(SchemaVersion schemaVersion) throws Exception {
         CustomDefinitionProviderV2 customDefinitionProvider = (javaType, context) -> javaType.getErasedType() == Integer.class
                 ? new CustomDefinition(context.createDefinition(context.getTypeContext().resolve(String.class)))
                 : null;
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_7)
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
                 .with(customDefinitionProvider)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(Integer.class);
         Assert.assertEquals(1, result.size());
-        Assert.assertEquals(SchemaVersion.getLatest().get(SchemaKeyword.TAG_TYPE_STRING),
-                result.get(SchemaVersion.getLatest().get(SchemaKeyword.TAG_TYPE)).asText());
+        Assert.assertEquals(schemaVersion.get(SchemaKeyword.TAG_TYPE_STRING), result.get(schemaVersion.get(SchemaKeyword.TAG_TYPE)).asText());
     }
 
     @Test
-    public void testGenerateSchema_CustomCollectionDefinition() throws Exception {
+    @Parameters(source = SchemaVersion.class)
+    public void testGenerateSchema_CustomCollectionDefinition(SchemaVersion schemaVersion) throws Exception {
         String accessProperty = "stream().findFirst().orElse(null)";
         CustomDefinitionProviderV2 customDefinitionProvider = (javaType, context) -> {
             if (!javaType.isInstanceOf(Collection.class)) {
@@ -66,7 +71,6 @@ public class SchemaGeneratorCustomDefinitionsTest {
                     .set(config.getKeyword(SchemaKeyword.TAG_PROPERTIES), config.createObjectNode()
                             .set(accessProperty, context.makeNullable(context.createDefinition(generic)))));
         };
-        final SchemaVersion schemaVersion = SchemaVersion.DRAFT_7;
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
                 .with(customDefinitionProvider)
                 .build();
@@ -84,7 +88,8 @@ public class SchemaGeneratorCustomDefinitionsTest {
     }
 
     @Test
-    public void testGenerateSchema_CustomStandardDefinition() throws Exception {
+    @Parameters(source = SchemaVersion.class)
+    public void testGenerateSchema_CustomStandardDefinition(SchemaVersion schemaVersion) throws Exception {
         CustomDefinitionProviderV2 customDefinitionProvider = new CustomDefinitionProviderV2() {
             @Override
             public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
@@ -97,7 +102,6 @@ public class SchemaGeneratorCustomDefinitionsTest {
                 return null;
             }
         };
-        final SchemaVersion schemaVersion = SchemaVersion.DRAFT_7;
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
                 .with(customDefinitionProvider)
                 .build();
@@ -109,7 +113,8 @@ public class SchemaGeneratorCustomDefinitionsTest {
     }
 
     @Test
-    public void testGenerateSchema_CircularCustomStandardDefinition() throws Exception {
+    @Parameters(source = SchemaVersion.class)
+    public void testGenerateSchema_CircularCustomStandardDefinition(SchemaVersion schemaVersion) throws Exception {
         String accessProperty = "get(0)";
         CustomDefinitionProviderV2 customDefinitionProvider = (javaType, context) -> {
             if (!javaType.isInstanceOf(List.class)) {
@@ -122,13 +127,13 @@ public class SchemaGeneratorCustomDefinitionsTest {
                     .set(config.getKeyword(SchemaKeyword.TAG_PROPERTIES), context.getGeneratorConfig().createObjectNode()
                             .set(accessProperty, context.createDefinitionReference(generic))));
         };
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_7)
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
                 .with(customDefinitionProvider)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(TestCircularClass1.class);
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                loadResource("circular-custom-definition.json"), result.toString(), JSONCompareMode.STRICT);
+                loadResource("circular-custom-definition-" + schemaVersion.name() + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 
     private static String loadResource(String resourcePath) throws IOException {

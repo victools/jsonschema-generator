@@ -71,6 +71,7 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
      * @param schemaVersion designated JSON Schema version
      */
     private void initConfigBuilder(SchemaVersion schemaVersion) {
+        this.prepareContextForVersion(schemaVersion);
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion, new OptionPreset());
         this.fieldConfigPart = Mockito.spy(configBuilder.forFields());
         this.methodConfigPart = Mockito.spy(configBuilder.forMethods());
