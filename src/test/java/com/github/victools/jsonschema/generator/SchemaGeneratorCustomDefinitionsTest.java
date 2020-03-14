@@ -53,7 +53,8 @@ public class SchemaGeneratorCustomDefinitionsTest {
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(Integer.class);
         Assert.assertEquals(1, result.size());
-        Assert.assertEquals(schemaVersion.get(SchemaKeyword.TAG_TYPE_STRING), result.get(schemaVersion.get(SchemaKeyword.TAG_TYPE)).asText());
+        Assert.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(schemaVersion),
+                result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
     }
 
     @Test
@@ -77,14 +78,15 @@ public class SchemaGeneratorCustomDefinitionsTest {
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(ArrayList.class, String.class);
         Assert.assertEquals(2, result.size());
-        Assert.assertEquals(schemaVersion.get(SchemaKeyword.TAG_TYPE_OBJECT), result.get(schemaVersion.get(SchemaKeyword.TAG_TYPE)).asText());
-        Assert.assertNotNull(result.get(schemaVersion.get(SchemaKeyword.TAG_PROPERTIES)));
-        Assert.assertNotNull(result.get(schemaVersion.get(SchemaKeyword.TAG_PROPERTIES)).get(accessProperty));
-        JsonNode accessPropertyType = result.get(schemaVersion.get(SchemaKeyword.TAG_PROPERTIES))
-                .get(accessProperty).get(schemaVersion.get(SchemaKeyword.TAG_TYPE));
+        Assert.assertEquals(SchemaKeyword.TAG_TYPE_OBJECT.forVersion(schemaVersion),
+                result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
+        Assert.assertNotNull(result.get(SchemaKeyword.TAG_PROPERTIES.forVersion(schemaVersion)));
+        Assert.assertNotNull(result.get(SchemaKeyword.TAG_PROPERTIES.forVersion(schemaVersion)).get(accessProperty));
+        JsonNode accessPropertyType = result.get(SchemaKeyword.TAG_PROPERTIES.forVersion(schemaVersion))
+                .get(accessProperty).get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion));
         Assert.assertNotNull(accessPropertyType);
-        Assert.assertEquals(schemaVersion.get(SchemaKeyword.TAG_TYPE_STRING), accessPropertyType.get(0).asText());
-        Assert.assertEquals(schemaVersion.get(SchemaKeyword.TAG_TYPE_NULL), accessPropertyType.get(1).asText());
+        Assert.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(schemaVersion), accessPropertyType.get(0).asText());
+        Assert.assertEquals(SchemaKeyword.TAG_TYPE_NULL.forVersion(schemaVersion), accessPropertyType.get(1).asText());
     }
 
     @Test
@@ -108,7 +110,8 @@ public class SchemaGeneratorCustomDefinitionsTest {
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(Integer.class);
         Assert.assertEquals(2, result.size());
-        Assert.assertEquals(schemaVersion.get(SchemaKeyword.TAG_TYPE_INTEGER), result.get(schemaVersion.get(SchemaKeyword.TAG_TYPE)).asText());
+        Assert.assertEquals(SchemaKeyword.TAG_TYPE_INTEGER.forVersion(schemaVersion),
+                result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
         Assert.assertEquals("custom override of Integer", result.get("$comment").asText());
     }
 

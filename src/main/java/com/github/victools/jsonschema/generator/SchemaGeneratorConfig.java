@@ -44,7 +44,7 @@ public interface SchemaGeneratorConfig {
      * @param keyword reference to a tag name or value
      * @return referenced tag name/value in the designated schema version
      * @see #getSchemaVersion()
-     * @see SchemaVersion#get(SchemaKeyword)
+     * @see SchemaKeyword#forVersion(SchemaVersion)
      */
     String getKeyword(SchemaKeyword keyword);
 

@@ -70,7 +70,8 @@ public class SchemaGeneratorSimpleTypesTest {
             Assert.assertTrue(result.isEmpty());
         } else {
             Assert.assertEquals(1, result.size());
-            Assert.assertEquals(schemaVersion.get(expectedJsonSchemaType), result.get(schemaVersion.get(SchemaKeyword.TAG_TYPE)).asText());
+            Assert.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
+                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
         }
     }
 
@@ -87,7 +88,8 @@ public class SchemaGeneratorSimpleTypesTest {
             Assert.assertTrue(result.isEmpty());
         } else {
             Assert.assertEquals(1, result.size());
-            Assert.assertEquals(schemaVersion.get(expectedJsonSchemaType), result.get(schemaVersion.get(SchemaKeyword.TAG_TYPE)).asText());
+            Assert.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
+                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
         }
     }
 }

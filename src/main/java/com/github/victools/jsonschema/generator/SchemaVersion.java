@@ -42,14 +42,4 @@ public enum SchemaVersion {
     public String getIdentifier() {
         return this.identifier;
     }
-
-    /**
-     * Get the given keyword's value for this particular schema version.
-     *
-     * @param keyword reference to a tag name or value
-     * @return referenced tag name/value in this schema version
-     */
-    public String get(SchemaKeyword keyword) {
-        return keyword.forVersion(this);
-    }
 }

@@ -97,7 +97,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
 
     @Override
     public String getKeyword(SchemaKeyword keyword) {
-        return this.schemaVersion.get(keyword);
+        return keyword.forVersion(this.getSchemaVersion());
     }
 
     @Override

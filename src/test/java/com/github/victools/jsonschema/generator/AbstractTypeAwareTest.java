@@ -51,7 +51,7 @@ public class AbstractTypeAwareTest {
         Mockito.when(this.context.getTypeContext()).thenReturn(typeContext);
         Mockito.when(this.context.getGeneratorConfig().getSchemaVersion()).thenReturn(schemaVersion);
 
-        Answer<String> keywordLookup = invocation -> schemaVersion.get(invocation.getArgument(0));
+        Answer<String> keywordLookup = invocation -> ((SchemaKeyword) invocation.getArgument(0)).forVersion(schemaVersion);
         Mockito.when(this.context.getGeneratorConfig().getKeyword(Mockito.any())).thenAnswer(keywordLookup);
         Mockito.when(this.context.getKeyword(Mockito.any())).thenAnswer(keywordLookup);
     }

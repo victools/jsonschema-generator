@@ -179,7 +179,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setTitle(ObjectNode node, String title) {
         if (title != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_TITLE), title);
+            node.put(SchemaKeyword.TAG_TITLE.forVersion(SchemaVersion.DRAFT_7), title);
         }
         return this;
     }
@@ -210,7 +210,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setDescription(ObjectNode node, String description) {
         if (description != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_DESCRIPTION), description);
+            node.put(SchemaKeyword.TAG_DESCRIPTION.forVersion(SchemaVersion.DRAFT_7), description);
         }
         return this;
     }
@@ -241,7 +241,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setDefault(ObjectNode node, Object defaultValue) {
         if (defaultValue != null) {
-            final String defaultTag = SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_DEFAULT);
+            final String defaultTag = SchemaKeyword.TAG_DEFAULT.forVersion(SchemaVersion.DRAFT_7);
             // need to specifically add simple/primitive values by type
             if (defaultValue instanceof String) {
                 node.put(defaultTag, (String) defaultValue);
@@ -318,9 +318,9 @@ public class AttributeCollector {
             if (values.size() == 1) {
                 Object singleValue = values.get(0);
                 if (singleValue instanceof String) {
-                    node.put(schemaVersion.get(SchemaKeyword.TAG_CONST), (String) singleValue);
+                    node.put(SchemaKeyword.TAG_CONST.forVersion(schemaVersion), (String) singleValue);
                 } else {
-                    node.putPOJO(schemaVersion.get(SchemaKeyword.TAG_CONST), singleValue);
+                    node.putPOJO(SchemaKeyword.TAG_CONST.forVersion(schemaVersion), singleValue);
                 }
             } else if (!values.isEmpty()) {
                 ArrayNode array = node.arrayNode();
@@ -331,7 +331,7 @@ public class AttributeCollector {
                         array.addPOJO(singleValue);
                     }
                 }
-                node.set(schemaVersion.get(SchemaKeyword.TAG_ENUM), array);
+                node.set(SchemaKeyword.TAG_ENUM.forVersion(schemaVersion), array);
             }
         }
         return this;
@@ -460,7 +460,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setStringMinLength(ObjectNode node, Integer minLength) {
         if (minLength != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_LENGTH_MIN), minLength);
+            node.put(SchemaKeyword.TAG_LENGTH_MIN.forVersion(SchemaVersion.DRAFT_7), minLength);
         }
         return this;
     }
@@ -491,7 +491,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setStringMaxLength(ObjectNode node, Integer maxLength) {
         if (maxLength != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_LENGTH_MAX), maxLength);
+            node.put(SchemaKeyword.TAG_LENGTH_MAX.forVersion(SchemaVersion.DRAFT_7), maxLength);
         }
         return this;
     }
@@ -522,7 +522,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setStringFormat(ObjectNode node, String format) {
         if (format != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_FORMAT), format);
+            node.put(SchemaKeyword.TAG_FORMAT.forVersion(SchemaVersion.DRAFT_7), format);
         }
         return this;
     }
@@ -553,7 +553,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setStringPattern(ObjectNode node, String pattern) {
         if (pattern != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_PATTERN), pattern);
+            node.put(SchemaKeyword.TAG_PATTERN.forVersion(SchemaVersion.DRAFT_7), pattern);
         }
         return this;
     }
@@ -584,7 +584,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setNumberInclusiveMinimum(ObjectNode node, BigDecimal inclusiveMinimum) {
         if (inclusiveMinimum != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MINIMUM), inclusiveMinimum);
+            node.put(SchemaKeyword.TAG_MINIMUM.forVersion(SchemaVersion.DRAFT_7), inclusiveMinimum);
         }
         return this;
     }
@@ -615,7 +615,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setNumberExclusiveMinimum(ObjectNode node, BigDecimal exclusiveMinimum) {
         if (exclusiveMinimum != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MINIMUM_EXCLUSIVE), exclusiveMinimum);
+            node.put(SchemaKeyword.TAG_MINIMUM_EXCLUSIVE.forVersion(SchemaVersion.DRAFT_7), exclusiveMinimum);
         }
         return this;
     }
@@ -646,7 +646,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setNumberInclusiveMaximum(ObjectNode node, BigDecimal inclusiveMaximum) {
         if (inclusiveMaximum != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MAXIMUM), inclusiveMaximum);
+            node.put(SchemaKeyword.TAG_MAXIMUM.forVersion(SchemaVersion.DRAFT_7), inclusiveMaximum);
         }
         return this;
     }
@@ -677,7 +677,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setNumberExclusiveMaximum(ObjectNode node, BigDecimal exclusiveMaximum) {
         if (exclusiveMaximum != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MAXIMUM_EXCLUSIVE), exclusiveMaximum);
+            node.put(SchemaKeyword.TAG_MAXIMUM_EXCLUSIVE.forVersion(SchemaVersion.DRAFT_7), exclusiveMaximum);
         }
         return this;
     }
@@ -708,7 +708,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setNumberMultipleOf(ObjectNode node, BigDecimal multipleOf) {
         if (multipleOf != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_MULTIPLE_OF), multipleOf);
+            node.put(SchemaKeyword.TAG_MULTIPLE_OF.forVersion(SchemaVersion.DRAFT_7), multipleOf);
         }
         return this;
     }
@@ -739,7 +739,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setArrayMinItems(ObjectNode node, Integer minItemCount) {
         if (minItemCount != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ITEMS_MIN), minItemCount);
+            node.put(SchemaKeyword.TAG_ITEMS_MIN.forVersion(SchemaVersion.DRAFT_7), minItemCount);
         }
         return this;
     }
@@ -770,7 +770,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setArrayMaxItems(ObjectNode node, Integer maxItemCount) {
         if (maxItemCount != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ITEMS_MAX), maxItemCount);
+            node.put(SchemaKeyword.TAG_ITEMS_MAX.forVersion(SchemaVersion.DRAFT_7), maxItemCount);
         }
         return this;
     }
@@ -801,7 +801,7 @@ public class AttributeCollector {
     @Deprecated
     public AttributeCollector setArrayUniqueItems(ObjectNode node, Boolean uniqueItems) {
         if (uniqueItems != null) {
-            node.put(SchemaVersion.DRAFT_7.get(SchemaKeyword.TAG_ITEMS_UNIQUE), uniqueItems);
+            node.put(SchemaKeyword.TAG_ITEMS_UNIQUE.forVersion(SchemaVersion.DRAFT_7), uniqueItems);
         }
         return this;
     }
