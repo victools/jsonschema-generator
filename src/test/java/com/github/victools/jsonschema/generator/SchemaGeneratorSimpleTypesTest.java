@@ -63,7 +63,7 @@ public class SchemaGeneratorSimpleTypesTest {
     @Parameters
     public void testGenerateSchema_SimpleType(Class<?> targetType, SchemaKeyword expectedJsonSchemaType, SchemaVersion schemaVersion)
             throws Exception {
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper()).build();
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion).build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(targetType);
         if (expectedJsonSchemaType == null) {
@@ -79,7 +79,7 @@ public class SchemaGeneratorSimpleTypesTest {
     @Parameters(method = "parametersForTestGenerateSchema_SimpleType")
     public void testGenerateSchema_SimpleType_withAdditionalPropertiesOption(Class<?> targetType, SchemaKeyword expectedJsonSchemaType,
             SchemaVersion schemaVersion) throws Exception {
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper())
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
                 .with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);

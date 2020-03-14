@@ -44,19 +44,20 @@ public class SchemaGeneratorSubtypesTest {
 
     Object parametersForTestGenerateSchema() {
         return new Object[][]{
-            {"testclass-withsupertypereferences-NO_SUBTYPES", Collections.emptyList()},
-            {"testclass-withsupertypereferences-ONE_SUBTYPE_VALID", Collections.singletonList(TestSubClass1.class)},
-            {"testclass-withsupertypereferences-ONE_SUBTYPE_INVALID", Collections.singletonList(TestSubClass3.class)},
-            {"testclass-withsupertypereferences-TWO_SUBTYPES", Arrays.asList(TestSubClass2.class, TestSubClass3.class)},
-            {"testclass-withsupertypereferences-THREE_SUBTYPES", Arrays.asList(TestSubClass1.class, TestSubClass2.class, TestSubClass3.class)}
+            {"testclass-withsupertypereferences-NO_SUBTYPES", Collections.emptyList(), SchemaVersion.DRAFT_7},
+            {"testclass-withsupertypereferences-ONE_SUBTYPE_VALID", Collections.singletonList(TestSubClass1.class), SchemaVersion.DRAFT_7},
+            {"testclass-withsupertypereferences-ONE_SUBTYPE_INVALID", Collections.singletonList(TestSubClass3.class), SchemaVersion.DRAFT_7},
+            {"testclass-withsupertypereferences-TWO_SUBTYPES", Arrays.asList(TestSubClass2.class, TestSubClass3.class), SchemaVersion.DRAFT_7},
+            {"testclass-withsupertypereferences-THREE_SUBTYPES", Arrays.asList(TestSubClass1.class, TestSubClass2.class, TestSubClass3.class),
+                SchemaVersion.DRAFT_7}
         };
     }
 
     @Test
     @Parameters
     @TestCaseName(value = "{method}({0}) [{index}]")
-    public void testGenerateSchema(String caseTitle, List<Class<?>> subtypes) throws Exception {
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), OptionPreset.PLAIN_JSON)
+    public void testGenerateSchema(String caseTitle, List<Class<?>> subtypes, SchemaVersion schemaVersion) throws Exception {
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion, OptionPreset.PLAIN_JSON)
                 .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_FIELDS_BY_DEFAULT);
         configBuilder.forTypesInGeneral()
                 .withSubtypeResolver(new TestSubtypeResolver(subtypes))

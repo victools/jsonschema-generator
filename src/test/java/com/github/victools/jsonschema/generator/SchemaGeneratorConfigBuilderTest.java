@@ -30,7 +30,7 @@ public class SchemaGeneratorConfigBuilderTest {
 
     @Before
     public void setUp() {
-        this.builder = new SchemaGeneratorConfigBuilder(new ObjectMapper());
+        this.builder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_2019_09);
     }
 
     @Test
