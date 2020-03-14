@@ -35,16 +35,16 @@ import java.util.stream.Stream;
  */
 public enum Option {
     /**
-     * Whether the "{@value SchemaConstants#TAG_SCHEMA}" attribute with value "{@value SchemaConstants#TAG_SCHEMA_DRAFT7}" should be included.
+     * Whether the {@link SchemaKeyword#TAG_SCHEMA} attribute with {@link SchemaKeyword#TAG_SCHEMA_VALUE} should be included.
      */
     SCHEMA_VERSION_INDICATOR(null, null),
     /**
-     * Whether additional types (and not just primitives and their associated classes should be included as fixed schema with a "type" attribute of
-     * "string"/"boolean"/"integer"/"number".
+     * Whether additional types (and not just primitives and their associated classes should be included as fixed schema with a
+     * {@link SchemaKeyword#TAG_TYPE} attribute of "string"/"boolean"/"integer"/"number".
      */
     ADDITIONAL_FIXED_TYPES(SimpleTypeModule::forPrimitiveAndAdditionalTypes, SimpleTypeModule::forPrimitiveTypes),
     /**
-     * Whether enums should be treated as "{@value SchemaConstants#TAG_TYPE_OBJECT}", with all methods but {@link Enum#name() name()} being excluded.
+     * Whether enums should be treated as {@link SchemaKeyword#TAG_TYPE_OBJECT}, with all methods but {@link Enum#name() name()} being excluded.
      * <br>
      * This only takes effect if {@link Option#FLATTENED_ENUMS} and {@link Option#FLATTENED_ENUMS_FROM_TOSTRING} are disabled.
      *
@@ -53,7 +53,7 @@ public enum Option {
      */
     SIMPLIFIED_ENUMS(EnumModule::asObjects, null),
     /**
-     * Whether enums should be treated as plain "{@value SchemaConstants#TAG_TYPE_STRING}" values – derived from their respective constant name.
+     * Whether enums should be treated as plain {@link SchemaKeyword#TAG_TYPE_STRING} values – derived from their respective constant name.
      * <br>
      * This only takes effect if {@link Option#FLATTENED_ENUMS_FROM_TOSTRING} is disabled but takes priority over {@link Option#SIMPLIFIED_ENUMS}.
      *
@@ -62,7 +62,7 @@ public enum Option {
      */
     FLATTENED_ENUMS(EnumModule::asStringsFromName, null, Option.SIMPLIFIED_ENUMS),
     /**
-     * Whether enums should be treated as plain "{@value SchemaConstants#TAG_TYPE_STRING}" values – derived from their respective {@code toString()}.
+     * Whether enums should be treated as plain {@link SchemaKeyword#TAG_TYPE_STRING} values – derived from their respective {@code toString()}.
      * <br>
      * This takes priority over both {@link Option#FLATTENED_ENUMS} and {@link Option#SIMPLIFIED_ENUMS}.
      *

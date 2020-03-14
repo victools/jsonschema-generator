@@ -23,9 +23,9 @@ import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
-import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import java.util.List;
 import java.util.function.Function;
@@ -149,9 +149,9 @@ public class EnumModule implements Module {
         public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
             if (javaType.isInstanceOf(Enum.class)) {
                 ObjectNode customNode = this.objectMapper.createObjectNode()
-                        .put(SchemaConstants.TAG_TYPE, SchemaConstants.TAG_TYPE_STRING);
+                        .put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_STRING));
                 new AttributeCollector(this.objectMapper)
-                        .setEnum(customNode, EnumModule.extractEnumValues(javaType, this.enumConstantToString));
+                        .setEnum(customNode, EnumModule.extractEnumValues(javaType, this.enumConstantToString), context);
                 return new CustomDefinition(customNode);
             }
             return null;

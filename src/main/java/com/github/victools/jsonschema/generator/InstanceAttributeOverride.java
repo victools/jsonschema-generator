@@ -28,7 +28,7 @@ public interface InstanceAttributeOverride<M extends MemberScope<?, ?>> {
     /**
      * Add/remove attributes on the given JSON Schema node – this is specifically intended for attributes relating to a particular instance.
      * <br>
-     * E.g. "{@value SchemaConstants#TAG_DESCRIPTION}", "{@value SchemaConstants#TAG_MINIMUM}", "{@value SchemaConstants#TAG_MAXIMUM_EXCLUSIVE}"
+     * E.g. {@link SchemaKeyword#TAG_DESCRIPTION}, {@link SchemaKeyword#TAG_MINIMUM}, {@link SchemaKeyword#TAG_MAXIMUM_EXCLUSIVE}
      *
      * @param jsonSchemaAttributesNode node to modify
      * @param member reference/context to which the collected attributes in the JSON Schema node are referring

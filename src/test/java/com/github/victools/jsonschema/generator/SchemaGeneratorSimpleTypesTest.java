@@ -18,6 +18,8 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.EnumSet;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -31,47 +33,53 @@ import org.junit.runner.RunWith;
 public class SchemaGeneratorSimpleTypesTest {
 
     Object parametersForTestGenerateSchema_SimpleType() {
-        return new Object[][]{
+        Object[][] typeCombinations = new Object[][]{
             {Object.class, null},
-            {String.class, SchemaConstants.TAG_TYPE_STRING},
-            {Character.class, SchemaConstants.TAG_TYPE_STRING},
-            {char.class, SchemaConstants.TAG_TYPE_STRING},
-            {CharSequence.class, SchemaConstants.TAG_TYPE_STRING},
-            {Boolean.class, SchemaConstants.TAG_TYPE_BOOLEAN},
-            {boolean.class, SchemaConstants.TAG_TYPE_BOOLEAN},
-            {Integer.class, SchemaConstants.TAG_TYPE_INTEGER},
-            {int.class, SchemaConstants.TAG_TYPE_INTEGER},
-            {Long.class, SchemaConstants.TAG_TYPE_INTEGER},
-            {long.class, SchemaConstants.TAG_TYPE_INTEGER},
-            {Short.class, SchemaConstants.TAG_TYPE_INTEGER},
-            {short.class, SchemaConstants.TAG_TYPE_INTEGER},
-            {Byte.class, SchemaConstants.TAG_TYPE_INTEGER},
-            {byte.class, SchemaConstants.TAG_TYPE_INTEGER},
-            {Double.class, SchemaConstants.TAG_TYPE_NUMBER},
-            {double.class, SchemaConstants.TAG_TYPE_NUMBER},
-            {Float.class, SchemaConstants.TAG_TYPE_NUMBER},
-            {float.class, SchemaConstants.TAG_TYPE_NUMBER}
+            {String.class, SchemaKeyword.TAG_TYPE_STRING},
+            {Character.class, SchemaKeyword.TAG_TYPE_STRING},
+            {char.class, SchemaKeyword.TAG_TYPE_STRING},
+            {CharSequence.class, SchemaKeyword.TAG_TYPE_STRING},
+            {Boolean.class, SchemaKeyword.TAG_TYPE_BOOLEAN},
+            {boolean.class, SchemaKeyword.TAG_TYPE_BOOLEAN},
+            {Integer.class, SchemaKeyword.TAG_TYPE_INTEGER},
+            {int.class, SchemaKeyword.TAG_TYPE_INTEGER},
+            {Long.class, SchemaKeyword.TAG_TYPE_INTEGER},
+            {long.class, SchemaKeyword.TAG_TYPE_INTEGER},
+            {Short.class, SchemaKeyword.TAG_TYPE_INTEGER},
+            {short.class, SchemaKeyword.TAG_TYPE_INTEGER},
+            {Byte.class, SchemaKeyword.TAG_TYPE_INTEGER},
+            {byte.class, SchemaKeyword.TAG_TYPE_INTEGER},
+            {Double.class, SchemaKeyword.TAG_TYPE_NUMBER},
+            {double.class, SchemaKeyword.TAG_TYPE_NUMBER},
+            {Float.class, SchemaKeyword.TAG_TYPE_NUMBER},
+            {float.class, SchemaKeyword.TAG_TYPE_NUMBER}
         };
+        return EnumSet.allOf(SchemaVersion.class).stream()
+                .flatMap(schemaVersion -> Arrays.stream(typeCombinations).map(entry -> new Object[]{entry[0], entry[1], schemaVersion}))
+                .toArray();
     }
 
     @Test
     @Parameters
-    public void testGenerateSchema_SimpleType(Class<?> targetType, String expectedJsonSchemaType) throws Exception {
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper()).build();
+    public void testGenerateSchema_SimpleType(Class<?> targetType, SchemaKeyword expectedJsonSchemaType, SchemaVersion schemaVersion)
+            throws Exception {
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion).build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(targetType);
         if (expectedJsonSchemaType == null) {
             Assert.assertTrue(result.isEmpty());
         } else {
             Assert.assertEquals(1, result.size());
-            Assert.assertEquals(expectedJsonSchemaType, result.get(SchemaConstants.TAG_TYPE).asText());
+            Assert.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
+                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
         }
     }
 
     @Test
     @Parameters(method = "parametersForTestGenerateSchema_SimpleType")
-    public void testGenerateSchema_SimpleType_withAdditionalPropertiesOption(Class<?> targetType, String expectedJsonSchemaType) throws Exception {
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper())
+    public void testGenerateSchema_SimpleType_withAdditionalPropertiesOption(Class<?> targetType, SchemaKeyword expectedJsonSchemaType,
+            SchemaVersion schemaVersion) throws Exception {
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
                 .with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
@@ -80,7 +88,8 @@ public class SchemaGeneratorSimpleTypesTest {
             Assert.assertTrue(result.isEmpty());
         } else {
             Assert.assertEquals(1, result.size());
-            Assert.assertEquals(expectedJsonSchemaType, result.get(SchemaConstants.TAG_TYPE).asText());
+            Assert.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
+                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
         }
     }
 }

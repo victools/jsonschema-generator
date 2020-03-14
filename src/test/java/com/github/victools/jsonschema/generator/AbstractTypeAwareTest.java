@@ -22,8 +22,8 @@ import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.classmate.members.ResolvedMethod;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.util.stream.Stream;
-import org.junit.Before;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 
 /**
  * Abstract test class catering for the type resolution of a dummy/test class to perform tests against introspected fields/methods.
@@ -38,13 +38,22 @@ public class AbstractTypeAwareTest {
         this.testClass = testClass;
     }
 
-    @Before
-    public final void abstractSetUp() {
+    /**
+     * Override generation context mock methods that are version dependent.
+     *
+     * @param schemaVersion designated JSON Schema version
+     */
+    protected void prepareContextForVersion(SchemaVersion schemaVersion) {
         TypeContext typeContext = TypeContextFactory.createDefaultTypeContext();
         ResolvedType resolvedTestClass = typeContext.resolve(this.testClass);
         this.testClassMembers = typeContext.resolveWithMembers(resolvedTestClass);
-        this.context = Mockito.mock(SchemaGenerationContext.class);
+        this.context = Mockito.mock(SchemaGenerationContext.class, Mockito.RETURNS_DEEP_STUBS);
         Mockito.when(this.context.getTypeContext()).thenReturn(typeContext);
+        Mockito.when(this.context.getGeneratorConfig().getSchemaVersion()).thenReturn(schemaVersion);
+
+        Answer<String> keywordLookup = invocation -> ((SchemaKeyword) invocation.getArgument(0)).forVersion(schemaVersion);
+        Mockito.when(this.context.getGeneratorConfig().getKeyword(Mockito.any())).thenAnswer(keywordLookup);
+        Mockito.when(this.context.getKeyword(Mockito.any())).thenAnswer(keywordLookup);
     }
 
     protected SchemaGenerationContext getContext() {

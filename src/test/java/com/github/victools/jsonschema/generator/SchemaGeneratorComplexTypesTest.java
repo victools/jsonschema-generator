@@ -136,13 +136,14 @@ public class SchemaGeneratorComplexTypesTest {
     @Parameters
     @TestCaseName(value = "{method}({0}) [{index}]")
     public void testGenerateSchema(String caseTitle, OptionPreset preset, Class<?> targetType, Module testModule) throws Exception {
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), preset);
+        final SchemaVersion schemaVersion = SchemaVersion.DRAFT_7;
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion, preset);
         configBuilder.with(testModule);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(targetType);
         // ensure that the generated definition keys are valid URIs without any characters requiring encoding
-        JsonNode definitions = result.get(SchemaConstants.TAG_DEFINITIONS);
+        JsonNode definitions = result.get(SchemaKeyword.TAG_DEFINITIONS.forVersion(schemaVersion));
         if (definitions instanceof ObjectNode) {
             Iterator<String> definitionKeys = ((ObjectNode) definitions).fieldNames();
             while (definitionKeys.hasNext()) {

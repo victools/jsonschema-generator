@@ -32,6 +32,23 @@ import java.util.Map;
 public interface SchemaGeneratorConfig {
 
     /**
+     * Getter for the designated JSON Schema version.
+     *
+     * @return target version of the JSON Schema to generate
+     */
+    SchemaVersion getSchemaVersion();
+
+    /**
+     * Getter for the indicated keyword's value in the designated JSON Schema version.
+     *
+     * @param keyword reference to a tag name or value
+     * @return referenced tag name/value in the designated schema version
+     * @see #getSchemaVersion()
+     * @see SchemaKeyword#forVersion(SchemaVersion)
+     */
+    String getKeyword(SchemaKeyword keyword);
+
+    /**
      * Determine whether all referenced objects should be listed in the schema's "definitions", even if they only occur once.
      *
      * @return whether to add a definition even for objects occurring only once
@@ -39,7 +56,7 @@ public interface SchemaGeneratorConfig {
     boolean shouldCreateDefinitionsForAllObjects();
 
     /**
-     * Determine whether the "{@value SchemaConstants#TAG_SCHEMA}" attribute with value "{@value SchemaConstants#TAG_SCHEMA_DRAFT7}" should be added.
+     * Determine whether the {@link SchemaKeyword#TAG_SCHEMA} attribute with {@link SchemaKeyword#TAG_SCHEMA_VALUE} should be added.
      *
      * @return whether to add the schema version attribute
      */
@@ -96,7 +113,7 @@ public interface SchemaGeneratorConfig {
             CustomDefinitionProviderV2 ignoredDefinitionProvider);
 
     /**
-     * Look-up a declared type's subtypes in order to list those specifically (in an "{@value SchemaConstants#TAG_ANYOF}").
+     * Look-up a declared type's subtypes in order to list those specifically (in an {@link SchemaKeyword#TAG_ANYOF}).
      *
      * @param javaType declared type to look-up subtypes for
      * @param context generation context (including a reference to the {@code TypeContext} for deriving a {@link ResolvedType} from a {@link Class})

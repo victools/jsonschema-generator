@@ -16,10 +16,11 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.function.Predicate;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -48,6 +49,7 @@ public class MethodExclusionModuleTest extends AbstractTypeAwareTest {
         this.builder = Mockito.mock(SchemaGeneratorConfigBuilder.class);
         this.methodConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
         Mockito.when(this.builder.forMethods()).thenReturn(this.methodConfigPart);
+        this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
     }
 
     @Test

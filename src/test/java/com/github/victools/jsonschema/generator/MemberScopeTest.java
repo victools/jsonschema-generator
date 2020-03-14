@@ -24,6 +24,7 @@ import java.util.Set;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,6 +36,11 @@ public class MemberScopeTest extends AbstractTypeAwareTest {
 
     public MemberScopeTest() {
         super(TestClass.class);
+    }
+
+    @Before
+    public void setUp() {
+        this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
     }
 
     @Test

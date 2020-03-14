@@ -28,18 +28,23 @@ import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaConstants;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
+import com.github.victools.jsonschema.generator.SchemaVersion;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 /**
  * Test for the {@link EnumModule} class.
  */
+@RunWith(JUnitParamsRunner.class)
 public class EnumModuleTest extends AbstractTypeAwareTest {
 
     private EnumModule instanceAsStringsFromName;
@@ -58,16 +63,27 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         this.instanceAsStringsFromName = EnumModule.asStringsFromName();
         this.instanceAsStringsFromToString = EnumModule.asStringsFromToString();
         this.instanceAsObjects = EnumModule.asObjects();
-        this.builder = Mockito.spy(new SchemaGeneratorConfigBuilder(new ObjectMapper(), new OptionPreset()));
-        this.fieldConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
-        this.methodConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
+    }
+
+    /**
+     * Initialise configuration builder instance for the given JSON Schema version.
+     *
+     * @param schemaVersion designated JSON Schema version
+     */
+    private void initConfigBuilder(SchemaVersion schemaVersion) {
+        this.prepareContextForVersion(schemaVersion);
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion, new OptionPreset());
+        this.fieldConfigPart = Mockito.spy(configBuilder.forFields());
+        this.methodConfigPart = Mockito.spy(configBuilder.forMethods());
+        this.builder = Mockito.spy(configBuilder);
         Mockito.when(this.builder.forFields()).thenReturn(this.fieldConfigPart);
         Mockito.when(this.builder.forMethods()).thenReturn(this.methodConfigPart);
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    public void testApplyToConfigBuilder_asStringsFromName() {
+    @Parameters(source = SchemaVersion.class)
+    public void testApplyToConfigBuilder_asStringsFromName(SchemaVersion schemaVersion) {
+        this.initConfigBuilder(schemaVersion);
         this.instanceAsStringsFromName.applyToConfigBuilder(this.builder);
 
         Mockito.verify(this.builder).getObjectMapper();
@@ -76,8 +92,9 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    public void testApplyToConfigBuilder_asStringsFromToString() {
+    @Parameters(source = SchemaVersion.class)
+    public void testApplyToConfigBuilder_asStringsFromToString(SchemaVersion schemaVersion) {
+        this.initConfigBuilder(schemaVersion);
         this.instanceAsStringsFromToString.applyToConfigBuilder(this.builder);
 
         Mockito.verify(this.builder).getObjectMapper();
@@ -86,8 +103,9 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    public void testApplyToConfigBuilder_asObjects() {
+    @Parameters(source = SchemaVersion.class)
+    public void testApplyToConfigBuilder_asObjects(SchemaVersion schemaVersion) {
+        this.initConfigBuilder(schemaVersion);
         this.instanceAsObjects.applyToConfigBuilder(this.builder);
 
         Mockito.verify(this.builder).forFields();
@@ -102,7 +120,9 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
     }
 
     @Test
-    public void testCustomSchemaDefinition_asStringsFromName() {
+    @Parameters(source = SchemaVersion.class)
+    public void testCustomSchemaDefinition_asStringsFromName(SchemaVersion schemaVersion) {
+        this.initConfigBuilder(schemaVersion);
         this.instanceAsStringsFromName.applyToConfigBuilder(this.builder);
         ArgumentCaptor<CustomDefinitionProviderV2> captor = ArgumentCaptor.forClass(CustomDefinitionProviderV2.class);
         Mockito.verify(this.builder).with(captor.capture());
@@ -113,11 +133,11 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         ObjectNode node = schemaDefinition.getValue();
         Assert.assertEquals(2, node.size());
 
-        JsonNode typeNode = node.get(SchemaConstants.TAG_TYPE);
+        JsonNode typeNode = node.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion));
         Assert.assertEquals(JsonNodeType.STRING, typeNode.getNodeType());
-        Assert.assertEquals(SchemaConstants.TAG_TYPE_STRING, typeNode.textValue());
+        Assert.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(schemaVersion), typeNode.textValue());
 
-        JsonNode enumNode = node.get(SchemaConstants.TAG_ENUM);
+        JsonNode enumNode = node.get(SchemaKeyword.TAG_ENUM.forVersion(schemaVersion));
         Assert.assertEquals(JsonNodeType.ARRAY, enumNode.getNodeType());
         Assert.assertEquals(3, ((ArrayNode) enumNode).size());
         Assert.assertEquals(JsonNodeType.STRING, enumNode.get(0).getNodeType());
@@ -129,7 +149,9 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
     }
 
     @Test
-    public void testCustomSchemaDefinition_asStringsFromToString() {
+    @Parameters(source = SchemaVersion.class)
+    public void testCustomSchemaDefinition_asStringsFromToString(SchemaVersion schemaVersion) {
+        this.initConfigBuilder(schemaVersion);
         this.instanceAsStringsFromToString.applyToConfigBuilder(this.builder);
         ArgumentCaptor<CustomDefinitionProviderV2> captor = ArgumentCaptor.forClass(CustomDefinitionProviderV2.class);
         Mockito.verify(this.builder).with(captor.capture());
@@ -140,11 +162,11 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         ObjectNode node = schemaDefinition.getValue();
         Assert.assertEquals(2, node.size());
 
-        JsonNode typeNode = node.get(SchemaConstants.TAG_TYPE);
+        JsonNode typeNode = node.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion));
         Assert.assertEquals(JsonNodeType.STRING, typeNode.getNodeType());
-        Assert.assertEquals(SchemaConstants.TAG_TYPE_STRING, typeNode.textValue());
+        Assert.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(schemaVersion), typeNode.textValue());
 
-        JsonNode enumNode = node.get(SchemaConstants.TAG_ENUM);
+        JsonNode enumNode = node.get(SchemaKeyword.TAG_ENUM.forVersion(schemaVersion));
         Assert.assertEquals(JsonNodeType.ARRAY, enumNode.getNodeType());
         Assert.assertEquals(3, ((ArrayNode) enumNode).size());
         Assert.assertEquals(JsonNodeType.STRING, enumNode.get(0).getNodeType());

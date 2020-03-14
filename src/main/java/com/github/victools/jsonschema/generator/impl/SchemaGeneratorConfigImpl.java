@@ -30,6 +30,8 @@ import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeAttributeOverride;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
@@ -48,6 +50,7 @@ import java.util.Set;
 public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
 
     private final ObjectMapper objectMapper;
+    private final SchemaVersion schemaVersion;
     private final Set<Option> enabledOptions;
     private final SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart;
     private final SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
@@ -57,17 +60,20 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      * Constructor of a configuration instance.
      *
      * @param objectMapper supplier for object and array nodes for the JSON structure being generated
+     * @param schemaVersion  designated JSON Schema version
      * @param enabledOptions enabled settings/options (either by default or explicitly set)
      * @param typesInGeneralConfigPart configuration part for context-independent attribute collection
      * @param fieldConfigPart configuration part for fields
      * @param methodConfigPart configuration part for methods
      */
     public SchemaGeneratorConfigImpl(ObjectMapper objectMapper,
+            SchemaVersion schemaVersion,
             Set<Option> enabledOptions,
             SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart,
             SchemaGeneratorConfigPart<FieldScope> fieldConfigPart,
             SchemaGeneratorConfigPart<MethodScope> methodConfigPart) {
         this.objectMapper = objectMapper;
+        this.schemaVersion = schemaVersion;
         this.enabledOptions = enabledOptions;
         this.typesInGeneralConfigPart = typesInGeneralConfigPart;
         this.fieldConfigPart = fieldConfigPart;
@@ -82,6 +88,16 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      */
     private boolean isOptionEnabled(Option setting) {
         return this.enabledOptions.contains(setting);
+    }
+
+    @Override
+    public SchemaVersion getSchemaVersion() {
+        return this.schemaVersion;
+    }
+
+    @Override
+    public String getKeyword(SchemaKeyword keyword) {
+        return keyword.forVersion(this.getSchemaVersion());
     }
 
     @Override

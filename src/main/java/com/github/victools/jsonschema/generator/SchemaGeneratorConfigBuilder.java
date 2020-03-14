@@ -33,6 +33,7 @@ public class SchemaGeneratorConfigBuilder {
 
     private final ObjectMapper objectMapper;
     private final OptionPreset preset;
+    private final SchemaVersion schemaVersion;
 
     private final Map<Option, Boolean> options = new HashMap<>();
     private final SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart = new SchemaGeneratorGeneralConfigPart();
@@ -40,24 +41,53 @@ public class SchemaGeneratorConfigBuilder {
     private final SchemaGeneratorConfigPart<MethodScope> methodConfigPart = new SchemaGeneratorConfigPart<>();
 
     /**
-     * Constructor of an empty configuration builder. This is equivalent to calling:<br>
-     * {@code new SchemaGeneratorConfigBuilder(objectMapper, OptionPreset.FULL_DOCUMENTATION)}
+     * Constructor of an empty configuration builder for a {@link SchemaVersion#DRAFT_7 Draft 7} schema. This is equivalent to calling:<br>
+     * {@code new SchemaGeneratorConfigBuilder(objectMapper, SchemaVersion.DRAFT_7, OptionPreset.FULL_DOCUMENTATION)}
      *
      * @param objectMapper supplier for object and array nodes for the JSON structure being generated
-     * @see #SchemaGeneratorConfigBuilder(ObjectMapper, OptionPreset)
+     * @see #SchemaGeneratorConfigBuilder(ObjectMapper, SchemaVersion, OptionPreset)
+     * @deprecated use {@link #SchemaGeneratorConfigBuilder(ObjectMapper, SchemaVersion)} instead
      */
+    @Deprecated
     public SchemaGeneratorConfigBuilder(ObjectMapper objectMapper) {
-        this(objectMapper, OptionPreset.FULL_DOCUMENTATION);
+        this(objectMapper, SchemaVersion.DRAFT_7, OptionPreset.FULL_DOCUMENTATION);
+    }
+
+    /**
+     * Constructor of an empty configuration builder. This is equivalent to calling:<br>
+     * {@code new SchemaGeneratorConfigBuilder(objectMapper, schemaVersion, OptionPreset.FULL_DOCUMENTATION)}
+     *
+     * @param objectMapper supplier for object and array nodes for the JSON structure being generated
+     * @param schemaVersion designated JSON Schema version
+     * @see #SchemaGeneratorConfigBuilder(ObjectMapper, SchemaVersion, OptionPreset)
+     */
+    public SchemaGeneratorConfigBuilder(ObjectMapper objectMapper, SchemaVersion schemaVersion) {
+        this(objectMapper, schemaVersion, OptionPreset.FULL_DOCUMENTATION);
+    }
+
+    /**
+     * Constructor of an empty configuration builder for a {@link SchemaVersion#DRAFT_7 Draft 7} schema. This is equivalent to calling:<br>
+     * {@code new SchemaGeneratorConfigBuilder(objectMapper, SchemaVersion.DRAFT_7, preset)}
+     *
+     * @param objectMapper supplier for object and array nodes for the JSON structure being generated
+     * @param preset default settings for standard {@link Option} values
+     * @deprecated use {@link #SchemaGeneratorConfigBuilder(ObjectMapper, SchemaVersion, OptionPreset)} instead
+     */
+    @Deprecated
+    public SchemaGeneratorConfigBuilder(ObjectMapper objectMapper, OptionPreset preset) {
+        this(objectMapper, SchemaVersion.DRAFT_7, preset);
     }
 
     /**
      * Constructor of an empty configuration builder.
      *
      * @param objectMapper supplier for object and array nodes for the JSON structure being generated
+     * @param schemaVersion designated JSON Schema version
      * @param preset default settings for standard {@link Option} values
      */
-    public SchemaGeneratorConfigBuilder(ObjectMapper objectMapper, OptionPreset preset) {
+    public SchemaGeneratorConfigBuilder(ObjectMapper objectMapper, SchemaVersion schemaVersion, OptionPreset preset) {
         this.objectMapper = objectMapper;
+        this.schemaVersion = schemaVersion;
         this.preset = preset;
     }
 
@@ -84,6 +114,7 @@ public class SchemaGeneratorConfigBuilder {
         enabledOptions.retainAll(validOptions.keySet());
         // construct the actual configuration instance
         return new SchemaGeneratorConfigImpl(this.objectMapper,
+                this.schemaVersion,
                 enabledOptions,
                 this.typesInGeneralConfigPart,
                 this.fieldConfigPart,

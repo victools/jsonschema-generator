@@ -16,10 +16,11 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.function.Predicate;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -48,6 +49,7 @@ public class FieldExclusionModuleTest extends AbstractTypeAwareTest {
         this.builder = Mockito.mock(SchemaGeneratorConfigBuilder.class);
         this.fieldConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
         Mockito.when(builder.forFields()).thenReturn(this.fieldConfigPart);
+        this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
     }
 
     @Test

@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -34,6 +35,11 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
 
     public MethodScopeTest() {
         super(TestClass.class);
+    }
+
+    @Before
+    public void setUp() {
+        this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
     }
 
     Object parametersForTestFindGetterField() {

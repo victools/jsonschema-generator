@@ -139,7 +139,7 @@ public class TypeContext {
     }
 
     /**
-     * Determine whether a given type should be treated as "{@value SchemaConstants#TAG_TYPE_ARRAY}" in the generated schema.
+     * Determine whether a given type should be treated as {@link SchemaKeyword#TAG_TYPE_ARRAY} in the generated schema.
      *
      * @param type type to check
      * @return whether the given type is an array or sub type of {@link Collection}
@@ -149,7 +149,7 @@ public class TypeContext {
     }
 
     /**
-     * Identify the element/item type of the given "{@value SchemaConstants#TAG_TYPE_ARRAY}".
+     * Identify the element/item type of the given {@link SchemaKeyword#TAG_TYPE_ARRAY}.
      *
      * @param containerType type to extract type of element/item from
      * @return type of elements/items

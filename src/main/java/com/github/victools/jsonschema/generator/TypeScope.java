@@ -71,7 +71,7 @@ public class TypeScope {
     }
 
     /**
-     * Determine whether this targeted type should be treated as "{@value SchemaConstants#TAG_TYPE_ARRAY}" in the generated schema.
+     * Determine whether this targeted type should be treated as {@link SchemaKeyword#TAG_TYPE_ARRAY} in the generated schema.
      * <br>
      * This is equivalent to calling: {@code scope.getContext().isContainerType(scope.getType())}
      *
@@ -83,7 +83,7 @@ public class TypeScope {
     }
 
     /**
-     * Identify the element/item type of the given "{@value SchemaConstants#TAG_TYPE_ARRAY}".
+     * Identify the element/item type of the given {@link SchemaKeyword#TAG_TYPE_ARRAY}.
      * <br>
      * This is equivalent to calling: {@code scope.getContext().getContainerItemType(scope.getType())}
      *
