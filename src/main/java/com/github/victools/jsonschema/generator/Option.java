@@ -201,11 +201,19 @@ public enum Option {
      */
     FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT(AdditionalPropertiesModule::forbiddenForAllObjectsButContainers, null),
     /**
-     * Whether all referenced objects should be listed in the schema's "definitions", otherwise single occurrences are defined in-line.
+     * Whether all referenced objects should be listed in the schema's "definitions"/"$defs", otherwise single occurrences are defined in-line.
      * <br>
      * Default: false (disabled)
      */
-    DEFINITIONS_FOR_ALL_OBJECTS(null, null);
+    DEFINITIONS_FOR_ALL_OBJECTS(null, null),
+    /**
+     * Whether as the last step of the schema generation, unnecessary "allOf" elements (i.e. where there are no conflicts/overlaps between the
+     * contained sub-schemas) should be merged into one, in order to make the generated schema more readable. This also applies to manually added
+     * "allOf" elements, e.g. through custom definitions or attribute overrides.
+     * <br>
+     * Default: false (disabled)
+     */
+    ALLOF_CLEANUP_AT_THE_END(null, null);
 
     /**
      * Optional: the module realising the setting/option if it is enabled.

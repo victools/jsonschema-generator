@@ -8,9 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Explicit indication of targeted JSON Schema version (for now: Draft 7 or 2019-09)
 - Support for renamed keywords between Draft versions through new `SchemaKeyword` enum (replacing static `SchemaConstants` interface)
+- Support for `$ref` alongside other attributes (from Draft 2019-09 onwards) thereby reducing number of `allOf` elements
+- Introduce `Option.ALLOF_CLEANUP_AT_THE_END` (also included in all standard `OptionPreset`s) for toggling-off this improvement if not desired
+
+### Changed
+- Reduce number of `allOf` elements in generated schema when contained schema parts are distinct (and in case of Draft 7: don't contain `$ref`)
 
 ### Deprecated
-- `SchemaConstants` interface containing static `String` constants for tag names/values
+- `SchemaConstants` interface containing static `String` constants for tag names/values (in favour of version-aware `SchemaKeyword` enum)
 - Internal `AttributeCollector` API without generation context as parameter
 - `SchemaGeneratorConfigBuilder` constructors without explicit JSON Schema version indication
 
