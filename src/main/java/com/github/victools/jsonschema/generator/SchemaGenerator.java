@@ -85,7 +85,9 @@ public class SchemaGenerator {
         }
         ObjectNode mainSchemaNode = generationContext.getDefinition(mainType);
         jsonSchemaResult.setAll(mainSchemaNode);
-        this.discardUnnecessaryAllOfWrappers(jsonSchemaResult);
+        if (this.config.shouldCleanupUnnecessaryAllOfElements()) {
+            this.discardUnnecessaryAllOfWrappers(jsonSchemaResult);
+        }
         return jsonSchemaResult;
     }
 

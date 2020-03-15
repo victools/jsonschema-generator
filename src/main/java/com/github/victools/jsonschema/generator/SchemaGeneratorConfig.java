@@ -63,6 +63,14 @@ public interface SchemaGeneratorConfig {
     boolean shouldIncludeSchemaVersionIndicator();
 
     /**
+     * Determine whether unnecessary {@link SchemaKeyword#TAG_ALLOF} elements should be removed and merged into their declaring schema when there are
+     * no conflicts between the sub-schemas.
+     *
+     * @return whether to clean-up {@link SchemaKeyword#TAG_ALLOF} elements as the last step during schema generation
+     */
+    boolean shouldCleanupUnnecessaryAllOfElements();
+
+    /**
      * Determine whether static fields should be included in the generated schema.
      *
      * @return whether to include static fields
