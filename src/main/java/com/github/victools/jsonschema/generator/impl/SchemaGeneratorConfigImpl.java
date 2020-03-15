@@ -106,6 +106,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldCleanupUnnecessaryAllOfElements() {
+        return this.isOptionEnabled(Option.ALLOF_CLEANUP_AT_THE_END);
+    }
+
+    @Override
     public boolean shouldIncludeStaticFields() {
         return this.isOptionEnabled(Option.PUBLIC_STATIC_FIELDS) || this.isOptionEnabled(Option.NONPUBLIC_STATIC_FIELDS);
     }

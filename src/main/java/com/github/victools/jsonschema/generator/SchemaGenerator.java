@@ -18,14 +18,21 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.SchemaGenerationContextImpl;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Generator for JSON Schema definitions via reflection based analysis of a given class.
@@ -78,6 +85,9 @@ public class SchemaGenerator {
         }
         ObjectNode mainSchemaNode = generationContext.getDefinition(mainType);
         jsonSchemaResult.setAll(mainSchemaNode);
+        if (this.config.shouldCleanupUnnecessaryAllOfElements()) {
+            this.discardUnnecessaryAllOfWrappers(jsonSchemaResult);
+        }
         return jsonSchemaResult;
     }
 
@@ -150,5 +160,135 @@ public class SchemaGenerator {
             }
         }
         return definitionsNode;
+    }
+
+    /**
+     * Collect names of schema tags that may contain sub-schemas, i.e. {@link SchemaKeyword#TAG_ADDITIONAL_PROPERTIES} and
+     * {@link SchemaKeyword#TAG_ITEMS}.
+     *
+     * @return names of eligible tags as per the designated JSON Schema version
+     * @see #discardUnnecessaryAllOfWrappers(ObjectNode)
+     */
+    private Set<String> getTagNamesContainingSchema() {
+        SchemaVersion schemaVersion = this.config.getSchemaVersion();
+        return Stream.of(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES, SchemaKeyword.TAG_ITEMS)
+                .map(keyword -> keyword.forVersion(schemaVersion))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Collect names of schema tags that may contain arrays of sub-schemas, i.e. {@link SchemaKeyword#TAG_ALLOF}, {@link SchemaKeyword#TAG_ANYOF} and
+     * {@link SchemaKeyword#TAG_ONEOF}.
+     *
+     * @return names of eligible tags as per the designated JSON Schema version
+     * @see #discardUnnecessaryAllOfWrappers(ObjectNode)
+     */
+    private Set<String> getTagNamesContainingSchemaArray() {
+        SchemaVersion schemaVersion = this.config.getSchemaVersion();
+        return Stream.of(SchemaKeyword.TAG_ALLOF, SchemaKeyword.TAG_ANYOF, SchemaKeyword.TAG_ONEOF)
+                .map(keyword -> keyword.forVersion(schemaVersion))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Collect names of schema tags that may contain objects with sub-schemas as values, i.e. {@link SchemaKeyword#TAG_PATTERN_PROPERTIES} and
+     * {@link SchemaKeyword#TAG_PROPERTIES}.
+     *
+     * @return names of eligible tags as per the designated JSON Schema version
+     * @see #discardUnnecessaryAllOfWrappers(ObjectNode)
+     */
+    private Set<String> getTagNamesContainingSchemaObject() {
+        SchemaVersion schemaVersion = this.config.getSchemaVersion();
+        return Stream.of(SchemaKeyword.TAG_PATTERN_PROPERTIES, SchemaKeyword.TAG_PROPERTIES)
+                .map(keyword -> keyword.forVersion(schemaVersion))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Iterate through a generated and fully populated schema and remove extraneous {@link SchemaKeyword#TAG_ALLOF} nodes, that are included due to
+     * the way how type references are handled during schema generation but are strictly not necessary. This makes for more readable schemas being
+     * generated but has the side-effect that any manually added {@link SchemaKeyword#TAG_ALLOF} (e.g. through a custom definition of attribute
+     * overrides) may be removed as well if it isn't strictly speaking necessary.
+     *
+     * @param schemaNode generated schema to clean-up
+     */
+    private void discardUnnecessaryAllOfWrappers(ObjectNode schemaNode) {
+        List<ObjectNode> nextNodesToCheck = new ArrayList<>();
+        Consumer<JsonNode> addNodeToCheck = node -> {
+            if (node instanceof ObjectNode) {
+                nextNodesToCheck.add((ObjectNode) node);
+            }
+        };
+        nextNodesToCheck.add(schemaNode);
+        SchemaVersion schemaVersion = this.config.getSchemaVersion();
+        Optional.ofNullable(schemaNode.get(SchemaKeyword.TAG_DEFINITIONS.forVersion(schemaVersion)))
+                .filter(definitions -> definitions instanceof ObjectNode)
+                .ifPresent(definitions -> ((ObjectNode) definitions).forEach(addNodeToCheck));
+
+        String allOfTagName = SchemaKeyword.TAG_ALLOF.forVersion(schemaVersion);
+        Set<String> tagsWithSchemas = this.getTagNamesContainingSchema();
+        Set<String> tagsWithSchemaArrays = this.getTagNamesContainingSchemaArray();
+        Set<String> tagsWithSchemaObjects = this.getTagNamesContainingSchemaObject();
+        do {
+            List<ObjectNode> currentNodesToCheck = new ArrayList<>(nextNodesToCheck);
+            nextNodesToCheck.clear();
+            for (ObjectNode nodeToCheck : currentNodesToCheck) {
+                this.mergeAllOfPartsIfPossible(nodeToCheck, allOfTagName);
+                tagsWithSchemas.stream().map(nodeToCheck::get).forEach(addNodeToCheck);
+                tagsWithSchemaArrays.stream()
+                        .map(nodeToCheck::get)
+                        .filter(possibleArrayNode -> possibleArrayNode instanceof ArrayNode)
+                        .forEach(arrayNode -> arrayNode.forEach(addNodeToCheck));
+                tagsWithSchemaObjects.stream()
+                        .map(nodeToCheck::get)
+                        .filter(possibleObjectNode -> possibleObjectNode instanceof ObjectNode)
+                        .forEach(objectNode -> objectNode.forEach(addNodeToCheck));
+            }
+        } while (!nextNodesToCheck.isEmpty());
+    }
+
+    /**
+     * Check whether the given schema node and its {@link SchemaKeyword#TAG_ALLOF} elements (if there are any) are distinct. If yes, remove the
+     * {@link SchemaKeyword#TAG_ALLOF} node and merge all its elements with the given schema node instead.
+     *
+     * @param schemaNode single node representing a sub-schema to consolidate contained {@link SchemaKeyword#TAG_ALLOF} for (if present)
+     * @param allOfTagName name of the {@link SchemaKeyword#TAG_ALLOF} in the designated JSON Schema version
+     */
+    private void mergeAllOfPartsIfPossible(JsonNode schemaNode, String allOfTagName) {
+        if (!(schemaNode instanceof ObjectNode)) {
+            return;
+        }
+        JsonNode allOfTag = schemaNode.get(allOfTagName);
+        if (!(allOfTag instanceof ArrayNode)) {
+            return;
+        }
+        allOfTag.forEach(part -> this.mergeAllOfPartsIfPossible(part, allOfTagName));
+
+        List<JsonNode> allOfElements = new ArrayList<>();
+        allOfTag.forEach(allOfElements::add);
+        if (allOfElements.stream().anyMatch(part -> !(part instanceof ObjectNode) && !part.asBoolean())) {
+            return;
+        }
+        List<ObjectNode> parts = allOfElements.stream()
+                .filter(part -> part instanceof ObjectNode)
+                .map(part -> (ObjectNode) part)
+                .collect(Collectors.toList());
+
+        final ObjectNode schemaObjectNode = (ObjectNode) schemaNode;
+        final SchemaVersion schemaVersion = this.config.getSchemaVersion();
+        if (schemaVersion == SchemaVersion.DRAFT_7) {
+            // in Draft 7, any other attributes besides the $ref keyword were ignored
+            String refKeyword = SchemaKeyword.TAG_REF.forVersion(schemaVersion);
+            if (schemaObjectNode.has(refKeyword) || parts.stream().anyMatch(part -> part.has(refKeyword))) {
+                return;
+            }
+        }
+        Map<String, Integer> fieldCount = Stream.concat(Stream.of(schemaObjectNode), parts.stream())
+                .flatMap(part -> StreamSupport.stream(((Iterable<String>) () -> part.fieldNames()).spliterator(), false))
+                .collect(Collectors.toMap(fieldName -> fieldName, _value -> 1, (currentCount, nextCount) -> currentCount + nextCount));
+        if (fieldCount.values().stream().allMatch(count -> count == 1)) {
+            schemaObjectNode.remove(allOfTagName);
+            parts.forEach(schemaObjectNode::setAll);
+        }
     }
 }
