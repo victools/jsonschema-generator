@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.6.0] - 2020-03-15
 ### Added
 - Explicit indication of targeted JSON Schema version (for now: Draft 7 or 2019-09)
 - Support for renamed keywords between Draft versions through new `SchemaKeyword` enum (replacing static `SchemaConstants` interface)
@@ -152,7 +152,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Specific handling of optionals (two alternatives via standard options).
 - Pre-defined sets of standard options to cover different use-cases and simplify library usage.
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.5.0...HEAD
+[4.6.0]: https://github.com/victools/jsonschema-generator/compare/v4.5.0...v4.6.0
 [4.5.0]: https://github.com/victools/jsonschema-generator/compare/v4.4.0...v4.5.0
 [4.4.0]: https://github.com/victools/jsonschema-generator/compare/v4.3.0...v4.4.0
 [4.3.0]: https://github.com/victools/jsonschema-generator/compare/v4.2.0...v4.3.0
