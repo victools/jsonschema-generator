@@ -471,26 +471,53 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      */
     private void populateField(FieldScope field, Map<String, JsonNode> collectedFields, Set<String> requiredProperties) {
         String propertyNameOverride = this.generatorConfig.resolvePropertyNameOverride(field);
-        FieldScope fieldWithOverride = propertyNameOverride == null ? field : field.withOverriddenName(propertyNameOverride);
-        String propertyName = fieldWithOverride.getSchemaPropertyName();
+        FieldScope fieldWithNameOverride = propertyNameOverride == null ? field : field.withOverriddenName(propertyNameOverride);
+        String propertyName = fieldWithNameOverride.getSchemaPropertyName();
         if (this.generatorConfig.isRequired(field)) {
             requiredProperties.add(propertyName);
         }
         if (collectedFields.containsKey(propertyName)) {
-            logger.debug("ignoring overridden {}.{}", fieldWithOverride.getDeclaringType(), fieldWithOverride.getDeclaredName());
+            logger.debug("ignoring overridden {}.{}", fieldWithNameOverride.getDeclaringType(), fieldWithNameOverride.getDeclaredName());
             return;
         }
-        ObjectNode subSchema = this.generatorConfig.createObjectNode();
-        collectedFields.put(propertyName, subSchema);
 
-        ResolvedType typeOverride = this.generatorConfig.resolveTargetTypeOverride(fieldWithOverride);
-        fieldWithOverride = typeOverride == null ? fieldWithOverride : fieldWithOverride.withOverriddenType(typeOverride);
-
-        ObjectNode fieldAttributes = AttributeCollector.collectFieldAttributes(fieldWithOverride, this);
-
+        List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(fieldWithNameOverride);
+        List<FieldScope> fieldOptions;
+        if (typeOverrides == null || typeOverrides.isEmpty()) {
+            fieldOptions = Collections.singletonList(fieldWithNameOverride);
+        } else {
+            fieldOptions = typeOverrides.stream()
+                    .map(fieldWithNameOverride::withOverriddenType)
+                    .collect(Collectors.toList());
+        }
         // consider declared type (instead of overridden one) for determining null-ability
-        boolean isNullable = !fieldWithOverride.getRawMember().isEnumConstant() && this.generatorConfig.isNullable(fieldWithOverride);
-        this.populateSchema(fieldWithOverride.getType(), subSchema, isNullable, fieldAttributes);
+        boolean isNullable = !field.getRawMember().isEnumConstant() && this.generatorConfig.isNullable(field);
+        if (fieldOptions.size() == 1) {
+            collectedFields.put(propertyName, this.createFieldSchema(fieldOptions.get(0), isNullable));
+        } else {
+            ObjectNode subSchema = this.generatorConfig.createObjectNode();
+            collectedFields.put(propertyName, subSchema);
+            ArrayNode anyOfArray = subSchema.withArray(this.getKeyword(SchemaKeyword.TAG_ANYOF));
+            if (isNullable) {
+                anyOfArray.add(this.generatorConfig.createObjectNode()
+                        .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL)));
+            }
+            fieldOptions.forEach(option -> anyOfArray.add(this.createFieldSchema(option, false)));
+        }
+    }
+
+    /**
+     * Preparation Step: create a node for a schema representing the given field's associated value type.
+     *
+     * @param field field/property to populate the schema node for
+     * @param isNullable whether the field/property's value may be null
+     * @return schema node representing the given field/property
+     */
+    private ObjectNode createFieldSchema(FieldScope field, boolean isNullable) {
+        ObjectNode subSchema = this.generatorConfig.createObjectNode();
+        ObjectNode fieldAttributes = AttributeCollector.collectFieldAttributes(field, this);
+        this.populateSchema(field.getType(), subSchema, isNullable, fieldAttributes);
+        return subSchema;
     }
 
     /**
@@ -502,31 +529,56 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      */
     private void populateMethod(MethodScope method, Map<String, JsonNode> collectedMethods, Set<String> requiredProperties) {
         String propertyNameOverride = this.generatorConfig.resolvePropertyNameOverride(method);
-        MethodScope methodWithOverride = propertyNameOverride == null ? method : method.withOverriddenName(propertyNameOverride);
-        String propertyName = methodWithOverride.getSchemaPropertyName();
+        MethodScope methodWithNameOverride = propertyNameOverride == null ? method : method.withOverriddenName(propertyNameOverride);
+        String propertyName = methodWithNameOverride.getSchemaPropertyName();
         if (this.generatorConfig.isRequired(method)) {
             requiredProperties.add(propertyName);
         }
         if (collectedMethods.containsKey(propertyName)) {
-            logger.debug("ignoring overridden {}.{}", methodWithOverride.getDeclaringType(), methodWithOverride.getDeclaredName());
+            logger.debug("ignoring overridden {}.{}", methodWithNameOverride.getDeclaringType(), methodWithNameOverride.getDeclaredName());
             return;
         }
 
-        ResolvedType typeOverride = this.generatorConfig.resolveTargetTypeOverride(methodWithOverride);
-        methodWithOverride = typeOverride == null ? methodWithOverride : methodWithOverride.withOverriddenType(typeOverride);
-
-        if (methodWithOverride.isVoid()) {
-            collectedMethods.put(propertyName, BooleanNode.FALSE);
+        List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(methodWithNameOverride);
+        List<MethodScope> methodOptions;
+        if (typeOverrides == null || typeOverrides.isEmpty()) {
+            methodOptions = Collections.singletonList(methodWithNameOverride);
+        } else {
+            methodOptions = typeOverrides.stream()
+                    .map(methodWithNameOverride::withOverriddenType)
+                    .collect(Collectors.toList());
+        }
+        // consider declared type (instead of overridden one) for determining null-ability
+        boolean isNullable = methodWithNameOverride.isVoid() || this.generatorConfig.isNullable(methodWithNameOverride);
+        if (methodOptions.size() == 1) {
+            collectedMethods.put(propertyName, this.createMethodSchema(methodOptions.get(0), isNullable));
         } else {
             ObjectNode subSchema = this.generatorConfig.createObjectNode();
             collectedMethods.put(propertyName, subSchema);
-
-            ObjectNode methodAttributes = AttributeCollector.collectMethodAttributes(methodWithOverride, this);
-
-            // consider declared type (instead of overridden one) for determining null-ability
-            boolean isNullable = this.generatorConfig.isNullable(methodWithOverride);
-            this.populateSchema(methodWithOverride.getType(), subSchema, isNullable, methodAttributes);
+            ArrayNode anyOfArray = subSchema.withArray(this.getKeyword(SchemaKeyword.TAG_ANYOF));
+            if (isNullable) {
+                anyOfArray.add(this.generatorConfig.createObjectNode()
+                        .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL)));
+            }
+            methodOptions.forEach(option -> anyOfArray.add(this.createMethodSchema(option, false)));
         }
+    }
+
+    /**
+     * Preparation Step: create a node for a schema representing the given method's associated return type.
+     *
+     * @param method method to populate the schema node for
+     * @param isNullable whether the method's return value may be null
+     * @return schema node representing the given method's return type
+     */
+    private JsonNode createMethodSchema(MethodScope method, boolean isNullable) {
+        if (method.isVoid()) {
+            return BooleanNode.FALSE;
+        }
+        ObjectNode subSchema = this.generatorConfig.createObjectNode();
+        ObjectNode methodAttributes = AttributeCollector.collectMethodAttributes(method, this);
+        this.populateSchema(method.getType(), subSchema, isNullable, methodAttributes);
+        return subSchema;
     }
 
     /**
