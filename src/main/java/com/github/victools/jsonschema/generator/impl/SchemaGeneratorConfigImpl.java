@@ -215,13 +215,13 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public ResolvedType resolveTargetTypeOverride(FieldScope field) {
-        return this.fieldConfigPart.resolveTargetTypeOverride(field);
+    public List<ResolvedType> resolveTargetTypeOverrides(FieldScope field) {
+        return this.fieldConfigPart.resolveTargetTypeOverrides(field);
     }
 
     @Override
-    public ResolvedType resolveTargetTypeOverride(MethodScope method) {
-        return this.methodConfigPart.resolveTargetTypeOverride(method);
+    public List<ResolvedType> resolveTargetTypeOverrides(MethodScope method) {
+        return this.methodConfigPart.resolveTargetTypeOverrides(method);
     }
 
     @Override

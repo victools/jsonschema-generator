@@ -203,16 +203,42 @@ public interface SchemaGeneratorConfig {
      *
      * @param field object's field/property to determine the target type for
      * @return target type (may be null)
+     * @deprecated use {@link #resolveTargetTypeOverrides(FieldScope)} instead
      */
-    ResolvedType resolveTargetTypeOverride(FieldScope field);
+    @Deprecated
+    default ResolvedType resolveTargetTypeOverride(FieldScope field) {
+        List<ResolvedType> result = this.resolveTargetTypeOverrides(field);
+        return result == null || result.isEmpty() ? null : result.get(0);
+    }
 
     /**
      * Determine the alternative target type from a method's return value.
      *
      * @param method method for whose return value to determine the target type for
      * @return target type (may be null)
+     * @deprecated use {@link #resolveTargetTypeOverrides(MethodScope)} instead
      */
-    ResolvedType resolveTargetTypeOverride(MethodScope method);
+    @Deprecated
+    default ResolvedType resolveTargetTypeOverride(MethodScope method) {
+        List<ResolvedType> result = this.resolveTargetTypeOverrides(method);
+        return result == null || result.isEmpty() ? null : result.get(0);
+    }
+
+    /**
+     * Determine the alternative target types from an object's field/property.
+     *
+     * @param field object's field/property to determine the target type for
+     * @return target types (may be null or empty)
+     */
+    List<ResolvedType> resolveTargetTypeOverrides(FieldScope field);
+
+    /**
+     * Determine the alternative target types from a method's return value.
+     *
+     * @param method method for whose return value to determine the target type for
+     * @return target types (may be null or empty)
+     */
+    List<ResolvedType> resolveTargetTypeOverrides(MethodScope method);
 
     /**
      * Determine the alternative name in a parent JSON Schema's "properties" from an object's field/property.

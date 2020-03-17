@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.classmate.ResolvedType;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import org.junit.Assert;
@@ -113,25 +114,25 @@ public class SchemaGeneratorConfigPartTest {
         ResolvedType type2 = Mockito.mock(ResolvedType.class);
         ResolvedType type3 = Mockito.mock(ResolvedType.class);
 
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(this.field1));
+        Assert.assertNull(this.instance.resolveTargetTypeOverrides(this.field1));
 
         ConfigFunction<FieldScope, ResolvedType> resolver1 = member -> member == this.field1 ? type1 : null;
         Assert.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver1));
-        Assert.assertSame(type1, this.instance.resolveTargetTypeOverride(this.field1));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(this.field2));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(this.field3));
+        Assert.assertEquals(Collections.singletonList(type1), this.instance.resolveTargetTypeOverrides(this.field1));
+        Assert.assertNull(this.instance.resolveTargetTypeOverrides(this.field2));
+        Assert.assertNull(this.instance.resolveTargetTypeOverrides(this.field3));
 
         ConfigFunction<FieldScope, ResolvedType> resolver2 = member -> member == this.field1 ? type2 : null;
         Assert.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver2));
-        Assert.assertSame(type1, this.instance.resolveTargetTypeOverride(this.field1));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(this.field2));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(this.field3));
+        Assert.assertEquals(Collections.singletonList(type1), this.instance.resolveTargetTypeOverrides(this.field1));
+        Assert.assertNull(this.instance.resolveTargetTypeOverrides(this.field2));
+        Assert.assertNull(this.instance.resolveTargetTypeOverrides(this.field3));
 
-        ConfigFunction<FieldScope, ResolvedType> resolver3 = member -> member == this.field2 ? type3 : null;
-        Assert.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver3));
-        Assert.assertSame(type1, this.instance.resolveTargetTypeOverride(this.field1));
-        Assert.assertSame(type3, this.instance.resolveTargetTypeOverride(this.field2));
-        Assert.assertNull(this.instance.resolveTargetTypeOverride(this.field3));
+        ConfigFunction<FieldScope, List<ResolvedType>> resolver3 = member -> member == this.field2 ? Arrays.asList(type2, type3) : null;
+        Assert.assertSame(this.instance, this.instance.withTargetTypeOverridesResolver(resolver3));
+        Assert.assertEquals(Collections.singletonList(type1), this.instance.resolveTargetTypeOverrides(this.field1));
+        Assert.assertEquals(Arrays.asList(type2, type3), this.instance.resolveTargetTypeOverrides(this.field2));
+        Assert.assertNull(this.instance.resolveTargetTypeOverrides(this.field3));
     }
 
     @Test

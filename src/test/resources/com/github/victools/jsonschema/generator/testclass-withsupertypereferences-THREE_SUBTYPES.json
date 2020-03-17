@@ -107,6 +107,15 @@
         "booleanSupertypeField": {
             "$ref": "#/definitions/TestSuperClass(Boolean)-nullable"
         },
+        "numberOrStringObjectField": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "type": "number"
+                }, {
+                    "type": "string"
+                }]
+        },
         "stringSupertypeField": {
             "$ref": "#/definitions/TestSuperClass(String)-nullable"
         }

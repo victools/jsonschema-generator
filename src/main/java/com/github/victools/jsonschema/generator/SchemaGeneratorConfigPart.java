@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
     /*
      * Customising options for the names of properties in a schema with "type": "object".
      */
-    private final List<ConfigFunction<M, ResolvedType>> targetTypeOverrideResolvers = new ArrayList<>();
+    private final List<ConfigFunction<M, List<ResolvedType>>> targetTypeOverridesResolvers = new ArrayList<>();
     private final List<ConfigFunction<M, String>> propertyNameOverrideResolvers = new ArrayList<>();
 
     /**
@@ -140,7 +141,8 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
     }
 
     /**
-     * Setter for target type resolver, expecting the respective member and the default type as inputs.
+     * Setter for target type resolver, expecting the respective member as input. NOTE: there is an alternative method allowing for multiple
+     * type overrides at once: {@link #withTargetTypeOverridesResolver(ConfigFunction)}
      * <br>
      * For generally replacing one type with one or multiple of its subtypes, you may want to consider adding a {@link SubtypeResolver} via
      * {@link SchemaGeneratorConfigBuilder#forTypesInGeneral() forTypesInGeneral()} instead.
@@ -148,9 +150,26 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
      * @param resolver how to determine the alternative target type
      * @return this config part (for chaining)
      * @see SchemaGeneratorGeneralConfigPart#withSubtypeResolver(SubtypeResolver)
+     * @deprecated use {@link #withTargetTypeOverridesResolver(ConfigFunction)} instead
      */
+    @Deprecated
     public SchemaGeneratorConfigPart<M> withTargetTypeOverrideResolver(ConfigFunction<M, ResolvedType> resolver) {
-        this.targetTypeOverrideResolvers.add(resolver);
+        this.targetTypeOverridesResolvers.add(member -> Optional.ofNullable(resolver.apply(member)).map(Collections::singletonList).orElse(null));
+        return this;
+    }
+
+    /**
+     * Setter for target type resolver, expecting the respective member as input. Allowing for multiple alternative types to be returned.
+     * <br>
+     * For generally replacing one type with one or multiple of its subtypes, you may want to consider adding a {@link SubtypeResolver} via
+     * {@link SchemaGeneratorConfigBuilder#forTypesInGeneral() forTypesInGeneral()} instead.
+     *
+     * @param resolver how to determine the alternative target types
+     * @return this config part (for chaining)
+     * @see SchemaGeneratorGeneralConfigPart#withSubtypeResolver(SubtypeResolver)
+     */
+    public SchemaGeneratorConfigPart<M> withTargetTypeOverridesResolver(ConfigFunction<M, List<ResolvedType>> resolver) {
+        this.targetTypeOverridesResolvers.add(resolver);
         return this;
     }
 
@@ -162,8 +181,8 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
      * @see MemberScope#getDeclaredType()
      * @see MemberScope#getOverriddenType()
      */
-    public ResolvedType resolveTargetTypeOverride(M member) {
-        return getFirstDefinedValue(this.targetTypeOverrideResolvers, member);
+    public List<ResolvedType> resolveTargetTypeOverrides(M member) {
+        return getFirstDefinedValue(this.targetTypeOverridesResolvers, member);
     }
 
     /**

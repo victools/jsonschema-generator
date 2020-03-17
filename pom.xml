@@ -85,10 +85,6 @@
         <version.slf4j>1.7.30</version.slf4j>
     </properties>
 
-    <prerequisites>
-        <maven>3.5</maven>
-    </prerequisites>
-
     <dependencies>
         <dependency>
             <groupId>com.fasterxml</groupId>
