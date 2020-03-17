@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.naming.TestCaseName;
@@ -63,11 +64,26 @@ public class SchemaGeneratorSubtypesTest {
                 .withSubtypeResolver(new TestSubtypeResolver(subtypes))
                 .withTitleResolver(TypeScope::getSimpleTypeDescription)
                 .withDescriptionResolver(scope -> scope.getType().getErasedType() == TestSuperClass.class ? "supertype-only description" : null);
+        if (!subtypes.isEmpty()) {
+            configBuilder.forFields()
+                    .withTargetTypeOverridesResolver(this::determineTargetTypeOverrides);
+        }
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(TestClassWithSuperTypeReferences.class);
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
                 loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
+    }
+
+    private List<ResolvedType> determineTargetTypeOverrides(FieldScope field) {
+        ResolvedType declaredType = field.getType();
+        if (declaredType.getErasedType() == Object.class && field.getName().startsWith("numberOrString")) {
+            // TypeContext::resolve() would have been sufficient here, but in advanced scenarios TypeContext::resolveSubType() is more appropriate
+            return Stream.of(Number.class, String.class)
+                    .map(specificSubtype -> field.getContext().resolveSubtype(declaredType, specificSubtype))
+                    .collect(Collectors.toList());
+        }
+        return null;
     }
 
     private static String loadResource(String resourcePath) throws IOException {
@@ -117,6 +133,7 @@ public class SchemaGeneratorSubtypesTest {
 
         public TestSuperClass<Boolean> booleanSupertypeField;
         public TestSuperClass<String> stringSupertypeField;
+        public Object numberOrStringObjectField;
 
     }
 

@@ -212,14 +212,6 @@ public interface SchemaGeneratorConfig {
     }
 
     /**
-     * Determine the alternative target types from an object's field/property.
-     *
-     * @param field object's field/property to determine the target type for
-     * @return target types (may be null or empty)
-     */
-    List<ResolvedType> resolveTargetTypeOverrides(FieldScope field);
-
-    /**
      * Determine the alternative target type from a method's return value.
      *
      * @param method method for whose return value to determine the target type for
@@ -231,6 +223,14 @@ public interface SchemaGeneratorConfig {
         List<ResolvedType> result = this.resolveTargetTypeOverrides(method);
         return result == null || result.isEmpty() ? null : result.get(0);
     }
+
+    /**
+     * Determine the alternative target types from an object's field/property.
+     *
+     * @param field object's field/property to determine the target type for
+     * @return target types (may be null or empty)
+     */
+    List<ResolvedType> resolveTargetTypeOverrides(FieldScope field);
 
     /**
      * Determine the alternative target types from a method's return value.

@@ -27,6 +27,7 @@
         "booleanSupertypeField": {
             "$ref": "#/definitions/TestSuperClass(Boolean)-nullable"
         },
+        "numberOrStringObjectField": {},
         "stringSupertypeField": {
             "$ref": "#/definitions/TestSuperClass(String)-nullable"
         }
