@@ -29,6 +29,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Internal `AttributeCollector` API without generation context as parameter
 - `SchemaGeneratorConfigBuilder` constructors without explicit JSON Schema version indication
 
+### Dependency Update
+- `com.fasterxml.jackson.core`:`jackson-core`/`jackson-databind` from `2.10.0` to `2.10.2`
+- `com.fasterxml`:`classmate` from `1.5.0` to `1.5.2`
+- Optional: `org.slf4j`:`slf4j-api` from `1.7.26` to `1.7.30`
+- Optional: `org.apache.logging.log4j`:`log4j-api`/`log4j-core`/`log4j-slf4j-impl` from `2.11.2` to `2.13.0`
+
 ## [4.5.0] - 2020-03-05
 ### Added
 - Expose `SchemaGenerationContext.createDefinitionReference()` to custom definitions to enable circular references within
