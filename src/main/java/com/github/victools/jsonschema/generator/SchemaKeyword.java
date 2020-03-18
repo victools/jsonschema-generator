@@ -24,6 +24,11 @@ import java.util.function.Function;
 public enum SchemaKeyword {
     TAG_SCHEMA("$schema"),
     TAG_SCHEMA_VALUE(SchemaVersion::getIdentifier),
+    TAG_ID("$id"),
+    /**
+     * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_2019_09}.
+     */
+    TAG_ANCHOR("$anchor"),
     TAG_DEFINITIONS(version -> version == SchemaVersion.DRAFT_7 ? "definitions" : "$defs"),
     TAG_REF("$ref"),
     TAG_REF_MAIN("#"),

@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.naming.TestCaseName;
@@ -111,8 +112,13 @@ public class SchemaGeneratorComplexTypesTest {
             }
             return null;
         });
+        AtomicInteger idCounter = new AtomicInteger();
+        AtomicInteger anchorCounter = new AtomicInteger();
         Module typeInGeneralModule = configBuilder -> populateTypeConfigPart(
-                configBuilder.with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT).forTypesInGeneral(), "for type in general: ");
+                configBuilder.with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT).forTypesInGeneral()
+                        .withIdResolver(scope -> scope.getType().getTypeName().contains("$Test") ? "id-" + idCounter.addAndGet(1) : null)
+                        .withAnchorResolver(scope -> scope.isContainerType() ? null : "#" + anchorCounter.addAndGet(1)),
+                "for type in general: ");
         Module methodModule = configBuilder -> populateConfigPart(configBuilder.forMethods(), "looked-up from method: ");
         Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields(), "looked-up from field: ");
         Module enumToStringModule = configBuilder -> configBuilder.with(Option.FLATTENED_ENUMS_FROM_TOSTRING);

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Support for multiple target type overrides at once per field/method
+- Support for "$id" property via `SchemaGeneratorGeneralConfigPart.withIdResolver()`
+- Support for "$anchor" property via `SchemaGeneratorGeneralConfigPart.withAnchorResolver()`
 
 ### Deprecated
 - Configuration option for single target type override

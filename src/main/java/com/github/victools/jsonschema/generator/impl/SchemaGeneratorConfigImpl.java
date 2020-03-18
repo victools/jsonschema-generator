@@ -235,6 +235,16 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public String resolveIdForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveId(scope);
+    }
+
+    @Override
+    public String resolveAnchorForType(TypeScope scope) {
+        return this.typesInGeneralConfigPart.resolveAnchor(scope);
+    }
+
+    @Override
     public String resolveTitle(FieldScope field) {
         return this.fieldConfigPart.resolveTitle(field);
     }

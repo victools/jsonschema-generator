@@ -257,6 +257,22 @@ public interface SchemaGeneratorConfig {
     String resolvePropertyNameOverride(MethodScope method);
 
     /**
+     * Determine the "$id" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "$id" value for
+     * @return "$id" in a JSON Schema (may be null)
+     */
+    String resolveIdForType(TypeScope scope);
+
+    /**
+     * Determine the "$anchor" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "$anchor" value for
+     * @return "$anchor" in a JSON Schema (may be null)
+     */
+    String resolveAnchorForType(TypeScope scope);
+
+    /**
      * Determine the "title" of an object's field/property.
      *
      * @param field object's field/property to determine "title" value for

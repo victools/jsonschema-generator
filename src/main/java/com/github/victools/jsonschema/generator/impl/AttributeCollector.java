@@ -138,6 +138,8 @@ public class AttributeCollector {
         SchemaGeneratorConfig config = generationContext.getGeneratorConfig();
         ObjectNode node = config.createObjectNode();
         AttributeCollector collector = new AttributeCollector(config.getObjectMapper());
+        collector.setId(node, config.resolveIdForType(scope), generationContext);
+        collector.setAnchor(node, config.resolveAnchorForType(scope), generationContext);
         collector.setTitle(node, config.resolveTitleForType(scope), generationContext);
         collector.setDescription(node, config.resolveDescriptionForType(scope), generationContext);
         collector.setDefault(node, config.resolveDefaultForType(scope), generationContext);
@@ -166,6 +168,36 @@ public class AttributeCollector {
             collector.setArrayUniqueItems(node, config.resolveArrayUniqueItemsForType(scope), generationContext);
         }
         return node;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_ID}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param id attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setId(ObjectNode node, String id, SchemaGenerationContext generationContext) {
+        if (id != null) {
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_ID), id);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_ANCHOR}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param anchor attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setAnchor(ObjectNode node, String anchor, SchemaGenerationContext generationContext) {
+        if (anchor != null) {
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_ANCHOR), anchor);
+        }
+        return this;
     }
 
     /**
