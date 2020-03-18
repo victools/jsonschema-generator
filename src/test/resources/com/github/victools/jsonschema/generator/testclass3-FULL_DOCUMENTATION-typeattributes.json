@@ -13,6 +13,7 @@
                     "type": ["integer", "null"]
                 }
             },
+            "$anchor": "#15",
             "title": "Optional<Integer>",
             "description": "for type in general: Optional<Integer>",
             "additionalProperties": false
@@ -54,6 +55,7 @@
                     "uniqueItems": false
                 }
             },
+            "$anchor": "#16",
             "title": "RoundingMode",
             "description": "for type in general: RoundingMode",
             "additionalProperties": false
@@ -76,6 +78,7 @@
                     "type": ["array", "null"],
                     "items": {
                         "type": "string",
+                        "$anchor": "#7",
                         "title": "String",
                         "description": "for type in general: String",
                         "const": "constant string value",
@@ -110,12 +113,15 @@
                     "type": "boolean"
                 }
             },
+            "$id": "id-3",
+            "$anchor": "#8",
             "title": "TestClass1",
             "description": "for type in general: TestClass1",
             "additionalProperties": false,
             "patternProperties": {
                 "^generic.+$": {
                     "type": "string",
+                    "$anchor": "#9",
                     "title": "String",
                     "description": "for type in general: String",
                     "const": "constant string value",
@@ -133,6 +139,7 @@
                     "type": ["array", "null"],
                     "items": {
                         "type": "integer",
+                        "$anchor": "#4",
                         "title": "Long",
                         "description": "for type in general: Long",
                         "default": 1,
@@ -156,12 +163,15 @@
                     "type": ["integer", "null"]
                 }
             },
+            "$id": "id-2",
+            "$anchor": "#5",
             "title": "TestClass2<Long>",
             "description": "for type in general: TestClass2<Long>",
             "additionalProperties": false,
             "patternProperties": {
                 "^generic.+$": {
                     "type": "integer",
+                    "$anchor": "#6",
                     "title": "Long",
                     "description": "for type in general: Long",
                     "default": 1,
@@ -188,6 +198,7 @@
                     "type": ["array", "null"],
                     "items": {
                         "type": "string",
+                        "$anchor": "#11",
                         "title": "String",
                         "description": "for type in general: String",
                         "const": "constant string value",
@@ -209,12 +220,15 @@
                     "type": ["string", "null"]
                 }
             },
+            "$id": "id-11",
+            "$anchor": "#12",
             "title": "TestClass2<String>",
             "description": "for type in general: TestClass2<String>",
             "additionalProperties": false,
             "patternProperties": {
                 "^generic.+$": {
                     "type": "string",
+                    "$anchor": "#13",
                     "title": "String",
                     "description": "for type in general: String",
                     "const": "constant string value",
@@ -242,12 +256,14 @@
                         "items": {
                             "$ref": "#/definitions/TestClass1"
                         },
+                        "$id": "id-5",
                         "title": "TestClass1[]",
                         "description": "for type in general: TestClass1[]",
                         "minItems": 2,
                         "maxItems": 100,
                         "uniqueItems": false
                     },
+                    "$id": "id-6",
                     "title": "TestClass1[][]<TestClass1[]>",
                     "description": "for type in general: TestClass1[][]<TestClass1[]>",
                     "minItems": 2,
@@ -259,6 +275,7 @@
                     "items": {
                         "$ref": "#/definitions/TestClass1"
                     },
+                    "$id": "id-4",
                     "title": "TestClass1[]",
                     "description": "for type in general: TestClass1[]",
                     "minItems": 2,
@@ -270,6 +287,7 @@
                     "items": {
                         "$ref": "#/definitions/TestClass1"
                     },
+                    "$id": "id-7",
                     "title": "TestClass1[]",
                     "description": "for type in general: TestClass1[]",
                     "minItems": 2,
@@ -277,6 +295,8 @@
                     "uniqueItems": false
                 }
             },
+            "$id": "id-8",
+            "$anchor": "#10",
             "title": "TestClass2<TestClass1[]>",
             "description": "for type in general: TestClass2<TestClass1[]>",
             "additionalProperties": false,
@@ -286,6 +306,7 @@
                     "items": {
                         "$ref": "#/definitions/TestClass1"
                     },
+                    "$id": "id-9",
                     "title": "TestClass1[]",
                     "description": "for type in general: TestClass1[]",
                     "minItems": 2,
@@ -302,6 +323,7 @@
                     "items": {
                         "$ref": "#/definitions/TestClass2(String)"
                     },
+                    "$id": "id-12",
                     "title": "TestClass2[]<TestClass2<String>>",
                     "description": "for type in general: TestClass2[]<TestClass2<String>>",
                     "minItems": 2,
@@ -315,6 +337,8 @@
                     "$ref": "#/definitions/TestClass2(String)-nullable"
                 }
             },
+            "$id": "id-13",
+            "$anchor": "#14",
             "title": "TestClass2<TestClass2<String>>",
             "description": "for type in general: TestClass2<TestClass2<String>>",
             "additionalProperties": false,
@@ -344,10 +368,13 @@
                     "$ref": "#/definitions/TestClass2(TestClass2(String))-nullable"
                 }
             },
+            "$id": "id-14",
+            "$anchor": "#17",
             "title": "TestClass4<Integer, String>",
             "description": "for type in general: TestClass4<Integer, String>",
             "additionalProperties": {
                 "type": "string",
+                "$anchor": "#18",
                 "title": "String",
                 "description": "for type in general: String",
                 "const": "constant string value",
@@ -374,6 +401,7 @@
             "items": {
                 "$ref": "#/definitions/TestClass2(Long)"
             },
+            "$id": "id-10",
             "title": "List<TestClass2<Long>>",
             "description": "for type in general: List<TestClass2<Long>>",
             "minItems": 2,
@@ -394,6 +422,7 @@
             "items": {
                 "$ref": "#/definitions/TestClass2(Long)"
             },
+            "$id": "id-15",
             "title": "List<TestClass2<Long>>",
             "description": "for type in general: List<TestClass2<Long>>",
             "minItems": 2,
@@ -401,6 +430,8 @@
             "uniqueItems": false
         }
     },
+    "$id": "id-16",
+    "$anchor": "#19",
     "title": "TestClass3",
     "description": "for type in general: TestClass3",
     "additionalProperties": false

@@ -33,6 +33,9 @@ public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigP
     private final List<SubtypeResolver> subtypeResolvers = new ArrayList<>();
     private final List<TypeAttributeOverride> typeAttributeOverrides = new ArrayList<>();
 
+    private final List<ConfigFunction<TypeScope, String>> idResolvers = new ArrayList<>();
+    private final List<ConfigFunction<TypeScope, String>> anchorResolvers = new ArrayList<>();
+
     /**
      * Adding a custom schema provider – if it returns null for a given type, the next definition provider will be applied.
      * <br>
@@ -95,6 +98,48 @@ public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigP
      */
     public List<TypeAttributeOverride> getTypeAttributeOverrides() {
         return Collections.unmodifiableList(this.typeAttributeOverrides);
+    }
+
+    /**
+     * Setter for "$id" resolver.
+     *
+     * @param resolver how to determine the "$id" of a JSON Schema
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorGeneralConfigPart withIdResolver(ConfigFunction<TypeScope, String> resolver) {
+        this.idResolvers.add(resolver);
+        return this;
+    }
+
+    /**
+     * Determine the "$id" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "$id" value for
+     * @return "$id" in a JSON Schema (may be null)
+     */
+    public String resolveId(TypeScope scope) {
+        return SchemaGeneratorGeneralConfigPart.getFirstDefinedValue(this.idResolvers, scope);
+    }
+
+    /**
+     * Setter for "$anchor" resolver.
+     *
+     * @param resolver how to determine the "$anchor" of a JSON Schema
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorGeneralConfigPart withAnchorResolver(ConfigFunction<TypeScope, String> resolver) {
+        this.anchorResolvers.add(resolver);
+        return this;
+    }
+
+    /**
+     * Determine the "$anchor" of a context-independent type representation.
+     *
+     * @param scope context-independent type representation to determine "$anchor" value for
+     * @return "$anchor" in a JSON Schema (may be null)
+     */
+    public String resolveAnchor(TypeScope scope) {
+        return SchemaGeneratorGeneralConfigPart.getFirstDefinedValue(this.anchorResolvers, scope);
     }
 
     @Override

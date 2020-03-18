@@ -9,6 +9,7 @@
             "type": ["array", "null"],
             "items": {
                 "type": "string",
+                "$anchor": "#1",
                 "title": "String",
                 "description": "for type in general: String",
                 "const": "constant string value",
@@ -43,12 +44,15 @@
             "type": "boolean"
         }
     },
+    "$id": "id-1",
+    "$anchor": "#2",
     "title": "TestClass1",
     "description": "for type in general: TestClass1",
     "additionalProperties": false,
     "patternProperties": {
         "^generic.+$": {
             "type": "string",
+            "$anchor": "#3",
             "title": "String",
             "description": "for type in general: String",
             "const": "constant string value",

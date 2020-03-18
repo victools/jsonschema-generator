@@ -20,6 +20,8 @@ import com.fasterxml.classmate.ResolvedType;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -37,18 +39,20 @@ public class FlattenedOptionalModule implements Module {
      * @param fieldOrMethod reference to the method/field (which is being ignored here)
      * @return the wrapped component type (or null if it is not an {@link Optional} (sub) type
      */
-    private ResolvedType resolveOptionalComponentType(MemberScope<?, ?> fieldOrMethod) {
-        return FlattenedOptionalModule.isOptional(fieldOrMethod.getType()) ? fieldOrMethod.getTypeParameterFor(Optional.class, 0) : null;
+    private List<ResolvedType> resolveOptionalComponentType(MemberScope<?, ?> fieldOrMethod) {
+        return FlattenedOptionalModule.isOptional(fieldOrMethod.getType())
+                ? Collections.singletonList(fieldOrMethod.getTypeParameterFor(Optional.class, 0))
+                : null;
     }
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         builder.forFields()
-                .withTargetTypeOverrideResolver(this::resolveOptionalComponentType)
+                .withTargetTypeOverridesResolver(this::resolveOptionalComponentType)
                 // need to getDeclaredType() to avoid the above override
                 .withNullableCheck(field -> FlattenedOptionalModule.isOptional(field.getDeclaredType()) ? Boolean.TRUE : null);
         builder.forMethods()
-                .withTargetTypeOverrideResolver(this::resolveOptionalComponentType)
+                .withTargetTypeOverridesResolver(this::resolveOptionalComponentType)
                 // need to getDeclaredType() to avoid the above override
                 .withNullableCheck(method -> FlattenedOptionalModule.isOptional(method.getDeclaredType()) ? Boolean.TRUE : null);
     }
