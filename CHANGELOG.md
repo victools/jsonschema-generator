@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for "$id" property via `SchemaGeneratorGeneralConfigPart.withIdResolver()`
 - Support for "$anchor" property via `SchemaGeneratorGeneralConfigPart.withAnchorResolver()`
 
+### Fixed
+- Allow for multiple types with the same name (but different package) instead of picking one at random
+- Allow for multiple definitions for the same type (e.g. in case of a custom definition wrapping the standard definition)
+
 ### Deprecated
 - Configuration option for single target type override
 - Look-up of single target type override from configuration

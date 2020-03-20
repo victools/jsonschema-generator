@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -59,9 +60,9 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
 
     private final SchemaGeneratorConfig generatorConfig;
     private final TypeContext typeContext;
-    private final Map<ResolvedType, ObjectNode> definitions = new HashMap<>();
-    private final Map<ResolvedType, List<ObjectNode>> references = new HashMap<>();
-    private final Map<ResolvedType, List<ObjectNode>> nullableReferences = new HashMap<>();
+    private final Map<DefinitionKey, ObjectNode> definitions = new LinkedHashMap<>();
+    private final Map<DefinitionKey, List<ObjectNode>> references = new HashMap<>();
+    private final Map<DefinitionKey, List<ObjectNode>> nullableReferences = new HashMap<>();
 
     /**
      * Constructor initialising type resolution context.
@@ -88,9 +89,11 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * Parse the given (possibly generic) type and populate this context. This is intended to be used only once, for the schema's main target type.
      *
      * @param type (possibly generic) type to analyse and populate this context with
+     * @return definition key identifying the given entry point
      */
-    public void parseType(ResolvedType type) {
+    public DefinitionKey parseType(ResolvedType type) {
         this.traverseGenericType(type, null, false);
+        return new DefinitionKey(type, null);
     }
 
     /**
@@ -98,32 +101,35 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      *
      * @param javaType type to which the definition belongs
      * @param definitionNode definition to remember
+     * @param ignoredDefinitionProvider first custom definition provider that was ignored when creating the definition (is null in most cases)
      * @return this context (for chaining)
      */
-    SchemaGenerationContextImpl putDefinition(ResolvedType javaType, ObjectNode definitionNode) {
-        this.definitions.put(javaType, definitionNode);
+    SchemaGenerationContextImpl putDefinition(ResolvedType javaType, ObjectNode definitionNode,
+            CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        this.definitions.put(new DefinitionKey(javaType, ignoredDefinitionProvider), definitionNode);
         return this;
     }
 
     /**
-     * Whether this context (already) contains a definition for the specified type.
+     * Whether this context (already) contains a definition for the specified type, considering custom definition providers after the specified one.
      *
      * @param javaType type to check for
+     * @param ignoredDefinitionProvider first custom definition provider that was ignored when creating the definition (is null in most cases)
      * @return whether a definition for the given type is already present
      */
-    public boolean containsDefinition(ResolvedType javaType) {
-        return this.definitions.containsKey(javaType);
+    public boolean containsDefinition(ResolvedType javaType, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        return this.definitions.containsKey(new DefinitionKey(javaType, ignoredDefinitionProvider));
     }
 
     /**
      * Retrieve the previously added definition for the specified type.
      *
-     * @param javaType type for which to retrieve the stored definition
+     * @param key definition key to look-up associated definition for
      * @return JSON schema definition (or null if none is present)
-     * @see #putDefinition(ResolvedType, ObjectNode)
+     * @see #putDefinition(ResolvedType, ObjectNode, CustomDefinitionProviderV2)
      */
-    public ObjectNode getDefinition(ResolvedType javaType) {
-        return this.definitions.get(javaType);
+    public ObjectNode getDefinition(DefinitionKey key) {
+        return this.definitions.get(key);
     }
 
     /**
@@ -131,7 +137,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      *
      * @return types for which a definition is present
      */
-    public Set<ResolvedType> getDefinedTypes() {
+    public Set<DefinitionKey> getDefinedTypes() {
         return Collections.unmodifiableSet(this.definitions.keySet());
     }
 
@@ -140,15 +146,18 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      *
      * @param javaType type for which to remember a reference
      * @param referencingNode node that should (later) include either the type's respective inline definition or a "$ref" to the definition
+     * @param ignoredDefinitionProvider first custom definition provider that was ignored when creating the definition (is null in most cases)
      * @param isNullable whether the reference may be null
      * @return this context (for chaining)
      */
-    SchemaGenerationContextImpl addReference(ResolvedType javaType, ObjectNode referencingNode, boolean isNullable) {
-        Map<ResolvedType, List<ObjectNode>> targetMap = isNullable ? this.nullableReferences : this.references;
-        List<ObjectNode> valueList = targetMap.get(javaType);
+    SchemaGenerationContextImpl addReference(ResolvedType javaType, ObjectNode referencingNode,
+            CustomDefinitionProviderV2 ignoredDefinitionProvider, boolean isNullable) {
+        Map<DefinitionKey, List<ObjectNode>> targetMap = isNullable ? this.nullableReferences : this.references;
+        DefinitionKey key = new DefinitionKey(javaType, ignoredDefinitionProvider);
+        List<ObjectNode> valueList = targetMap.get(key);
         if (valueList == null) {
             valueList = new ArrayList<>();
-            targetMap.put(javaType, valueList);
+            targetMap.put(key, valueList);
         }
         valueList.add(referencingNode);
         return this;
@@ -157,21 +166,21 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     /**
      * Getter for the nodes representing not-nullable references to the given type.
      *
-     * @param javaType target type
+     * @param key definition key to look-up collected references for
      * @return not-nullable nodes to be populated with the schema of the given type
      */
-    public List<ObjectNode> getReferences(ResolvedType javaType) {
-        return Collections.unmodifiableList(this.references.getOrDefault(javaType, Collections.emptyList()));
+    public List<ObjectNode> getReferences(DefinitionKey key) {
+        return Collections.unmodifiableList(this.references.getOrDefault(key, Collections.emptyList()));
     }
 
     /**
      * Getter for the nodes representing nullable references to the given type.
      *
-     * @param javaType target type
+     * @param key definition key to look-up collected references for
      * @return nullable nodes to be populated with the schema of the given type
      */
-    public List<ObjectNode> getNullableReferences(ResolvedType javaType) {
-        return Collections.unmodifiableList(this.nullableReferences.getOrDefault(javaType, Collections.emptyList()));
+    public List<ObjectNode> getNullableReferences(DefinitionKey key) {
+        return Collections.unmodifiableList(this.nullableReferences.getOrDefault(key, Collections.emptyList()));
     }
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -223,20 +232,20 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      */
     private void traverseGenericType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable, boolean forceInlineDefinition,
             CustomDefinitionProviderV2 ignoredDefinitionProvider) {
-        if (!forceInlineDefinition && this.containsDefinition(targetType)) {
+        if (!forceInlineDefinition && this.containsDefinition(targetType, ignoredDefinitionProvider)) {
             logger.debug("adding reference to existing definition of {}", targetType);
-            this.addReference(targetType, targetNode, isNullable);
+            this.addReference(targetType, targetNode, ignoredDefinitionProvider, isNullable);
             // nothing more to be done
             return;
         }
         final ObjectNode definition;
         boolean includeTypeAttributes = true;
         final CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(targetType, this, ignoredDefinitionProvider);
-        if (customDefinition != null && customDefinition.isMeantToBeInline()) {
+        if (customDefinition != null && (customDefinition.isMeantToBeInline() || forceInlineDefinition)) {
             if (targetNode == null) {
                 logger.debug("storing configured custom inline type for {} as definition (since it is the main schema \"#\")", targetType);
                 definition = customDefinition.getValue();
-                this.putDefinition(targetType, definition);
+                this.putDefinition(targetType, definition, ignoredDefinitionProvider);
                 // targetNode will be populated at the end, in buildDefinitionsAndResolveReferences()
             } else {
                 logger.debug("directly applying configured custom inline type for {}", targetType);
@@ -253,17 +262,17 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 definition = targetNode;
             } else {
                 definition = this.generatorConfig.createObjectNode();
-                this.putDefinition(targetType, definition);
+                this.putDefinition(targetType, definition, ignoredDefinitionProvider);
                 if (targetNode != null) {
                     // targetNode is only null for the main class for which the schema is being generated
-                    this.addReference(targetType, targetNode, isNullable);
+                    this.addReference(targetType, targetNode, ignoredDefinitionProvider, isNullable);
                 }
             }
             if (customDefinition != null) {
                 logger.debug("applying configured custom definition for {}", targetType);
                 definition.setAll(customDefinition.getValue());
             } else if (isContainerType) {
-                logger.debug("generating definition for {}", targetType);
+                logger.debug("generating array definition for {}", targetType);
                 this.generateArrayDefinition(targetType, definition, isNullable);
             } else {
                 logger.debug("generating definition for {}", targetType);
@@ -303,11 +312,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             this.traverseGenericType(subtypes.get(0), definition, false);
         } else {
             ArrayNode anyOfArrayNode = this.generatorConfig.createArrayNode();
-            for (ResolvedType subtype : subtypes) {
-                ObjectNode subtypeSchema = this.generatorConfig.createObjectNode();
-                this.traverseGenericType(subtype, subtypeSchema, false);
-                anyOfArrayNode.add(subtypeSchema);
-            }
+            subtypes.forEach(subtype -> this.traverseGenericType(subtype, anyOfArrayNode.addObject(), false));
             definition.set(this.getKeyword(SchemaKeyword.TAG_ANYOF), anyOfArrayNode);
         }
         return true;

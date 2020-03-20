@@ -1,0 +1,57 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "String": {
+            "title": "Custom Definition #1 for String",
+            "anyOf": [{
+                    "type": "string"
+                }, {
+                    "type": "null"
+                }]
+        },
+        "TestDirectCircularClass-1": {
+            "type": "object",
+            "properties": {
+                "number": {
+                    "$ref": "#/definitions/int-2"
+                },
+                "self": {
+                    "$ref": "#"
+                },
+                "text": {
+                    "$ref": "#/definitions/String"
+                }
+            }
+        },
+        "TestDirectCircularClass-2": {
+            "title": "Custom Definition #2 for com.github.victools.jsonschema.generator.SchemaGeneratorCustomDefinitionsTest$TestDirectCircularClass",
+            "oneOf": [{
+                    "$ref": "#/definitions/TestDirectCircularClass-1"
+                }, {
+                    "type": "null"
+                }]
+        },
+        "int-1": {
+            "title": "Custom Definition #2 for int",
+            "oneOf": [{
+                    "type": "integer"
+                }, {
+                    "type": "null"
+                }]
+        },
+        "int-2": {
+            "title": "Custom Definition #1 for int",
+            "anyOf": [{
+                    "$ref": "#/definitions/int-1"
+                }, {
+                    "type": "null"
+                }]
+        }
+    },
+    "title": "Custom Definition #1 for TestDirectCircularClass",
+    "anyOf": [{
+            "$ref": "#/definitions/TestDirectCircularClass-2"
+        }, {
+            "type": "null"
+        }]
+}

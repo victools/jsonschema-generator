@@ -20,15 +20,18 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import com.github.victools.jsonschema.generator.impl.SchemaGenerationContextImpl;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,18 +75,18 @@ public class SchemaGenerator {
     public JsonNode generateSchema(Type mainTargetType, Type... typeParameters) {
         SchemaGenerationContextImpl generationContext = new SchemaGenerationContextImpl(this.config, this.typeContext);
         ResolvedType mainType = this.typeContext.resolve(mainTargetType, typeParameters);
-        generationContext.parseType(mainType);
+        DefinitionKey mainKey = generationContext.parseType(mainType);
 
         ObjectNode jsonSchemaResult = this.config.createObjectNode();
         if (this.config.shouldIncludeSchemaVersionIndicator()) {
             jsonSchemaResult.put(this.config.getKeyword(SchemaKeyword.TAG_SCHEMA),
                     this.config.getKeyword(SchemaKeyword.TAG_SCHEMA_VALUE));
         }
-        ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(mainType, generationContext);
+        ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(mainKey, generationContext);
         if (definitionsNode.size() > 0) {
             jsonSchemaResult.set(this.config.getKeyword(SchemaKeyword.TAG_DEFINITIONS), definitionsNode);
         }
-        ObjectNode mainSchemaNode = generationContext.getDefinition(mainType);
+        ObjectNode mainSchemaNode = generationContext.getDefinition(mainKey);
         jsonSchemaResult.setAll(mainSchemaNode);
         if (this.config.shouldCleanupUnnecessaryAllOfElements()) {
             this.discardUnnecessaryAllOfWrappers(jsonSchemaResult);
@@ -95,71 +98,100 @@ public class SchemaGenerator {
      * Finalisation Step: collect the entries for the generated schema's "definitions" and ensure that all references are either pointing to the
      * appropriate definition or contain the respective (sub) schema directly inline.
      *
-     * @param mainSchemaTarget main type for which generateSchema() was invoked
+     * @param mainSchemaKey definition key identifying the main type for which generateSchema() was invoked
      * @param generationContext context containing all definitions of (sub) schemas and the list of references to them
      * @return node representing the main schema's "definitions" (may be empty)
      */
-    private ObjectNode buildDefinitionsAndResolveReferences(ResolvedType mainSchemaTarget, SchemaGenerationContextImpl generationContext) {
-        // determine short names to be used as definition names
-        Map<String, List<ResolvedType>> aliases = generationContext.getDefinedTypes().stream()
-                .collect(Collectors.groupingBy(this.typeContext::getSchemaDefinitionName, TreeMap::new, Collectors.toList()));
-        // create the "definitions" node with the respective aliases as keys
+    private ObjectNode buildDefinitionsAndResolveReferences(DefinitionKey mainSchemaKey, SchemaGenerationContextImpl generationContext) {
         ObjectNode definitionsNode = this.config.createObjectNode();
         boolean createDefinitionsForAll = this.config.shouldCreateDefinitionsForAllObjects();
-        for (Map.Entry<String, List<ResolvedType>> aliasEntry : aliases.entrySet()) {
-            List<ResolvedType> types = aliasEntry.getValue();
-            List<ObjectNode> referencingNodes = types.stream()
-                    .flatMap(type -> generationContext.getReferences(type).stream())
-                    .collect(Collectors.toList());
-            List<ObjectNode> nullableReferences = types.stream()
-                    .flatMap(type -> generationContext.getNullableReferences(type).stream())
-                    .collect(Collectors.toList());
-            // ensure that the type description is converted into an URI-compatible format
-            final String alias = aliasEntry.getKey()
-                    // removing white-spaces
-                    .replaceAll("[ ]+", "")
-                    // marking arrays with an asterisk instead of square brackets
-                    .replaceAll("\\[\\]", "*")
-                    // indicating generics in parentheses instead of angled brackets
-                    .replaceAll("<", "(")
-                    .replaceAll(">", ")");
+        for (Map.Entry<DefinitionKey, String> entry : this.getReferenceKeys(mainSchemaKey, generationContext).entrySet()) {
+            String definitionName = entry.getValue();
+            DefinitionKey definitionKey = entry.getKey();
+            List<ObjectNode> references = generationContext.getReferences(definitionKey);
+            List<ObjectNode> nullableReferences = generationContext.getNullableReferences(definitionKey);
             final String referenceKey;
-            boolean referenceInline = !types.contains(mainSchemaTarget)
-                    && (referencingNodes.isEmpty() || (!createDefinitionsForAll && (referencingNodes.size() + nullableReferences.size()) < 2));
+            boolean referenceInline = (references.isEmpty() || (!createDefinitionsForAll && (references.size() + nullableReferences.size()) < 2))
+                    && !mainSchemaKey.equals(definitionKey);
             if (referenceInline) {
                 // it is a simple type, just in-line the sub-schema everywhere
-                referencingNodes.forEach(node -> node.setAll(generationContext.getDefinition(types.get(0))));
+                references.forEach(node -> node.setAll(generationContext.getDefinition(definitionKey)));
                 referenceKey = null;
             } else {
                 // the same sub-schema is referenced in multiple places
-                if (types.contains(mainSchemaTarget)) {
+                if (mainSchemaKey.equals(definitionKey)) {
                     referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN);
                 } else {
                     // add it to the definitions (unless it is the main schema)
-                    definitionsNode.set(alias, generationContext.getDefinition(types.get(0)));
-                    referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_PREFIX) + alias;
+                    definitionsNode.set(definitionName, generationContext.getDefinition(definitionKey));
+                    referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_PREFIX) + definitionName;
                 }
-                referencingNodes.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey));
+                references.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey));
             }
             if (!nullableReferences.isEmpty()) {
                 ObjectNode definition;
                 if (referenceInline) {
-                    definition = generationContext.getDefinition(types.get(0));
+                    definition = generationContext.getDefinition(definitionKey);
                 } else {
                     definition = this.config.createObjectNode().put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey);
                 }
                 generationContext.makeNullable(definition);
                 if (createDefinitionsForAll || nullableReferences.size() > 1) {
-                    String nullableAlias = alias + "-nullable";
-                    String nullableReferenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_PREFIX) + nullableAlias;
-                    definitionsNode.set(nullableAlias, definition);
-                    nullableReferences.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF), nullableReferenceKey));
+                    String nullableDefinitionName = definitionName + "-nullable";
+                    definitionsNode.set(nullableDefinitionName, definition);
+                    nullableReferences.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF),
+                            this.config.getKeyword(SchemaKeyword.TAG_REF_PREFIX) + nullableDefinitionName));
                 } else {
                     nullableReferences.forEach(node -> node.setAll(definition));
                 }
             }
         }
         return definitionsNode;
+    }
+
+    /**
+     * Derive the applicable keys for the collected entries for the {@link SchemaKeyword#TAG_DEFINITIONS} in the given context.
+     *
+     * @param mainSchemaKey special definition key for the main schema
+     * @param generationContext generation context in which all traversed types and their definitions have been collected
+     * @return encountered types with their corresponding reference keys
+     */
+    private Map<DefinitionKey, String> getReferenceKeys(DefinitionKey mainSchemaKey, SchemaGenerationContextImpl generationContext) {
+        Map<String, List<DefinitionKey>> aliases = generationContext.getDefinedTypes().stream()
+                .collect(Collectors.groupingBy(this::getSchemaBaseDefinitionName, TreeMap::new, Collectors.toList()));
+        Map<DefinitionKey, String> referenceKeys = new LinkedHashMap<>();
+        for (Map.Entry<String, List<DefinitionKey>> group : aliases.entrySet()) {
+            List<DefinitionKey> definitionKeys = group.getValue();
+            if (definitionKeys.size() == 1 || (definitionKeys.size() == 2 && definitionKeys.contains(mainSchemaKey))) {
+                definitionKeys.forEach(key -> referenceKeys.put(key, group.getKey()));
+            } else {
+                AtomicInteger counter = new AtomicInteger(0);
+                definitionKeys.forEach(key -> referenceKeys.put(key, group.getKey() + "-" + counter.incrementAndGet()));
+            }
+        }
+        return referenceKeys;
+    }
+
+    /**
+     * Returns the name to be associated with an entry in the generated schema's list of {@link SchemaKeyword#TAG_DEFINITIONS}.
+     * <br>
+     * Beware: if multiple types have the same name, the actual key in {@link SchemaKeyword#TAG_DEFINITIONS} may have a numeric counter appended to it
+     *
+     * @param key the definition key to be represented in the generated schema's {@link SchemaKeyword#TAG_DEFINITIONS}
+     * @return name in {@link SchemaKeyword#TAG_DEFINITIONS}
+     */
+    private String getSchemaBaseDefinitionName(DefinitionKey key) {
+        String schemaDefinitionName = this.typeContext.getSchemaDefinitionName(key.getType());
+        // ensure that the type description is converted into an URI-compatible format
+        String uriCompatibleName = schemaDefinitionName
+                // removing white-spaces
+                .replaceAll("[ ]+", "")
+                // marking arrays with an asterisk instead of square brackets
+                .replaceAll("\\[\\]", "*")
+                // indicating generics in parentheses instead of angled brackets
+                .replaceAll("<", "(")
+                .replaceAll(">", ")");
+        return uriCompatibleName;
     }
 
     /**
