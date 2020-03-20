@@ -91,7 +91,7 @@ public class SchemaGeneratorCustomDefinitionsTest {
 
     @Test
     @Parameters(source = SchemaVersion.class)
-    public void testGenerateSchema_CustomStandardDefinition(SchemaVersion schemaVersion) throws Exception {
+    public void testGenerateSchema_CustomInlineStandardDefinition(SchemaVersion schemaVersion) throws Exception {
         CustomDefinitionProviderV2 customDefinitionProvider = new CustomDefinitionProviderV2() {
             @Override
             public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
@@ -113,6 +113,49 @@ public class SchemaGeneratorCustomDefinitionsTest {
         Assert.assertEquals(SchemaKeyword.TAG_TYPE_INTEGER.forVersion(schemaVersion),
                 result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
         Assert.assertEquals("custom override of Integer", result.get("$comment").asText());
+    }
+
+    @Test
+    @Parameters(source = SchemaVersion.class)
+    public void testGenerateSchema_CustomStandardDefinition(SchemaVersion schemaVersion) throws Exception {
+        CustomDefinitionProviderV2 customDefinitionProviderOne = new CustomDefinitionProviderV2() {
+            @Override
+            public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
+                ObjectNode customDefinition = context.getGeneratorConfig().createObjectNode()
+                        .put(context.getKeyword(SchemaKeyword.TAG_TITLE),
+                                "Custom Definition #1 for " + context.getTypeContext().getSimpleTypeDescription(javaType));
+                // using SchemaGenerationContext.createStandardDefinitionReference() to avoid endless loop with this custom definition
+                customDefinition.withArray(context.getKeyword(SchemaKeyword.TAG_ANYOF))
+                        .add(context.createStandardDefinitionReference(javaType, this))
+                        .addObject().put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
+                return new CustomDefinition(customDefinition);
+            }
+        };
+        CustomDefinitionProviderV2 customDefinitionProviderTwo = new CustomDefinitionProviderV2() {
+            @Override
+            public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
+                if (javaType.getErasedType() == String.class) {
+                    return null;
+                }
+                ObjectNode customDefinition = context.getGeneratorConfig().createObjectNode()
+                        .put(context.getKeyword(SchemaKeyword.TAG_TITLE),
+                                "Custom Definition #2 for " + context.getTypeContext().getFullTypeDescription(javaType));
+                // using SchemaGenerationContext.createStandardDefinitionReference() to avoid endless loop with this custom definition
+                customDefinition.withArray(context.getKeyword(SchemaKeyword.TAG_ONEOF))
+                        .add(context.createStandardDefinitionReference(javaType, this))
+                        .addObject().put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
+                return new CustomDefinition(customDefinition);
+            }
+        };
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion, OptionPreset.PLAIN_JSON)
+                .with(customDefinitionProviderOne)
+                .with(customDefinitionProviderTwo)
+                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS)
+                .build();
+        SchemaGenerator generator = new SchemaGenerator(config);
+        JsonNode result = generator.generateSchema(TestDirectCircularClass.class);
+        JSONAssert.assertEquals('\n' + result.toString() + '\n',
+                loadResource("multiple-definitions-one-type-" + schemaVersion.name() + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -150,6 +193,13 @@ public class SchemaGeneratorCustomDefinitionsTest {
         }
         String fileAsString = stringBuilder.toString();
         return fileAsString;
+    }
+
+    private static class TestDirectCircularClass {
+
+        public int number;
+        public TestDirectCircularClass self;
+        public String text;
     }
 
     private static class TestCircularClass1 {

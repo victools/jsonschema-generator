@@ -199,7 +199,7 @@
         <!--<module name="FinalParameters" />-->
         <module name="InnerAssignment" />
         <module name="CyclomaticComplexity">
-            <property name="max" value="15"/>
+            <property name="max" value="16"/>
         </module>
     </module>
 </module>
