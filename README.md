@@ -25,7 +25,7 @@ Topics covered in this document are:
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>4.6.0</version>
+    <version>4.7.0</version>
 </dependency>
 ```
 
