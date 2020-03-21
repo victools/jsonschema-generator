@@ -109,6 +109,7 @@ public class SchemaGeneratorConfigPartTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testTargetTypeOverride() {
         ResolvedType type1 = Mockito.mock(ResolvedType.class);
         ResolvedType type2 = Mockito.mock(ResolvedType.class);

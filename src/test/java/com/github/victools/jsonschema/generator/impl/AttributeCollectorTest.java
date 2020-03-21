@@ -125,7 +125,7 @@ public class AttributeCollectorTest {
         Assert.assertNotNull(additionalPropertiesNode);
         Assert.assertTrue(additionalPropertiesNode.isObject());
         ResolvedType resolvedType = generationContext.getTypeContext().resolve(int.class);
-        Assert.assertTrue(generationContext.containsDefinition(resolvedType));
+        Assert.assertTrue(generationContext.containsDefinition(resolvedType, null));
     }
 
     @Test
@@ -155,7 +155,7 @@ public class AttributeCollectorTest {
         Assert.assertTrue(patternPropertiesNode.isObject());
         Assert.assertEquals(1, patternPropertiesNode.size());
         Assert.assertTrue(patternPropertiesNode.get("^objectClass.*$").isObject());
-        Assert.assertTrue(generationContext.containsDefinition(generationContext.getTypeContext().resolve(Object.class)));
+        Assert.assertTrue(generationContext.containsDefinition(generationContext.getTypeContext().resolve(Object.class), null));
     }
 
     @Test
@@ -171,7 +171,7 @@ public class AttributeCollectorTest {
         Assert.assertTrue(patternPropertiesNode.isObject());
         Assert.assertEquals(1, patternPropertiesNode.size());
         Assert.assertTrue(patternPropertiesNode.get("^resolvedObjectClass.*$").isObject());
-        Assert.assertTrue(generationContext.containsDefinition(generationContext.getTypeContext().resolve(Object.class)));
+        Assert.assertTrue(generationContext.containsDefinition(generationContext.getTypeContext().resolve(Object.class), null));
     }
 
     @Test
@@ -189,7 +189,7 @@ public class AttributeCollectorTest {
         Assert.assertEquals(2, patternPropertiesNode.size());
         Assert.assertTrue(patternPropertiesNode.get("^intClass.*$").isObject());
         Assert.assertTrue(patternPropertiesNode.get("^resolvedStringClass.*$").isObject());
-        Assert.assertTrue(generationContext.containsDefinition(generationContext.getTypeContext().resolve(int.class)));
-        Assert.assertTrue(generationContext.containsDefinition(generationContext.getTypeContext().resolve(String.class)));
+        Assert.assertTrue(generationContext.containsDefinition(generationContext.getTypeContext().resolve(int.class), null));
+        Assert.assertTrue(generationContext.containsDefinition(generationContext.getTypeContext().resolve(String.class), null));
     }
 }
