@@ -24,7 +24,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class CustomDefinition {
 
     private final ObjectNode value;
-    private final boolean meantToBeInline;
+    private final CustomDefinition.DefinitionType definitionType;
+    private final AttributeInclusion attributeInclusion;
 
     /**
      * Constructor for a custom definition that should follow the standard behaviour in regards to be inlined or mentioned in the "definitions".
@@ -32,7 +33,7 @@ public class CustomDefinition {
      * @param value generated custom definition
      */
     public CustomDefinition(ObjectNode value) {
-        this(value, false);
+        this(value, DefinitionType.STANDARD, AttributeInclusion.YES);
     }
 
     /**
@@ -42,8 +43,20 @@ public class CustomDefinition {
      * @param meantToBeInline whether the definition should be inlined even if it occurs multiple times; otherwise applying standard behaviour
      */
     public CustomDefinition(ObjectNode value, boolean meantToBeInline) {
+        this(value, meantToBeInline ? DefinitionType.INLINE : DefinitionType.STANDARD, AttributeInclusion.YES);
+    }
+
+    /**
+     * Constructor for a custom definition.
+     *
+     * @param value generated custom definition
+     * @param definitionType whether the definition should be inlined even if it occurs multiple times; otherwise applying standard behaviour
+     * @param attributeInclusion whether additional attributes should be applied on top of this custom definition
+     */
+    public CustomDefinition(ObjectNode value, DefinitionType definitionType, AttributeInclusion attributeInclusion) {
         this.value = value;
-        this.meantToBeInline = meantToBeInline;
+        this.definitionType = definitionType;
+        this.attributeInclusion = attributeInclusion;
     }
 
     /**
@@ -56,11 +69,63 @@ public class CustomDefinition {
     }
 
     /**
+     * Getter for the associated definition type.
+     *
+     * @return indication whether a custom definition should always be inlined or follow the standard behaviour
+     */
+    public DefinitionType getDefinitionType() {
+        return this.definitionType;
+    }
+
+    /**
      * Getter for the flag indicating whether this custom definition should be inlined even if it occurs multiple times.
      *
      * @return whether this custom definition should be inlined even if it occurs multiple times
      */
     public boolean isMeantToBeInline() {
-        return this.meantToBeInline;
+        return this.definitionType == DefinitionType.INLINE;
+    }
+
+    /**
+     * Getter for the associated extent of additional attributes being collected and applied.
+     *
+     * @return indication whether the normal attribute collection should be performed and any attributes should be added to the custom definition
+     */
+    public AttributeInclusion getAttributeInclusion() {
+        return this.attributeInclusion;
+    }
+
+    public boolean shouldIncludeAttributes() {
+        return this.attributeInclusion == AttributeInclusion.YES;
+    }
+
+    /**
+     * Indication whether a custom definition should always be inlined or follow the standard behaviour.
+     */
+    public enum DefinitionType {
+        /**
+         * Always inline an associated custom definition (with the potential risk of creating infinite loops).
+         */
+        INLINE,
+        /**
+         * Follow the standard behaviour of being moved into the {@link SchemaKeyword#TAG_DEFINITIONS} if it is being referenced multiple times or
+         * {@link Option#DEFINITIONS_FOR_ALL_OBJECTS} is enabled.
+         */
+        STANDARD;
+    }
+
+    /**
+     * Indication whether the normal attribute collection should be performed and any attributes should be added to the custom definition.
+     */
+    public enum AttributeInclusion {
+        /**
+         * Collect and add attributes both for a specific field/method as well as for the associated type in general.
+         */
+        YES,
+        /**
+         * Skip the attribute collection both for a specific field/method or the type in general if that's the level where this custom definition is
+         * being applied. If this is a nested type/definition, a previous (custom) definition may have already decided something else.
+         */
+        NO;
     }
 }

@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
  */
 public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends SchemaGeneratorTypeConfigPart<M> {
 
+    private final List<CustomPropertyDefinitionProvider<M>> customDefinitionProviders = new ArrayList<>();
     private final List<InstanceAttributeOverride<M>> instanceAttributeOverrides = new ArrayList<>();
 
     /*
@@ -52,6 +53,28 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
      */
     private final List<ConfigFunction<M, List<ResolvedType>>> targetTypeOverridesResolvers = new ArrayList<>();
     private final List<ConfigFunction<M, String>> propertyNameOverrideResolvers = new ArrayList<>();
+
+    /**
+     * Adding a custom schema provider – if it returns null for a given type, the next definition provider will be applied.
+     * <br>
+     * If all custom property schema providers return null (or there is none), then the general type custom schema providers apply.
+     *
+     * @param definitionProvider provider of a custom property definition to register, which may return null
+     * @return this builder instance (for chaining)
+     */
+    public SchemaGeneratorConfigPart<M> withCustomDefinitionProvider(CustomPropertyDefinitionProvider<M> definitionProvider) {
+        this.customDefinitionProviders.add(definitionProvider);
+        return this;
+    }
+
+    /**
+     * Getter for the applicable custom property definition provider.
+     *
+     * @return providers for certain custom definitions by-passing the default schema generation to some extent
+     */
+    public List<CustomPropertyDefinitionProvider<M>> getCustomDefinitionProviders() {
+        return Collections.unmodifiableList(this.customDefinitionProviders);
+    }
 
     /**
      * Setter for override of attributes on a given JSON Schema node in the respective member.

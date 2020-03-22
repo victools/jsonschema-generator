@@ -22,8 +22,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
+import com.github.victools.jsonschema.generator.CustomPropertyDefinition;
+import com.github.victools.jsonschema.generator.CustomPropertyDefinitionProvider;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.InstanceAttributeOverride;
+import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
@@ -60,7 +63,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      * Constructor of a configuration instance.
      *
      * @param objectMapper supplier for object and array nodes for the JSON structure being generated
-     * @param schemaVersion  designated JSON Schema version
+     * @param schemaVersion designated JSON Schema version
      * @param enabledOptions enabled settings/options (either by default or explicitly set)
      * @param typesInGeneralConfigPart configuration part for context-independent attribute collection
      * @param fieldConfigPart configuration part for fields
@@ -141,17 +144,61 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public <M extends MemberScope<?, ?>> CustomDefinition getCustomDefinition(M scope, SchemaGenerationContext context,
+            CustomPropertyDefinitionProvider<M> ignoredDefinitionProvider) {
+        CustomDefinition result;
+        if (scope instanceof FieldScope) {
+            result = this.getCustomDefinition(this.fieldConfigPart, (FieldScope) scope, context,
+                    (CustomPropertyDefinitionProvider<FieldScope>) ignoredDefinitionProvider);
+        } else if (scope instanceof MethodScope) {
+            result = this.getCustomDefinition(this.methodConfigPart, (MethodScope) scope, context,
+                    (CustomPropertyDefinitionProvider<MethodScope>) ignoredDefinitionProvider);
+        } else {
+            throw new IllegalArgumentException("Unexpected member scope: " + (scope == null ? null : scope.getClass().getName()));
+        }
+        if (result == null) {
+            result = this.getCustomDefinition(scope.getType(), context, null);
+        }
+        return result;
+    }
+
+    /**
+     * Look-up the non-standard JSON schema definition for a given property. If this returns null, the per-type custom definitions are checked next.
+     *
+     * @param <M> type of targeted property
+     * @param configPart configuration part associated with targeted type of property
+     * @param scope targeted scope for which to provide a custom definition
+     * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
+     * @param ignoredDefinitionProvider custom definition provider to ignore
+     * @return non-standard JSON schema definition (may be null)
+     * @see #getCustomDefinition(ResolvedType, SchemaGenerationContext, CustomDefinitionProviderV3)
+     */
+    private <M extends MemberScope<?, ?>> CustomPropertyDefinition getCustomDefinition(SchemaGeneratorConfigPart<M> configPart, M scope,
+            SchemaGenerationContext context, CustomPropertyDefinitionProvider<? extends M> ignoredDefinitionProvider) {
+        final List<CustomPropertyDefinitionProvider<M>> providers = configPart.getCustomDefinitionProviders();
+        CustomPropertyDefinition result;
+        if (ignoredDefinitionProvider == null || providers.contains(ignoredDefinitionProvider)) {
+            int firstRelevantProviderIndex = 1 + providers.indexOf(ignoredDefinitionProvider);
+            result = providers.subList(firstRelevantProviderIndex, providers.size())
+                    .stream()
+                    .map(provider -> provider.provideCustomSchemaDefinition(scope, context))
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
     public CustomDefinition getCustomDefinition(ResolvedType javaType, SchemaGenerationContext context,
             CustomDefinitionProviderV2 ignoredDefinitionProvider) {
-        final List<CustomDefinitionProviderV2> customDefinitions = this.typesInGeneralConfigPart.getCustomDefinitionProviders();
-        final List<CustomDefinitionProviderV2> relevantCustomDefinitions;
-        if (ignoredDefinitionProvider == null) {
-            relevantCustomDefinitions = customDefinitions;
-        } else {
-            int firstRelevantProviderIndex = 1 + customDefinitions.indexOf(ignoredDefinitionProvider);
-            relevantCustomDefinitions = customDefinitions.subList(firstRelevantProviderIndex, customDefinitions.size());
-        }
-        return relevantCustomDefinitions.stream()
+        final List<CustomDefinitionProviderV2> providers = this.typesInGeneralConfigPart.getCustomDefinitionProviders();
+        int firstRelevantProviderIndex = 1 + providers.indexOf(ignoredDefinitionProvider);
+        return providers.subList(firstRelevantProviderIndex, providers.size())
+                .stream()
                 .map(provider -> provider.provideCustomSchemaDefinition(javaType, context))
                 .filter(Objects::nonNull)
                 .findFirst()

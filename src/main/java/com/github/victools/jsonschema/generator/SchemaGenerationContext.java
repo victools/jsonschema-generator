@@ -17,6 +17,8 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
@@ -100,6 +102,38 @@ public interface SchemaGenerationContext {
      * @see #createStandardDefinition(ResolvedType, CustomDefinitionProviderV2)
      */
     ObjectNode createStandardDefinitionReference(ResolvedType targetType, CustomDefinitionProviderV2 ignoredDefinitionProvider);
+
+    /**
+     * Create a standard definition for the given property. Ignoring custom definitions up to the given one, but respecting others.
+     * <br>
+     * If a specific custom definition for this field is being applied, it will be inlined and fully populated; that may be further manipulated.
+     * Otherwise, the returned node will be empty and is populated only later, i.e. it should not be changed in that case!
+     *
+     * @param targetScope property to create definition (reference) node for
+     * @param ignoredDefinitionProvider custom definition provider to ignore
+     * @return either custom inline definition for this field or a (temporarily) empty reference node for the targetType that will only be populated
+     *         at the very end of the schema generation
+     *
+     * @see #createDefinitionReference(ResolvedType)
+     */
+    ObjectNode createStandardDefinitionReference(FieldScope targetScope, CustomPropertyDefinitionProvider<FieldScope> ignoredDefinitionProvider);
+
+    /**
+     * Create a standard definition for the given property. Ignoring custom definitions up to the given one, but respecting others.
+     * <br>
+     * If a specific custom definition for this method is being applied, it will be inlined and fully populated; that may be further manipulated.
+     * Otherwise, the returned node will be empty and is populated only later, i.e. it should not be changed in that case!
+     * <br>
+     * The returned type is always an {@link ObjectNode} unless the given method is {@code void}, which will result in a {@link BooleanNode#FALSE}.
+     *
+     * @param targetScope property to create definition (reference) node for
+     * @param ignoredDefinitionProvider custom definition provider to ignore
+     * @return either custom inline definition for this method or a (temporarily) empty reference node for the targetType that will only be populated
+     *         at the very end of the schema generation
+     *
+     * @see #createDefinitionReference(ResolvedType)
+     */
+    JsonNode createStandardDefinitionReference(MethodScope targetScope, CustomPropertyDefinitionProvider<MethodScope> ignoredDefinitionProvider);
 
     /**
      * Ensure that the JSON schema represented by the given node allows for it to be of "type" "null".

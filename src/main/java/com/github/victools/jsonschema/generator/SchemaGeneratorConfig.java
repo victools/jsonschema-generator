@@ -110,6 +110,19 @@ public interface SchemaGeneratorConfig {
     ArrayNode createArrayNode();
 
     /**
+     * Look-up the non-standard JSON schema definition for a given property. Falling-back on the per-type custom definitions.
+     *
+     * @param <M> type of targeted property
+     * @param scope targeted scope for which to provide a custom definition
+     * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
+     * @param ignoredDefinitionProvider custom definition provider to ignore
+     * @return non-standard JSON schema definition for the given field/method (may be null)
+     * @see #getCustomDefinition(ResolvedType, SchemaGenerationContext, CustomDefinitionProviderV2)
+     */
+    <M extends MemberScope<?, ?>> CustomDefinition getCustomDefinition(M scope, SchemaGenerationContext context,
+            CustomPropertyDefinitionProvider<M> ignoredDefinitionProvider);
+
+    /**
      * Look-up the non-standard JSON schema definition for a given type. If this returns null, the standard behaviour is expected to be applied.
      *
      * @param javaType generic type to provide custom definition for

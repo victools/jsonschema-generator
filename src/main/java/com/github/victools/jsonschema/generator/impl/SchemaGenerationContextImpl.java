@@ -28,7 +28,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
+import com.github.victools.jsonschema.generator.CustomPropertyDefinitionProvider;
 import com.github.victools.jsonschema.generator.FieldScope;
+import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
@@ -199,15 +201,29 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     @Override
     public ObjectNode createStandardDefinition(ResolvedType targetType, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
         ObjectNode definition = this.generatorConfig.createObjectNode();
-        this.traverseGenericType(targetType, definition, false, true, ignoredDefinitionProvider);
+        TypeScope scope = this.typeContext.createTypeScope(targetType);
+        this.traverseGenericType(scope, definition, false, true, ignoredDefinitionProvider);
         return definition;
     }
 
     @Override
     public ObjectNode createStandardDefinitionReference(ResolvedType targetType, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
         ObjectNode definition = this.generatorConfig.createObjectNode();
-        this.traverseGenericType(targetType, definition, false, false, ignoredDefinitionProvider);
+        TypeScope scope = this.typeContext.createTypeScope(targetType);
+        this.traverseGenericType(scope, definition, false, false, ignoredDefinitionProvider);
         return definition;
+    }
+
+    @Override
+    public ObjectNode createStandardDefinitionReference(FieldScope targetScope,
+            CustomPropertyDefinitionProvider<FieldScope> ignoredDefinitionProvider) {
+        return this.createFieldSchema(targetScope, false, ignoredDefinitionProvider);
+    }
+
+    @Override
+    public JsonNode createStandardDefinitionReference(MethodScope targetScope,
+            CustomPropertyDefinitionProvider<MethodScope> ignoredDefinitionProvider) {
+        return this.createMethodSchema(targetScope, false, ignoredDefinitionProvider);
     }
 
     /**
@@ -218,20 +234,22 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @param isNullable whether the field/method's return value is allowed to be null in the declaringType in this particular scenario
      */
     protected void traverseGenericType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable) {
-        this.traverseGenericType(targetType, targetNode, isNullable, false, null);
+        TypeScope scope = this.typeContext.createTypeScope(targetType);
+        this.traverseGenericType(scope, targetNode, isNullable, false, null);
     }
 
     /**
      * Preparation Step: add the given targetType. Also catering for forced inline-definitions and ignoring custom definitions
      *
-     * @param targetType (possibly generic) type to add
+     * @param scope targeted scope to add
      * @param targetNode node in the JSON schema that should represent the targetType
      * @param isNullable whether the field/method's return value is allowed to be null in the declaringType in this particular scenario
      * @param forceInlineDefinition whether to generate an inline definition without registering it in this context
-     * @param ignoredDefinitionProvider custom definition provider to ignore
+     * @param ignoredDefinitionProvider first custom definition provider to ignore
      */
-    private void traverseGenericType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable, boolean forceInlineDefinition,
+    private void traverseGenericType(TypeScope scope, ObjectNode targetNode, boolean isNullable, boolean forceInlineDefinition,
             CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        ResolvedType targetType = scope.getType();
         if (!forceInlineDefinition && this.containsDefinition(targetType, ignoredDefinitionProvider)) {
             logger.debug("adding reference to existing definition of {}", targetType);
             this.addReference(targetType, targetNode, ignoredDefinitionProvider, isNullable);
@@ -239,9 +257,10 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             return;
         }
         final ObjectNode definition;
-        boolean includeTypeAttributes = true;
+        final boolean includeTypeAttributes;
         final CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(targetType, this, ignoredDefinitionProvider);
         if (customDefinition != null && (customDefinition.isMeantToBeInline() || forceInlineDefinition)) {
+            includeTypeAttributes = customDefinition.shouldIncludeAttributes();
             if (targetNode == null) {
                 logger.debug("storing configured custom inline type for {} as definition (since it is the main schema \"#\")", targetType);
                 definition = customDefinition.getValue();
@@ -271,15 +290,16 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             if (customDefinition != null) {
                 logger.debug("applying configured custom definition for {}", targetType);
                 definition.setAll(customDefinition.getValue());
+                includeTypeAttributes = customDefinition.shouldIncludeAttributes();
             } else if (isContainerType) {
                 logger.debug("generating array definition for {}", targetType);
                 this.generateArrayDefinition(targetType, definition, isNullable);
+                includeTypeAttributes = true;
             } else {
                 logger.debug("generating definition for {}", targetType);
                 includeTypeAttributes = !this.addSubtypeReferencesInDefinition(targetType, definition);
             }
         }
-        TypeScope scope = this.typeContext.createTypeScope(targetType);
         if (includeTypeAttributes) {
             Set<String> allowedSchemaTypes = this.collectAllowedSchemaTypes(definition);
             ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this, allowedSchemaTypes);
@@ -498,7 +518,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         // consider declared type (instead of overridden one) for determining null-ability
         boolean isNullable = !field.getRawMember().isEnumConstant() && this.generatorConfig.isNullable(field);
         if (fieldOptions.size() == 1) {
-            collectedFields.put(propertyName, this.createFieldSchema(fieldOptions.get(0), isNullable));
+            collectedFields.put(propertyName, this.createFieldSchema(fieldOptions.get(0), isNullable, null));
         } else {
             ObjectNode subSchema = this.generatorConfig.createObjectNode();
             collectedFields.put(propertyName, subSchema);
@@ -507,7 +527,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 anyOfArray.add(this.generatorConfig.createObjectNode()
                         .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL)));
             }
-            fieldOptions.forEach(option -> anyOfArray.add(this.createFieldSchema(option, false)));
+            fieldOptions.forEach(option -> anyOfArray.add(this.createFieldSchema(option, false, null)));
         }
     }
 
@@ -516,12 +536,14 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      *
      * @param field field/property to populate the schema node for
      * @param isNullable whether the field/property's value may be null
+     * @param ignoredDefinitionProvider first custom definition provider to ignore
      * @return schema node representing the given field/property
      */
-    private ObjectNode createFieldSchema(FieldScope field, boolean isNullable) {
+    private ObjectNode createFieldSchema(FieldScope field, boolean isNullable,
+            CustomPropertyDefinitionProvider<FieldScope> ignoredDefinitionProvider) {
         ObjectNode subSchema = this.generatorConfig.createObjectNode();
         ObjectNode fieldAttributes = AttributeCollector.collectFieldAttributes(field, this);
-        this.populateSchema(field.getType(), subSchema, isNullable, fieldAttributes);
+        this.populateMemberSchema(field, subSchema, isNullable, fieldAttributes, ignoredDefinitionProvider);
         return subSchema;
     }
 
@@ -556,7 +578,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         // consider declared type (instead of overridden one) for determining null-ability
         boolean isNullable = methodWithNameOverride.isVoid() || this.generatorConfig.isNullable(methodWithNameOverride);
         if (methodOptions.size() == 1) {
-            collectedMethods.put(propertyName, this.createMethodSchema(methodOptions.get(0), isNullable));
+            collectedMethods.put(propertyName, this.createMethodSchema(methodOptions.get(0), isNullable, null));
         } else {
             ObjectNode subSchema = this.generatorConfig.createObjectNode();
             collectedMethods.put(propertyName, subSchema);
@@ -565,7 +587,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 anyOfArray.add(this.generatorConfig.createObjectNode()
                         .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL)));
             }
-            methodOptions.forEach(option -> anyOfArray.add(this.createMethodSchema(option, false)));
+            methodOptions.forEach(option -> anyOfArray.add(this.createMethodSchema(option, false, null)));
         }
     }
 
@@ -574,33 +596,38 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      *
      * @param method method to populate the schema node for
      * @param isNullable whether the method's return value may be null
+     * @param ignoredDefinitionProvider first custom definition provider to ignore
      * @return schema node representing the given method's return type
      */
-    private JsonNode createMethodSchema(MethodScope method, boolean isNullable) {
+    private JsonNode createMethodSchema(MethodScope method, boolean isNullable,
+            CustomPropertyDefinitionProvider<MethodScope> ignoredDefinitionProvider) {
         if (method.isVoid()) {
             return BooleanNode.FALSE;
         }
         ObjectNode subSchema = this.generatorConfig.createObjectNode();
         ObjectNode methodAttributes = AttributeCollector.collectMethodAttributes(method, this);
-        this.populateSchema(method.getType(), subSchema, isNullable, methodAttributes);
+        this.populateMemberSchema(method, subSchema, isNullable, methodAttributes, ignoredDefinitionProvider);
         return subSchema;
     }
 
     /**
      * Preparation Step: combine the collected attributes and the javaType's definition in the given targetNode.
      *
-     * @param javaType field's type or method return value's type that should be represented by the given targetNode
+     * @param <M> type of target scope, i.e. either a field or method
+     * @param scope field's type or method return value's type that should be represented by the given targetNode
      * @param targetNode node in the JSON schema that should represent the associated javaType and include the separately collected attributes
      * @param isNullable whether the field/method's return value the javaType refers to is allowed to be null in the declaringType
      * @param collectedAttributes separately collected attribute for the field/method in their respective declaring type
+     * @param ignoredDefinitionProvider first custom definition provider to ignore
      * @see #populateField(FieldScope, Map, Set)
      * @see #populateMethod(MethodScope, Map, Set)
      */
-    private void populateSchema(ResolvedType javaType, ObjectNode targetNode, boolean isNullable, ObjectNode collectedAttributes) {
-        final CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(javaType, this, null);
+    private <M extends MemberScope<?, ?>> void populateMemberSchema(M scope, ObjectNode targetNode, boolean isNullable,
+            ObjectNode collectedAttributes, CustomPropertyDefinitionProvider<M> ignoredDefinitionProvider) {
+        final CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(scope, this, ignoredDefinitionProvider);
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
             targetNode.setAll(customDefinition.getValue());
-            if (collectedAttributes != null && collectedAttributes.size() > 0) {
+            if (customDefinition.shouldIncludeAttributes() && collectedAttributes != null && collectedAttributes.size() > 0) {
                 targetNode.setAll(collectedAttributes);
             }
             if (isNullable) {
@@ -609,15 +636,17 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         } else {
             // create an "allOf" wrapper for the attributes related to this particular field and its general type
             final ObjectNode referenceContainer;
-            if (collectedAttributes == null || collectedAttributes.size() == 0) {
+            if (customDefinition != null && !customDefinition.shouldIncludeAttributes()
+                    || collectedAttributes == null || collectedAttributes.size() == 0) {
                 // no need for the allOf, can use the sub-schema instance directly as reference
                 referenceContainer = targetNode;
-            } else if (customDefinition == null && this.typeContext.isContainerType(javaType)) {
+            } else if (customDefinition == null && scope.isContainerType()) {
                 // same as above, but the collected attributes should be applied also for containers/arrays
                 referenceContainer = targetNode;
                 referenceContainer.setAll(collectedAttributes);
             } else {
                 // avoid mixing potential "$ref" element with contextual attributes by introducing an "allOf" wrapper
+                // this is only relevant for DRAFT_7 and is being cleaned-up afterwards for newer DRAFT versions
                 referenceContainer = this.generatorConfig.createObjectNode();
                 targetNode.set(this.getKeyword(SchemaKeyword.TAG_ALLOF), this.generatorConfig.createArrayNode()
                         .add(referenceContainer)
@@ -625,7 +654,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             }
             // only add reference for separate definition if it is not a fixed type that should be in-lined
             try {
-                this.traverseGenericType(javaType, referenceContainer, isNullable);
+                this.traverseGenericType(scope, referenceContainer, isNullable, false, null);
             } catch (UnsupportedOperationException ex) {
                 logger.warn("Skipping type definition due to error", ex);
             }
