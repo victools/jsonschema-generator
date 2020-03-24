@@ -23,6 +23,19 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  */
 public class CustomDefinition {
 
+    /**
+     * Alternative accessor for {@link DefinitionType#INLINE CustomDefinition.DefinitionType.INLINE}.
+     */
+    public static final DefinitionType INLINE_DEFINITION = DefinitionType.INLINE;
+    /**
+     * Alternative accessor for {@link AttributeInclusion#YES CustomDefinition.AttributeInclusion.YES}.
+     */
+    public static final AttributeInclusion INCLUDING_ATTRIBUTES = AttributeInclusion.YES;
+    /**
+     * Alternative accessor for {@link AttributeInclusion#NO CustomDefinition.AttributeInclusion.NO}.
+     */
+    public static final AttributeInclusion EXCLUDING_ATTRIBUTES = AttributeInclusion.NO;
+
     private final ObjectNode value;
     private final CustomDefinition.DefinitionType definitionType;
     private final AttributeInclusion attributeInclusion;
@@ -82,7 +95,7 @@ public class CustomDefinition {
      *
      * @return whether this custom definition should be inlined even if it occurs multiple times
      */
-    public boolean isMeantToBeInline() {
+    public final boolean isMeantToBeInline() {
         return this.definitionType == DefinitionType.INLINE;
     }
 
