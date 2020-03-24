@@ -188,3 +188,5 @@ configBuilder.forTypesInGeneral()
 |   31 | `maxItems` | Collected value according to configuration (`SchemaGeneratorConfigPart.withArrayMaxItemsResolver()`). |
 |   32 | `uniqueItems` | Collected value according to configuration (`SchemaGeneratorConfigPart.withArrayUniqueItemsResolver()`). |
 |   33 | any other | You can directly manipulate the generated `ObjectNode` of a sub-schema – e.g. setting additional attributes – via configuration based on a given type in general (`SchemaGeneratorConfigBuilder.with(TypeAttributeOverride)`) and/or in the context of a particular field/method (`SchemaGeneratorConfigPart.withInstanceAttributeOverride()`). |
+
+If all that is not flexible enough, you can freely define any schema definition for (parts of) your data structure through `SchemaGeneratorGeneralConfigPart.withCustomDefinitionProvider()`/`SchemaGeneratorConfigPart.withCustomDefinitionProvider()` respectively.
