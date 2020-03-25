@@ -23,10 +23,6 @@ Schema attributes derived from validation annotations on getter methods are also
 </dependency>
 ```
 
-### Compatibility
-Please note that while the minor versions may differ, it is recommended to use matching major versions of the `jsonschema-generator` and this module.
-However, versions 3.* of this module are also compatible with `jsonschema-generator` 4.* (as no existing features were removed/broken).
-
 ### Code
 #### Passing into SchemaGeneratorConfigBuilder.with(Module)
 ```java

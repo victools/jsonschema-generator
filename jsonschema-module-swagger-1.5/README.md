@@ -28,10 +28,6 @@ Schema attributes derived from `@ApiModelProperty` on getter methods are also ap
 </dependency>
 ```
 
-### Compatibility
-Please note that while the minor versions may differ, it is recommended to use matching major versions of the `jsonschema-generator` and this module.
-However, versions 3.* of this module are also compatible with `jsonschema-generator` 4.* (as no relevant features were removed/broken).
-
 ### Code
 #### Passing into SchemaGeneratorConfigBuilder.with(Module)
 ```java
