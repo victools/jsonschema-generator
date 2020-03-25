@@ -5,136 +5,185 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Added
+### `jsonschema-generator`
+#### Added
 - Support for custom definitions in the scope of a particular field/method via `SchemaGeneratorConfigPart.withCustomDefinitionProvider()`
 - Ability to opt-out of normal "attribute collection" for custom definitions through new `CustomDefinition` constructor parameters
 
 ## [4.7.0] - 2020-03-20
-### Added
+### `jsonschema-generator`
+#### Added
 - Support for multiple target type overrides at once per field/method
 - Support for "$id" property via `SchemaGeneratorGeneralConfigPart.withIdResolver()`
 - Support for "$anchor" property via `SchemaGeneratorGeneralConfigPart.withAnchorResolver()`
 
-### Fixed
+#### Fixed
 - Allow for multiple types with the same name (but different package) instead of picking one at random
 - Allow for multiple definitions for the same type (e.g. in case of a custom definition wrapping the standard definition)
 
-### Deprecated
+#### Deprecated
 - Configuration option for single target type override
 - Look-up of single target type override from configuration
 
+### `jsonschema-module-jackson`
+#### Changed
+- Ignore/exclude properties marked with `@JsonBackReference`
+
 ## [4.6.0] - 2020-03-15
-### Added
+### `jsonschema-generator`
+#### Added
 - Explicit indication of targeted JSON Schema version (for now: Draft 7 or 2019-09)
 - Support for renamed keywords between Draft versions through new `SchemaKeyword` enum (replacing static `SchemaConstants` interface)
 - Support for `$ref` alongside other attributes (from Draft 2019-09 onwards) thereby reducing number of `allOf` elements
 - Introduce `Option.ALLOF_CLEANUP_AT_THE_END` (also included in all standard `OptionPreset`s) for toggling-off this improvement if not desired
 
-### Changed
+#### Changed
 - Reduce number of `allOf` elements in generated schema when contained schema parts are distinct (and in case of Draft 7: don't contain `$ref`)
 
-### Deprecated
+#### Deprecated
 - `SchemaConstants` interface containing static `String` constants for tag names/values (in favour of version-aware `SchemaKeyword` enum)
 - Internal `AttributeCollector` API without generation context as parameter
 - `SchemaGeneratorConfigBuilder` constructors without explicit JSON Schema version indication
 
-### Dependency Update
+#### Dependency Update
 - `com.fasterxml.jackson.core`:`jackson-core`/`jackson-databind` from `2.10.0` to `2.10.2`
 - `com.fasterxml`:`classmate` from `1.5.0` to `1.5.2`
 - Optional: `org.slf4j`:`slf4j-api` from `1.7.26` to `1.7.30`
 - Optional: `org.apache.logging.log4j`:`log4j-api`/`log4j-core`/`log4j-slf4j-impl` from `2.11.2` to `2.13.0`
 
 ## [4.5.0] - 2020-03-05
-### Added
+### `jsonschema-generator`
+#### Added
 - Expose `SchemaGenerationContext.createDefinitionReference()` to custom definitions to enable circular references within
 - Expose `SchemaGenerationContext.createStandardDefinitionReference()` to custom definitions to enable circular references within
 
+### `jsonschema-module-jackson`
+#### Added
+- New `JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE` for considering `@JsonValue` annotations on enums, similar to `Option.FLATTENED_ENUMS`
+
 ## [4.4.0] - 2020-03-02
-### Added
+### `jsonschema-generator`
+#### Added
 - Enable declaration of subtypes through `withSubtypeResolver(SubtypeResolver)` on `forTypesInGeneral()` (#24)
 
-### Changed
+#### Changed
 - Move custom definitions and type attribute overrides into `forTypesInGeneral()` (while preserving delegate setters on config builder)
 
 ## [4.3.0] - 2020-02-28
-### Changed
+### `jsonschema-generator`
+#### Changed
 - Limit collected type attributes by declared "type" (prior to any `TypeAttributeOverride`!)
 
-### Fixed
+#### Fixed
 - Not declare any "type" for `Object.class` by default
 
 ## [4.2.0] - 2020-02-27
-### Added
+### `jsonschema-generator`
+#### Added
 - Support for "additionalProperties" property via `SchemaGeneratorTypeConfigPart.withAdditionalPropertiesResolver()`
 - Support for "patternProperties" property via `SchemaGeneratorTypeConfigPart.withPatternPropertiesResolver()`
 - Introduce new `Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` for more convenient usage
 - Offer `TypeScope.getTypeParameterFor()` and `TypeContext.getTypeParameterFor()` convenience methods
 
-### Fixed
+#### Fixed
 - Possible exceptions in case of encountered collections without specific type parameters
 
 ## [4.1.0] - 2020-02-18
-### Added
+### `jsonschema-generator`
+#### Added
 - New `Option.FLATTENED_ENUMS_FROM_TOSTRING`, using `toString()` instead of `name()` as per `Option.FLATTENED_ENUMS`
 
 ## [4.0.2] - 2020-01-30
-### Fixed
+### `jsonschema-generator`
+#### Fixed
 - Avoid further characters in definition keys that are not URI-compatible (#19)
 
 ## [4.0.1] - 2020-01-29
-### Fixed
+### `jsonschema-generator`
+#### Fixed
 - Avoid white-spaces in definition keys
 
 ## [4.0.0] - 2020-01-03
-### Added
+### `jsonschema-generator`
+#### Added
 - Extended API for defining context independent collection of schema attributes (for array/collection items that are not directly under a member)
 
-### Changed
+#### Changed
 - BREAKING CHANGE: `TypeAttributeOverride`'s second parameter is now the new `TypeScope` wrapper instead of just a `ResolvedType`
 
+### `jsonschema-module-jackson`
+#### Changed
+- Look-up descriptions from `@JsonClassDescription` via new `forTypesInGeneral()` API
+
+### `jsonschema-module-swagger-1.5`
+#### Changed
+- Look-up titles and descriptions from `@ApiModel` via new `forTypesInGeneral()` API
+
 ## [3.5.0] - 2020-01-01
-### Added
+### `jsonschema-generator`
+#### Added
 - `CustomDefinitionProviderV2` with access to `SchemaGenerationContext`, e.g. to allow continuing normal schema generation for nested properties
 
-### Deprecated
+#### Deprecated
 - `CustomDefinitionProvider` receiving only the `TypeContext` as parameter
 
-### Fixed
+#### Fixed
 - Possible `IllegalAccess` when loading constant values should just be ignored
 
 ## [3.4.1] - 2019-12-30
-### Fixed
+### `jsonschema-generator`
+#### Fixed
 - Collected attributes should also be applied to container types (Issue #15)
 
 ## [3.4.0] - 2019-11-29
-### Added
+### `jsonschema-generator`
+#### Added
 - Introduce convenience function `MemberScope.getAnnotationConsideringFieldAndGetter(Class)`
 
+### `jsonschema-module-swagger-1.5`
+#### Added
+- Optionally provide a field/method's "title" as per `@ApiModel(value = ...)`
+- Allow to ignore the general `@ApiModel(description = ...)` when populating a field/method's "description"
+
 ## [3.3.0] - 2019-10-25
-### Fixed
+### `jsonschema-generator`
+#### Fixed
 - Increase dependency version for jackson-databind (and jackson-core) to resolve security alerts.
 - Avoid unnecessary quotes when representing constant string values (due to changed behaviour in jackson >=2.10.0)
 
 ## [3.2.0] – 2019-09-01
-### Added
+### `jsonschema-generator`
+#### Added
 - In `SchemaGenerator.generateSchema(Type)` also allow passing type parameters via `SchemaGenerator.generateSchema(Type, Type...)`.
 - Support for "required" property via `SchemaGeneratorConfigPart.withRequiredCheck()` (PR #5).
 - Support for "default" property via `SchemaGeneratorConfigPart.withDefaultResolver()` (PR #5).
 - Support for "pattern" property via `SchemaGeneratorConfigPart.withStringPatternResolver()` (Issue #9).
 
+### `jsonschema-module-javax-validation`
+#### Added
+- Option for treating not-nullable fields as "required" in their parent type
+- Option for treating not-nullable methods as "required" in their parent type
+- Indicate a string's "format" to be "email" if `@Email` is present
+- Option for returning "idn-email" instead of "email" as "format" if `@Email` is present
+- Indicate a string's "pattern" according to regular expressions on `@Pattern` or `@Email` (ignoring specified flags)
+- Option for enabling the inclusion of "pattern" expressions (they are excluded by default)
+- Allow filtering applicable annotations by their declared validation `groups` via `JavaxValidationModule.forValidationGroups()`
+
 ## [3.1.0] – 2019-06-18
-### Changed
+### `jsonschema-generator`
+#### Changed
 - Use `Class.getTypeName()` instead of `Class.getName()` in `TypeContext.getFullTypeDescription()`.
 
-### Added
+#### Added
 - In `TypeContext.resolve(Type)` also allow passing type parameters via `TypeContext.resolve(Type, Type...)`.
 
-### Fixed
+#### Fixed
 - `NullPointerException` on `MemberScope` representing `void` methods.
 - `IndexOutOfBoundsException` when determining container item type of raw `Collection`.
 
 ## [3.0.0] – 2019-06-10
-### Changed
+### `jsonschema-generator`
+#### Changed
 - Simplify configuration API to be based on `FieldScope`/`MethodScope` respectively.
 - Consolidate some utility functions into `FieldScope`/`MethodScope`.
 - Consolidate logic for determining whether a type is a container into `TypeContext`.
@@ -142,30 +191,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `TypeContext` argument to `CustomDefinitionProvider` interface.
 - Remove `SchemaGeneratorConfig` argument from `InstanceAttributeOverride` interface.
 
-### Added
+#### Added
 - Allow for sub-typing of `FieldScope`/`MethodScope` and `TypeContext` (in case offered configuration options are insufficient).
 
-### Removed
+#### Removed
 - Remove support for `Option.GETTER_ATTRIBUTES_FOR_FIELDS` and `Option.FIELD_ATTRIBUTES_FOR_GETTERS`, rather let configurations/modules decide individually and avoid potential endless loop.
 
+### `jsonschema-module-jackson`
+#### Added
+- Populate "description" as per `@JsonPropertyDescription` (falling-back on `@JsonClassDescription`).
+- Apply alternative field names defined in `@JsonProperty` annotations.
+- Ignore fields that are deemed to be ignored according to various `jackson-annotations` (e.g. `@JsonIgnore`, `@JsonIgnoreType`, `@JsonIgnoreProperties`) or are otherwise supposed to be excluded.
+
+### `jsonschema-module-javax-validation`
+#### Added
+- Consider the same validation annotations on a getter method also for its field
+- Consider the same validation annotations on a field also for its getter method
+
+### `jsonschema-module-swagger-1.5`
+#### Added
+- Optionally override a field's property name with `@ApiModelProperty(name = ...)`
+- Optionally ignore a field/method if `@ApiModelProperty(hidden = true)`
+- Provide a field/method's "description" as per `@ApiModelProperty(value = ...)` or `@ApiModel(description = ...)`
+- Indicate a number's (field/method) "minimum" (inclusive) according to `@ApiModelProperty(allowableValues = "range[...")`
+- Indicate a number's (field/method) "exclusiveMinimum" according to `@ApiModelProperty(allowableValues = "range(...")`
+- Indicate a number's (field/method) "maximum" (inclusive) according to `@ApiModelProperty(allowableValues = "range...]")`
+- Indicate a number's (field/method) "exclusiveMaximum" according to `@ApiModelProperty(allowableValues = "range...)")`
+- Indicate a field/method's "const"/"enum" as `@ApiModelProperty(allowableValues = ...)` (if it is not a numeric range declaration)
+- Consider the `@ApiModelProperty` annotation on a getter method also for its field
+- Consider the `@ApiModelProperty` annotation on a field also for its getter method
+
 ## [2.0.0] – 2019-06-07
-### Changed
+### `jsonschema-generator`
+#### Changed
 - Removed type resolution and replaced it with `org.fasterxml:classmate` dependency.
 - Adjusting configuration API to use `classmate` references for types/fields/methods.
 
-### Fixed
+#### Fixed
 - Ignore complex constant values that may not be properly representable as JSON.
 
 ## [1.0.2] - 2019-05-30
-### Fixed
+### `jsonschema-generator`
+#### Fixed
 - Increase dependency version for jackson-databind to resolve security alert.
 
 ## [1.0.1] - 2019-05-19
-### Fixed
+### `jsonschema-generator`
+#### Fixed
 - Specified "test" scope for dependency on jsonassert.
 
 ## [1.0.0] - 2019-05-18
-### Added
+### `jsonschema-generator`
+#### Added
 - Reflection-based JSON Schema Generator.
 - Support of generics and the resolution of their type boundaries in the respective scope.
 - Inclusion of any fields and public methods in a generated JSON Schema.
@@ -176,6 +253,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Specific handling of enums (two alternatives via standard options).
 - Specific handling of optionals (two alternatives via standard options).
 - Pre-defined sets of standard options to cover different use-cases and simplify library usage.
+
+### `jsonschema-module-javax-validation`
+#### Added
+- Indicate a field/method to be nullable if `@Null` is present
+- Indicate a field/method to be not nullable if `@NotNull`, `@NotEmpty` or `@NotBlank` is present
+- Indicate an array's "minItems" according to `@Size` or `@NotEmpty`
+- Indicate an array's "maxItems" according to `@Size`
+- Indicate a string's "minLength" according to `@Size`, `@NotEmpty` or `@NotBlank`
+- Indicate a string's "maxLength" according to `@Size`
+- Indicate a number's "minimum" (inclusive) according to `@Min`, `@DecimalMin` or `@PositiveOrZero`
+- Indicate a number's "exclusiveMinimum" according to `@DecimalMin` or `@Positive`
+- Indicate a number's "maximum" (inclusive) according to `@Max`, `@DecimalMax` or `@NegativeOrZero`
+- Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
 [Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.7.0...HEAD
