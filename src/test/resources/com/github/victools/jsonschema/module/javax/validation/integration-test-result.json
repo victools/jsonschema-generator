@@ -1,0 +1,57 @@
+{
+    "type": "object",
+    "properties": {
+        "exclusiveRangeDouble": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "exclusiveMaximum": 1
+        },
+        "inclusiveRangeInt": {
+            "type": "integer",
+            "minimum": 7,
+            "maximum": 38
+        },
+        "notBlankText": {
+            "type": "string",
+            "minLength": 1
+        },
+        "notEmptyList": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "notEmptyPatternText": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\w+"
+        },
+        "notNullEmail": {
+            "type": "string",
+            "format": "email",
+            "pattern": ".+@.+\\..+"
+        },
+        "notNullList": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "nullObject": {},
+        "sizeRangeList": {
+            "minItems": 3,
+            "maxItems": 25,
+            "type": ["array", "null"],
+            "items": {
+                "type": "string"
+            }
+        },
+        "sizeRangeText": {
+            "type": ["string", "null"],
+            "minLength": 5,
+            "maxLength": 12
+        }
+    },
+    "required": ["notNullEmail", "notEmptyPatternText", "notBlankText", "notEmptyList", "notNullList"]
+}
