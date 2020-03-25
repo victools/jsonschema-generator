@@ -1,5 +1,4 @@
 # Java JSON Schema Generation – Module jackson
-[![Build Status](https://github.com/victools/jsonschema-module-jackson/workflows/Java%20CI%20(Maven)/badge.svg)](https://github.com/victools/jsonschema-module-jackson/actions?query=workflow%3A%22Java+CI+%28Maven%29%22)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-jackson/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-jackson)
 
 Module for the `jsonschema-generator` – deriving JSON Schema attributes from `jackson` annotations.

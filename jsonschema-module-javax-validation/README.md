@@ -1,5 +1,4 @@
 # Java JSON Schema Generator – Module javax.validation
-[![Build Status](https://github.com/victools/jsonschema-module-javax-validation/workflows/Java%20CI%20(Maven)/badge.svg)](https://github.com/victools/jsonschema-module-javax-validation/actions?query=workflow%3A%22Java+CI+%28Maven%29%22)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-javax-validation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-javax-validation)
 
 Module for the `jsonschema-generator` – deriving JSON Schema attributes from `javax.validation.constraints` annotations.

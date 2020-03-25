@@ -1,5 +1,4 @@
 # Java JSON Schema Generator
-[![Build Status](https://github.com/victools/jsonschema-generator/workflows/Java%20CI%20(Maven)/badge.svg)](https://github.com/victools/jsonschema-generator/actions?query=workflow%3A%22Java+CI+%28Maven%29%22)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-generator/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-generator)
 
 Creating JSON Schema (Draft 7 or Draft 2019-09) from your Java classes utilising Jackson (inspired by JJSchema).
@@ -103,11 +102,7 @@ SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(ob
     .with(separateModule);
 ```
 
-Some available modules are:
-- [victools/jsonschema-module-jackson](https://github.com/victools/jsonschema-module-jackson) – deriving JSON Schema attributes from `jackson` annotations (e.g. "description", property name overrides, what properties to ignore).
-- [victools/jsonschema-module-javax-validation](https://github.com/victools/jsonschema-module-javax-validation) – deriving JSON Schema attributes from `javax.validation` annotations (e.g. which properties are nullable or not, their "minimum"/"maximum", "minItems"/"maxItems", "minLength"/"maxLength").
-- [victools/jsonschema-module-swagger-1.5](https://github.com/victools/jsonschema-module-swagger-1.5) – deriving JSON Schema attributes from `swagger` (1.5.x) annotations (e.g. "description", property name overrides, what properties to ignore, their "minimum"/"maximum", "const"/"enum").
-- [imIfOu/jsonschema-module-addon](https://github.com/imIfOu/jsonschema-module-addon) – deriving JSON Schema attributes from a custom annotation with various parameters, which is part of the module.
+For a list of available modules refer to the main [README](../README.md).
 
 #### Defining Desired Behaviour via individual Configurations
 ```java
