@@ -78,6 +78,6 @@ jobs:
       with:
         java-version: 11
     - name: Generate JavaDoc
-      run: mvn verify -DskipTests=true -Dcheckstyle.skip=true -B
+      run: mvn verify -DskipTests=true -Dcheckstyle.skip=true -Dgpg.skip=true -B
       env:
         CI: true
