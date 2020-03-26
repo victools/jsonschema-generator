@@ -6,12 +6,12 @@ Creating JSON Schema (Draft 7 or Draft 2019-09) from your Java classes utilising
 
 ----
 
-This project consists mainly of:
+This project consists of:
 - the `jsonschema-generator` (the only thing you need to get started) – [find its README here](jsonschema-generator/README.md)
-- some "modules" bundling some standard configurations for your convenience:
-    - `jsonschema-module-jackson` – deriving JSON Schema attributes from `jackson` annotations (e.g. "description", property name overrides, what properties to ignore) – refer to its [README](jsonschema-module-jackson/README.md) for more details
-    - `jsonschema-module-javax-validation` – deriving JSON Schema attributes from `javax.validation` annotations (e.g. which properties are nullable or not, their "minimum"/"maximum", "minItems"/"maxItems", "minLength"/"maxLength") – refer to its [README](jsonschema-module-javax-validation/README.md) for more details
-    - `jsonschema-module-swagger-1.5` – deriving JSON Schema attributes from `swagger` (1.5.x) annotations (e.g. "description", property name overrides, what properties to ignore, their "minimum"/"maximum", "const"/"enum") – refer to its [README](jsonschema-module-swagger-1.5/README.md) for more details
+- a few modules bundling some standard configurations for your convenience:
+    - [victools/jsonschema-module-jackson](jsonschema-module-jackson/README.md) – deriving JSON Schema attributes from `jackson` annotations (e.g. "description", property name overrides, what properties to ignore)
+    - [victools/jsonschema-module-javax-validation](jsonschema-module-javax-validation/README.md) – deriving JSON Schema attributes from `javax.validation` annotations (e.g. which properties are nullable or not, their "minimum"/"maximum", "minItems"/"maxItems", "minLength"/"maxLength")
+    - [victools/jsonschema-module-swagger-1.5](jsonschema-module-swagger-1.5/README.md) – deriving JSON Schema attributes from `swagger` (1.5.x) annotations (e.g. "description", property name overrides, what properties to ignore, their "minimum"/"maximum", "const"/"enum")
 
 Another example for such a module is:
 - [imIfOu/jsonschema-module-addon](https://github.com/imIfOu/jsonschema-module-addon) – deriving JSON Schema attributes from a custom annotation with various parameters, which is part of the module.
