@@ -1,0 +1,25 @@
+{
+    "type": "object",
+    "properties": {
+        "fieldWithDescriptionAndAllowableValues": {
+            "type": ["string", "null"],
+            "description": "field description",
+            "enum": ["A", "B", "C", "D"]
+        },
+        "fieldWithExclusiveNumericRange": {
+            "type": "integer",
+            "exclusiveMinimum": 14,
+            "exclusiveMaximum": 21
+        },
+        "fieldWithInclusiveNumericRange": {
+            "type": "integer",
+            "minimum": 15,
+            "maximum": 20
+        },
+        "fieldWithOverriddenName": {
+            "type": "boolean"
+        }
+    },
+    "title": "test title",
+    "description": "test description"
+}
