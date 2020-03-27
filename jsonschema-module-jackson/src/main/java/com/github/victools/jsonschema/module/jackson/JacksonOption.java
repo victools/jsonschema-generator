@@ -28,5 +28,9 @@ public enum JacksonOption {
      * @see com.github.victools.jsonschema.generator.Option#FLATTENED_ENUMS
      * @see com.github.victools.jsonschema.generator.Option#FLATTENED_ENUMS_FROM_TOSTRING
      */
-    FLATTENED_ENUMS_FROM_JSONVALUE;
+    FLATTENED_ENUMS_FROM_JSONVALUE,
+    /**
+     * Use this option to skip the automatic look-up of subtype information according to {@code @JsonTypeInfo} or {@code @JsonSubTypes} annotations.
+     */
+    SKIP_SUBTYPE_LOOKUP;
 }

@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Dependency Update
 - `com.fasterxml.jackson.core`:`jackson-core`/`jackson-databind` from `2.10.2` to `2.10.3`
 
+### `jsonschema-module-jackson`
+#### Added
+- Look-up subtypes according to `@JsonTypeInfo` and `@JsonSubTypes` annotations per-type or overridden per-property:
+    - Considering `@JsonTypeInfo.include` with values `As.PROPERTY`, `As.EXISTING_PROPERTY`, `As.WRAPPER_ARRAY`, `As.WRAPPER_OBJECT`
+    - Considering `@JsonTypeInfo.use` with values `Id.NAME` (from `@JsonTypeName`) and `Id.CLASS` 
+- New `JacksonOption.SKIP_SUBTYPE_LOOKUP` to allow disabling the new subtype handling (i.e. to regain previous behaviour) if required
+
 ## [4.7.0] - 2020-03-20
 ### `jsonschema-generator`
 #### Added

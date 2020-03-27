@@ -82,6 +82,16 @@ public class JacksonModule implements Module {
         if (this.options.contains(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE)) {
             generalConfigPart.withCustomDefinitionProvider(new CustomEnumJsonValueDefinitionProvider());
         }
+        if (!this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP)) {
+            JsonSubTypesResolver subtypeResolver = new JsonSubTypesResolver();
+            generalConfigPart.withSubtypeResolver(subtypeResolver)
+                    .withCustomDefinitionProvider(subtypeResolver);
+            fieldConfigPart.withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides)
+                    .withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
+            builder.forMethods()
+                    .withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides)
+                    .withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
+        }
     }
 
     /**
