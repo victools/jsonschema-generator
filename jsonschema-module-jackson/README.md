@@ -1,7 +1,7 @@
 # Java JSON Schema Generation – Module jackson
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-jackson/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-jackson)
 
-Module for the `jsonschema-generator` – deriving JSON Schema attributes from `jackson` annotations.
+Module for the [jsonschema-generator](../jsonschema-generator) – deriving JSON Schema attributes from `jackson` annotations.
 
 ## Features
 1. Populate a field/method's "description" as per `@JsonPropertyDescription`
