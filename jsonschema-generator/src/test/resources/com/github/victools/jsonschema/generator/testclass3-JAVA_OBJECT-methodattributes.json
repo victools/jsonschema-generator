@@ -42,7 +42,12 @@
                     "uniqueItems": false,
                     "type": ["array", "null"],
                     "items": {
-                        "$ref": "#/definitions/RoundingMode"
+                        "allOf": [{
+                                "$ref": "#/definitions/RoundingMode"
+                            }, {
+                                "title": "RoundingMode",
+                                "description": "looked-up from method: RoundingMode"
+                            }]
                     }
                 }
             }
@@ -242,7 +247,18 @@
                     "uniqueItems": false,
                     "type": ["array", "null"],
                     "items": {
-                        "$ref": "#/definitions/TestClass1"
+                        "allOf": [{
+                                "$ref": "#/definitions/TestClass1"
+                            }, {
+                                "title": "TestClass1",
+                                "description": "looked-up from method: TestClass1",
+                                "additionalProperties": false,
+                                "patternProperties": {
+                                    "^generic.+$": {
+                                        "type": "string"
+                                    }
+                                }
+                            }]
                     }
                 }
             },
@@ -281,7 +297,18 @@
             "uniqueItems": false,
             "type": ["array", "null"],
             "items": {
-                "$ref": "#/definitions/TestClass2(Long)"
+                "allOf": [{
+                        "$ref": "#/definitions/TestClass2(Long)"
+                    }, {
+                        "title": "TestClass2<Long>",
+                        "description": "looked-up from method: TestClass2<Long>",
+                        "additionalProperties": false,
+                        "patternProperties": {
+                            "^generic.+$": {
+                                "type": "integer"
+                            }
+                        }
+                    }]
             }
         }
     }

@@ -4,16 +4,39 @@
             "type": ["object", "null"],
             "properties": {
                 "get()": {
-                    "type": ["integer", "null"]
+                    "type": ["integer", "null"],
+                    "$anchor": "#anchor",
+                    "title": "Integer",
+                    "description": "for type in general: Integer",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 1E+1,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
                 },
                 "isPresent()": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "$anchor": "#anchor",
+                    "title": "boolean",
+                    "description": "for type in general: boolean"
                 },
                 "orElse(Integer)": {
-                    "type": ["integer", "null"]
+                    "type": ["integer", "null"],
+                    "$anchor": "#anchor",
+                    "title": "Integer",
+                    "description": "for type in general: Integer",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 1E+1,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
                 }
             },
-            "$anchor": "#15",
+            "$anchor": "#anchor",
             "title": "Optional<Integer>",
             "description": "for type in general: Optional<Integer>",
             "additionalProperties": false
@@ -22,20 +45,45 @@
             "type": "object",
             "properties": {
                 "name": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "$anchor": "#anchor",
+                    "title": "String",
+                    "description": "for type in general: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
                 },
                 "oldMode": {
-                    "type": "integer"
+                    "type": "integer",
+                    "$anchor": "#anchor",
+                    "title": "int",
+                    "description": "for type in general: int"
                 },
                 "ordinal": {
-                    "type": "integer"
+                    "type": "integer",
+                    "$anchor": "#anchor",
+                    "title": "int",
+                    "description": "for type in general: int"
                 },
                 "compareTo(RoundingMode)": {
-                    "type": "integer"
+                    "type": "integer",
+                    "$anchor": "#anchor",
+                    "title": "int",
+                    "description": "for type in general: int"
                 },
                 "name()": {
                     "type": "string",
-                    "enum": ["UP", "DOWN", "CEILING", "FLOOR", "HALF_UP", "HALF_DOWN", "HALF_EVEN", "UNNECESSARY"]
+                    "enum": ["UP", "DOWN", "CEILING", "FLOOR", "HALF_UP", "HALF_DOWN", "HALF_EVEN", "UNNECESSARY"],
+                    "$anchor": "#anchor",
+                    "title": "String",
+                    "description": "for type in general: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
                 },
                 "valueOf(String)": {
                     "$ref": "#/definitions/RoundingMode-nullable"
@@ -55,7 +103,7 @@
                     "uniqueItems": false
                 }
             },
-            "$anchor": "#16",
+            "$anchor": "#anchor",
             "title": "RoundingMode",
             "description": "for type in general: RoundingMode",
             "additionalProperties": false
@@ -72,13 +120,23 @@
             "properties": {
                 "CONSTANT": {
                     "type": "integer",
-                    "const": 5
+                    "const": 5,
+                    "$anchor": "#anchor",
+                    "title": "Long",
+                    "description": "for type in general: Long",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 1E+1,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
                 },
                 "genericArray": {
                     "type": ["array", "null"],
                     "items": {
                         "type": "string",
-                        "$anchor": "#7",
+                        "$anchor": "#anchor",
                         "title": "String",
                         "description": "for type in general: String",
                         "const": "constant string value",
@@ -94,34 +152,69 @@
                     "uniqueItems": false
                 },
                 "genericValue": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "$anchor": "#anchor",
+                    "title": "String",
+                    "description": "for type in general: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
                 },
                 "ignoredInternalValue": {
-                    "type": ["integer", "null"]
+                    "type": ["integer", "null"],
+                    "$anchor": "#anchor",
+                    "title": "Integer",
+                    "description": "for type in general: Integer",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 1E+1,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
                 },
                 "primitiveValue": {
-                    "type": "integer"
+                    "type": "integer",
+                    "$anchor": "#anchor",
+                    "title": "int",
+                    "description": "for type in general: int"
                 },
                 "calculateSomething(Number, Number)": false,
                 "getGenericValue()": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "$anchor": "#anchor",
+                    "title": "String",
+                    "description": "for type in general: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
                 },
                 "getPrimitiveValue()": {
-                    "type": "integer"
+                    "type": "integer",
+                    "$anchor": "#anchor",
+                    "title": "int",
+                    "description": "for type in general: int"
                 },
                 "isSimpleTestClass()": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "$anchor": "#anchor",
+                    "title": "boolean",
+                    "description": "for type in general: boolean"
                 }
             },
-            "$id": "id-3",
-            "$anchor": "#8",
+            "$id": "id-TestClass1",
+            "$anchor": "#anchor",
             "title": "TestClass1",
             "description": "for type in general: TestClass1",
             "additionalProperties": false,
             "patternProperties": {
                 "^generic.+$": {
                     "type": "string",
-                    "$anchor": "#9",
+                    "$anchor": "#anchor",
                     "title": "String",
                     "description": "for type in general: String",
                     "const": "constant string value",
@@ -139,7 +232,7 @@
                     "type": ["array", "null"],
                     "items": {
                         "type": "integer",
-                        "$anchor": "#4",
+                        "$anchor": "#anchor",
                         "title": "Long",
                         "description": "for type in general: Long",
                         "default": 1,
@@ -157,21 +250,41 @@
                     "uniqueItems": false
                 },
                 "genericValue": {
-                    "type": ["integer", "null"]
+                    "type": ["integer", "null"],
+                    "$anchor": "#anchor",
+                    "title": "Long",
+                    "description": "for type in general: Long",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 1E+1,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
                 },
                 "getGenericValue()": {
-                    "type": ["integer", "null"]
+                    "type": ["integer", "null"],
+                    "$anchor": "#anchor",
+                    "title": "Long",
+                    "description": "for type in general: Long",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 1E+1,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
                 }
             },
-            "$id": "id-2",
-            "$anchor": "#5",
+            "$id": "id-TestClass2<Long>",
+            "$anchor": "#anchor",
             "title": "TestClass2<Long>",
             "description": "for type in general: TestClass2<Long>",
             "additionalProperties": false,
             "patternProperties": {
                 "^generic.+$": {
                     "type": "integer",
-                    "$anchor": "#6",
+                    "$anchor": "#anchor",
                     "title": "Long",
                     "description": "for type in general: Long",
                     "default": 1,
@@ -198,7 +311,7 @@
                     "type": ["array", "null"],
                     "items": {
                         "type": "string",
-                        "$anchor": "#11",
+                        "$anchor": "#anchor",
                         "title": "String",
                         "description": "for type in general: String",
                         "const": "constant string value",
@@ -214,21 +327,37 @@
                     "uniqueItems": false
                 },
                 "genericValue": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "$anchor": "#anchor",
+                    "title": "String",
+                    "description": "for type in general: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
                 },
                 "getGenericValue()": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "$anchor": "#anchor",
+                    "title": "String",
+                    "description": "for type in general: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
                 }
             },
-            "$id": "id-11",
-            "$anchor": "#12",
+            "$id": "id-TestClass2<String>",
+            "$anchor": "#anchor",
             "title": "TestClass2<String>",
             "description": "for type in general: TestClass2<String>",
             "additionalProperties": false,
             "patternProperties": {
                 "^generic.+$": {
                     "type": "string",
-                    "$anchor": "#13",
+                    "$anchor": "#anchor",
                     "title": "String",
                     "description": "for type in general: String",
                     "const": "constant string value",
@@ -256,14 +385,14 @@
                         "items": {
                             "$ref": "#/definitions/TestClass1"
                         },
-                        "$id": "id-5",
+                        "$id": "id-TestClass1[]",
                         "title": "TestClass1[]",
                         "description": "for type in general: TestClass1[]",
                         "minItems": 2,
                         "maxItems": 100,
                         "uniqueItems": false
                     },
-                    "$id": "id-6",
+                    "$id": "id-TestClass1[][]<TestClass1[]>",
                     "title": "TestClass1[][]<TestClass1[]>",
                     "description": "for type in general: TestClass1[][]<TestClass1[]>",
                     "minItems": 2,
@@ -275,7 +404,7 @@
                     "items": {
                         "$ref": "#/definitions/TestClass1"
                     },
-                    "$id": "id-4",
+                    "$id": "id-TestClass1[]",
                     "title": "TestClass1[]",
                     "description": "for type in general: TestClass1[]",
                     "minItems": 2,
@@ -287,7 +416,7 @@
                     "items": {
                         "$ref": "#/definitions/TestClass1"
                     },
-                    "$id": "id-7",
+                    "$id": "id-TestClass1[]",
                     "title": "TestClass1[]",
                     "description": "for type in general: TestClass1[]",
                     "minItems": 2,
@@ -295,8 +424,8 @@
                     "uniqueItems": false
                 }
             },
-            "$id": "id-8",
-            "$anchor": "#10",
+            "$id": "id-TestClass2<TestClass1[]>",
+            "$anchor": "#anchor",
             "title": "TestClass2<TestClass1[]>",
             "description": "for type in general: TestClass2<TestClass1[]>",
             "additionalProperties": false,
@@ -306,7 +435,7 @@
                     "items": {
                         "$ref": "#/definitions/TestClass1"
                     },
-                    "$id": "id-9",
+                    "$id": "id-TestClass1[]",
                     "title": "TestClass1[]",
                     "description": "for type in general: TestClass1[]",
                     "minItems": 2,
@@ -323,7 +452,7 @@
                     "items": {
                         "$ref": "#/definitions/TestClass2(String)"
                     },
-                    "$id": "id-12",
+                    "$id": "id-TestClass2[]<TestClass2<String>>",
                     "title": "TestClass2[]<TestClass2<String>>",
                     "description": "for type in general: TestClass2[]<TestClass2<String>>",
                     "minItems": 2,
@@ -337,8 +466,8 @@
                     "$ref": "#/definitions/TestClass2(String)-nullable"
                 }
             },
-            "$id": "id-13",
-            "$anchor": "#14",
+            "$id": "id-TestClass2<TestClass2<String>>",
+            "$anchor": "#anchor",
             "title": "TestClass2<TestClass2<String>>",
             "description": "for type in general: TestClass2<TestClass2<String>>",
             "additionalProperties": false,
@@ -368,13 +497,13 @@
                     "$ref": "#/definitions/TestClass2(TestClass2(String))-nullable"
                 }
             },
-            "$id": "id-14",
-            "$anchor": "#17",
+            "$id": "id-TestClass4<Integer, String>",
+            "$anchor": "#anchor",
             "title": "TestClass4<Integer, String>",
             "description": "for type in general: TestClass4<Integer, String>",
             "additionalProperties": {
                 "type": "string",
-                "$anchor": "#18",
+                "$anchor": "#anchor",
                 "title": "String",
                 "description": "for type in general: String",
                 "const": "constant string value",
@@ -401,7 +530,7 @@
             "items": {
                 "$ref": "#/definitions/TestClass2(Long)"
             },
-            "$id": "id-10",
+            "$id": "id-List<TestClass2<Long>>",
             "title": "List<TestClass2<Long>>",
             "description": "for type in general: List<TestClass2<Long>>",
             "minItems": 2,
@@ -422,7 +551,7 @@
             "items": {
                 "$ref": "#/definitions/TestClass2(Long)"
             },
-            "$id": "id-15",
+            "$id": "id-List<TestClass2<Long>>",
             "title": "List<TestClass2<Long>>",
             "description": "for type in general: List<TestClass2<Long>>",
             "minItems": 2,
@@ -430,8 +559,8 @@
             "uniqueItems": false
         }
     },
-    "$id": "id-16",
-    "$anchor": "#19",
+    "$id": "id-TestClass3",
+    "$anchor": "#anchor",
     "title": "TestClass3",
     "description": "for type in general: TestClass3",
     "additionalProperties": false
