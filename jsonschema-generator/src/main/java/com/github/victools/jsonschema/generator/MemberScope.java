@@ -37,6 +37,7 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
     private final ResolvedType overriddenType;
     private final String overriddenName;
     private final ResolvedTypeWithMembers declaringTypeMembers;
+    private boolean fakeContainerItemScope;
     private final TypeContext context;
 
     /**
@@ -46,16 +47,27 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @param overriddenType alternative type for this field or method's return value
      * @param overriddenName alternative name for this field or method
      * @param declaringTypeMembers collection of the declaring type's (other) fields and methods
+     * @param fakeContainerItemScope whether this field/method scope represents only the container item type of the actual field/method
      * @param context the overall type resolution context
      */
     protected MemberScope(M member, ResolvedType overriddenType, String overriddenName,
-            ResolvedTypeWithMembers declaringTypeMembers, TypeContext context) {
+            ResolvedTypeWithMembers declaringTypeMembers, boolean fakeContainerItemScope, TypeContext context) {
         super(Optional.ofNullable(overriddenType).orElseGet(member::getType), context);
         this.member = member;
         this.overriddenType = overriddenType;
         this.overriddenName = overriddenName;
         this.declaringTypeMembers = declaringTypeMembers;
+        this.fakeContainerItemScope = fakeContainerItemScope;
         this.context = context;
+    }
+
+    /**
+     * Set the {@code fakeContainerItemScope} flag to {@code true}.
+     *
+     * @see #isFakeContainerItemScope()
+     */
+    protected void markAsFakeContainerItemScope() {
+        this.fakeContainerItemScope = true;
     }
 
     /**
@@ -67,6 +79,23 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @see #getOverriddenType()
      */
     public abstract MemberScope<M, T> withOverriddenType(ResolvedType overriddenType);
+
+    /**
+     * Create another instance for this field or method and context, representing its field/method return type's container item type.
+     *
+     * @return new instance with the container item type as override (or an identical copy if this is not a container type)
+     * @see #withOverriddenType(ResolvedType)
+     * @see #getContainerItemType()
+     * @see #isFakeContainerItemScope()
+     */
+    public MemberScope<M, T> asFakeContainerItemScope() {
+        if (!this.isContainerType()) {
+            return this.withOverriddenType(this.getOverriddenType());
+        }
+        MemberScope<M, T> result = this.withOverriddenType(this.getContainerItemType());
+        result.markAsFakeContainerItemScope();
+        return result;
+    }
 
     /**
      * Create another instance for this field or method and context, but overriding the declared field/method name with the given one.
@@ -114,6 +143,15 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      */
     public ResolvedType getOverriddenType() {
         return this.overriddenType;
+    }
+
+    /**
+     * Check whether this field/method scope represents only the container item type of the actual field/method.
+     *
+     * @return whether this is not the actual field/method but a representation of its container item type
+     */
+    public boolean isFakeContainerItemScope() {
+        return this.fakeContainerItemScope;
     }
 
     /**

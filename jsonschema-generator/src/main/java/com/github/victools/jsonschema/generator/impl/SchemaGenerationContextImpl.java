@@ -293,7 +293,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 includeTypeAttributes = customDefinition.shouldIncludeAttributes();
             } else if (isContainerType) {
                 logger.debug("generating array definition for {}", targetType);
-                this.generateArrayDefinition(targetType, definition, isNullable);
+                this.generateArrayDefinition(scope, definition, isNullable);
                 includeTypeAttributes = true;
             } else {
                 logger.debug("generating definition for {}", targetType);
@@ -362,11 +362,11 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     /**
      * Preparation Step: add the given targetType (which was previously determined to be an array type).
      *
-     * @param targetType (possibly generic) array type to add
+     * @param targetScope (possibly generic) array type to add
      * @param definition node in the JSON schema to which all collected attributes should be added
      * @param isNullable whether the field/method's return value the targetType refers to is allowed to be null in the declaring type
      */
-    private void generateArrayDefinition(ResolvedType targetType, ObjectNode definition, boolean isNullable) {
+    private void generateArrayDefinition(TypeScope targetScope, ObjectNode definition, boolean isNullable) {
         if (isNullable) {
             ArrayNode typeArray = this.generatorConfig.createArrayNode()
                     .add(this.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY))
@@ -375,10 +375,22 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         } else {
             definition.put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY));
         }
-        ObjectNode arrayItemTypeRef = this.generatorConfig.createObjectNode();
-        definition.set(this.getKeyword(SchemaKeyword.TAG_ITEMS), arrayItemTypeRef);
-        ResolvedType itemType = this.typeContext.getContainerItemType(targetType);
-        this.traverseGenericType(itemType, arrayItemTypeRef, false);
+        if (targetScope instanceof MemberScope<?, ?> && !((MemberScope<?, ?>) targetScope).isFakeContainerItemScope()) {
+            MemberScope<?, ?> fakeArrayItemMember = ((MemberScope<?, ?>) targetScope).asFakeContainerItemScope();
+            Map<String, JsonNode> fakeItemDefinition = new HashMap<>();
+            if (targetScope instanceof FieldScope) {
+                this.populateField((FieldScope) fakeArrayItemMember, fakeItemDefinition, null);
+            } else if (targetScope instanceof MethodScope) {
+                this.populateMethod((MethodScope) fakeArrayItemMember, fakeItemDefinition, null);
+            } else {
+                throw new IllegalStateException("Unsupported member type: " + targetScope.getClass().getName());
+            }
+            definition.set(this.getKeyword(SchemaKeyword.TAG_ITEMS), fakeItemDefinition.values().iterator().next());
+        } else {
+            ObjectNode arrayItemTypeRef = this.generatorConfig.createObjectNode();
+            definition.set(this.getKeyword(SchemaKeyword.TAG_ITEMS), arrayItemTypeRef);
+            this.traverseGenericType(targetScope.getContainerItemType(), arrayItemTypeRef, false);
+        }
     }
 
     /**
@@ -495,15 +507,22 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @param requiredProperties set of properties value required
      */
     private void populateField(FieldScope field, Map<String, JsonNode> collectedFields, Set<String> requiredProperties) {
-        String propertyNameOverride = this.generatorConfig.resolvePropertyNameOverride(field);
-        FieldScope fieldWithNameOverride = propertyNameOverride == null ? field : field.withOverriddenName(propertyNameOverride);
-        String propertyName = fieldWithNameOverride.getSchemaPropertyName();
-        if (this.generatorConfig.isRequired(field)) {
-            requiredProperties.add(propertyName);
-        }
-        if (collectedFields.containsKey(propertyName)) {
-            logger.debug("ignoring overridden {}.{}", fieldWithNameOverride.getDeclaringType(), fieldWithNameOverride.getDeclaredName());
-            return;
+        final FieldScope fieldWithNameOverride;
+        final String propertyName;
+        if (field.isFakeContainerItemScope()) {
+            fieldWithNameOverride = field;
+            propertyName = field.getSchemaPropertyName();
+        } else {
+            String propertyNameOverride = this.generatorConfig.resolvePropertyNameOverride(field);
+            fieldWithNameOverride = propertyNameOverride == null ? field : field.withOverriddenName(propertyNameOverride);
+            propertyName = fieldWithNameOverride.getSchemaPropertyName();
+            if (this.generatorConfig.isRequired(field)) {
+                requiredProperties.add(propertyName);
+            }
+            if (collectedFields.containsKey(propertyName)) {
+                logger.debug("ignoring overridden {}.{}", fieldWithNameOverride.getDeclaringType(), fieldWithNameOverride.getDeclaredName());
+                return;
+            }
         }
 
         List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(fieldWithNameOverride);
@@ -516,7 +535,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                     .collect(Collectors.toList());
         }
         // consider declared type (instead of overridden one) for determining null-ability
-        boolean isNullable = !field.getRawMember().isEnumConstant() && this.generatorConfig.isNullable(field);
+        boolean isNullable = !field.getRawMember().isEnumConstant() && !field.isFakeContainerItemScope() && this.generatorConfig.isNullable(field);
         if (fieldOptions.size() == 1) {
             collectedFields.put(propertyName, this.createFieldSchema(fieldOptions.get(0), isNullable, null));
         } else {
@@ -524,8 +543,8 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             collectedFields.put(propertyName, subSchema);
             ArrayNode anyOfArray = subSchema.withArray(this.getKeyword(SchemaKeyword.TAG_ANYOF));
             if (isNullable) {
-                anyOfArray.add(this.generatorConfig.createObjectNode()
-                        .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL)));
+                anyOfArray.addObject()
+                        .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
             }
             fieldOptions.forEach(option -> anyOfArray.add(this.createFieldSchema(option, false, null)));
         }
@@ -555,15 +574,22 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @param requiredProperties set of properties value required
      */
     private void populateMethod(MethodScope method, Map<String, JsonNode> collectedMethods, Set<String> requiredProperties) {
-        String propertyNameOverride = this.generatorConfig.resolvePropertyNameOverride(method);
-        MethodScope methodWithNameOverride = propertyNameOverride == null ? method : method.withOverriddenName(propertyNameOverride);
-        String propertyName = methodWithNameOverride.getSchemaPropertyName();
-        if (this.generatorConfig.isRequired(method)) {
-            requiredProperties.add(propertyName);
-        }
-        if (collectedMethods.containsKey(propertyName)) {
-            logger.debug("ignoring overridden {}.{}", methodWithNameOverride.getDeclaringType(), methodWithNameOverride.getDeclaredName());
-            return;
+        final MethodScope methodWithNameOverride;
+        final String propertyName;
+        if (method.isFakeContainerItemScope()) {
+            methodWithNameOverride = method;
+            propertyName = method.getSchemaPropertyName();
+        } else {
+            String propertyNameOverride = this.generatorConfig.resolvePropertyNameOverride(method);
+            methodWithNameOverride = propertyNameOverride == null ? method : method.withOverriddenName(propertyNameOverride);
+            propertyName = methodWithNameOverride.getSchemaPropertyName();
+            if (this.generatorConfig.isRequired(method)) {
+                requiredProperties.add(propertyName);
+            }
+            if (collectedMethods.containsKey(propertyName)) {
+                logger.debug("ignoring overridden {}.{}", methodWithNameOverride.getDeclaringType(), methodWithNameOverride.getDeclaredName());
+                return;
+            }
         }
 
         List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(methodWithNameOverride);
@@ -576,7 +602,8 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                     .collect(Collectors.toList());
         }
         // consider declared type (instead of overridden one) for determining null-ability
-        boolean isNullable = methodWithNameOverride.isVoid() || this.generatorConfig.isNullable(methodWithNameOverride);
+        boolean isNullable = methodWithNameOverride.isVoid()
+                || !method.isFakeContainerItemScope() && this.generatorConfig.isNullable(methodWithNameOverride);
         if (methodOptions.size() == 1) {
             collectedMethods.put(propertyName, this.createMethodSchema(methodOptions.get(0), isNullable, null));
         } else {

@@ -202,7 +202,7 @@ public class JavaxValidationModule implements Module {
      * @see Size
      */
     protected Integer resolveArrayMinItems(MemberScope<?, ?> member) {
-        if (member.isContainerType()) {
+        if (member.isContainerType() && !member.isFakeContainerItemScope()) {
             Size sizeAnnotation = this.getAnnotationFromFieldOrGetter(member, Size.class, Size::groups);
             if (sizeAnnotation != null && sizeAnnotation.min() > 0) {
                 // minimum length greater than the default 0 was specified
@@ -223,7 +223,7 @@ public class JavaxValidationModule implements Module {
      * @see Size
      */
     protected Integer resolveArrayMaxItems(MemberScope<?, ?> member) {
-        if (member.isContainerType()) {
+        if (member.isContainerType() && !member.isFakeContainerItemScope()) {
             Size sizeAnnotation = this.getAnnotationFromFieldOrGetter(member, Size.class, Size::groups);
             if (sizeAnnotation != null && sizeAnnotation.max() < 2147483647) {
                 // maximum length below the default 2147483647 was specified
@@ -243,7 +243,7 @@ public class JavaxValidationModule implements Module {
      * @see NotBlank
      */
     protected Integer resolveStringMinLength(MemberScope<?, ?> member) {
-        if (member.getType().isInstanceOf(CharSequence.class)) {
+        if (member.getType().isInstanceOf(CharSequence.class) && !member.isFakeContainerItemScope()) {
             Size sizeAnnotation = this.getAnnotationFromFieldOrGetter(member, Size.class, Size::groups);
             if (sizeAnnotation != null && sizeAnnotation.min() > 0) {
                 // minimum length greater than the default 0 was specified
@@ -265,7 +265,7 @@ public class JavaxValidationModule implements Module {
      * @see Size
      */
     protected Integer resolveStringMaxLength(MemberScope<?, ?> member) {
-        if (member.getType().isInstanceOf(CharSequence.class)) {
+        if (member.getType().isInstanceOf(CharSequence.class) && !member.isFakeContainerItemScope()) {
             Size sizeAnnotation = this.getAnnotationFromFieldOrGetter(member, Size.class, Size::groups);
             if (sizeAnnotation != null && sizeAnnotation.max() < 2147483647) {
                 // maximum length below the default 2147483647 was specified

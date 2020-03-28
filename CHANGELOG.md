@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for custom definitions in the scope of a particular field/method via `SchemaGeneratorConfigPart.withCustomDefinitionProvider()`
 - Ability to opt-out of normal "attribute collection" for custom definitions through new `CustomDefinition` constructor parameters
 
+#### Changed
+- If a field/method is of a container type: apply the per-property configurations on its items; with `MemberScope.isFakeContainerItemScope()` flag
+
 #### Fixed
 - Should consider per-type attributes even on inline custom definitions
 

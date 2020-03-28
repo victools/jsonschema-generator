@@ -105,6 +105,9 @@ public class JacksonModule implements Module {
      * @return successfully looked-up description (or {@code null})
      */
     protected String resolveDescription(FieldScope field) {
+        if (field.isFakeContainerItemScope()) {
+            return null;
+        }
         // look for property specific description
         JsonPropertyDescription propertyAnnotation = field.getAnnotationConsideringFieldAndGetter(JsonPropertyDescription.class);
         if (propertyAnnotation != null) {
