@@ -205,7 +205,10 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         switch (typeInfoAnnotation.include()) {
         case WRAPPER_ARRAY:
             definition.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY));
-            ArrayNode itemsArray = definition.withArray(context.getKeyword(SchemaKeyword.TAG_ITEMS)).add(typeIdentifier);
+            ArrayNode itemsArray = definition.withArray(context.getKeyword(SchemaKeyword.TAG_ITEMS));
+            itemsArray.addObject()
+                    .put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_STRING))
+                    .put(context.getKeyword(SchemaKeyword.TAG_CONST), typeIdentifier);
             if (attributesToInclude == null || attributesToInclude.isEmpty()) {
                 itemsArray.add(context.createStandardDefinitionReference(javaType, this));
             } else {
