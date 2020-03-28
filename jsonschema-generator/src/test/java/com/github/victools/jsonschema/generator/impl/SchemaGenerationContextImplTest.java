@@ -202,7 +202,7 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
                 .getCustomDefinition(Mockito.any(FieldScope.class), Mockito.any(), Mockito.any());
         FieldScope targetField = this.getTestClassField("booleanField");
         ObjectNode result = this.contextImpl.createStandardDefinitionReference(targetField, null);
-        Assert.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Field Title\"}", result.toString());
+        Assert.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Field Title\",\"description\":\"Type Description\"}", result.toString());
     }
 
     @Test
@@ -215,7 +215,7 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
                 .getCustomDefinition(Mockito.any(FieldScope.class), Mockito.any(), Mockito.any());
         FieldScope targetField = this.getTestClassField("booleanField");
         ObjectNode result = this.contextImpl.createStandardDefinitionReference(targetField, null);
-        Assert.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Field Title\"}", result.toString());
+        Assert.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Field Title\",\"description\":\"Type Description\"}", result.toString());
     }
 
     @Test
@@ -243,7 +243,7 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
                 .getCustomDefinition(Mockito.any(MethodScope.class), Mockito.any(), Mockito.any());
         MethodScope targetMethod = this.getTestClassMethod("isBooleanField");
         JsonNode result = this.contextImpl.createStandardDefinitionReference(targetMethod, null);
-        Assert.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Method Title\"}", result.toString());
+        Assert.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Method Title\",\"description\":\"Type Description\"}", result.toString());
     }
 
     @Test
@@ -256,7 +256,7 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
                 .getCustomDefinition(Mockito.any(MethodScope.class), Mockito.any(), Mockito.any());
         MethodScope targetMethod = this.getTestClassMethod("isBooleanField");
         JsonNode result = this.contextImpl.createStandardDefinitionReference(targetMethod, null);
-        Assert.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Method Title\"}", result.toString());
+        Assert.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Method Title\",\"description\":\"Type Description\"}", result.toString());
     }
 
     @Test

@@ -13,10 +13,12 @@
                     "title": "List<Boolean>"
                 },
                 "genericFieldInSupertype": {
-                    "type": ["boolean", "null"]
+                    "type": ["boolean", "null"],
+                    "title": "Boolean"
                 },
                 "sameGenericFieldInSubtype1": {
-                    "type": ["boolean", "null"]
+                    "type": ["boolean", "null"],
+                    "title": "Boolean"
                 }
             },
             "title": "TestSubClass1<Boolean>"
@@ -33,10 +35,12 @@
                     "title": "List<String>"
                 },
                 "genericFieldInSupertype": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "title": "String"
                 },
                 "sameGenericFieldInSubtype1": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "title": "String"
                 }
             },
             "title": "TestSubClass1<String>"
@@ -65,9 +69,11 @@
             "anyOf": [{
                     "type": "null"
                 }, {
-                    "type": "number"
+                    "type": "number",
+                    "title": "Number"
                 }, {
-                    "type": "string"
+                    "type": "string",
+                    "title": "String"
                 }]
         },
         "stringSupertypeField": {

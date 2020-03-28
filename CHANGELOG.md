@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for custom definitions in the scope of a particular field/method via `SchemaGeneratorConfigPart.withCustomDefinitionProvider()`
 - Ability to opt-out of normal "attribute collection" for custom definitions through new `CustomDefinition` constructor parameters
 
+#### Fixed
+- Should consider per-type attributes even on inline custom definitions
+
 #### Dependency Update
 - `com.fasterxml.jackson.core`:`jackson-core`/`jackson-databind` from `2.10.2` to `2.10.3`
 

@@ -627,8 +627,16 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         final CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(scope, this, ignoredDefinitionProvider);
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
             targetNode.setAll(customDefinition.getValue());
-            if (customDefinition.shouldIncludeAttributes() && collectedAttributes != null && collectedAttributes.size() > 0) {
-                targetNode.setAll(collectedAttributes);
+            if (customDefinition.shouldIncludeAttributes()) {
+                if (collectedAttributes != null && collectedAttributes.size() > 0) {
+                    targetNode.setAll(collectedAttributes);
+                }
+                Set<String> allowedSchemaTypes = this.collectAllowedSchemaTypes(targetNode);
+                ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this, allowedSchemaTypes);
+                // ensure no existing attributes in the 'definition' are replaced, by way of first overriding any conflicts the other way around
+                typeAttributes.setAll(targetNode);
+                // apply merged attributes
+                targetNode.setAll(typeAttributes);
             }
             if (isNullable) {
                 this.makeNullable(targetNode);

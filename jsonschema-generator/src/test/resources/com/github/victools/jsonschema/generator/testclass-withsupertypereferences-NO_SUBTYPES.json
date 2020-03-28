@@ -5,7 +5,8 @@
             "type": ["object", "null"],
             "properties": {
                 "genericFieldInSupertype": {
-                    "type": ["boolean", "null"]
+                    "type": ["boolean", "null"],
+                    "title": "Boolean"
                 }
             },
             "title": "TestSuperClass<Boolean>",
@@ -15,7 +16,8 @@
             "type": ["object", "null"],
             "properties": {
                 "genericFieldInSupertype": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "title": "String"
                 }
             },
             "title": "TestSuperClass<String>",
@@ -27,7 +29,9 @@
         "booleanSupertypeField": {
             "$ref": "#/definitions/TestSuperClass(Boolean)-nullable"
         },
-        "numberOrStringObjectField": {},
+        "numberOrStringObjectField": {
+            "title": "Object"
+        },
         "stringSupertypeField": {
             "$ref": "#/definitions/TestSuperClass(String)-nullable"
         }

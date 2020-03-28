@@ -5,10 +5,12 @@
             "type": "object",
             "properties": {
                 "fieldInSubtype": {
-                    "type": "integer"
+                    "type": "integer",
+                    "title": "int"
                 },
                 "genericFieldInSupertype": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "title": "String"
                 }
             },
             "title": "TestSubClass3"
@@ -17,7 +19,8 @@
             "type": ["object", "null"],
             "properties": {
                 "genericFieldInSupertype": {
-                    "type": ["boolean", "null"]
+                    "type": ["boolean", "null"],
+                    "title": "Boolean"
                 }
             },
             "title": "TestSuperClass<Boolean>",
@@ -40,9 +43,11 @@
             "anyOf": [{
                     "type": "null"
                 }, {
-                    "type": "number"
+                    "type": "number",
+                    "title": "Number"
                 }, {
-                    "type": "string"
+                    "type": "string",
+                    "title": "String"
                 }]
         },
         "stringSupertypeField": {
