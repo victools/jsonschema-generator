@@ -141,7 +141,7 @@ public class SchemaGeneratorCustomDefinitionsTest {
                         .put(context.getKeyword(SchemaKeyword.TAG_TITLE),
                                 "Custom Definition #2 for " + context.getTypeContext().getFullTypeDescription(javaType));
                 // using SchemaGenerationContext.createStandardDefinitionReference() to avoid endless loop with this custom definition
-                customDefinition.withArray(context.getKeyword(SchemaKeyword.TAG_ONEOF))
+                customDefinition.withArray(context.getKeyword(SchemaKeyword.TAG_ANYOF))
                         .add(context.createStandardDefinitionReference(javaType, this))
                         .addObject().put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
                 return new CustomDefinition(customDefinition);

@@ -11,10 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ability to opt-out of normal "attribute collection" for custom definitions through new `CustomDefinition` constructor parameters
 
 #### Changed
+- Consolidate `anyOf` entries that only contain an `anyOf` themselves into the outer `anyOf` (mostly relevant for nullable entries with subtypes)
 - If a field/method is of a container type: apply the per-property configurations on its items; with `MemberScope.isFakeContainerItemScope()` flag
 
 #### Fixed
 - Should consider per-type attributes even on inline custom definitions
+- Use less strict `anyOf` instead of `oneOf` when indicating that a sub-schema may be of `"type": "null"`
 
 #### Dependency Update
 - `com.fasterxml.jackson.core`:`jackson-core`/`jackson-databind` from `2.10.2` to `2.10.3`

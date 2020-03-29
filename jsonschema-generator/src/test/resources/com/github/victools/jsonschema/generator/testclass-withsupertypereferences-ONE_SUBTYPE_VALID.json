@@ -46,14 +46,14 @@
             "title": "TestSubClass1<String>"
         },
         "TestSuperClass(Boolean)-nullable": {
-            "oneOf": [{
+            "anyOf": [{
                     "type": "null"
                 }, {
                     "$ref": "#/definitions/TestSubClass1(Boolean)"
                 }]
         },
         "TestSuperClass(String)-nullable": {
-            "oneOf": [{
+            "anyOf": [{
                     "type": "null"
                 }, {
                     "$ref": "#/definitions/TestSubClass1(String)"

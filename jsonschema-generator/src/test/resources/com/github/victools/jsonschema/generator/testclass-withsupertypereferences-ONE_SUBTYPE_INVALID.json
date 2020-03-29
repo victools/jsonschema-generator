@@ -27,7 +27,7 @@
             "description": "supertype-only description"
         },
         "TestSuperClass(String)-nullable": {
-            "oneOf": [{
+            "anyOf": [{
                     "type": "null"
                 }, {
                     "$ref": "#/definitions/TestSubClass3"

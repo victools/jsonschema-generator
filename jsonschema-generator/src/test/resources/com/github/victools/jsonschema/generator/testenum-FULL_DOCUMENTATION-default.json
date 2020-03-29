@@ -1,7 +1,7 @@
 {
     "definitions": {
         "TestEnum-nullable": {
-            "oneOf": [{
+            "anyOf": [{
                     "type": "null"
                 }, {
                     "$ref": "#"

@@ -705,14 +705,14 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             // cannot be sure what is specified in those other schema parts, instead simply create a oneOf wrapper
             ObjectNode nullSchema = this.generatorConfig.createObjectNode()
                     .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
-            ArrayNode oneOf = this.generatorConfig.createArrayNode()
+            ArrayNode anyOf = this.generatorConfig.createArrayNode()
                     // one option in the oneOf should be null
                     .add(nullSchema)
                     // the other option is the given (assumed to be) not-nullable node
                     .add(this.generatorConfig.createObjectNode().setAll(node));
             // replace all existing (and already copied properties with the oneOf wrapper
             node.removeAll();
-            node.set(this.getKeyword(SchemaKeyword.TAG_ONEOF), oneOf);
+            node.set(this.getKeyword(SchemaKeyword.TAG_ANYOF), anyOf);
         } else {
             // given node is a simple schema, we can simply adjust its "type" attribute
             JsonNode fixedJsonSchemaType = node.get(this.getKeyword(SchemaKeyword.TAG_TYPE));

@@ -89,8 +89,12 @@ public class SchemaGenerator {
         ObjectNode mainSchemaNode = generationContext.getDefinition(mainKey);
         jsonSchemaResult.setAll(mainSchemaNode);
         if (this.config.shouldCleanupUnnecessaryAllOfElements()) {
-            this.discardUnnecessaryAllOfWrappers(jsonSchemaResult);
+            String allOfTagName = this.config.getKeyword(SchemaKeyword.TAG_ALLOF);
+            this.finaliseSchemaParts(jsonSchemaResult, nodeToCheck -> this.mergeAllOfPartsIfPossible(nodeToCheck, allOfTagName));
         }
+        String anyOfTagName = this.config.getKeyword(SchemaKeyword.TAG_ANYOF);
+        this.finaliseSchemaParts(jsonSchemaResult, nodeToCheck -> this.reduceAnyOfWrappersIfPossible(nodeToCheck, anyOfTagName));
+
         return jsonSchemaResult;
     }
 
@@ -237,14 +241,15 @@ public class SchemaGenerator {
     }
 
     /**
-     * Iterate through a generated and fully populated schema and remove extraneous {@link SchemaKeyword#TAG_ALLOF} nodes, that are included due to
-     * the way how type references are handled during schema generation but are strictly not necessary. This makes for more readable schemas being
-     * generated but has the side-effect that any manually added {@link SchemaKeyword#TAG_ALLOF} (e.g. through a custom definition of attribute
-     * overrides) may be removed as well if it isn't strictly speaking necessary.
+     * Iterate through a generated and fully populated schema and remove extraneous {@link SchemaKeyword#TAG_ANYOF} nodes, where one entry of the
+     * array is again a {@link SchemaKeyword#TAG_ANYOF} wrapper and nothing else. This makes for more readable schemas being generated but has the
+     * side-effect that any manually added {@link SchemaKeyword#TAG_ANYOF} (e.g. through a custom definition of attribute overrides) may be removed as
+     * well if it isn't strictly speaking necessary.
      *
      * @param schemaNode generated schema to clean-up
+     * @param performCleanUpOnSingleSchemaNode clean up task to execute before looking for deeper nested sub-schemas for which to apply the same
      */
-    private void discardUnnecessaryAllOfWrappers(ObjectNode schemaNode) {
+    private void finaliseSchemaParts(ObjectNode schemaNode, Consumer<ObjectNode> performCleanUpOnSingleSchemaNode) {
         List<ObjectNode> nextNodesToCheck = new ArrayList<>();
         Consumer<JsonNode> addNodeToCheck = node -> {
             if (node instanceof ObjectNode) {
@@ -252,12 +257,10 @@ public class SchemaGenerator {
             }
         };
         nextNodesToCheck.add(schemaNode);
-        SchemaVersion schemaVersion = this.config.getSchemaVersion();
-        Optional.ofNullable(schemaNode.get(SchemaKeyword.TAG_DEFINITIONS.forVersion(schemaVersion)))
+        Optional.ofNullable(schemaNode.get(this.config.getKeyword(SchemaKeyword.TAG_DEFINITIONS)))
                 .filter(definitions -> definitions instanceof ObjectNode)
                 .ifPresent(definitions -> ((ObjectNode) definitions).forEach(addNodeToCheck));
 
-        String allOfTagName = SchemaKeyword.TAG_ALLOF.forVersion(schemaVersion);
         Set<String> tagsWithSchemas = this.getTagNamesContainingSchema();
         Set<String> tagsWithSchemaArrays = this.getTagNamesContainingSchemaArray();
         Set<String> tagsWithSchemaObjects = this.getTagNamesContainingSchemaObject();
@@ -265,7 +268,7 @@ public class SchemaGenerator {
             List<ObjectNode> currentNodesToCheck = new ArrayList<>(nextNodesToCheck);
             nextNodesToCheck.clear();
             for (ObjectNode nodeToCheck : currentNodesToCheck) {
-                this.mergeAllOfPartsIfPossible(nodeToCheck, allOfTagName);
+                performCleanUpOnSingleSchemaNode.accept(nodeToCheck);
                 tagsWithSchemas.stream().map(nodeToCheck::get).forEach(addNodeToCheck);
                 tagsWithSchemaArrays.stream()
                         .map(nodeToCheck::get)
@@ -282,6 +285,9 @@ public class SchemaGenerator {
     /**
      * Check whether the given schema node and its {@link SchemaKeyword#TAG_ALLOF} elements (if there are any) are distinct. If yes, remove the
      * {@link SchemaKeyword#TAG_ALLOF} node and merge all its elements with the given schema node instead.
+     * <br>
+     * This makes for more readable schemas being generated but has the side-effect that manually added {@link SchemaKeyword#TAG_ALLOF} (e.g. from a
+     * custom definition or attribute overrides) may be removed as well if it isn't strictly speaking necessary.
      *
      * @param schemaNode single node representing a sub-schema to consolidate contained {@link SchemaKeyword#TAG_ALLOF} for (if present)
      * @param allOfTagName name of the {@link SchemaKeyword#TAG_ALLOF} in the designated JSON Schema version
@@ -321,6 +327,42 @@ public class SchemaGenerator {
         if (fieldCount.values().stream().allMatch(count -> count == 1)) {
             schemaObjectNode.remove(allOfTagName);
             parts.forEach(schemaObjectNode::setAll);
+        }
+    }
+
+    /**
+     * Check whether the given schema node contains a {@link SchemaKeyword#TAG_ANYOF} element which in turn contains an entry with only another
+     * {@link SchemaKeyword#TAG_ANYOF} inside. If yes, move the entries from the inner array up to the outer one.
+     * <br>
+     * This makes for more readable schemas being generated but has the side-effect that manually added {@link SchemaKeyword#TAG_ANYOF} entries (e.g.
+     * from a custom definition or attribute overrides) may be removed as well if it isn't strictly speaking necessary.
+     *
+     * @param schemaNode single node representing a sub-schema to consolidate contained {@link SchemaKeyword#TAG_ANYOF} for (if present)
+     * @param anyOfTagName name of the {@link SchemaKeyword#TAG_ANYOF} in the designated JSON Schema version
+     */
+    private void reduceAnyOfWrappersIfPossible(JsonNode schemaNode, String anyOfTagName) {
+        if (!(schemaNode instanceof ObjectNode)) {
+            return;
+        }
+        JsonNode anyOfTag = schemaNode.get(anyOfTagName);
+        if (!(anyOfTag instanceof ArrayNode)) {
+            return;
+        }
+        anyOfTag.forEach(part -> this.reduceAnyOfWrappersIfPossible(part, anyOfTagName));
+
+        for (int index = anyOfTag.size() - 1; index > -1; index--) {
+            JsonNode arrayEntry = anyOfTag.get(index);
+            if (!(arrayEntry instanceof ObjectNode) || arrayEntry.size() != 1) {
+                continue;
+            }
+            JsonNode nestedAnyOf = arrayEntry.get(anyOfTagName);
+            if (!(nestedAnyOf instanceof ArrayNode)) {
+                continue;
+            }
+            ((ArrayNode) anyOfTag).remove(index);
+            for (int nestedEntryIndex = nestedAnyOf.size() - 1; nestedEntryIndex > -1; nestedEntryIndex--) {
+                ((ArrayNode) anyOfTag).insert(index, nestedAnyOf.get(nestedEntryIndex));
+            }
         }
     }
 }

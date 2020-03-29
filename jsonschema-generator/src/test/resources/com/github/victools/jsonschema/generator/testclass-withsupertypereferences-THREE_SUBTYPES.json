@@ -88,27 +88,23 @@
             "title": "TestSubClass3"
         },
         "TestSuperClass(Boolean)-nullable": {
-            "oneOf": [{
+            "anyOf": [{
                     "type": "null"
                 }, {
-                    "anyOf": [{
-                            "$ref": "#/definitions/TestSubClass1(Boolean)"
-                        }, {
-                            "$ref": "#/definitions/TestSubClass2(Boolean)"
-                        }]
+                    "$ref": "#/definitions/TestSubClass1(Boolean)"
+                }, {
+                    "$ref": "#/definitions/TestSubClass2(Boolean)"
                 }]
         },
         "TestSuperClass(String)-nullable": {
-            "oneOf": [{
+            "anyOf": [{
                     "type": "null"
                 }, {
-                    "anyOf": [{
-                            "$ref": "#/definitions/TestSubClass1(String)"
-                        }, {
-                            "$ref": "#/definitions/TestSubClass2(String)"
-                        }, {
-                            "$ref": "#/definitions/TestSubClass3"
-                        }]
+                    "$ref": "#/definitions/TestSubClass1(String)"
+                }, {
+                    "$ref": "#/definitions/TestSubClass2(String)"
+                }, {
+                    "$ref": "#/definitions/TestSubClass3"
                 }]
         }
     },

@@ -53,7 +53,7 @@
             }
         },
         "RoundingMode-nullable": {
-            "oneOf": [{
+            "anyOf": [{
                     "type": "null"
                 }, {
                     "$ref": "#/definitions/RoundingMode"
@@ -196,7 +196,7 @@
                             }
                         },
                         "getGenericValue()": {
-                            "oneOf": [{
+                            "anyOf": [{
                                     "type": "null"
                                 }, {
                                     "$ref": "#/definitions/TestClass2(String)"
@@ -275,7 +275,7 @@
             }
         },
         "getNestedLong()": {
-            "oneOf": [{
+            "anyOf": [{
                     "type": "null"
                 }, {
                     "$ref": "#/definitions/TestClass2(Long)"

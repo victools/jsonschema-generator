@@ -25,7 +25,7 @@
         },
         "TestDirectCircularClass-2": {
             "title": "Custom Definition #2 for com.github.victools.jsonschema.generator.SchemaGeneratorCustomDefinitionsTest$TestDirectCircularClass",
-            "oneOf": [{
+            "anyOf": [{
                     "$ref": "#/$defs/TestDirectCircularClass-1"
                 }, {
                     "type": "null"
@@ -33,7 +33,7 @@
         },
         "int-1": {
             "title": "Custom Definition #2 for int",
-            "oneOf": [{
+            "anyOf": [{
                     "type": "integer"
                 }, {
                     "type": "null"
