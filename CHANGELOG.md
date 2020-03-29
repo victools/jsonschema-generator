@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Dependency Update
 - `com.fasterxml.jackson.core`:`jackson-core`/`jackson-databind` from `2.10.2` to `2.10.3`
+- removed dependencies to `log4j` implementation (only `slf4j-api` remains)
 
 ### `jsonschema-module-jackson`
 #### Added
