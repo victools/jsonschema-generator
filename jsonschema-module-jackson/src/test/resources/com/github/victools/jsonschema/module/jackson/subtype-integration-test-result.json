@@ -38,13 +38,6 @@
                 }
             }
         },
-        "TestSubClass2-2-nullable": {
-            "anyOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/$defs/TestSubClass2-2"
-                }]
-        },
         "TestSubClass3-1": {
             "type": "object",
             "properties": {
@@ -78,7 +71,10 @@
             "type": "object",
             "properties": {
                 "directSubClass2": {
-                    "$ref": "#/$defs/TestSubClass2-2-nullable"
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/$defs/TestSubClass2-2"
+                    }
                 },
                 "typeString": {
                     "type": ["string", "null"]

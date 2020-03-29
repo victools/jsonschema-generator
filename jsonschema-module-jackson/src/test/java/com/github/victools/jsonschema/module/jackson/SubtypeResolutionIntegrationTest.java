@@ -34,6 +34,8 @@ import com.networknt.schema.ValidationMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -99,15 +101,12 @@ public class SubtypeResolutionIntegrationTest {
 
         TestClassForSubtypeResolution() {
             this.supertypeWithoutAnnotation = new TestSubClassWithTypeNameAnnotation(
-                    new TestSubClass2(
-                            new TestSubClass3(null)
-                    )
+                    new TestSubClass2(new TestSubClass3(null))
             );
             this.supertypeWithJsonSubTypesAnnotation = new TestSubClass2(
                     new TestSubClassWithTypeNameAnnotation(
-                            new TestSubClass2(
-                                    new TestSubClassWithTypeNameAnnotation(null)
-                            )
+                            new TestSubClass2(new TestSubClassWithTypeNameAnnotation()),
+                            new TestSubClass2()
                     )
             );
             this.supertypeAsWrapperArray = new TestSubClass3(
@@ -130,10 +129,10 @@ public class SubtypeResolutionIntegrationTest {
     @JsonTypeName("AnnotatedSubTypeName")
     private static class TestSubClassWithTypeNameAnnotation extends TestSuperClass {
 
-        public TestSubClass2 directSubClass2;
+        public List<TestSubClass2> directSubClass2;
 
-        TestSubClassWithTypeNameAnnotation(TestSubClass2 directSubClass2) {
-            this.directSubClass2 = directSubClass2;
+        TestSubClassWithTypeNameAnnotation(TestSubClass2... directSubClass2) {
+            this.directSubClass2 = Arrays.asList(directSubClass2);
         }
     }
 
@@ -145,6 +144,10 @@ public class SubtypeResolutionIntegrationTest {
             @JsonSubTypes.Type(value = TestSubClass3.class, name = "Sub3")
         })
         public TestSuperClass superClassViaExistingProperty;
+
+        public TestSubClass2() {
+            this.superClassViaExistingProperty = null;
+        }
 
         public TestSubClass2(TestSubClassWithTypeNameAnnotation superClassViaExistingProperty) {
             this.superClassViaExistingProperty = superClassViaExistingProperty;

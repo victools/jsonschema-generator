@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.FieldScope;
+import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
@@ -82,15 +83,21 @@ public class JacksonModule implements Module {
         if (this.options.contains(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE)) {
             generalConfigPart.withCustomDefinitionProvider(new CustomEnumJsonValueDefinitionProvider());
         }
-        if (!this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP)) {
+        boolean lookUpSubtypes = !this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP);
+        boolean includeTypeInfoTransform = !this.options.contains(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM);
+        if (lookUpSubtypes || includeTypeInfoTransform) {
             JsonSubTypesResolver subtypeResolver = new JsonSubTypesResolver();
-            generalConfigPart.withSubtypeResolver(subtypeResolver)
-                    .withCustomDefinitionProvider(subtypeResolver);
-            fieldConfigPart.withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides)
-                    .withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
-            builder.forMethods()
-                    .withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides)
-                    .withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
+            SchemaGeneratorConfigPart<MethodScope> methodConfigPart = builder.forMethods();
+            if (lookUpSubtypes) {
+                generalConfigPart.withSubtypeResolver(subtypeResolver);
+                fieldConfigPart.withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides);
+                methodConfigPart.withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides);
+            }
+            if (includeTypeInfoTransform) {
+                generalConfigPart.withCustomDefinitionProvider(subtypeResolver);
+                fieldConfigPart.withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
+                methodConfigPart.withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
+            }
         }
     }
 

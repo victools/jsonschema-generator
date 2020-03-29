@@ -27,8 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - Look-up subtypes according to `@JsonTypeInfo` and `@JsonSubTypes` annotations per-type or overridden per-property:
     - Considering `@JsonTypeInfo.include` with values `As.PROPERTY`, `As.EXISTING_PROPERTY`, `As.WRAPPER_ARRAY`, `As.WRAPPER_OBJECT`
-    - Considering `@JsonTypeInfo.use` with values `Id.NAME` (from `@JsonTypeName`) and `Id.CLASS` 
-- New `JacksonOption.SKIP_SUBTYPE_LOOKUP` to allow disabling the new subtype handling (i.e. to regain previous behaviour) if required
+    - Considering `@JsonTypeInfo.use` with values `Id.NAME` (from `@JsonTypeName`) and `Id.CLASS`
+- New `JacksonOption.SKIP_SUBTYPE_LOOKUP` for disabling the new look-up of subtypes (i.e. to regain previous behaviour) if required
+- New `JacksonOption.IGNORE_TYPE_INFO_TRANSFORM` for disabling addition of extra property or wrapping in an array/object according to `@JsonTypeInfo`
 
 ## [4.7.0] - 2020-03-20
 ### `jsonschema-generator`

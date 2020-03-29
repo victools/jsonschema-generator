@@ -65,11 +65,22 @@ public class JacksonModuleTest {
 
         Mockito.verify(this.configBuilder).forMethods();
         Mockito.verify(this.typesInGeneralConfigPart).withSubtypeResolver(Mockito.any());
-        Mockito.verify(this.typesInGeneralConfigPart).withCustomDefinitionProvider(Mockito.any());
         Mockito.verify(this.fieldConfigPart).withTargetTypeOverridesResolver(Mockito.any());
-        Mockito.verify(this.fieldConfigPart).withCustomDefinitionProvider(Mockito.any());
         Mockito.verify(this.methodConfigPart).withTargetTypeOverridesResolver(Mockito.any());
+        Mockito.verify(this.typesInGeneralConfigPart).withCustomDefinitionProvider(Mockito.any());
+        Mockito.verify(this.fieldConfigPart).withCustomDefinitionProvider(Mockito.any());
         Mockito.verify(this.methodConfigPart).withCustomDefinitionProvider(Mockito.any());
+
+        Mockito.verifyNoMoreInteractions(this.configBuilder, this.fieldConfigPart, this.methodConfigPart, this.typesInGeneralConfigPart);
+    }
+
+
+    @Test
+    public void testApplyToConfigBuilderWithSkipSubtypeLookupAndIgnoreTypeInfoTranformOptions() {
+        new JacksonModule(JacksonOption.SKIP_SUBTYPE_LOOKUP, JacksonOption.IGNORE_TYPE_INFO_TRANSFORM)
+                .applyToConfigBuilder(this.configBuilder);
+
+        this.verifyCommonConfigurations();
 
         Mockito.verifyNoMoreInteractions(this.configBuilder, this.fieldConfigPart, this.methodConfigPart, this.typesInGeneralConfigPart);
     }
@@ -80,6 +91,26 @@ public class JacksonModuleTest {
                 .applyToConfigBuilder(this.configBuilder);
 
         this.verifyCommonConfigurations();
+
+        Mockito.verify(this.configBuilder).forMethods();
+        Mockito.verify(this.typesInGeneralConfigPart).withCustomDefinitionProvider(Mockito.any());
+        Mockito.verify(this.fieldConfigPart).withCustomDefinitionProvider(Mockito.any());
+        Mockito.verify(this.methodConfigPart).withCustomDefinitionProvider(Mockito.any());
+
+        Mockito.verifyNoMoreInteractions(this.configBuilder, this.fieldConfigPart, this.methodConfigPart, this.typesInGeneralConfigPart);
+    }
+
+    @Test
+    public void testApplyToConfigBuilderWithIgnoreTypeInfoTranformOption() {
+        new JacksonModule(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM)
+                .applyToConfigBuilder(this.configBuilder);
+
+        this.verifyCommonConfigurations();
+
+        Mockito.verify(this.configBuilder).forMethods();
+        Mockito.verify(this.typesInGeneralConfigPart).withSubtypeResolver(Mockito.any());
+        Mockito.verify(this.fieldConfigPart).withTargetTypeOverridesResolver(Mockito.any());
+        Mockito.verify(this.methodConfigPart).withTargetTypeOverridesResolver(Mockito.any());
 
         Mockito.verifyNoMoreInteractions(this.configBuilder, this.fieldConfigPart, this.methodConfigPart, this.typesInGeneralConfigPart);
     }

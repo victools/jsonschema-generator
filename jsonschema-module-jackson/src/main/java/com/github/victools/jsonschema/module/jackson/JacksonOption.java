@@ -30,7 +30,11 @@ public enum JacksonOption {
      */
     FLATTENED_ENUMS_FROM_JSONVALUE,
     /**
-     * Use this option to skip the automatic look-up of subtype information according to {@code @JsonTypeInfo} or {@code @JsonSubTypes} annotations.
+     * Use this option to skip the automatic look-up of subtypes according to {@code @JsonSubTypes} annotations.
      */
-    SKIP_SUBTYPE_LOOKUP;
+    SKIP_SUBTYPE_LOOKUP,
+    /**
+     * Use this option to skip the transformation according to {@code @JsonTypeInfo} annotations (typically used to identify specific subtypes).
+     */
+    IGNORE_TYPE_INFO_TRANSFORM;
 }
