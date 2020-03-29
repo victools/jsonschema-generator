@@ -86,8 +86,11 @@
                 }
             },
             "title": "TestSubClass3"
-        },
-        "TestSuperClass(Boolean)-nullable": {
+        }
+    },
+    "type": "object",
+    "properties": {
+        "booleanSupertypeField": {
             "anyOf": [{
                     "type": "null"
                 }, {
@@ -95,23 +98,6 @@
                 }, {
                     "$ref": "#/definitions/TestSubClass2(Boolean)"
                 }]
-        },
-        "TestSuperClass(String)-nullable": {
-            "anyOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/TestSubClass1(String)"
-                }, {
-                    "$ref": "#/definitions/TestSubClass2(String)"
-                }, {
-                    "$ref": "#/definitions/TestSubClass3"
-                }]
-        }
-    },
-    "type": "object",
-    "properties": {
-        "booleanSupertypeField": {
-            "$ref": "#/definitions/TestSuperClass(Boolean)-nullable"
         },
         "numberOrStringObjectField": {
             "anyOf": [{
@@ -125,7 +111,15 @@
                 }]
         },
         "stringSupertypeField": {
-            "$ref": "#/definitions/TestSuperClass(String)-nullable"
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestSubClass1(String)"
+                }, {
+                    "$ref": "#/definitions/TestSubClass2(String)"
+                }, {
+                    "$ref": "#/definitions/TestSubClass3"
+                }]
         }
     },
     "title": "TestClassWithSuperTypeReferences"

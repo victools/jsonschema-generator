@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Fixed
 - Should consider per-type attributes even on inline custom definitions
+- Look-up per-type subtypes for properties if there is no per-property target type override
 - Use less strict `anyOf` instead of `oneOf` when indicating that a sub-schema may be of `"type": "null"`
 
 #### Dependency Update

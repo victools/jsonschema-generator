@@ -339,10 +339,10 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     }
 
     /**
-     * Collect the specified value(s) from the given definition's "{@value SchemaConstants#TAG_TYPE}" attribute.
+     * Collect the specified value(s) from the given definition's {@link SchemaKeyword#TAG_TYPE} attribute.
      *
-     * @param definition type definition to extract specified "{@value SchemaConstants#TAG_TYPE}" values from
-     * @return extracted "{@value SchemaConstants#TAG_TYPE}" values (may be empty)
+     * @param definition type definition to extract specified {@link SchemaKeyword#TAG_TYPE} values from
+     * @return extracted {@link SchemaKeyword#TAG_TYPE} – values (may be empty)
      */
     private Set<String> collectAllowedSchemaTypes(ObjectNode definition) {
         JsonNode declaredTypes = definition.get(this.getKeyword(SchemaKeyword.TAG_TYPE));
@@ -526,6 +526,9 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         }
 
         List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(fieldWithNameOverride);
+        if (typeOverrides == null) {
+            typeOverrides = this.generatorConfig.resolveSubtypes(fieldWithNameOverride.getType(), this);
+        }
         List<FieldScope> fieldOptions;
         if (typeOverrides == null || typeOverrides.isEmpty()) {
             fieldOptions = Collections.singletonList(fieldWithNameOverride);
@@ -593,6 +596,9 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         }
 
         List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(methodWithNameOverride);
+        if (typeOverrides == null && !methodWithNameOverride.isVoid()) {
+            typeOverrides = this.generatorConfig.resolveSubtypes(methodWithNameOverride.getType(), this);
+        }
         List<MethodScope> methodOptions;
         if (typeOverrides == null || typeOverrides.isEmpty()) {
             methodOptions = Collections.singletonList(methodWithNameOverride);

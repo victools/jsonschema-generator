@@ -92,17 +92,6 @@
                     "$ref": "#/$defs/TestSubClassWithTypeNameAnnotation-1"
                 }
             }
-        },
-        "TestSuperClass-nullable": {
-            "anyOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/$defs/TestSubClassWithTypeNameAnnotation-2"
-                }, {
-                    "$ref": "#/$defs/TestSubClass2-2"
-                }, {
-                    "$ref": "#/$defs/TestSubClass3-2"
-                }]
         }
     },
     "type": "object",
@@ -146,7 +135,15 @@
                 }]
         },
         "supertypeWithoutAnnotation": {
-            "$ref": "#/$defs/TestSuperClass-nullable"
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/$defs/TestSubClassWithTypeNameAnnotation-2"
+                }, {
+                    "$ref": "#/$defs/TestSubClass2-2"
+                }, {
+                    "$ref": "#/$defs/TestSubClass3-2"
+                }]
         }
     }
 }

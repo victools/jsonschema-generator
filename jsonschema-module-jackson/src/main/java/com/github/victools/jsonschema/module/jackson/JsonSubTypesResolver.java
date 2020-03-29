@@ -53,36 +53,17 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
     }
 
     /**
-     * Look-up applicable subtypes for the given field if there is a {@link JsonSubTypes} annotation.
+     * Look-up applicable subtypes for the given field/method if there is a {@link JsonSubTypes} annotation.
      *
-     * @param field targeted field
+     * @param property targeted field/method
      * @return list of annotated subtypes (or {@code null} if there is no {@link JsonSubTypes} annotation)
      */
-    public List<ResolvedType> findTargetTypeOverrides(FieldScope field) {
-        List<ResolvedType> subtypesFromFieldOverride = this.lookUpSubtypesFromAnnotation(field.getType(),
-                field.getAnnotationConsideringFieldAndGetter(JsonSubTypes.class), field.getContext());
-        if (subtypesFromFieldOverride != null) {
-            return subtypesFromFieldOverride;
-        }
-        if (field.getAnnotationConsideringFieldAndGetter(JsonTypeInfo.class) == null) {
+    public List<ResolvedType> findTargetTypeOverrides(MemberScope<?, ?> property) {
+        if (property.getType() == null) {
             return null;
         }
-        JsonSubTypes subtypesAnnotation = field.getType().getErasedType().getAnnotation(JsonSubTypes.class);
-        return this.lookUpSubtypesFromAnnotation(field.getType(), subtypesAnnotation, field.getContext());
-    }
-
-    /**
-     * Look-up applicable subtypes for the given method if there is a {@link JsonSubTypes} annotation.
-     *
-     * @param method targeted method
-     * @return list of annotated subtypes (or {@code null} if there is no {@link JsonSubTypes} annotation)
-     */
-    public List<ResolvedType> findTargetTypeOverrides(MethodScope method) {
-        if (method.isVoid()) {
-            return null;
-        }
-        return this.lookUpSubtypesFromAnnotation(method.getType(), method.getAnnotationConsideringFieldAndGetter(JsonSubTypes.class),
-                method.getContext());
+        JsonSubTypes subtypesAnnotation = property.getAnnotationConsideringFieldAndGetter(JsonSubTypes.class);
+        return this.lookUpSubtypesFromAnnotation(property.getType(), subtypesAnnotation, property.getContext());
     }
 
     /**
