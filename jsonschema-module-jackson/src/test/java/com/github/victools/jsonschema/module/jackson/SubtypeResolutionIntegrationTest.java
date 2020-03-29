@@ -43,8 +43,8 @@ public class SubtypeResolutionIntegrationTest {
     @Test
     public void testIntegration() throws Exception {
         JacksonModule module = new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE);
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_7, OptionPreset.PLAIN_JSON)
-                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS)
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
+                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_FIELDS_BY_DEFAULT)
                 .with(module)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
@@ -105,7 +105,7 @@ public class SubtypeResolutionIntegrationTest {
             @JsonSubTypes.Type(value = TestSubClassWithTypeNameAnnotation.class, name = "Sub1"),
             @JsonSubTypes.Type(value = TestSubClass3.class, name = "Sub3")
         })
-        public TestSuperClass superClassViaExternalProperty;
+        public TestSuperClass superClassViaExistingProperty;
     }
 
     private static class TestSubClass3 extends TestSuperClass {

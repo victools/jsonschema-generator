@@ -59,8 +59,16 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      * @return list of annotated subtypes (or {@code null} if there is no {@link JsonSubTypes} annotation)
      */
     public List<ResolvedType> findTargetTypeOverrides(FieldScope field) {
-        return this.lookUpSubtypesFromAnnotation(field.getType(), field.getAnnotationConsideringFieldAndGetter(JsonSubTypes.class),
-                field.getContext());
+        List<ResolvedType> subtypesFromFieldOverride = this.lookUpSubtypesFromAnnotation(field.getType(),
+                field.getAnnotationConsideringFieldAndGetter(JsonSubTypes.class), field.getContext());
+        if (subtypesFromFieldOverride != null) {
+            return subtypesFromFieldOverride;
+        }
+        if (field.getAnnotationConsideringFieldAndGetter(JsonTypeInfo.class) == null) {
+            return null;
+        }
+        JsonSubTypes subtypesAnnotation = field.getType().getErasedType().getAnnotation(JsonSubTypes.class);
+        return this.lookUpSubtypesFromAnnotation(field.getType(), subtypesAnnotation, field.getContext());
     }
 
     /**

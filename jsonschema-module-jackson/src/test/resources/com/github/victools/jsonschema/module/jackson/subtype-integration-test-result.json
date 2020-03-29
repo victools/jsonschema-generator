@@ -1,36 +1,32 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "definitions": {
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "$defs": {
         "TestSubClass2-1": {
             "type": "object",
             "properties": {
-                "superClassViaExternalProperty": {
+                "superClassViaExistingProperty": {
                     "anyOf": [{
-                            "allOf": [{
-                                    "$ref": "#/definitions/TestSubClassWithTypeNameAnnotation-1"
-                                }, {
-                                    "type": "object",
-                                    "properties": {
-                                        "typeString": {
-                                            "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionIntegrationTest$TestSubClassWithTypeNameAnnotation"
-                                        }
-                                    }
-                                }]
+                            "type": "null"
                         }, {
-                            "allOf": [{
-                                    "$ref": "#/definitions/TestSubClass3-1"
-                                }, {
-                                    "type": "object",
-                                    "properties": {
-                                        "typeString": {
-                                            "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionIntegrationTest$TestSubClass3"
-                                        }
-                                    }
-                                }]
+                            "$ref": "#/$defs/TestSubClassWithTypeNameAnnotation-1",
+                            "type": "object",
+                            "properties": {
+                                "typeString": {
+                                    "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionIntegrationTest$TestSubClassWithTypeNameAnnotation"
+                                }
+                            }
+                        }, {
+                            "$ref": "#/$defs/TestSubClass3-1",
+                            "type": "object",
+                            "properties": {
+                                "typeString": {
+                                    "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionIntegrationTest$TestSubClass3"
+                                }
+                            }
                         }]
                 },
                 "typeString": {
-                    "type": "string"
+                    "type": ["string", "null"]
                 }
             }
         },
@@ -38,18 +34,25 @@
             "type": "object",
             "properties": {
                 "TestSubClass2": {
-                    "$ref": "#/definitions/TestSubClass2-1"
+                    "$ref": "#/$defs/TestSubClass2-1"
                 }
             }
+        },
+        "TestSubClass2-2-nullable": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/$defs/TestSubClass2-2"
+                }]
         },
         "TestSubClass3-1": {
             "type": "object",
             "properties": {
                 "recursiveSubClass3": {
-                    "$ref": "#/definitions/TestSubClass3-2"
+                    "$ref": "#/$defs/TestSubClass3-2-nullable"
                 },
                 "typeString": {
-                    "type": "string"
+                    "type": ["string", "null"]
                 }
             }
         },
@@ -57,18 +60,25 @@
             "type": "object",
             "properties": {
                 "TestSubClass3": {
-                    "$ref": "#/definitions/TestSubClass3-1"
+                    "$ref": "#/$defs/TestSubClass3-1"
                 }
             }
+        },
+        "TestSubClass3-2-nullable": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/$defs/TestSubClass3-2"
+                }]
         },
         "TestSubClassWithTypeNameAnnotation-1": {
             "type": "object",
             "properties": {
                 "directSubClass2": {
-                    "$ref": "#/definitions/TestSubClass2-2"
+                    "$ref": "#/$defs/TestSubClass2-2-nullable"
                 },
                 "typeString": {
-                    "type": "string"
+                    "type": ["string", "null"]
                 }
             }
         },
@@ -76,34 +86,64 @@
             "type": "object",
             "properties": {
                 "AnnotatedSubTypeName": {
-                    "$ref": "#/definitions/TestSubClassWithTypeNameAnnotation-1"
+                    "$ref": "#/$defs/TestSubClassWithTypeNameAnnotation-1"
                 }
             }
         },
-        "TestSuperClass": {
+        "TestSuperClass-nullable": {
             "anyOf": [{
-                    "$ref": "#/definitions/TestSubClassWithTypeNameAnnotation-2"
+                    "type": "null"
                 }, {
-                    "$ref": "#/definitions/TestSubClass2-2"
+                    "$ref": "#/$defs/TestSubClassWithTypeNameAnnotation-2"
                 }, {
-                    "$ref": "#/definitions/TestSubClass3-2"
+                    "$ref": "#/$defs/TestSubClass2-2"
+                }, {
+                    "$ref": "#/$defs/TestSubClass3-2"
                 }]
         }
     },
     "type": "object",
     "properties": {
         "supertypeAsWrapperArray": {
-            "$ref": "#/definitions/TestSuperClass"
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "type": "array",
+                    "items": [{
+                            "type": "string",
+                            "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionIntegrationTest$TestSubClassWithTypeNameAnnotation"
+                        }, {
+                            "$ref": "#/$defs/TestSubClassWithTypeNameAnnotation-1"
+                        }]
+                }, {
+                    "type": "array",
+                    "items": [{
+                            "type": "string",
+                            "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionIntegrationTest$TestSubClass2"
+                        }, {
+                            "$ref": "#/$defs/TestSubClass2-1"
+                        }]
+                }, {
+                    "type": "array",
+                    "items": [{
+                            "type": "string",
+                            "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionIntegrationTest$TestSubClass3"
+                        }, {
+                            "$ref": "#/$defs/TestSubClass3-1"
+                        }]
+                }]
         },
         "supertypeWithJsonSubTypesAnnotation": {
             "anyOf": [{
-                    "$ref": "#/definitions/TestSubClassWithTypeNameAnnotation-2"
+                    "type": "null"
                 }, {
-                    "$ref": "#/definitions/TestSubClass2-2"
+                    "$ref": "#/$defs/TestSubClassWithTypeNameAnnotation-2"
+                }, {
+                    "$ref": "#/$defs/TestSubClass2-2"
                 }]
         },
         "supertypeWithoutAnnotation": {
-            "$ref": "#/definitions/TestSuperClass"
+            "$ref": "#/$defs/TestSuperClass-nullable"
         }
     }
 }
