@@ -28,6 +28,9 @@ Schema attributes derived from `@ApiModelProperty` on getter methods are also ap
 </dependency>
 ```
 
+Since version 4.7, the release versions of the main generator library and this module are aligned.
+It is recommended to use identical versions for both dependencies to ensure compatibility.
+
 ### Code
 #### Passing into SchemaGeneratorConfigBuilder.with(Module)
 ```java

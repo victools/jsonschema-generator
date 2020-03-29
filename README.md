@@ -29,6 +29,9 @@ Another example for such a module is:
 </dependency>
 ```
 
+Since version 4.7, the release versions of the main generator library and the (standard) `victools` modules listed above are aligned.
+It is recommended to use identical versions for all of them to ensure compatibility.
+
 ### Code
 #### Complete/Minimal Example
 ```java
