@@ -74,6 +74,7 @@
         <version.mockito>2.27.0</version.mockito>
         <version.slf4j>1.7.30</version.slf4j>
         <version.swagger-1.5>1.5.22</version.swagger-1.5>
+        <version.validator>1.0.36</version.validator>
     </properties>
 
     <dependencyManagement>
@@ -164,6 +165,22 @@
             <artifactId>jsonassert</artifactId>
             <version>${version.jsonassert}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${version.validator}</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

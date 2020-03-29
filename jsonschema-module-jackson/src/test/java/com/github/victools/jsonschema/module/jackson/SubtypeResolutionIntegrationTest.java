@@ -27,10 +27,17 @@ import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
+import com.networknt.schema.ValidationMessage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.junit.Assert;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -53,6 +60,16 @@ public class SubtypeResolutionIntegrationTest {
         String rawJsonSchema = result.toString();
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
                 loadResource("subtype-integration-test-result.json"), rawJsonSchema, JSONCompareMode.STRICT);
+
+        JsonSchema schemaForValidation = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909).getSchema(result);
+        String jsonInstance = config.getObjectMapper().writeValueAsString(new TestClassForSubtypeResolution());
+
+        Set<ValidationMessage> validationResult = schemaForValidation.validate(config.getObjectMapper().readTree(jsonInstance));
+        if (!validationResult.isEmpty()) {
+            Assert.fail("\n" + jsonInstance + "\n  " + validationResult.stream()
+                    .map(ValidationMessage::getMessage)
+                    .collect(Collectors.joining("\n  ")));
+        }
     }
 
     private static String loadResource(String resourcePath) throws IOException {
@@ -79,6 +96,24 @@ public class SubtypeResolutionIntegrationTest {
         public TestSuperClass supertypeWithJsonSubTypesAnnotation;
         @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
         public TestSuperClass supertypeAsWrapperArray;
+
+        TestClassForSubtypeResolution() {
+            this.supertypeWithoutAnnotation = new TestSubClassWithTypeNameAnnotation(
+                    new TestSubClass2(
+                            new TestSubClass3(null)
+                    )
+            );
+            this.supertypeWithJsonSubTypesAnnotation = new TestSubClass2(
+                    new TestSubClassWithTypeNameAnnotation(
+                            new TestSubClass2(
+                                    new TestSubClassWithTypeNameAnnotation(null)
+                            )
+                    )
+            );
+            this.supertypeAsWrapperArray = new TestSubClass3(
+                    new TestSubClass3(null)
+            );
+        }
     }
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
@@ -96,6 +131,10 @@ public class SubtypeResolutionIntegrationTest {
     private static class TestSubClassWithTypeNameAnnotation extends TestSuperClass {
 
         public TestSubClass2 directSubClass2;
+
+        TestSubClassWithTypeNameAnnotation(TestSubClass2 directSubClass2) {
+            this.directSubClass2 = directSubClass2;
+        }
     }
 
     private static class TestSubClass2 extends TestSuperClass {
@@ -106,10 +145,24 @@ public class SubtypeResolutionIntegrationTest {
             @JsonSubTypes.Type(value = TestSubClass3.class, name = "Sub3")
         })
         public TestSuperClass superClassViaExistingProperty;
+
+        public TestSubClass2(TestSubClassWithTypeNameAnnotation superClassViaExistingProperty) {
+            this.superClassViaExistingProperty = superClassViaExistingProperty;
+            this.superClassViaExistingProperty.typeString = "Sub1";
+        }
+
+        public TestSubClass2(TestSubClass3 superClassViaExistingProperty) {
+            this.superClassViaExistingProperty = superClassViaExistingProperty;
+            this.superClassViaExistingProperty.typeString = "Sub3";
+        }
     }
 
     private static class TestSubClass3 extends TestSuperClass {
 
         public TestSubClass3 recursiveSubClass3;
+
+        TestSubClass3(TestSubClass3 recursiveSubClass3) {
+            this.recursiveSubClass3 = recursiveSubClass3;
+        }
     }
 }
