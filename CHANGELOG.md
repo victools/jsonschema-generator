@@ -16,12 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Fixed
 - Should consider per-type attributes even on inline custom definitions
-- Look-up per-type subtypes for properties if there is no per-property target type override
 - Use less strict `anyOf` instead of `oneOf` when indicating that a sub-schema may be of `"type": "null"`
 
 #### Dependency Update
 - `com.fasterxml.jackson.core`:`jackson-core`/`jackson-databind` from `2.10.2` to `2.10.3`
-- removed dependencies to `log4j` implementation (only `slf4j-api` remains)
+- Remove dependencies to `log4j` implementation (only `slf4j-api` remains)
 
 ### `jsonschema-module-jackson`
 #### Added
