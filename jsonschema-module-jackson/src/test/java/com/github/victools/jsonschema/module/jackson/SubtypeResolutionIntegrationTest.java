@@ -159,6 +159,7 @@ public class SubtypeResolutionIntegrationTest {
 
     private static class TestSubClass3 extends TestSuperClass {
 
+        @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
         public TestSubClass3 recursiveSubClass3;
 
         TestSubClass3(TestSubClass3 recursiveSubClass3) {

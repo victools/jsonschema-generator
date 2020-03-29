@@ -183,7 +183,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
             typeIdentifier = Optional.ofNullable(erasedTargetType.getAnnotation(JsonTypeName.class))
                     .map(JsonTypeName::value)
                     .filter(name -> !name.isEmpty())
-                    .orElseGet(erasedTargetType::getSimpleName);
+                    .orElseGet(() -> getUnqualifiedClassName(erasedTargetType));
             break;
         case CLASS:
             typeIdentifier = erasedTargetType.getName();
@@ -192,6 +192,20 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
             typeIdentifier = null;
         }
         return typeIdentifier;
+    }
+
+    /**
+     * In case of a missing {@link JsonTypeName} annotation for a {@code JsonTypeInfo.Id.NAME}, determine the unqualified name of the given class.
+     *
+     * @param erasedTargetType class to produce unqualified class name for
+     * @return simple class name, with declaring class's unqualified name as prefix for member classes
+     */
+    private static String getUnqualifiedClassName(Class<?> erasedTargetType) {
+        Class<?> declaringClass = erasedTargetType.getDeclaringClass();
+        if (declaringClass == null) {
+            return erasedTargetType.getSimpleName();
+        }
+        return getUnqualifiedClassName(declaringClass) + '$' + erasedTargetType.getSimpleName();
     }
 
     /**

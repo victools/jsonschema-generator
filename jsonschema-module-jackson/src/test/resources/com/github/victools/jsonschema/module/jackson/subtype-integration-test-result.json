@@ -33,7 +33,7 @@
         "TestSubClass2-2": {
             "type": "object",
             "properties": {
-                "TestSubClass2": {
+                "SubtypeResolutionIntegrationTest$TestSubClass2": {
                     "$ref": "#/$defs/TestSubClass2-1"
                 }
             }
@@ -49,7 +49,17 @@
             "type": "object",
             "properties": {
                 "recursiveSubClass3": {
-                    "$ref": "#/$defs/TestSubClass3-2-nullable"
+                    "anyOf": [{
+                            "type": "null"
+                        }, {
+                            "$ref": "#/$defs/TestSubClass3-1",
+                            "type": "object",
+                            "properties": {
+                                "@type": {
+                                    "const": "SubtypeResolutionIntegrationTest$TestSubClass3"
+                                }
+                            }
+                        }]
                 },
                 "typeString": {
                     "type": ["string", "null"]
@@ -59,17 +69,10 @@
         "TestSubClass3-2": {
             "type": "object",
             "properties": {
-                "TestSubClass3": {
+                "SubtypeResolutionIntegrationTest$TestSubClass3": {
                     "$ref": "#/$defs/TestSubClass3-1"
                 }
             }
-        },
-        "TestSubClass3-2-nullable": {
-            "anyOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/$defs/TestSubClass3-2"
-                }]
         },
         "TestSubClassWithTypeNameAnnotation-1": {
             "type": "object",
