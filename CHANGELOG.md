@@ -10,6 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for custom definitions in the scope of a particular field/method via `SchemaGeneratorConfigPart.withCustomDefinitionProvider()`
 - Ability to opt-out of normal "attribute collection" for custom definitions through new `CustomDefinition` constructor parameters
 
+#### Changed
+- Consolidate `anyOf` entries that only contain an `anyOf` themselves into the outer `anyOf` (mostly relevant for nullable entries with subtypes)
+- If a field/method is of a container type: apply the per-property configurations on its items; with `MemberScope.isFakeContainerItemScope()` flag
+
+#### Fixed
+- Should consider per-type attributes even on inline custom definitions
+- Use less strict `anyOf` instead of `oneOf` when indicating that a sub-schema may be of `"type": "null"`
+
+#### Dependency Update
+- `com.fasterxml.jackson.core`:`jackson-core`/`jackson-databind` from `2.10.2` to `2.10.3`
+- Remove dependencies to `log4j` implementation (only `slf4j-api` remains)
+
+### `jsonschema-module-jackson`
+#### Added
+- Look-up subtypes according to `@JsonTypeInfo` and `@JsonSubTypes` annotations per-type or overridden per-property:
+    - Considering `@JsonTypeInfo.include` with values `As.PROPERTY`, `As.EXISTING_PROPERTY`, `As.WRAPPER_ARRAY`, `As.WRAPPER_OBJECT`
+    - Considering `@JsonTypeInfo.use` with values `Id.NAME` (from `@JsonTypeName`) and `Id.CLASS`
+- New `JacksonOption.SKIP_SUBTYPE_LOOKUP` for disabling the new look-up of subtypes (i.e. to regain previous behaviour) if required
+- New `JacksonOption.IGNORE_TYPE_INFO_TRANSFORM` for disabling addition of extra property or wrapping in an array/object according to `@JsonTypeInfo`
+
 ## [4.7.0] - 2020-03-20
 ### `jsonschema-generator`
 #### Added

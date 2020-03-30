@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.FieldScope;
+import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
@@ -82,6 +83,22 @@ public class JacksonModule implements Module {
         if (this.options.contains(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE)) {
             generalConfigPart.withCustomDefinitionProvider(new CustomEnumJsonValueDefinitionProvider());
         }
+        boolean lookUpSubtypes = !this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP);
+        boolean includeTypeInfoTransform = !this.options.contains(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM);
+        if (lookUpSubtypes || includeTypeInfoTransform) {
+            JsonSubTypesResolver subtypeResolver = new JsonSubTypesResolver();
+            SchemaGeneratorConfigPart<MethodScope> methodConfigPart = builder.forMethods();
+            if (lookUpSubtypes) {
+                generalConfigPart.withSubtypeResolver(subtypeResolver);
+                fieldConfigPart.withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides);
+                methodConfigPart.withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides);
+            }
+            if (includeTypeInfoTransform) {
+                generalConfigPart.withCustomDefinitionProvider(subtypeResolver);
+                fieldConfigPart.withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
+                methodConfigPart.withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
+            }
+        }
     }
 
     /**
@@ -95,6 +112,9 @@ public class JacksonModule implements Module {
      * @return successfully looked-up description (or {@code null})
      */
     protected String resolveDescription(FieldScope field) {
+        if (field.isFakeContainerItemScope()) {
+            return null;
+        }
         // look for property specific description
         JsonPropertyDescription propertyAnnotation = field.getAnnotationConsideringFieldAndGetter(JsonPropertyDescription.class);
         if (propertyAnnotation != null) {

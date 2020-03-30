@@ -1,7 +1,7 @@
 # Java JSON Schema Generator – Module Swagger (1.5)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-swagger-1.5/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-swagger-1.5)
 
-Module for the `jsonschema-generator` – deriving JSON Schema attributes from `swagger` (1.5.x) annotations
+Module for the [jsonschema-generator](../jsonschema-generator) – deriving JSON Schema attributes from `swagger` (1.5.x) annotations
 
 ## Features
 1. Optionally override a field's property name with `@ApiModelProperty(name = ...)`
@@ -13,7 +13,7 @@ Module for the `jsonschema-generator` – deriving JSON Schema attributes from `
 7. Indicate a number's (field/method) "exclusiveMinimum" according to `@ApiModelProperty(allowableValues = "range(...")`
 8. Indicate a number's (field/method) "maximum" (inclusive) according to `@ApiModelProperty(allowableValues = "range...]")`
 9. Indicate a number's (field/method) "exclusiveMaximum" according to `@ApiModelProperty(allowableValues = "range...)")`
-10. Indicate a field/method's "const"/"enum" as `@ApiModelProperty(allowableValues = ...)` (if it is not a numeric range declaration)
+10. Indicate a field/method's "const"/"enum" as per `@ApiModelProperty(allowableValues = ...)` (if it is not a numeric range declaration)
 
 Schema attributes derived from `@ApiModelProperty` on fields are also applied to their respective getter methods.
 Schema attributes derived from `@ApiModelProperty` on getter methods are also applied to their associated fields.
@@ -27,6 +27,9 @@ Schema attributes derived from `@ApiModelProperty` on getter methods are also ap
     <version>4.7.0</version>
 </dependency>
 ```
+
+Since version 4.7, the release versions of the main generator library and this module are aligned.
+It is recommended to use identical versions for both dependencies to ensure compatibility.
 
 ### Code
 #### Passing into SchemaGeneratorConfigBuilder.with(Module)

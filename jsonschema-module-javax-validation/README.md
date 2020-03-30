@@ -1,7 +1,7 @@
 # Java JSON Schema Generator – Module javax.validation
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-javax-validation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-javax-validation)
 
-Module for the `jsonschema-generator` – deriving JSON Schema attributes from `javax.validation.constraints` annotations.
+Module for the [jsonschema-generator](../jsonschema-generator) – deriving JSON Schema attributes from `javax.validation.constraints` annotations.
 
 ## Features
 1. Determine whether a member is not nullable, base assumption being that all fields and method return values are nullable if not annotated. Based on `@NotNull`/`@Null`/`@NotEmpty`/`@NotBlank`
@@ -25,6 +25,9 @@ Schema attributes derived from validation annotations on getter methods are also
     <version>4.7.0</version>
 </dependency>
 ```
+
+Since version 4.7, the release versions of the main generator library and this module are aligned.
+It is recommended to use identical versions for both dependencies to ensure compatibility.
 
 ### Code
 #### Passing into SchemaGeneratorConfigBuilder.with(Module)

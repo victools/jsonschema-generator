@@ -51,7 +51,7 @@
             }
         },
         "RoundingMode-nullable": {
-            "oneOf": [{
+            "anyOf": [{
                     "type": "null"
                 }, {
                     "$ref": "#/definitions/RoundingMode"
@@ -109,7 +109,7 @@
             }
         },
         "TestClass2(Long)-nullable": {
-            "oneOf": [{
+            "anyOf": [{
                     "type": "null"
                 }, {
                     "$ref": "#/definitions/TestClass2(Long)"
@@ -133,7 +133,7 @@
             }
         },
         "TestClass2(String)-nullable": {
-            "oneOf": [{
+            "anyOf": [{
                     "type": "null"
                 }, {
                     "$ref": "#/definitions/TestClass2(String)"

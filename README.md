@@ -7,11 +7,11 @@ Creating JSON Schema (Draft 7 or Draft 2019-09) from your Java classes utilising
 ----
 
 This project consists of:
-- the `jsonschema-generator` (the only thing you need to get started) – [find its README here](jsonschema-generator/README.md)
-- a few modules bundling some standard configurations for your convenience:
-    - [victools/jsonschema-module-jackson](jsonschema-module-jackson/README.md) – deriving JSON Schema attributes from `jackson` annotations (e.g. "description", property name overrides, what properties to ignore)
-    - [victools/jsonschema-module-javax-validation](jsonschema-module-javax-validation/README.md) – deriving JSON Schema attributes from `javax.validation` annotations (e.g. which properties are nullable or not, their "minimum"/"maximum", "minItems"/"maxItems", "minLength"/"maxLength")
-    - [victools/jsonschema-module-swagger-1.5](jsonschema-module-swagger-1.5/README.md) – deriving JSON Schema attributes from `swagger` (1.5.x) annotations (e.g. "description", property name overrides, what properties to ignore, their "minimum"/"maximum", "const"/"enum")
+- the [victools/jsonschema-generator](jsonschema-generator) (the only thing you need to get started)
+- a few modules bundling standard configurations for your convenience:
+    - [victools/jsonschema-module-jackson](jsonschema-module-jackson) – deriving JSON Schema attributes from `jackson` annotations (e.g. "description", property name overrides, what properties to ignore) as well as looking up appropriate (annotated) subtypes
+    - [victools/jsonschema-module-javax-validation](jsonschema-module-javax-validation) – deriving JSON Schema attributes from `javax.validation` annotations (e.g. which properties are nullable or not, their "minimum"/"maximum", "minItems"/"maxItems", "minLength"/"maxLength")
+    - [victools/jsonschema-module-swagger-1.5](jsonschema-module-swagger-1.5) – deriving JSON Schema attributes from `swagger` (1.5.x) annotations (e.g. "description", property name overrides, what properties to ignore, their "minimum"/"maximum", "const"/"enum")
 
 Another example for such a module is:
 - [imIfOu/jsonschema-module-addon](https://github.com/imIfOu/jsonschema-module-addon) – deriving JSON Schema attributes from a custom annotation with various parameters, which is part of the module.
@@ -28,6 +28,9 @@ Another example for such a module is:
     <version>4.7.0</version>
 </dependency>
 ```
+
+Since version 4.7, the release versions of the main generator library and the (standard) `victools` modules listed above are aligned.
+It is recommended to use identical versions for all of them to ensure compatibility.
 
 ### Code
 #### Complete/Minimal Example

@@ -1,14 +1,16 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
-        "TestSubClass2(Boolean)": {
-            "type": "object",
+        "TestSubClass2(Boolean)-nullable": {
+            "type": ["object", "null"],
             "properties": {
                 "genericFieldInSupertype": {
-                    "type": ["boolean", "null"]
+                    "type": ["boolean", "null"],
+                    "title": "Boolean"
                 },
                 "sameGenericFieldInSubtype2": {
-                    "type": ["boolean", "null"]
+                    "type": ["boolean", "null"],
+                    "title": "Boolean"
                 }
             },
             "title": "TestSubClass2<Boolean>"
@@ -17,10 +19,12 @@
             "type": "object",
             "properties": {
                 "genericFieldInSupertype": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "title": "String"
                 },
                 "sameGenericFieldInSubtype2": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "title": "String"
                 }
             },
             "title": "TestSubClass2<String>"
@@ -29,49 +33,41 @@
             "type": "object",
             "properties": {
                 "fieldInSubtype": {
-                    "type": "integer"
+                    "type": "integer",
+                    "title": "int"
                 },
                 "genericFieldInSupertype": {
-                    "type": ["string", "null"]
+                    "type": ["string", "null"],
+                    "title": "String"
                 }
             },
             "title": "TestSubClass3"
-        },
-        "TestSuperClass(Boolean)-nullable": {
-            "oneOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/TestSubClass2(Boolean)"
-                }]
-        },
-        "TestSuperClass(String)-nullable": {
-            "oneOf": [{
-                    "type": "null"
-                }, {
-                    "anyOf": [{
-                            "$ref": "#/definitions/TestSubClass2(String)"
-                        }, {
-                            "$ref": "#/definitions/TestSubClass3"
-                        }]
-                }]
         }
     },
     "type": "object",
     "properties": {
         "booleanSupertypeField": {
-            "$ref": "#/definitions/TestSuperClass(Boolean)-nullable"
+            "$ref": "#/definitions/TestSubClass2(Boolean)-nullable"
         },
         "numberOrStringObjectField": {
             "anyOf": [{
                     "type": "null"
                 }, {
-                    "type": "number"
+                    "type": "number",
+                    "title": "Number"
                 }, {
-                    "type": "string"
+                    "type": "string",
+                    "title": "String"
                 }]
         },
         "stringSupertypeField": {
-            "$ref": "#/definitions/TestSuperClass(String)-nullable"
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestSubClass2(String)"
+                }, {
+                    "$ref": "#/definitions/TestSubClass3"
+                }]
         }
     },
     "title": "TestClassWithSuperTypeReferences"

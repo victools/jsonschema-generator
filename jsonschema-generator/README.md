@@ -161,8 +161,8 @@ configBuilder.forTypesInGeneral()
 |    9 | `items` | Indicating the type of `array`/`Collection` elements. |
 |   10 | `required` | Listing the names of fields/methods that are deemed mandatory according to configuration (`SchemaGeneratorConfigPart.withRequiredCheck()`). |
 |   11 | `allOf` | Used to combine general attributes derived from the type itself with attributes collected in the respective context of the associated field/method. |
-|   12 | `anyOf` | Used to list alternatives according to configuration (`SchemaGeneratorGeneralConfigPart.withSubtypeResolver()`). |
-|   13 | `oneOf` | Used to indicate when a particular field/method can be of `type` `null`. |
+|   12 | `anyOf` | Used to list alternatives according to configuration (`SchemaGeneratorGeneralConfigPart.withSubtypeResolver()`) and to indicate when a particular field/method can be of `type` `null` according to configuration (`SchemaGeneratorConfigPart.withNullableCheck()`). |
+|   13 | `oneOf` | Is being considered when coming from a custom definition, but not added by default – the less strict `anyOf` is used instead. |
 |   14 | `title` | Collected value according to configuration (`SchemaGeneratorConfigPart.withTitleResolver()`). |
 |   15 | `description` | Collected value according to configuration (`SchemaGeneratorConfigPart.withDescriptionResolver()`). |
 |   16 | `const` | Collected value according to configuration (`SchemaGeneratorConfigPart.withEnumResolver()`) if only a single value was found. |

@@ -12,7 +12,14 @@
                     "uniqueItems": false,
                     "type": ["array", "null"],
                     "items": {
-                        "type": "string"
+                        "type": "string",
+                        "title": "String",
+                        "description": "looked-up from field: String",
+                        "const": "constant string value",
+                        "minLength": 1,
+                        "maxLength": 256,
+                        "format": "date",
+                        "pattern": "^.{1,256}$"
                     }
                 },
                 "genericValue": {
@@ -55,7 +62,16 @@
                     "uniqueItems": false,
                     "type": ["array", "null"],
                     "items": {
-                        "type": "integer"
+                        "type": "integer",
+                        "title": "Long",
+                        "description": "looked-up from field: Long",
+                        "default": 1,
+                        "enum": [1, 2, 3, 4, 5],
+                        "minimum": 1,
+                        "exclusiveMinimum": 0,
+                        "maximum": 1E+1,
+                        "exclusiveMaximum": 11,
+                        "multipleOf": 1
                     }
                 },
                 "genericValue": {
@@ -83,7 +99,14 @@
                     "uniqueItems": false,
                     "type": ["array", "null"],
                     "items": {
-                        "type": "string"
+                        "type": "string",
+                        "title": "String",
+                        "description": "looked-up from field: String",
+                        "const": "constant string value",
+                        "minLength": 1,
+                        "maxLength": 256,
+                        "format": "date",
+                        "pattern": "^.{1,256}$"
                     }
                 },
                 "genericValue": {
@@ -115,11 +138,22 @@
                             "uniqueItems": false,
                             "type": ["array", "null"],
                             "items": {
-                                "$ref": "#/definitions/TestClass2(String)"
+                                "allOf": [{
+                                        "$ref": "#/definitions/TestClass2(String)"
+                                    }, {
+                                        "title": "TestClass2<String>",
+                                        "description": "looked-up from field: TestClass2<String>",
+                                        "additionalProperties": false,
+                                        "patternProperties": {
+                                            "^generic.+$": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }]
                             }
                         },
                         "genericValue": {
-                            "oneOf": [{
+                            "anyOf": [{
                                     "type": "null"
                                 }, {
                                     "$ref": "#/definitions/TestClass2(String)"
@@ -173,6 +207,11 @@
                     "uniqueItems": false,
                     "type": ["array", "null"],
                     "items": {
+                        "title": "TestClass1[]",
+                        "description": "looked-up from field: TestClass1[]",
+                        "minItems": 2,
+                        "maxItems": 100,
+                        "uniqueItems": false,
                         "type": "array",
                         "items": {
                             "$ref": "#/definitions/TestClass1"
@@ -187,7 +226,18 @@
                     "uniqueItems": false,
                     "type": ["array", "null"],
                     "items": {
-                        "$ref": "#/definitions/TestClass1"
+                        "allOf": [{
+                                "$ref": "#/definitions/TestClass1"
+                            }, {
+                                "title": "TestClass1",
+                                "description": "looked-up from field: TestClass1",
+                                "additionalProperties": false,
+                                "patternProperties": {
+                                    "^generic.+$": {
+                                        "type": "string"
+                                    }
+                                }
+                            }]
                     }
                 }
             },
@@ -225,7 +275,18 @@
             "uniqueItems": false,
             "type": "array",
             "items": {
-                "$ref": "#/definitions/TestClass2(Long)"
+                "allOf": [{
+                        "$ref": "#/definitions/TestClass2(Long)"
+                    }, {
+                        "title": "TestClass2<Long>",
+                        "description": "looked-up from field: TestClass2<Long>",
+                        "additionalProperties": false,
+                        "patternProperties": {
+                            "^generic.+$": {
+                                "type": "integer"
+                            }
+                        }
+                    }]
             }
         }
     },

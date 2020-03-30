@@ -39,7 +39,7 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
      * @param context the overall type resolution context
      */
     protected MethodScope(ResolvedMethod method, ResolvedTypeWithMembers declaringTypeMembers, TypeContext context) {
-        this(method, null, null, declaringTypeMembers, context);
+        this(method, null, null, declaringTypeMembers, false, context);
     }
 
     /**
@@ -49,21 +49,24 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
      * @param overriddenType alternative type for this method's return value
      * @param overriddenName alternative name for this method
      * @param declaringTypeMembers collection of the declaring type's fields and (other) methods
+     * @param fakeContainerItemScope whether this field/method scope represents only the container item type of the actual field/method
      * @param context the overall type resolution context
      */
     protected MethodScope(ResolvedMethod method, ResolvedType overriddenType, String overriddenName,
-            ResolvedTypeWithMembers declaringTypeMembers, TypeContext context) {
-        super(method, overriddenType, overriddenName, declaringTypeMembers, context);
+            ResolvedTypeWithMembers declaringTypeMembers, boolean fakeContainerItemScope, TypeContext context) {
+        super(method, overriddenType, overriddenName, declaringTypeMembers, fakeContainerItemScope, context);
     }
 
     @Override
     public MethodScope withOverriddenType(ResolvedType overriddenType) {
-        return new MethodScope(this.getMember(), overriddenType, this.getOverriddenName(), this.getDeclaringTypeMembers(), this.getContext());
+        return new MethodScope(this.getMember(), overriddenType, this.getOverriddenName(), this.getDeclaringTypeMembers(),
+                this.isFakeContainerItemScope(), this.getContext());
     }
 
     @Override
     public MethodScope withOverriddenName(String overriddenName) {
-        return new MethodScope(this.getMember(), this.getOverriddenType(), overriddenName, this.getDeclaringTypeMembers(), this.getContext());
+        return new MethodScope(this.getMember(), this.getOverriddenType(), overriddenName, this.getDeclaringTypeMembers(),
+                this.isFakeContainerItemScope(), this.getContext());
     }
 
     /**
