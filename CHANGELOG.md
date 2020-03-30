@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.8.0] - 2020-03-30
 ### `jsonschema-generator`
 #### Added
 - Support for custom definitions in the scope of a particular field/method via `SchemaGeneratorConfigPart.withCustomDefinitionProvider()`
@@ -288,7 +288,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.7.0...HEAD
+[4.8.0]: https://github.com/victools/jsonschema-generator/compare/v4.7.0...v4.8.0
 [4.7.0]: https://github.com/victools/jsonschema-generator/compare/v4.6.0...v4.7.0
 [4.6.0]: https://github.com/victools/jsonschema-generator/compare/v4.5.0...v4.6.0
 [4.5.0]: https://github.com/victools/jsonschema-generator/compare/v4.4.0...v4.5.0
