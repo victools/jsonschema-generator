@@ -27,6 +27,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.function.Predicate;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -219,19 +220,24 @@ public class SwaggerModuleTest {
 
     Object parametersForTestTitleResolver() {
         return new Object[][]{
-            {"unannotatedField", null},
-            {"exampleWithEmptyApiModel", null},
-            {"exampleWithApiModelTitle", "example title"}
+            {"unannotatedField", false, null},
+            {"exampleWithEmptyApiModel", false, null},
+            {"exampleWithApiModelTitle", false, "example title"},
+            {"listExampleWithApiModelTitle", false, null},
+            {"listExampleWithApiModelTitle", true, "example title"}
         };
     }
 
     @Test
     @Parameters
-    public void testTitleResolver(String fieldName, String expectedTitle) {
+    public void testTitleResolver(String fieldName, boolean asContainerItem, String expectedTitle) {
         new SwaggerModule().applyToConfigBuilder(this.configBuilder);
 
         TestType testType = new TestType(TestClassForDescription.class);
         FieldScope field = testType.getMemberField(fieldName);
+        if (asContainerItem) {
+            field = field.asFakeContainerItemScope();
+        }
 
         ArgumentCaptor<ConfigFunction<TypeScope, String>> captor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.typesInGeneralConfigPart).withTitleResolver(captor.capture());
@@ -241,25 +247,30 @@ public class SwaggerModuleTest {
 
     Object parametersForTestDescriptionResolver() {
         return new Object[][]{
-            {"unannotatedField", null, null},
-            {"annotatedWithoutValueField", null, null},
-            {"annotatedWithoutValueGetterField", null, null},
-            {"annotatedField", "annotation value 1", null},
-            {"annotatedGetterField", "annotation value 2", null},
-            {"exampleWithEmptyApiModel", null, null},
-            {"exampleWithApiModelDescription", null, "type description"},
-            {"exampleWithTwoDescriptions", "property description", "type description"},
-            {"exampleWithApiModelTitle", null, null}
+            {"unannotatedField", false, null, null},
+            {"annotatedWithoutValueField", false, null, null},
+            {"annotatedWithoutValueGetterField", false, null, null},
+            {"annotatedField", false, "annotation value 1", null},
+            {"annotatedGetterField", false, "annotation value 2", null},
+            {"exampleWithEmptyApiModel", false, null, null},
+            {"exampleWithApiModelDescription", false, null, "type description"},
+            {"arrayExampleWithApiModelDescription", false, null, null},
+            {"arrayExampleWithApiModelDescription", true, null, "type description"},
+            {"exampleWithTwoDescriptions", false, "property description", "type description"},
+            {"exampleWithApiModelTitle", false, null, null}
         };
     }
 
     @Test
     @Parameters
-    public void testDescriptionResolver(String fieldName, String expectedMemberDescription, String expectedTypeDescription) {
+    public void testDescriptionResolver(String fieldName, boolean asContainerItem, String expectedMemberDescription, String expectedTypeDescription) {
         new SwaggerModule().applyToConfigBuilder(this.configBuilder);
 
         TestType testType = new TestType(TestClassForDescription.class);
         FieldScope field = testType.getMemberField(fieldName);
+        if (asContainerItem) {
+            field = field.asFakeContainerItemScope();
+        }
 
         ArgumentCaptor<ConfigFunction<FieldScope, String>> memberCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withDescriptionResolver(memberCaptor.capture());
@@ -307,34 +318,39 @@ public class SwaggerModuleTest {
 
     Object parametersForTestNumberMinMaxResolvers() {
         return new Object[][]{
-            {"unannotatedInt", null, null, null, null},
-            {"minMinusHundredLong", "-100", null, null, null},
-            {"minMinusHundredOnGetterLong", "-100", null, null, null},
-            {"maxFiftyShort", null, null, "50", null},
-            {"maxFiftyOnGetterShort", null, null, "50", null},
-            {"tenToTwentyInclusiveDouble", "10.1", null, "20.2", null},
-            {"tenToTwentyInclusiveOnGetterDouble", "10.1", null, "20.2", null},
-            {"tenToTwentyExclusiveDecimal", null, "10.1", null, "20.2"},
-            {"tenToTwentyExclusiveOnGetterDecimal", null, "10.1", null, "20.2"},
-            {"positiveByte", null, BigDecimal.ZERO, null, null},
-            {"positiveOnGetterByte", null, BigDecimal.ZERO, null, null},
-            {"positiveOrZeroBigInteger", BigDecimal.ZERO, null, null, null},
-            {"positiveOrZeroOnGetterBigInteger", BigDecimal.ZERO, null, null, null},
-            {"negativeDecimal", null, null, null, BigDecimal.ZERO},
-            {"negativeOnGetterDecimal", null, null, null, BigDecimal.ZERO},
-            {"negativeOrZeroLong", null, null, BigDecimal.ZERO, null},
-            {"negativeOrZeroOnGetterLong", null, null, BigDecimal.ZERO, null}
+            {"unannotatedInt", false, null, null, null, null},
+            {"unannotatedIntArray", false, null, null, null, null},
+            {"unannotatedIntArray", true, null, null, null, null},
+            {"minMinusHundredLong", false, "-100", null, null, null},
+            {"minMinusHundredOnGetterLong", false, "-100", null, null, null},
+            {"maxFiftyShort", false, null, null, "50", null},
+            {"maxFiftyOnGetterShort", false, null, null, "50", null},
+            {"tenToTwentyInclusiveDouble", false, "10.1", null, "20.2", null},
+            {"tenToTwentyInclusiveOnGetterDouble", false, "10.1", null, "20.2", null},
+            {"tenToTwentyExclusiveDecimal", false, null, "10.1", null, "20.2"},
+            {"tenToTwentyExclusiveOnGetterDecimal", false, null, "10.1", null, "20.2"},
+            {"positiveByte", false, null, BigDecimal.ZERO, null, null},
+            {"positiveOnGetterByte", false, null, BigDecimal.ZERO, null, null},
+            {"positiveOrZeroBigInteger", false, BigDecimal.ZERO, null, null, null},
+            {"positiveOrZeroOnGetterBigInteger", false, BigDecimal.ZERO, null, null, null},
+            {"negativeDecimal", false, null, null, null, BigDecimal.ZERO},
+            {"negativeOnGetterDecimal", false, null, null, null, BigDecimal.ZERO},
+            {"negativeOrZeroLong", false, null, null, BigDecimal.ZERO, null},
+            {"negativeOrZeroOnGetterLong", false, null, null, BigDecimal.ZERO, null}
         };
     }
 
     @Test
     @Parameters
-    public void testNumberMinMaxResolvers(String fieldName, BigDecimal expectedMinInclusive, BigDecimal expectedMinExclusive,
+    public void testNumberMinMaxResolvers(String fieldName, boolean asContainerItem, BigDecimal expectedMinInclusive, BigDecimal expectedMinExclusive,
             BigDecimal expectedMaxInclusive, BigDecimal expectedMaxExclusive) throws Exception {
         new SwaggerModule().applyToConfigBuilder(this.configBuilder);
 
         TestType testType = new TestType(TestClassForNumberMinMax.class);
         FieldScope field = testType.getMemberField(fieldName);
+        if (asContainerItem) {
+            field = field.asFakeContainerItemScope();
+        }
 
         ArgumentCaptor<ConfigFunction<FieldScope, BigDecimal>> minInclusiveCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withNumberInclusiveMinimumResolver(minInclusiveCaptor.capture());
@@ -409,14 +425,16 @@ public class SwaggerModuleTest {
         int annotatedWithoutValueField;
         double annotatedWithoutValueGetterField;
         @ApiModelProperty(value = "annotation value 1")
-        Object annotatedField;
+        List<Object> annotatedField;
         boolean annotatedGetterField;
 
         ExampleWithEmptyApiModel exampleWithEmptyApiModel;
         ExampleWithApiModelDescription exampleWithApiModelDescription;
+        ExampleWithApiModelDescription[] arrayExampleWithApiModelDescription;
         @ApiModelProperty(value = "property description")
         ExampleWithApiModelDescription exampleWithTwoDescriptions;
         ExampleWithApiModelTitle exampleWithApiModelTitle;
+        List<ExampleWithApiModelTitle> listExampleWithApiModelTitle;
 
         public String getUnannotatedField() {
             return this.unannotatedField;
@@ -431,7 +449,7 @@ public class SwaggerModuleTest {
             return this.annotatedWithoutValueGetterField;
         }
 
-        public Object getAnnotatedField() {
+        public List<Object> getAnnotatedField() {
             return this.annotatedField;
         }
 
@@ -489,6 +507,7 @@ public class SwaggerModuleTest {
     private static class TestClassForNumberMinMax {
 
         int unannotatedInt;
+        int[] unannotatedIntArray;
         @ApiModelProperty(allowableValues = "range[-100, infinity)")
         long minMinusHundredLong;
         long minMinusHundredOnGetterLong;

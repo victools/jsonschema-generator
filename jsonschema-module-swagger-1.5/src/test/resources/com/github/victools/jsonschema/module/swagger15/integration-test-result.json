@@ -17,7 +17,10 @@
             "maximum": 20
         },
         "fieldWithOverriddenName": {
-            "type": "boolean"
+            "type": ["array", "null"],
+            "items": {
+                "type": "boolean"
+            }
         }
     },
     "title": "test title",
