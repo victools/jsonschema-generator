@@ -20,6 +20,8 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedMethod;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,6 +69,11 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
     public MethodScope withOverriddenName(String overriddenName) {
         return new MethodScope(this.getMember(), this.getOverriddenType(), overriddenName, this.getDeclaringTypeMembers(),
                 this.isFakeContainerItemScope(), this.getContext());
+    }
+
+    @Override
+    public MethodScope asFakeContainerItemScope() {
+        return (MethodScope) super.asFakeContainerItemScope();
     }
 
     /**
@@ -142,12 +149,50 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
         return this.findGetterField() != null;
     }
 
+    /**
+     * Return the annotation of the given type on the method or its return type, if such an annotation is present.
+     *
+     * @param <A> type of annotation to look-up
+     * @param annotationClass annotation class to look up instance on member for
+     * @return annotation instance (or {@code null} if no annotation of the given type is present
+     */
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
+        A annotation = super.getAnnotation(annotationClass);
+        if (annotation == null) {
+            annotation = this.getRawMember().getAnnotatedReturnType().getAnnotation(annotationClass);
+        }
+        return annotation;
+    }
+
+    @Override
+    public <A extends Annotation> A getContainerItemAnnotation(Class<A> annotationClass) {
+        AnnotatedType annotatedReturnType = this.getRawMember().getAnnotatedReturnType();
+        if (annotatedReturnType instanceof AnnotatedParameterizedType) {
+            AnnotatedType[] typeArguments = ((AnnotatedParameterizedType) annotatedReturnType).getAnnotatedActualTypeArguments();
+            if (typeArguments.length > 0) {
+                return typeArguments[0].getAnnotation(annotationClass);
+            }
+        }
+        return null;
+    }
+
     @Override
     public <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass) {
         A annotation = this.getAnnotation(annotationClass);
         if (annotation == null) {
             MemberScope<?, ?> associatedField = this.findGetterField();
             annotation = associatedField == null ? null : associatedField.getAnnotation(annotationClass);
+        }
+        return annotation;
+    }
+
+    @Override
+    public <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetter(Class<A> annotationClass) {
+        A annotation = this.getContainerItemAnnotation(annotationClass);
+        if (annotation == null) {
+            MemberScope<?, ?> associatedField = this.findGetterField();
+            annotation = associatedField == null ? null : associatedField.getContainerItemAnnotation(annotationClass);
         }
         return annotation;
     }

@@ -90,11 +90,11 @@ public class IntegrationTest {
         public Object nullObject;
 
         @NotNull
-        public List<String> notNullList;
+        public List<@Min(2) @Max(2048) Integer> notNullList;
         @NotEmpty
-        public List<String> notEmptyList;
+        public List<@DecimalMin(value = "0", inclusive = false) @DecimalMax(value = "1", inclusive = false) Double> notEmptyList;
         @Size(min = 3, max = 25)
-        public List<String> sizeRangeList;
+        public List<@NotEmpty @Size(max = 100) String> sizeRangeList;
 
         @NotNull
         @Email(regexp = ".+@.+\\..+")

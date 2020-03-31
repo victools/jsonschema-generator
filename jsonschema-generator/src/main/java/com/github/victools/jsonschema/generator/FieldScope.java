@@ -21,6 +21,8 @@ import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.classmate.members.ResolvedMethod;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.util.stream.Stream;
 
@@ -65,6 +67,11 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
     public FieldScope withOverriddenName(String overriddenName) {
         return new FieldScope(this.getMember(), this.getOverriddenType(), overriddenName, this.getDeclaringTypeMembers(),
                 this.isFakeContainerItemScope(), this.getContext());
+    }
+
+    @Override
+    public FieldScope asFakeContainerItemScope() {
+        return (FieldScope) super.asFakeContainerItemScope();
     }
 
     /**
@@ -118,11 +125,33 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
     }
 
     @Override
+    public <A extends Annotation> A getContainerItemAnnotation(Class<A> annotationClass) {
+        AnnotatedType annotatedType = this.getRawMember().getAnnotatedType();
+        if (annotatedType instanceof AnnotatedParameterizedType) {
+            AnnotatedType[] typeArguments = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
+            if (typeArguments.length > 0) {
+                return typeArguments[0].getAnnotation(annotationClass);
+            }
+        }
+        return null;
+    }
+
+    @Override
     public <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass) {
         A annotation = this.getAnnotation(annotationClass);
         if (annotation == null) {
             MemberScope<?, ?> associatedGetter = this.findGetter();
             annotation = associatedGetter == null ? null : associatedGetter.getAnnotation(annotationClass);
+        }
+        return annotation;
+    }
+
+    @Override
+    public <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetter(Class<A> annotationClass) {
+        A annotation = this.getContainerItemAnnotation(annotationClass);
+        if (annotation == null) {
+            MemberScope<?, ?> associatedGetter = this.findGetter();
+            annotation = associatedGetter == null ? null : associatedGetter.getContainerItemAnnotation(annotationClass);
         }
         return annotation;
     }

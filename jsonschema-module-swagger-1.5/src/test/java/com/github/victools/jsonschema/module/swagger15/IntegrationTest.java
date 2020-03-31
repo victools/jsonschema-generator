@@ -27,6 +27,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Scanner;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -80,7 +81,7 @@ public class IntegrationTest {
         public Object hiddenField;
 
         @ApiModelProperty(name = "fieldWithOverriddenName")
-        public boolean originalFieldName;
+        public List<Boolean> originalFieldName;
 
         @ApiModelProperty(value = "field description", allowableValues = "A, B,    C, D")
         public String fieldWithDescriptionAndAllowableValues;
