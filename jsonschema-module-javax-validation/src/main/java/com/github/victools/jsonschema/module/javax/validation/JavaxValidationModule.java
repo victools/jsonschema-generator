@@ -130,32 +130,30 @@ public class JavaxValidationModule implements Module {
     }
 
     /**
-     * Retrieves the annotation instance of the given type, either from the field it self or (if not present) from its getter.
+     * Retrieves the annotation instance of the given type, either from the field itself or (if not present) from its getter.
+     * <br>
+     * If the given field/method represents only a container item of the actual declared type, that container item's annotations are being checked.
      *
      * @param <A> type of annotation
      * @param member field or method to retrieve annotation instance from (or from a field's getter or getter method's field)
      * @param annotationClass type of annotation
      * @param validationGroupsLookup how to look-up the associated validation groups of an annotation instance
      * @return annotation instance (or {@code null})
-     * @see MemberScope#getAnnotation(Class)
-     * @see FieldScope#findGetter()
-     * @see MethodScope#findGetterField()
+     * @see MemberScope#getAnnotationConsideringFieldAndGetter(Class)
+     * @see MemberScope#getContainerItemAnnotationConsideringFieldAndGetter(Class)
      */
     protected <A extends Annotation> A getAnnotationFromFieldOrGetter(MemberScope<?, ?> member, Class<A> annotationClass,
             Function<A, Class<?>[]> validationGroupsLookup) {
-        A annotation = member.getAnnotationConsideringFieldAndGetter(annotationClass);
-        if (annotation != null) {
+        A annotation;
+        if (member.isFakeContainerItemScope()) {
+            annotation = member.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass);
+        } else {
+            annotation = member.getAnnotationConsideringFieldAndGetter(annotationClass);
+        }
+        if (annotation != null && this.validationGroups != null) {
             Class<?>[] associatedGroups = validationGroupsLookup.apply(annotation);
-            /*
-             * the annotation is deemed applicable in one of the following three cases:
-             * 1. Validation groups are specifically ignored (i.e. forValidationGroups() was never called or with null as only parameter)
-             * 2. No validation groups are specified on the annotation.
-             * 3. Some validation group(s) are specified on the annotation and at least one of them was provided via forValidationGroups().
-             */
-            if (this.validationGroups != null && associatedGroups.length > 0
-                    && Collections.disjoint(this.validationGroups, Arrays.asList(associatedGroups))) {
-                // ignore the looked-up annotation as it is not associated with one of the desired validation groups
-                annotation = null;
+            if (associatedGroups.length > 0 && Collections.disjoint(this.validationGroups, Arrays.asList(associatedGroups))) {
+                return null;
             }
         }
         return annotation;
@@ -202,7 +200,7 @@ public class JavaxValidationModule implements Module {
      * @see Size
      */
     protected Integer resolveArrayMinItems(MemberScope<?, ?> member) {
-        if (member.isContainerType() && !member.isFakeContainerItemScope()) {
+        if (member.isContainerType()) {
             Size sizeAnnotation = this.getAnnotationFromFieldOrGetter(member, Size.class, Size::groups);
             if (sizeAnnotation != null && sizeAnnotation.min() > 0) {
                 // minimum length greater than the default 0 was specified
@@ -223,7 +221,7 @@ public class JavaxValidationModule implements Module {
      * @see Size
      */
     protected Integer resolveArrayMaxItems(MemberScope<?, ?> member) {
-        if (member.isContainerType() && !member.isFakeContainerItemScope()) {
+        if (member.isContainerType()) {
             Size sizeAnnotation = this.getAnnotationFromFieldOrGetter(member, Size.class, Size::groups);
             if (sizeAnnotation != null && sizeAnnotation.max() < 2147483647) {
                 // maximum length below the default 2147483647 was specified
@@ -243,7 +241,7 @@ public class JavaxValidationModule implements Module {
      * @see NotBlank
      */
     protected Integer resolveStringMinLength(MemberScope<?, ?> member) {
-        if (member.getType().isInstanceOf(CharSequence.class) && !member.isFakeContainerItemScope()) {
+        if (member.getType().isInstanceOf(CharSequence.class)) {
             Size sizeAnnotation = this.getAnnotationFromFieldOrGetter(member, Size.class, Size::groups);
             if (sizeAnnotation != null && sizeAnnotation.min() > 0) {
                 // minimum length greater than the default 0 was specified
@@ -265,7 +263,7 @@ public class JavaxValidationModule implements Module {
      * @see Size
      */
     protected Integer resolveStringMaxLength(MemberScope<?, ?> member) {
-        if (member.getType().isInstanceOf(CharSequence.class) && !member.isFakeContainerItemScope()) {
+        if (member.getType().isInstanceOf(CharSequence.class)) {
             Size sizeAnnotation = this.getAnnotationFromFieldOrGetter(member, Size.class, Size::groups);
             if (sizeAnnotation != null && sizeAnnotation.max() < 2147483647) {
                 // maximum length below the default 2147483647 was specified

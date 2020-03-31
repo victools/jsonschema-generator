@@ -19,7 +19,9 @@
             "minItems": 1,
             "type": "array",
             "items": {
-                "type": "string"
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "exclusiveMaximum": 1
             }
         },
         "notEmptyPatternText": {
@@ -35,7 +37,9 @@
         "notNullList": {
             "type": "array",
             "items": {
-                "type": "string"
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 2048
             }
         },
         "nullObject": {},
@@ -44,7 +48,9 @@
             "maxItems": 25,
             "type": ["array", "null"],
             "items": {
-                "type": "string"
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
             }
         },
         "sizeRangeText": {
