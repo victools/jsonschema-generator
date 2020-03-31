@@ -264,6 +264,16 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
     }
 
     /**
+     * Return the annotation of the given type on the member's container item (i.e. first type parameter if there is one), if such an annotation is
+     * present on either the field or its getter.
+     *
+     * @param <A> type of annotation
+     * @param annotationClass type of annotation
+     * @return annotation instance (or {@code null} if no annotation of the given type is present)
+     */
+    public abstract <A extends Annotation> A getContainerItemAnnotation(Class<A> annotationClass);
+
+    /**
      * Return the annotation of the given type on the member, if such an annotation is present on either the field or its getter.
      *
      * @param <A> type of annotation
@@ -271,6 +281,16 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @return annotation instance (or {@code null} if no annotation of the given type is present)
      */
     public abstract <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass);
+
+    /**
+     * Return the annotation of the given type on the member's container item (i.e. first type parameter if there is one), if such an annotation is
+     * present on either the field or its getter.
+     *
+     * @param <A> type of annotation
+     * @param annotationClass type of annotation
+     * @return annotation instance (or {@code null} if no annotation of the given type is present)
+     */
+    public abstract <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetter(Class<A> annotationClass);
 
     /**
      * Returns the name to be used to reference this member in its parent's "properties".
