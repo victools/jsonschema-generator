@@ -168,7 +168,7 @@ public class SwaggerModule implements Module {
      */
     private Optional<String> findModelPropertyAllowableValues(MemberScope<?, ?> member) {
         if (member.isFakeContainerItemScope()) {
-            return null;
+            return Optional.empty();
         }
         return Optional.ofNullable(member.getAnnotationConsideringFieldAndGetter(ApiModelProperty.class))
                 .map(ApiModelProperty::allowableValues)
