@@ -99,20 +99,25 @@ public class SchemaGeneratorCustomDefinitionsTest {
                     // using SchemaGenerationContext.createStandardDefinition() to avoid endless loop with this custom definition
                     ObjectNode standardDefinition = context.createStandardDefinition(context.getTypeContext().resolve(Integer.class), this);
                     standardDefinition.put("$comment", "custom override of Integer");
+                    standardDefinition.put(context.getKeyword(SchemaKeyword.TAG_TITLE), "custom title");
                     return new CustomDefinition(standardDefinition);
                 }
                 return null;
             }
         };
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
-                .with(customDefinitionProvider)
-                .build();
-        SchemaGenerator generator = new SchemaGenerator(config);
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion);
+        configBuilder.forTypesInGeneral()
+                .withTitleResolver(_scope -> "type title")
+                .withDescriptionResolver(_scope -> "type description")
+                .withCustomDefinitionProvider(customDefinitionProvider);
+        SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(Integer.class);
-        Assert.assertEquals(2, result.size());
+        Assert.assertEquals(4, result.size());
         Assert.assertEquals(SchemaKeyword.TAG_TYPE_INTEGER.forVersion(schemaVersion),
                 result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
         Assert.assertEquals("custom override of Integer", result.get("$comment").asText());
+        Assert.assertEquals("custom title", result.get(SchemaKeyword.TAG_TITLE.forVersion(schemaVersion)).asText());
+        Assert.assertEquals("type description", result.get(SchemaKeyword.TAG_DESCRIPTION.forVersion(schemaVersion)).asText());
     }
 
     @Test
@@ -147,12 +152,12 @@ public class SchemaGeneratorCustomDefinitionsTest {
                 return new CustomDefinition(customDefinition);
             }
         };
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion, OptionPreset.PLAIN_JSON)
-                .with(customDefinitionProviderOne)
-                .with(customDefinitionProviderTwo)
-                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS)
-                .build();
-        SchemaGenerator generator = new SchemaGenerator(config);
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion, OptionPreset.PLAIN_JSON)
+                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS);
+        configBuilder.forTypesInGeneral()
+                .withCustomDefinitionProvider(customDefinitionProviderOne)
+                .withCustomDefinitionProvider(customDefinitionProviderTwo);
+        SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(TestDirectCircularClass.class);
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
                 loadResource("multiple-definitions-one-type-" + schemaVersion.name() + ".json"), result.toString(), JSONCompareMode.STRICT);
@@ -168,18 +173,45 @@ public class SchemaGeneratorCustomDefinitionsTest {
             }
             ResolvedType generic = context.getTypeContext().getContainerItemType(javaType);
             SchemaGeneratorConfig config = context.getGeneratorConfig();
-            return new CustomDefinition(context.getGeneratorConfig().createObjectNode()
+            return new CustomDefinition(config.createObjectNode()
                     .put(config.getKeyword(SchemaKeyword.TAG_TYPE), config.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT))
-                    .set(config.getKeyword(SchemaKeyword.TAG_PROPERTIES), context.getGeneratorConfig().createObjectNode()
+                    .set(config.getKeyword(SchemaKeyword.TAG_PROPERTIES), config.createObjectNode()
                             .set(accessProperty, context.createDefinitionReference(generic))));
         };
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
-                .with(customDefinitionProvider)
-                .build();
-        SchemaGenerator generator = new SchemaGenerator(config);
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion);
+        configBuilder.forTypesInGeneral()
+                .withCustomDefinitionProvider(customDefinitionProvider);
+        SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(TestCircularClass1.class);
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
                 loadResource("circular-custom-definition-" + schemaVersion.name() + ".json"), result.toString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    @Parameters(source = SchemaVersion.class)
+    public void testGenerateSchema_CustomPropertyDefinition(SchemaVersion schemaVersion) throws Exception {
+        CustomPropertyDefinitionProvider<FieldScope> customPropertyDefinitionProvider = (field, context) -> {
+            if (field.getType().getErasedType() == int.class) {
+                return new CustomPropertyDefinition(context.createDefinition(field.getType())
+                        .put(context.getKeyword(SchemaKeyword.TAG_TITLE), "custom title"));
+            }
+            if (field.getType().getErasedType() == String.class) {
+                return new CustomPropertyDefinition(context.createDefinition(field.getType())
+                        .put(context.getKeyword(SchemaKeyword.TAG_DESCRIPTION), "custom description"));
+            }
+            // the circular reference would result in an endless loop here; need to be careful!
+            return null;
+        };
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON);
+        configBuilder.forTypesInGeneral()
+                .withTitleResolver(_scope -> "type title");
+        configBuilder.forFields()
+                .withDescriptionResolver(_field -> "field description")
+                .withCustomDefinitionProvider(customPropertyDefinitionProvider);
+        SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
+        JsonNode result = generator.generateSchema(TestDirectCircularClass.class);
+        JSONAssert.assertEquals('\n' + result.toString() + '\n',
+                loadResource("custom-property-definition-" + schemaVersion.name() + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 
     private static String loadResource(String resourcePath) throws IOException {

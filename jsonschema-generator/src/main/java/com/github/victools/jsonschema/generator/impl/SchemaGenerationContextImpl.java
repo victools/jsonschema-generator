@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -661,15 +662,10 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
             targetNode.setAll(customDefinition.getValue());
             if (customDefinition.shouldIncludeAttributes()) {
-                if (collectedAttributes != null && collectedAttributes.size() > 0) {
-                    targetNode.setAll(collectedAttributes);
-                }
+                this.addMissingAttributes(targetNode, collectedAttributes);
                 Set<String> allowedSchemaTypes = this.collectAllowedSchemaTypes(targetNode);
                 ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this, allowedSchemaTypes);
-                // ensure no existing attributes in the 'definition' are replaced, by way of first overriding any conflicts the other way around
-                typeAttributes.setAll(targetNode);
-                // apply merged attributes
-                targetNode.setAll(typeAttributes);
+                this.addMissingAttributes(targetNode, typeAttributes);
             }
             if (isNullable) {
                 this.makeNullable(targetNode);
@@ -684,7 +680,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             } else if (customDefinition == null && scope.isContainerType()) {
                 // same as above, but the collected attributes should be applied also for containers/arrays
                 referenceContainer = targetNode;
-                referenceContainer.setAll(collectedAttributes);
+                this.addMissingAttributes(targetNode, collectedAttributes);
             } else {
                 // avoid mixing potential "$ref" element with contextual attributes by introducing an "allOf" wrapper
                 // this is only relevant for DRAFT_7 and is being cleaned-up afterwards for newer DRAFT versions
@@ -698,6 +694,25 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 this.traverseGenericType(scope, referenceContainer, isNullable, false, null);
             } catch (UnsupportedOperationException ex) {
                 logger.warn("Skipping type definition due to error", ex);
+            }
+        }
+    }
+
+    /**
+     * Merge the second node's attributes into the first, skipping those attributes that are already contained in the first node.
+     *
+     * @param targetNode node to add non-existent attributes to
+     * @param attributeContainer container holding attributes to add to the first node
+     */
+    private void addMissingAttributes(ObjectNode targetNode, ObjectNode attributeContainer) {
+        if (attributeContainer == null) {
+            return;
+        }
+        Iterator<Map.Entry<String, JsonNode>> attributeIterator = attributeContainer.fields();
+        while (attributeIterator.hasNext()) {
+            Map.Entry<String, JsonNode> attribute = attributeIterator.next();
+            if (!targetNode.has(attribute.getKey())) {
+                targetNode.set(attribute.getKey(), attribute.getValue());
             }
         }
     }
