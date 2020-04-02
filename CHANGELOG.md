@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Changed
 - `MethodScope.getAnnotation()` now also considers annotations directly on return type (when no matching annotation was found on the method itself)
 
+#### Fixed
+- Attributes set in custom property definitions should not be overridden by other configurations (except for explicit attribute overrides)
+
 ### `jsonschema-module-javax-validation`
 #### Changed
 - Consider (first level) container item annotations (e.g. List<@Size(min = 3) String>`)
