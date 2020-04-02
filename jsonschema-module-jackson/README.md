@@ -22,7 +22,7 @@ Schema attributes derived from validation annotations on getter methods are also
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-module-jackson</artifactId>
-    <version>4.8.1</version>
+    <version>[4.9.0,5.0.0)</version>
 </dependency>
 ```
 
@@ -33,28 +33,28 @@ It is recommended to use identical versions for both dependencies to ensure comp
 #### Passing into SchemaGeneratorConfigBuilder.with(Module)
 ```java
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
 ```
 ```java
 JacksonModule module = new JacksonModule();
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper)
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09)
     .with(module);
 ```
 
 #### Complete Example
 ```java
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
 ```
 ```java
-ObjectMapper objectMapper = new ObjectMapper();
 JacksonModule module = new JacksonModule();
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper, OptionPreset.PLAIN_JSON)
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
     .with(module);
 SchemaGeneratorConfig config = configBuilder.build();
 SchemaGenerator generator = new SchemaGenerator(config);

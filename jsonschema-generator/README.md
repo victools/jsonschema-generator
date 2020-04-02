@@ -24,7 +24,7 @@ Topics covered in this document are:
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>4.8.1</version>
+    <version>4.9.0</version>
 </dependency>
 ```
 
@@ -32,7 +32,6 @@ Topics covered in this document are:
 #### Complete/Minimal Example
 ```java
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
@@ -40,8 +39,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 ```
 ```java
-ObjectMapper objectMapper = new ObjectMapper();
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper, SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON);
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON);
 SchemaGeneratorConfig config = configBuilder.build();
 SchemaGenerator generator = new SchemaGenerator(config);
 JsonNode jsonSchema = generator.generateSchema(YourClass.class);
@@ -62,7 +60,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 ```
 ```java
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper, SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON);
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON);
 ```
 
 #### Toggling Standard Options (individually)
@@ -73,7 +71,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 ```
 ```java
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper, SchemaVersion.DRAFT_2019_09)
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09)
     .with(Option.FLATTENED_ENUMS)
     .without(Option.NULLABLE_FIELDS_BY_DEFAULT, Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT);
 ```
@@ -86,7 +84,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 ```
 ```java
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper, SchemaVersion.DRAFT_2019_09, new OptionPreset())
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, new OptionPreset())
     .with(Option.ADDITIONAL_FIXED_TYPES, Option.PUBLIC_NONSTATIC_FIELDS);
 ```
 
@@ -98,7 +96,7 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 ```
 ```java
 Module separateModule = new YourSeparateModule();
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper, SchemaVersion.DRAFT_2019_09)
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09)
     .with(separateModule);
 ```
 
@@ -112,7 +110,7 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeScope;
 ```
 ```java
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper, SchemaVersion.DRAFT_2019_09);
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09);
 configBuilder.forTypesInGeneral()
     // populate the "title" of all schemas with a description of the java type
     .withTitleResolver(TypeScope::getSimpleTypeDescription);
@@ -134,7 +132,7 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.Map;
 ```
 ```java
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper, SchemaVersion.DRAFT_2019_09)
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09)
     .with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT);
 configBuilder.forTypesInGeneral()
     .withAdditionalPropertiesResolver((scope) -> {

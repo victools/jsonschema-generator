@@ -25,7 +25,7 @@ Another example for such a module is:
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>4.8.1</version>
+    <version>4.9.0</version>
 </dependency>
 ```
 

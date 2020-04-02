@@ -15,7 +15,7 @@ Module for the [jsonschema-generator](../jsonschema-generator) – deriving JSON
 9. Indicate a number's (field/method) "exclusiveMaximum" according to `@ApiModelProperty(allowableValues = "range...)")`
 10. Indicate a field/method's "const"/"enum" as per `@ApiModelProperty(allowableValues = ...)` (if it is not a numeric range declaration)
 
-Schema attributes derived from `@ApiModelProperty` on fields are also applied to their respective getter methods.
+Schema attributes derived from `@ApiModelProperty` on fields are also applied to their respective getter methods.  
 Schema attributes derived from `@ApiModelProperty` on getter methods are also applied to their associated fields.
 
 ## Usage
@@ -24,7 +24,7 @@ Schema attributes derived from `@ApiModelProperty` on getter methods are also ap
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-module-swagger-1.5</artifactId>
-    <version>4.8.1</version>
+    <version>[4.9.0,5.0.0)</version>
 </dependency>
 ```
 
@@ -35,11 +35,12 @@ It is recommended to use identical versions for both dependencies to ensure comp
 #### Passing into SchemaGeneratorConfigBuilder.with(Module)
 ```java
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.swagger15.SwaggerModule;
 ```
 ```java
 SwaggerModule module = new SwaggerModule();
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper)
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09)
     .with(module);
 ```
 
@@ -64,17 +65,17 @@ SwaggerModule module = new SwaggerModule(SwaggerOption.NO_APIMODEL_DESCRIPTION, 
 #### Complete Example
 ```java
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.swagger15.SwaggerModule;
 ```
 ```java
 ObjectMapper objectMapper = new ObjectMapper();
 SwaggerModule module = new SwaggerModule();
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper, OptionPreset.PLAIN_JSON)
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
     .with(module);
 SchemaGeneratorConfig config = configBuilder.build();
 SchemaGenerator generator = new SchemaGenerator(config);

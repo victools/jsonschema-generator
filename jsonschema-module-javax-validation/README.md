@@ -13,7 +13,7 @@ Module for the [jsonschema-generator](../jsonschema-generator) – deriving JSON
 7. Populate "minimum"/"exclusiveMinimum" for numbers. Based on `@Min`/`@DecimalMin`/`@Positive`/`@PositiveOrZero`
 8. Populate "maximum"/"exclusiveMaximum" for numbers. Based on `@Max`/`@DecimalMax`/`@Negative`/`@NegativeOrZero`
 
-Schema attributes derived from validation annotations on fields are also applied to their respective getter methods.
+Schema attributes derived from validation annotations on fields are also applied to their respective getter methods.  
 Schema attributes derived from validation annotations on getter methods are also applied to their associated fields.
 
 ## Usage
@@ -22,7 +22,7 @@ Schema attributes derived from validation annotations on getter methods are also
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-module-javax-validation</artifactId>
-    <version>4.8.1</version>
+    <version>[4.9.0,5.0.0)</version>
 </dependency>
 ```
 
@@ -33,29 +33,29 @@ It is recommended to use identical versions for both dependencies to ensure comp
 #### Passing into SchemaGeneratorConfigBuilder.with(Module)
 ```java
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationModule;
 ```
 ```java
 JavaxValidationModule module = new JavaxValidationModule();
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper)
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09)
     .with(module);
 ```
 
 #### Complete Example
 ```java
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationModule;
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationOption;
 ```
 ```java
-ObjectMapper objectMapper = new ObjectMapper();
 JavaxValidationModule module = new JavaxValidationModule(JavaxValidationOption.INCLUDE_PATTERN_EXPRESSIONS);
-SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper, OptionPreset.PLAIN_JSON)
+SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
     .with(module);
 SchemaGeneratorConfig config = configBuilder.build();
 SchemaGenerator generator = new SchemaGenerator(config);

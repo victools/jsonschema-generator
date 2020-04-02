@@ -4,10 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.9.0] - 2020-04-02
 ### `jsonschema-generator`
 #### Added
-- Convenience constructor on `SchemaGeneratorConfigBuilder` without explicit `ObjectMapper` instance being expected
+- Convenience constructors on `SchemaGeneratorConfigBuilder` without explicit `ObjectMapper` instance being expected
 - Convenience methods on `FieldScope`/`MethodScope` for accessing (first level) container item annotations: `getContainerItemAnnotation()` and `getContainerItemAnnotationConsideringFieldAndGetter()`
 
 #### Changed
@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `jsonschema-module-javax-validation`
 #### Changed
-- Consider (first level) container item annotations (e.g. List<@Size(min = 3) String>`)
+- Consider (first level) container item annotations (e.g. `List<@Size(min = 3) String>`)
 
 ## [4.8.1] - 2020-03-31
 ### All
@@ -313,8 +313,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.8.1...HEAD
-[4.8.1]: https://github.com/victools/jsonschema-generator/compare/v4.8.0...v4.8.2
+[4.9.0]: https://github.com/victools/jsonschema-generator/compare/v4.8.1...v4.9.0
+[4.8.1]: https://github.com/victools/jsonschema-generator/compare/v4.8.0...v4.8.1
 [4.8.0]: https://github.com/victools/jsonschema-generator/compare/v4.7.0...v4.8.0
 [4.7.0]: https://github.com/victools/jsonschema-generator/compare/v4.6.0...v4.7.0
 [4.6.0]: https://github.com/victools/jsonschema-generator/compare/v4.5.0...v4.6.0
