@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### `jsonschema-generator`
 #### Added
+- Convenience constructor on `SchemaGeneratorConfigBuilder` without explicit `ObjectMapper` instance being expected
 - Convenience methods on `FieldScope`/`MethodScope` for accessing (first level) container item annotations: `getContainerItemAnnotation()` and `getContainerItemAnnotationConsideringFieldAndGetter()`
 
 #### Changed
