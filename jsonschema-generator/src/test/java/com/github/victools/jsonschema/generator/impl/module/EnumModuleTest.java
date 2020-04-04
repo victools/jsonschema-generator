@@ -125,12 +125,12 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         this.setUp();
         return Stream.of(SchemaVersion.values())
                 .flatMap(schemaVersion -> Stream.of(
-                        new Object[]{ schemaVersion, this.instanceAsStringsFromName, "VALUE1", "VALUE2", "VALUE3" },
-                        new Object[]{ schemaVersion, this.instanceAsStringsFromToString, "value1_toString", "value2_toString", "value3_toString" }
+                        new Object[]{schemaVersion, this.instanceAsStringsFromName, "VALUE1", "VALUE2", "VALUE3"},
+                        new Object[]{schemaVersion, this.instanceAsStringsFromToString, "value1_toString", "value2_toString", "value3_toString"}
                 ))
                 .collect(Collectors.toList()).toArray();
     }
-    
+
     @Test
     @Parameters
     public void testCustomSchemaDefinition_asStrings(SchemaVersion schemaVersion, EnumModule instance,
