@@ -18,6 +18,7 @@ package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -32,6 +33,7 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -168,6 +170,25 @@ public class AttributeCollector {
             collector.setArrayUniqueItems(node, config.resolveArrayUniqueItemsForType(scope), generationContext);
         }
         return node;
+    }
+
+    /**
+     * Merge the second node's attributes into the first, skipping those attributes that are already contained in the first node.
+     *
+     * @param targetNode node to add non-existent attributes to
+     * @param attributeContainer container holding attributes to add to the first node
+     */
+    public static void mergeMissingAttributes(ObjectNode targetNode, ObjectNode attributeContainer) {
+        if (attributeContainer == null) {
+            return;
+        }
+        Iterator<Map.Entry<String, JsonNode>> attributeIterator = attributeContainer.fields();
+        while (attributeIterator.hasNext()) {
+            Map.Entry<String, JsonNode> attribute = attributeIterator.next();
+            if (!targetNode.has(attribute.getKey())) {
+                targetNode.set(attribute.getKey(), attribute.getValue());
+            }
+        }
     }
 
     /**

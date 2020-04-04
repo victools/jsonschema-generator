@@ -41,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -662,10 +661,10 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
             targetNode.setAll(customDefinition.getValue());
             if (customDefinition.shouldIncludeAttributes()) {
-                this.addMissingAttributes(targetNode, collectedAttributes);
+                AttributeCollector.mergeMissingAttributes(targetNode, collectedAttributes);
                 Set<String> allowedSchemaTypes = this.collectAllowedSchemaTypes(targetNode);
                 ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this, allowedSchemaTypes);
-                this.addMissingAttributes(targetNode, typeAttributes);
+                AttributeCollector.mergeMissingAttributes(targetNode, typeAttributes);
             }
             if (isNullable) {
                 this.makeNullable(targetNode);
@@ -680,7 +679,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             } else if (customDefinition == null && scope.isContainerType()) {
                 // same as above, but the collected attributes should be applied also for containers/arrays
                 referenceContainer = targetNode;
-                this.addMissingAttributes(targetNode, collectedAttributes);
+                AttributeCollector.mergeMissingAttributes(targetNode, collectedAttributes);
             } else {
                 // avoid mixing potential "$ref" element with contextual attributes by introducing an "allOf" wrapper
                 // this is only relevant for DRAFT_7 and is being cleaned-up afterwards for newer DRAFT versions
@@ -698,34 +697,16 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         }
     }
 
-    /**
-     * Merge the second node's attributes into the first, skipping those attributes that are already contained in the first node.
-     *
-     * @param targetNode node to add non-existent attributes to
-     * @param attributeContainer container holding attributes to add to the first node
-     */
-    private void addMissingAttributes(ObjectNode targetNode, ObjectNode attributeContainer) {
-        if (attributeContainer == null) {
-            return;
-        }
-        Iterator<Map.Entry<String, JsonNode>> attributeIterator = attributeContainer.fields();
-        while (attributeIterator.hasNext()) {
-            Map.Entry<String, JsonNode> attribute = attributeIterator.next();
-            if (!targetNode.has(attribute.getKey())) {
-                targetNode.set(attribute.getKey(), attribute.getValue());
-            }
-        }
-    }
-
     @Override
     public ObjectNode makeNullable(ObjectNode node) {
+        final String nullTypeName = this.getKeyword(SchemaKeyword.TAG_TYPE_NULL);
         if (node.has(this.getKeyword(SchemaKeyword.TAG_REF))
                 || node.has(this.getKeyword(SchemaKeyword.TAG_ALLOF))
                 || node.has(this.getKeyword(SchemaKeyword.TAG_ANYOF))
                 || node.has(this.getKeyword(SchemaKeyword.TAG_ONEOF))) {
             // cannot be sure what is specified in those other schema parts, instead simply create a oneOf wrapper
             ObjectNode nullSchema = this.generatorConfig.createObjectNode()
-                    .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
+                    .put(this.getKeyword(SchemaKeyword.TAG_TYPE), nullTypeName);
             ArrayNode anyOf = this.generatorConfig.createArrayNode()
                     // one option in the oneOf should be null
                     .add(nullSchema)
@@ -743,19 +724,20 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 // one of the existing "type" values could be null
                 boolean alreadyContainsNull = false;
                 for (JsonNode arrayEntry : arrayOfTypes) {
-                    alreadyContainsNull = alreadyContainsNull || this.getKeyword(SchemaKeyword.TAG_TYPE_NULL).equals(arrayEntry.textValue());
+                    alreadyContainsNull = alreadyContainsNull || nullTypeName.equals(arrayEntry.textValue());
                 }
 
                 if (!alreadyContainsNull) {
-                    // null "type" was not mentioned before, we simply add it to the existing list
-                    arrayOfTypes.add(this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
+                    // null "type" was not mentioned before, to be safe we need to replace the old array and add the null entry
+                    node.replace(this.getKeyword(SchemaKeyword.TAG_TYPE), this.generatorConfig.createArrayNode()
+                            .addAll(arrayOfTypes)
+                            .add(nullTypeName));
                 }
-            } else if (fixedJsonSchemaType instanceof TextNode
-                    && !this.getKeyword(SchemaKeyword.TAG_TYPE_NULL).equals(fixedJsonSchemaType.textValue())) {
+            } else if (fixedJsonSchemaType instanceof TextNode && !nullTypeName.equals(fixedJsonSchemaType.textValue())) {
                 // add null as second "type" option
                 node.replace(this.getKeyword(SchemaKeyword.TAG_TYPE), this.generatorConfig.createArrayNode()
                         .add(fixedJsonSchemaType)
-                        .add(this.getKeyword(SchemaKeyword.TAG_TYPE_NULL)));
+                        .add(nullTypeName));
             }
             // if no "type" is specified, null is allowed already
         }

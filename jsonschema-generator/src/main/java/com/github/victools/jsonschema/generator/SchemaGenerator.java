@@ -119,7 +119,8 @@ public class SchemaGenerator {
                     && !mainSchemaKey.equals(definitionKey);
             if (referenceInline) {
                 // it is a simple type, just in-line the sub-schema everywhere
-                references.forEach(node -> node.setAll(generationContext.getDefinition(definitionKey)));
+                ObjectNode definition = generationContext.getDefinition(definitionKey);
+                references.forEach(node -> AttributeCollector.mergeMissingAttributes(node, definition));
                 referenceKey = null;
             } else {
                 // the same sub-schema is referenced in multiple places
@@ -146,7 +147,7 @@ public class SchemaGenerator {
                     nullableReferences.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF),
                             this.config.getKeyword(SchemaKeyword.TAG_REF_PREFIX) + nullableDefinitionName));
                 } else {
-                    nullableReferences.forEach(node -> node.setAll(definition));
+                    nullableReferences.forEach(node -> AttributeCollector.mergeMissingAttributes(node, definition));
                 }
             }
         }
