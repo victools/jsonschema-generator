@@ -10,9 +10,11 @@ Module for the [jsonschema-generator](../jsonschema-generator) – deriving JSON
 4. Ignore fields that are marked with a `@JsonBackReference` annotation.
 5. Ignore fields that are deemed to be ignored according to various other `jackson-annotations` (e.g. `@JsonIgnore`, `@JsonIgnoreType`, `@JsonIgnoreProperties`) or are otherwise supposed to be excluded.
 6. Optionally: treat enum types as plain strings, serialized by `@JsonValue` annotated method
-7. Subtype resolution through `@JsonTypeInfo` and `@JsonSubTypes` on supertype or directly on properties as override of the per-type behaviour
-    - Considering `@JsonTypeInfo.include` with values `As.PROPERTY`, `As.EXISTING_PROPERTY`, `As.WRAPPER_ARRAY`, `As.WRAPPER_OBJECT`
-    - Considering `@JsonTypeInfo.use` with values `Id.CLASS`, `Id.NAME`
+7. Optionally: treat enum types as plain strings, as per each enum constant's `@JsonProperty` annotation
+8. Optionally: resolve subtypes according to `@JsonSubTypes` on a supertype in general or directly on specific fields/methods as an override of the per-type behavior.
+9. Optionally: apply structural changes for subtypes according to `@JsonTypeInfo` on a supertype in general or directly on specific fields/methods as an override of the per-type behavior.
+    - Considering @JsonTypeInfo.include with values As.PROPERTY, As.EXISTING_PROPERTY, As.WRAPPER_ARRAY, As.WRAPPER_OBJECT
+    - Considering @JsonTypeInfo.use with values Id.CLASS, Id.NAME
 
 Schema attributes derived from validation annotations on getter methods are also applied to their associated fields.
 

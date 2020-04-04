@@ -18,6 +18,7 @@ package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.members.ResolvedMethod;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +30,8 @@ import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
+import java.util.Arrays;
+import java.util.List;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -39,12 +42,11 @@ import org.mockito.Answers;
 import org.mockito.Mockito;
 
 /**
- * Test for the {@link CustomEnumJsonValueDefinitionProvider}.
+ * Test for the {@link CustomEnumDefinitionProvider}.
  */
 @RunWith(JUnitParamsRunner.class)
-public class CustomEnumJsonValueDefinitionProviderTest {
+public class CustomEnumDefinitionProviderTest {
 
-    private final CustomEnumJsonValueDefinitionProvider definitionProvider = new CustomEnumJsonValueDefinitionProvider();
     private final TypeContext typeContext = TypeContextFactory.createDefaultTypeContext();
     private SchemaGenerationContext generationContext;
 
@@ -60,38 +62,68 @@ public class CustomEnumJsonValueDefinitionProviderTest {
                 .thenAnswer(invocation -> ((SchemaKeyword) invocation.getArgument(0)).forVersion(SchemaVersion.DRAFT_2019_09));
     }
 
+    public Object[] parametersForTestProvideCustomSchemaDefinition() {
+        return new Object[][]{
+            {EnumWithInactiveJsonValueAndJsonProperty.class, true, true, Arrays.asList("entry")},
+            {EnumWithInactiveJsonValueAndJsonProperty.class, false, true, Arrays.asList("entry")},
+            {EnumWithJsonValueAndJsonProperty.class, true, false, Arrays.asList("json-value-ENTRY1", "json-value-ENTRY2")},
+            {EnumWithJsonValueAndJsonProperty.class, true, true, Arrays.asList("json-value-ENTRY1", "json-value-ENTRY2")},
+            {EnumWithJsonValueAndJsonProperty.class, false, true, Arrays.asList("entry1", "ENTRY2")}};
+    }
+
     @Test
-    public void testProvideCustomSchemaDefinition() {
-        ResolvedType type = this.typeContext.resolve(EnumWithJsonValue.class);
-        CustomDefinition result = this.definitionProvider.provideCustomSchemaDefinition(type, this.generationContext);
+    @Parameters
+    public void testProvideCustomSchemaDefinition(Class<?> erasedType, boolean considerJsonValue, boolean considerJsonProperty, List<String> values) {
+        ResolvedType type = this.typeContext.resolve(erasedType);
+        CustomDefinition result = new CustomEnumDefinitionProvider(considerJsonValue, considerJsonProperty)
+                .provideCustomSchemaDefinition(type, this.generationContext);
         Assert.assertNotNull(result);
         Assert.assertFalse(result.isMeantToBeInline());
         ObjectNode customDefinitionNode = result.getValue();
         Assert.assertEquals(2, customDefinitionNode.size());
         Assert.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(SchemaVersion.DRAFT_2019_09),
                 customDefinitionNode.get(SchemaKeyword.TAG_TYPE.forVersion(SchemaVersion.DRAFT_2019_09)).asText());
-        JsonNode enumNode = customDefinitionNode.get(SchemaKeyword.TAG_ENUM.forVersion(SchemaVersion.DRAFT_2019_09));
-        Assert.assertTrue(enumNode.isArray());
-        ArrayNode arrayNode = (ArrayNode) enumNode;
-        Assert.assertEquals(2, arrayNode.size());
-        Assert.assertEquals("json-value-ENTRY1", arrayNode.get(0).asText());
-        Assert.assertEquals("json-value-ENTRY2", arrayNode.get(1).asText());
+        int expectedValueCount = values.size();
+        if (expectedValueCount == 1) {
+            JsonNode constNode = customDefinitionNode.get(SchemaKeyword.TAG_CONST.forVersion(SchemaVersion.DRAFT_2019_09));
+            Assert.assertTrue(constNode.isTextual());
+            Assert.assertEquals(values.get(0), constNode.asText());
+        } else {
+            JsonNode enumNode = customDefinitionNode.get(SchemaKeyword.TAG_ENUM.forVersion(SchemaVersion.DRAFT_2019_09));
+            Assert.assertTrue(enumNode.isArray());
+            ArrayNode arrayNode = (ArrayNode) enumNode;
+            Assert.assertEquals(expectedValueCount, arrayNode.size());
+            for (int index = 0; index < expectedValueCount; index++) {
+                Assert.assertEquals(values.get(index), arrayNode.get(index).asText());
+            }
+        }
     }
 
     public Object[] parametersForTestProvideForInvalidTargetType() {
         return new Object[][]{
-            {Enum.class},
-            {ClassWithJsonValue.class},
-            {EmptyEnumWithJsonValue.class},
-            {EnumWithInvalidJsonValue.class},
-            {EnumWithInactiveJsonValue.class},
-            {EnumWithTwoJsonValues.class}};
+            {Enum.class, true, false},
+            {Enum.class, false, true},
+            {Enum.class, true, true},
+            {ClassWithJsonValue.class, true, false},
+            {ClassWithJsonValue.class, false, true},
+            {ClassWithJsonValue.class, true, true},
+            {EmptyEnumWithJsonValue.class, true, false},
+            {EmptyEnumWithJsonValue.class, false, true},
+            {EmptyEnumWithJsonValue.class, true, true},
+            {EnumWithInvalidJsonValue.class, true, false},
+            {EnumWithInvalidJsonValue.class, false, true},
+            {EnumWithInvalidJsonValue.class, true, true},
+            {EnumWithInactiveJsonValueAndJsonProperty.class, true, false},
+            {EnumWithTwoJsonValuesAndIncompleteJsonProperty.class, true, true},
+            {EnumWithTwoJsonValuesAndIncompleteJsonProperty.class, false, true},
+            {EnumWithTwoJsonValuesAndIncompleteJsonProperty.class, true, false}};
     }
 
     @Test
     @Parameters
-    public void testProvideForInvalidTargetType(Class<?> erasedType) {
-        CustomDefinition result = this.definitionProvider.provideCustomSchemaDefinition(this.typeContext.resolve(erasedType), this.generationContext);
+    public void testProvideForInvalidTargetType(Class<?> erasedType, boolean considerJsonValue, boolean considerJsonProperty) {
+        CustomDefinition result = new CustomEnumDefinitionProvider(considerJsonValue, considerJsonProperty)
+                .provideCustomSchemaDefinition(this.typeContext.resolve(erasedType), this.generationContext);
         Assert.assertNull(result);
     }
 
@@ -101,15 +133,16 @@ public class CustomEnumJsonValueDefinitionProviderTest {
             {ClassWithJsonValue.class, "serialise"},
             {EmptyEnumWithJsonValue.class, "asText"},
             {EnumWithInvalidJsonValue.class, null},
-            {EnumWithInactiveJsonValue.class, null},
-            {EnumWithTwoJsonValues.class, null},
-            {EnumWithJsonValue.class, "getJsonValue"}};
+            {EnumWithInactiveJsonValueAndJsonProperty.class, null},
+            {EnumWithTwoJsonValuesAndIncompleteJsonProperty.class, null},
+            {EnumWithJsonValueAndJsonProperty.class, "getJsonValue"}};
     }
 
     @Test
     @Parameters
     public void testGetJsonValueAnnotatedMethod(Class<?> erasedType, String methodName) {
-        ResolvedMethod result = this.definitionProvider.getJsonValueAnnotatedMethod(this.typeContext.resolve(erasedType), this.generationContext);
+        ResolvedMethod result = new CustomEnumDefinitionProvider(true, false)
+                .getJsonValueAnnotatedMethod(this.typeContext.resolve(erasedType), this.generationContext);
         if (methodName == null) {
             Assert.assertNull(result);
         } else {
@@ -143,8 +176,8 @@ public class CustomEnumJsonValueDefinitionProviderTest {
         }
     }
 
-    private static enum EnumWithInactiveJsonValue {
-        ENTRY;
+    private static enum EnumWithInactiveJsonValueAndJsonProperty {
+        @JsonProperty("entry") ENTRY;
 
         @JsonValue(false)
         public String serialize() {
@@ -152,8 +185,9 @@ public class CustomEnumJsonValueDefinitionProviderTest {
         }
     }
 
-    private static enum EnumWithTwoJsonValues {
-        ENTRY;
+    private static enum EnumWithTwoJsonValuesAndIncompleteJsonProperty {
+        ENTRY1,
+        @JsonProperty("only-entry-2") ENTRY2;
 
         @JsonValue
         public String getValue1() {
@@ -166,8 +200,9 @@ public class CustomEnumJsonValueDefinitionProviderTest {
         }
     }
 
-    private static enum EnumWithJsonValue {
-        ENTRY1, ENTRY2;
+    private static enum EnumWithJsonValueAndJsonProperty {
+        @JsonProperty("entry1") ENTRY1,
+        @JsonProperty ENTRY2;
 
         @JsonValue
         public String getJsonValue() {

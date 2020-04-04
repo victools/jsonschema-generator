@@ -47,7 +47,7 @@ public class IntegrationTest {
      */
     @Test
     public void testIntegration() throws Exception {
-        JacksonModule module = new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE);
+        JacksonModule module = new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE, JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY);
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_7, OptionPreset.PLAIN_JSON)
                 .with(module)
                 .build();
@@ -85,6 +85,8 @@ public class IntegrationTest {
         public TestEnum enumValueHandledByStandardOption;
 
         public TestEnumWithJsonValueAnnotation enumValueWithJsonValueAnnotation;
+
+        public TestEnumWithJsonPropertyAnnotations enumValueWithJsonPropertyAnnotations;
     }
 
     static enum TestEnum {
@@ -98,5 +100,10 @@ public class IntegrationTest {
         public String getJsonValue() {
             return this.name().toLowerCase();
         }
+    }
+
+    static enum TestEnumWithJsonPropertyAnnotations {
+        @JsonProperty("x_property") X,
+        @JsonProperty Y;
     }
 }

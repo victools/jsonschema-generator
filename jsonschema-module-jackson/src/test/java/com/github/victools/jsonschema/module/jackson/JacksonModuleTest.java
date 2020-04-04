@@ -115,9 +115,18 @@ public class JacksonModuleTest {
         Mockito.verifyNoMoreInteractions(this.configBuilder, this.fieldConfigPart, this.methodConfigPart, this.typesInGeneralConfigPart);
     }
 
+    public Object[] parametersForTestApplyToConfigBuilderWithEnumOptions() {
+        return new Object[][]{
+            {new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE}},
+            {new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY}},
+            {new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE, JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY}}
+        };
+    }
+
     @Test
-    public void testApplyToConfigBuilderWithFlattenedEnumOption() {
-        new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE)
+    @Parameters
+    public void testApplyToConfigBuilderWithEnumOptions(JacksonOption[] options) {
+        new JacksonModule(options)
                 .applyToConfigBuilder(this.configBuilder);
 
         this.verifyCommonConfigurations();

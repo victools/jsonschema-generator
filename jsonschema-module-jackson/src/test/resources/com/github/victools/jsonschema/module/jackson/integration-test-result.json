@@ -6,6 +6,10 @@
             "type": "string",
             "enum": ["A", "B", "C"]
         },
+        "enumValueWithJsonPropertyAnnotations": {
+            "type": "string",
+            "enum": ["x_property", "Y"]
+        },
         "enumValueWithJsonValueAnnotation": {
             "type": "string",
             "enum": ["entry1", "entry2", "entry3"]
