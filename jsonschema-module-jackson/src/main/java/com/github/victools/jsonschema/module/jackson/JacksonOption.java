@@ -24,11 +24,28 @@ public enum JacksonOption {
      * Use this option to treat enum types with a {@link com.fasterxml.jackson.annotation.JsonValue JsonValue} annotation on one of its methods as
      * plain strings in the generated schema. If no such annotation with {@code value = true} is present on exactly one argument-free method, it will
      * fall-back on following custom definitions (e.g. from one of the standard generator {@code Option}s).
+     * <br>
+     * This can be enabled at the same time as the {@link #FLATTENED_ENUMS_FROM_JSONPROPERTY} option, with the {@code JsonValue} annotation taking
+     * precedence.
      *
+     * @see JacksonOption#FLATTENED_ENUMS_FROM_JSONPROPERTY
      * @see com.github.victools.jsonschema.generator.Option#FLATTENED_ENUMS
      * @see com.github.victools.jsonschema.generator.Option#FLATTENED_ENUMS_FROM_TOSTRING
      */
     FLATTENED_ENUMS_FROM_JSONVALUE,
+    /**
+     * Use this option to treat enum types with a {@link com.fasterxml.jackson.annotation.JsonProperty JsonProperty} annotation on each of its
+     * constants as plain strings in the generated schema. If no such annotation is present on each enum constants, it will fall-back on following
+     * custom definitions (e.g. from one of the standard generator {@code Option}s).
+     * <br>
+     * This can be enabled at the same time as the {@link #FLATTENED_ENUMS_FROM_JSONVALUE} option, with the {@code JsonValue} annotation taking
+     * precedence.
+     *
+     * @see JacksonOption#FLATTENED_ENUMS_FROM_JSONVALUE
+     * @see com.github.victools.jsonschema.generator.Option#FLATTENED_ENUMS
+     * @see com.github.victools.jsonschema.generator.Option#FLATTENED_ENUMS_FROM_TOSTRING
+     */
+    FLATTENED_ENUMS_FROM_JSONPROPERTY,
     /**
      * Use this option to skip the automatic look-up of subtypes according to {@code @JsonSubTypes} annotations.
      */

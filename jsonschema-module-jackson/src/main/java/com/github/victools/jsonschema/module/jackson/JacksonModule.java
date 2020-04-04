@@ -80,8 +80,10 @@ public class JacksonModule implements Module {
         SchemaGeneratorGeneralConfigPart generalConfigPart = builder.forTypesInGeneral();
         generalConfigPart.withDescriptionResolver(this::resolveDescriptionForType);
 
-        if (this.options.contains(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE)) {
-            generalConfigPart.withCustomDefinitionProvider(new CustomEnumJsonValueDefinitionProvider());
+        boolean considerEnumJsonValue = this.options.contains(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE);
+        boolean considerEnumJsonProperty = this.options.contains(JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY);
+        if (considerEnumJsonValue || considerEnumJsonProperty) {
+            generalConfigPart.withCustomDefinitionProvider(new CustomEnumDefinitionProvider(considerEnumJsonValue, considerEnumJsonProperty));
         }
         boolean lookUpSubtypes = !this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP);
         boolean includeTypeInfoTransform = !this.options.contains(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM);
