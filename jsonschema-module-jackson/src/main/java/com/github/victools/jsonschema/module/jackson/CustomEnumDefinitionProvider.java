@@ -59,12 +59,16 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
 
     @Override
     public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
+        Object[] enumConstants = javaType.getErasedType().getEnumConstants();
+        if (enumConstants == null || enumConstants.length == 0) {
+            return null;
+        }
         List<?> serializedJsonValues = null;
         if (this.checkForJsonValueAnnotatedMethod) {
-            serializedJsonValues = this.getSerializedValuesFromJsonValue(javaType, context);
+            serializedJsonValues = this.getSerializedValuesFromJsonValue(javaType, enumConstants, context);
         }
         if (serializedJsonValues == null && this.checkForJsonPropertyAnnotations) {
-            serializedJsonValues = this.getSerializedValuesFromJsonProperty(javaType);
+            serializedJsonValues = this.getSerializedValuesFromJsonProperty(javaType, enumConstants);
         }
         if (serializedJsonValues == null) {
             return null;
@@ -82,14 +86,11 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
      * {@code value = true} and no expected arguments.
      *
      * @param javaType encountered type during schema generation
+     * @param enumConstants non-empty array of enum constants
      * @param context current generation context
      * @return results from invoking the {@link JsonValue} annotated method for each enum constant (or {@code null} if the criteria are not met)
      */
-    protected List<Object> getSerializedValuesFromJsonValue(ResolvedType javaType, SchemaGenerationContext context) {
-        Object[] enumConstants = javaType.getErasedType().getEnumConstants();
-        if (enumConstants == null || enumConstants.length == 0) {
-            return null;
-        }
+    protected List<Object> getSerializedValuesFromJsonValue(ResolvedType javaType, Object[] enumConstants, SchemaGenerationContext context) {
         ResolvedMethod jsonValueAnnotatedEnumMethod = this.getJsonValueAnnotatedMethod(javaType, context);
         if (jsonValueAnnotatedEnumMethod == null) {
             return null;
@@ -128,19 +129,17 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
      * Check whether the given type is an enum with at least one constant value and each enum constant value has a {@link JsonProperty} annotation.
      *
      * @param javaType encountered type during schema generation
+     * @param enumConstants non-empty array of enum constants
      * @return annotated {@link JsonProperty#value()} for each enum constant (or {@code null} if the criteria are not met)
      */
-    protected List<String> getSerializedValuesFromJsonProperty(ResolvedType javaType) {
-        Class<?> erasedType = javaType.getErasedType();
-        Object[] enumConstants = erasedType.getEnumConstants();
-        if (enumConstants == null || enumConstants.length == 0) {
-            return null;
-        }
+    protected List<String> getSerializedValuesFromJsonProperty(ResolvedType javaType, Object[] enumConstants) {
         try {
             List<String> serializedJsonValues = new ArrayList<>(enumConstants.length);
             for (Object enumConstant : enumConstants) {
                 String enumValueName = ((Enum<?>) enumConstant).name();
-                JsonProperty annotation = erasedType.getDeclaredField(enumValueName).getAnnotation(JsonProperty.class);
+                JsonProperty annotation = javaType.getErasedType()
+                        .getDeclaredField(enumValueName)
+                        .getAnnotation(JsonProperty.class);
                 if (annotation == null) {
                     // enum constant without @JsonProperty annotation
                     return null;
