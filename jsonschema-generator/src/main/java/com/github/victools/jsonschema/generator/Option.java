@@ -21,6 +21,7 @@ import com.github.victools.jsonschema.generator.impl.module.ConstantValueModule;
 import com.github.victools.jsonschema.generator.impl.module.EnumModule;
 import com.github.victools.jsonschema.generator.impl.module.FieldExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.FlattenedOptionalModule;
+import com.github.victools.jsonschema.generator.impl.module.InlineSchemaModule;
 import com.github.victools.jsonschema.generator.impl.module.MethodExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
 import com.github.victools.jsonschema.generator.impl.module.SimplifiedOptionalModule;
@@ -206,6 +207,15 @@ public enum Option {
      * Default: false (disabled)
      */
     DEFINITIONS_FOR_ALL_OBJECTS(null, null),
+    /**
+     * Whether all sub-schemas should be defined in-line, i.e. including no "definitions"/"$defs". This takes precedence over
+     * {@link #DEFINITIONS_FOR_ALL_OBJECTS}.
+     * <br>
+     * Beware: This will result in an exception being thrown if a single circular reference is being encountered!
+     * <br>
+     * Default: false (disabled)
+     */
+    INLINE_ALL_SCHEMAS(InlineSchemaModule::new, null, Option.DEFINITIONS_FOR_ALL_OBJECTS),
     /**
      * Whether as the last step of the schema generation, unnecessary "allOf" elements (i.e. where there are no conflicts/overlaps between the
      * contained sub-schemas) should be merged into one, in order to make the generated schema more readable. This also applies to manually added

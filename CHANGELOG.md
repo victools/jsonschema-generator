@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### `jsonschema-generator`
+#### Added
+- New `Option.INLINE_ALL_SCHEMAS` to enforce no `definitions`/`$defs` to be produced (throwing exception if there is at least one circular reference)
+
 #### Changed
 - Enhance `Option.ALLOF_CLEANUP_AT_THE_END` to also reduce `allOf` if multiple parts have the same attributes but with equal values
 

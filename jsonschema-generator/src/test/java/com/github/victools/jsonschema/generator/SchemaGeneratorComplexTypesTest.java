@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,7 +116,7 @@ public class SchemaGeneratorComplexTypesTest {
                         .withAnchorResolver(scope -> scope.isContainerType() ? null : "#anchor"),
                 "for type in general: ");
         Module methodModule = configBuilder -> populateConfigPart(configBuilder.forMethods(), "looked-up from method: ");
-        Module fieldModule = configBuilder -> populateConfigPart(configBuilder.forFields(), "looked-up from field: ");
+        Module fieldModule = configBuilder -> populateConfigPart(configBuilder.with(Option.INLINE_ALL_SCHEMAS).forFields(), "looked-up from field: ");
         Module enumToStringModule = configBuilder -> configBuilder.with(Option.FLATTENED_ENUMS_FROM_TOSTRING);
         return new Object[][]{
             {"testclass1-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, neutralModule},
@@ -140,7 +139,7 @@ public class SchemaGeneratorComplexTypesTest {
     @TestCaseName(value = "{method}({0}) [{index}]")
     public void testGenerateSchema(String caseTitle, OptionPreset preset, Class<?> targetType, Module testModule) throws Exception {
         final SchemaVersion schemaVersion = SchemaVersion.DRAFT_7;
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion, preset);
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, preset);
         configBuilder.with(testModule);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
@@ -156,6 +155,15 @@ public class SchemaGeneratorComplexTypesTest {
         }
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
                 loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGenerateInlineSchemaWithCircularReference() {
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
+                .with(Option.INLINE_ALL_SCHEMAS)
+                .build();
+
+        new SchemaGenerator(config).generateSchema(TestClassCircular.class);
     }
 
     private static String loadResource(String resourcePath) throws IOException {
@@ -234,6 +242,11 @@ public class SchemaGeneratorComplexTypesTest {
         public TestClass2<TestClass2<T>> getClass2OfClass2OfT() {
             return this.class2OfClass2OfT;
         }
+    }
+
+    private static class TestClassCircular {
+
+        public TestClass2<TestClassCircular> class2OfCircular;
     }
 
     private static enum TestEnum {

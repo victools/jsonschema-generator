@@ -20,6 +20,7 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import com.github.victools.jsonschema.generator.impl.SchemaGenerationContextImpl;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
@@ -109,13 +110,15 @@ public class SchemaGenerator {
     private ObjectNode buildDefinitionsAndResolveReferences(DefinitionKey mainSchemaKey, SchemaGenerationContextImpl generationContext) {
         ObjectNode definitionsNode = this.config.createObjectNode();
         boolean createDefinitionsForAll = this.config.shouldCreateDefinitionsForAllObjects();
+        boolean inlineAllSchemas = this.config.shouldInlineAllSchemas();
         for (Map.Entry<DefinitionKey, String> entry : this.getReferenceKeys(mainSchemaKey, generationContext).entrySet()) {
             String definitionName = entry.getValue();
             DefinitionKey definitionKey = entry.getKey();
             List<ObjectNode> references = generationContext.getReferences(definitionKey);
             List<ObjectNode> nullableReferences = generationContext.getNullableReferences(definitionKey);
             final String referenceKey;
-            boolean referenceInline = (references.isEmpty() || (!createDefinitionsForAll && (references.size() + nullableReferences.size()) < 2))
+            boolean referenceInline = inlineAllSchemas
+                    || (references.isEmpty() || (!createDefinitionsForAll && (references.size() + nullableReferences.size()) < 2))
                     && !mainSchemaKey.equals(definitionKey);
             if (referenceInline) {
                 // it is a simple type, just in-line the sub-schema everywhere
@@ -141,7 +144,7 @@ public class SchemaGenerator {
                     definition = this.config.createObjectNode().put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey);
                 }
                 generationContext.makeNullable(definition);
-                if (createDefinitionsForAll || nullableReferences.size() > 1) {
+                if (!inlineAllSchemas && (createDefinitionsForAll || nullableReferences.size() > 1)) {
                     String nullableDefinitionName = definitionName + "-nullable";
                     definitionsNode.set(nullableDefinitionName, definition);
                     nullableReferences.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF),
