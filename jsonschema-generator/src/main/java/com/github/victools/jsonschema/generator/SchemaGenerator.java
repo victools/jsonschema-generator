@@ -20,6 +20,7 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import com.github.victools.jsonschema.generator.impl.SchemaGenerationContextImpl;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
@@ -109,17 +110,20 @@ public class SchemaGenerator {
     private ObjectNode buildDefinitionsAndResolveReferences(DefinitionKey mainSchemaKey, SchemaGenerationContextImpl generationContext) {
         ObjectNode definitionsNode = this.config.createObjectNode();
         boolean createDefinitionsForAll = this.config.shouldCreateDefinitionsForAllObjects();
+        boolean inlineAllSchemas = this.config.shouldInlineAllSchemas();
         for (Map.Entry<DefinitionKey, String> entry : this.getReferenceKeys(mainSchemaKey, generationContext).entrySet()) {
             String definitionName = entry.getValue();
             DefinitionKey definitionKey = entry.getKey();
             List<ObjectNode> references = generationContext.getReferences(definitionKey);
             List<ObjectNode> nullableReferences = generationContext.getNullableReferences(definitionKey);
             final String referenceKey;
-            boolean referenceInline = (references.isEmpty() || (!createDefinitionsForAll && (references.size() + nullableReferences.size()) < 2))
+            boolean referenceInline = inlineAllSchemas
+                    || (references.isEmpty() || (!createDefinitionsForAll && (references.size() + nullableReferences.size()) < 2))
                     && !mainSchemaKey.equals(definitionKey);
             if (referenceInline) {
                 // it is a simple type, just in-line the sub-schema everywhere
-                references.forEach(node -> node.setAll(generationContext.getDefinition(definitionKey)));
+                ObjectNode definition = generationContext.getDefinition(definitionKey);
+                references.forEach(node -> AttributeCollector.mergeMissingAttributes(node, definition));
                 referenceKey = null;
             } else {
                 // the same sub-schema is referenced in multiple places
@@ -140,13 +144,13 @@ public class SchemaGenerator {
                     definition = this.config.createObjectNode().put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey);
                 }
                 generationContext.makeNullable(definition);
-                if (createDefinitionsForAll || nullableReferences.size() > 1) {
+                if (!inlineAllSchemas && (createDefinitionsForAll || nullableReferences.size() > 1)) {
                     String nullableDefinitionName = definitionName + "-nullable";
                     definitionsNode.set(nullableDefinitionName, definition);
                     nullableReferences.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF),
                             this.config.getKeyword(SchemaKeyword.TAG_REF_PREFIX) + nullableDefinitionName));
                 } else {
-                    nullableReferences.forEach(node -> node.setAll(definition));
+                    nullableReferences.forEach(node -> AttributeCollector.mergeMissingAttributes(node, definition));
                 }
             }
         }
@@ -321,10 +325,12 @@ public class SchemaGenerator {
                 return;
             }
         }
-        Map<String, Integer> fieldCount = Stream.concat(Stream.of(schemaObjectNode), parts.stream())
-                .flatMap(part -> StreamSupport.stream(((Iterable<String>) () -> part.fieldNames()).spliterator(), false))
-                .collect(Collectors.toMap(fieldName -> fieldName, _value -> 1, (currentCount, nextCount) -> currentCount + nextCount));
-        if (fieldCount.values().stream().allMatch(count -> count == 1)) {
+        // collect all defined attributes from the separate parts and check whether there are incompatible differences
+        Map<String, List<Map.Entry<String, JsonNode>>> fieldsFromAllParts = Stream.concat(Stream.of(schemaObjectNode), parts.stream())
+                .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) () -> part.fields()).spliterator(), false))
+                .collect(Collectors.groupingBy(Map.Entry::getKey));
+        if (fieldsFromAllParts.values().stream().allMatch(entries -> entries.subList(1, entries.size()).stream().allMatch(entries.get(0)::equals))) {
+            // all attributes are either distinct or have equal values in all occurrences
             schemaObjectNode.remove(allOfTagName);
             parts.forEach(schemaObjectNode::setAll);
         }

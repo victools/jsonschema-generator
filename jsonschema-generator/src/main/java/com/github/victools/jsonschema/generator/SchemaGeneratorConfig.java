@@ -49,11 +49,18 @@ public interface SchemaGeneratorConfig {
     String getKeyword(SchemaKeyword keyword);
 
     /**
-     * Determine whether all referenced objects should be listed in the schema's "definitions", even if they only occur once.
+     * Determine whether all referenced objects should be listed in the schema's "definitions"/"$defs", even if they only occur once.
      *
      * @return whether to add a definition even for objects occurring only once
      */
     boolean shouldCreateDefinitionsForAllObjects();
+
+    /**
+     * Determine whether all sub-schemas should be included in-line, even if they occur multiple times, and not in the schema's "definitions"/"$defs".
+     *
+     * @return whether to include all sub-schemas in-line
+     */
+    boolean shouldInlineAllSchemas();
 
     /**
      * Determine whether the {@link SchemaKeyword#TAG_SCHEMA} attribute with {@link SchemaKeyword#TAG_SCHEMA_VALUE} should be added.

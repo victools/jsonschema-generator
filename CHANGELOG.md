@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Added
+- New `Option.INLINE_ALL_SCHEMAS` to enforce no `definitions`/`$defs` to be produced (throwing exception if there is at least one circular reference)
+
+#### Changed
+- Enhance `Option.ALLOF_CLEANUP_AT_THE_END` to also reduce `allOf` if multiple parts have the same attributes but with equal values
+
 ### `jsonschema-module-jackson`
 #### Added
 - New `JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY` to allow enum serialization based on each constant's `@JsonProperty` value
