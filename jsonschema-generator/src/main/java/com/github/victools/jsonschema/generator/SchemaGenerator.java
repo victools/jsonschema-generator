@@ -322,10 +322,12 @@ public class SchemaGenerator {
                 return;
             }
         }
-        Map<String, Integer> fieldCount = Stream.concat(Stream.of(schemaObjectNode), parts.stream())
-                .flatMap(part -> StreamSupport.stream(((Iterable<String>) () -> part.fieldNames()).spliterator(), false))
-                .collect(Collectors.toMap(fieldName -> fieldName, _value -> 1, (currentCount, nextCount) -> currentCount + nextCount));
-        if (fieldCount.values().stream().allMatch(count -> count == 1)) {
+        // collect all defined attributes from the separate parts and check whether there are incompatible differences
+        Map<String, List<Map.Entry<String, JsonNode>>> fieldsFromAllParts = Stream.concat(Stream.of(schemaObjectNode), parts.stream())
+                .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) () -> part.fields()).spliterator(), false))
+                .collect(Collectors.groupingBy(Map.Entry::getKey));
+        if (fieldsFromAllParts.values().stream().allMatch(entries -> entries.subList(1, entries.size()).stream().allMatch(entries.get(0)::equals))) {
+            // all attributes are either distinct or have equal values in all occurrences
             schemaObjectNode.remove(allOfTagName);
             parts.forEach(schemaObjectNode::setAll);
         }
