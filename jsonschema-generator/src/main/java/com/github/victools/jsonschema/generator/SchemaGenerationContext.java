@@ -90,6 +90,38 @@ public interface SchemaGenerationContext {
     ObjectNode createStandardDefinition(ResolvedType targetType, CustomDefinitionProviderV2 ignoredDefinitionProvider);
 
     /**
+     * Create a standard definition for the given property. Ignoring custom definitions up to the given one, but respecting others.
+     * <br>
+     * The returned schema will be inlined and fully populated, i.e. it may be further manipulated - at the risk of an endless loop in case of a
+     * circular reference.
+     *
+     * @param targetScope property to create definition node for
+     * @param ignoredDefinitionProvider custom definition provider to ignore
+     * @return inline definition for the given field
+     *
+     * @see #createDefinitionReference(ResolvedType)
+     * @see #createStandardDefinitionReference(FieldScope, CustomPropertyDefinitionProvider)
+     */
+    ObjectNode createStandardDefinition(FieldScope targetScope, CustomPropertyDefinitionProvider<FieldScope> ignoredDefinitionProvider);
+
+    /**
+     * Create a standard definition for the given property. Ignoring custom definitions up to the given one, but respecting others.
+     * <br>
+     * The returned schema will be inlined and fully populated, i.e. it may be further manipulated - at the risk of an endless loop in case of a
+     * circular reference.
+     * <br>
+     * The returned type is always an {@link ObjectNode} unless the given method is {@code void}, which will result in a {@link BooleanNode#FALSE}.
+     *
+     * @param targetScope property to create definition node for
+     * @param ignoredDefinitionProvider custom definition provider to ignore
+     * @return inline definition for the given method
+     *
+     * @see #createDefinition(ResolvedType)
+     * @see #createStandardDefinitionReference(MethodScope, CustomPropertyDefinitionProvider)
+     */
+    JsonNode createStandardDefinition(MethodScope targetScope, CustomPropertyDefinitionProvider<MethodScope> ignoredDefinitionProvider);
+
+    /**
      * Create a standard definition for the given targetType. Ignoring custom definitions up to the given one, but respecting others.
      * <br>
      * The returned node will be empty, but is being remembered internally and populated later, i.e. it should not be changed!
@@ -115,6 +147,7 @@ public interface SchemaGenerationContext {
      *         at the very end of the schema generation
      *
      * @see #createDefinitionReference(ResolvedType)
+     * @see #createStandardDefinition(FieldScope, CustomPropertyDefinitionProvider)
      */
     ObjectNode createStandardDefinitionReference(FieldScope targetScope, CustomPropertyDefinitionProvider<FieldScope> ignoredDefinitionProvider);
 
@@ -132,6 +165,7 @@ public interface SchemaGenerationContext {
      *         at the very end of the schema generation
      *
      * @see #createDefinitionReference(ResolvedType)
+     * @see #createStandardDefinition(MethodScope, CustomPropertyDefinitionProvider)
      */
     JsonNode createStandardDefinitionReference(MethodScope targetScope, CustomPropertyDefinitionProvider<MethodScope> ignoredDefinitionProvider);
 
