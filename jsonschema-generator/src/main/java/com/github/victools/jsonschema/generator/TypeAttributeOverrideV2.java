@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 VicTools.
+ * Copyright 2020 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,18 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
- * Entry point for customising a JSON Schema being generated for a particular java type, i.e. the part that may be referenced multiple times.
- *
- * @deprecated use {@link TypeAttributeOverrideV2} instead
+ * Entry point for customising the JSON Schema attributes being collected for a type in general, i.e. the part that may be referenced multiple times.
  */
-@Deprecated
-public interface TypeAttributeOverride extends TypeAttributeOverrideV2 {
+public interface TypeAttributeOverrideV2 {
 
     /**
      * Add/remove attributes on the given JSON Schema node – this is specifically intended for attributes relating to the type in general.
      * <br>
      * E.g. {@link SchemaKeyword#TAG_FORMAT}, {@link SchemaKeyword#TAG_PATTERN}, {@link SchemaKeyword#TAG_REQUIRED}
      *
-     * @param jsonSchemaTypeNode node to modify (the part that may be referenced multiple times)
+     * @param collectedTypeAttributes node to modify (the part that may be referenced multiple times)
      * @param scope the type representation associated with the JSON Schema node
-     * @param config applicable configuration
+     * @param context generation context
      */
-    void overrideTypeAttributes(ObjectNode jsonSchemaTypeNode, TypeScope scope, SchemaGeneratorConfig config);
-
-    @Override
-    default void overrideTypeAttributes(ObjectNode collectedTypeAttributes, TypeScope scope, SchemaGenerationContext context) {
-        this.overrideTypeAttributes(collectedTypeAttributes, scope, context.getGeneratorConfig());
-    }
+    void overrideTypeAttributes(ObjectNode collectedTypeAttributes, TypeScope scope, SchemaGenerationContext context);
 }

@@ -210,7 +210,9 @@ public class SchemaGeneratorConfigBuilder {
      *
      * @param definitionProvider provider of a custom definition to register, which may return null
      * @return this builder instance (for chaining)
+     * @deprecated use {@link SchemaGeneratorGeneralConfigPart#withCustomDefinitionProvider(CustomDefinitionProviderV2)} instead
      */
+    @Deprecated
     public SchemaGeneratorConfigBuilder with(CustomDefinitionProviderV2 definitionProvider) {
         this.typesInGeneralConfigPart.withCustomDefinitionProvider(definitionProvider);
         return this;
@@ -221,7 +223,9 @@ public class SchemaGeneratorConfigBuilder {
      *
      * @param override adding/removing attributes on a JSON Schema node – specifically intended for attributes relating to the type in general.
      * @return this builder instance (for chaining)
+     * @deprecated use {@link SchemaGeneratorGeneralConfigPart#withTypeAttributeOverride(TypeAttributeOverrideV2)} instead
      */
+    @Deprecated
     public SchemaGeneratorConfigBuilder with(TypeAttributeOverride override) {
         this.typesInGeneralConfigPart.withTypeAttributeOverride(override);
         return this;

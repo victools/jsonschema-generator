@@ -89,7 +89,7 @@ public class AttributeCollector {
         collector.setArrayMaxItems(node, config.resolveArrayMaxItems(field), generationContext);
         collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(field), generationContext);
         config.getFieldAttributeOverrides()
-                .forEach(override -> override.overrideInstanceAttributes(node, field));
+                .forEach(override -> override.overrideInstanceAttributes(node, field, generationContext));
         return node;
     }
 
@@ -123,7 +123,7 @@ public class AttributeCollector {
         collector.setArrayMaxItems(node, config.resolveArrayMaxItems(method), generationContext);
         collector.setArrayUniqueItems(node, config.resolveArrayUniqueItems(method), generationContext);
         config.getMethodAttributeOverrides()
-                .forEach(override -> override.overrideInstanceAttributes(node, method));
+                .forEach(override -> override.overrideInstanceAttributes(node, method, generationContext));
         return node;
     }
 

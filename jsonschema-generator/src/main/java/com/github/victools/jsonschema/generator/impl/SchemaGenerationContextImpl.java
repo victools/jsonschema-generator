@@ -320,7 +320,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         }
         // apply overrides as the very last step
         this.generatorConfig.getTypeAttributeOverrides()
-                .forEach(override -> override.overrideTypeAttributes(definition, scope, this.generatorConfig));
+                .forEach(override -> override.overrideTypeAttributes(definition, scope, this));
     }
 
     /**

@@ -32,7 +32,7 @@ public interface SubtypeResolver {
     /**
      * Look-up the subtypes for a given type, that should be listed independently.
      * <br>
-     * If it returns null, the next subtype resolver is expected to be applied.An empty list will result only in the originally declared type to be
+     * If it returns null, the next subtype resolver is expected to be applied. An empty list will result only in the originally declared type to be
      * considered.
      * <br>
      * Returning a list with a single entry will treat the declared type as one-to-one alias for the returned type. Alternatively, you may want to

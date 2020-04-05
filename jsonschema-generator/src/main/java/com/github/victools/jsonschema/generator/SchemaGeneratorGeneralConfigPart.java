@@ -31,7 +31,7 @@ public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigP
 
     private final List<CustomDefinitionProviderV2> customDefinitionProviders = new ArrayList<>();
     private final List<SubtypeResolver> subtypeResolvers = new ArrayList<>();
-    private final List<TypeAttributeOverride> typeAttributeOverrides = new ArrayList<>();
+    private final List<TypeAttributeOverrideV2> typeAttributeOverrides = new ArrayList<>();
 
     private final List<ConfigFunction<TypeScope, String>> idResolvers = new ArrayList<>();
     private final List<ConfigFunction<TypeScope, String>> anchorResolvers = new ArrayList<>();
@@ -86,7 +86,7 @@ public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigP
      * @param override adding/removing attributes on a JSON Schema node – specifically intended for attributes relating to the type in general.
      * @return this builder instance (for chaining)
      */
-    public SchemaGeneratorGeneralConfigPart withTypeAttributeOverride(TypeAttributeOverride override) {
+    public SchemaGeneratorGeneralConfigPart withTypeAttributeOverride(TypeAttributeOverrideV2 override) {
         this.typeAttributeOverrides.add(override);
         return this;
     }
@@ -96,7 +96,7 @@ public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigP
      *
      * @return registered overrides to be applied in the given order
      */
-    public List<TypeAttributeOverride> getTypeAttributeOverrides() {
+    public List<TypeAttributeOverrideV2> getTypeAttributeOverrides() {
         return Collections.unmodifiableList(this.typeAttributeOverrides);
     }
 

@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Changed
 - Enhance `Option.ALLOF_CLEANUP_AT_THE_END` to also reduce `allOf` if multiple parts have the same attributes but with equal values
+- Providing access to the `SchemaGenerationContext` when invoking `InstanceAttributeOverrideV2` and `TypeAttributeOverrideV2` (potentially breaking change in case of override definition via lambda)
+
+#### Deprecated
+- Old `InstanceAttributeOverride` and `TypeAttributeOverride` interfaces
+- Ambiguous `SchemaGeneratorConfigBuilder.with(CustomDefinitionProviderV2)` and `SchemaGeneratorConfigBuilder.with(TypeAttributeOverrideV2)`
 
 ### `jsonschema-module-jackson`
 #### Added
