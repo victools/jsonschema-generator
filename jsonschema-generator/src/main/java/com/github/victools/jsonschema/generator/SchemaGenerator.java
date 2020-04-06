@@ -316,24 +316,44 @@ public class SchemaGenerator {
                 .map(part -> (ObjectNode) part)
                 .collect(Collectors.toList());
 
-        final ObjectNode schemaObjectNode = (ObjectNode) schemaNode;
-        final SchemaVersion schemaVersion = this.config.getSchemaVersion();
-        if (schemaVersion == SchemaVersion.DRAFT_7) {
+        // collect all defined attributes from the separate parts and check whether there are incompatible differences
+        Map<String, List<JsonNode>> fieldsFromAllParts = Stream.concat(Stream.of(schemaNode), parts.stream())
+                .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) () -> part.fields()).spliterator(), false))
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
+        if (this.config.getSchemaVersion() == SchemaVersion.DRAFT_7
+                && fieldsFromAllParts.containsKey(this.config.getKeyword(SchemaKeyword.TAG_REF))) {
             // in Draft 7, any other attributes besides the $ref keyword were ignored
-            String refKeyword = SchemaKeyword.TAG_REF.forVersion(schemaVersion);
-            if (schemaObjectNode.has(refKeyword) || parts.stream().anyMatch(part -> part.has(refKeyword))) {
+            return;
+        }
+        String ifTagName = this.config.getKeyword(SchemaKeyword.TAG_IF);
+        for (Map.Entry<String, List<JsonNode>> fieldEntries : fieldsFromAllParts.entrySet()) {
+            if (fieldEntries.getValue().size() == 1) {
+                // no conflicts, no further checks
+                continue;
+            }
+            if (ifTagName.equals(fieldEntries.getKey())) {
+                // "if"/"then"/"else" tags should remain isolated in their sub-schemas
+                return;
+            }
+            int offset;
+            if (!allOfTagName.equals(fieldEntries.getKey())) {
+                offset = 0;
+            } else if (fieldEntries.getValue().size() == 2) {
+                // we can ignore the "allOf" tag in the target node (the one we are trying to remove here)
+                continue;
+            } else {
+                offset = 1;
+            }
+            if (!fieldEntries.getValue().stream().skip(offset + 1).allMatch(fieldEntries.getValue().get(offset)::equals)) {
+                // different values for the same tag: be conservative for now and not merge anything
+                // later, we may want to decide based on the tag how to merge them (e.g. take the highest "minLength" and the lowest "maximum")
                 return;
             }
         }
-        // collect all defined attributes from the separate parts and check whether there are incompatible differences
-        Map<String, List<Map.Entry<String, JsonNode>>> fieldsFromAllParts = Stream.concat(Stream.of(schemaObjectNode), parts.stream())
-                .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) () -> part.fields()).spliterator(), false))
-                .collect(Collectors.groupingBy(Map.Entry::getKey));
-        if (fieldsFromAllParts.values().stream().allMatch(entries -> entries.subList(1, entries.size()).stream().allMatch(entries.get(0)::equals))) {
-            // all attributes are either distinct or have equal values in all occurrences
-            schemaObjectNode.remove(allOfTagName);
-            parts.forEach(schemaObjectNode::setAll);
-        }
+        // all attributes are either distinct or have equal values in all occurrences
+        ObjectNode schemaObjectNode = (ObjectNode) schemaNode;
+        schemaObjectNode.remove(allOfTagName);
+        parts.forEach(schemaObjectNode::setAll);
     }
 
     /**

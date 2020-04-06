@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Alternative `SchemaGenerationConfigPart.withInstanceAttributeOverride(InstanceAttributeOverrideV2)` with access to `SchemaGenerationContext`
 
 #### Changed
-- Enhance `Option.ALLOF_CLEANUP_AT_THE_END` to also reduce `allOf` if multiple parts have the same attributes but with equal values
+- Enhance `Option.ALLOF_CLEANUP_AT_THE_END` to also reduce `allOf` if multiple parts have the same attributes but with equal values (except for `if` tags)
 - Providing access to the `SchemaGenerationContext` when invoking `TypeAttributeOverrideV2` (potentially BREAKING change in case of lambda usage)
 
 #### Deprecated
