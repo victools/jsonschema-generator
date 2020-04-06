@@ -48,10 +48,10 @@ public class SchemaGeneratorConfigPartTest {
 
     @Test
     public void testInstanceAttributeOverride() {
-        InstanceAttributeOverride<FieldScope> instanceOverride = (node, field) -> node.put("$comment", "test");
+        InstanceAttributeOverrideV2<FieldScope> instanceOverride = (node, _field, _context) -> node.put("$comment", "test");
         Assert.assertSame(this.instance, this.instance.withInstanceAttributeOverride(instanceOverride));
 
-        List<InstanceAttributeOverride<FieldScope>> instanceOverrideList = this.instance.getInstanceAttributeOverrides();
+        List<InstanceAttributeOverrideV2<FieldScope>> instanceOverrideList = this.instance.getInstanceAttributeOverrides();
         Assert.assertEquals(1, instanceOverrideList.size());
         Assert.assertSame(instanceOverride, instanceOverrideList.get(0));
     }

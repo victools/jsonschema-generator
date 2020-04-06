@@ -154,21 +154,21 @@ public interface SchemaGeneratorConfig {
      *
      * @return overrides of a given JSON Schema node's type attributes
      */
-    List<TypeAttributeOverride> getTypeAttributeOverrides();
+    List<TypeAttributeOverrideV2> getTypeAttributeOverrides();
 
     /**
      * Getter for the applicable instance attribute overrides for fields.
      *
      * @return overrides of a given JSON Schema node's instance attributes
      */
-    List<InstanceAttributeOverride<FieldScope>> getFieldAttributeOverrides();
+    List<InstanceAttributeOverrideV2<FieldScope>> getFieldAttributeOverrides();
 
     /**
      * Getter for the applicable instance attribute overrides for methods.
      *
      * @return overrides of a given JSON Schema node's instance attributes
      */
-    List<InstanceAttributeOverride<MethodScope>> getMethodAttributeOverrides();
+    List<InstanceAttributeOverrideV2<MethodScope>> getMethodAttributeOverrides();
 
     /**
      * Check whether a field/property is nullable.

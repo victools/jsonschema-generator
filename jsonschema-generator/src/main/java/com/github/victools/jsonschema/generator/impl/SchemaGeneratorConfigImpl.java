@@ -25,7 +25,7 @@ import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.CustomPropertyDefinition;
 import com.github.victools.jsonschema.generator.CustomPropertyDefinitionProvider;
 import com.github.victools.jsonschema.generator.FieldScope;
-import com.github.victools.jsonschema.generator.InstanceAttributeOverride;
+import com.github.victools.jsonschema.generator.InstanceAttributeOverrideV2;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Option;
@@ -35,7 +35,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.generator.TypeAttributeOverride;
+import com.github.victools.jsonschema.generator.TypeAttributeOverrideV2;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -220,17 +220,17 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public List<TypeAttributeOverride> getTypeAttributeOverrides() {
+    public List<TypeAttributeOverrideV2> getTypeAttributeOverrides() {
         return this.typesInGeneralConfigPart.getTypeAttributeOverrides();
     }
 
     @Override
-    public List<InstanceAttributeOverride<FieldScope>> getFieldAttributeOverrides() {
+    public List<InstanceAttributeOverrideV2<FieldScope>> getFieldAttributeOverrides() {
         return this.fieldConfigPart.getInstanceAttributeOverrides();
     }
 
     @Override
-    public List<InstanceAttributeOverride<MethodScope>> getMethodAttributeOverrides() {
+    public List<InstanceAttributeOverrideV2<MethodScope>> getMethodAttributeOverrides() {
         return this.methodConfigPart.getInstanceAttributeOverrides();
     }
 

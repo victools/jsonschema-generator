@@ -24,13 +24,13 @@ import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.FieldScope;
-import com.github.victools.jsonschema.generator.InstanceAttributeOverride;
+import com.github.victools.jsonschema.generator.InstanceAttributeOverrideV2;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.generator.TypeAttributeOverride;
+import com.github.victools.jsonschema.generator.TypeAttributeOverrideV2;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -195,30 +195,30 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     @Test
     public void testGetTypeAttributeOverrides() {
-        TypeAttributeOverride typeOverride = (typeNode, type, c) -> typeNode.put("$comment", type.getSimpleTypeDescription());
+        TypeAttributeOverrideV2 typeOverride = (typeNode, type, c) -> typeNode.put("$comment", type.getSimpleTypeDescription());
         Mockito.when(this.typesInGeneralConfigPart.getTypeAttributeOverrides()).thenReturn(Collections.singletonList(typeOverride));
 
-        List<TypeAttributeOverride> result = this.instance.getTypeAttributeOverrides();
+        List<TypeAttributeOverrideV2> result = this.instance.getTypeAttributeOverrides();
         Assert.assertEquals(1, result.size());
         Assert.assertSame(typeOverride, result.get(0));
     }
 
     @Test
     public void testGetFieldAttributeOverrides() {
-        InstanceAttributeOverride<FieldScope> instanceOverride = (node, field) -> node.put("$comment", field.getName());
+        InstanceAttributeOverrideV2<FieldScope> instanceOverride = (node, field, _context) -> node.put("$comment", field.getName());
         Mockito.when(this.fieldConfigPart.getInstanceAttributeOverrides()).thenReturn(Collections.singletonList(instanceOverride));
 
-        List<InstanceAttributeOverride<FieldScope>> result = this.instance.getFieldAttributeOverrides();
+        List<InstanceAttributeOverrideV2<FieldScope>> result = this.instance.getFieldAttributeOverrides();
         Assert.assertEquals(1, result.size());
         Assert.assertSame(instanceOverride, result.get(0));
     }
 
     @Test
     public void testGetMethodAttributeOverrides() {
-        InstanceAttributeOverride<MethodScope> instanceOverride = (node, method) -> node.put("$comment", method.getName() + "()");
+        InstanceAttributeOverrideV2<MethodScope> instanceOverride = (node, method, _context) -> node.put("$comment", method.getName() + "()");
         Mockito.when(this.methodConfigPart.getInstanceAttributeOverrides()).thenReturn(Collections.singletonList(instanceOverride));
 
-        List<InstanceAttributeOverride<MethodScope>> result = this.instance.getMethodAttributeOverrides();
+        List<InstanceAttributeOverrideV2<MethodScope>> result = this.instance.getMethodAttributeOverrides();
         Assert.assertEquals(1, result.size());
         Assert.assertSame(instanceOverride, result.get(0));
     }

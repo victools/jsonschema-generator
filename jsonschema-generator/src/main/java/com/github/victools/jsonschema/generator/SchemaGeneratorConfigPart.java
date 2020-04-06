@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends SchemaGeneratorTypeConfigPart<M> {
 
     private final List<CustomPropertyDefinitionProvider<M>> customDefinitionProviders = new ArrayList<>();
-    private final List<InstanceAttributeOverride<M>> instanceAttributeOverrides = new ArrayList<>();
+    private final List<InstanceAttributeOverrideV2<M>> instanceAttributeOverrides = new ArrayList<>();
 
     /*
      * Customising options for properties in a schema with "type": object;
@@ -81,8 +81,20 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
      *
      * @param override override of a given JSON Schema node's instance attributes
      * @return this config part (for chaining)
+     * @deprecated use {@link #withInstanceAttributeOverride(InstanceAttributeOverrideV2)} instead
      */
+    @Deprecated
     public SchemaGeneratorConfigPart<M> withInstanceAttributeOverride(InstanceAttributeOverride<M> override) {
+        return this.withInstanceAttributeOverride((InstanceAttributeOverrideV2<M>) override);
+    }
+
+    /**
+     * Setter for override of attributes on a given JSON Schema node in the respective member.
+     *
+     * @param override override of a given JSON Schema node's instance attributes
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorConfigPart<M> withInstanceAttributeOverride(InstanceAttributeOverrideV2<M> override) {
         this.instanceAttributeOverrides.add(override);
         return this;
     }
@@ -92,7 +104,7 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
      *
      * @return overrides of a given JSON Schema node's instance attributes
      */
-    public List<InstanceAttributeOverride<M>> getInstanceAttributeOverrides() {
+    public List<InstanceAttributeOverrideV2<M>> getInstanceAttributeOverrides() {
         return Collections.unmodifiableList(this.instanceAttributeOverrides);
     }
 
