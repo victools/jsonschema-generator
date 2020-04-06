@@ -81,6 +81,18 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
      *
      * @param override override of a given JSON Schema node's instance attributes
      * @return this config part (for chaining)
+     * @deprecated use {@link #withInstanceAttributeOverride(InstanceAttributeOverrideV2)} instead
+     */
+    @Deprecated
+    public SchemaGeneratorConfigPart<M> withInstanceAttributeOverride(InstanceAttributeOverride<M> override) {
+        return this.withInstanceAttributeOverride((InstanceAttributeOverrideV2<M>) override);
+    }
+
+    /**
+     * Setter for override of attributes on a given JSON Schema node in the respective member.
+     *
+     * @param override override of a given JSON Schema node's instance attributes
+     * @return this config part (for chaining)
      */
     public SchemaGeneratorConfigPart<M> withInstanceAttributeOverride(InstanceAttributeOverrideV2<M> override) {
         this.instanceAttributeOverrides.add(override);
