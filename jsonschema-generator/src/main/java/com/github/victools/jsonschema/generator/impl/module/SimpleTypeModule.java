@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
@@ -196,9 +195,8 @@ public class SimpleTypeModule implements Module {
                 .withNullableCheck(this::isNullableType);
         builder.forTypesInGeneral()
                 .withAdditionalPropertiesResolver(this::resolveAdditionalProperties)
-                .withPatternPropertiesResolver(this::resolvePatternProperties);
-
-        builder.with(new SimpleTypeDefinitionProvider(builder.getObjectMapper()));
+                .withPatternPropertiesResolver(this::resolvePatternProperties)
+                .withCustomDefinitionProvider(new SimpleTypeDefinitionProvider());
     }
 
     /**
@@ -236,17 +234,6 @@ public class SimpleTypeModule implements Module {
      */
     private class SimpleTypeDefinitionProvider implements CustomDefinitionProviderV2 {
 
-        private final ObjectMapper objectMapper;
-
-        /**
-         * Constructor setting the object mapper to use for creating a custom schema definition for later use.
-         *
-         * @param objectMapper supplier for object and array nodes for the JSON structure being generated
-         */
-        SimpleTypeDefinitionProvider(ObjectMapper objectMapper) {
-            this.objectMapper = objectMapper;
-        }
-
         @Override
         public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
             if (!javaType.getTypeParameters().isEmpty()) {
@@ -257,7 +244,7 @@ public class SimpleTypeModule implements Module {
                 return null;
             }
             // create fixed JSON schema definition, containing only the corresponding "type" attribute
-            ObjectNode customSchema = this.objectMapper.createObjectNode();
+            ObjectNode customSchema = context.getGeneratorConfig().createObjectNode();
             if (jsonSchemaTypeValue != SchemaKeyword.TAG_TYPE_NULL) {
                 customSchema.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(jsonSchemaTypeValue));
             }

@@ -101,7 +101,7 @@ public class SchemaGeneratorComplexTypesTest {
     }
 
     Object parametersForTestGenerateSchema() {
-        Module neutralModule = configBuilder -> configBuilder.with((javaType, context) -> {
+        Module neutralModule = configBuilder -> configBuilder.forTypesInGeneral().withCustomDefinitionProvider((javaType, _context) -> {
             if (Integer.class == javaType.getErasedType()) {
                 ObjectNode customNode = configBuilder.getObjectMapper()
                         .createObjectNode()

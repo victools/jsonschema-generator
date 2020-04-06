@@ -64,11 +64,10 @@ public class SimpleTypeModuleTest {
 
         Mockito.verify(this.typeConfigPart).withAdditionalPropertiesResolver(Mockito.any());
         Mockito.verify(this.typeConfigPart).withPatternPropertiesResolver(Mockito.any());
+        Mockito.verify(this.typeConfigPart).withCustomDefinitionProvider(Mockito.any(CustomDefinitionProviderV2.class));
         Mockito.verifyNoMoreInteractions(this.typeConfigPart);
         Mockito.verify(this.builder).forTypesInGeneral();
 
-        Mockito.verify(this.builder).getObjectMapper();
-        Mockito.verify(this.builder).with(Mockito.any(CustomDefinitionProviderV2.class));
 
         Mockito.verifyNoMoreInteractions(this.builder);
     }

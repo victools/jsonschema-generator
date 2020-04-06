@@ -20,6 +20,7 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.classmate.members.ResolvedMethod;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.util.stream.Stream;
 import org.mockito.Mockito;
@@ -49,6 +50,10 @@ public class AbstractTypeAwareTest {
         this.testClassMembers = typeContext.resolveWithMembers(resolvedTestClass);
         this.context = Mockito.mock(SchemaGenerationContext.class, Mockito.RETURNS_DEEP_STUBS);
         Mockito.when(this.context.getTypeContext()).thenReturn(typeContext);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Mockito.when(this.context.getGeneratorConfig().getObjectMapper()).thenReturn(objectMapper);
+        Mockito.when(this.context.getGeneratorConfig().createArrayNode()).thenAnswer(_invocation -> objectMapper.createArrayNode());
+        Mockito.when(this.context.getGeneratorConfig().createObjectNode()).thenAnswer(_invocation -> objectMapper.createObjectNode());
         Mockito.when(this.context.getGeneratorConfig().getSchemaVersion()).thenReturn(schemaVersion);
 
         Answer<String> keywordLookup = invocation -> ((SchemaKeyword) invocation.getArgument(0)).forVersion(schemaVersion);
