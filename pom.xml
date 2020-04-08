@@ -7,7 +7,7 @@
 
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator-parent</artifactId>
-    <version>4.8.0</version>
+    <version>4.8.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
     <licenses>
@@ -57,6 +57,7 @@
 		<module>jsonschema-module-jackson</module>
 		<module>jsonschema-module-javax-validation</module>
 		<module>jsonschema-module-swagger-1.5</module>
+        <module>jsonschema-maven-plugin</module>
 	</modules>
 
     <properties>
