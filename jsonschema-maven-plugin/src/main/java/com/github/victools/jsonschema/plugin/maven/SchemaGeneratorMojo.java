@@ -28,6 +28,10 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
+import com.github.victools.jsonschema.module.javax.validation.JavaxValidationModule;
+import com.github.victools.jsonschema.module.javax.validation.JavaxValidationOption;
+import com.github.victools.jsonschema.module.swagger15.SwaggerModule;
+import com.github.victools.jsonschema.module.swagger15.SwaggerOption;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -135,14 +139,15 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Construct the classloader based on the project classpath.
      *
      * @return The classloader
+     * @throws MojoExecutionException in case of problems
      */
-    private URLClassLoader getClassLoader() {
+    private URLClassLoader getClassLoader() throws MojoExecutionException {
         if (classLoader == null) {
-            List<String> runtimeClasspathElements = null;
+            List<String> runtimeClasspathElements;
             try {
                 runtimeClasspathElements = project.getRuntimeClasspathElements();
             } catch (DependencyResolutionRequiredException e) {
-                e.printStackTrace();
+                throw new MojoExecutionException("Error: Class path construction problem.", e);
             }
 
             if (runtimeClasspathElements != null) {
@@ -152,7 +157,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                     try {
                         runtimeUrls[i] = new File(element).toURI().toURL();
                     } catch (MalformedURLException e) {
-                        e.printStackTrace();
+                        throw new MojoExecutionException("Error: Class path construction problem.", e);
                     }
                 }
                 classLoader = new URLClassLoader(runtimeUrls,
@@ -172,7 +177,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         if (schemaFileName == null || schemaFileName.isEmpty()) {
             return schemaFilePath + "/" + className + ".schema.json";
         }
-        return schemaFilePath + "/" + schemaFileName;
+        return schemaFilePath + File.pathSeparator + schemaFileName;
     }
 
     /**
@@ -275,9 +280,9 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                     getLog().info("- Adding JacksonModule");
                     addJacksonModule(configBuilder, module);
                     break;
-                case "Validation":
+                case "JavaxValidation":
                     getLog().info("- Adding Javax Validation Module");
-                    addValidationModule(configBuilder, module);
+                    addJavaxValidationModule(configBuilder, module);
                     break;
                 case "Swagger":
                     getLog().info("- Adding SwaggerModule");
@@ -296,9 +301,22 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      *
      * @param configBuilder The builder on which the config is added
      * @param module        The modules section form the pom
+     * @throws MojoExecutionException in case of problems
      */
-    private void addSwaggerModule(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) {
-        // TODO
+    private void addSwaggerModule(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
+        if (module.options == null || module.options.length == 0) {
+            configBuilder.with(new SwaggerModule());
+        } else {
+            SwaggerOption[] swaggerOptions = new SwaggerOption[module.options.length];
+            for (int i = 0; i < module.options.length; i++) {
+                try {
+                    swaggerOptions[i] = SwaggerOption.valueOf(module.options[i]);
+                } catch (IllegalArgumentException e) {
+                    throw new MojoExecutionException("Error: Unknown Swagger option " + swaggerOptions[i], e);
+                }
+            }
+            configBuilder.with(new SwaggerModule(swaggerOptions));
+        }
     }
 
     /**
@@ -306,9 +324,22 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      *
      * @param configBuilder The builder on which the config is added
      * @param module        The modules section form the pom
+     * @throws MojoExecutionException in case of problems
      */
-    private void addValidationModule(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) {
-        // TODO
+    private void addJavaxValidationModule(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
+        if (module.options == null || module.options.length == 0) {
+            configBuilder.with(new JavaxValidationModule());
+        } else {
+            JavaxValidationOption[] javaxValidationOptions = new JavaxValidationOption[module.options.length];
+            for (int i = 0; i < module.options.length; i++) {
+                try {
+                    javaxValidationOptions[i] = JavaxValidationOption.valueOf(module.options[i]);
+                } catch (IllegalArgumentException e) {
+                    throw new MojoExecutionException("Error: Unknown JavaxValidation option " + javaxValidationOptions[i], e);
+                }
+            }
+            configBuilder.with(new JavaxValidationModule(javaxValidationOptions));
+        }
     }
 
     /**
@@ -343,6 +374,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private void configureDefaultModules(SchemaGeneratorConfigBuilder configBuilder) {
         getLog().info("- Adding JacksonModule");
         configBuilder.with(new JacksonModule());
+        getLog().info("- Adding SwaggerModule");
+        configBuilder.with(new SwaggerModule());
+        getLog().info("- Adding Javax Validation Module");
+        configBuilder.with(new JavaxValidationModule());
     }
 
     /**
@@ -350,8 +385,9 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      *
      * @param content  content to be written
      * @param fileName the name of the file
+     * @throws MojoExecutionException in case of problems
      */
-    private static void writeToFile(String content, String fileName) {
+    private static void writeToFile(String content, String fileName) throws MojoExecutionException {
         try {
             File file = new File(fileName);
             Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
@@ -359,7 +395,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             pw.print(content);
             pw.close();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            throw new MojoExecutionException("Error: Can not write to file " + fileName, e);
         }
     }
 }
