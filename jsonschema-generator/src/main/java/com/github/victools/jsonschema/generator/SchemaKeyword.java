@@ -72,7 +72,11 @@ public enum SchemaKeyword {
 
     TAG_ITEMS_MIN("minItems"),
     TAG_ITEMS_MAX("maxItems"),
-    TAG_ITEMS_UNIQUE("uniqueItems");
+    TAG_ITEMS_UNIQUE("uniqueItems"),
+
+    TAG_IF("if"),
+    TAG_THEN("then"),
+    TAG_ELSE("else");
 
     private final Function<SchemaVersion, String> valueProvider;
 

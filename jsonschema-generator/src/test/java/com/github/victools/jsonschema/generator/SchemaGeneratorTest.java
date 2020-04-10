@@ -27,7 +27,8 @@ import org.junit.runners.Suite;
     SchemaGeneratorSimpleTypesTest.class,
     SchemaGeneratorComplexTypesTest.class,
     SchemaGeneratorSubtypesTest.class,
-    SchemaGeneratorCustomDefinitionsTest.class
+    SchemaGeneratorCustomDefinitionsTest.class,
+    SchemaGeneratorAllOfCleanUpTest.class
 })
 public class SchemaGeneratorTest {
     // suite as collection of separate test classes to avoid one huge test class

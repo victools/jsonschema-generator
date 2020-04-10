@@ -18,13 +18,10 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Scanner;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.naming.TestCaseName;
@@ -101,7 +97,7 @@ public class SchemaGeneratorComplexTypesTest {
     }
 
     Object parametersForTestGenerateSchema() {
-        Module neutralModule = configBuilder -> configBuilder.with((javaType, context) -> {
+        Module neutralModule = configBuilder -> configBuilder.forTypesInGeneral().withCustomDefinitionProvider((javaType, _context) -> {
             if (Integer.class == javaType.getErasedType()) {
                 ObjectNode customNode = configBuilder.getObjectMapper()
                         .createObjectNode()
@@ -154,7 +150,7 @@ public class SchemaGeneratorComplexTypesTest {
             }
         }
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
+                TestUtils.loadResource(this.getClass(), caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -164,19 +160,6 @@ public class SchemaGeneratorComplexTypesTest {
                 .build();
 
         new SchemaGenerator(config).generateSchema(TestClassCircular.class);
-    }
-
-    private static String loadResource(String resourcePath) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-        try (InputStream inputStream = SchemaGeneratorComplexTypesTest.class
-                .getResourceAsStream(resourcePath);
-                Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
-            while (scanner.hasNext()) {
-                stringBuilder.append(scanner.nextLine()).append('\n');
-            }
-        }
-        String fileAsString = stringBuilder.toString();
-        return fileAsString;
     }
 
     private static class TestClass1 extends TestClass2<String> {

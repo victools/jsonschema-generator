@@ -18,7 +18,6 @@ package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -30,6 +29,7 @@ import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.stream.Collectors;
@@ -53,6 +53,7 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
     private EnumModule instanceAsStringsFromToString;
     private EnumModule instanceAsObjects;
     private SchemaGeneratorConfigBuilder builder;
+    private SchemaGeneratorGeneralConfigPart typeConfigPart;
     private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
     private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
 
@@ -74,10 +75,12 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
      */
     private void initConfigBuilder(SchemaVersion schemaVersion) {
         this.prepareContextForVersion(schemaVersion);
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion, new OptionPreset());
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, new OptionPreset());
+        this.typeConfigPart = Mockito.spy(configBuilder.forTypesInGeneral());
         this.fieldConfigPart = Mockito.spy(configBuilder.forFields());
         this.methodConfigPart = Mockito.spy(configBuilder.forMethods());
         this.builder = Mockito.spy(configBuilder);
+        Mockito.when(this.builder.forTypesInGeneral()).thenReturn(this.typeConfigPart);
         Mockito.when(this.builder.forFields()).thenReturn(this.fieldConfigPart);
         Mockito.when(this.builder.forMethods()).thenReturn(this.methodConfigPart);
     }
@@ -88,9 +91,9 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         this.initConfigBuilder(schemaVersion);
         this.instanceAsStringsFromName.applyToConfigBuilder(this.builder);
 
-        Mockito.verify(this.builder).getObjectMapper();
-        Mockito.verify(this.builder).with(Mockito.any(CustomDefinitionProviderV2.class));
-        Mockito.verifyNoMoreInteractions(this.builder);
+        Mockito.verify(this.typeConfigPart).withCustomDefinitionProvider(Mockito.any(CustomDefinitionProviderV2.class));
+        Mockito.verify(this.builder).forTypesInGeneral();
+        Mockito.verifyNoMoreInteractions(this.typeConfigPart, this.builder);
     }
 
     @Test
@@ -99,9 +102,9 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         this.initConfigBuilder(schemaVersion);
         this.instanceAsStringsFromToString.applyToConfigBuilder(this.builder);
 
-        Mockito.verify(this.builder).getObjectMapper();
-        Mockito.verify(this.builder).with(Mockito.any(CustomDefinitionProviderV2.class));
-        Mockito.verifyNoMoreInteractions(this.builder);
+        Mockito.verify(this.typeConfigPart).withCustomDefinitionProvider(Mockito.any(CustomDefinitionProviderV2.class));
+        Mockito.verify(this.builder).forTypesInGeneral();
+        Mockito.verifyNoMoreInteractions(this.typeConfigPart, this.builder);
     }
 
     @Test
@@ -138,7 +141,7 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         this.initConfigBuilder(schemaVersion);
         instance.applyToConfigBuilder(this.builder);
         ArgumentCaptor<CustomDefinitionProviderV2> captor = ArgumentCaptor.forClass(CustomDefinitionProviderV2.class);
-        Mockito.verify(this.builder).with(captor.capture());
+        Mockito.verify(this.typeConfigPart).withCustomDefinitionProvider(captor.capture());
 
         ResolvedType testEnumType = this.getContext().getTypeContext().resolve(TestEnum.class);
         CustomDefinition schemaDefinition = captor.getValue().provideCustomSchemaDefinition(testEnumType, this.getContext());

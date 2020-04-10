@@ -18,15 +18,10 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Scanner;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -47,10 +42,9 @@ public class SchemaGeneratorCustomDefinitionsTest {
         CustomDefinitionProviderV2 customDefinitionProvider = (javaType, context) -> javaType.getErasedType() == Integer.class
                 ? new CustomDefinition(context.createDefinition(context.getTypeContext().resolve(String.class)))
                 : null;
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
-                .with(customDefinitionProvider)
-                .build();
-        SchemaGenerator generator = new SchemaGenerator(config);
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion);
+        configBuilder.forTypesInGeneral().withCustomDefinitionProvider(customDefinitionProvider);
+        SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(Integer.class);
         Assert.assertEquals(1, result.size());
         Assert.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(schemaVersion),
@@ -72,10 +66,9 @@ public class SchemaGeneratorCustomDefinitionsTest {
                     .set(config.getKeyword(SchemaKeyword.TAG_PROPERTIES), config.createObjectNode()
                             .set(accessProperty, context.makeNullable(context.createDefinition(generic)))));
         };
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
-                .with(customDefinitionProvider)
-                .build();
-        SchemaGenerator generator = new SchemaGenerator(config);
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion);
+        configBuilder.forTypesInGeneral().withCustomDefinitionProvider(customDefinitionProvider);
+        SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(ArrayList.class, String.class);
         Assert.assertEquals(2, result.size());
         Assert.assertEquals(SchemaKeyword.TAG_TYPE_OBJECT.forVersion(schemaVersion),
@@ -105,7 +98,7 @@ public class SchemaGeneratorCustomDefinitionsTest {
                 return null;
             }
         };
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion);
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion);
         configBuilder.forTypesInGeneral()
                 .withTitleResolver(_scope -> "type title")
                 .withDescriptionResolver(_scope -> "type description")
@@ -152,7 +145,7 @@ public class SchemaGeneratorCustomDefinitionsTest {
                 return new CustomDefinition(customDefinition);
             }
         };
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion, OptionPreset.PLAIN_JSON)
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON)
                 .with(Option.DEFINITIONS_FOR_ALL_OBJECTS);
         configBuilder.forTypesInGeneral()
                 .withCustomDefinitionProvider(customDefinitionProviderOne)
@@ -160,7 +153,8 @@ public class SchemaGeneratorCustomDefinitionsTest {
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(TestDirectCircularClass.class);
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                loadResource("multiple-definitions-one-type-" + schemaVersion.name() + ".json"), result.toString(), JSONCompareMode.STRICT);
+                TestUtils.loadResource(this.getClass(), "multiple-definitions-one-type-" + schemaVersion.name() + ".json"),
+                result.toString(), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -178,13 +172,14 @@ public class SchemaGeneratorCustomDefinitionsTest {
                     .set(config.getKeyword(SchemaKeyword.TAG_PROPERTIES), config.createObjectNode()
                             .set(accessProperty, context.createDefinitionReference(generic))));
         };
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion);
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion);
         configBuilder.forTypesInGeneral()
                 .withCustomDefinitionProvider(customDefinitionProvider);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(TestCircularClass1.class);
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                loadResource("circular-custom-definition-" + schemaVersion.name() + ".json"), result.toString(), JSONCompareMode.STRICT);
+                TestUtils.loadResource(this.getClass(), "circular-custom-definition-" + schemaVersion.name() + ".json"),
+                result.toString(), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -211,20 +206,8 @@ public class SchemaGeneratorCustomDefinitionsTest {
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(TestDirectCircularClass.class);
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                loadResource("custom-property-definition-" + schemaVersion.name() + ".json"), result.toString(), JSONCompareMode.STRICT);
-    }
-
-    private static String loadResource(String resourcePath) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-        try (InputStream inputStream = SchemaGeneratorComplexTypesTest.class
-                .getResourceAsStream(resourcePath);
-                Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
-            while (scanner.hasNext()) {
-                stringBuilder.append(scanner.nextLine()).append('\n');
-            }
-        }
-        String fileAsString = stringBuilder.toString();
-        return fileAsString;
+                TestUtils.loadResource(this.getClass(), "custom-property-definition-" + schemaVersion.name() + ".json"),
+                result.toString(), JSONCompareMode.STRICT);
     }
 
     private static class TestDirectCircularClass {

@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
@@ -87,7 +86,7 @@ public class EnumModule implements Module {
             builder.forFields()
                     .withIgnoreCheck(field -> field.getRawMember().isEnumConstant());
         } else {
-            builder.with(new EnumAsStringDefinitionProvider(builder.getObjectMapper(), this.enumConstantToString));
+            builder.forTypesInGeneral().withCustomDefinitionProvider(new EnumAsStringDefinitionProvider(this.enumConstantToString));
         }
     }
 
@@ -131,26 +130,23 @@ public class EnumModule implements Module {
      */
     private static class EnumAsStringDefinitionProvider implements CustomDefinitionProviderV2 {
 
-        private final ObjectMapper objectMapper;
         private final Function<Enum<?>, String> enumConstantToString;
 
         /**
-         * Constructor setting the given object mapper for later use as ObjectNode prodiver.
+         * Constructor.
          *
-         * @param objectMapper object node provider
          * @param enumConstantToString how to derive a plain string representation from an enum constant value
          */
-        EnumAsStringDefinitionProvider(ObjectMapper objectMapper, Function<Enum<?>, String> enumConstantToString) {
-            this.objectMapper = objectMapper;
+        EnumAsStringDefinitionProvider(Function<Enum<?>, String> enumConstantToString) {
             this.enumConstantToString = enumConstantToString;
         }
 
         @Override
         public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
             if (javaType.isInstanceOf(Enum.class)) {
-                ObjectNode customNode = this.objectMapper.createObjectNode()
+                ObjectNode customNode = context.getGeneratorConfig().createObjectNode()
                         .put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_STRING));
-                new AttributeCollector(this.objectMapper)
+                new AttributeCollector(context.getGeneratorConfig().getObjectMapper())
                         .setEnum(customNode, EnumModule.extractEnumValues(javaType, this.enumConstantToString), context);
                 return new CustomDefinition(customNode);
             }
