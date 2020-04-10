@@ -19,14 +19,10 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import junitparams.JUnitParamsRunner;
@@ -72,7 +68,7 @@ public class SchemaGeneratorSubtypesTest {
 
         JsonNode result = generator.generateSchema(TestClassWithSuperTypeReferences.class);
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                loadResource(caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
+                TestUtils.loadResource(SchemaGeneratorSubtypesTest.class, caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 
     private List<ResolvedType> determineTargetTypeOverrides(FieldScope field) {
@@ -84,19 +80,6 @@ public class SchemaGeneratorSubtypesTest {
                     .collect(Collectors.toList());
         }
         return null;
-    }
-
-    private static String loadResource(String resourcePath) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-        try (InputStream inputStream = SchemaGeneratorSubtypesTest.class
-                .getResourceAsStream(resourcePath);
-                Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
-            while (scanner.hasNext()) {
-                stringBuilder.append(scanner.nextLine()).append('\n');
-            }
-        }
-        String fileAsString = stringBuilder.toString();
-        return fileAsString;
     }
 
     private static class TestSubtypeResolver implements SubtypeResolver {

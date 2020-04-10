@@ -19,13 +19,9 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Scanner;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -157,7 +153,8 @@ public class SchemaGeneratorCustomDefinitionsTest {
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(TestDirectCircularClass.class);
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                loadResource("multiple-definitions-one-type-" + schemaVersion.name() + ".json"), result.toString(), JSONCompareMode.STRICT);
+                TestUtils.loadResource(this.getClass(), "multiple-definitions-one-type-" + schemaVersion.name() + ".json"),
+                result.toString(), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -181,7 +178,8 @@ public class SchemaGeneratorCustomDefinitionsTest {
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(TestCircularClass1.class);
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                loadResource("circular-custom-definition-" + schemaVersion.name() + ".json"), result.toString(), JSONCompareMode.STRICT);
+                TestUtils.loadResource(this.getClass(), "circular-custom-definition-" + schemaVersion.name() + ".json"),
+                result.toString(), JSONCompareMode.STRICT);
     }
 
     @Test
@@ -208,20 +206,8 @@ public class SchemaGeneratorCustomDefinitionsTest {
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(TestDirectCircularClass.class);
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                loadResource("custom-property-definition-" + schemaVersion.name() + ".json"), result.toString(), JSONCompareMode.STRICT);
-    }
-
-    private static String loadResource(String resourcePath) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-        try (InputStream inputStream = SchemaGeneratorComplexTypesTest.class
-                .getResourceAsStream(resourcePath);
-                Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
-            while (scanner.hasNext()) {
-                stringBuilder.append(scanner.nextLine()).append('\n');
-            }
-        }
-        String fileAsString = stringBuilder.toString();
-        return fileAsString;
+                TestUtils.loadResource(this.getClass(), "custom-property-definition-" + schemaVersion.name() + ".json"),
+                result.toString(), JSONCompareMode.STRICT);
     }
 
     private static class TestDirectCircularClass {
