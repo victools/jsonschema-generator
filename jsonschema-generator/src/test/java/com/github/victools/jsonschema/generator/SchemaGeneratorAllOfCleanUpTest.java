@@ -37,14 +37,21 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 public class SchemaGeneratorAllOfCleanUpTest {
 
     public Object[] parametersForTestAllOfCleanUp() {
-        String differentValueInMainSchema = "{ \"type\": \"object\", \"title\":\"main schema\", \"allOf\": [{ \"title\": \"different title\" }, {}] }";
-        String differentValueInAllOfPart = "{ \"type\": \"object\", \"allOf\": [{ \"title\": \"title X\" }, { \"title\": \"title Y\" }] }";
+        String differentValueInMainSchema = "{ \"type\":\"object\", \"title\":\"main schema\", \"allOf\":[{ \"title\":\"different title\" }, {}] }";
+        String differentValueInAllOfPart = "{ \"type\":\"object\", \"allOf\":[{ \"title\":\"title X\" }, { \"title\":\"title Y\" }] }";
+        String equalIfTagInMainSchema = "{ \"type\":\"object\", \"if\":{ \"const\": 1 }, \"then\":{}, "
+                + "\"allOf\":[{ \"if\":{ \"const\": 1 }, \"then\":{}, \"else\": { \"title\": \"otherwise...\" } }, {}] }";
+        String equalIfTagInAllOfPart = "{ \"type\":\"object\", \"allOf\":[{ \"if\":{ \"const\": 1 }, \"then\":{} }, "
+                + "{ \"if\":{ \"const\": 1 }, \"then\":{}, \"else\": { \"title\": \"otherwise...\" } }] }";
         List<Object[]> testCases = EnumSet.allOf(SchemaVersion.class).stream()
                 .map(schemaVersion -> new Object[][]{
                     {schemaVersion, differentValueInMainSchema, differentValueInMainSchema},
                     {schemaVersion, differentValueInAllOfPart, differentValueInAllOfPart},
+                    {schemaVersion, equalIfTagInMainSchema, equalIfTagInMainSchema},
+                    {schemaVersion, equalIfTagInAllOfPart, equalIfTagInAllOfPart},
                     {schemaVersion,
-                        "{ \"type\": \"object\", \"title\":\"same in all three\", \"allOf\": [{ \"title\":\"same in all three\" }, { \"title\":\"same in all three\" }] }",
+                        "{ \"type\": \"object\", \"title\":\"same in all three\", "
+                                + "\"allOf\": [{ \"title\":\"same in all three\" }, { \"title\":\"same in all three\" }] }",
                         "{ \"type\": \"object\", \"title\":\"same in all three\" }"},
                     {schemaVersion,
                         "{ \"type\": \"object\",\"allOf\": [{ \"title\":\"from allOf[0]\" }, { \"description\":\"from allOf[1]\" }] }",

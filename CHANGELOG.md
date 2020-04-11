@@ -17,11 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Providing access to the `SchemaGenerationContext` when invoking `TypeAttributeOverrideV2` (potentially BREAKING change in case of lambda usage)
 
 #### Deprecated
-- `SchemaGenerationConfigPart.withInstanceAttributeOverride(InstanceAttributeOverride)` without access to SchemaGenerationContext`
+- `SchemaGenerationConfigPart.withInstanceAttributeOverride(InstanceAttributeOverride)` without access to `SchemaGenerationContext`
 - `InstanceAttributeOverride` interface without access to `SchemaGenerationContext`
 - `TypeAttributeOverride` interface with only access to `SchemaGenerationConfig` and not `SchemaGenerationContext`
 - Ambiguous `SchemaGeneratorConfigBuilder.with(CustomDefinitionProviderV2)`
-- Ambiguous `SchemaGeneratorConfigBuilder.with(TypeAttributeOverrideV2)`
+- Ambiguous and outdated `SchemaGeneratorConfigBuilder.with(TypeAttributeOverride)`
 
 ### `jsonschema-module-jackson`
 #### Added
