@@ -30,6 +30,8 @@ public enum JavaxValidationOption {
     NOT_NULLABLE_METHOD_IS_REQUIRED,
     /**
      * Use this option to indicate the "idn-email" format instead of "email" when an {@code @Email} annotation is being found.
+     * <br>
+     * Beware that this format was only introduced in {@code SchemaVersion.DRAFT_7}.
      */
     PREFER_IDN_EMAIL_FORMAT,
     /**

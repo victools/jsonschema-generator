@@ -10,7 +10,7 @@
     <artifactId>jsonschema-generator</artifactId>
     
     <name>Java JSON Schema Generator</name>
-    <description>Java JSON Schema Generator – creating a JSON Schema (Draft 7 or Draft 2019-09) from your Java classes</description>
+    <description>Java JSON Schema Generator – creating a JSON Schema (Draft 6, Draft 7 or Draft 2019-09) from your Java classes</description>
     <url>https://github.com/victools/jsonschema-generator</url>
 
     <dependencies>

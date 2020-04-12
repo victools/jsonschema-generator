@@ -60,10 +60,12 @@ public class SchemaGeneratorAllOfCleanUpTest {
                 .flatMap(oneVersion -> Arrays.asList(oneVersion).stream())
                 .collect(Collectors.toList());
 
-        // in Draft 7, alongside $ref all other attributes are being ignored and should therefore not be merged
+        // in Drafts 6/7, alongside $ref all other attributes are being ignored and should therefore not be merged
+        EnumSet<SchemaVersion> versionsWithSpecialRefHandling = EnumSet.of(SchemaVersion.DRAFT_6, SchemaVersion.DRAFT_7);
         String refInAllOfPart = "{ \"type\": \"object\", \"allOf\": [{ \"$ref\": \"#\" }, { \"title\": \"value\" }] }";
-        testCases.add(new Object[]{ SchemaVersion.DRAFT_7, refInAllOfPart, refInAllOfPart });
-        EnumSet.complementOf(EnumSet.of(SchemaVersion.DRAFT_7)).stream()
+        versionsWithSpecialRefHandling.stream()
+                .forEach(schemaVersion -> testCases.add(new Object[]{ schemaVersion, refInAllOfPart, refInAllOfPart }));
+        EnumSet.complementOf(versionsWithSpecialRefHandling).stream()
                 .forEach(schemaVersion ->
         testCases.add(new Object[]{ schemaVersion, refInAllOfPart, "{ \"type\": \"object\", \"$ref\": \"#\", \"title\": \"value\" }" }));
         return testCases.toArray();
