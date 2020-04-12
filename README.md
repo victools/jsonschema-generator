@@ -32,7 +32,7 @@ Additional documentation can be found in the [Project Wiki](https://github.com/v
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>4.9.0</version>
+    <version>4.10.0</version>
 </dependency>
 ```
 
