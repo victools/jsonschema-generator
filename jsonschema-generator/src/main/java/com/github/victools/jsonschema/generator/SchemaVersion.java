@@ -20,6 +20,7 @@ package com.github.victools.jsonschema.generator;
  * Supported JSON Schema Versions.
  */
 public enum SchemaVersion {
+    DRAFT_6("http://json-schema.org/draft-06/schema#"),
     DRAFT_7("http://json-schema.org/draft-07/schema#"),
     DRAFT_2019_09("https://json-schema.org/draft/2019-09/schema");
 

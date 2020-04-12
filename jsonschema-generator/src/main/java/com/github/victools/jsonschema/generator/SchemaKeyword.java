@@ -29,10 +29,10 @@ public enum SchemaKeyword {
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_2019_09}.
      */
     TAG_ANCHOR("$anchor"),
-    TAG_DEFINITIONS(version -> version == SchemaVersion.DRAFT_7 ? "definitions" : "$defs"),
+    TAG_DEFINITIONS(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7 ? "definitions" : "$defs"),
     TAG_REF("$ref"),
     TAG_REF_MAIN("#"),
-    TAG_REF_PREFIX(version -> version == SchemaVersion.DRAFT_7 ? "#/definitions/" : "#/$defs/"),
+    TAG_REF_PREFIX(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7 ? "#/definitions/" : "#/$defs/"),
 
     TAG_TYPE("type"),
     TAG_TYPE_NULL("null"),
@@ -74,8 +74,17 @@ public enum SchemaKeyword {
     TAG_ITEMS_MAX("maxItems"),
     TAG_ITEMS_UNIQUE("uniqueItems"),
 
+    /**
+     * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
+     */
     TAG_IF("if"),
+    /**
+     * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
+     */
     TAG_THEN("then"),
+    /**
+     * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
+     */
     TAG_ELSE("else");
 
     private final Function<SchemaVersion, String> valueProvider;

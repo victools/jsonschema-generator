@@ -1,7 +1,7 @@
 # Java JSON Schema Generator
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-generator/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-generator)
 
-Creating JSON Schema (Draft 7 or Draft 2019-09) from your Java classes utilising Jackson (inspired by JJSchema).
+Creating JSON Schema (Draft 6, Draft 7 or Draft 2019-09) from your Java classes utilising Jackson (inspired by JJSchema).
 
 Topics covered in this document are:
 - [Usage](#usage)

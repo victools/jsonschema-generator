@@ -320,7 +320,7 @@ public class SchemaGenerator {
         Map<String, List<JsonNode>> fieldsFromAllParts = Stream.concat(Stream.of(schemaNode), parts.stream())
                 .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) () -> part.fields()).spliterator(), false))
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
-        if (this.config.getSchemaVersion() == SchemaVersion.DRAFT_7
+        if ((this.config.getSchemaVersion() == SchemaVersion.DRAFT_6 || this.config.getSchemaVersion() == SchemaVersion.DRAFT_7)
                 && fieldsFromAllParts.containsKey(this.config.getKeyword(SchemaKeyword.TAG_REF))) {
             // in Draft 7, any other attributes besides the $ref keyword were ignored
             return;

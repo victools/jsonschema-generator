@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### `jsonschema-generator`
 #### Added
+- Official support for Draft 6 (via new `SchemaVersion.DRAFT_6`)
 - New `Option.INLINE_ALL_SCHEMAS` to enforce no `definitions`/`$defs` to be produced (throwing exception if there is at least one circular reference)
 - Offering also `SchemaGenerationContext.createStandardDefinition(FieldScope, CustomPropertyDefinitionProvider)`
 - Offering also `SchemaGenerationContext.createStandardDefinition(MethodScope, CustomPropertyDefinitionProvider)`
