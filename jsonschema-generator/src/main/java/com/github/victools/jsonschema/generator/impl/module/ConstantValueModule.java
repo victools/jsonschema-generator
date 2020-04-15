@@ -35,7 +35,7 @@ public class ConstantValueModule implements Module {
      * @return collection containing single constant value; returning null if field has no constant value
      */
     private static List<?> extractConstantFieldValue(FieldScope field) {
-        if (field.isStatic() && field.isFinal() && !field.getRawMember().isEnumConstant()) {
+        if (field.isStatic() && field.isFinal() && !field.getRawMember().isEnumConstant() && !field.isFakeContainerItemScope()) {
             Field rawField = field.getRawMember();
             try {
                 return Collections.singletonList(rawField.get(null));
