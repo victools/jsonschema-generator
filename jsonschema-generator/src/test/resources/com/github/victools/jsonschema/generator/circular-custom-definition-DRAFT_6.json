@@ -1,0 +1,34 @@
+{
+    "definitions": {
+        "List(TestCircularClass1)-nullable": {
+            "type": ["object", "null"],
+            "properties": {
+                "get(0)": {
+                    "$ref": "#"
+                }
+            }
+        },
+        "List(TestCircularClass2)-nullable": {
+            "type": ["object", "null"],
+            "properties": {
+                "get(0)": {
+                    "$ref": "#/definitions/TestCircularClass2"
+                }
+            }
+        },
+        "TestCircularClass2": {
+            "type": "object",
+            "properties": {
+                "list1": {
+                    "$ref": "#/definitions/List(TestCircularClass1)-nullable"
+                }
+            }
+        }
+    },
+    "type": "object",
+    "properties": {
+        "list2": {
+            "$ref": "#/definitions/List(TestCircularClass2)-nullable"
+        }
+    }
+}
