@@ -1,0 +1,70 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "TestSubClass1(Boolean)-nullable": {
+            "type": ["object", "null"],
+            "properties": {
+                "dependentGenericFieldInSubtype": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "boolean",
+                        "title": "Boolean"
+                    },
+                    "title": "List<Boolean>"
+                },
+                "genericFieldInSupertype": {
+                    "type": ["boolean", "null"],
+                    "title": "Boolean"
+                },
+                "sameGenericFieldInSubtype1": {
+                    "type": ["boolean", "null"],
+                    "title": "Boolean"
+                }
+            },
+            "title": "TestSubClass1<Boolean>"
+        },
+        "TestSubClass1(String)-nullable": {
+            "type": ["object", "null"],
+            "properties": {
+                "dependentGenericFieldInSubtype": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "string",
+                        "title": "String"
+                    },
+                    "title": "List<String>"
+                },
+                "genericFieldInSupertype": {
+                    "type": ["string", "null"],
+                    "title": "String"
+                },
+                "sameGenericFieldInSubtype1": {
+                    "type": ["string", "null"],
+                    "title": "String"
+                }
+            },
+            "title": "TestSubClass1<String>"
+        }
+    },
+    "type": "object",
+    "properties": {
+        "booleanSupertypeField": {
+            "$ref": "#/definitions/TestSubClass1(Boolean)-nullable"
+        },
+        "numberOrStringObjectField": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "type": "number",
+                    "title": "Number"
+                }, {
+                    "type": "string",
+                    "title": "String"
+                }]
+        },
+        "stringSupertypeField": {
+            "$ref": "#/definitions/TestSubClass1(String)-nullable"
+        }
+    },
+    "title": "TestClassWithSuperTypeReferences"
+}

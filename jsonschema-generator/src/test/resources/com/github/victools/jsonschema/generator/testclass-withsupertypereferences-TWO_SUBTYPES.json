@@ -1,0 +1,74 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "TestSubClass2(Boolean)-nullable": {
+            "type": ["object", "null"],
+            "properties": {
+                "genericFieldInSupertype": {
+                    "type": ["boolean", "null"],
+                    "title": "Boolean"
+                },
+                "sameGenericFieldInSubtype2": {
+                    "type": ["boolean", "null"],
+                    "title": "Boolean"
+                }
+            },
+            "title": "TestSubClass2<Boolean>"
+        },
+        "TestSubClass2(String)": {
+            "type": "object",
+            "properties": {
+                "genericFieldInSupertype": {
+                    "type": ["string", "null"],
+                    "title": "String"
+                },
+                "sameGenericFieldInSubtype2": {
+                    "type": ["string", "null"],
+                    "title": "String"
+                }
+            },
+            "title": "TestSubClass2<String>"
+        },
+        "TestSubClass3": {
+            "type": "object",
+            "properties": {
+                "fieldInSubtype": {
+                    "type": "integer",
+                    "title": "int"
+                },
+                "genericFieldInSupertype": {
+                    "type": ["string", "null"],
+                    "title": "String"
+                }
+            },
+            "title": "TestSubClass3"
+        }
+    },
+    "type": "object",
+    "properties": {
+        "booleanSupertypeField": {
+            "$ref": "#/definitions/TestSubClass2(Boolean)-nullable"
+        },
+        "numberOrStringObjectField": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "type": "number",
+                    "title": "Number"
+                }, {
+                    "type": "string",
+                    "title": "String"
+                }]
+        },
+        "stringSupertypeField": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestSubClass2(String)"
+                }, {
+                    "$ref": "#/definitions/TestSubClass3"
+                }]
+        }
+    },
+    "title": "TestClassWithSuperTypeReferences"
+}

@@ -1,0 +1,315 @@
+{
+    "definitions": {
+        "RoundingMode": {
+            "type": "object",
+            "properties": {
+                "compareTo(RoundingMode)": {
+                    "type": ["integer", "null"],
+                    "title": "int",
+                    "description": "looked-up from method: int"
+                },
+                "name()": {
+                    "type": ["string", "null"],
+                    "title": "String",
+                    "description": "looked-up from method: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
+                },
+                "valueOf(String)": {
+                    "allOf": [{
+                            "$ref": "#/definitions/RoundingMode-nullable"
+                        }, {
+                            "title": "RoundingMode",
+                            "description": "looked-up from method: RoundingMode"
+                        }]
+                },
+                "valueOf(int)": {
+                    "allOf": [{
+                            "$ref": "#/definitions/RoundingMode-nullable"
+                        }, {
+                            "title": "RoundingMode",
+                            "description": "looked-up from method: RoundingMode"
+                        }]
+                },
+                "values()": {
+                    "title": "RoundingMode[]",
+                    "description": "looked-up from method: RoundingMode[]",
+                    "minItems": 2,
+                    "maxItems": 100,
+                    "uniqueItems": false,
+                    "type": ["array", "null"],
+                    "items": {
+                        "allOf": [{
+                                "$ref": "#/definitions/RoundingMode"
+                            }, {
+                                "title": "RoundingMode",
+                                "description": "looked-up from method: RoundingMode"
+                            }]
+                    }
+                }
+            }
+        },
+        "RoundingMode-nullable": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/RoundingMode"
+                }]
+        },
+        "TestClass1": {
+            "type": "object",
+            "properties": {
+                "CONSTANT": {
+                    "type": "integer",
+                    "const": 5
+                },
+                "genericArray": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "calculateSomething(Number, Number)": false,
+                "getGenericValue()": {
+                    "type": ["string", "null"],
+                    "title": "String",
+                    "description": "looked-up from method: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
+                },
+                "getPrimitiveValue()": {
+                    "type": ["integer", "null"],
+                    "title": "int",
+                    "description": "looked-up from method: int"
+                },
+                "isSimpleTestClass()": {
+                    "type": ["boolean", "null"],
+                    "title": "boolean",
+                    "description": "looked-up from method: boolean"
+                }
+            }
+        },
+        "TestClass2(Long)": {
+            "type": "object",
+            "properties": {
+                "genericArray": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "getGenericValue()": {
+                    "type": ["integer", "null"],
+                    "title": "Long",
+                    "description": "looked-up from method: Long",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 1E+1,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
+                }
+            }
+        },
+        "TestClass2(String)": {
+            "type": "object",
+            "properties": {
+                "genericArray": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "getGenericValue()": {
+                    "type": ["string", "null"],
+                    "title": "String",
+                    "description": "looked-up from method: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
+                }
+            }
+        }
+    },
+    "type": "object",
+    "properties": {
+        "getClass4()": {
+            "type": ["object", "null"],
+            "properties": {
+                "DEFAULT_ROUNDING_MODE": {
+                    "allOf": [{
+                            "$ref": "#/definitions/RoundingMode"
+                        }, {
+                            "const": "HALF_UP"
+                        }]
+                },
+                "optionalS": {
+                    "type": "object",
+                    "properties": {
+                        "get()": {
+                            "type": ["integer", "null"],
+                            "title": "Integer",
+                            "description": "looked-up from method: Integer",
+                            "default": 1,
+                            "enum": [1, 2, 3, 4, 5],
+                            "minimum": 1,
+                            "exclusiveMinimum": 0,
+                            "maximum": 1E+1,
+                            "exclusiveMaximum": 11,
+                            "multipleOf": 1
+                        },
+                        "isPresent()": {
+                            "type": ["boolean", "null"],
+                            "title": "boolean",
+                            "description": "looked-up from method: boolean"
+                        },
+                        "orElse(Integer)": {
+                            "type": ["integer", "null"],
+                            "title": "Integer",
+                            "description": "looked-up from method: Integer",
+                            "default": 1,
+                            "enum": [1, 2, 3, 4, 5],
+                            "minimum": 1,
+                            "exclusiveMinimum": 0,
+                            "maximum": 1E+1,
+                            "exclusiveMaximum": 11,
+                            "multipleOf": 1
+                        }
+                    }
+                },
+                "getClass2OfClass2OfT()": {
+                    "type": ["object", "null"],
+                    "properties": {
+                        "genericArray": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/TestClass2(String)"
+                            }
+                        },
+                        "getGenericValue()": {
+                            "anyOf": [{
+                                    "type": "null"
+                                }, {
+                                    "$ref": "#/definitions/TestClass2(String)"
+                                }],
+                            "title": "TestClass2<String>",
+                            "description": "looked-up from method: TestClass2<String>",
+                            "additionalProperties": false,
+                            "patternProperties": {
+                                "^generic.+$": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "title": "TestClass2<TestClass2<String>>",
+                    "description": "looked-up from method: TestClass2<TestClass2<String>>",
+                    "additionalProperties": false,
+                    "patternProperties": {
+                        "^generic.+$": {
+                            "$ref": "#/definitions/TestClass2(String)"
+                        }
+                    }
+                }
+            },
+            "title": "TestClass4<Integer, String>",
+            "description": "looked-up from method: TestClass4<Integer, String>",
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        "getNestedClass1Array()": {
+            "type": ["object", "null"],
+            "properties": {
+                "genericArray": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/TestClass1"
+                        }
+                    }
+                },
+                "getGenericValue()": {
+                    "title": "TestClass1[]",
+                    "description": "looked-up from method: TestClass1[]",
+                    "minItems": 2,
+                    "maxItems": 100,
+                    "uniqueItems": false,
+                    "type": ["array", "null"],
+                    "items": {
+                        "allOf": [{
+                                "$ref": "#/definitions/TestClass1"
+                            }, {
+                                "title": "TestClass1",
+                                "description": "looked-up from method: TestClass1",
+                                "additionalProperties": false,
+                                "patternProperties": {
+                                    "^generic.+$": {
+                                        "type": "string"
+                                    }
+                                }
+                            }]
+                    }
+                }
+            },
+            "title": "TestClass2<TestClass1[]>",
+            "description": "looked-up from method: TestClass2<TestClass1[]>",
+            "additionalProperties": false,
+            "patternProperties": {
+                "^generic.+$": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TestClass1"
+                    }
+                }
+            }
+        },
+        "getNestedLong()": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestClass2(Long)"
+                }],
+            "title": "TestClass2<Long>",
+            "description": "looked-up from method: TestClass2<Long>",
+            "additionalProperties": false,
+            "patternProperties": {
+                "^generic.+$": {
+                    "type": "integer"
+                }
+            }
+        },
+        "getNestedLongList()": {
+            "title": "List<TestClass2<Long>>",
+            "description": "looked-up from method: List<TestClass2<Long>>",
+            "minItems": 2,
+            "maxItems": 100,
+            "uniqueItems": false,
+            "type": ["array", "null"],
+            "items": {
+                "allOf": [{
+                        "$ref": "#/definitions/TestClass2(Long)"
+                    }, {
+                        "title": "TestClass2<Long>",
+                        "description": "looked-up from method: TestClass2<Long>",
+                        "additionalProperties": false,
+                        "patternProperties": {
+                            "^generic.+$": {
+                                "type": "integer"
+                            }
+                        }
+                    }]
+            }
+        }
+    }
+}
