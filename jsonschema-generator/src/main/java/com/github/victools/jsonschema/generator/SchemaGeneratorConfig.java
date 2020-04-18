@@ -56,6 +56,14 @@ public interface SchemaGeneratorConfig {
     boolean shouldCreateDefinitionsForAllObjects();
 
     /**
+     * Determine whether the schema for the target/main type should be included alongside any "definitions"/"$defs" and be referenced via
+     * {@code "$ref": "#"} if necessary. Otherwise, it may be moved into the "definitions"/"$defs" like any other subschema.
+     *
+     * @return whether to allow "$ref"-erences to the empty fragment "#"
+     */
+    boolean shouldCreateDefinitionForMainSchema();
+
+    /**
      * Determine whether all sub-schemas should be included in-line, even if they occur multiple times, and not in the schema's "definitions"/"$defs".
      *
      * @return whether to include all sub-schemas in-line

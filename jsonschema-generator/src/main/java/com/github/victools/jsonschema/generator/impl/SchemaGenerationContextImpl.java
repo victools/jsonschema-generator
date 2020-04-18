@@ -152,7 +152,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @param isNullable whether the reference may be null
      * @return this context (for chaining)
      */
-    SchemaGenerationContextImpl addReference(ResolvedType javaType, ObjectNode referencingNode,
+    public SchemaGenerationContextImpl addReference(ResolvedType javaType, ObjectNode referencingNode,
             CustomDefinitionProviderV2 ignoredDefinitionProvider, boolean isNullable) {
         Map<DefinitionKey, List<ObjectNode>> targetMap = isNullable ? this.nullableReferences : this.references;
         DefinitionKey key = new DefinitionKey(javaType, ignoredDefinitionProvider);

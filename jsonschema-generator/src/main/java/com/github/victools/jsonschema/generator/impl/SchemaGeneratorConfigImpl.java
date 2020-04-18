@@ -109,6 +109,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldCreateDefinitionForMainSchema() {
+        return this.isOptionEnabled(Option.DEFINITION_FOR_MAIN_SCHEMA);
+    }
+
+    @Override
     public boolean shouldInlineAllSchemas() {
         return this.isOptionEnabled(Option.INLINE_ALL_SCHEMAS);
     }
