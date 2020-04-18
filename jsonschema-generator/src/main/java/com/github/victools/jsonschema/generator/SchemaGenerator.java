@@ -77,12 +77,18 @@ public class SchemaGenerator {
             jsonSchemaResult.put(this.config.getKeyword(SchemaKeyword.TAG_SCHEMA),
                     this.config.getKeyword(SchemaKeyword.TAG_SCHEMA_VALUE));
         }
+        boolean createDefinitionForMainSchema = this.config.shouldCreateDefinitionForMainSchema();
+        if (createDefinitionForMainSchema) {
+            generationContext.addReference(mainType, jsonSchemaResult, null, false);
+        }
         ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(mainKey, generationContext);
         if (definitionsNode.size() > 0) {
             jsonSchemaResult.set(this.config.getKeyword(SchemaKeyword.TAG_DEFINITIONS), definitionsNode);
         }
-        ObjectNode mainSchemaNode = generationContext.getDefinition(mainKey);
-        jsonSchemaResult.setAll(mainSchemaNode);
+        if (!createDefinitionForMainSchema) {
+            ObjectNode mainSchemaNode = generationContext.getDefinition(mainKey);
+            jsonSchemaResult.setAll(mainSchemaNode);
+        }
         SchemaCleanUpUtils cleanUpUtils = new SchemaCleanUpUtils(this.config);
         if (this.config.shouldCleanupUnnecessaryAllOfElements()) {
             cleanUpUtils.reduceAllOfNodes(jsonSchemaResult);
@@ -103,6 +109,7 @@ public class SchemaGenerator {
     private ObjectNode buildDefinitionsAndResolveReferences(DefinitionKey mainSchemaKey, SchemaGenerationContextImpl generationContext) {
         ObjectNode definitionsNode = this.config.createObjectNode();
         boolean createDefinitionsForAll = this.config.shouldCreateDefinitionsForAllObjects();
+        boolean createDefinitionForMainSchema = this.config.shouldCreateDefinitionForMainSchema();
         boolean inlineAllSchemas = this.config.shouldInlineAllSchemas();
         for (Map.Entry<DefinitionKey, String> entry : this.getReferenceKeys(mainSchemaKey, generationContext).entrySet()) {
             String definitionName = entry.getValue();
@@ -120,12 +127,12 @@ public class SchemaGenerator {
                 referenceKey = null;
             } else {
                 // the same sub-schema is referenced in multiple places
-                if (mainSchemaKey.equals(definitionKey)) {
-                    referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN);
-                } else {
-                    // add it to the definitions (unless it is the main schema)
+                if (createDefinitionForMainSchema || !mainSchemaKey.equals(definitionKey)) {
+                    // add it to the definitions (unless it is the main schema that is not explicitly moved there via an Option)
                     definitionsNode.set(definitionName, generationContext.getDefinition(definitionKey));
                     referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_PREFIX) + definitionName;
+                } else {
+                    referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN);
                 }
                 references.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey));
             }
@@ -158,12 +165,14 @@ public class SchemaGenerator {
      * @return encountered types with their corresponding reference keys
      */
     private Map<DefinitionKey, String> getReferenceKeys(DefinitionKey mainSchemaKey, SchemaGenerationContextImpl generationContext) {
+        boolean createDefinitionForMainSchema = this.config.shouldCreateDefinitionForMainSchema();
         Map<String, List<DefinitionKey>> aliases = generationContext.getDefinedTypes().stream()
                 .collect(Collectors.groupingBy(this::getSchemaBaseDefinitionName, TreeMap::new, Collectors.toList()));
         Map<DefinitionKey, String> referenceKeys = new LinkedHashMap<>();
         for (Map.Entry<String, List<DefinitionKey>> group : aliases.entrySet()) {
             List<DefinitionKey> definitionKeys = group.getValue();
-            if (definitionKeys.size() == 1 || (definitionKeys.size() == 2 && definitionKeys.contains(mainSchemaKey))) {
+            if (definitionKeys.size() == 1
+                    || (definitionKeys.size() == 2 && !createDefinitionForMainSchema && definitionKeys.contains(mainSchemaKey))) {
                 definitionKeys.forEach(key -> referenceKeys.put(key, group.getKey()));
             } else {
                 AtomicInteger counter = new AtomicInteger(0);

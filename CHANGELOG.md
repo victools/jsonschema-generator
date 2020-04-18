@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### `jsonschema-generator`
+#### Added
+- New `Option.DEFINITION_FOR_MAIN_SCHEMA` to allow moving main/target schema into `definitions`/`$defs`
+
 #### Fixed
 - Skip fields for which `isFakeContainerItemScope()` returns `true`, when fulfilling value collection for `Option.VALUES_FROM_CONSTANT_FIELDS`
 

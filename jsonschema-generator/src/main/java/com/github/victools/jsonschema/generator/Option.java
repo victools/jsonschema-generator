@@ -186,42 +186,51 @@ public enum Option {
     /**
      * Whether an object's field/property should be deemed to be nullable if no specific check says otherwise.
      * <br>
-     * Default: false (disabled)
+     * Without this option, all fields are deemed not-nullable unless a specific check says otherwise.
      */
     NULLABLE_FIELDS_BY_DEFAULT(null, null),
     /**
      * Whether a method's return value should be deemed to be nullable if no specific check says otherwise.
      * <br>
-     * Default: false (disabled)
+     * Without this option, all methods' return values are deemed not-nullable unless a specific check says otherwise.
      */
     NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT(null, null),
     /**
      * Whether a schema's "additionalProperties" should be set to "false" if no specific configuration says otherwise.
      * <br>
-     * Default: false (omitting the "additionalProperties" keyword and thereby allowing any additional properties in an object schema)
+     * Without this option, i.e. by default the "additionalProperties" keyword will be omitted and thereby allowing any additional properties in an
+     * object schema).
      */
     FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT(AdditionalPropertiesModule::forbiddenForAllObjectsButContainers, null),
     /**
-     * Whether all referenced objects should be listed in the schema's "definitions"/"$defs", otherwise single occurrences are defined in-line.
+     * Whether all referenced objects should be listed in the schema's "definitions"/"$defs".
      * <br>
-     * Default: false (disabled)
+     * Without this option, only those subschemas will be "$ref"-erenced if they occur more than once – in-lining everything else.
      */
     DEFINITIONS_FOR_ALL_OBJECTS(null, null),
     /**
-     * Whether all sub-schemas should be defined in-line, i.e. including no "definitions"/"$defs". This takes precedence over
-     * {@link #DEFINITIONS_FOR_ALL_OBJECTS}.
+     * Whether the schema for the target/main type should be included in the "definitions"/"$defs" – thereby avoiding an potential {@code "$ref": "#"}
+     * and assigning a name to it like for all other defined subschemas.
      * <br>
-     * Beware: This will result in an exception being thrown if a single circular reference is being encountered!
-     * <br>
-     * Default: false (disabled)
+     * Otherwise, "$ref"-erences to the main/target schema will use the empty fragment ("#") and it will not be listed in the "definitions"/"$defs".
+     * <p>
+     * Beware: this only results in a valid schema from {@link SchemaVersion#DRAFT_2019_09} onward. Before that, everything besides "$ref" would be
+     * ignored.
+     * </p>
      */
-    INLINE_ALL_SCHEMAS(InlineSchemaModule::new, null, Option.DEFINITIONS_FOR_ALL_OBJECTS),
+    DEFINITION_FOR_MAIN_SCHEMA(null, null),
+    /**
+     * Whether all sub-schemas should be defined in-line, i.e. including no "definitions"/"$defs". This takes precedence over
+     * {@link #DEFINITIONS_FOR_ALL_OBJECTS} and {@link #DEFINITION_FOR_MAIN_SCHEMA}.
+     * <p>
+     * Beware: This will result in an exception being thrown if a single circular reference is being encountered!
+     * </p>
+     */
+    INLINE_ALL_SCHEMAS(InlineSchemaModule::new, null, Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.DEFINITION_FOR_MAIN_SCHEMA),
     /**
      * Whether as the last step of the schema generation, unnecessary "allOf" elements (i.e. where there are no conflicts/overlaps between the
      * contained sub-schemas) should be merged into one, in order to make the generated schema more readable. This also applies to manually added
      * "allOf" elements, e.g. through custom definitions or attribute overrides.
-     * <br>
-     * Default: false (disabled)
      */
     ALLOF_CLEANUP_AT_THE_END(null, null);
 
