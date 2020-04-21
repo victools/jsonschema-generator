@@ -49,7 +49,7 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
                         "                    <className>" +
                         "com.github.victools.jsonschema.plugin.maven.TestClass</className>\n" +
                         "                    <schemaFileName>result.json</schemaFileName>\n" +
-                        "                    <schemaFilePath>src/test/resources</schemaFilePath>\n" +
+                        "                    <schemaFilePath>target/generated-test-sources</schemaFilePath>\n" +
                         "                    <options>\n" +
                         "                        <option>DEFINITIONS_FOR_ALL_OBJECTS</option>\n" +
                         "                    </options>\n" +
@@ -88,7 +88,7 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         myMojo.execute();
 
         // Validate that the schema files is created.
-        File file = new File("src/test/resources/result.json");
+        File file = new File("target/generated-test-sources/result.json");
         assertTrue(file.exists());
     }
 }
