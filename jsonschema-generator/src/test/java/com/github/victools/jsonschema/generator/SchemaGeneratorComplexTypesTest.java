@@ -106,6 +106,7 @@ public class SchemaGeneratorComplexTypesTest {
             }
             return null;
         });
+        Module alternativeDefinitionModule = configBuilder -> configBuilder.with(Option.DEFINITION_FOR_MAIN_SCHEMA);
         Module typeInGeneralModule = configBuilder -> populateTypeConfigPart(
                 configBuilder.with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT).forTypesInGeneral()
                         .withIdResolver(scope -> scope.getType().getTypeName().contains("$Test") ? "id-" + scope.getSimpleTypeDescription() : null)
@@ -119,13 +120,13 @@ public class SchemaGeneratorComplexTypesTest {
             {"testclass1-FULL_DOCUMENTATION-typeattributes", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, typeInGeneralModule},
             {"testclass1-JAVA_OBJECT-methodattributes", OptionPreset.JAVA_OBJECT, TestClass1.class, methodModule},
             {"testclass1-PLAIN_JSON-fieldattributes", OptionPreset.PLAIN_JSON, TestClass1.class, fieldModule},
-            {"testclass2-array", OptionPreset.FULL_DOCUMENTATION, TestClass2[].class, neutralModule},
-            {"testclass3-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, neutralModule},
+            {"testclass2-array", OptionPreset.FULL_DOCUMENTATION, TestClass2[].class, alternativeDefinitionModule},
+            {"testclass3-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, alternativeDefinitionModule},
             {"testclass3-FULL_DOCUMENTATION-typeattributes", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, typeInGeneralModule},
             {"testclass3-JAVA_OBJECT-methodattributes", OptionPreset.JAVA_OBJECT, TestClass3.class, methodModule},
             {"testclass3-PLAIN_JSON-fieldattributes", OptionPreset.PLAIN_JSON, TestClass3.class, fieldModule},
             {"testenum-PLAIN_JSON-default", OptionPreset.PLAIN_JSON, TestEnum.class, neutralModule},
-            {"testenum-FULL_DOCUMENTATION-default", OptionPreset.FULL_DOCUMENTATION, TestEnum.class, neutralModule},
+            {"testenum-FULL_DOCUMENTATION-default", OptionPreset.FULL_DOCUMENTATION, TestEnum.class, alternativeDefinitionModule},
             {"testenum-PLAIN_JSON-viaToString", OptionPreset.PLAIN_JSON, TestEnum.class, enumToStringModule}
         };
     }
