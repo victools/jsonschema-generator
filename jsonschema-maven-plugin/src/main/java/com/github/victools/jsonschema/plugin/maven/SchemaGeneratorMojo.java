@@ -57,7 +57,7 @@ import java.util.List;
 /**
  * Maven plugin for the victools/jsonschema-generator.
  */
-@Mojo(name = "schema-generator",
+@Mojo(name = "generate-schema",
         defaultPhase = LifecyclePhase.PROCESS_TEST_SOURCES,
         requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class SchemaGeneratorMojo extends AbstractMojo {
@@ -85,7 +85,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private String schemaFileName;
 
     /**
-     * The schema version to be used: DRAFT_7 or DRAFT_2019_09.
+     * The schema version to be used: DRAFT_6, DRAFT_7 or DRAFT_2019_09.
      */
     @Parameter(property = "schemaVersion", defaultValue = "DRAFT_7")
     private String schemaVersion;
@@ -229,7 +229,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Get the schema version to be used from the configuration.
      *
      * @return The schema version
-     * @throws MojoExecutionException Exception in case of an unknowm value
+     * @throws MojoExecutionException Exception in case of an unknown value
      */
     private SchemaVersion getSchemaVersion() throws MojoExecutionException {
         try {
@@ -290,20 +290,20 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             } else if (module.name != null) {
                 switch (module.name) {
                 case "Jackson":
-                    getLog().info("- Adding JacksonModule");
+                    getLog().info("- Adding Jackson Module");
                     addJacksonModule(configBuilder, module);
                     break;
                 case "JavaxValidation":
                     getLog().info("- Adding Javax Validation Module");
                     addJavaxValidationModule(configBuilder, module);
                     break;
-                case "Swagger":
-                    getLog().info("- Adding SwaggerModule");
-                    addSwaggerModule(configBuilder, module);
+                case "Swagger15":
+                    getLog().info("- Adding Swagger 1.5 Module");
+                    addSwagger15Module(configBuilder, module);
                     break;
                 default:
                     throw new MojoExecutionException("Error: Module does not have a name in "
-                            + "['Jackson', 'Validation', 'Swagger'] or does not have a custom classname.");
+                            + "['Jackson', 'JavaxValidation', 'Swagger15'] or does not have a custom classname.");
                 }
             }
         }
@@ -316,7 +316,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @param module        The modules section form the pom
      * @throws MojoExecutionException in case of problems
      */
-    private void addSwaggerModule(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
+    private void addSwagger15Module(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
         if (module.options == null || module.options.length == 0) {
             configBuilder.with(new SwaggerModule());
         } else {

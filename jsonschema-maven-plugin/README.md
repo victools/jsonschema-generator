@@ -1,5 +1,5 @@
 # Java JSON Schema Generator – Maven Plugin
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-javax-validation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-maven-plugin)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-maven-plugin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-maven-plugin)
 
 Maven plugin for the [jsonschema-generator](../jsonschema-generator) – Integrating JSON Schema generation in your builds
 
@@ -28,34 +28,36 @@ Maven plugin for the [jsonschema-generator](../jsonschema-generator) – Integra
     </configuration>
 </plugin>
 ```
-This will use the default configuration of the generator. This will enable all of the modules that are part of the generator. 
-
+This will use the default configuration of the generator. This will enable all the modules that are part of the generator. 
 
 ### Configuring file locations
 ```xml
 <configuration>
-    <className>com.myOrg.myApp.myclass</className>
+    <className>com.myOrg.myApp.Myclass</className>
     <schemaFileName>mySchema.json</schemaFileName>
     <schemaFilePath>src/main/resources/schemas</schemaFilePath>
 </configuration>
 ```
-- The default name of the file is the name of the class extended with ".schema.json"
-- The default path is "src/main/resources"
+- The default name of the file is the name of the class extended with `.schema.json`
+- The default path is `src/main/resources`
+
 ### Configuring schema version
-The version of JSON Schema that is to be used can be configed with the schemaVersion element.
+The version of JSON Schema that is to be used can be configured with the `<schemaVersion>` element.
 ```xml
 <configuration>
-    <className>com.github.victools.jsonschema.plugin.maven.TestClass</className>
+    <className>com.myOrg.myApp.MyClass</className>
     <schemaVersion>DRAFT_2019_09</schemaVersion>
 </configuration>
 ```
 Allowed values are:
-- DRAFT_2019_09
-- DRAFT_7
+- `DRAFT_2019_09`
+- `DRAFT_7`
+- `DRAFT_6`
 
-The last one is the default
+`DRAFT_7` is the default, if not specified.
+
 ### Configuring modules
-When you want to have tighter control over the modules that are to be used during generation, the <module> element can be used to define them 
+When you want to have more control over the modules that are to be used during generation, the `<module>` element can be used to define them. 
 ```xml
 <configuration>
     <className>com.myOrg.myApp.myclass</className>
@@ -66,7 +68,13 @@ When you want to have tighter control over the modules that are to be used durin
     </modules>
 </configuration>  
 ```
-This configuration will only enable the Jackson module.
+This configuration will generate the schema by only using the Jackson module.
+
+There are three standard modules that can be used:
+- `Jackson`
+- `JavaxValidation`
+- `Swagger15` 
+
 ### Defining the options for a module
 ```xml
 <configuration>
@@ -82,6 +90,7 @@ This configuration will only enable the Jackson module.
 </configuration>  
 ```
 in this way the options as supported by the module can be specified.
+
 ### Defining the use of custom modules
 To enable a custom module in the generation the following construct can be used:
 ```xml
@@ -89,14 +98,14 @@ To enable a custom module in the generation the following construct can be used:
     <className>com.myOrg.myApp.myclass</className>
     <modules>
         <module>
-            <name>MySchemaModule</name>
             <className>com.myOrg.myApp.MyAddonModule</className>
         </module>
     </modules>
 </configuration>  
 ```
-Make sure your custom module is on the classpath.
-Setting options on custom modules is not yet supported.
+Make sure your custom module is on the classpath and has a default constructor.
+It is not possible to configure options for custom modules.
+
 ### Full example
 ```xml
 <build>
@@ -112,7 +121,7 @@ Setting options on custom modules is not yet supported.
                 <schemaFilePath>result/schemas</schemaFilePath>
                 <options>
                     <option>DEFINITIONS_FOR_ALL_OBJECTS</option>
-                    <option>OTHER_OPTION</option>
+                    <option>NULLABLE_FIELDS_BY_DEFAULT</option>
                 </options>
                 <modules>
                     <module>

@@ -61,7 +61,6 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
                         "                            </options>\n" +
                         "                        </module>\n" +
                         "                        <module>\n" +
-                        "                            <name>MyModule</name>\n" +
                         "                            <className>" +
                         "com.github.victools.jsonschema.plugin.maven.TestModule</className>\n" +
                         "                        </module>\n" +
@@ -82,7 +81,7 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
      * @throws Exception In case something goes wrong
      */
     public void testBasicWorking() throws Exception {
-        SchemaGeneratorMojo myMojo = (SchemaGeneratorMojo) lookupConfiguredMojo(new MavenProject(), "schema-generator");
+        SchemaGeneratorMojo myMojo = (SchemaGeneratorMojo) lookupConfiguredMojo(new MavenProject(), "generate-schema");
         myMojo = (SchemaGeneratorMojo) configureMojo(myMojo, pluginConfiguration);
 
         myMojo.execute();
