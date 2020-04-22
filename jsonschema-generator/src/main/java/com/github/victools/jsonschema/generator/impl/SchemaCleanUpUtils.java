@@ -35,7 +35,7 @@ import java.util.stream.StreamSupport;
 /**
  * Utility for cleaning up generated schemas.
  */
-public class SchemaCleanupUtils {
+public class SchemaCleanUpUtils {
 
     private final SchemaGeneratorConfig config;
 
@@ -44,7 +44,7 @@ public class SchemaCleanupUtils {
      *
      * @param config configuration to be applied
      */
-    public SchemaCleanupUtils(SchemaGeneratorConfig config) {
+    public SchemaCleanUpUtils(SchemaGeneratorConfig config) {
         this.config = config;
     }
 

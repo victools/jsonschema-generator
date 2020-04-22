@@ -20,7 +20,7 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
-import com.github.victools.jsonschema.generator.impl.SchemaCleanupUtils;
+import com.github.victools.jsonschema.generator.impl.SchemaCleanUpUtils;
 import com.github.victools.jsonschema.generator.impl.SchemaGenerationContextImpl;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -83,7 +83,7 @@ public class SchemaBuilder {
         this.generationContext = new SchemaGenerationContextImpl(this.config, this.typeContext);
         this.schemaNodes = new ArrayList<>();
 
-        SchemaCleanupUtils cleanupUtils = new SchemaCleanupUtils(config);
+        SchemaCleanUpUtils cleanupUtils = new SchemaCleanUpUtils(config);
         this.definitionKeyCleanup = config.shouldUsePlainDefinitionKeys()
                 ? cleanupUtils::ensureDefinitionKeyIsPlain
                 : cleanupUtils::ensureDefinitionKeyIsUriCompatible;
@@ -165,11 +165,11 @@ public class SchemaBuilder {
      * of the schema generation.
      *
      * @see SchemaGeneratorConfig#shouldCleanupUnnecessaryAllOfElements()
-     * @see SchemaCleanupUtils#reduceAllOfNodes(List)
-     * @see SchemaCleanupUtils#reduceAnyOfNodes(List)
+     * @see SchemaCleanUpUtils#reduceAllOfNodes(List)
+     * @see SchemaCleanUpUtils#reduceAnyOfNodes(List)
      */
     private void performCleanup() {
-        SchemaCleanupUtils cleanUpUtils = new SchemaCleanupUtils(this.config);
+        SchemaCleanUpUtils cleanUpUtils = new SchemaCleanUpUtils(this.config);
         if (this.config.shouldCleanupUnnecessaryAllOfElements()) {
             cleanUpUtils.reduceAllOfNodes(this.schemaNodes);
         }
