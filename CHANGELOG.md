@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Fixed
 - Skip fields for which `isFakeContainerItemScope()` returns `true`, when fulfilling value collection for `Option.VALUES_FROM_CONSTANT_FIELDS`
+- Treat `Byte`/`byte` as `"type": "string"` and not as `"type": "integer"` by default
 
 ## [4.10.0] - 2020-04-12
 ### `jsonschema-generator`
