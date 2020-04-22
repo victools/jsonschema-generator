@@ -90,4 +90,42 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         File file = new File("target/generated-test-sources/result.json");
         assertTrue(file.exists());
     }
+
+    /**
+     * Unit test a setup with the default setup
+     *
+     * @throws Exception In case something goes wrong
+     */
+    public void testDefaultConfig() throws Exception {
+        String pom =
+                "<project>\n" +
+                        "    <build>\n" +
+                        "        <plugins>\n" +
+                        "            <plugin>\n" +
+                        "                <groupId>com.github.victools</groupId>\n" +
+                        "                <artifactId>jsonschema-maven-plugin</artifactId>\n" +
+                        "                <version>4.8.0</version>\n" +
+                        "                <configuration>\n" +
+                        "                    <className>" +
+                        "com.github.victools.jsonschema.plugin.maven.TestClass</className>\n" +
+                        "                    <schemaFileName>defaultConfig.json</schemaFileName>\n" +
+                        "                    <schemaFilePath>target/generated-test-sources</schemaFilePath>\n" +
+                        "                </configuration>\n" +
+                        "            </plugin>\n" +
+                        "        </plugins>\n" +
+                        "    </build>" +
+                        "</project>";
+
+        Xpp3Dom pomDom = Xpp3DomBuilder.build(new StringReader(pom));
+        PlexusConfiguration defaultConfiguration = extractPluginConfiguration("jsonschema-maven-plugin", pomDom);
+        SchemaGeneratorMojo myMojo = (SchemaGeneratorMojo) lookupConfiguredMojo(new MavenProject(), "generate-schema");
+        myMojo = (SchemaGeneratorMojo) configureMojo(myMojo, defaultConfiguration);
+
+        myMojo.execute();
+
+        // Validate that the schema files is created.
+        File file = new File("target/generated-test-sources/defaultConfig.json");
+        assertTrue(file.exists());
+    }
+
 }

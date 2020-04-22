@@ -28,7 +28,7 @@ Maven plugin for the [jsonschema-generator](../jsonschema-generator) – Integra
     </configuration>
 </plugin>
 ```
-This will use the default configuration of the generator. This will enable all the modules that are part of the generator. 
+This will use the default configuration of the generator. 
 
 ### Configuring file locations
 ```xml
@@ -68,14 +68,14 @@ When you want to have more control over the modules that are to be used during g
     </modules>
 </configuration>  
 ```
-This configuration will generate the schema by only using the Jackson module.
+This configuration will generate the schema using the Jackson module.
 
 There are three standard modules that can be used:
 - `Jackson`
 - `JavaxValidation`
 - `Swagger15` 
 
-### Defining the options for a module
+### Defining options for a module
 ```xml
 <configuration>
     <className>com.myOrg.myApp.myclass</className>
