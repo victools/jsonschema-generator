@@ -119,6 +119,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldUsePlainDefinitionKeys() {
+        return this.isOptionEnabled(Option.PLAIN_DEFINITION_KEYS);
+    }
+
+    @Override
     public boolean shouldCleanupUnnecessaryAllOfElements() {
         return this.isOptionEnabled(Option.ALLOF_CLEANUP_AT_THE_END);
     }

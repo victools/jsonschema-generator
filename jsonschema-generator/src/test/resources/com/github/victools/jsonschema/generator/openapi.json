@@ -1,0 +1,82 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Test API",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/test": {
+            "post": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "value2": {
+                                        "$ref": "#/components/schemas/TestClass2"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "succesful POST",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TestClass2"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TestClass3"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "succesful PUT",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TestClass3"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "TestClass2": {
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    }
+                }
+            },
+            "TestClass3": {
+                "type": "object",
+                "properties": {
+                    "number": {
+                        "type": "number"
+                    }
+                }
+            }
+        }
+    }
+}
