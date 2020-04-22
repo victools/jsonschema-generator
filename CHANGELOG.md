@@ -8,9 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `jsonschema-generator`
 #### Added
 - New `Option.DEFINITION_FOR_MAIN_SCHEMA` to allow moving main/target schema into `definitions`/`$defs`
+- New `Option.PLAIN_DEFINITION_KEYS` to ensure keys in `definitions`/`$defs` adhere to the reduced set of allowed characters expected by OpenAPI
+- New `SchemaGenerator.buildMultipleSchemaDefinitions()` allowing to generate JSON Schema elements (e.g. for building an OpenAPI description)
 
 #### Fixed
 - Skip fields for which `isFakeContainerItemScope()` returns `true`, when fulfilling value collection for `Option.VALUES_FROM_CONSTANT_FIELDS`
+- Treat `Byte`/`byte` as `"type": "string"` and not as `"type": "integer"` by default
 
 ## [4.10.0] - 2020-04-12
 ### `jsonschema-generator`
