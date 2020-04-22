@@ -213,12 +213,8 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             setOptionsFromConfig(configBuilder, options);
         }
 
-        // Register the modules
-        if (modules.length == 0) {
-            configureDefaultModules(configBuilder);
-        } else {
-            configureModules(configBuilder, modules);
-        }
+        // Register the modules when specified
+        configureModules(configBuilder, modules);
 
         // And construct the generator
         SchemaGeneratorConfig config = configBuilder.build();
@@ -376,21 +372,6 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             }
             configBuilder.with(new JacksonModule(jacksonOptions));
         }
-    }
-
-    /**
-     * Configure the default modules.
-     * This is used in case no modules are specified in the pom.
-     *
-     * @param configBuilder The config builder that is configured.
-     */
-    private void configureDefaultModules(SchemaGeneratorConfigBuilder configBuilder) {
-        getLog().info("- Adding JacksonModule");
-        configBuilder.with(new JacksonModule());
-        getLog().info("- Adding SwaggerModule");
-        configBuilder.with(new SwaggerModule());
-        getLog().info("- Adding Javax Validation Module");
-        configBuilder.with(new JavaxValidationModule());
     }
 
     /**
