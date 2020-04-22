@@ -58,7 +58,7 @@ import java.util.List;
  * Maven plugin for the victools/jsonschema-generator.
  */
 @Mojo(name = "generate-schema",
-        defaultPhase = LifecyclePhase.PROCESS_TEST_SOURCES,
+        defaultPhase = LifecyclePhase.COMPILE,
         requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class SchemaGeneratorMojo extends AbstractMojo {
 
