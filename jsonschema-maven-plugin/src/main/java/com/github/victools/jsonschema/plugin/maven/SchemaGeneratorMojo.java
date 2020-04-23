@@ -240,7 +240,6 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private OptionPreset getOptionPreset() throws MojoExecutionException {
         // Unfortunately OptionPreset is not an Enum. So have to do some hardcoding now.
-        // Set the option preset
         if (options.preset != null && !options.preset.isEmpty()) {
             switch (options.preset) {
             case "FULL_DOCUMENTATION":
@@ -263,9 +262,8 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      *
      * @param configBuilder The configbuilder on which the options are set
      * @param options       The options from the pom file
-     * @throws MojoExecutionException An exception in case of unexpected behavior
      */
-    private void setOptions(SchemaGeneratorConfigBuilder configBuilder, GeneratorOptions options) throws MojoExecutionException {
+    private void setOptions(SchemaGeneratorConfigBuilder configBuilder, GeneratorOptions options) {
         // Enable all the configured options
         if (options.enabled != null) {
             for (Option option : options.enabled) {
