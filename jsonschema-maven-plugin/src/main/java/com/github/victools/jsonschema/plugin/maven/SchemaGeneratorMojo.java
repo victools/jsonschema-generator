@@ -94,7 +94,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * The options for the generator.
      */
     @Parameter(property = "options")
-    private String[] options;
+    private GeneratorOptions options;
 
     /**
      * Selection of Modules that need to be activated during generation.
@@ -185,7 +185,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
 
         String fileName;
         if (schemaFileName == null || schemaFileName.isEmpty()) {
-            fileName =  className + ".schema.json";
+            fileName = className + ".schema.json";
         } else {
             fileName = schemaFileName;
         }
@@ -204,10 +204,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private SchemaGenerator createGenerator(ObjectMapper mapper) throws MojoExecutionException {
         // Start with the generator builder
         SchemaGeneratorConfigBuilder configBuilder =
-                new SchemaGeneratorConfigBuilder(mapper, getSchemaVersion(), OptionPreset.PLAIN_JSON);
+                new SchemaGeneratorConfigBuilder(mapper, getSchemaVersion(), getOptionPreset());
 
         // Add options when required
-        if (options.length == 0) {
+        if (options == null) {
             setDefaultOptions(configBuilder);
         } else {
             setOptionsFromConfig(configBuilder, options);
@@ -236,6 +236,33 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     }
 
     /**
+     * Determine the standard option preset of the generator. Take it from the configuration or set the default.
+     * The default is: PLAIN_JSON
+     *
+     * @return The OptionPreset
+     * @throws MojoExecutionException In case an unknown preset was used.
+     */
+    private OptionPreset getOptionPreset() throws MojoExecutionException {
+        // Unfortunately OptionPreset is not an Enum. So have to do some hardcoding now.
+        // Set the option preset
+        if (options.preset != null && !options.preset.isEmpty()) {
+            switch (options.preset) {
+            case "FULL_DOCUMENTATION":
+                return OptionPreset.FULL_DOCUMENTATION;
+            case "PLAIN_JSON":
+                return OptionPreset.PLAIN_JSON;
+            case "JAVA_OBJECT":
+                return OptionPreset.JAVA_OBJECT;
+            default:
+                throw new MojoExecutionException("Error: Option preset is not one of "
+                        + "['FULL_DOCUMENTATION', 'PLAIN_JSON', 'JAVA_OBJECT']");
+            }
+        }
+
+        return OptionPreset.PLAIN_JSON;
+    }
+
+    /**
      * Set the default generator options.
      *
      * @param configBuilder The builder on which to set the options
@@ -251,13 +278,18 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @param options       The options from the pom file
      * @throws MojoExecutionException An exception in case of unexpected behavior
      */
-    private void setOptionsFromConfig(SchemaGeneratorConfigBuilder configBuilder, String[] options) throws MojoExecutionException {
-        for (String option : options) {
-            try {
-                Option optionLiteral = Option.valueOf(option);
-                configBuilder = configBuilder.with(optionLiteral);
-            } catch (IllegalArgumentException e) {
-                throw new MojoExecutionException("Error: Unknown option " + option, e);
+    private void setOptionsFromConfig(SchemaGeneratorConfigBuilder configBuilder, GeneratorOptions options) throws MojoExecutionException {
+        // Enable all the configured options
+        if (options.enabled != null) {
+            for (Option option : options.enabled) {
+                configBuilder.with(option);
+            }
+        }
+
+        // Disable all the configured options
+        if (options.disabled != null) {
+            for (Option option : options.disabled) {
+                configBuilder.without(option);
             }
         }
     }

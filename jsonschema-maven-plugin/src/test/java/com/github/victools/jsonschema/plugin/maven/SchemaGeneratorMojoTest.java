@@ -51,7 +51,12 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
                         "                    <schemaFileName>result.json</schemaFileName>\n" +
                         "                    <schemaFilePath>target/generated-test-sources</schemaFilePath>\n" +
                         "                    <options>\n" +
-                        "                        <option>DEFINITIONS_FOR_ALL_OBJECTS</option>\n" +
+                        "                        <preset>FULL_DOCUMENTATION</preset>\n" +
+                        "                        <enabled>\n" +
+                        "                            <option>DEFINITIONS_FOR_ALL_OBJECTS</option>\n" +
+                        "                            <option>FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</option>\n" +
+                        "                        </enabled>\n" +
+                        "                        <disabled>SIMPLIFIED_ENUMS</disabled>\n" +
                         "                    </options>\n" +
                         "                    <modules>\n" +
                         "                        <module>\n" +
@@ -127,5 +132,4 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         File file = new File("target/generated-test-sources/defaultConfig.json");
         assertTrue(file.exists());
     }
-
 }
