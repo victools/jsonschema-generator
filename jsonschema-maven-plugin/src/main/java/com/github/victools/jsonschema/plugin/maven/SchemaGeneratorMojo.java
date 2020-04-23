@@ -207,14 +207,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                 new SchemaGeneratorConfigBuilder(mapper, getSchemaVersion(), getOptionPreset());
 
         // Add options when required
-        if (options == null) {
-            setDefaultOptions(configBuilder);
-        } else {
-            setOptionsFromConfig(configBuilder, options);
-        }
+        setOptions(configBuilder, options);
 
         // Register the modules when specified
-        configureModules(configBuilder, modules);
+        setModules(configBuilder, modules);
 
         // And construct the generator
         SchemaGeneratorConfig config = configBuilder.build();
@@ -244,7 +240,6 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private OptionPreset getOptionPreset() throws MojoExecutionException {
         // Unfortunately OptionPreset is not an Enum. So have to do some hardcoding now.
-        // Set the option preset
         if (options.preset != null && !options.preset.isEmpty()) {
             switch (options.preset) {
             case "FULL_DOCUMENTATION":
@@ -263,22 +258,12 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     }
 
     /**
-     * Set the default generator options.
-     *
-     * @param configBuilder The builder on which to set the options
-     */
-    private void setDefaultOptions(SchemaGeneratorConfigBuilder configBuilder) {
-        configBuilder.with(Option.DEFINITIONS_FOR_ALL_OBJECTS);
-    }
-
-    /**
      * Set the generator options form the configuration.
      *
      * @param configBuilder The configbuilder on which the options are set
      * @param options       The options from the pom file
-     * @throws MojoExecutionException An exception in case of unexpected behavior
      */
-    private void setOptionsFromConfig(SchemaGeneratorConfigBuilder configBuilder, GeneratorOptions options) throws MojoExecutionException {
+    private void setOptions(SchemaGeneratorConfigBuilder configBuilder, GeneratorOptions options) {
         // Enable all the configured options
         if (options.enabled != null) {
             for (Option option : options.enabled) {
@@ -301,7 +286,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @param modules       The modules configuration part from the the pom.xml
      * @throws MojoExecutionException Error exception
      */
-    private void configureModules(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule[] modules) throws MojoExecutionException {
+    private void setModules(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule[] modules) throws MojoExecutionException {
         for (GeneratorModule module : modules) {
             if (module.className != null && !module.className.isEmpty()) {
                 try {
