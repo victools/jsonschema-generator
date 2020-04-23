@@ -18,7 +18,7 @@ Maven plugin for the [jsonschema-generator](../jsonschema-generator) – Integra
     <executions>
         <execution>
             <goals>
-                <goal>generator-schema</goal>
+                <goal>generate-schema</goal>
             </goals>
         </execution>
     </executions>
@@ -72,10 +72,10 @@ The following example shows the possible elements:
 </configuration>
 ```
 The `preset` element can select one of the values from `com.github.victools.jsonschema.generator.Option`.
-In case no prefix is not specified `PLAIN_JSON` is taken as default value.
+In case no `preset` is specified, `PLAIN_JSON` is taken as default value.
 
-Additional to the prefix a number of options that will be enabled and disabled can be specified.
-The syntax supports a single value, and multiple values as nested elements.
+Additional to the `preset` a number of options can be either enabled and/or disabled.
+The syntax supports a single value as well as multiple values as nested elements.
 
 ### Configuring modules
 When you want to have more control over the modules that are to be used during generation, the `<module>` element can be used to define them. 
