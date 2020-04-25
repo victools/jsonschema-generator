@@ -196,6 +196,10 @@ public enum Option {
      */
     NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT(null, null),
     /**
+     * Whether a {@link java.util.Map Map&lt;K, V&gt;} schema's "additionalProperties" should be set to its declared value type {@code V}.
+     */
+    MAP_VALUES_AS_ADDITIONAL_PROPERTIES(AdditionalPropertiesModule::forMapValues, null),
+    /**
      * Whether a schema's "additionalProperties" should be set to "false" if no specific configuration says otherwise.
      * <br>
      * Without this option, i.e. by default the "additionalProperties" keyword will be omitted and thereby allowing any additional properties in an

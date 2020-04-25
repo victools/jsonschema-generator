@@ -262,13 +262,13 @@ public class SchemaCleanUpUtils {
      */
     public String ensureDefinitionKeyIsUriCompatible(String definitionKey) {
         return definitionKey
-                // removing white-spaces
-                .replaceAll("[ ]+", "")
                 // marking arrays with an asterisk instead of square brackets
                 .replaceAll("\\[\\]", "*")
                 // indicating generics in parentheses instead of angled brackets
                 .replaceAll("<", "(")
-                .replaceAll(">", ")");
+                .replaceAll(">", ")")
+                // removing white-spaces and any other remaining invalid characters
+                .replaceAll("[^a-zA-Z0-9\\.\\-_\\$\\*\\(\\),]+", "");
     }
 
     /**
@@ -279,8 +279,6 @@ public class SchemaCleanUpUtils {
      */
     public String ensureDefinitionKeyIsPlain(String definitionKey) {
         return definitionKey
-                // removing white-spaces
-                .replaceAll("[ ]+", "")
                 // avoid dollar symbols for inner types
                 .replaceAll("\\$", "-")
                 // marking arrays with three dots instead of square brackets
@@ -288,6 +286,8 @@ public class SchemaCleanUpUtils {
                 // indicating generics in underscores instead of angled brackets
                 .replaceAll("[<>]", "_")
                 // use dots instead of commas between type parameters
-                .replaceAll(",", ".");
+                .replaceAll(",", ".")
+                // removing white-spaces and any other remaining invalid characters
+                .replaceAll("[^a-zA-Z0-9\\.\\-_]+", "");
     }
 }
