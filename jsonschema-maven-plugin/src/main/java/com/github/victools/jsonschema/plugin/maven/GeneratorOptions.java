@@ -24,7 +24,7 @@ import com.github.victools.jsonschema.generator.Option;
 public class GeneratorOptions {
 
     // The preset options
-    public String preset;
+    public StandardOptionPreset preset;
 
     // The options of the generator that should be enabled
     public Option[] enabled;
