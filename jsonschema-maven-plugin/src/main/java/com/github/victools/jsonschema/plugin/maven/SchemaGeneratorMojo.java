@@ -185,18 +185,18 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private void logInfo() {
         StringBuilder logText = new StringBuilder("Generating JSON Schema for ");
-        if (classNames != null) {
+        if (classNames.length > 0) {
             logText.append("class");
             if (classNames.length > 1) {
                 logText.append("es");
             }
             logText.append(" ");
             logText.append(String.join(", ", classNames));
-            if (packageNames != null) {
+            if (packageNames.length > 0) {
                 logText.append(" and ");
             }
         }
-        if (packageNames != null) {
+        if (packageNames.length > 0) {
             logText.append("package");
             if (packageNames.length > 1) {
                 logText.append("s");
@@ -204,6 +204,8 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             logText.append(" ");
             logText.append(String.join(", ", packageNames));
         }
+
+        getLog().info(logText);
     }
 
     /**
