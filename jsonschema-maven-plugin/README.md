@@ -24,7 +24,7 @@ Maven plugin for the [jsonschema-generator](../jsonschema-generator) – Integra
         </execution>
     </executions>
     <configuration>
-        <className>com.myOrg.myApp.MyClass</className>
+        <classNames>com.myOrg.myApp.MyClass</classNames>
     </configuration>
 </plugin>
 ```
@@ -33,7 +33,7 @@ This will use the default configuration of the generator.
 ### Configuring file locations
 ```xml
 <configuration>
-    <className>com.myOrg.myApp.MyClass</className>
+    <classNames>com.myOrg.myApp.MyClass</classNames>
     <schemaFileName>mySchema.json</schemaFileName>
     <schemaFilePath>src/main/resources/schemas</schemaFilePath>
 </configuration>

@@ -9,8 +9,8 @@
                         <className>com.github.victools.jsonschema.plugin.maven.TestPackage.TestClassA</className>
                         <className>com.github.victools.jsonschema.plugin.maven.TestPackage.TestClassB</className>
                     </classNames>
-                    <schemaFilePath>target/generated-test-sources/FileNamePattern</schemaFilePath>
-                    <schemaFileNamePattern>schemas/{1}/{0}.schema</schemaFileNamePattern>
+                    <schemaFilePath>target/generated-test-sources/SchemaFileName</schemaFilePath>
+                    <schemaFileName>schemas/{1}/{0}.schema</schemaFileName>
                 </configuration>
             </plugin>
         </plugins>

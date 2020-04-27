@@ -10,7 +10,7 @@
                         <className>com.github.victools.jsonschema.plugin.maven.TestPackage.TestClassB</className>
                     </classNames>
                     <schemaFilePath>target/generated-test-sources/TwoClasses</schemaFilePath>
-                    <schemaFileNamePattern>{0}.schema</schemaFileNamePattern>
+                    <schemaFileName>{0}.schema</schemaFileName>
                 </configuration>
             </plugin>
         </plugins>
