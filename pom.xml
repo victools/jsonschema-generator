@@ -41,6 +41,23 @@
         </developer>
     </developers>
 
+    <contributors>
+        <contributor>
+            <name>Florian Didier</name>
+            <url>https://github.com/imIfOu</url>
+            <roles>
+                <role>Provided PR #5 (support for "required" and "default" properties)</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>Jan Labrie</name>
+            <url>https://github.com/JanLabrie</url>
+            <roles>
+                <role>Provided PR #78 and various follow-ups (creation of maven plugin)</role>
+            </roles>
+        </contributor>
+    </contributors>
+
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
