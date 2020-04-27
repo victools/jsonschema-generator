@@ -16,24 +16,22 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
+import java.io.File;
+import java.io.FileReader;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-
-import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnitParamsRunner.class)
 public class SchemaGeneratorMojoTest {
@@ -65,33 +63,52 @@ public class SchemaGeneratorMojoTest {
         executePom(new File(testCaseLocation, testCaseName + "-pom.xml"));
 
         // Validate that the schema files is created.
-        File resultFile = new File(generationLocation,testCaseName + "/TestClass-schema.json");
-        assertTrue(resultFile.exists());
+        File resultFile = new File(generationLocation,testCaseName + ".json");
+        Assert.assertTrue(resultFile.exists());
 
         // Validate that is the same as the reference
         File referenceFile = new File(testCaseLocation + "/" + testCaseName + "-reference.json");
-        assertTrue(referenceFile.exists());
-        assertTrue("Generated schema for " + testCaseName + " is not equal to the expected reference.",
+        Assert.assertTrue(referenceFile.exists());
+        Assert.assertTrue("Generated schema for " + testCaseName + " is not equal to the expected reference.",
                 FileUtils.contentEquals(resultFile, referenceFile));
     }
 
     public Object[] parametersForTestPomErrors() {
         return new Object[][]{
                 {"ClassNotFound"},
-                {"UnknownModule"},
+                {"UnknownModule"}
+        };
+    }
+
+    /**
+     * Unit test that will generate from a maven pom file fragment and expect a MojoExecutionException.
+     *
+     * @param testCaseName Name of the test case and file name prefix of the example {@code pom.xml}
+     * @throws Exception In case something goes wrong
+     */
+    @Test(expected = MojoExecutionException.class)
+    @Parameters
+    public void testPomErrors(String testCaseName) throws Exception {
+        File testCaseLocation = new File("src/test/resources/error-test-cases");
+        executePom(new File(testCaseLocation, testCaseName + "-pom.xml"));
+    }
+
+    public Object[] parametersForTestPomConfigurationErrors() {
+        return new Object[][]{
                 {"UnknownSchemaVersion"},
                 {"UnknownGeneratorPreset"}
         };
     }
 
     /**
-     * Unit test that will generate from a maven pom file fragment and expect an MojoExecutionException
+     * Unit test that will generate from a maven pom file fragment and expect a ComponentConfigurationException.
      *
+     * @param testCaseName Name of the test case and file name prefix of the example {@code pom.xml}
      * @throws Exception In case something goes wrong
      */
-    @Test(expected = MojoExecutionException.class)
+    @Test(expected = ComponentConfigurationException.class)
     @Parameters
-    public void testPomErrors(String testCaseName) throws Exception {
+    public void testPomConfigurationErrors(String testCaseName) throws Exception {
         File testCaseLocation = new File("src/test/resources/error-test-cases");
         executePom(new File(testCaseLocation, testCaseName + "-pom.xml"));
     }
@@ -169,12 +186,11 @@ public class SchemaGeneratorMojoTest {
         PlexusConfiguration configuration = rule.extractPluginConfiguration("jsonschema-maven-plugin", pomDom);
 
         // Configure the Mojo
-        SchemaGeneratorMojo myMojo = (SchemaGeneratorMojo) rule.lookupConfiguredMojo(new MavenProject(), "generate-schema");
+        SchemaGeneratorMojo myMojo = (SchemaGeneratorMojo) rule.lookupConfiguredMojo(new MavenProject(), "generate");
         myMojo = (SchemaGeneratorMojo) rule.configureMojo(myMojo, configuration);
 
         // And execute
         myMojo.execute();
     }
-
 
 }
