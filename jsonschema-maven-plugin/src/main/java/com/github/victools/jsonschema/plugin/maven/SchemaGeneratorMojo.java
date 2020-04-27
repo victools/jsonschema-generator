@@ -52,7 +52,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Maven plugin for the victools/jsonschema-generator.
@@ -66,10 +69,16 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     MavenProject project;
 
     /**
-     * Full name of the class for which the JSON schema will be generated.
+     * Full name of the classes for which the JSON schema will be generated.
      */
-    @Parameter(property = "className", required = true)
-    private String className;
+    @Parameter(property = "targetTypes")
+    private String[] classNames;
+
+    /**
+     * Full name of a package for which for all classes in the package JSON schemas will be generated.
+     */
+    @Parameter(property = "targetPackages")
+    private String[] packageNames;
 
     /**
      * The directory path where the schema files is generated.
@@ -79,10 +88,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private String schemaFilePath;
 
     /**
-     * The name of the file in which the generate schema is written.
+     * The pattern according which the name of the generated schema file is derived.
      */
-    @Parameter(property = "schemaFileName")
-    private String schemaFileName;
+    @Parameter(property = "schemaFileNamePattern", defaultValue = "{0}-schema.json")
+    private String schemaFileNamePattern;
 
     /**
      * The schema version to be used: DRAFT_6, DRAFT_7 or DRAFT_2019_09.
@@ -103,13 +112,53 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private GeneratorModule[] modules;
 
     /**
+     * Classloader to find the classes based on the maven specified buildpath
+     */
+    private URLClassLoader classLoader = null;
+
+    private ObjectMapper mapper;
+    private SchemaGenerator generator;
+
+    /**
      * Invoke the schema generator.
      *
      * @throws MojoExecutionException An exception in case of errors and unexpected behavior
      */
     public void execute() throws MojoExecutionException {
-        getLog().info("Generating JSON Schema for class " + className);
+        // Inform the user
+        logInfo();
 
+        // Create the rightly configured generator
+        mapper = new ObjectMapper();
+        generator = createGenerator(mapper);
+
+        if (classNames != null) {
+            for (String className : classNames) {
+                generateSchema(className);
+            }
+        }
+
+        if (packageNames != null) {
+            for (String packageName : packageNames) {
+               generateSchemaForPackage(packageName);
+            }
+        }
+    }
+
+    /**
+     * Generate JSON schema's for all classes in a package.
+     * @param packageName The name of the package
+     */
+    private void generateSchemaForPackage(String packageName) {
+
+    }
+
+    /**
+     * Generate the JSON schema for the given className
+     * @param className The name of the class
+     * @throws MojoExecutionException In case of problems
+     */
+    private void generateSchema(String className) throws MojoExecutionException {
         // Load the class for which the schema will be generated
         Class<?> schemaClass;
         try {
@@ -119,12 +168,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         }
 
         // Generate the schema
-        ObjectMapper mapper = new ObjectMapper();
-        SchemaGenerator generator = createGenerator(mapper);
         JsonNode jsonSchema = generator.generateSchema(schemaClass);
 
         // Write the result
-        File schemaFile = getSchemaFile();
+        File schemaFile = getSchemaFile(className);
         try {
             String schema = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonSchema);
             writeToFile(schema, schemaFile);
@@ -133,7 +180,31 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         }
     }
 
-    private static URLClassLoader classLoader = null;
+    /**
+     * Log a properly formatted info string
+     */
+    private void logInfo() {
+        StringBuilder logText = new StringBuilder("Generating JSON Schema for ");
+        if (classNames != null) {
+            logText.append("class");
+            if (classNames.length > 1) {
+                logText.append("es");
+            }
+            logText.append(" ");
+            logText.append(String.join(", ", classNames));
+            if (packageNames != null) {
+                logText.append(" and ");
+            }
+        }
+        if (packageNames != null) {
+            logText.append("package");
+            if (packageNames.length > 1) {
+                logText.append("s");
+            }
+            logText.append(" ");
+            logText.append(String.join(", ", packageNames));
+        }
+    }
 
     /**
      * Construct the classloader based on the project classpath.
@@ -170,12 +241,12 @@ public class SchemaGeneratorMojo extends AbstractMojo {
 
     /**
      * Return the name of the file in which the schema has to be written.
-     * The default path is: src/main/resources
-     * The default file name is: name of the class + ".schema.json"
      *
+     * @param fullClassName The fully qualified name of the class for which a schema file names is determined
      * @return The full path name of the schema file
      */
-    private File getSchemaFile() {
+    private File getSchemaFile(String fullClassName) throws MojoExecutionException {
+        // Find the root folder for outputting
         File filePath;
         if (schemaFilePath == null || schemaFilePath.isEmpty()) {
             filePath = new File("src" + File.separator + "main" + File.separator + "resources");
@@ -183,14 +254,22 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             filePath = new File(schemaFilePath);
         }
 
-        String fileName;
-        if (schemaFileName == null || schemaFileName.isEmpty()) {
-            fileName = className + ".schema.json";
-        } else {
-            fileName = schemaFileName;
+        // Get only the name of the class. Remove a possible package prefix.
+        String[] classNameParts = fullClassName.split(Pattern.quote("."));
+        String className = classNameParts[classNameParts.length-1];
+        String packagePath =
+                String.join("/", Arrays.copyOf(classNameParts, classNameParts.length -1));
+
+        // Apply the given pattern
+        String fileName = MessageFormat.format(schemaFileNamePattern, className, packagePath);
+
+        File schemaFile = new File(filePath, fileName);
+        File parentFile = schemaFile.getParentFile();
+        if (!parentFile.exists() && !parentFile.mkdirs()) {
+            throw new MojoExecutionException("Error creating directory: " + parentFile);
         }
 
-        return new File(filePath, fileName);
+        return schemaFile;
     }
 
     /**

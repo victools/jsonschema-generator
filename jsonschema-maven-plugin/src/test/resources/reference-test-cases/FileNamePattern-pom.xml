@@ -1,0 +1,18 @@
+<project>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-maven-plugin</artifactId>
+                <configuration>
+                    <classNames>
+                        <className>com.github.victools.jsonschema.plugin.maven.TestPackage.TestClassA</className>
+                        <className>com.github.victools.jsonschema.plugin.maven.TestPackage.TestClassB</className>
+                    </classNames>
+                    <schemaFilePath>target/generated-test-sources/FileNamePattern</schemaFilePath>
+                    <schemaFileNamePattern>schemas/{1}/{0}.schema</schemaFileNamePattern>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
