@@ -64,13 +64,13 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     /**
      * Full name of the classes for which the JSON schema will be generated.
      */
-    @Parameter(property="classNames")
+    @Parameter(property = "classNames")
     private String[] classNames;
 
     /**
      * Full name of a package for which for all classes in the package JSON schemas will be generated.
      */
-    @Parameter(property="packageNames")
+    @Parameter(property = "packageNames")
     private String[] packageNames;
 
     /**
@@ -111,7 +111,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private GeneratorModule[] modules;
 
     /**
-     * The generator to be used for all schema generations
+     * The generator to be used for all schema generations.
      */
     private SchemaGenerator generator = null;
 
@@ -148,7 +148,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     }
 
     /**
-     * Generate the JSON schema for the given className
+     * Generate the JSON schema for the given className.
      *
      * @param className The name of the class
      * @throws MojoExecutionException In case of problems
@@ -170,7 +170,8 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     }
 
     /**
-     * Build up the initial logging text
+     * Build up the initial logging text.
+     *
      * @return The info message text
      */
     private String getInfoText() {
