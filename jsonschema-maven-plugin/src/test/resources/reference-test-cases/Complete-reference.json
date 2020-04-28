@@ -1,0 +1,5 @@
+{
+  "type" : "object",
+  "description" : "Jackson annotation class",
+  "additionalProperties" : false
+}
