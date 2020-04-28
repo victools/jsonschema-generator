@@ -1,5 +1,5 @@
 {
-    "$ref": "#/definitions/TestClass2*",
+    "$ref": "#/definitions/TestClass2...",
     "definitions": {
         "TestClass2": {
             "type": "object",
@@ -12,7 +12,7 @@
                 "getGenericValue()": {}
             }
         },
-        "TestClass2*": {
+        "TestClass2...": {
             "type": "array",
             "items": {
                 "$ref": "#/definitions/TestClass2"

@@ -22,10 +22,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.generator.TypeContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -51,21 +51,21 @@ public class SchemaCleanUpUtils {
     /**
      * Remove and merge {@link SchemaKeyword#TAG_ALLOF} parts when there are no conflicts between the sub-schemas.
      *
-     * @param jsonSchema generated schema that may contain unnecessary {@link SchemaKeyword#TAG_ALLOF} nodes
+     * @param jsonSchemas generated schemas that may contain unnecessary {@link SchemaKeyword#TAG_ALLOF} nodes
      */
-    public void reduceAllOfNodes(ObjectNode jsonSchema) {
+    public void reduceAllOfNodes(List<ObjectNode> jsonSchemas) {
         String allOfTagName = this.config.getKeyword(SchemaKeyword.TAG_ALLOF);
-        this.finaliseSchemaParts(jsonSchema, nodeToCheck -> this.mergeAllOfPartsIfPossible(nodeToCheck, allOfTagName));
+        this.finaliseSchemaParts(jsonSchemas, nodeToCheck -> this.mergeAllOfPartsIfPossible(nodeToCheck, allOfTagName));
     }
 
     /**
      * Reduce nested {@link SchemaKeyword#TAG_ANYOF} parts when one contains an entry with only another {@link SchemaKeyword#TAG_ANYOF} inside.
      *
-     * @param jsonSchema generated schema that may contain unnecessary nested {@link SchemaKeyword#TAG_ANYOF} nodes
+     * @param jsonSchemas generated schemas that may contain unnecessary nested {@link SchemaKeyword#TAG_ANYOF} nodes
      */
-    public void reduceAnyOfNodes(ObjectNode jsonSchema) {
+    public void reduceAnyOfNodes(List<ObjectNode> jsonSchemas) {
         String anyOfTagName = this.config.getKeyword(SchemaKeyword.TAG_ANYOF);
-        this.finaliseSchemaParts(jsonSchema, nodeToCheck -> this.reduceAnyOfWrappersIfPossible(nodeToCheck, anyOfTagName));
+        this.finaliseSchemaParts(jsonSchemas, nodeToCheck -> this.reduceAnyOfWrappersIfPossible(nodeToCheck, anyOfTagName));
     }
 
     /**
@@ -116,20 +116,16 @@ public class SchemaCleanUpUtils {
      * side-effect that any manually added {@link SchemaKeyword#TAG_ANYOF} (e.g. through a custom definition of attribute overrides) may be removed as
      * well if it isn't strictly speaking necessary.
      *
-     * @param schemaNode generated schema to clean-up
+     * @param schemaNodes generated schemas to clean-up
      * @param performCleanUpOnSingleSchemaNode clean up task to execute before looking for deeper nested sub-schemas for which to apply the same
      */
-    private void finaliseSchemaParts(ObjectNode schemaNode, Consumer<ObjectNode> performCleanUpOnSingleSchemaNode) {
-        List<ObjectNode> nextNodesToCheck = new ArrayList<>();
+    private void finaliseSchemaParts(List<ObjectNode> schemaNodes, Consumer<ObjectNode> performCleanUpOnSingleSchemaNode) {
+        List<ObjectNode> nextNodesToCheck = new ArrayList<>(schemaNodes);
         Consumer<JsonNode> addNodeToCheck = node -> {
             if (node instanceof ObjectNode) {
                 nextNodesToCheck.add((ObjectNode) node);
             }
         };
-        nextNodesToCheck.add(schemaNode);
-        Optional.ofNullable(schemaNode.get(this.config.getKeyword(SchemaKeyword.TAG_DEFINITIONS)))
-                .filter(definitions -> definitions instanceof ObjectNode)
-                .ifPresent(definitions -> ((ObjectNode) definitions).forEach(addNodeToCheck));
 
         Set<String> tagsWithSchemas = this.getTagNamesContainingSchema();
         Set<String> tagsWithSchemaArrays = this.getTagNamesContainingSchemaArray();
@@ -256,5 +252,42 @@ public class SchemaCleanUpUtils {
                 ((ArrayNode) anyOfTag).insert(index, nestedAnyOf.get(nestedEntryIndex));
             }
         }
+    }
+
+    /**
+     * Replace characters in the given definition key that are deemed incompatible within a URI (as expected by JSON Schema).
+     *
+     * @param definitionKey the output of the {@link TypeContext#getSchemaDefinitionName(com.fasterxml.classmate.ResolvedType)}
+     * @return URI compatible version of the given definition key
+     */
+    public String ensureDefinitionKeyIsUriCompatible(String definitionKey) {
+        return definitionKey
+                // marking arrays with an asterisk instead of square brackets
+                .replaceAll("\\[\\]", "*")
+                // indicating generics in parentheses instead of angled brackets
+                .replaceAll("<", "(")
+                .replaceAll(">", ")")
+                // removing white-spaces and any other remaining invalid characters
+                .replaceAll("[^a-zA-Z0-9\\.\\-_\\$\\*\\(\\),]+", "");
+    }
+
+    /**
+     * Replace characters in the given definition key that are neither alphanumeric nor a dot, dash or underscore (as expected by OpenAPI).
+     *
+     * @param definitionKey the output of the {@link TypeContext#getSchemaDefinitionName(com.fasterxml.classmate.ResolvedType)}
+     * @return simplified version of the given definition key
+     */
+    public String ensureDefinitionKeyIsPlain(String definitionKey) {
+        return definitionKey
+                // avoid dollar symbols for inner types
+                .replaceAll("\\$", "-")
+                // marking arrays with three dots instead of square brackets
+                .replaceAll("\\[\\]", "...")
+                // indicating generics in underscores instead of angled brackets
+                .replaceAll("[<>]", "_")
+                // use dots instead of commas between type parameters
+                .replaceAll(",", ".")
+                // removing white-spaces and any other remaining invalid characters
+                .replaceAll("[^a-zA-Z0-9\\.\\-_]+", "");
     }
 }
