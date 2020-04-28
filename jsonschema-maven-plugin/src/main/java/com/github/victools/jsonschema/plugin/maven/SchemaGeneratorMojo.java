@@ -61,9 +61,6 @@ import org.reflections.scanners.SubTypesScanner;
         requiresDependencyCollection = ResolutionScope.COMPILE)
 public class SchemaGeneratorMojo extends AbstractMojo {
 
-    @Parameter(defaultValue = "${project}", required = true, readonly = true)
-    MavenProject project;
-
     /**
      * Full name of the classes for which the JSON schema will be generated.
      */
