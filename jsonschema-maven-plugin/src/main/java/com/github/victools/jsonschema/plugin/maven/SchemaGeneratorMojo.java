@@ -40,6 +40,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.util.Set;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -48,6 +49,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 
 /**
  * Maven plugin for the victools/jsonschema-generator.
@@ -139,15 +142,6 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     }
 
     /**
-     * Generate JSON schema's for all classes in a package.
-     *
-     * @param packageName The name of the package
-     */
-    private void generateSchemaForPackage(String packageName) {
-        // TODO: Final step
-    }
-
-    /**
      * Generate the JSON schema for the given className.
      *
      * @param className The name of the class
@@ -162,11 +156,34 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             throw new MojoExecutionException("Error loading class " + className, e);
         }
 
-        // Generate the schema
+        this.generateSchema(schemaClass);
+    }
+
+    /**
+     * Generate the JSON schema for the given className.
+     *
+     * @param schemaClass The class for which the schema is to be generated
+     * @throws MojoExecutionException In case of problems
+     */
+    private void generateSchema(Class<?> schemaClass) throws MojoExecutionException {
         JsonNode jsonSchema = getGenerator().generateSchema(schemaClass);
         File file = getSchemaFile(schemaClass);
         this.getLog().info("- Writing schema to file: " + file);
         this.writeToFile(jsonSchema, file);
+    }
+
+    /**
+     * Generate JSON schema's for all classes in a package.
+     *
+     * @param packageName The name of the package
+     * @throws MojoExecutionException in case of problems
+     */
+    private void generateSchemaForPackage(String packageName) throws MojoExecutionException {
+        Reflections reflections = new Reflections(packageName, new SubTypesScanner(false));
+        Set<Class<?>> subTypes = reflections.getSubTypesOf(Object.class);
+        for (Class<?> mainType : subTypes) {
+            this.generateSchema(mainType);
+        }
     }
 
     /**

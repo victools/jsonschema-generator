@@ -147,6 +147,36 @@ public class SchemaGeneratorMojoTest {
      * Unit test to test the generation of schemas for multiple classes
      */
     @Test
+    public void testPackageName() throws Exception {
+        File testCaseLocation = new File("src/test/resources/reference-test-cases");
+        File generationLocation = new File("target/generated-test-sources/PackageName");
+
+        // Execute the pom
+        executePom(new File("src/test/resources/reference-test-cases/PackageName-pom.xml"));
+
+        // Validate that the schema files are created.
+        File resultFileA = new File(generationLocation,"TestClassA-schema.json");
+        Assert.assertTrue(resultFileA.exists());
+
+        File resultFileB = new File(generationLocation,"TestClassB-schema.json");
+        Assert.assertTrue(resultFileB.exists());
+
+        // Validate that they are the same as the reference
+        File referenceFileA = new File(testCaseLocation + "/" + "TestClassA-reference.json");
+        Assert.assertTrue(referenceFileA.exists());
+        Assert.assertTrue("Generated schema for TestClassA is not equal to the expected reference.",
+                FileUtils.contentEquals(resultFileA, referenceFileA));
+
+        File referenceFileB = new File(testCaseLocation + "/" + "TestClassB-reference.json");
+        Assert.assertTrue(referenceFileB.exists());
+        Assert.assertTrue("Generated schema for TestClassB is not equal to the expected reference.",
+                FileUtils.contentEquals(resultFileB, referenceFileB));
+    }
+
+    /**
+     * Unit test to test the generation of schemas for multiple classes
+     */
+    @Test
     public void testFileNamePattern() throws Exception {
         File testCaseLocation = new File("src/test/resources/reference-test-cases");
         File generationLocation = new File("target/generated-test-sources/SchemaFileName/schemas/"+
