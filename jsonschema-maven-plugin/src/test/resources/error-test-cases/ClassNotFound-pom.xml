@@ -5,7 +5,7 @@
                 <groupId>com.github.victools</groupId>
                 <artifactId>jsonschema-maven-plugin</artifactId>
                 <configuration>
-                    <className>com.github.victools.jsonschema.plugin.maven.UnknownTestClass</className>
+                    <classNames>com.github.victools.jsonschema.plugin.maven.UnknownTestClass</classNames>
                 </configuration>
             </plugin>
         </plugins>

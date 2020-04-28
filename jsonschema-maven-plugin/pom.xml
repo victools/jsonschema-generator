@@ -23,6 +23,7 @@
         <maven.core.version>3.6.3</maven.core.version>
         <maven.testing.version>3.3.0</maven.testing.version>
         <maven.tools.version>3.6.0</maven.tools.version>
+        <reflections.version>0.9.12</reflections.version>
     </properties>
 
     <dependencies>
@@ -88,6 +89,11 @@
             <groupId>com.github.victools</groupId>
             <artifactId>jsonschema-module-javax-validation</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>${reflections.version}</version>
         </dependency>
     </dependencies>
 
