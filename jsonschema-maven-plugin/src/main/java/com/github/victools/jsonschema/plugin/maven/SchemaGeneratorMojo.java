@@ -67,7 +67,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private String[] classNames;
 
     /**
-     * Full name of a package for which for all classes in the package JSON schemas will be generated.
+     * Full name of the packages for which a JSON schema will be generated for each contained class.
      */
     @Parameter(property = "packageNames")
     private String[] packageNames;
@@ -77,24 +77,24 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * <br>
      * By default, this is: {@code src/main/resources}
      */
-    @Parameter
+    @Parameter(property = "schemaFilePath")
     private File schemaFilePath;
 
     /**
      * The name of the file in which the generated schema is written. Allowing for two placeholders:
      * <ul>
-     * <li><code>{0}</code> - containing the simple class name (last part of the className)</li>
-     * <li><code>{1}</code> - containing the package path (first part of the className)</li>
+     * <li><code>{0}</code> - containing the simple class name of the class for which the schema was generated</li>
+     * <li><code>{1}</code> - containing the package path of the class for which the schema was generated</li>
      * </ul>
      * The default name is: <code>{0}-schema.json</code>
      */
-    @Parameter(defaultValue = "{0}-schema.json")
+    @Parameter(property = "schemaFileName", defaultValue = "{0}-schema.json")
     private String schemaFileName;
 
     /**
      * The schema version to be used: DRAFT_6, DRAFT_7 or DRAFT_2019_09.
      */
-    @Parameter(defaultValue = "DRAFT_7")
+    @Parameter(property = "schemaVersion", defaultValue = "DRAFT_7")
     private SchemaVersion schemaVersion;
 
     /**
@@ -121,7 +121,6 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     @Override
     public void execute() throws MojoExecutionException {
-        this.getLog().debug("Initializing Schema Generator");
         this.getLog().info(getInfoText());
 
         if (classNames != null) {
@@ -219,8 +218,8 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * <br>
      * The name of the file is determined based on the {@link #schemaFileName} parameter, which allows for two placeholders:
      * <ul>
-     * <li><code>{0}</code> - containing the simple class name of the parameter)</li>
-     * <li><code>{1}</code> - containing the package path of the parameter)</li>
+     * <li><code>{0}</code> - containing the simple name of the class for the schema was generated</li>
+     * <li><code>{1}</code> - containing the package path of the class for the schema was generated</li>
      * </ul>
      * </p>
      * The default path is: {@code src/main/resources}
@@ -245,7 +244,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                 // placeholder {0}
                 mainType.getSimpleName(),
                 // placeholder {1}
-                mainType.getPackage().getName().replace('.', '/'));
+                mainType.getPackage().getName().replace('.', File.separatorChar));
         File schemaFile = new File(directory, fileName);
 
         // Make sure the directory is available
@@ -268,6 +267,8 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private SchemaGenerator getGenerator() throws MojoExecutionException {
         if (this.generator == null) {
+            this.getLog().debug("Initializing Schema Generator");
+
             // Start with the generator builder
             SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(this.schemaVersion, this.getOptionPreset());
 

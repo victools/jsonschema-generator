@@ -37,10 +37,10 @@ This can be either one element, or multiple by using nested elements.
 ```xml
     <configuration>
         <classNames>com.myOrg.myApp.MyClass</classNames>
-    <packageNames>
-        <packageName>com.myOrg.myApp.package1</packageName>
-        <packageName>com.myOrg.myApp.package2</packageName>
-    </packageNames>
+        <packageNames>
+            <packageName>com.myOrg.myApp.package1</packageName>
+            <packageName>com.myOrg.myApp.package2</packageName>
+        </packageNames>
     </configuration>
 ```
 
@@ -56,11 +56,11 @@ The default path is `src/main/resources`
 
 The name of the generated schema files can be configured with the `<schemaFileName>` element. This 
 is a substitution pattern that is used for all generated files. It following the MessageFormat syntax, where the 
- following variables can be used:
- - {0} : This is the name of the class
- - {1} : This is package path of the class 
+following variables can be used:
+ - `{0}` : This is the name of the class
+ - `{1}` : This is package path of the class 
 
-For example the following configuration will create files that have the `.schema` extention. 
+For example, the following configuration will create a `MyClass.schema` file. 
 ```xml
 <configuration>
     <classNames>com.myOrg.myApp.MyClass</classNames>
