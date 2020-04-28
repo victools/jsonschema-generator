@@ -21,12 +21,18 @@ package com.github.victools.jsonschema.plugin.maven;
  */
 public class GeneratorModule {
 
-    // Name of the module
+    /**
+     * Name of the module.
+     */
     public String name;
 
-    // The fully qualified java class name of the module
+    /**
+     * The fully qualified java class name of the module.
+     */
     public String className;
 
-    // The options to be configured on the module
+    /**
+     * The options to be configured on the module.
+     */
     public String[] options;
 }

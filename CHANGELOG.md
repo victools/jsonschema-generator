@@ -12,6 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Fixed
 - Skip fields for which `isFakeContainerItemScope()` returns `true`, when fulfilling value collection for `Option.VALUES_FROM_CONSTANT_FIELDS`
 
+### `jsonschema-maven-plugin`
+#### Added
+- Initial implementation
+- Support schema generation from one or multiple classes
+- Support schema generation for all classes in one or multiple packages
+- Allow configuration of target schema version
+- Allow configuration of `OptionPreset` (also allowing for `NONE`)
+- Allow configuration of individual `Option`s to be enabled/disabled
+- Allow configuration of standard modules by name, with possible list of module options
+- Allow configuration of custom modules by class name
+
 ## [4.10.0] - 2020-04-12
 ### `jsonschema-generator`
 #### Added

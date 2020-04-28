@@ -65,6 +65,7 @@ public class SchemaGeneratorMojoTest {
         // Validate that the schema files is created.
         File resultFile = new File(generationLocation,testCaseName + "/TestClass-schema.json");
         Assert.assertTrue(resultFile.exists());
+        resultFile.deleteOnExit();
 
         // Validate that is the same as the reference
         File referenceFile = new File(testCaseLocation + "/" + testCaseName + "-reference.json");
@@ -127,9 +128,11 @@ public class SchemaGeneratorMojoTest {
         // Validate that the schema files are created.
         File resultFileA = new File(generationLocation,"TestClassA.schema");
         Assert.assertTrue(resultFileA.exists());
+        resultFileA.deleteOnExit();
 
         File resultFileB = new File(generationLocation,"TestClassB.schema");
         Assert.assertTrue(resultFileB.exists());
+        resultFileB.deleteOnExit();
 
         // Validate that they are the same as the reference
         File referenceFileA = new File(testCaseLocation + "/" + "TestClassA-reference.json");
@@ -157,9 +160,11 @@ public class SchemaGeneratorMojoTest {
         // Validate that the schema files are created.
         File resultFileA = new File(generationLocation,"TestClassA-schema.json");
         Assert.assertTrue(resultFileA.exists());
+        resultFileA.deleteOnExit();
 
         File resultFileB = new File(generationLocation,"TestClassB-schema.json");
         Assert.assertTrue(resultFileB.exists());
+        resultFileB.deleteOnExit();
 
         // Validate that they are the same as the reference
         File referenceFileA = new File(testCaseLocation + "/" + "TestClassA-reference.json");
@@ -188,9 +193,11 @@ public class SchemaGeneratorMojoTest {
         // Validate that the schema files are created.
         File resultFileA = new File(generationLocation,"TestClassA.schema");
         Assert.assertTrue(resultFileA.exists());
+        resultFileA.deleteOnExit();
 
         File resultFileB = new File(generationLocation,"TestClassB.schema");
         Assert.assertTrue(resultFileB.exists());
+        resultFileB.deleteOnExit();
 
         // Validate that they are the same as the reference
         File referenceFileA = new File(testCaseLocation + "/" + "TestClassA-reference.json");

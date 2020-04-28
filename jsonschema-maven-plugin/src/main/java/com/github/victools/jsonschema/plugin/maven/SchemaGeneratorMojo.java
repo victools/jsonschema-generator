@@ -30,7 +30,6 @@ import com.github.victools.jsonschema.module.javax.validation.JavaxValidationMod
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationOption;
 import com.github.victools.jsonschema.module.swagger15.SwaggerModule;
 import com.github.victools.jsonschema.module.swagger15.SwaggerOption;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -41,7 +40,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.Set;
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -121,16 +119,19 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     @Override
     public void execute() throws MojoExecutionException {
-        this.getLog().info(getInfoText());
+        // trigger initialization of the generator instance
+        this.getGenerator();
 
-        if (classNames != null) {
-            for (String className : classNames) {
+        if (this.classNames != null) {
+            for (String className : this.classNames) {
+                this.getLog().info("Generating JSON Schema for class " + className);
                 generateSchema(className);
             }
         }
 
-        if (packageNames != null) {
-            for (String packageName : packageNames) {
+        if (this.packageNames != null) {
+            for (String packageName : this.packageNames) {
+                this.getLog().info("Generating JSON Schema for package " + packageName);
                 generateSchemaForPackage(packageName);
             }
         }
@@ -182,44 +183,14 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     }
 
     /**
-     * Build up the initial logging text.
-     *
-     * @return The info message text
-     */
-    private String getInfoText() {
-        StringBuilder logText = new StringBuilder("Generating JSON Schema for ");
-        if (classNames.length > 0) {
-            logText.append("class");
-            if (classNames.length > 1) {
-                logText.append("es");
-            }
-            logText.append(" ");
-            logText.append(String.join(", ", classNames));
-            if (packageNames.length > 0) {
-                logText.append(" and ");
-            }
-        }
-        if (packageNames.length > 0) {
-            logText.append("package");
-            if (packageNames.length > 1) {
-                logText.append("s");
-            }
-            logText.append(" ");
-            logText.append(String.join(", ", packageNames));
-        }
-
-        return logText.toString();
-    }
-
-    /**
      * Return the file in which the schema has to be written.
      *
      * <p>The path is determined based on the {@link #schemaFilePath} parameter.
      * <br>
      * The name of the file is determined based on the {@link #schemaFileName} parameter, which allows for two placeholders:
      * <ul>
-     * <li><code>{0}</code> - containing the simple name of the class for the schema was generated</li>
-     * <li><code>{1}</code> - containing the package path of the class for the schema was generated</li>
+     * <li><code>{0}</code> - containing the simple name of the class the schema was generated for</li>
+     * <li><code>{1}</code> - containing the package path of the class the schema was generated for</li>
      * </ul>
      * </p>
      * The default path is: {@code src/main/resources}
@@ -291,7 +262,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      *
      * @return The OptionPreset
      */
-    private OptionPreset getOptionPreset()  {
+    private OptionPreset getOptionPreset() {
         if (this.options != null && this.options.preset != null) {
             return this.options.preset.getPreset();
         }
@@ -446,7 +417,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private void writeToFile(JsonNode jsonSchema, File file) throws MojoExecutionException {
         try (FileOutputStream outputStream = new FileOutputStream(file);
-             PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+                PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             writer.print(jsonSchema.toPrettyString());
         } catch (IOException e) {
             throw new MojoExecutionException("Error: Can not write to file " + file, e);

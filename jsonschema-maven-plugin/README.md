@@ -4,11 +4,12 @@
 Maven plugin for the [jsonschema-generator](../jsonschema-generator) – Integrating JSON Schema generation in your builds
 
 ## Features
-1. Generate the JSON schema for a Java class.
-2. Configure the designated JSON Schema Draft version.
-3. Configure the `OptionPreset` and individual `Option`s to be considered during schema generation.
-4. Configure the standard modules and their respective options to be applied.
-5. Configure any custom modules to be applied.
+1. Generate JSON schema(s) for one or multiple Java classes.
+2. Generate JSON schemas for all classes in one or multiple packages.
+3. Configure the designated JSON Schema Draft version.
+4. Configure the `OptionPreset` and individual `Option`s to be considered during schema generation.
+5. Configure the standard modules and their respective options to be applied.
+6. Configure any custom modules to be applied.
 
 ## Usage
 ### Plugin definition
@@ -54,11 +55,11 @@ The location where the files will be generated can be specified with the `<schem
 ```
 The default path is `src/main/resources`
 
-The name of the generated schema files can be configured with the `<schemaFileName>` element. This 
-is a substitution pattern that is used for all generated files. It following the MessageFormat syntax, where the 
-following variables can be used:
+The name of the generated schema files can be configured with the `<schemaFileName>` element.
+This is a substitution pattern that is used for all generated files. It following the `MessageFormat` syntax,
+where the following variables can be used:
  - `{0}` : This is the name of the class
- - `{1}` : This is package path of the class 
+ - `{1}` : This is the package path of the class
 
 For example, the following configuration will create a `MyClass.schema` file. 
 ```xml
@@ -93,7 +94,7 @@ Allowed values are (as per `com.github.victools.jsonschema.generator.SchemaVersi
 `DRAFT_7` is the default, if not specified.
 
 ### Configuring the generator
-The JSON schema generator can be configured with individual options as they are defined in `com.github.victools.jsonschema.generator.Option`
+The JSON schema generator can be configured with individual options as they are defined in `com.github.victools.jsonschema.generator.Option`.
 The following example shows the possible elements:
 ```xml
 <configuration>
@@ -108,7 +109,7 @@ The following example shows the possible elements:
     </options>
 </configuration>
 ```
-The `preset` element can select one of the constant values from `com.github.victools.jsonschema.generator.OptionPreset`.
+The `preset` element can be either `NONE` or one of the constant values from `com.github.victools.jsonschema.generator.OptionPreset`.
 In case no `preset` is specified, `PLAIN_JSON` is taken as default value.
 
 Additional to the `preset` a number of individual `Option`s can be either enabled and/or disabled.
