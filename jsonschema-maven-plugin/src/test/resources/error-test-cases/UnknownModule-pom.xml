@@ -1,0 +1,18 @@
+<project>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-maven-plugin</artifactId>
+                <configuration>
+                    <classNames>com.github.victools.jsonschema.plugin.maven.TestClass</classNames>
+                    <modules>
+                        <module>
+                            <name>Unknown</name>
+                        </module>
+                    </modules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

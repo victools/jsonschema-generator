@@ -30,8 +30,17 @@ public enum SchemaKeyword {
      */
     TAG_ANCHOR("$anchor"),
     TAG_DEFINITIONS(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7 ? "definitions" : "$defs"),
+    /**
+     * Before {@link SchemaVersion#DRAFT_2019_09} all other properties in the same sub-schema besides this one were ignored.
+     */
     TAG_REF("$ref"),
     TAG_REF_MAIN("#"),
+    /**
+     * Common prefix of all standard {@link #TAG_REF} values.
+     *
+     * @deprecated is now implicitly created based on {@link SchemaKeyword#TAG_DEFINITIONS} or an explicit alternative definitions path
+     */
+    @Deprecated
     TAG_REF_PREFIX(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7 ? "#/definitions/" : "#/$defs/"),
 
     TAG_TYPE("type"),

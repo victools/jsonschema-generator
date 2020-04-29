@@ -4,13 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.11.0] - 2020-04-28
 ### `jsonschema-generator`
 #### Added
+- New `Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES` to include `additionalProperties` with a schema for each `Map<K, V>`'s value type `V`
 - New `Option.DEFINITION_FOR_MAIN_SCHEMA` to allow moving main/target schema into `definitions`/`$defs`
+- New `Option.PLAIN_DEFINITION_KEYS` to ensure keys in `definitions`/`$defs` adhere to the reduced set of allowed characters expected by OpenAPI
+- New `SchemaGenerator.buildMultipleSchemaDefinitions()` allowing to generate JSON Schema elements (e.g. for building an OpenAPI description)
 
 #### Fixed
 - Skip fields for which `isFakeContainerItemScope()` returns `true`, when fulfilling value collection for `Option.VALUES_FROM_CONSTANT_FIELDS`
+- Treat `Byte`/`byte` as `"type": "string"` and not as `"type": "integer"` by default
+
+### `jsonschema-maven-plugin`
+#### Added
+- Initial implementation
+- Support schema generation from one or multiple classes
+- Support schema generation for all classes in one or multiple packages
+- Allow configuration of target schema version
+- Allow configuration of `OptionPreset` (also allowing for `NONE`)
+- Allow configuration of individual `Option`s to be enabled/disabled
+- Allow configuration of standard modules by name, with possible list of module options
+- Allow configuration of custom modules by class name
 
 ## [4.10.0] - 2020-04-12
 ### `jsonschema-generator`
@@ -345,7 +360,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.10.0...HEAD
+[4.11.0]: https://github.com/victools/jsonschema-generator/compare/v4.10.0...v4.11.0
 [4.10.0]: https://github.com/victools/jsonschema-generator/compare/v4.9.0...v4.10.0
 [4.9.0]: https://github.com/victools/jsonschema-generator/compare/v4.8.1...v4.9.0
 [4.8.1]: https://github.com/victools/jsonschema-generator/compare/v4.8.0...v4.8.1

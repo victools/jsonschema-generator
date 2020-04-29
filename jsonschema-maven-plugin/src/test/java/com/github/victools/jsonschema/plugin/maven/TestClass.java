@@ -16,6 +16,9 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
+import com.fasterxml.jackson.annotation.JsonClassDescription;
+
+@JsonClassDescription("Jackson annotation class")
 public class TestClass {
     private int anInt;
 

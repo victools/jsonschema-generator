@@ -16,23 +16,19 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
+import com.github.victools.jsonschema.generator.Option;
+
 /**
- * Configuration class to hold the configuration of generator modules and their options.
+ * Class to hold the configuration options of the generator.
  */
-public class GeneratorModule {
+public class GeneratorOptions {
 
-    /**
-     * Name of the module.
-     */
-    public String name;
+    // The preset options
+    public StandardOptionPreset preset;
 
-    /**
-     * The fully qualified java class name of the module.
-     */
-    public String className;
+    // The options of the generator that should be enabled
+    public Option[] enabled;
 
-    /**
-     * The options to be configured on the module.
-     */
-    public String[] options;
+    // The options of the generator that should be disabled
+    public Option[] disabled;
 }

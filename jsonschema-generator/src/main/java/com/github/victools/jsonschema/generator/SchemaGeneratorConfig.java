@@ -78,6 +78,14 @@ public interface SchemaGeneratorConfig {
     boolean shouldIncludeSchemaVersionIndicator();
 
     /**
+     * Determine whether the {@link SchemaKeyword#TAG_REF} values should not just be URI compatible (as expected in JSON Schemas). It should further
+     * respect the reduced set of characters as per the following regular expression (as expected by OpenAPI): {@code ^[a-zA-Z0-9\.\-_]+$}
+     *
+     * @return whether to use only alphanumeric characters, dots, dashes and underscores in {@link SchemaKeyword#TAG_REF} values
+     */
+    boolean shouldUsePlainDefinitionKeys();
+
+    /**
      * Determine whether unnecessary {@link SchemaKeyword#TAG_ALLOF} elements should be removed and merged into their declaring schema when there are
      * no conflicts between the sub-schemas.
      *

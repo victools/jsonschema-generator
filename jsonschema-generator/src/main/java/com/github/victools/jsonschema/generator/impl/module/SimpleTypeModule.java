@@ -62,13 +62,13 @@ public class SimpleTypeModule implements Module {
 
         module.withEmptySchema(Object.class);
 
-        Stream.of(String.class, Character.class, char.class, CharSequence.class)
+        Stream.of(String.class, Character.class, char.class, CharSequence.class, Byte.class, byte.class)
                 .forEach(module::withStringType);
 
         Stream.of(Boolean.class, boolean.class)
                 .forEach(module::withBooleanType);
 
-        Stream.of(Integer.class, int.class, Long.class, long.class, Short.class, short.class, Byte.class, byte.class)
+        Stream.of(Integer.class, int.class, Long.class, long.class, Short.class, short.class)
                 .forEach(module::withIntegerType);
 
         Stream.of(Double.class, double.class, Float.class, float.class)

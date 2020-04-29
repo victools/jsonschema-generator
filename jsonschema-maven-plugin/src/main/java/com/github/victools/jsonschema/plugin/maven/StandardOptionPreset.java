@@ -16,23 +16,29 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
+import com.github.victools.jsonschema.generator.OptionPreset;
+
 /**
- * Configuration class to hold the configuration of generator modules and their options.
+ * Enum of supported standard {@link OptionPreset}s that can be configured.
  */
-public class GeneratorModule {
+public enum StandardOptionPreset {
+    FULL_DOCUMENTATION(OptionPreset.FULL_DOCUMENTATION),
+    PLAIN_JSON(OptionPreset.PLAIN_JSON),
+    JAVA_OBJECT(OptionPreset.JAVA_OBJECT),
+    NONE(new OptionPreset());
+
+    private final OptionPreset preset;
+
+    private StandardOptionPreset(OptionPreset preset) {
+        this.preset = preset;
+    }
 
     /**
-     * Name of the module.
+     * Getter for the corresponding {@link OptionPreset} instance.
+     *
+     * @return {@link OptionPreset} instance
      */
-    public String name;
-
-    /**
-     * The fully qualified java class name of the module.
-     */
-    public String className;
-
-    /**
-     * The options to be configured on the module.
-     */
-    public String[] options;
+    public OptionPreset getPreset() {
+        return this.preset;
+    }
 }

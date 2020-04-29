@@ -16,11 +16,12 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
-import java.util.function.Predicate;
+import java.util.Map;
 
 /**
  * Default module being included if {@code Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT} is enabled.
@@ -28,44 +29,47 @@ import java.util.function.Predicate;
 public class AdditionalPropertiesModule implements Module {
 
     /**
+     * Create module instance that specifically allows additional properties on {@link Map} instances.
+     *
+     * @return module instance
+     */
+    public static AdditionalPropertiesModule forMapValues() {
+        return new AdditionalPropertiesModule(scope -> {
+            if (scope.getType().isInstanceOf(Map.class)) {
+                // within a Map<Key, Value> allow additionalProperties of the Value type
+                // if no type parameters are defined, this will result in additionalProperties to be omitted (by way of returning Object.class)
+                return scope.getTypeParameterFor(Map.class, 1);
+            }
+            return null;
+        });
+    }
+
+    /**
      * Create module instance that forbids additional properties everywhere but on container types.
      * <br>
-     * This assumes that the respective {@link SimpleTypeModule} instance is being applied first and already enforces the "additionProperties" keyword
-     * to be omitted on other non-object schemas.
+     * This assumes that the respective {@link SimpleTypeModule} instance is being applied first and already enforces the "additionalProperties"
+     * keyword to be omitted on other non-object schemas.
      *
      * @return module instance
      */
     public static AdditionalPropertiesModule forbiddenForAllObjectsButContainers() {
-        return new AdditionalPropertiesModule(scope -> !scope.isContainerType());
+        return new AdditionalPropertiesModule(scope -> scope.isContainerType() ? null : Void.class);
     }
 
-    private final Predicate<TypeScope> exclusionCheck;
+    private final ConfigFunction<TypeScope, Type> additionalPropertiesResolver;
 
     /**
      * Constructor.
      *
-     * @param exclusionCheck determining whether additionalProperties should be forbidden on a given scope
+     * @param additionalPropertiesResolver resolver for additionalProperties
      */
-    public AdditionalPropertiesModule(Predicate<TypeScope> exclusionCheck) {
-        this.exclusionCheck = exclusionCheck;
+    public AdditionalPropertiesModule(ConfigFunction<TypeScope, Type> additionalPropertiesResolver) {
+        this.additionalPropertiesResolver = additionalPropertiesResolver;
     }
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         builder.forTypesInGeneral()
-                .withAdditionalPropertiesResolver(this::resolveAdditionalProperties);
-    }
-
-    /**
-     * Either forbid additionProperties (according to the specified check) or leave it up to other configurations.
-     *
-     * @param scope type scope for which to determine whether additionalProperties should be forbidden
-     * @return either Void.class to indicate forbidden additionalProperties or null
-     */
-    private Type resolveAdditionalProperties(TypeScope scope) {
-        if (this.exclusionCheck.test(scope)) {
-            return Void.class;
-        }
-        return null;
+                .withAdditionalPropertiesResolver(this.additionalPropertiesResolver);
     }
 }

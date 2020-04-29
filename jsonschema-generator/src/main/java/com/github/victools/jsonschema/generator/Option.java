@@ -196,6 +196,10 @@ public enum Option {
      */
     NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT(null, null),
     /**
+     * Whether a {@link java.util.Map Map&lt;K, V&gt;} schema's "additionalProperties" should be set to its declared value type {@code V}.
+     */
+    MAP_VALUES_AS_ADDITIONAL_PROPERTIES(AdditionalPropertiesModule::forMapValues, null),
+    /**
      * Whether a schema's "additionalProperties" should be set to "false" if no specific configuration says otherwise.
      * <br>
      * Without this option, i.e. by default the "additionalProperties" keyword will be omitted and thereby allowing any additional properties in an
@@ -227,6 +231,12 @@ public enum Option {
      * </p>
      */
     INLINE_ALL_SCHEMAS(InlineSchemaModule::new, null, Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.DEFINITION_FOR_MAIN_SCHEMA),
+    /**
+     * Generally, keys in the collected "definitions"/"$defs" are ensured to be URI compatible but may include parentheses and commas for listing type
+     * parameters. By enabling this option, these parentheses and commas will be removed to conform with a reduced set of characters, e.g. as expected
+     * by OpenAPI: following the regular expression {@code ^[a-zA-Z0-9\.\-_]+$}.
+     */
+    PLAIN_DEFINITION_KEYS(null, null),
     /**
      * Whether as the last step of the schema generation, unnecessary "allOf" elements (i.e. where there are no conflicts/overlaps between the
      * contained sub-schemas) should be merged into one, in order to make the generated schema more readable. This also applies to manually added

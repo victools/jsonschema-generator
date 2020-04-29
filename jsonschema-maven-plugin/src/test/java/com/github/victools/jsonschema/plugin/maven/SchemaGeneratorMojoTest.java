@@ -16,116 +16,218 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import java.io.File;
+import java.io.FileReader;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import org.apache.commons.io.FileUtils;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import java.io.File;
-import java.io.StringReader;
+@RunWith(JUnitParamsRunner.class)
+public class SchemaGeneratorMojoTest {
 
-public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
+    @Rule
+    public MojoRule rule = new MojoRule();
 
-    private PlexusConfiguration pluginConfiguration;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp()
-            throws Exception {
-        super.setUp();
-
-        String pom =
-                "<project>\n" +
-                        "    <build>\n" +
-                        "        <plugins>\n" +
-                        "            <plugin>\n" +
-                        "                <groupId>com.github.victools</groupId>\n" +
-                        "                <artifactId>jsonschema-maven-plugin</artifactId>\n" +
-                        "                <version>4.8.0</version>\n" +
-                        "                <configuration>\n" +
-                        "                    <className>" +
-                        "com.github.victools.jsonschema.plugin.maven.TestClass</className>\n" +
-                        "                    <schemaFileName>result.json</schemaFileName>\n" +
-                        "                    <schemaFilePath>target/generated-test-sources</schemaFilePath>\n" +
-                        "                    <options>\n" +
-                        "                        <option>DEFINITIONS_FOR_ALL_OBJECTS</option>\n" +
-                        "                    </options>\n" +
-                        "                    <modules>\n" +
-                        "                        <module>\n" +
-                        "                            <name>Jackson</name>\n" +
-                        "                            <options>\n" +
-                        "                                <option>FLATTENED_ENUMS_FROM_JSONVALUE</option>\n" +
-                        "                            </options>\n" +
-                        "                        </module>\n" +
-                        "                        <module>\n" +
-                        "                            <className>" +
-                        "com.github.victools.jsonschema.plugin.maven.TestModule</className>\n" +
-                        "                        </module>\n" +
-                        "                    </modules>\n" +
-                        "                </configuration>\n" +
-                        "            </plugin>\n" +
-                        "        </plugins>\n" +
-                        "    </build>" +
-                        "</project>";
-
-        Xpp3Dom pomDom = Xpp3DomBuilder.build(new StringReader(pom));
-        pluginConfiguration = extractPluginConfiguration("jsonschema-maven-plugin", pomDom);
+    public Object[] parametersForTestGeneration() {
+        return new Object[][]{
+                {"DefaultConfig"},
+                {"SchemaVersion"},
+                {"JacksonModule"},
+                {"Complete"}
+        };
     }
 
     /**
-     * Unit test to test the basic working with a complete configuration
+     * Unit that will generate from a maven pom file fragment and compare with a reference file
      *
      * @throws Exception In case something goes wrong
      */
-    public void testBasicWorking() throws Exception {
-        SchemaGeneratorMojo myMojo = (SchemaGeneratorMojo) lookupConfiguredMojo(new MavenProject(), "generate-schema");
-        myMojo = (SchemaGeneratorMojo) configureMojo(myMojo, pluginConfiguration);
+    @Test
+    @Parameters
+    public void testGeneration(String testCaseName) throws Exception {
+        File testCaseLocation = new File("src/test/resources/reference-test-cases");
+        File generationLocation = new File("target/generated-test-sources");
 
-        myMojo.execute();
+        // Execute the pom
+        executePom(new File(testCaseLocation, testCaseName + "-pom.xml"));
 
         // Validate that the schema files is created.
-        File file = new File("target/generated-test-sources/result.json");
-        assertTrue(file.exists());
+        File resultFile = new File(generationLocation,testCaseName + "/TestClass-schema.json");
+        Assert.assertTrue(resultFile.exists());
+        resultFile.deleteOnExit();
+
+        // Validate that is the same as the reference
+        File referenceFile = new File(testCaseLocation + "/" + testCaseName + "-reference.json");
+        Assert.assertTrue(referenceFile.exists());
+        Assert.assertTrue("Generated schema for " + testCaseName + " is not equal to the expected reference.",
+                FileUtils.contentEquals(resultFile, referenceFile));
+    }
+
+    public Object[] parametersForTestPomErrors() {
+        return new Object[][]{
+                {"ClassNotFound"},
+                {"UnknownModule"}
+        };
     }
 
     /**
-     * Unit test a setup with the default setup
+     * Unit test that will generate from a maven pom file fragment and expect a MojoExecutionException.
      *
+     * @param testCaseName Name of the test case and file name prefix of the example {@code pom.xml}
      * @throws Exception In case something goes wrong
      */
-    public void testDefaultConfig() throws Exception {
-        String pom =
-                "<project>\n" +
-                        "    <build>\n" +
-                        "        <plugins>\n" +
-                        "            <plugin>\n" +
-                        "                <groupId>com.github.victools</groupId>\n" +
-                        "                <artifactId>jsonschema-maven-plugin</artifactId>\n" +
-                        "                <version>4.8.0</version>\n" +
-                        "                <configuration>\n" +
-                        "                    <className>" +
-                        "com.github.victools.jsonschema.plugin.maven.TestClass</className>\n" +
-                        "                    <schemaFileName>defaultConfig.json</schemaFileName>\n" +
-                        "                    <schemaFilePath>target/generated-test-sources</schemaFilePath>\n" +
-                        "                </configuration>\n" +
-                        "            </plugin>\n" +
-                        "        </plugins>\n" +
-                        "    </build>" +
-                        "</project>";
+    @Test(expected = MojoExecutionException.class)
+    @Parameters
+    public void testPomErrors(String testCaseName) throws Exception {
+        File testCaseLocation = new File("src/test/resources/error-test-cases");
+        executePom(new File(testCaseLocation, testCaseName + "-pom.xml"));
+    }
 
-        Xpp3Dom pomDom = Xpp3DomBuilder.build(new StringReader(pom));
-        PlexusConfiguration defaultConfiguration = extractPluginConfiguration("jsonschema-maven-plugin", pomDom);
-        SchemaGeneratorMojo myMojo = (SchemaGeneratorMojo) lookupConfiguredMojo(new MavenProject(), "generate-schema");
-        myMojo = (SchemaGeneratorMojo) configureMojo(myMojo, defaultConfiguration);
+    public Object[] parametersForTestPomConfigurationErrors() {
+        return new Object[][]{
+                {"UnknownSchemaVersion"},
+                {"UnknownGeneratorPreset"}
+        };
+    }
 
+    /**
+     * Unit test that will generate from a maven pom file fragment and expect a ComponentConfigurationException.
+     *
+     * @param testCaseName Name of the test case and file name prefix of the example {@code pom.xml}
+     * @throws Exception In case something goes wrong
+     */
+    @Test(expected = ComponentConfigurationException.class)
+    @Parameters
+    public void testPomConfigurationErrors(String testCaseName) throws Exception {
+        File testCaseLocation = new File("src/test/resources/error-test-cases");
+        executePom(new File(testCaseLocation, testCaseName + "-pom.xml"));
+    }
+
+    /**
+     * Unit test to test the generation of schemas for multiple classes
+     */
+    @Test
+    public void testTwoClasses() throws Exception {
+        File testCaseLocation = new File("src/test/resources/reference-test-cases");
+        File generationLocation = new File("target/generated-test-sources/TwoClasses");
+
+        // Execute the pom
+        executePom(new File("src/test/resources/reference-test-cases/TwoClasses-pom.xml"));
+
+        // Validate that the schema files are created.
+        File resultFileA = new File(generationLocation,"TestClassA.schema");
+        Assert.assertTrue(resultFileA.exists());
+        resultFileA.deleteOnExit();
+
+        File resultFileB = new File(generationLocation,"TestClassB.schema");
+        Assert.assertTrue(resultFileB.exists());
+        resultFileB.deleteOnExit();
+
+        // Validate that they are the same as the reference
+        File referenceFileA = new File(testCaseLocation + "/" + "TestClassA-reference.json");
+        Assert.assertTrue(referenceFileA.exists());
+        Assert.assertTrue("Generated schema for TestClassA is not equal to the expected reference.",
+                FileUtils.contentEquals(resultFileA, referenceFileA));
+
+        File referenceFileB = new File(testCaseLocation + "/" + "TestClassB-reference.json");
+        Assert.assertTrue(referenceFileB.exists());
+        Assert.assertTrue("Generated schema for TestClassB is not equal to the expected reference.",
+                FileUtils.contentEquals(resultFileB, referenceFileB));
+    }
+
+    /**
+     * Unit test to test the generation of schemas for multiple classes
+     */
+    @Test
+    public void testPackageName() throws Exception {
+        File testCaseLocation = new File("src/test/resources/reference-test-cases");
+        File generationLocation = new File("target/generated-test-sources/PackageName");
+
+        // Execute the pom
+        executePom(new File("src/test/resources/reference-test-cases/PackageName-pom.xml"));
+
+        // Validate that the schema files are created.
+        File resultFileA = new File(generationLocation,"TestClassA-schema.json");
+        Assert.assertTrue(resultFileA.exists());
+        resultFileA.deleteOnExit();
+
+        File resultFileB = new File(generationLocation,"TestClassB-schema.json");
+        Assert.assertTrue(resultFileB.exists());
+        resultFileB.deleteOnExit();
+
+        // Validate that they are the same as the reference
+        File referenceFileA = new File(testCaseLocation + "/" + "TestClassA-reference.json");
+        Assert.assertTrue(referenceFileA.exists());
+        Assert.assertTrue("Generated schema for TestClassA is not equal to the expected reference.",
+                FileUtils.contentEquals(resultFileA, referenceFileA));
+
+        File referenceFileB = new File(testCaseLocation + "/" + "TestClassB-reference.json");
+        Assert.assertTrue(referenceFileB.exists());
+        Assert.assertTrue("Generated schema for TestClassB is not equal to the expected reference.",
+                FileUtils.contentEquals(resultFileB, referenceFileB));
+    }
+
+    /**
+     * Unit test to test the generation of schemas for multiple classes
+     */
+    @Test
+    public void testFileNamePattern() throws Exception {
+        File testCaseLocation = new File("src/test/resources/reference-test-cases");
+        File generationLocation = new File("target/generated-test-sources/SchemaFileName/schemas/"+
+                "com/github/victools/jsonschema/plugin/maven/TestPackage");
+
+        // Execute the pom
+        executePom(new File("src/test/resources/reference-test-cases/SchemaFileName-pom.xml"));
+
+        // Validate that the schema files are created.
+        File resultFileA = new File(generationLocation,"TestClassA.schema");
+        Assert.assertTrue(resultFileA.exists());
+        resultFileA.deleteOnExit();
+
+        File resultFileB = new File(generationLocation,"TestClassB.schema");
+        Assert.assertTrue(resultFileB.exists());
+        resultFileB.deleteOnExit();
+
+        // Validate that they are the same as the reference
+        File referenceFileA = new File(testCaseLocation + "/" + "TestClassA-reference.json");
+        Assert.assertTrue(referenceFileA.exists());
+        Assert.assertTrue("Generated schema for TestClassA is not equal to the expected reference.",
+                FileUtils.contentEquals(resultFileA, referenceFileA));
+
+        File referenceFileB = new File(testCaseLocation + "/" + "TestClassB-reference.json");
+        Assert.assertTrue(referenceFileB.exists());
+        Assert.assertTrue("Generated schema for TestClassB is not equal to the expected reference.",
+                FileUtils.contentEquals(resultFileB, referenceFileB));
+    }
+
+    /**
+     * Execute the schema-generator plugin as define the the given pom file
+     *
+     * @param pomFile The pom file
+     * @throws Exception In case of problems
+     */
+    private void executePom(File pomFile) throws Exception {
+        // Get the maven pom file content
+        Xpp3Dom pomDom = Xpp3DomBuilder.build(new FileReader(pomFile));
+        PlexusConfiguration configuration = rule.extractPluginConfiguration("jsonschema-maven-plugin", pomDom);
+
+        // Configure the Mojo
+        SchemaGeneratorMojo myMojo = (SchemaGeneratorMojo) rule.lookupConfiguredMojo(new MavenProject(), "generate");
+        myMojo = (SchemaGeneratorMojo) rule.configureMojo(myMojo, configuration);
+
+        // And execute
         myMojo.execute();
-
-        // Validate that the schema files is created.
-        File file = new File("target/generated-test-sources/defaultConfig.json");
-        assertTrue(file.exists());
     }
 
 }

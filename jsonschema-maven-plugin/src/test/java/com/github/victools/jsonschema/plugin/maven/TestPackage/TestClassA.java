@@ -14,25 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.plugin.maven;
+package com.github.victools.jsonschema.plugin.maven.TestPackage;
 
-/**
- * Configuration class to hold the configuration of generator modules and their options.
- */
-public class GeneratorModule {
+import com.fasterxml.jackson.annotation.JsonClassDescription;
 
-    /**
-     * Name of the module.
-     */
-    public String name;
+@JsonClassDescription("Jackson annotation class for Test Class A")
+public class TestClassA {
 
-    /**
-     * The fully qualified java class name of the module.
-     */
-    public String className;
+    private String aString;
 
-    /**
-     * The options to be configured on the module.
-     */
-    public String[] options;
+    public TestClassA(String aString) {
+        this.aString = aString;
+    }
 }
