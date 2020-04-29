@@ -124,6 +124,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldSortPropertiesAlphabetically() {
+        return !this.isOptionEnabled(Option.PROPERTIES_IN_DECLARATION_ORDER);
+    }
+
+    @Override
     public boolean shouldCleanupUnnecessaryAllOfElements() {
         return this.isOptionEnabled(Option.ALLOF_CLEANUP_AT_THE_END);
     }

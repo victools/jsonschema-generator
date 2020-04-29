@@ -86,6 +86,14 @@ public interface SchemaGeneratorConfig {
     boolean shouldUsePlainDefinitionKeys();
 
     /**
+     * Determine whether the fields and methods should be sorted alphabetically instead of being included in the declaration order. The declaration
+     * order applies per type, i.e. the non-overridden properties declared in supertypes will be listed after the subtype's properties.
+     *
+     * @return whether to sort properties alphabetically
+     */
+    boolean shouldSortPropertiesAlphabetically();
+
+    /**
      * Determine whether unnecessary {@link SchemaKeyword#TAG_ALLOF} elements should be removed and merged into their declaring schema when there are
      * no conflicts between the sub-schemas.
      *

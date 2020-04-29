@@ -196,6 +196,14 @@ public enum Option {
      */
     NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT(null, null),
     /**
+     * Whether the declaration order of fields and methods should be preserved instead of sorting them alphabetically. The declaration order applies
+     * per type, i.e. the non-overridden properties declared in supertypes will be listed after a respective subtype's properties. Additionally,
+     * static properties are being listed after all non-static properties, if they are included.
+     *
+     * @since 4.12.0
+     */
+    PROPERTIES_IN_DECLARATION_ORDER(null, null),
+    /**
      * Whether a {@link java.util.Map Map&lt;K, V&gt;} schema's "additionalProperties" should be set to its declared value type {@code V}.
      *
      * @since 4.11.0

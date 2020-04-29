@@ -28,6 +28,7 @@ import org.junit.runners.Suite;
     SchemaGeneratorComplexTypesTest.class,
     SchemaGeneratorSubtypesTest.class,
     SchemaGeneratorCustomDefinitionsTest.class,
+    SchemaGeneratorOptionsTest.class,
     SchemaGeneratorAllOfCleanUpTest.class
 })
 public class SchemaGeneratorTest {

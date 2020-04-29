@@ -40,13 +40,15 @@ import com.github.victools.jsonschema.generator.TypeScope;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -62,6 +64,9 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
 
     private final SchemaGeneratorConfig generatorConfig;
     private final TypeContext typeContext;
+    private final Supplier<Map<String, JsonNode>> propertyMapSupplier;
+    private final Supplier<Set<String>> propertyNameSetSupplier;
+
     private final Map<DefinitionKey, ObjectNode> definitions = new LinkedHashMap<>();
     private final Map<DefinitionKey, List<ObjectNode>> references = new HashMap<>();
     private final Map<DefinitionKey, List<ObjectNode>> nullableReferences = new HashMap<>();
@@ -75,6 +80,13 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     public SchemaGenerationContextImpl(SchemaGeneratorConfig generatorConfig, TypeContext typeContext) {
         this.generatorConfig = generatorConfig;
         this.typeContext = typeContext;
+        if (this.generatorConfig.shouldSortPropertiesAlphabetically()) {
+            this.propertyMapSupplier = TreeMap::new;
+            this.propertyNameSetSupplier = TreeSet::new;
+        } else {
+            this.propertyMapSupplier = LinkedHashMap::new;
+            this.propertyNameSetSupplier = LinkedHashSet::new;
+        }
     }
 
     @Override
@@ -412,9 +424,9 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     private void generateObjectDefinition(ResolvedType targetType, ObjectNode definition) {
         definition.put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT));
 
-        final Map<String, JsonNode> targetFields = new TreeMap<>();
-        final Map<String, JsonNode> targetMethods = new TreeMap<>();
-        final Set<String> requiredProperties = new HashSet<>();
+        final Map<String, JsonNode> targetFields = this.propertyMapSupplier.get();
+        final Map<String, JsonNode> targetMethods = this.propertyMapSupplier.get();
+        final Set<String> requiredProperties = this.propertyNameSetSupplier.get();
 
         this.collectObjectProperties(targetType, targetFields, targetMethods, requiredProperties);
 
