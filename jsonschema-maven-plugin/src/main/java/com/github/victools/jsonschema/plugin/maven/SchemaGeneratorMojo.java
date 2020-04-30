@@ -44,7 +44,6 @@ import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -321,7 +320,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             if (module.className != null && !module.className.isEmpty()) {
                 try {
                     this.getLog().debug("- Adding custom Module " + module.className);
-                    Class<? extends Module> moduleClass = (Class<? extends Module>) loadClass(module.className);
+                    Class<? extends Module> moduleClass = (Class<? extends Module>) this.loadClass(module.className);
                     Module moduleInstance = moduleClass.getConstructor().newInstance();
                     configBuilder.with(moduleInstance);
                 } catch (ClassCastException | InstantiationException
@@ -357,12 +356,12 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @return The classloader
      */
     private ClassLoader getClassLoader() {
-        if (classLoader == null) {
+        if (this.classLoader == null) {
             List<String> runtimeClasspathElements = null;
             try {
                 runtimeClasspathElements = project.getRuntimeClasspathElements();
             } catch (DependencyResolutionRequiredException e) {
-                e.printStackTrace();
+                this.getLog().error("Failed to resolve runtime classpath elements", e);
             }
 
             if (runtimeClasspathElements != null) {
@@ -372,15 +371,15 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                     try {
                         runtimeUrls[i] = new File(element).toURI().toURL();
                     } catch (MalformedURLException e) {
-                        e.printStackTrace();
+                        this.getLog().error("Failed to resolve runtime classpath element", e);
                     }
                 }
-                classLoader = new URLClassLoader(runtimeUrls,
+                this.classLoader = new URLClassLoader(runtimeUrls,
                         Thread.currentThread().getContextClassLoader());
             }
         }
 
-        return classLoader;
+        return this.classLoader;
     }
 
     /**
@@ -392,7 +391,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private Class<?> loadClass(String className) throws MojoExecutionException {
         try {
-            return getClassLoader().loadClass(className);
+            return this.getClassLoader().loadClass(className);
         } catch (ClassNotFoundException e) {
             throw new MojoExecutionException("Error loading class " + className, e);
         }
