@@ -197,6 +197,8 @@ public enum Option {
     NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT(null, null),
     /**
      * Whether a {@link java.util.Map Map&lt;K, V&gt;} schema's "additionalProperties" should be set to its declared value type {@code V}.
+     *
+     * @since 4.11.0
      */
     MAP_VALUES_AS_ADDITIONAL_PROPERTIES(AdditionalPropertiesModule::forMapValues, null),
     /**
@@ -204,6 +206,8 @@ public enum Option {
      * <br>
      * Without this option, i.e. by default the "additionalProperties" keyword will be omitted and thereby allowing any additional properties in an
      * object schema).
+     *
+     * @since 4.2.0
      */
     FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT(AdditionalPropertiesModule::forbiddenForAllObjectsButContainers, null),
     /**
@@ -221,6 +225,8 @@ public enum Option {
      * Beware: this only results in a valid schema from {@link SchemaVersion#DRAFT_2019_09} onward. Before that, everything besides "$ref" would be
      * ignored.
      * </p>
+     *
+     * @since 4.11.0
      */
     DEFINITION_FOR_MAIN_SCHEMA(null, null),
     /**
@@ -229,18 +235,24 @@ public enum Option {
      * <p>
      * Beware: This will result in an exception being thrown if a single circular reference is being encountered!
      * </p>
+     *
+     * @since 4.10.0
      */
     INLINE_ALL_SCHEMAS(InlineSchemaModule::new, null, Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.DEFINITION_FOR_MAIN_SCHEMA),
     /**
      * Generally, keys in the collected "definitions"/"$defs" are ensured to be URI compatible but may include parentheses and commas for listing type
      * parameters. By enabling this option, these parentheses and commas will be removed to conform with a reduced set of characters, e.g. as expected
      * by OpenAPI: following the regular expression {@code ^[a-zA-Z0-9\.\-_]+$}.
+     *
+     * @since 4.11.0
      */
     PLAIN_DEFINITION_KEYS(null, null),
     /**
      * Whether as the last step of the schema generation, unnecessary "allOf" elements (i.e. where there are no conflicts/overlaps between the
      * contained sub-schemas) should be merged into one, in order to make the generated schema more readable. This also applies to manually added
      * "allOf" elements, e.g. through custom definitions or attribute overrides.
+     *
+     * @since 4.6.0
      */
     ALLOF_CLEANUP_AT_THE_END(null, null);
 
