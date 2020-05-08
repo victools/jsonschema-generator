@@ -220,7 +220,7 @@
                     <executions>
                         <execution>
                             <configuration>
-                                <configLocation>checkstyle.xml</configLocation>
+                                <configLocation>../checkstyle.xml</configLocation>
                                 <sourceDirectories>${project.build.sourceDirectory}</sourceDirectories>
                                 <encoding>UTF-8</encoding>
                                 <consoleOutput>true</consoleOutput>
