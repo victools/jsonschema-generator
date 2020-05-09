@@ -16,12 +16,6 @@
                     "exclusiveMaximum": 11,
                     "multipleOf": 1
                 },
-                "isPresent()": {
-                    "type": "boolean",
-                    "$anchor": "#anchor",
-                    "title": "boolean",
-                    "description": "for type in general: boolean"
-                },
                 "orElse(Integer)": {
                     "type": ["integer", "null"],
                     "$anchor": "#anchor",
@@ -34,6 +28,12 @@
                     "maximum": 1E+1,
                     "exclusiveMaximum": 11,
                     "multipleOf": 1
+                },
+                "isPresent()": {
+                    "type": "boolean",
+                    "$anchor": "#anchor",
+                    "title": "boolean",
+                    "description": "for type in general: boolean"
                 }
             },
             "$anchor": "#anchor",
@@ -55,19 +55,13 @@
                     "format": "date",
                     "pattern": "^.{1,256}$"
                 },
-                "oldMode": {
-                    "type": "integer",
-                    "$anchor": "#anchor",
-                    "title": "int",
-                    "description": "for type in general: int"
-                },
                 "ordinal": {
                     "type": "integer",
                     "$anchor": "#anchor",
                     "title": "int",
                     "description": "for type in general: int"
                 },
-                "compareTo(RoundingMode)": {
+                "oldMode": {
                     "type": "integer",
                     "$anchor": "#anchor",
                     "title": "int",
@@ -85,11 +79,11 @@
                     "format": "date",
                     "pattern": "^.{1,256}$"
                 },
-                "valueOf(String)": {
-                    "$ref": "#/definitions/RoundingMode-nullable"
-                },
-                "valueOf(int)": {
-                    "$ref": "#/definitions/RoundingMode-nullable"
+                "compareTo(RoundingMode)": {
+                    "type": "integer",
+                    "$anchor": "#anchor",
+                    "title": "int",
+                    "description": "for type in general: int"
                 },
                 "values()": {
                     "type": ["array", "null"],
@@ -101,6 +95,12 @@
                     "minItems": 2,
                     "maxItems": 100,
                     "uniqueItems": false
+                },
+                "valueOf(int)": {
+                    "$ref": "#/definitions/RoundingMode-nullable"
+                },
+                "valueOf(String)": {
+                    "$ref": "#/definitions/RoundingMode-nullable"
                 }
             },
             "$anchor": "#anchor",
@@ -118,19 +118,16 @@
         "TestClass1": {
             "type": "object",
             "properties": {
-                "CONSTANT": {
-                    "type": "integer",
-                    "const": 5,
+                "genericValue": {
+                    "type": ["string", "null"],
                     "$anchor": "#anchor",
-                    "title": "Long",
-                    "description": "for type in general: Long",
-                    "default": 1,
-                    "enum": [1, 2, 3, 4, 5],
-                    "minimum": 1,
-                    "exclusiveMinimum": 0,
-                    "maximum": 1E+1,
-                    "exclusiveMaximum": 11,
-                    "multipleOf": 1
+                    "title": "String",
+                    "description": "for type in general: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
                 },
                 "genericArray": {
                     "type": ["array", "null"],
@@ -151,16 +148,11 @@
                     "maxItems": 100,
                     "uniqueItems": false
                 },
-                "genericValue": {
-                    "type": ["string", "null"],
+                "primitiveValue": {
+                    "type": "integer",
                     "$anchor": "#anchor",
-                    "title": "String",
-                    "description": "for type in general: String",
-                    "const": "constant string value",
-                    "minLength": 1,
-                    "maxLength": 256,
-                    "format": "date",
-                    "pattern": "^.{1,256}$"
+                    "title": "int",
+                    "description": "for type in general: int"
                 },
                 "ignoredInternalValue": {
                     "type": ["integer", "null"],
@@ -175,7 +167,13 @@
                     "exclusiveMaximum": 11,
                     "multipleOf": 1
                 },
-                "primitiveValue": {
+                "isSimpleTestClass()": {
+                    "type": "boolean",
+                    "$anchor": "#anchor",
+                    "title": "boolean",
+                    "description": "for type in general: boolean"
+                },
+                "getPrimitiveValue()": {
                     "type": "integer",
                     "$anchor": "#anchor",
                     "title": "int",
@@ -193,17 +191,19 @@
                     "format": "date",
                     "pattern": "^.{1,256}$"
                 },
-                "getPrimitiveValue()": {
+                "CONSTANT": {
                     "type": "integer",
+                    "const": 5,
                     "$anchor": "#anchor",
-                    "title": "int",
-                    "description": "for type in general: int"
-                },
-                "isSimpleTestClass()": {
-                    "type": "boolean",
-                    "$anchor": "#anchor",
-                    "title": "boolean",
-                    "description": "for type in general: boolean"
+                    "title": "Long",
+                    "description": "for type in general: Long",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 1E+1,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
                 }
             },
             "$id": "id-TestClass1",
@@ -228,6 +228,19 @@
         "TestClass2(Long)": {
             "type": "object",
             "properties": {
+                "genericValue": {
+                    "type": ["integer", "null"],
+                    "$anchor": "#anchor",
+                    "title": "Long",
+                    "description": "for type in general: Long",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 1E+1,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
+                },
                 "genericArray": {
                     "type": ["array", "null"],
                     "items": {
@@ -248,19 +261,6 @@
                     "minItems": 2,
                     "maxItems": 100,
                     "uniqueItems": false
-                },
-                "genericValue": {
-                    "type": ["integer", "null"],
-                    "$anchor": "#anchor",
-                    "title": "Long",
-                    "description": "for type in general: Long",
-                    "default": 1,
-                    "enum": [1, 2, 3, 4, 5],
-                    "minimum": 1,
-                    "exclusiveMinimum": 0,
-                    "maximum": 1E+1,
-                    "exclusiveMaximum": 11,
-                    "multipleOf": 1
                 },
                 "getGenericValue()": {
                     "type": ["integer", "null"],
@@ -307,6 +307,17 @@
         "TestClass2(String)": {
             "type": "object",
             "properties": {
+                "genericValue": {
+                    "type": ["string", "null"],
+                    "$anchor": "#anchor",
+                    "title": "String",
+                    "description": "for type in general: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
+                },
                 "genericArray": {
                     "type": ["array", "null"],
                     "items": {
@@ -325,17 +336,6 @@
                     "minItems": 2,
                     "maxItems": 100,
                     "uniqueItems": false
-                },
-                "genericValue": {
-                    "type": ["string", "null"],
-                    "$anchor": "#anchor",
-                    "title": "String",
-                    "description": "for type in general: String",
-                    "const": "constant string value",
-                    "minLength": 1,
-                    "maxLength": 256,
-                    "format": "date",
-                    "pattern": "^.{1,256}$"
                 },
                 "getGenericValue()": {
                     "type": ["string", "null"],
@@ -378,6 +378,18 @@
         "TestClass2(TestClass1*)-nullable": {
             "type": ["object", "null"],
             "properties": {
+                "genericValue": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/TestClass1"
+                    },
+                    "$id": "id-TestClass1[]",
+                    "title": "TestClass1[]",
+                    "description": "for type in general: TestClass1[]",
+                    "minItems": 2,
+                    "maxItems": 100,
+                    "uniqueItems": false
+                },
                 "genericArray": {
                     "type": ["array", "null"],
                     "items": {
@@ -395,18 +407,6 @@
                     "$id": "id-TestClass1[][]<TestClass1[]>",
                     "title": "TestClass1[][]<TestClass1[]>",
                     "description": "for type in general: TestClass1[][]<TestClass1[]>",
-                    "minItems": 2,
-                    "maxItems": 100,
-                    "uniqueItems": false
-                },
-                "genericValue": {
-                    "type": ["array", "null"],
-                    "items": {
-                        "$ref": "#/definitions/TestClass1"
-                    },
-                    "$id": "id-TestClass1[]",
-                    "title": "TestClass1[]",
-                    "description": "for type in general: TestClass1[]",
                     "minItems": 2,
                     "maxItems": 100,
                     "uniqueItems": false
@@ -447,6 +447,9 @@
         "TestClass2(TestClass2(String))-nullable": {
             "type": ["object", "null"],
             "properties": {
+                "genericValue": {
+                    "$ref": "#/definitions/TestClass2(String)-nullable"
+                },
                 "genericArray": {
                     "type": ["array", "null"],
                     "items": {
@@ -458,9 +461,6 @@
                     "minItems": 2,
                     "maxItems": 100,
                     "uniqueItems": false
-                },
-                "genericValue": {
-                    "$ref": "#/definitions/TestClass2(String)-nullable"
                 },
                 "getGenericValue()": {
                     "$ref": "#/definitions/TestClass2(String)-nullable"
@@ -480,13 +480,6 @@
         "TestClass4(Integer,String)-nullable": {
             "type": ["object", "null"],
             "properties": {
-                "DEFAULT_ROUNDING_MODE": {
-                    "allOf": [{
-                            "$ref": "#/definitions/RoundingMode"
-                        }, {
-                            "const": "HALF_UP"
-                        }]
-                },
                 "class2OfClass2OfT": {
                     "$ref": "#/definitions/TestClass2(TestClass2(String))-nullable"
                 },
@@ -495,6 +488,13 @@
                 },
                 "getClass2OfClass2OfT()": {
                     "$ref": "#/definitions/TestClass2(TestClass2(String))-nullable"
+                },
+                "DEFAULT_ROUNDING_MODE": {
+                    "allOf": [{
+                            "$ref": "#/definitions/RoundingMode"
+                        }, {
+                            "const": "HALF_UP"
+                        }]
                 }
             },
             "$id": "id-TestClass4<Integer, String>",
@@ -516,16 +516,28 @@
     },
     "type": "object",
     "properties": {
-        "class4": {
-            "$ref": "#/definitions/TestClass4(Integer,String)-nullable"
+        "nestedLong": {
+            "$ref": "#/definitions/TestClass2(Long)-nullable"
         },
         "nestedClass1Array": {
             "$ref": "#/definitions/TestClass2(TestClass1*)-nullable"
         },
-        "nestedLong": {
-            "$ref": "#/definitions/TestClass2(Long)-nullable"
-        },
         "nestedLongList": {
+            "type": ["array", "null"],
+            "items": {
+                "$ref": "#/definitions/TestClass2(Long)"
+            },
+            "$id": "id-List<TestClass2<Long>>",
+            "title": "List<TestClass2<Long>>",
+            "description": "for type in general: List<TestClass2<Long>>",
+            "minItems": 2,
+            "maxItems": 100,
+            "uniqueItems": false
+        },
+        "class4": {
+            "$ref": "#/definitions/TestClass4(Integer,String)-nullable"
+        },
+        "getNestedLongList()": {
             "type": ["array", "null"],
             "items": {
                 "$ref": "#/definitions/TestClass2(Long)"
@@ -540,23 +552,11 @@
         "getClass4()": {
             "$ref": "#/definitions/TestClass4(Integer,String)-nullable"
         },
-        "getNestedClass1Array()": {
-            "$ref": "#/definitions/TestClass2(TestClass1*)-nullable"
-        },
         "getNestedLong()": {
             "$ref": "#/definitions/TestClass2(Long)-nullable"
         },
-        "getNestedLongList()": {
-            "type": ["array", "null"],
-            "items": {
-                "$ref": "#/definitions/TestClass2(Long)"
-            },
-            "$id": "id-List<TestClass2<Long>>",
-            "title": "List<TestClass2<Long>>",
-            "description": "for type in general: List<TestClass2<Long>>",
-            "minItems": 2,
-            "maxItems": 100,
-            "uniqueItems": false
+        "getNestedClass1Array()": {
+            "$ref": "#/definitions/TestClass2(TestClass1*)-nullable"
         }
     },
     "$id": "id-TestClass3",

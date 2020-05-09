@@ -110,7 +110,8 @@ public class SchemaGeneratorComplexTypesTest {
         Module typeInGeneralModule = configBuilder -> populateTypeConfigPart(
                 configBuilder.with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT).forTypesInGeneral()
                         .withIdResolver(scope -> scope.getType().getTypeName().contains("$Test") ? "id-" + scope.getSimpleTypeDescription() : null)
-                        .withAnchorResolver(scope -> scope.isContainerType() ? null : "#anchor"),
+                        .withAnchorResolver(scope -> scope.isContainerType() ? null : "#anchor")
+                        .withPropertySorter((_prop1, _prop2) -> 0),
                 "for type in general: ");
         Module methodModule = configBuilder -> populateConfigPart(configBuilder.forMethods(), "looked-up from method: ");
         Module fieldModule = configBuilder -> populateConfigPart(configBuilder.with(Option.INLINE_ALL_SCHEMAS).forFields(), "looked-up from field: ");

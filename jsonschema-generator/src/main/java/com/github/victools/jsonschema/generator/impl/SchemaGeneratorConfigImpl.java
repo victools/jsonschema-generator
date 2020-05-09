@@ -159,6 +159,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public int sortProperties(MemberScope<?, ?> first, MemberScope<?, ?> second) {
+        return this.typesInGeneralConfigPart.getPropertySorter().compare(first, second);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <M extends MemberScope<?, ?>> CustomDefinition getCustomDefinition(M scope, SchemaGenerationContext context,
             CustomPropertyDefinitionProvider<M> ignoredDefinitionProvider) {
