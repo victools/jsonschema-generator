@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Module for setting up schema generation aspects based on {@code jackson-annotations}:
+ * Module for setting up schema generation aspects based on {@code jackson-annotations}.
  * <ul>
  * <li>Populate the "description" attributes as per {@link JsonPropertyDescription} and {@link JsonClassDescription} annotations.</li>
  * <li>Apply alternative property names defined in {@link JsonProperty} annotations.</li>
