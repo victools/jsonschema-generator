@@ -1,19 +1,16 @@
 {
     "type": "object",
     "properties": {
-        "CONSTANT": {
-            "type": "integer",
-            "const": 5,
+        "genericValue": {
+            "type": ["string", "null"],
             "$anchor": "#anchor",
-            "title": "Long",
-            "description": "for type in general: Long",
-            "default": 1,
-            "enum": [1, 2, 3, 4, 5],
-            "minimum": 1,
-            "exclusiveMinimum": 0,
-            "maximum": 1E+1,
-            "exclusiveMaximum": 11,
-            "multipleOf": 1
+            "title": "String",
+            "description": "for type in general: String",
+            "const": "constant string value",
+            "minLength": 1,
+            "maxLength": 256,
+            "format": "date",
+            "pattern": "^.{1,256}$"
         },
         "genericArray": {
             "type": ["array", "null"],
@@ -34,16 +31,11 @@
             "maxItems": 100,
             "uniqueItems": false
         },
-        "genericValue": {
-            "type": ["string", "null"],
+        "primitiveValue": {
+            "type": "integer",
             "$anchor": "#anchor",
-            "title": "String",
-            "description": "for type in general: String",
-            "const": "constant string value",
-            "minLength": 1,
-            "maxLength": 256,
-            "format": "date",
-            "pattern": "^.{1,256}$"
+            "title": "int",
+            "description": "for type in general: int"
         },
         "ignoredInternalValue": {
             "type": ["integer", "null"],
@@ -58,7 +50,13 @@
             "exclusiveMaximum": 11,
             "multipleOf": 1
         },
-        "primitiveValue": {
+        "isSimpleTestClass()": {
+            "type": "boolean",
+            "$anchor": "#anchor",
+            "title": "boolean",
+            "description": "for type in general: boolean"
+        },
+        "getPrimitiveValue()": {
             "type": "integer",
             "$anchor": "#anchor",
             "title": "int",
@@ -76,17 +74,19 @@
             "format": "date",
             "pattern": "^.{1,256}$"
         },
-        "getPrimitiveValue()": {
+        "CONSTANT": {
             "type": "integer",
+            "const": 5,
             "$anchor": "#anchor",
-            "title": "int",
-            "description": "for type in general: int"
-        },
-        "isSimpleTestClass()": {
-            "type": "boolean",
-            "$anchor": "#anchor",
-            "title": "boolean",
-            "description": "for type in general: boolean"
+            "title": "Long",
+            "description": "for type in general: Long",
+            "default": 1,
+            "enum": [1, 2, 3, 4, 5],
+            "minimum": 1,
+            "exclusiveMinimum": 0,
+            "maximum": 1E+1,
+            "exclusiveMaximum": 11,
+            "multipleOf": 1
         }
     },
     "$id": "id-TestClass1",

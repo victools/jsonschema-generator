@@ -133,6 +133,16 @@ public interface SchemaGeneratorConfig {
     ArrayNode createArrayNode();
 
     /**
+     * Implementation of the {@link java.util.Comparator#compare(Object, Object)} interface method to determine the order of fields and methods in an
+     * object's {@code "properties"}.
+     *
+     * @param first first field/method to compare to {@code second}
+     * @param second second field/method to compare to {@code first}
+     * @return a negative/positive integer as the first field/method should be positioned before/after the second respectively
+     */
+    int sortProperties(MemberScope<?, ?> first, MemberScope<?, ?> second);
+
+    /**
      * Look-up the non-standard JSON schema definition for a given property. Falling-back on the per-type custom definitions.
      *
      * @param <M> type of targeted property

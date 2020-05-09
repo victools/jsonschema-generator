@@ -45,7 +45,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -156,11 +155,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             CustomDefinitionProviderV2 ignoredDefinitionProvider, boolean isNullable) {
         Map<DefinitionKey, List<ObjectNode>> targetMap = isNullable ? this.nullableReferences : this.references;
         DefinitionKey key = new DefinitionKey(javaType, ignoredDefinitionProvider);
-        List<ObjectNode> valueList = targetMap.get(key);
-        if (valueList == null) {
-            valueList = new ArrayList<>();
-            targetMap.put(key, valueList);
-        }
+        List<ObjectNode> valueList = targetMap.computeIfAbsent(key, k -> new ArrayList<>());
         valueList.add(referencingNode);
         return this;
     }
@@ -387,15 +382,15 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         }
         if (targetScope instanceof MemberScope<?, ?> && !((MemberScope<?, ?>) targetScope).isFakeContainerItemScope()) {
             MemberScope<?, ?> fakeArrayItemMember = ((MemberScope<?, ?>) targetScope).asFakeContainerItemScope();
-            Map<String, JsonNode> fakeItemDefinition = new HashMap<>();
+            JsonNode fakeItemDefinition;
             if (targetScope instanceof FieldScope) {
-                this.populateField((FieldScope) fakeArrayItemMember, fakeItemDefinition, null);
+                fakeItemDefinition = this.populateFieldSchema((FieldScope) fakeArrayItemMember);
             } else if (targetScope instanceof MethodScope) {
-                this.populateMethod((MethodScope) fakeArrayItemMember, fakeItemDefinition, null);
+                fakeItemDefinition = this.populateMethodSchema((MethodScope) fakeArrayItemMember);
             } else {
                 throw new IllegalStateException("Unsupported member type: " + targetScope.getClass().getName());
             }
-            definition.set(this.getKeyword(SchemaKeyword.TAG_ITEMS), fakeItemDefinition.values().iterator().next());
+            definition.set(this.getKeyword(SchemaKeyword.TAG_ITEMS), fakeItemDefinition);
         } else {
             ObjectNode arrayItemTypeRef = this.generatorConfig.createObjectNode();
             definition.set(this.getKeyword(SchemaKeyword.TAG_ITEMS), arrayItemTypeRef);
@@ -412,21 +407,40 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     private void generateObjectDefinition(ResolvedType targetType, ObjectNode definition) {
         definition.put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT));
 
-        final Map<String, JsonNode> targetFields = new TreeMap<>();
-        final Map<String, JsonNode> targetMethods = new TreeMap<>();
+        /*
+         * Collecting fields and methods according to their order in the Java Byte Code.
+         * Depending on the compiler implementation, that order may or may not match the declaration order in the source code.
+         */
+        final Map<String, MemberScope<?, ?>> targetProperties = new LinkedHashMap<>();
         final Set<String> requiredProperties = new HashSet<>();
 
-        this.collectObjectProperties(targetType, targetFields, targetMethods, requiredProperties);
+        this.collectObjectProperties(targetType, targetProperties, requiredProperties);
 
-        if (!targetFields.isEmpty() || !targetMethods.isEmpty()) {
+        if (!targetProperties.isEmpty()) {
             ObjectNode propertiesNode = this.generatorConfig.createObjectNode();
-            propertiesNode.setAll(targetFields);
-            propertiesNode.setAll(targetMethods);
+            List<MemberScope<?, ?>> sortedProperties = targetProperties.values().stream()
+                    .sorted(this.generatorConfig::sortProperties)
+                    .collect(Collectors.toList());
+            for (MemberScope<?, ?> property : sortedProperties) {
+                JsonNode subSchema;
+                if (property instanceof FieldScope) {
+                    subSchema = this.populateFieldSchema((FieldScope) property);
+                } else if (property instanceof MethodScope) {
+                    subSchema = this.populateMethodSchema((MethodScope) property);
+                } else {
+                    throw new IllegalStateException("Unsupported member scope of type " + property.getClass());
+                }
+                propertiesNode.set(property.getSchemaPropertyName(), subSchema);
+            }
             definition.set(this.getKeyword(SchemaKeyword.TAG_PROPERTIES), propertiesNode);
 
             if (!requiredProperties.isEmpty()) {
                 ArrayNode requiredNode = this.generatorConfig.createArrayNode();
-                requiredProperties.forEach(requiredNode::add);
+                // list required properties in the same order as the property
+                sortedProperties.stream()
+                        .map(MemberScope::getSchemaPropertyName)
+                        .filter(requiredProperties::contains)
+                        .forEach(requiredNode::add);
                 definition.set(this.getKeyword(SchemaKeyword.TAG_REQUIRED), requiredNode);
             }
         }
@@ -436,17 +450,15 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * Recursively collect all properties of the given object type and add them to the respective maps.
      *
      * @param targetType the type for which to collect fields and methods
-     * @param targetFields map of named JSON schema nodes representing individual fields
-     * @param targetMethods map of named JSON schema nodes representing individual methods
+     * @param targetProperties map of named fields and methods
      * @param requiredProperties set of properties value required
      */
-    private void collectObjectProperties(ResolvedType targetType, Map<String, JsonNode> targetFields, Map<String, JsonNode> targetMethods,
-            Set<String> requiredProperties) {
+    private void collectObjectProperties(ResolvedType targetType, Map<String, MemberScope<?, ?>> targetProperties, Set<String> requiredProperties) {
         logger.debug("collecting non-static fields and methods from {}", targetType);
         final ResolvedTypeWithMembers targetTypeWithMembers = this.typeContext.resolveWithMembers(targetType);
         // member fields and methods are being collected from the targeted type as well as its super types
-        this.populateFields(targetTypeWithMembers, ResolvedTypeWithMembers::getMemberFields, targetFields, requiredProperties);
-        this.populateMethods(targetTypeWithMembers, ResolvedTypeWithMembers::getMemberMethods, targetMethods, requiredProperties);
+        this.collectFields(targetTypeWithMembers, ResolvedTypeWithMembers::getMemberFields, targetProperties, requiredProperties);
+        this.collectMethods(targetTypeWithMembers, ResolvedTypeWithMembers::getMemberMethods, targetProperties, requiredProperties);
 
         final boolean includeStaticFields = this.generatorConfig.shouldIncludeStaticFields();
         final boolean includeStaticMethods = this.generatorConfig.shouldIncludeStaticMethods();
@@ -468,10 +480,10 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                     hierarchyTypeMembers = this.typeContext.resolveWithMembers(hierachyType);
                 }
                 if (includeStaticFields) {
-                    this.populateFields(hierarchyTypeMembers, ResolvedTypeWithMembers::getStaticFields, targetFields, requiredProperties);
+                    this.collectFields(hierarchyTypeMembers, ResolvedTypeWithMembers::getStaticFields, targetProperties, requiredProperties);
                 }
                 if (includeStaticMethods) {
-                    this.populateMethods(hierarchyTypeMembers, ResolvedTypeWithMembers::getStaticMethods, targetMethods, requiredProperties);
+                    this.collectMethods(hierarchyTypeMembers, ResolvedTypeWithMembers::getStaticMethods, targetProperties, requiredProperties);
                 }
             }
         }
@@ -482,15 +494,15 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      *
      * @param declaringTypeMembers the type declaring the fields to populate
      * @param fieldLookup retrieval function for getter targeted fields from {@code declaringTypeMembers}
-     * @param collectedFields property nodes in the JSON schema to which the field sub schemas should be added
+     * @param collectedProperties collected fields and methods for which sub schemas should be added
      * @param requiredProperties set of properties value required
      */
-    private void populateFields(ResolvedTypeWithMembers declaringTypeMembers, Function<ResolvedTypeWithMembers, ResolvedField[]> fieldLookup,
-            Map<String, JsonNode> collectedFields, Set<String> requiredProperties) {
+    private void collectFields(ResolvedTypeWithMembers declaringTypeMembers, Function<ResolvedTypeWithMembers, ResolvedField[]> fieldLookup,
+            Map<String, MemberScope<?, ?>> collectedProperties, Set<String> requiredProperties) {
         Stream.of(fieldLookup.apply(declaringTypeMembers))
                 .map(declaredField -> this.typeContext.createFieldScope(declaredField, declaringTypeMembers))
                 .filter(fieldScope -> !this.generatorConfig.shouldIgnore(fieldScope))
-                .forEach(fieldScope -> this.populateField(fieldScope, collectedFields, requiredProperties));
+                .forEach(fieldScope -> this.collectField(fieldScope, collectedProperties, requiredProperties));
     }
 
     /**
@@ -498,25 +510,25 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      *
      * @param declaringTypeMembers the type declaring the methods to populate
      * @param methodLookup retrieval function for getter targeted methods from {@code declaringTypeMembers}
-     * @param collectedMethods property nodes in the JSON schema to which the method sub schemas should be added
+     * @param collectedProperties collected fields and methods for which sub schemas should be added
      * @param requiredProperties set of properties value required
      */
-    private void populateMethods(ResolvedTypeWithMembers declaringTypeMembers, Function<ResolvedTypeWithMembers, ResolvedMethod[]> methodLookup,
-            Map<String, JsonNode> collectedMethods, Set<String> requiredProperties) {
+    private void collectMethods(ResolvedTypeWithMembers declaringTypeMembers, Function<ResolvedTypeWithMembers, ResolvedMethod[]> methodLookup,
+            Map<String, MemberScope<?, ?>> collectedProperties, Set<String> requiredProperties) {
         Stream.of(methodLookup.apply(declaringTypeMembers))
                 .map(declaredMethod -> this.typeContext.createMethodScope(declaredMethod, declaringTypeMembers))
                 .filter(methodScope -> !this.generatorConfig.shouldIgnore(methodScope))
-                .forEach(methodScope -> this.populateMethod(methodScope, collectedMethods, requiredProperties));
+                .forEach(methodScope -> this.collectMethod(methodScope, collectedProperties, requiredProperties));
     }
 
     /**
      * Preparation Step: add the given field to the specified {@link Map}.
      *
-     * @param field declared field that should be added to the specified node
-     * @param collectedFields node in the JSON schema to which the field's sub schema should be added as property
-     * @param requiredProperties set of properties value required
+     * @param field declared field that should be added
+     * @param collectedProperties collection of fields/methods to be added as properties
+     * @param requiredProperties set of required properties
      */
-    private void populateField(FieldScope field, Map<String, JsonNode> collectedFields, Set<String> requiredProperties) {
+    private void collectField(FieldScope field, Map<String, MemberScope<?, ?>> collectedProperties, Set<String> requiredProperties) {
         final FieldScope fieldWithNameOverride;
         final String propertyName;
         if (field.isFakeContainerItemScope()) {
@@ -529,38 +541,46 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             if (this.generatorConfig.isRequired(field)) {
                 requiredProperties.add(propertyName);
             }
-            if (collectedFields.containsKey(propertyName)) {
+            if (collectedProperties.containsKey(propertyName)) {
                 logger.debug("ignoring overridden {}.{}", fieldWithNameOverride.getDeclaringType(), fieldWithNameOverride.getDeclaredName());
                 return;
             }
         }
+        collectedProperties.put(propertyName, fieldWithNameOverride);
+    }
 
-        List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(fieldWithNameOverride);
+    /**
+     * Preparation Step: create a node for a schema representing the given field's associated value type.
+     *
+     * @param field field/property to populate the schema node for
+     * @return schema node representing the given field/property
+     */
+    private ObjectNode populateFieldSchema(FieldScope field) {
+        List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(field);
         if (typeOverrides == null) {
-            typeOverrides = this.generatorConfig.resolveSubtypes(fieldWithNameOverride.getType(), this);
+            typeOverrides = this.generatorConfig.resolveSubtypes(field.getType(), this);
         }
         List<FieldScope> fieldOptions;
         if (typeOverrides == null || typeOverrides.isEmpty()) {
-            fieldOptions = Collections.singletonList(fieldWithNameOverride);
+            fieldOptions = Collections.singletonList(field);
         } else {
             fieldOptions = typeOverrides.stream()
-                    .map(fieldWithNameOverride::withOverriddenType)
+                    .map(field::withOverriddenType)
                     .collect(Collectors.toList());
         }
         // consider declared type (instead of overridden one) for determining null-ability
         boolean isNullable = !field.getRawMember().isEnumConstant() && !field.isFakeContainerItemScope() && this.generatorConfig.isNullable(field);
         if (fieldOptions.size() == 1) {
-            collectedFields.put(propertyName, this.createFieldSchema(fieldOptions.get(0), isNullable, false, null));
-        } else {
-            ObjectNode subSchema = this.generatorConfig.createObjectNode();
-            collectedFields.put(propertyName, subSchema);
-            ArrayNode anyOfArray = subSchema.withArray(this.getKeyword(SchemaKeyword.TAG_ANYOF));
-            if (isNullable) {
-                anyOfArray.addObject()
-                        .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
-            }
-            fieldOptions.forEach(option -> anyOfArray.add(this.createFieldSchema(option, false, false, null)));
+            return this.createFieldSchema(fieldOptions.get(0), isNullable, false, null);
         }
+        ObjectNode subSchema = this.generatorConfig.createObjectNode();
+        ArrayNode anyOfArray = subSchema.withArray(this.getKeyword(SchemaKeyword.TAG_ANYOF));
+        if (isNullable) {
+            anyOfArray.addObject()
+                    .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
+        }
+        fieldOptions.forEach(option -> anyOfArray.add(this.createFieldSchema(option, false, false, null)));
+        return subSchema;
     }
 
     /**
@@ -584,10 +604,10 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * Preparation Step: add the given method to the specified {@link Map}.
      *
      * @param method declared method that should be added to the specified node
-     * @param collectedMethods node in the JSON schema to which the method's (and its return value's) sub schema should be added as property
+     * @param collectedProperties collection of fields/methods to be added as properties
      * @param requiredProperties set of properties value required
      */
-    private void populateMethod(MethodScope method, Map<String, JsonNode> collectedMethods, Set<String> requiredProperties) {
+    private void collectMethod(MethodScope method, Map<String, MemberScope<?, ?>> collectedProperties, Set<String> requiredProperties) {
         final MethodScope methodWithNameOverride;
         final String propertyName;
         if (method.isFakeContainerItemScope()) {
@@ -600,39 +620,47 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             if (this.generatorConfig.isRequired(method)) {
                 requiredProperties.add(propertyName);
             }
-            if (collectedMethods.containsKey(propertyName)) {
+            if (collectedProperties.containsKey(propertyName)) {
                 logger.debug("ignoring overridden {}.{}", methodWithNameOverride.getDeclaringType(), methodWithNameOverride.getDeclaredName());
                 return;
             }
         }
+        collectedProperties.put(propertyName, methodWithNameOverride);
+    }
 
-        List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(methodWithNameOverride);
-        if (typeOverrides == null && !methodWithNameOverride.isVoid()) {
-            typeOverrides = this.generatorConfig.resolveSubtypes(methodWithNameOverride.getType(), this);
+    /**
+     * Preparation Step: create a node for a schema representing the given method's associated return type.
+     *
+     * @param method method to populate the schema node for
+     * @return schema node representing the given method's return type
+     */
+    private JsonNode populateMethodSchema(MethodScope method) {
+        List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(method);
+        if (typeOverrides == null && !method.isVoid()) {
+            typeOverrides = this.generatorConfig.resolveSubtypes(method.getType(), this);
         }
         List<MethodScope> methodOptions;
         if (typeOverrides == null || typeOverrides.isEmpty()) {
-            methodOptions = Collections.singletonList(methodWithNameOverride);
+            methodOptions = Collections.singletonList(method);
         } else {
             methodOptions = typeOverrides.stream()
-                    .map(methodWithNameOverride::withOverriddenType)
+                    .map(method::withOverriddenType)
                     .collect(Collectors.toList());
         }
         // consider declared type (instead of overridden one) for determining null-ability
-        boolean isNullable = methodWithNameOverride.isVoid()
-                || !method.isFakeContainerItemScope() && this.generatorConfig.isNullable(methodWithNameOverride);
+        boolean isNullable = method.isVoid()
+                || !method.isFakeContainerItemScope() && this.generatorConfig.isNullable(method);
         if (methodOptions.size() == 1) {
-            collectedMethods.put(propertyName, this.createMethodSchema(methodOptions.get(0), isNullable, false, null));
-        } else {
-            ObjectNode subSchema = this.generatorConfig.createObjectNode();
-            collectedMethods.put(propertyName, subSchema);
-            ArrayNode anyOfArray = subSchema.withArray(this.getKeyword(SchemaKeyword.TAG_ANYOF));
-            if (isNullable) {
-                anyOfArray.add(this.generatorConfig.createObjectNode()
-                        .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL)));
-            }
-            methodOptions.forEach(option -> anyOfArray.add(this.createMethodSchema(option, false, false, null)));
+            return this.createMethodSchema(methodOptions.get(0), isNullable, false, null);
         }
+        ObjectNode subSchema = this.generatorConfig.createObjectNode();
+        ArrayNode anyOfArray = subSchema.withArray(this.getKeyword(SchemaKeyword.TAG_ANYOF));
+        if (isNullable) {
+            anyOfArray.add(this.generatorConfig.createObjectNode()
+                    .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL)));
+        }
+        methodOptions.forEach(option -> anyOfArray.add(this.createMethodSchema(option, false, false, null)));
+        return subSchema;
     }
 
     /**
@@ -666,7 +694,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @param collectedAttributes separately collected attribute for the field/method in their respective declaring type
      * @param ignoredDefinitionProvider first custom definition provider to ignore
      * @see #populateField(FieldScope, Map, Set)
-     * @see #populateMethod(MethodScope, Map, Set)
+     * @see #collectMethod(MethodScope, Map, Set)
      */
     private <M extends MemberScope<?, ?>> void populateMemberSchema(M scope, ObjectNode targetNode, boolean isNullable, boolean forceInlineDefinition,
             ObjectNode collectedAttributes, CustomPropertyDefinitionProvider<M> ignoredDefinitionProvider) {
