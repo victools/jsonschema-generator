@@ -53,6 +53,10 @@ public enum JacksonOption {
      */
     RESPECT_JSONPROPERTY_ORDER,
     /**
+     * Use this option to skip property name changes according to {@link com.fasterxml.jackson.databind.annotation.JsonNaming JsonNaming} annotations.
+     */
+    IGNORE_PROPERTY_NAMING_STRATEGY,
+    /**
      * Use this option to skip the automatic look-up of subtypes according to {@code @JsonSubTypes} annotations.
      */
     SKIP_SUBTYPE_LOOKUP,
