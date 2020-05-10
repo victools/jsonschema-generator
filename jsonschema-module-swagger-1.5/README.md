@@ -18,6 +18,15 @@ Module for the [jsonschema-generator](../jsonschema-generator) – deriving JSON
 Schema attributes derived from `@ApiModelProperty` on fields are also applied to their respective getter methods.  
 Schema attributes derived from `@ApiModelProperty` on getter methods are also applied to their associated fields.
 
+----
+
+## Documentation
+JavaDoc is being used throughout the codebase, offering contextual information in your respective IDE or being available online through services like [javadoc.io](https://www.javadoc.io/doc/com.github.victools/jsonschema-module-swagger-1.5).
+
+Additional documentation can be found in the [Project Wiki](https://github.com/victools/jsonschema-generator/wiki).
+
+----
+
 ## Usage
 ### Dependency (Maven)
 ```xml

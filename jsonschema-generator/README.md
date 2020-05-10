@@ -17,6 +17,13 @@ Topics covered in this document are:
 
 ----
 
+## Documentation
+JavaDoc is being used throughout the codebase, offering contextual information in your respective IDE or being available online through services like [javadoc.io](https://www.javadoc.io/doc/com.github.victools/jsonschema-generator).
+
+Additional documentation can be found in the [Project Wiki](https://github.com/victools/jsonschema-generator/wiki).
+
+----
+
 ## Usage
 ### Dependency (Maven)
 
