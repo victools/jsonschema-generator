@@ -370,6 +370,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
+[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.11.1...HEAD
 [4.11.1]: https://github.com/victools/jsonschema-generator/compare/v4.11.0...v4.11.1
 [4.11.0]: https://github.com/victools/jsonschema-generator/compare/v4.10.0...v4.11.0
 [4.10.0]: https://github.com/victools/jsonschema-generator/compare/v4.9.0...v4.10.0
