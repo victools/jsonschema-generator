@@ -19,39 +19,22 @@ package com.github.victools.jsonschema.generator.impl;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Comparator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import junitparams.naming.TestCaseName;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 /**
  * Test for the {@link PropertySortUtils} class.
  */
+@RunWith(JUnitParamsRunner.class)
 public class PropertySortUtilsTest {
-
-    private FieldScope instanceFieldA;
-    private FieldScope instanceFieldC;
-    private MethodScope instanceMethodB;
-    private FieldScope staticFieldE;
-    private MethodScope staticMethodD;
-    private MethodScope staticMethodF;
-    private List<MemberScope<?, ?>> memberList;
-
-    @Before
-    public void setUp() {
-        this.instanceFieldA = this.createMemberMock(FieldScope.class, false, "a");
-        this.instanceFieldC = this.createMemberMock(FieldScope.class, false, "c");
-        this.staticFieldE = this.createMemberMock(FieldScope.class, true, "e");
-        this.instanceMethodB = this.createMemberMock(MethodScope.class, false, "b()");
-        this.staticMethodD = this.createMemberMock(MethodScope.class, true, "d()");
-        this.staticMethodF = this.createMemberMock(MethodScope.class, true, "f()");
-
-        this.memberList = Arrays.asList(
-                this.instanceFieldC, this.staticMethodF, this.staticFieldE, this.instanceFieldA, this.instanceMethodB, this.staticMethodD);
-    }
 
     private <S extends MemberScope<?, ?>> S createMemberMock(Class<S> scopeType, boolean isStatic, String name) {
         S mock = Mockito.mock(scopeType);
@@ -60,39 +43,30 @@ public class PropertySortUtilsTest {
         return mock;
     }
 
-    /**
-     * Test the correct sorting based on the {@link PropertySortUtils#SORT_PROPERTIES_FIELDS_BEFORE_METHODS} {@code Comparator}.
-     */
-    @Test
-    public void testSortPropertiesFieldsBeforeMethods() {
-        String sortingResult = this.memberList.stream()
-                .sorted(PropertySortUtils.SORT_PROPERTIES_FIELDS_BEFORE_METHODS)
-                .map(MemberScope::getSchemaPropertyName)
-                .collect(Collectors.joining(" "));
-        Assert.assertEquals("c e a f() b() d()", sortingResult);
+    public Object[] parametersForTestSortProperties() {
+        Comparator<MemberScope<?, ?>> noSorting = (_first, _second) -> 0;
+        return new Object[][]{
+            {"unsorted", "c f() e a b() d()", noSorting},
+            {"fields-before-methods", "c e a f() b() d()", PropertySortUtils.SORT_PROPERTIES_FIELDS_BEFORE_METHODS},
+            {"alphabetically-by-name", "a b() c d() e f()", PropertySortUtils.SORT_PROPERTIES_BY_NAME_ALPHABETICALLY},
+            {"default-order", "a c e b() d() f()", PropertySortUtils.DEFAULT_PROPERTY_ORDER}
+        };
     }
 
-    /**
-     * Test the correct sorting based on the {@link PropertySortUtils#SORT_PROPERTIES_BY_NAME_ALPHABETICALLY} {@code Comparator}.
-     */
     @Test
-    public void testSortPropertiesByNameAlphabetically() {
-        String sortingResult = this.memberList.stream()
-                .sorted(PropertySortUtils.SORT_PROPERTIES_BY_NAME_ALPHABETICALLY)
+    @Parameters
+    @TestCaseName(value = "{method}({0}) [{index}]")
+    public void testSortProperties(String _testCaseName, String expectedResult, Comparator<MemberScope<?, ?>> sortingLogic) {
+        Stream<MemberScope<?, ?>> properties = Stream.of(
+                this.createMemberMock(FieldScope.class, false, "c"),
+                this.createMemberMock(MethodScope.class, true, "f()"),
+                this.createMemberMock(FieldScope.class, true, "e"),
+                this.createMemberMock(FieldScope.class, false, "a"),
+                this.createMemberMock(MethodScope.class, false, "b()"),
+                this.createMemberMock(MethodScope.class, true, "d()"));
+        String sortingResult = properties.sorted(sortingLogic)
                 .map(MemberScope::getSchemaPropertyName)
                 .collect(Collectors.joining(" "));
-        Assert.assertEquals("a b() c d() e f()", sortingResult);
-    }
-
-    /**
-     * Test the correct sorting based on the {@link PropertySortUtils#DEFAULT_PROPERTY_ORDER} {@code Comparator}.
-     */
-    @Test
-    public void testDefaultPropertyOrder() {
-        String sortingResult = this.memberList.stream()
-                .sorted(PropertySortUtils.DEFAULT_PROPERTY_ORDER)
-                .map(MemberScope::getSchemaPropertyName)
-                .collect(Collectors.joining(" "));
-        Assert.assertEquals("a c e b() d() f()", sortingResult);
+        Assert.assertEquals(expectedResult, sortingResult);
     }
 }

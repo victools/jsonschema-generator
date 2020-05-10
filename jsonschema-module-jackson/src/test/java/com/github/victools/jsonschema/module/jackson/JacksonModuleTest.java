@@ -74,6 +74,17 @@ public class JacksonModuleTest {
         Mockito.verifyNoMoreInteractions(this.configBuilder, this.fieldConfigPart, this.methodConfigPart, this.typesInGeneralConfigPart);
     }
 
+    @Test
+    public void testApplyToConfigBuilderWithRespectJsonPropertyOrderOption() {
+        new JacksonModule(JacksonOption.RESPECT_JSONPROPERTY_ORDER, JacksonOption.SKIP_SUBTYPE_LOOKUP, JacksonOption.IGNORE_TYPE_INFO_TRANSFORM)
+                .applyToConfigBuilder(this.configBuilder);
+
+        this.verifyCommonConfigurations();
+
+        Mockito.verify(this.typesInGeneralConfigPart).withPropertySorter(Mockito.any(JsonPropertySorter.class));
+
+        Mockito.verifyNoMoreInteractions(this.configBuilder, this.fieldConfigPart, this.methodConfigPart, this.typesInGeneralConfigPart);
+    }
 
     @Test
     public void testApplyToConfigBuilderWithSkipSubtypeLookupAndIgnoreTypeInfoTranformOptions() {
