@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - New `SchemaGeneratorGeneralConfigPart.withPropertySorter()` exposing the sorting logic of an object schema's properties
 
+### `jsonschema-module-jackson`
+#### Added
+- New `JacksonOption.RESPECT_JSONPROPERTY_ORDER` to sort properties in an object's schema based on `@JsonPropertyOrder` annotations
+
 ## [4.11.1] - 2020-04-30
 ### `jsonschema-maven-plugin`
 #### Fixed

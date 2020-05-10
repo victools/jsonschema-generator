@@ -85,6 +85,11 @@ public class JacksonModule implements Module {
         if (considerEnumJsonValue || considerEnumJsonProperty) {
             generalConfigPart.withCustomDefinitionProvider(new CustomEnumDefinitionProvider(considerEnumJsonValue, considerEnumJsonProperty));
         }
+
+        if (this.options.contains(JacksonOption.RESPECT_JSONPROPERTY_ORDER)) {
+            generalConfigPart.withPropertySorter(new JsonPropertySorter(true));
+        }
+
         boolean lookUpSubtypes = !this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP);
         boolean includeTypeInfoTransform = !this.options.contains(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM);
         if (lookUpSubtypes || includeTypeInfoTransform) {
