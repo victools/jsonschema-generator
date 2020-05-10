@@ -14,7 +14,7 @@ Module for the [jsonschema-generator](../jsonschema-generator) – deriving JSON
 8. Optionally: sort an object's properties according to its `@JsonPropertyOrder` annotation
 9. Optionally: resolve subtypes according to `@JsonSubTypes` on a supertype in general or directly on specific fields/methods as an override of the per-type behavior.
 10. Optionally: apply structural changes for subtypes according to `@JsonTypeInfo` on a supertype in general or directly on specific fields/methods as an override of the per-type behavior.
-    - Considering `@JsonTypeInfo.include with values `As.PROPERTY`, `As.EXISTING_PROPERTY`, `As.WRAPPER_ARRAY`, `As.WRAPPER_OBJECT`
+    - Considering `@JsonTypeInfo.include` with values `As.PROPERTY`, `As.EXISTING_PROPERTY`, `As.WRAPPER_ARRAY`, `As.WRAPPER_OBJECT`
     - Considering `@JsonTypeInfo.use` with values `Id.CLASS`, `Id.NAME`
 
 Schema attributes derived from validation annotations on getter methods are also applied to their associated fields.
