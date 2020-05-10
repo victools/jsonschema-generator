@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `jsonschema-module-jackson`
 #### Added
 - New `JacksonOption.RESPECT_JSONPROPERTY_ORDER` to sort properties in an object's schema based on `@JsonPropertyOrder` annotations
+- New `JacksonOption.IGNORE_PROPERTY_NAMING_STRATEGY` to skip the adjustment of property names based on `@JsonNaming` annotations
+
+#### Changed
+- Consider `@JsonNaming` annotations to alter the names of contained fields according to the specified `PropertyNamingStrategy`
 
 ## [4.11.1] - 2020-04-30
 ### `jsonschema-maven-plugin`
