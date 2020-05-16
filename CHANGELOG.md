@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
 ## [4.12.0] - 2020-05-10
 ### `jsonschema-generator`
 #### Added
@@ -378,6 +380,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
+[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.12.0...HEAD
 [4.12.0]: https://github.com/victools/jsonschema-generator/compare/v4.11.1...v4.12.0
 [4.11.1]: https://github.com/victools/jsonschema-generator/compare/v4.11.0...v4.11.1
 [4.11.0]: https://github.com/victools/jsonschema-generator/compare/v4.10.0...v4.11.0
