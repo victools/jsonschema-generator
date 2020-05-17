@@ -30,6 +30,7 @@ import com.github.victools.jsonschema.module.javax.validation.JavaxValidationMod
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationOption;
 import com.github.victools.jsonschema.module.swagger15.SwaggerModule;
 import com.github.victools.jsonschema.module.swagger15.SwaggerOption;
+import com.github.victools.jsonschema.module.swagger2.Swagger2Module;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -342,9 +343,13 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                     this.getLog().debug("- Adding Swagger 1.5 Module");
                     addSwagger15Module(configBuilder, module);
                     break;
+                case "Swagger2":
+                    this.getLog().debug("- Adding Swagger 2.x Module");
+                    addSwagger2Module(configBuilder, module);
+                    break;
                 default:
                     throw new MojoExecutionException("Error: Module does not have a name in "
-                            + "['Jackson', 'JavaxValidation', 'Swagger15'] or does not have a custom classname.");
+                            + "['Jackson', 'JavaxValidation', 'Swagger15', 'Swagger2'] or does not have a custom classname.");
                 }
             }
         }
@@ -398,7 +403,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     }
 
     /**
-     * Add the Swagger module to the generator config.
+     * Add the Swagger (1.5) module to the generator config.
      *
      * @param configBuilder The builder on which the config is added
      * @param module        The modules section form the pom
@@ -406,7 +411,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private void addSwagger15Module(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
         if (module.options == null || module.options.length == 0) {
-            configBuilder.with(new SwaggerModule());
+            configBuilder.with(new Swagger2Module());
         } else {
             SwaggerOption[] swaggerOptions = new SwaggerOption[module.options.length];
             for (int i = 0; i < module.options.length; i++) {
@@ -418,6 +423,17 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             }
             configBuilder.with(new SwaggerModule(swaggerOptions));
         }
+    }
+
+    /**
+     * Add the Swagger (2.x) module to the generator config.
+     *
+     * @param configBuilder The builder on which the config is added
+     * @param module        The modules section form the pom
+     * @throws MojoExecutionException in case of problems
+     */
+    private void addSwagger2Module(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
+        configBuilder.with(new Swagger2Module());
     }
 
     /**
