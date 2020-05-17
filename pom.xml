@@ -74,6 +74,7 @@
 		<module>jsonschema-module-jackson</module>
 		<module>jsonschema-module-javax-validation</module>
 		<module>jsonschema-module-swagger-1.5</module>
+		<module>jsonschema-module-swagger-2</module>
         <module>jsonschema-maven-plugin</module>
 	</modules>
 
@@ -92,6 +93,7 @@
         <version.mockito>2.27.0</version.mockito>
         <version.slf4j>1.7.30</version.slf4j>
         <version.swagger-1.5>1.5.22</version.swagger-1.5>
+        <version.swagger-2>2.1.2</version.swagger-2>
         <version.validator>1.0.36</version.validator>
     </properties>
 
@@ -131,6 +133,11 @@
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-annotations</artifactId>
                 <version>${version.swagger-1.5}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${version.swagger-2}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
