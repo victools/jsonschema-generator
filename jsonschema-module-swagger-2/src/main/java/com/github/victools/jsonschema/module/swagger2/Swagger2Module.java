@@ -17,16 +17,21 @@
 package com.github.victools.jsonschema.module.swagger2;
 
 import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.Module;
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * JSON Schema Generator Module – Swagger (2.x).
@@ -46,9 +51,16 @@ public class Swagger2Module implements Module {
 
         configPart.withDescriptionResolver(this::resolveDescription);
         configPart.withTitleResolver(this::resolveTitle);
+        configPart.withRequiredCheck(this::checkRequired);
+        configPart.withNullableCheck(this::checkNullable);
+        configPart.withEnumResolver(this::resolveEnum);
+        configPart.withDefaultResolver(this::resolveDefault);
+
         configPart.withStringMinLengthResolver(this::resolveMinLength);
         configPart.withStringMaxLengthResolver(this::resolveMaxLength);
+        configPart.withStringFormatResolver(this::resolveFormat);
         configPart.withStringPatternResolver(this::resolvePattern);
+
         configPart.withNumberMultipleOfResolver(this::resolveMultipleOf);
         configPart.withNumberExclusiveMaximumResolver(this::resolveExclusiveMaximum);
         configPart.withNumberInclusiveMaximumResolver(this::resolveInclusiveMaximum);
@@ -58,6 +70,8 @@ public class Swagger2Module implements Module {
         configPart.withArrayMinItemsResolver(this::resolveArrayMinItems);
         configPart.withArrayMaxItemsResolver(this::resolveArrayMaxItems);
         configPart.withArrayUniqueItemsResolver(this::resolveArrayUniqueItems);
+
+        configPart.withInstanceAttributeOverride(this::overrideInstanceAttributes);
     }
 
     protected List<ResolvedType> resolveTargetTypeOverrides(MemberScope<?, ?> member) {
@@ -83,6 +97,33 @@ public class Swagger2Module implements Module {
                 .orElse(null);
     }
 
+    protected boolean checkRequired(MemberScope<?, ?> member) {
+        return this.getSchemaAnnotation(member)
+                .filter(Schema::required)
+                .isPresent();
+    }
+
+    protected boolean checkNullable(MemberScope<?, ?> member) {
+        return this.getSchemaAnnotation(member)
+                .filter(Schema::nullable)
+                .isPresent();
+    }
+
+    protected List<String> resolveEnum(MemberScope<?, ?> member) {
+        return this.getSchemaAnnotation(member)
+                .map(Schema::allowableValues)
+                .filter(allowableValues -> allowableValues.length > 0)
+                .map(Arrays::asList)
+                .orElse(null);
+    }
+
+    protected String resolveDefault(MemberScope<?, ?> member) {
+        return this.getSchemaAnnotation(member)
+                .map(Schema::defaultValue)
+                .filter(defaultValue -> !defaultValue.isEmpty())
+                .orElse(null);
+    }
+
     protected Integer resolveMinLength(MemberScope<?, ?> member) {
         return this.getSchemaAnnotation(member)
                 .map(Schema::minLength)
@@ -94,6 +135,13 @@ public class Swagger2Module implements Module {
         return this.getSchemaAnnotation(member)
                 .map(Schema::maxLength)
                 .filter(maxLength -> maxLength < Integer.MAX_VALUE && maxLength > -1)
+                .orElse(null);
+    }
+
+    protected String resolveFormat(MemberScope<?, ?> member) {
+        return this.getSchemaAnnotation(member)
+                .map(Schema::format)
+                .filter(format -> !format.isEmpty())
                 .orElse(null);
     }
 
@@ -186,6 +234,22 @@ public class Swagger2Module implements Module {
                 .map(ArraySchema::uniqueItems)
                 .filter(uniqueItemsFlag -> uniqueItemsFlag)
                 .orElse(null);
+    }
+
+    protected void overrideInstanceAttributes(ObjectNode memberAttributes, MemberScope<?, ?> member, SchemaGenerationContext context) {
+        Schema annotation = this.getSchemaAnnotation(member).orElse(null);
+        if (annotation == null) {
+            return;
+        }
+        if (annotation.not() != Void.class) {
+            memberAttributes.set("not", context.createDefinitionReference(context.getTypeContext().resolve(annotation.not())));
+        }
+        if (annotation.allOf().length > 0) {
+            Stream.of(annotation.allOf())
+                    .map(rawType -> context.getTypeContext().resolve(rawType))
+                    .map(context::createDefinitionReference)
+                    .forEach(memberAttributes.withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))::add);
+        }
     }
 
     /**
