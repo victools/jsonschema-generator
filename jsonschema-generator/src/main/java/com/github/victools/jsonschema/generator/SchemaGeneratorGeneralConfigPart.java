@@ -16,11 +16,13 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.github.victools.jsonschema.generator.impl.PropertySortUtils;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -29,12 +31,34 @@ import java.util.Map;
  */
 public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigPart<TypeScope> {
 
+    private Comparator<MemberScope<?, ?>> propertySorter = PropertySortUtils.DEFAULT_PROPERTY_ORDER;
+
     private final List<CustomDefinitionProviderV2> customDefinitionProviders = new ArrayList<>();
     private final List<SubtypeResolver> subtypeResolvers = new ArrayList<>();
     private final List<TypeAttributeOverrideV2> typeAttributeOverrides = new ArrayList<>();
 
     private final List<ConfigFunction<TypeScope, String>> idResolvers = new ArrayList<>();
     private final List<ConfigFunction<TypeScope, String>> anchorResolvers = new ArrayList<>();
+
+    /**
+     * Replacing the current sorting algorithm of properties (fields and methods).
+     *
+     * @param propertySorter sorting algorithm for an object's properties
+     * @return this builder instance (for chaining)
+     */
+    public SchemaGeneratorGeneralConfigPart withPropertySorter(Comparator<MemberScope<?, ?>> propertySorter) {
+        this.propertySorter = propertySorter;
+        return this;
+    }
+
+    /**
+     * Getter for the sorting algorithm for an object's properties (fields and methods).
+     *
+     * @return applicable {@link Comparator} for an object's properties
+     */
+    public Comparator<MemberScope<?, ?>> getPropertySorter() {
+        return this.propertySorter;
+    }
 
     /**
      * Adding a custom schema provider – if it returns null for a given type, the next definition provider will be applied.

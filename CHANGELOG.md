@@ -6,6 +6,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.12.0] - 2020-05-10
+### `jsonschema-generator`
+#### Added
+- New `SchemaGeneratorGeneralConfigPart.withPropertySorter()` exposing the sorting logic of an object schema's properties
+
+### `jsonschema-module-jackson`
+#### Added
+- New `JacksonOption.RESPECT_JSONPROPERTY_ORDER` to sort properties in an object's schema based on `@JsonPropertyOrder` annotations
+- New `JacksonOption.IGNORE_PROPERTY_NAMING_STRATEGY` to skip the adjustment of property names based on `@JsonNaming` annotations
+
+#### Changed
+- Consider `@JsonNaming` annotations to alter the names of contained fields according to the specified `PropertyNamingStrategy`
+
+## [4.11.1] - 2020-04-30
+### `jsonschema-maven-plugin`
+#### Fixed
+- Maven plugin is unable to resolve runtime dependencies (#95)
+
 ## [4.11.0] - 2020-04-28
 ### `jsonschema-generator`
 #### Added
@@ -362,7 +380,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.11.0...HEAD
+[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.12.0...HEAD
+[4.12.0]: https://github.com/victools/jsonschema-generator/compare/v4.11.1...v4.12.0
+[4.11.1]: https://github.com/victools/jsonschema-generator/compare/v4.11.0...v4.11.1
 [4.11.0]: https://github.com/victools/jsonschema-generator/compare/v4.10.0...v4.11.0
 [4.10.0]: https://github.com/victools/jsonschema-generator/compare/v4.9.0...v4.10.0
 [4.9.0]: https://github.com/victools/jsonschema-generator/compare/v4.8.1...v4.9.0

@@ -23,6 +23,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
@@ -35,10 +37,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
- * Module for setting up schema generation aspects based on {@code jackson-annotations}:
+ * Module for setting up schema generation aspects based on {@code jackson-annotations}.
  * <ul>
  * <li>Populate the "description" attributes as per {@link JsonPropertyDescription} and {@link JsonClassDescription} annotations.</li>
  * <li>Apply alternative property names defined in {@link JsonProperty} annotations.</li>
@@ -51,6 +54,7 @@ public class JacksonModule implements Module {
     private final Set<JacksonOption> options;
     private ObjectMapper objectMapper;
     private final Map<Class<?>, BeanDescription> beanDescriptions = new HashMap<>();
+    private final Map<Class<?>, PropertyNamingStrategy> namingStrategies = new HashMap<>();
 
     /**
      * Constructor, without any additional options.
@@ -75,16 +79,25 @@ public class JacksonModule implements Module {
         this.objectMapper = builder.getObjectMapper();
         SchemaGeneratorConfigPart<FieldScope> fieldConfigPart = builder.forFields();
         fieldConfigPart.withDescriptionResolver(this::resolveDescription)
-                .withPropertyNameOverrideResolver(this::getPropertyNameOverride)
+                .withPropertyNameOverrideResolver(this::getPropertyNameOverrideBasedOnJsonPropertyAnnotation)
                 .withIgnoreCheck(this::shouldIgnoreField);
         SchemaGeneratorGeneralConfigPart generalConfigPart = builder.forTypesInGeneral();
         generalConfigPart.withDescriptionResolver(this::resolveDescriptionForType);
+
+        if (!this.options.contains(JacksonOption.IGNORE_PROPERTY_NAMING_STRATEGY)) {
+            fieldConfigPart.withPropertyNameOverrideResolver(this::getPropertyNameOverrideBasedOnJsonNamingAnnotation);
+        }
 
         boolean considerEnumJsonValue = this.options.contains(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE);
         boolean considerEnumJsonProperty = this.options.contains(JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY);
         if (considerEnumJsonValue || considerEnumJsonProperty) {
             generalConfigPart.withCustomDefinitionProvider(new CustomEnumDefinitionProvider(considerEnumJsonValue, considerEnumJsonProperty));
         }
+
+        if (this.options.contains(JacksonOption.RESPECT_JSONPROPERTY_ORDER)) {
+            generalConfigPart.withPropertySorter(new JsonPropertySorter(true));
+        }
+
         boolean lookUpSubtypes = !this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP);
         boolean includeTypeInfoTransform = !this.options.contains(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM);
         if (lookUpSubtypes || includeTypeInfoTransform) {
@@ -153,7 +166,7 @@ public class JacksonModule implements Module {
      * @param field field to look-up alternative property name for
      * @return alternative property name (or {@code null})
      */
-    protected String getPropertyNameOverride(FieldScope field) {
+    protected String getPropertyNameOverrideBasedOnJsonPropertyAnnotation(FieldScope field) {
         JsonProperty annotation = field.getAnnotationConsideringFieldAndGetter(JsonProperty.class);
         if (annotation != null) {
             String nameOverride = annotation.value();
@@ -163,6 +176,40 @@ public class JacksonModule implements Module {
             }
         }
         return null;
+    }
+
+    /**
+     * Alter the declaring name of the given field as per the declaring type's {@link JsonNaming} annotation.
+     *
+     * @param field field to look-up naming strategy for
+     * @return altered property name (or {@code null})
+     */
+    protected String getPropertyNameOverrideBasedOnJsonNamingAnnotation(FieldScope field) {
+        PropertyNamingStrategy strategy = this.namingStrategies.computeIfAbsent(field.getDeclaringType().getErasedType(),
+                this::getAnnotatedNamingStrategy);
+        if (strategy == null) {
+            return null;
+        }
+        return strategy.nameForField(null, null, field.getName());
+    }
+
+    /**
+     * Look-up the given type's {@link JsonNaming} annotation and instantiate the declared {@link PropertyNamingStrategy}.
+     *
+     * @param declaringType type declaring fields for which the applicable naming strategy should be looked-up
+     * @return annotated naming strategy instance (or {@code null})
+     */
+    private PropertyNamingStrategy getAnnotatedNamingStrategy(Class<?> declaringType) {
+        return Optional.ofNullable(declaringType.getAnnotation(JsonNaming.class))
+                .map(JsonNaming::value)
+                .map(strategyType -> {
+                    try {
+                        return strategyType.newInstance();
+                    } catch (InstantiationException | IllegalAccessException ex) {
+                        return null;
+                    }
+                })
+                .orElse(null);
     }
 
     /**

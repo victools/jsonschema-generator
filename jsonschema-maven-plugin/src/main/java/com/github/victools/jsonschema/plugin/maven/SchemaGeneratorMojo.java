@@ -36,16 +36,22 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Set;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.MavenProject;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
@@ -108,9 +114,20 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private GeneratorModule[] modules;
 
     /**
+     * The Maven project.
+     */
+    @Parameter(defaultValue = "${project}", required = true, readonly = true)
+    MavenProject project;
+
+    /**
      * The generator to be used for all schema generations.
      */
     private SchemaGenerator generator = null;
+
+    /**
+     * The classloader used for loading generator modules and classes.
+     */
+    private ClassLoader classLoader = null;
 
     /**
      * Invoke the schema generator.
@@ -145,13 +162,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private void generateSchema(String className) throws MojoExecutionException {
         // Load the class for which the schema will be generated
-        Class<?> schemaClass;
-        try {
-            schemaClass = Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            throw new MojoExecutionException("Error loading class " + className, e);
-        }
-
+        Class<?> schemaClass = this.loadClass(className);
         this.generateSchema(schemaClass);
     }
 
@@ -309,13 +320,13 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             if (module.className != null && !module.className.isEmpty()) {
                 try {
                     this.getLog().debug("- Adding custom Module " + module.className);
-                    Class<? extends Module> moduleClass = (Class<? extends Module>) Class.forName(module.className);
+                    Class<? extends Module> moduleClass = (Class<? extends Module>) this.loadClass(module.className);
                     Module moduleInstance = moduleClass.getConstructor().newInstance();
                     configBuilder.with(moduleInstance);
                 } catch (ClassCastException | InstantiationException
                         | IllegalAccessException | NoSuchMethodException
-                        | InvocationTargetException | ClassNotFoundException e) {
-                    throw new MojoExecutionException("Error: Can not instantiate custom module" + module.className, e);
+                        | InvocationTargetException e) {
+                    throw new MojoExecutionException("Error: Can not instantiate custom module " + module.className, e);
                 }
             } else if (module.name != null) {
                 switch (module.name) {
@@ -336,6 +347,53 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                             + "['Jackson', 'JavaxValidation', 'Swagger15'] or does not have a custom classname.");
                 }
             }
+        }
+    }
+
+    /**
+     * Construct the classloader based on the project classpath.
+     *
+     * @return The classloader
+     */
+    private ClassLoader getClassLoader() {
+        if (this.classLoader == null) {
+            List<String> runtimeClasspathElements = null;
+            try {
+                runtimeClasspathElements = project.getRuntimeClasspathElements();
+            } catch (DependencyResolutionRequiredException e) {
+                this.getLog().error("Failed to resolve runtime classpath elements", e);
+            }
+
+            if (runtimeClasspathElements != null) {
+                URL[] runtimeUrls = new URL[runtimeClasspathElements.size()];
+                for (int i = 0; i < runtimeClasspathElements.size(); i++) {
+                    String element = runtimeClasspathElements.get(i);
+                    try {
+                        runtimeUrls[i] = new File(element).toURI().toURL();
+                    } catch (MalformedURLException e) {
+                        this.getLog().error("Failed to resolve runtime classpath element", e);
+                    }
+                }
+                this.classLoader = new URLClassLoader(runtimeUrls,
+                        Thread.currentThread().getContextClassLoader());
+            }
+        }
+
+        return this.classLoader;
+    }
+
+    /**
+     * Load a class from the plugin classpath enriched with the project dependencies.
+     *
+     * @param className Name of the class to be loaded
+     * @return The loaded class
+     * @throws MojoExecutionException In case of unexpected behavior
+     */
+    private Class<?> loadClass(String className) throws MojoExecutionException {
+        try {
+            return this.getClassLoader().loadClass(className);
+        } catch (ClassNotFoundException e) {
+            throw new MojoExecutionException("Error loading class " + className, e);
         }
     }
 

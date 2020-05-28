@@ -451,5 +451,5 @@
             }
         }
     },
-    "required": ["nestedLongList", "nestedLong", "nestedClass1Array"]
+    "required": ["nestedClass1Array", "nestedLong", "nestedLongList"]
 }
