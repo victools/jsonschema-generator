@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.module.swagger2;
 
 import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.Module;
@@ -29,8 +30,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -249,6 +252,20 @@ public class Swagger2Module implements Module {
                     .map(rawType -> context.getTypeContext().resolve(rawType))
                     .map(context::createDefinitionReference)
                     .forEach(memberAttributes.withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))::add);
+        }
+        if (annotation.minProperties() > 0) {
+            memberAttributes.put("minProperties", annotation.minProperties());
+        }
+        if (annotation.maxProperties() > 0) {
+            memberAttributes.put("maxProperties", annotation.maxProperties());
+        }
+        if (annotation.requiredProperties().length > 0) {
+            Set<String> alreadyMentionedRequiredFields = new HashSet<>();
+            ArrayNode requiredFieldNames = memberAttributes.withArray(context.getKeyword(SchemaKeyword.TAG_REQUIRED));
+            requiredFieldNames.forEach(arrayItem -> alreadyMentionedRequiredFields.add(arrayItem.asText()));
+            Stream.of(annotation.requiredProperties())
+                    .filter(field -> !alreadyMentionedRequiredFields.contains(field))
+                    .forEach(requiredFieldNames::add);
         }
     }
 
