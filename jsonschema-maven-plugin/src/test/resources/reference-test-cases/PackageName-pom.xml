@@ -5,7 +5,7 @@
                 <groupId>com.github.victools</groupId>
                 <artifactId>jsonschema-maven-plugin</artifactId>
                 <configuration>
-                    <packageNames>com.github.victools.jsonschema.plugin.maven.TestPackage</packageNames>
+                    <packageNames>com.github.victools.jsonschema.plugin.maven.testpackage</packageNames>
                     <schemaFilePath>target/generated-test-sources/PackageName</schemaFilePath>
                 </configuration>
             </plugin>

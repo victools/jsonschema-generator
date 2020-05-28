@@ -186,7 +186,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @throws MojoExecutionException in case of problems
      */
     private void generateSchemaForPackage(String packageName) throws MojoExecutionException {
-        Reflections reflections = new Reflections(packageName, new SubTypesScanner(false));
+        Reflections reflections = new Reflections(this.getClassLoader(), packageName, new SubTypesScanner(false));
         Set<Class<?>> subTypes = reflections.getSubTypesOf(Object.class);
         for (Class<?> mainType : subTypes) {
             this.generateSchema(mainType);
