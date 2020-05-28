@@ -166,6 +166,10 @@ public class SchemaGeneratorMojoTest {
         Assert.assertTrue(resultFileB.exists());
         resultFileB.deleteOnExit();
 
+        File resultFileC = new File(generationLocation,"TestClassC-schema.json");
+        Assert.assertTrue(resultFileC.exists());
+        resultFileC.deleteOnExit();
+
         // Validate that they are the same as the reference
         File referenceFileA = new File(testCaseLocation + "/" + "TestClassA-reference.json");
         Assert.assertTrue(referenceFileA.exists());
@@ -176,6 +180,11 @@ public class SchemaGeneratorMojoTest {
         Assert.assertTrue(referenceFileB.exists());
         Assert.assertTrue("Generated schema for TestClassB is not equal to the expected reference.",
                 FileUtils.contentEquals(resultFileB, referenceFileB));
+
+        File referenceFileC = new File(testCaseLocation + "/" + "TestClassC-reference.json");
+        Assert.assertTrue(referenceFileC.exists());
+        Assert.assertTrue("Generated schema for TestClassC is not equal to the expected reference.",
+                FileUtils.contentEquals(resultFileC, referenceFileC));
     }
 
     /**
@@ -185,7 +194,7 @@ public class SchemaGeneratorMojoTest {
     public void testFileNamePattern() throws Exception {
         File testCaseLocation = new File("src/test/resources/reference-test-cases");
         File generationLocation = new File("target/generated-test-sources/SchemaFileName/schemas/"+
-                "com/github/victools/jsonschema/plugin/maven/TestPackage");
+                "com/github/victools/jsonschema/plugin/maven/testpackage");
 
         // Execute the pom
         executePom(new File("src/test/resources/reference-test-cases/SchemaFileName-pom.xml"));
