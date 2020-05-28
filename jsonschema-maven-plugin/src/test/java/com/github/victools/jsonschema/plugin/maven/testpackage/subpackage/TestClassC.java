@@ -18,7 +18,7 @@ package com.github.victools.jsonschema.plugin.maven.testpackage.subpackage;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 
-@JsonClassDescription("Jackson annotation classB of the subpackage")
+@JsonClassDescription("Jackson annotation classC of the subpackage")
 public class TestClassC {
     private double aDouble;
     private double anotherDouble;
