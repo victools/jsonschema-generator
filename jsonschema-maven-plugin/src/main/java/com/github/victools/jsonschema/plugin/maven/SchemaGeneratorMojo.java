@@ -30,6 +30,7 @@ import com.github.victools.jsonschema.module.javax.validation.JavaxValidationMod
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationOption;
 import com.github.victools.jsonschema.module.swagger15.SwaggerModule;
 import com.github.victools.jsonschema.module.swagger15.SwaggerOption;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -44,6 +45,7 @@ import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -53,6 +55,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.reflections.Reflections;
+import org.reflections.ReflectionsException;
 import org.reflections.scanners.SubTypesScanner;
 
 /**
@@ -187,7 +190,17 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private void generateSchemaForPackage(String packageName) throws MojoExecutionException {
         Reflections reflections = new Reflections(this.getClassLoader(), packageName, new SubTypesScanner(false));
-        Set<Class<?>> subTypes = reflections.getSubTypesOf(Object.class);
+        Set<Class<?>> subTypes;
+        try {
+            subTypes = reflections.getSubTypesOf(Object.class);
+        } catch (ReflectionsException reflectionsException) {
+            if (reflectionsException.getMessage().contains("Scanner SubTypesScanner was not configured")) {
+                throw new MojoExecutionException("Could not locate any classes in package " + packageName, reflectionsException);
+            } else {
+                throw new MojoExecutionException("Unknown problem when locating classes in package " + packageName, reflectionsException);
+            }
+        }
+
         for (Class<?> mainType : subTypes) {
             this.generateSchema(mainType);
         }
@@ -475,7 +488,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private void writeToFile(JsonNode jsonSchema, File file) throws MojoExecutionException {
         try (FileOutputStream outputStream = new FileOutputStream(file);
-                PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+             PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             writer.print(jsonSchema.toPrettyString());
         } catch (IOException e) {
             throw new MojoExecutionException("Error: Can not write to file " + file, e);
