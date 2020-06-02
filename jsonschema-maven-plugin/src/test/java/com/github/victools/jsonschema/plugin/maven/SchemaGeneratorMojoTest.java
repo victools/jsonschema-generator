@@ -77,6 +77,7 @@ public class SchemaGeneratorMojoTest {
     public Object[] parametersForTestPomErrors() {
         return new Object[][]{
                 {"ClassNotFound"},
+                {"EmptyPackage"},
                 {"UnknownModule"}
         };
     }
