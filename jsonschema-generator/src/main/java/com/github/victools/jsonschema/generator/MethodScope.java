@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedMethod;
+import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
@@ -32,6 +33,8 @@ import java.util.stream.Stream;
  * Representation of a single introspected method.
  */
 public class MethodScope extends MemberScope<ResolvedMethod, Method> {
+
+    private final LazyValue<FieldScope> getterField = new LazyValue<>(this::doFindGetterField);
 
     /**
      * Constructor.
@@ -111,6 +114,15 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
      * @return associated field
      */
     public FieldScope findGetterField() {
+        return this.getterField.get();
+    }
+
+    /**
+     * Look-up the field associated with this method if it is deemed to be a getter by convention.
+     *
+     * @return associated field
+     */
+    private FieldScope doFindGetterField() {
         if (this.getType() == null || !this.isPublic() || this.getArgumentCount() > 0) {
             // void and non-public methods or those with arguments are not deemed to be getters
             return null;

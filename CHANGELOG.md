@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Changed
+- Cache looked-up getter in `FieldScope.findGetter()`
+- Cache looked-up field in `MethodScope.findGetterField()`
+
+### `jsonschema-maven-plugin`
+#### Fixed
+- Clearer error message in case of package resolution finding no types to produce schemas for
 
 ## [4.12.1] - 2020-05-28
 ### `jsonschema-maven-plugin`
