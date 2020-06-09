@@ -53,7 +53,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.reflections.Reflections;
-import org.reflections.ReflectionsException;
 import org.reflections.scanners.SubTypesScanner;
 
 /**
@@ -187,20 +186,12 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @throws MojoExecutionException in case of problems
      */
     private void generateSchemaForPackage(String packageName) throws MojoExecutionException {
-        Reflections reflections = new Reflections(this.getClassLoader(), packageName, new SubTypesScanner(false));
-        Set<Class<?>> subTypes;
-        try {
-            subTypes = reflections.getSubTypesOf(Object.class);
-        } catch (ReflectionsException reflectionsException) {
-            if (reflectionsException.getMessage().contains("Scanner SubTypesScanner was not configured")) {
-                throw new MojoExecutionException("Could not locate any classes in package " + packageName, reflectionsException);
-            } else {
-                throw new MojoExecutionException("Unknown problem when locating classes in package " + packageName, reflectionsException);
+        Reflections reflections = new Reflections("", new SubTypesScanner(false), this.getClassLoader());
+        Set<String> classes = reflections.getAllTypes();
+        for (String className : classes) {
+            if (className.startsWith(packageName)) {
+                this.generateSchema(className);
             }
-        }
-
-        for (Class<?> mainType : subTypes) {
-            this.generateSchema(mainType);
         }
     }
 
