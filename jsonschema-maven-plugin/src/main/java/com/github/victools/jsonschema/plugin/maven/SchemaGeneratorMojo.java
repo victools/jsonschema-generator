@@ -53,7 +53,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.reflections.Reflections;
-import org.reflections.ReflectionsException;
 import org.reflections.scanners.SubTypesScanner;
 
 /**
@@ -131,6 +130,11 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private ClassLoader classLoader = null;
 
     /**
+     * The list of all the classes on the classpath.
+     */
+    private Set<String> allTypes = null;
+
+    /**
      * Invoke the schema generator.
      *
      * @throws MojoExecutionException An exception in case of errors and unexpected behavior
@@ -181,27 +185,31 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     }
 
     /**
-     * Generate JSON schema's for all classes in a package.
+     * Generate JSON schema's for all classes in a package and it's subpackages.
      *
      * @param packageName The name of the package
      * @throws MojoExecutionException in case of problems
      */
     private void generateSchemaForPackage(String packageName) throws MojoExecutionException {
-        Reflections reflections = new Reflections(this.getClassLoader(), packageName, new SubTypesScanner(false));
-        Set<Class<?>> subTypes;
-        try {
-            subTypes = reflections.getSubTypesOf(Object.class);
-        } catch (ReflectionsException reflectionsException) {
-            if (reflectionsException.getMessage().contains("Scanner SubTypesScanner was not configured")) {
-                throw new MojoExecutionException("Could not locate any classes in package " + packageName, reflectionsException);
-            } else {
-                throw new MojoExecutionException("Unknown problem when locating classes in package " + packageName, reflectionsException);
+        for (String className : this.getAllClassNames()) {
+            if (className.startsWith(packageName + ".")) {
+                this.generateSchema(className);
             }
         }
+    }
 
-        for (Class<?> mainType : subTypes) {
-            this.generateSchema(mainType);
+    /**
+     * Get all the names of classes on the classpath.
+     *
+     * @return A set of class names as found on the classpath
+     */
+    private Set<String> getAllClassNames() {
+        if (this.allTypes == null) {
+            Reflections reflections = new Reflections("", new SubTypesScanner(false), this.getClassLoader());
+            allTypes = reflections.getAllTypes();
         }
+
+        return allTypes;
     }
 
     /**
