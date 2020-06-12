@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.generator.TypeContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -257,7 +256,7 @@ public class SchemaCleanUpUtils {
     /**
      * Replace characters in the given definition key that are deemed incompatible within a URI (as expected by JSON Schema).
      *
-     * @param definitionKey the output of the {@link TypeContext#getSchemaDefinitionName(com.fasterxml.classmate.ResolvedType)}
+     * @param definitionKey {@link com.github.victools.jsonschema.generator.SchemaDefinitionNamingStrategy SchemaDefinitionNamingStrategy} output
      * @return URI compatible version of the given definition key
      */
     public String ensureDefinitionKeyIsUriCompatible(String definitionKey) {
@@ -274,7 +273,7 @@ public class SchemaCleanUpUtils {
     /**
      * Replace characters in the given definition key that are neither alphanumeric nor a dot, dash or underscore (as expected by OpenAPI).
      *
-     * @param definitionKey the output of the {@link TypeContext#getSchemaDefinitionName(com.fasterxml.classmate.ResolvedType)}
+     * @param definitionKey {@link com.github.victools.jsonschema.generator.SchemaDefinitionNamingStrategy SchemaDefinitionNamingStrategy} output
      * @return simplified version of the given definition key
      */
     public String ensureDefinitionKeyIsPlain(String definitionKey) {

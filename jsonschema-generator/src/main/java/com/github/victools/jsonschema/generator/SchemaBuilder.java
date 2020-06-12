@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
+import com.github.victools.jsonschema.generator.impl.DefaultSchemaDefinitionNamingStrategy;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import com.github.victools.jsonschema.generator.impl.SchemaCleanUpUtils;
 import com.github.victools.jsonschema.generator.impl.SchemaGenerationContextImpl;
@@ -28,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -69,6 +69,7 @@ public class SchemaBuilder {
     private final TypeContext typeContext;
     private final SchemaGenerationContextImpl generationContext;
     private final List<ObjectNode> schemaNodes;
+    private final SchemaDefinitionNamingStrategy definitionNamingStrategy;
     private final Function<String, String> definitionKeyCleanup;
 
     /**
@@ -87,6 +88,12 @@ public class SchemaBuilder {
         this.definitionKeyCleanup = config.shouldUsePlainDefinitionKeys()
                 ? cleanupUtils::ensureDefinitionKeyIsPlain
                 : cleanupUtils::ensureDefinitionKeyIsUriCompatible;
+
+        if (config.getDefinitionNamingStrategy() == null) {
+            this.definitionNamingStrategy = new DefaultSchemaDefinitionNamingStrategy();
+        } else {
+            this.definitionNamingStrategy = config.getDefinitionNamingStrategy();
+        }
     }
 
     /**
@@ -247,8 +254,10 @@ public class SchemaBuilder {
      */
     private Map<DefinitionKey, String> getReferenceKeys(DefinitionKey mainSchemaKey, SchemaGenerationContextImpl generationContext) {
         boolean createDefinitionForMainSchema = this.config.shouldCreateDefinitionForMainSchema();
+        Function<DefinitionKey, String> definitionNamesForKey = key -> this.definitionKeyCleanup.apply(
+                this.definitionNamingStrategy.getDefinitionNameForKey(key, generationContext));
         Map<String, List<DefinitionKey>> aliases = generationContext.getDefinedTypes().stream()
-                .collect(Collectors.groupingBy(this::getSchemaBaseDefinitionName, TreeMap::new, Collectors.toList()));
+                .collect(Collectors.groupingBy(definitionNamesForKey, TreeMap::new, Collectors.toList()));
         Map<DefinitionKey, String> referenceKeys = new LinkedHashMap<>();
         for (Map.Entry<String, List<DefinitionKey>> group : aliases.entrySet()) {
             List<DefinitionKey> definitionKeys = group.getValue();
@@ -256,24 +265,29 @@ public class SchemaBuilder {
                     || (definitionKeys.size() == 2 && !createDefinitionForMainSchema && definitionKeys.contains(mainSchemaKey))) {
                 definitionKeys.forEach(key -> referenceKeys.put(key, group.getKey()));
             } else {
-                AtomicInteger counter = new AtomicInteger(0);
-                definitionKeys.forEach(key -> referenceKeys.put(key, group.getKey() + "-" + counter.incrementAndGet()));
+                Map<DefinitionKey, String> referenceKeyGroup = definitionKeys.stream()
+                        .collect(Collectors.toMap(key -> key, _key -> group.getKey(), (val1, _val2) -> val1, LinkedHashMap::new));
+                this.definitionNamingStrategy.adjustDuplicateNames(referenceKeyGroup, generationContext);
+                if (definitionKeys.size() != referenceKeyGroup.size()) {
+                    throw new IllegalStateException(SchemaDefinitionNamingStrategy.class.getSimpleName()
+                            + " of type " + this.definitionNamingStrategy.getClass().getSimpleName()
+                            + " altered list of subschemas with duplicate names.");
+                }
+                referenceKeyGroup.entrySet().forEach(entry -> entry.setValue(this.definitionKeyCleanup.apply(entry.getValue())));
+                referenceKeys.putAll(referenceKeyGroup);
             }
         }
+        String remainingDuplicateKeys = referenceKeys.values().stream()
+                .collect(Collectors.groupingBy(key -> key, Collectors.counting()))
+                .entrySet().stream()
+                .filter(entry -> entry.getValue() > 1)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.joining(", "));
+        if (!remainingDuplicateKeys.isEmpty()) {
+            throw new IllegalStateException(SchemaDefinitionNamingStrategy.class.getSimpleName()
+                    + " of type " + this.definitionNamingStrategy.getClass().getSimpleName()
+                    + " produced duplicate keys: " + remainingDuplicateKeys);
+        }
         return referenceKeys;
-    }
-
-    /**
-     * Returns the name to be associated with an entry in the generated schema's list of {@link SchemaKeyword#TAG_DEFINITIONS}.
-     * <br>
-     * Beware: if multiple types have the same name, the actual key in {@link SchemaKeyword#TAG_DEFINITIONS} may have a numeric counter appended to it
-     *
-     * @param key the definition key to be represented in the generated schema's {@link SchemaKeyword#TAG_DEFINITIONS}
-     * @return name in {@link SchemaKeyword#TAG_DEFINITIONS}
-     */
-    private String getSchemaBaseDefinitionName(DefinitionKey key) {
-        String schemaDefinitionName = this.typeContext.getSchemaDefinitionName(key.getType());
-        // ensure that the type description is converted into a compatible format
-        return this.definitionKeyCleanup.apply(schemaDefinitionName);
     }
 }

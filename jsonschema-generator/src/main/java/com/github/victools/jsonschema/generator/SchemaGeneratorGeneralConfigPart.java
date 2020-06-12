@@ -32,6 +32,7 @@ import java.util.Map;
 public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigPart<TypeScope> {
 
     private Comparator<MemberScope<?, ?>> propertySorter = PropertySortUtils.DEFAULT_PROPERTY_ORDER;
+    private SchemaDefinitionNamingStrategy definitionNamingStrategy = null;
 
     private final List<CustomDefinitionProviderV2> customDefinitionProviders = new ArrayList<>();
     private final List<SubtypeResolver> subtypeResolvers = new ArrayList<>();
@@ -58,6 +59,26 @@ public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigP
      */
     public Comparator<MemberScope<?, ?>> getPropertySorter() {
         return this.propertySorter;
+    }
+
+    /**
+     * Replacing the current naming strategy for keys in the "definitions"/"$defs".
+     *
+     * @param namingStrategy naming strategy for "definitions"/"$defs" keys
+     * @return this builder instance (for chaining)
+     */
+    public SchemaGeneratorGeneralConfigPart withDefinitionNamingStrategy(SchemaDefinitionNamingStrategy namingStrategy) {
+        this.definitionNamingStrategy = namingStrategy;
+        return this;
+    }
+
+    /**
+     * Getter for the current naming strategy for keys in the "definitions"/"$defs".
+     *
+     * @return applicable naming strategy for "definitions"/"$defs" keys (or {@code null} if the a default strategy should be used)
+     */
+    public SchemaDefinitionNamingStrategy getDefinitionNamingStrategy() {
+        return this.definitionNamingStrategy;
     }
 
     /**

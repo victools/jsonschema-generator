@@ -29,6 +29,7 @@ import com.github.victools.jsonschema.generator.InstanceAttributeOverrideV2;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Option;
+import com.github.victools.jsonschema.generator.SchemaDefinitionNamingStrategy;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
@@ -161,6 +162,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public int sortProperties(MemberScope<?, ?> first, MemberScope<?, ?> second) {
         return this.typesInGeneralConfigPart.getPropertySorter().compare(first, second);
+    }
+
+    @Override
+    public SchemaDefinitionNamingStrategy getDefinitionNamingStrategy() {
+        return this.typesInGeneralConfigPart.getDefinitionNamingStrategy();
     }
 
     @Override

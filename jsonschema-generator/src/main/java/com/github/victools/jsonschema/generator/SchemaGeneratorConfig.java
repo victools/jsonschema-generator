@@ -143,6 +143,13 @@ public interface SchemaGeneratorConfig {
     int sortProperties(MemberScope<?, ?> first, MemberScope<?, ?> second);
 
     /**
+     * Getter for the naming strategy to be applied when determining key names in the "definitions"/"$defs".
+     *
+     * @return definition key naming strategy
+     */
+    SchemaDefinitionNamingStrategy getDefinitionNamingStrategy();
+
+    /**
      * Look-up the non-standard JSON schema definition for a given property. Falling-back on the per-type custom definitions.
      *
      * @param <M> type of targeted property
