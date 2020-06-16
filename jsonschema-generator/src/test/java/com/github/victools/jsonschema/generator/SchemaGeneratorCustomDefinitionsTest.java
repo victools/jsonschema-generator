@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;

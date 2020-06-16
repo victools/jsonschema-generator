@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.generator;
+package com.github.victools.jsonschema.generator.naming;
 
+import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.PropertyNamingStrategyBase;
-import com.github.victools.jsonschema.generator.impl.DefaultSchemaDefinitionNamingStrategy;
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
+import com.github.victools.jsonschema.generator.TypeContext;
+import com.github.victools.jsonschema.generator.naming.DefaultSchemaDefinitionNamingStrategy;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import com.github.victools.jsonschema.generator.impl.SchemaCleanUpUtils;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;

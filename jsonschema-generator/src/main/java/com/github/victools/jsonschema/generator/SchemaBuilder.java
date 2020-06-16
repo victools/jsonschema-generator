@@ -19,10 +19,12 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
-import com.github.victools.jsonschema.generator.impl.DefaultSchemaDefinitionNamingStrategy;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import com.github.victools.jsonschema.generator.impl.SchemaCleanUpUtils;
 import com.github.victools.jsonschema.generator.impl.SchemaGenerationContextImpl;
+import com.github.victools.jsonschema.generator.naming.CleanSchemaDefinitionNamingStrategy;
+import com.github.victools.jsonschema.generator.naming.DefaultSchemaDefinitionNamingStrategy;
+import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -69,8 +71,7 @@ public class SchemaBuilder {
     private final TypeContext typeContext;
     private final SchemaGenerationContextImpl generationContext;
     private final List<ObjectNode> schemaNodes;
-    private final SchemaDefinitionNamingStrategy definitionNamingStrategy;
-    private final Function<String, String> definitionKeyCleanup;
+    private final CleanSchemaDefinitionNamingStrategy definitionNamingStrategy;
 
     /**
      * Constructor.
@@ -84,16 +85,16 @@ public class SchemaBuilder {
         this.generationContext = new SchemaGenerationContextImpl(this.config, this.typeContext);
         this.schemaNodes = new ArrayList<>();
 
+        SchemaDefinitionNamingStrategy baseNamingStrategy = config.getDefinitionNamingStrategy();
+        if (baseNamingStrategy == null) {
+            baseNamingStrategy = new DefaultSchemaDefinitionNamingStrategy();
+        }
         SchemaCleanUpUtils cleanupUtils = new SchemaCleanUpUtils(config);
-        this.definitionKeyCleanup = config.shouldUsePlainDefinitionKeys()
+        Function<String, String> definitionCleanUpTask = config.shouldUsePlainDefinitionKeys()
                 ? cleanupUtils::ensureDefinitionKeyIsPlain
                 : cleanupUtils::ensureDefinitionKeyIsUriCompatible;
 
-        if (config.getDefinitionNamingStrategy() == null) {
-            this.definitionNamingStrategy = new DefaultSchemaDefinitionNamingStrategy();
-        } else {
-            this.definitionNamingStrategy = config.getDefinitionNamingStrategy();
-        }
+        this.definitionNamingStrategy = new CleanSchemaDefinitionNamingStrategy(baseNamingStrategy, definitionCleanUpTask);
     }
 
     /**
@@ -232,7 +233,8 @@ public class SchemaBuilder {
                 }
                 generationContext.makeNullable(definition);
                 if (!inlineAllSchemas && (createDefinitionsForAll || nullableReferences.size() > 1)) {
-                    String nullableDefinitionName = definitionName + "-nullable";
+                    String nullableDefinitionName = this.definitionNamingStrategy
+                            .adjustNullableName(definitionKey, definitionName, generationContext);
                     definitionsNode.set(nullableDefinitionName, definition);
                     nullableReferences.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF),
                             this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN) + '/' + designatedDefinitionPath + '/' + nullableDefinitionName));
@@ -254,8 +256,7 @@ public class SchemaBuilder {
      */
     private Map<DefinitionKey, String> getReferenceKeys(DefinitionKey mainSchemaKey, SchemaGenerationContextImpl generationContext) {
         boolean createDefinitionForMainSchema = this.config.shouldCreateDefinitionForMainSchema();
-        Function<DefinitionKey, String> definitionNamesForKey = key -> this.definitionKeyCleanup.apply(
-                this.definitionNamingStrategy.getDefinitionNameForKey(key, generationContext));
+        Function<DefinitionKey, String> definitionNamesForKey = key -> this.definitionNamingStrategy.getDefinitionNameForKey(key, generationContext);
         Map<String, List<DefinitionKey>> aliases = generationContext.getDefinedTypes().stream()
                 .collect(Collectors.groupingBy(definitionNamesForKey, TreeMap::new, Collectors.toList()));
         Map<DefinitionKey, String> referenceKeys = new LinkedHashMap<>();

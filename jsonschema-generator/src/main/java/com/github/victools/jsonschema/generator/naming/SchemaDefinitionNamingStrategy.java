@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.generator;
+package com.github.victools.jsonschema.generator.naming;
 
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import java.util.Map;
 
@@ -51,5 +52,19 @@ public interface SchemaDefinitionNamingStrategy {
             singleEntry.setValue(singleEntry.getValue() + "-" + index);
             index++;
         }
+    }
+
+    /**
+     * Provide an alternative definition name for the given key and name when it is nullable.
+     * <br>
+     * By default, a {@code "-nullable"} suffix will be appended.
+     *
+     * @param key definition reference for a type (there may be multiple different keys for the same type if custom definitions are involved)
+     * @param definitionName previous result of {@link #getDefinitionNameForKey(DefinitionKey, SchemaGenerationContext)} to be adjusted
+     * @param generationContext generation context providing access to the applied configuration and type context
+     * @return adjusted definition name
+     */
+    default String adjustNullableName(DefinitionKey key, String definitionName, SchemaGenerationContext generationContext) {
+        return definitionName + "-nullable";
     }
 }

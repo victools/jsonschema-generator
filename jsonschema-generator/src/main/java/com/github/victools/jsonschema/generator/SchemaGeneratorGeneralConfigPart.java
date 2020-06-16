@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.generator;
 
 import com.github.victools.jsonschema.generator.impl.PropertySortUtils;
+import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;

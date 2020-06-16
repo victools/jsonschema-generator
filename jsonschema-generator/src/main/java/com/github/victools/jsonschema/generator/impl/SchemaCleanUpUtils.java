@@ -256,7 +256,7 @@ public class SchemaCleanUpUtils {
     /**
      * Replace characters in the given definition key that are deemed incompatible within a URI (as expected by JSON Schema).
      *
-     * @param definitionKey {@link com.github.victools.jsonschema.generator.SchemaDefinitionNamingStrategy SchemaDefinitionNamingStrategy} output
+     * @param definitionKey {@code SchemaDefinitionNamingStrategy} output
      * @return URI compatible version of the given definition key
      */
     public String ensureDefinitionKeyIsUriCompatible(String definitionKey) {
@@ -273,7 +273,7 @@ public class SchemaCleanUpUtils {
     /**
      * Replace characters in the given definition key that are neither alphanumeric nor a dot, dash or underscore (as expected by OpenAPI).
      *
-     * @param definitionKey {@link com.github.victools.jsonschema.generator.SchemaDefinitionNamingStrategy SchemaDefinitionNamingStrategy} output
+     * @param definitionKey {@code SchemaDefinitionNamingStrategy} output
      * @return simplified version of the given definition key
      */
     public String ensureDefinitionKeyIsPlain(String definitionKey) {

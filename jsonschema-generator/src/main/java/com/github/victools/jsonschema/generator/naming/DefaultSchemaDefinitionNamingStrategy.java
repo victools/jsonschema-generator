@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.generator.impl;
+package com.github.victools.jsonschema.generator.naming;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.github.victools.jsonschema.generator.SchemaDefinitionNamingStrategy;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.TypeContext;
+import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 
 /**
  * Default implementation of a {@link SchemaDefinitionNamingStrategy} using the output of {@link TypeContext#getSimpleTypeDescription(ResolvedType)}
