@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Changed
 - Determine names/keys of subschemas in `definitions`/`$defs` through configurable `SchemaDefinitionNamingStrategy`
 
+#### Fixed
+- For multiple definitions for the same type, they might be unnecessarily treated as having conflicting definition names requiring resolution
+
 #### Removed
 - Obsolete `TypeContext.getSchemaDefinitionName()`
 

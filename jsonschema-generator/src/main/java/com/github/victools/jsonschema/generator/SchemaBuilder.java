@@ -31,7 +31,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -195,19 +197,35 @@ public class SchemaBuilder {
      */
     private ObjectNode buildDefinitionsAndResolveReferences(String designatedDefinitionPath, DefinitionKey mainSchemaKey,
             SchemaGenerationContextImpl generationContext) {
-        ObjectNode definitionsNode = this.config.createObjectNode();
-        boolean createDefinitionsForAll = this.config.shouldCreateDefinitionsForAllObjects();
-        boolean createDefinitionForMainSchema = this.config.shouldCreateDefinitionForMainSchema();
-        boolean inlineAllSchemas = this.config.shouldInlineAllSchemas();
-        for (Map.Entry<DefinitionKey, String> entry : this.getReferenceKeys(mainSchemaKey, generationContext).entrySet()) {
+        final ObjectNode definitionsNode = this.config.createObjectNode();
+        final boolean createDefinitionsForAll = this.config.shouldCreateDefinitionsForAllObjects();
+        final boolean inlineAllSchemas = this.config.shouldInlineAllSchemas();
+
+        final AtomicBoolean considerOnlyDirectReferences = new AtomicBoolean(false);
+        Predicate<DefinitionKey> shouldProduceDefinition = definitionKey -> {
+            if (inlineAllSchemas) {
+                return false;
+            }
+            if (definitionKey.equals(mainSchemaKey)) {
+                return true;
+            }
+            List<ObjectNode> references = generationContext.getReferences(definitionKey);
+            if (considerOnlyDirectReferences.get() && references.isEmpty()) {
+                return false;
+            }
+            List<ObjectNode> nullableReferences = generationContext.getNullableReferences(definitionKey);
+            return createDefinitionsForAll || (references.size() + nullableReferences.size()) > 1;
+        };
+        Map<DefinitionKey, String> baseReferenceKeys = this.getReferenceKeys(mainSchemaKey, shouldProduceDefinition, generationContext);
+        considerOnlyDirectReferences.set(true);
+        final boolean createDefinitionForMainSchema = this.config.shouldCreateDefinitionForMainSchema();
+        for (Map.Entry<DefinitionKey, String> entry : baseReferenceKeys.entrySet()) {
             String definitionName = entry.getValue();
             DefinitionKey definitionKey = entry.getKey();
             List<ObjectNode> references = generationContext.getReferences(definitionKey);
             List<ObjectNode> nullableReferences = generationContext.getNullableReferences(definitionKey);
             final String referenceKey;
-            boolean referenceInline = inlineAllSchemas
-                    || (references.isEmpty() || (!createDefinitionsForAll && (references.size() + nullableReferences.size()) < 2))
-                    && !definitionKey.equals(mainSchemaKey);
+            boolean referenceInline = !shouldProduceDefinition.test(definitionKey);
             if (referenceInline) {
                 // it is a simple type, just in-line the sub-schema everywhere
                 ObjectNode definition = generationContext.getDefinition(definitionKey);
@@ -251,17 +269,22 @@ public class SchemaBuilder {
      * Derive the applicable keys for the collected entries for the {@link SchemaKeyword#TAG_DEFINITIONS} in the given context.
      *
      * @param mainSchemaKey special definition key for the main schema
+     * @param shouldProduceDefinition filter to indicate whether a given key should be considered when determining definition names
      * @param generationContext generation context in which all traversed types and their definitions have been collected
      * @return encountered types with their corresponding reference keys
      */
-    private Map<DefinitionKey, String> getReferenceKeys(DefinitionKey mainSchemaKey, SchemaGenerationContextImpl generationContext) {
+    private Map<DefinitionKey, String> getReferenceKeys(DefinitionKey mainSchemaKey, Predicate<DefinitionKey> shouldProduceDefinition,
+            SchemaGenerationContextImpl generationContext) {
         boolean createDefinitionForMainSchema = this.config.shouldCreateDefinitionForMainSchema();
         Function<DefinitionKey, String> definitionNamesForKey = key -> this.definitionNamingStrategy.getDefinitionNameForKey(key, generationContext);
         Map<String, List<DefinitionKey>> aliases = generationContext.getDefinedTypes().stream()
                 .collect(Collectors.groupingBy(definitionNamesForKey, TreeMap::new, Collectors.toList()));
         Map<DefinitionKey, String> referenceKeys = new LinkedHashMap<>();
         for (Map.Entry<String, List<DefinitionKey>> group : aliases.entrySet()) {
-            List<DefinitionKey> definitionKeys = group.getValue();
+            group.getValue().forEach(key -> referenceKeys.put(key, ""));
+            List<DefinitionKey> definitionKeys = group.getValue().stream()
+                    .filter(shouldProduceDefinition)
+                    .collect(Collectors.toList());
             if (definitionKeys.size() == 1
                     || (definitionKeys.size() == 2 && !createDefinitionForMainSchema && definitionKeys.contains(mainSchemaKey))) {
                 definitionKeys.forEach(key -> referenceKeys.put(key, group.getKey()));
@@ -274,11 +297,11 @@ public class SchemaBuilder {
                             + " of type " + this.definitionNamingStrategy.getClass().getSimpleName()
                             + " altered list of subschemas with duplicate names.");
                 }
-                referenceKeyGroup.entrySet().forEach(entry -> entry.setValue(this.definitionKeyCleanup.apply(entry.getValue())));
                 referenceKeys.putAll(referenceKeyGroup);
             }
         }
         String remainingDuplicateKeys = referenceKeys.values().stream()
+                .filter(value -> !value.isEmpty())
                 .collect(Collectors.groupingBy(key -> key, Collectors.counting()))
                 .entrySet().stream()
                 .filter(entry -> entry.getValue() > 1)
