@@ -267,7 +267,7 @@ public class Swagger2Module implements Module {
      *            annotation
      * @param valueExtractor
      *            the getter for the value from the annotation
-     * @param a
+     * @param valueFilter
      *            filter that determines whether the value from a given
      *            annotation matches our criteria
      * 
