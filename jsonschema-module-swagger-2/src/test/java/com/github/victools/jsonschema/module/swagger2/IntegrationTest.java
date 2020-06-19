@@ -28,10 +28,15 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.module.swagger2.IntegrationTest.Foo;
+import com.github.victools.jsonschema.module.swagger2.IntegrationTest.IReference;
+import com.github.victools.jsonschema.module.swagger2.IntegrationTest.Person;
+import com.github.victools.jsonschema.module.swagger2.IntegrationTest.PersonReference;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -56,9 +61,28 @@ public class IntegrationTest {
         JsonNode result = generator.generateSchema(TestClass.class);
 
         String rawJsonSchema = result.toString();
-        System.out.println(rawJsonSchema);
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
-                loadResource("integration-test-result.json"), rawJsonSchema,
+                loadResource("integration-test-result-TestClass.json"), rawJsonSchema,
+                JSONCompareMode.STRICT);
+    }
+
+    /**
+     * Test
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testIntegration2() throws Exception {
+        // active all optional modules
+        Swagger2Module module = new Swagger2Module();
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(),
+                SchemaVersion.DRAFT_2019_09).with(module).with(Option.INLINE_ALL_SCHEMAS).build();
+        SchemaGenerator generator = new SchemaGenerator(config);
+        JsonNode result = generator.generateSchema(Foo.class);
+
+        String rawJsonSchema = result.toString();
+        JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
+                loadResource("integration-test-result-Foo.json"), rawJsonSchema,
                 JSONCompareMode.STRICT);
     }
 
@@ -93,5 +117,33 @@ public class IntegrationTest {
 
         @Schema(minimum = "14", maximum = "21", exclusiveMinimum = true, exclusiveMaximum = true)
         public int fieldWithExclusiveNumericRange;
+    }
+
+    interface IReference {
+        String getName();
+    }
+
+    class Reference<T> implements IReference {
+        private String name;
+
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
+
+    class Person {
+
+    }
+
+    @Schema(description = "the foo's person")
+    interface PersonReference extends IReference {
+        @Schema(description = "the person's name")
+        String getName();
+    }
+
+    class Foo {
+        @Schema(implementation = PersonReference.class)
+        private Reference<Person> person;
     }
 }
