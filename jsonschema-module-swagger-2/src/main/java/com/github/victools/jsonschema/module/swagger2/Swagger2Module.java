@@ -16,17 +16,6 @@
 
 package com.github.victools.jsonschema.module.swagger2;
 
-import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.MemberScope;
-import com.github.victools.jsonschema.generator.Module;
-import com.github.victools.jsonschema.generator.SchemaGenerationContext;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.SchemaKeyword;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,6 +27,19 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.MemberScope;
+import com.github.victools.jsonschema.generator.Module;
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
+
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * JSON Schema Generator Module – Swagger (2.x).
  *
@@ -45,7 +47,7 @@ import java.util.stream.Stream;
  */
 public class Swagger2Module implements Module {
 
-  @Override
+    @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         this.applyToConfigBuilder(builder.forFields());
         this.applyToConfigBuilder(builder.forMethods());
@@ -82,20 +84,19 @@ public class Swagger2Module implements Module {
     protected List<ResolvedType> resolveTargetTypeOverrides(MemberScope<?, ?> member) {
         return this
                 .getSchemaAnnotationValue(member, Schema::implementation,
-                                          annotatedImplementation -> annotatedImplementation != Void.class)
+                        annotatedImplementation -> annotatedImplementation != Void.class)
                 .map(annotatedType -> member.getContext().resolve(annotatedType))
                 .map(Collections::singletonList).orElse(null);
     }
 
     protected String resolveDescription(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::description,
-                                             description -> !description.isEmpty())
-                   .orElse(null);
+                description -> !description.isEmpty()).orElse(null);
     }
 
     protected String resolveTitle(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::title, title -> !title.isEmpty())
-                   .orElse(null);
+                .orElse(null);
     }
 
     protected boolean checkRequired(MemberScope<?, ?> member) {
