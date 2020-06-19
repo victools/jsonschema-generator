@@ -82,19 +82,20 @@ public class Swagger2Module implements Module {
     protected List<ResolvedType> resolveTargetTypeOverrides(MemberScope<?, ?> member) {
         return this
                 .getSchemaAnnotationValue(member, Schema::implementation,
-                        Predicate.not(Void.class::equals))
+                                          annotatedImplementation -> annotatedImplementation != Void.class)
                 .map(annotatedType -> member.getContext().resolve(annotatedType))
                 .map(Collections::singletonList).orElse(null);
     }
 
     protected String resolveDescription(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::description,
-                Predicate.not(String::isEmpty)).orElse(null);
+                                             description -> !description.isEmpty())
+                   .orElse(null);
     }
 
     protected String resolveTitle(MemberScope<?, ?> member) {
-        return this.getSchemaAnnotationValue(member, Schema::title, Predicate.not(String::isEmpty))
-                .orElse(null);
+        return this.getSchemaAnnotationValue(member, Schema::title, title -> !title.isEmpty())
+                   .orElse(null);
     }
 
     protected boolean checkRequired(MemberScope<?, ?> member) {
