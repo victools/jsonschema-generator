@@ -16,6 +16,17 @@
 
 package com.github.victools.jsonschema.module.swagger2;
 
+import com.github.victools.jsonschema.generator.MemberScope;
+import com.github.victools.jsonschema.generator.Module;
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,19 +37,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
-import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.MemberScope;
-import com.github.victools.jsonschema.generator.Module;
-import com.github.victools.jsonschema.generator.SchemaGenerationContext;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.SchemaKeyword;
-
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * JSON Schema Generator Module – Swagger (2.x).
@@ -262,7 +260,7 @@ public class Swagger2Module implements Module {
     /**
      * Look up a value from a {@link Schema} annotation on the given property or
      * its associated field/getter or an external class referenced by
-     * {@link Schema#implementation()}
+     * {@link Schema#implementation()}.
      *
      * @param member
      *            field/method for which to look-up any present {@link Schema}
@@ -272,6 +270,8 @@ public class Swagger2Module implements Module {
      * @param valueFilter
      *            filter that determines whether the value from a given
      *            annotation matches our criteria
+     * @param <T>
+     *            the type of the returned value
      * 
      * @return the value from one of the matching {@link Schema} annotations or
      *         {@code Optional.empty()}
