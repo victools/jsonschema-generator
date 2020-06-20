@@ -53,6 +53,8 @@ public class Swagger2Module implements Module {
 
     private void applyToConfigBuilder(SchemaGeneratorConfigPart<?> configPart) {
         configPart.withTargetTypeOverridesResolver(this::resolveTargetTypeOverrides);
+        configPart.withIgnoreCheck(this::shouldBeIgnored);
+        configPart.withPropertyNameOverrideResolver(this::resolvePropertyNameOverride);
 
         configPart.withDescriptionResolver(this::resolveDescription);
         configPart.withTitleResolver(this::resolveTitle);
@@ -83,6 +85,16 @@ public class Swagger2Module implements Module {
         return this.getSchemaAnnotationValue(member, Schema::implementation, annotatedImplementation -> annotatedImplementation != Void.class)
                 .map(annotatedType -> member.getContext().resolve(annotatedType))
                 .map(Collections::singletonList)
+                .orElse(null);
+    }
+
+    protected boolean shouldBeIgnored(MemberScope<?, ?> member) {
+        return this.getSchemaAnnotationValue(member, Schema::hidden, Boolean.TRUE::equals)
+                .isPresent();
+    }
+
+    protected String resolvePropertyNameOverride(MemberScope<?, ?> member) {
+        return this.getSchemaAnnotationValue(member, Schema::name, name -> !name.isEmpty())
                 .orElse(null);
     }
 
