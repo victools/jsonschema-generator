@@ -207,20 +207,6 @@ public class TypeContext {
     }
 
     /**
-     * Returns the name to be associated with an entry in the generated schema's list of "definitions"/"$defs".
-     * <br>
-     * Beware: if multiple types have the same name, the actual key in "definitions"/"$defs" may have a numeric counter appended to it
-     *
-     * @param type the type to be represented in the generated schema's "definitions"/"$defs"
-     * @return name in "definitions"/"$defs"
-     */
-    public String getSchemaDefinitionName(ResolvedType type) {
-        // known limitation: if two types have the same name and the only difference is their package, the resulting schema will only contain one
-        // using getFullTypeDescription() instead would avoid that issue, but the resulting schema does not look as nice
-        return this.getSimpleTypeDescription(type);
-    }
-
-    /**
      * Returns the type description for an argument in a method's property name.
      *
      * @param type method argument's type to represent

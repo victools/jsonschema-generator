@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.plugin.maven.TestPackage;
+package com.github.victools.jsonschema.plugin.maven.testpackage;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 
-@JsonClassDescription("Jackson annotation classB")
-public class TestClassB {
-    private double aDouble;
+@JsonClassDescription("Jackson annotation class for Test Class A")
+public class TestClassA {
 
-    public TestClassB(double aDouble) {
-        this.aDouble = aDouble;
+    private String aString;
+
+    public TestClassA(String aString) {
+        this.aString = aString;
     }
 }

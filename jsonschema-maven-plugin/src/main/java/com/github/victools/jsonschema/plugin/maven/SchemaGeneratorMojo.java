@@ -131,6 +131,11 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private ClassLoader classLoader = null;
 
     /**
+     * The list of all the classes on the classpath.
+     */
+    private Set<String> allTypes = null;
+
+    /**
      * Invoke the schema generator.
      *
      * @throws MojoExecutionException An exception in case of errors and unexpected behavior
@@ -181,17 +186,31 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     }
 
     /**
-     * Generate JSON schema's for all classes in a package.
+     * Generate JSON schema's for all classes in a package and it's subpackages.
      *
      * @param packageName The name of the package
      * @throws MojoExecutionException in case of problems
      */
     private void generateSchemaForPackage(String packageName) throws MojoExecutionException {
-        Reflections reflections = new Reflections(packageName, new SubTypesScanner(false));
-        Set<Class<?>> subTypes = reflections.getSubTypesOf(Object.class);
-        for (Class<?> mainType : subTypes) {
-            this.generateSchema(mainType);
+        for (String className : this.getAllClassNames()) {
+            if (className.startsWith(packageName + ".")) {
+                this.generateSchema(className);
+            }
         }
+    }
+
+    /**
+     * Get all the names of classes on the classpath.
+     *
+     * @return A set of class names as found on the classpath
+     */
+    private Set<String> getAllClassNames() {
+        if (this.allTypes == null) {
+            Reflections reflections = new Reflections("", new SubTypesScanner(false), this.getClassLoader());
+            allTypes = reflections.getAllTypes();
+        }
+
+        return allTypes;
     }
 
     /**

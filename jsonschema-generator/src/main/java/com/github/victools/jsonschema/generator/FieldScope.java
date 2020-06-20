@@ -20,6 +20,7 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.classmate.members.ResolvedMethod;
+import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
@@ -30,6 +31,8 @@ import java.util.stream.Stream;
  * Representation of a single introspected field.
  */
 public class FieldScope extends MemberScope<ResolvedField, Field> {
+
+    private final LazyValue<MethodScope> getter = new LazyValue<>(this::doFindGetter);
 
     /**
      * Constructor.
@@ -100,18 +103,26 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
      * @return public getter from within the field's declaring class
      */
     public MethodScope findGetter() {
+        return this.getter.get();
+    }
+
+    /**
+     * Return the conventional getter method (if one exists). E.g. for a field named "foo", look-up either "getFoo()" or "isFoo()".
+     *
+     * @return public getter from within the field's declaring class
+     */
+    private MethodScope doFindGetter() {
         String capitalisedFieldName = this.getName().substring(0, 1).toUpperCase() + this.getName().substring(1);
         String getterName1 = "get" + capitalisedFieldName;
         String getterName2 = "is" + capitalisedFieldName;
         ResolvedMethod[] methods = this.getDeclaringTypeMembers().getMemberMethods();
-        MethodScope getter = Stream.of(methods)
+        return Stream.of(methods)
                 .filter(method -> method.getRawMember().getParameterCount() == 0)
                 .filter(ResolvedMethod::isPublic)
                 .filter(method -> method.getName().equals(getterName1) || method.getName().equals(getterName2))
                 .findFirst()
                 .map(method -> this.getContext().createMethodScope(method, this.getDeclaringTypeMembers()))
                 .orElse(null);
-        return getter;
     }
 
     /**

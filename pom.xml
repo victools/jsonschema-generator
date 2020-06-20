@@ -53,7 +53,8 @@
             <name>Jan Labrie</name>
             <url>https://github.com/JanLabrie</url>
             <roles>
-                <role>Provided PR #78 and various follow-ups (creation of maven plugin)</role>
+                <role>Provided PR #78 (creation of maven plugin)</role>
+                <role>Various follow-up enhancements and fixes for maven plugin</role>
             </roles>
         </contributor>
     </contributors>

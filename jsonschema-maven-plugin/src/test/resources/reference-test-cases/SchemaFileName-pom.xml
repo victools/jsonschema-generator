@@ -6,8 +6,8 @@
                 <artifactId>jsonschema-maven-plugin</artifactId>
                 <configuration>
                     <classNames>
-                        <className>com.github.victools.jsonschema.plugin.maven.TestPackage.TestClassA</className>
-                        <className>com.github.victools.jsonschema.plugin.maven.TestPackage.TestClassB</className>
+                        <className>com.github.victools.jsonschema.plugin.maven.testpackage.TestClassA</className>
+                        <className>com.github.victools.jsonschema.plugin.maven.testpackage.TestClassB</className>
                     </classNames>
                     <schemaFilePath>target/generated-test-sources/SchemaFileName</schemaFilePath>
                     <schemaFileName>schemas/{1}/{0}.schema</schemaFileName>

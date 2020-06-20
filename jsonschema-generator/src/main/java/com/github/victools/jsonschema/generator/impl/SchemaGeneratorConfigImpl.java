@@ -37,6 +37,7 @@ import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeAttributeOverrideV2;
 import com.github.victools.jsonschema.generator.TypeScope;
+import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -161,6 +162,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public int sortProperties(MemberScope<?, ?> first, MemberScope<?, ?> second) {
         return this.typesInGeneralConfigPart.getPropertySorter().compare(first, second);
+    }
+
+    @Override
+    public SchemaDefinitionNamingStrategy getDefinitionNamingStrategy() {
+        return this.typesInGeneralConfigPart.getDefinitionNamingStrategy();
     }
 
     @Override
