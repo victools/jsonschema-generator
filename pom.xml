@@ -57,6 +57,13 @@
                 <role>Various follow-up enhancements and fixes for maven plugin</role>
             </roles>
         </contributor>
+        <contributor>
+            <name>Jochen Berger</name>
+            <url>https://github.com/jochenberger</url>
+            <roles>
+                <role>Provided PR #116 (part of initial swagger-2 module)</role>
+            </roles>
+        </contributor>
     </contributors>
 
     <distributionManagement>

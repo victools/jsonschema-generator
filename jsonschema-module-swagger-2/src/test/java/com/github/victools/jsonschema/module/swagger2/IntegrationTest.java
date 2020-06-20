@@ -27,62 +27,44 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.victools.jsonschema.generator.Option;
+import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.module.swagger2.IntegrationTest.Foo;
 import com.github.victools.jsonschema.module.swagger2.IntegrationTest.IReference;
 import com.github.victools.jsonschema.module.swagger2.IntegrationTest.Person;
 import com.github.victools.jsonschema.module.swagger2.IntegrationTest.PersonReference;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import org.junit.runner.RunWith;
 
 /**
- * Integration test of this module being used in a real SchemaGenerator
- * instance.
+ * Integration test of this module being used in a real SchemaGenerator instance.
  */
+@RunWith(JUnitParamsRunner.class)
 public class IntegrationTest {
 
-    /**
-     * Test
-     *
-     * @throws Exception
-     */
-    @Test
-    public void testIntegration() throws Exception {
-        // active all optional modules
-        Swagger2Module module = new Swagger2Module();
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(),
-                SchemaVersion.DRAFT_2019_09).with(module).build();
-        SchemaGenerator generator = new SchemaGenerator(config);
-        JsonNode result = generator.generateSchema(TestClass.class);
-
-        String rawJsonSchema = result.toString();
-        JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
-                loadResource("integration-test-result-TestClass.json"), rawJsonSchema,
-                JSONCompareMode.STRICT);
+    public Object[] parametersForTestIntegration() {
+        return new Object[][]{
+            {TestClass.class},
+            {Foo.class}
+        };
     }
 
-    /**
-     * Test
-     *
-     * @throws Exception
-     */
     @Test
-    public void testIntegration2() throws Exception {
-        // active all optional modules
+    @Parameters
+    public void testIntegration(Class<?> rawTargetType) throws Exception {
         Swagger2Module module = new Swagger2Module();
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(),
-                SchemaVersion.DRAFT_2019_09).with(module).with(Option.INLINE_ALL_SCHEMAS).build();
-        SchemaGenerator generator = new SchemaGenerator(config);
-        JsonNode result = generator.generateSchema(Foo.class);
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
+                .with(module);
+        SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
+        JsonNode result = generator.generateSchema(rawTargetType);
 
         String rawJsonSchema = result.toString();
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
-                loadResource("integration-test-result-Foo.json"), rawJsonSchema,
+                loadResource("integration-test-result-" + rawTargetType.getSimpleName() + ".json"), rawJsonSchema,
                 JSONCompareMode.STRICT);
     }
 
@@ -108,8 +90,7 @@ public class IntegrationTest {
         @Schema(name = "fieldWithOverriddenName")
         public List<Boolean> originalFieldName;
 
-        @Schema(description = "field description", nullable = true, allowableValues = { "A", "B",
-                "C", "D" })
+        @Schema(description = "field description", nullable = true, allowableValues = {"A", "B", "C", "D"})
         public String fieldWithDescriptionAndAllowableValues;
 
         @Schema(minimum = "15", maximum = "20")
@@ -120,15 +101,17 @@ public class IntegrationTest {
     }
 
     interface IReference {
+
         String getName();
     }
 
     class Reference<T> implements IReference {
+
         private String name;
 
         @Override
         public String getName() {
-            return name;
+            return this.name;
         }
     }
 
@@ -137,12 +120,17 @@ public class IntegrationTest {
     }
 
     @Schema(description = "the foo's person")
-    interface PersonReference extends IReference {
+    class PersonReference extends Reference<Person> {
+
+        @Override
         @Schema(description = "the person's name")
-        String getName();
+        public String getName() {
+            return super.getName();
+        }
     }
 
     class Foo {
+
         @Schema(implementation = PersonReference.class)
         private Reference<Person> person;
     }

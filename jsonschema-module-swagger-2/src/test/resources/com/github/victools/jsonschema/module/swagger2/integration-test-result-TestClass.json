@@ -1,4 +1,5 @@
 {
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
     "type": "object",
     "properties": {
         "fieldWithDescriptionAndAllowableValues": {
@@ -17,7 +18,7 @@
             "maximum": 20
         },
         "fieldWithOverriddenName": {
-            "type": ["array", "null"],
+            "type": "array",
             "items": {
                 "type": "boolean"
             }

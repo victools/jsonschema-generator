@@ -80,16 +80,15 @@ public class Swagger2Module implements Module {
     }
 
     protected List<ResolvedType> resolveTargetTypeOverrides(MemberScope<?, ?> member) {
-        return this
-                .getSchemaAnnotationValue(member, Schema::implementation,
-                        annotatedImplementation -> annotatedImplementation != Void.class)
+        return this.getSchemaAnnotationValue(member, Schema::implementation, annotatedImplementation -> annotatedImplementation != Void.class)
                 .map(annotatedType -> member.getContext().resolve(annotatedType))
-                .map(Collections::singletonList).orElse(null);
+                .map(Collections::singletonList)
+                .orElse(null);
     }
 
     protected String resolveDescription(MemberScope<?, ?> member) {
-        return this.getSchemaAnnotationValue(member, Schema::description,
-                description -> !description.isEmpty()).orElse(null);
+        return this.getSchemaAnnotationValue(member, Schema::description, description -> !description.isEmpty())
+                .orElse(null);
     }
 
     protected String resolveTitle(MemberScope<?, ?> member) {
@@ -108,13 +107,14 @@ public class Swagger2Module implements Module {
     }
 
     protected List<String> resolveEnum(MemberScope<?, ?> member) {
-        return this.getSchemaAnnotationValue(member, Schema::allowableValues,
-                values -> values.length > 0).map(Arrays::asList).orElse(null);
+        return this.getSchemaAnnotationValue(member, Schema::allowableValues, values -> values.length > 0)
+                .map(Arrays::asList)
+                .orElse(null);
     }
 
     protected String resolveDefault(MemberScope<?, ?> member) {
-        return this.getSchemaAnnotationValue(member, Schema::defaultValue,
-                defaultValue -> !defaultValue.isEmpty()).orElse(null);
+        return this.getSchemaAnnotationValue(member, Schema::defaultValue, defaultValue -> !defaultValue.isEmpty())
+                .orElse(null);
     }
 
     protected Integer resolveMinLength(MemberScope<?, ?> member) {
@@ -123,8 +123,8 @@ public class Swagger2Module implements Module {
     }
 
     protected Integer resolveMaxLength(MemberScope<?, ?> member) {
-        return this.getSchemaAnnotationValue(member, Schema::maxLength,
-                maxLength -> maxLength < Integer.MAX_VALUE && maxLength > -1).orElse(null);
+        return this.getSchemaAnnotationValue(member, Schema::maxLength, maxLength -> maxLength < Integer.MAX_VALUE && maxLength > -1)
+                .orElse(null);
     }
 
     protected String resolveFormat(MemberScope<?, ?> member) {
@@ -138,49 +138,43 @@ public class Swagger2Module implements Module {
     }
 
     protected BigDecimal resolveMultipleOf(MemberScope<?, ?> member) {
-        return this
-                .getSchemaAnnotationValue(member, Schema::multipleOf, multipleOf -> multipleOf != 0)
-                .map(BigDecimal::new).orElse(null);
+        return this.getSchemaAnnotationValue(member, Schema::multipleOf, multipleOf -> multipleOf != 0)
+                .map(BigDecimal::new)
+                .orElse(null);
     }
 
     protected BigDecimal resolveExclusiveMaximum(MemberScope<?, ?> member) {
-        return this
-                .getSchemaAnnotationValue(member, Schema::maximum,
-                        maximum -> !maximum.isEmpty() && this.getSchemaAnnotationValue(member,
-                                Schema::exclusiveMaximum, Boolean.TRUE::equals).isPresent())
-                .map(BigDecimal::new).orElse(null);
+        return this.getSchemaAnnotationValue(member, Schema::maximum, maximum -> !maximum.isEmpty())
+                .filter(_maximum -> this.getSchemaAnnotationValue(member, Schema::exclusiveMaximum, Boolean.TRUE::equals).isPresent())
+                .map(BigDecimal::new)
+                .orElse(null);
     }
 
     protected BigDecimal resolveInclusiveMaximum(MemberScope<?, ?> member) {
-        return this
-                .getSchemaAnnotationValue(member, Schema::maximum,
-                        maximum -> !maximum.isEmpty() && this.getSchemaAnnotationValue(member,
-                                Schema::exclusiveMaximum, Boolean.FALSE::equals).isPresent())
-                .map(BigDecimal::new).orElse(null);
+        return this.getSchemaAnnotationValue(member, Schema::maximum, maximum -> !maximum.isEmpty())
+                .filter(_maximum -> this.getSchemaAnnotationValue(member, Schema::exclusiveMaximum, Boolean.FALSE::equals).isPresent())
+                .map(BigDecimal::new)
+                .orElse(null);
     }
 
     protected BigDecimal resolveExclusiveMinimum(MemberScope<?, ?> member) {
-        return this
-                .getSchemaAnnotationValue(member, Schema::minimum,
-                        minimum -> !minimum.isEmpty() && this.getSchemaAnnotationValue(member,
-                                Schema::exclusiveMinimum, Boolean.TRUE::equals).isPresent())
-                .map(BigDecimal::new).orElse(null);
+        return this.getSchemaAnnotationValue(member, Schema::minimum, minimum -> !minimum.isEmpty())
+                .filter(_minimum -> this.getSchemaAnnotationValue(member, Schema::exclusiveMinimum, Boolean.TRUE::equals).isPresent())
+                .map(BigDecimal::new)
+                .orElse(null);
     }
 
     protected BigDecimal resolveInclusiveMinimum(MemberScope<?, ?> member) {
-        return this
-                .getSchemaAnnotationValue(member, Schema::minimum,
-                        minimum -> !minimum.isEmpty() && this.getSchemaAnnotationValue(member,
-                                Schema::exclusiveMinimum, Boolean.FALSE::equals).isPresent())
-                .map(BigDecimal::new).orElse(null);
+        return this.getSchemaAnnotationValue(member, Schema::minimum, minimum -> !minimum.isEmpty())
+                .filter(_minimum -> this.getSchemaAnnotationValue(member, Schema::exclusiveMinimum, Boolean.FALSE::equals).isPresent())
+                .map(BigDecimal::new)
+                .orElse(null);
     }
 
     /**
-     * Determine the given field/method's {@link ArraySchema} annotation is
-     * present and contains a specific {@code minItems}.
+     * Determine the given field/method's {@link ArraySchema} annotation is present and contains a specific {@code minItems}.
      *
-     * @param member
-     *            potentially annotated field/method
+     * @param member potentially annotated field/method
      * @return the {@code @ArraySchema(minItems)} value, otherwise {@code null}
      */
     protected Integer resolveArrayMinItems(MemberScope<?, ?> member) {
@@ -192,11 +186,9 @@ public class Swagger2Module implements Module {
     }
 
     /**
-     * Determine the given field/method's {@link ArraySchema} annotation is
-     * present and contains a specific {@code maxItems}.
+     * Determine the given field/method's {@link ArraySchema} annotation is present and contains a specific {@code maxItems}.
      *
-     * @param member
-     *            potentially annotated field/method
+     * @param member potentially annotated field/method
      * @return the {@code @ArraySchema(maxItems)} value, otherwise {@code null}
      */
     protected Integer resolveArrayMaxItems(MemberScope<?, ?> member) {
@@ -208,11 +200,9 @@ public class Swagger2Module implements Module {
     }
 
     /**
-     * Determine the given field/method's {@link ArraySchema} annotation is
-     * present and is marked as {@code uniqueItems = true}.
+     * Determine the given field/method's {@link ArraySchema} annotation is present and is marked as {@code uniqueItems = true}.
      *
-     * @param member
-     *            potentially annotated field/method
+     * @param member potentially annotated field/method
      * @return whether {@code @ArraySchema(uniqueItems = true)} is present
      */
     protected Boolean resolveArrayUniqueItems(MemberScope<?, ?> member) {
@@ -223,21 +213,20 @@ public class Swagger2Module implements Module {
                 .filter(uniqueItemsFlag -> uniqueItemsFlag).orElse(null);
     }
 
-    protected void overrideInstanceAttributes(ObjectNode memberAttributes, MemberScope<?, ?> member,
-            SchemaGenerationContext context) {
+    protected void overrideInstanceAttributes(ObjectNode memberAttributes, MemberScope<?, ?> member, SchemaGenerationContext context) {
         Schema annotation = this.getSchemaAnnotationValue(member, Function.identity(), x -> true)
                 .orElse(null);
         if (annotation == null) {
             return;
         }
         if (annotation.not() != Void.class) {
-            memberAttributes.set("not", context
-                    .createDefinitionReference(context.getTypeContext().resolve(annotation.not())));
+            memberAttributes.set("not", context.createDefinitionReference(context.getTypeContext().resolve(annotation.not())));
         }
         if (annotation.allOf().length > 0) {
-            Stream.of(annotation.allOf()).map(rawType -> context.getTypeContext().resolve(rawType))
+            Stream.of(annotation.allOf())
+                    .map(rawType -> context.getTypeContext().resolve(rawType))
                     .map(context::createDefinitionReference).forEach(memberAttributes
-                            .withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))::add);
+                    .withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))::add);
         }
         if (annotation.minProperties() > 0) {
             memberAttributes.put("minProperties", annotation.minProperties());
@@ -258,60 +247,42 @@ public class Swagger2Module implements Module {
     }
 
     /**
-     * Look up a value from a {@link Schema} annotation on the given property or
-     * its associated field/getter or an external class referenced by
+     * Look up a value from a {@link Schema} annotation on the given property or its associated field/getter or an external class referenced by
      * {@link Schema#implementation()}.
      *
-     * @param member
-     *            field/method for which to look-up any present {@link Schema}
-     *            annotation
-     * @param valueExtractor
-     *            the getter for the value from the annotation
-     * @param valueFilter
-     *            filter that determines whether the value from a given
-     *            annotation matches our criteria
-     * @param <T>
-     *            the type of the returned value
-     * 
-     * @return the value from one of the matching {@link Schema} annotations or
-     *         {@code Optional.empty()}
+     * @param member field/method for which to look-up any present {@link Schema} annotation
+     * @param valueExtractor the getter for the value from the annotation
+     * @param valueFilter filter that determines whether the value from a given annotation matches our criteria
+     * @param <T> the type of the returned value
+     *
+     * @return the value from one of the matching {@link Schema} annotations or {@code Optional.empty()}
      */
-    private <T> Optional<T> getSchemaAnnotationValue(MemberScope<?, ?> member,
-            Function<Schema, T> valueExtractor, Predicate<T> valueFilter) {
+    private <T> Optional<T> getSchemaAnnotationValue(MemberScope<?, ?> member, Function<Schema, T> valueExtractor, Predicate<T> valueFilter) {
         if (member.isFakeContainerItemScope()) {
-            return this.getArraySchemaAnnotation(member).map(ArraySchema::schema)
-                    .map(valueExtractor).filter(valueFilter);
+            return this.getArraySchemaAnnotation(member)
+                    .map(ArraySchema::schema)
+                    .map(valueExtractor)
+                    .filter(valueFilter);
         }
         Schema annotation = member.getAnnotationConsideringFieldAndGetter(Schema.class);
         if (annotation != null) {
-            if (annotation.implementation() != Void.class) {
-                Schema annotationFromImplementation = annotation.implementation()
-                        .getAnnotation(Schema.class);
-                if (annotationFromImplementation != null) {
-                    T value = valueExtractor.apply(annotationFromImplementation);
-                    if (valueFilter.test(value)) {
-                        return Optional.of(value);
-                    }
-                }
-            }
-            return Optional.of(annotation).map(valueExtractor).filter(valueFilter);
+            return Optional.of(annotation)
+                    .map(valueExtractor)
+                    .filter(valueFilter);
         }
-        return this.getArraySchemaAnnotation(member).map(ArraySchema::arraySchema)
-                .map(valueExtractor).filter(valueFilter);
+        return this.getArraySchemaAnnotation(member)
+                .map(ArraySchema::arraySchema)
+                .map(valueExtractor)
+                .filter(valueFilter);
     }
 
     /**
-     * Look-up the {@link ArraySchema} annotation on the given property or its
-     * associated field/getter.
+     * Look-up the {@link ArraySchema} annotation on the given property or its associated field/getter.
      *
-     * @param member
-     *            field/method for which to look-up any present
-     *            {@link ArraySchema} annotation
-     * @return present {@link ArraySchema} annotation or
-     *         {@code Optional.empty()}
+     * @param member field/method for which to look-up any present {@link ArraySchema} annotation
+     * @return present {@link ArraySchema} annotation or {@code Optional.empty()}
      */
     private Optional<ArraySchema> getArraySchemaAnnotation(MemberScope<?, ?> member) {
-        return Optional
-                .ofNullable(member.getAnnotationConsideringFieldAndGetter(ArraySchema.class));
+        return Optional.ofNullable(member.getAnnotationConsideringFieldAndGetter(ArraySchema.class));
     }
 }
