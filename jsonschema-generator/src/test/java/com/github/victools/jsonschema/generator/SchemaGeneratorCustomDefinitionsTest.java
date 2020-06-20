@@ -16,12 +16,15 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -149,7 +152,22 @@ public class SchemaGeneratorCustomDefinitionsTest {
                 .with(Option.DEFINITIONS_FOR_ALL_OBJECTS);
         configBuilder.forTypesInGeneral()
                 .withCustomDefinitionProvider(customDefinitionProviderOne)
-                .withCustomDefinitionProvider(customDefinitionProviderTwo);
+                .withCustomDefinitionProvider(customDefinitionProviderTwo)
+                .withDefinitionNamingStrategy(new SchemaDefinitionNamingStrategy() {
+                    @Override
+                    public String getDefinitionNameForKey(DefinitionKey key, SchemaGenerationContext generationContext) {
+                        return key.getType().getErasedType().getSimpleName().toLowerCase();
+                    }
+
+                    @Override
+                    public void adjustDuplicateNames(Map<DefinitionKey, String> duplicateNames, SchemaGenerationContext context) {
+                        char suffix = 'a';
+                        for (Map.Entry<DefinitionKey, String> singleEntry : duplicateNames.entrySet()) {
+                            singleEntry.setValue(singleEntry.getValue() + " (" + suffix + ")");
+                            suffix++;
+                        }
+                    }
+                });
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(TestDirectCircularClass.class);
         JSONAssert.assertEquals('\n' + result.toString() + '\n',

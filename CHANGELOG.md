@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Added
+- Possibility to configure `SchemaDefinitionNamingStrategy` via `configBuilder.forTypesInGeneral().withDefinitionNamingStrategy()`
+- Explicit `DefaultSchemaDefinitionNamingStrategy` that is being applied if no other `SchemaDefinitionNamingStrategy` is being configured
+
+#### Changed
+- Determine names/keys of subschemas in `definitions`/`$defs` through configurable `SchemaDefinitionNamingStrategy`
+
+#### Fixed
+- For multiple definitions for the same type, they might be unnecessarily treated as having conflicting definition names requiring resolution
+
+#### Removed
+- Obsolete `TypeContext.getSchemaDefinitionName()`
 
 ## [4.12.2] - 2020-06-10
 ### `jsonschema-generator`

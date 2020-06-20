@@ -34,7 +34,7 @@ public class DefinitionKey {
      * @param type encountered type a schema definition is associated with
      * @param ignoredDefinitionProvider first custom definition provider that was ignored when creating the definition (is null in most cases)
      */
-    DefinitionKey(ResolvedType type, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+    protected DefinitionKey(ResolvedType type, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
         this.type = type;
         this.ignoredDefinitionProvider = ignoredDefinitionProvider;
     }
@@ -55,7 +55,7 @@ public class DefinitionKey {
      *
      * @return first custom definition provider that was ignored when creating the definition (is null in most cases)
      */
-    CustomDefinitionProviderV2 getIgnoredDefinitionProvider() {
+    public CustomDefinitionProviderV2 getIgnoredDefinitionProvider() {
         return this.ignoredDefinitionProvider;
     }
 

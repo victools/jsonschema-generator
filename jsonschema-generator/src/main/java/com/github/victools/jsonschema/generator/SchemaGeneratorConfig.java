@@ -20,6 +20,7 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -141,6 +142,13 @@ public interface SchemaGeneratorConfig {
      * @return a negative/positive integer as the first field/method should be positioned before/after the second respectively
      */
     int sortProperties(MemberScope<?, ?> first, MemberScope<?, ?> second);
+
+    /**
+     * Getter for the naming strategy to be applied when determining key names in the "definitions"/"$defs".
+     *
+     * @return definition key naming strategy
+     */
+    SchemaDefinitionNamingStrategy getDefinitionNamingStrategy();
 
     /**
      * Look-up the non-standard JSON schema definition for a given property. Falling-back on the per-type custom definitions.
