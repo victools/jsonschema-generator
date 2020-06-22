@@ -318,7 +318,7 @@ public class Swagger2Module implements Module {
         return typeScope -> Optional
                 .ofNullable(typeScope.getType().getErasedType().getAnnotation(Schema.class))
                 .map(valueExtractor).filter(valueFilter).orElse(null);
-     }
+    }
 
     /**
      * Look-up the {@link ArraySchema} annotation on the given property or its associated field/getter.
