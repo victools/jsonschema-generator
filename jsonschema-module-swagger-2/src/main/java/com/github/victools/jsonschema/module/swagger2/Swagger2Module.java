@@ -19,12 +19,15 @@ package com.github.victools.jsonschema.module.swagger2;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
+import com.github.victools.jsonschema.generator.TypeScope;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
@@ -47,8 +50,16 @@ public class Swagger2Module implements Module {
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
+        this.applyToConfigBuilder(builder.forTypesInGeneral());
         this.applyToConfigBuilder(builder.forFields());
         this.applyToConfigBuilder(builder.forMethods());
+    }
+
+    private void applyToConfigBuilder(SchemaGeneratorGeneralConfigPart configPart) {
+        configPart.withDescriptionResolver(this.createTypePropertyResolver(Schema::description,
+                description -> !description.isEmpty()));
+        configPart.withTitleResolver(this.createTypePropertyResolver(Schema::title,
+                description -> !description.isEmpty()));
     }
 
     private void applyToConfigBuilder(SchemaGeneratorConfigPart<?> configPart) {
@@ -287,6 +298,27 @@ public class Swagger2Module implements Module {
                 .map(valueExtractor)
                 .filter(valueFilter);
     }
+
+    /**
+     * Create a {@link ConfigFunction} that extracts a value from the
+     * {@link Schema} annotation of a {@link TypeScope}.
+     * 
+     * @param valueExtractor
+     *            the getter for the value from the annotation
+     * @param valueFilter
+     *            filter that determines whether the value from a given
+     *            annotation matches our criteria
+     * @param <T>
+     *            the type of the returned value
+     * @return the value from the matching type's {@link Schema} annotation or
+     *         {@code Optional.empty()}
+     */
+    private <T> ConfigFunction<TypeScope, T> createTypePropertyResolver(
+            Function<Schema, T> valueExtractor, Predicate<T> valueFilter) {
+        return typeScope -> Optional
+                .ofNullable(typeScope.getType().getErasedType().getAnnotation(Schema.class))
+                .map(valueExtractor).filter(valueFilter).orElse(null);
+     }
 
     /**
      * Look-up the {@link ArraySchema} annotation on the given property or its associated field/getter.
