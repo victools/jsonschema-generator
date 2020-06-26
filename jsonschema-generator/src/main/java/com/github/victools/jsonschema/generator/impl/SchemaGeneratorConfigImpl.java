@@ -140,6 +140,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldDeriveFieldsFromArgumentFreeMethods() {
+        return this.isOptionEnabled(Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS);
+    }
+
+    @Override
     public boolean shouldIncludeSchemaVersionIndicator() {
         return this.isOptionEnabled(Option.SCHEMA_VERSION_INDICATOR);
     }
