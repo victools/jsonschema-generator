@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - Possibility to configure `SchemaDefinitionNamingStrategy` via `configBuilder.forTypesInGeneral().withDefinitionNamingStrategy()`
 - Explicit `DefaultSchemaDefinitionNamingStrategy` that is being applied if no other `SchemaDefinitionNamingStrategy` is being configured
+- New `Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS` to allow deriving fields from getter methods
 
 #### Changed
 - Determine names/keys of subschemas in `definitions`/`$defs` through configurable `SchemaDefinitionNamingStrategy`
+- Default property sort order to consider property name when differentiating fields and methods (now that methods may have field-like names)
 
 #### Fixed
 - For multiple definitions for the same type, they might be unnecessarily treated as having conflicting definition names requiring resolution

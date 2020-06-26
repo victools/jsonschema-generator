@@ -109,6 +109,13 @@ public interface SchemaGeneratorConfig {
     boolean shouldIncludeStaticMethods();
 
     /**
+     * Determine whether non-void argument-free "getXyZ"/"isXyZ" methods should be represented by the respective field name "xyZ" by default.
+     *
+     * @return whether to treat argument-free methods as fields in schema
+     */
+    boolean shouldDeriveFieldsFromArgumentFreeMethods();
+
+    /**
      * Getter for the underlying object mapper.
      *
      * @return object mapper being used for generating JSON Schema structure

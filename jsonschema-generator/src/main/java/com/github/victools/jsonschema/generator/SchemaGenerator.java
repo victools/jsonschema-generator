@@ -35,7 +35,7 @@ public class SchemaGenerator {
      * @param config configuration to be applied
      */
     public SchemaGenerator(SchemaGeneratorConfig config) {
-        this(config, TypeContextFactory.createDefaultTypeContext());
+        this(config, TypeContextFactory.createDefaultTypeContext(config));
     }
 
     /**

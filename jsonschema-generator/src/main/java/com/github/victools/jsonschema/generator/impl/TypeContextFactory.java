@@ -18,6 +18,7 @@ package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.classmate.AnnotationConfiguration;
 import com.fasterxml.classmate.AnnotationInclusion;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.TypeContext;
 
 /**
@@ -37,6 +38,17 @@ public class TypeContextFactory {
     }
 
     /**
+     * Create the default {@link TypeContext} with {@link AnnotationInclusion#INCLUDE_AND_INHERIT_IF_INHERITED}.<br>
+     * This is equivalent to calling: {@code TypeContextFactory.createTypeContext(AnnotationInclusion.INCLUDE_AND_INHERIT_IF_INHERITED)}
+     *
+     * @param config configuration to consider
+     * @return created {@link TypeContext} instance
+     */
+    public static TypeContext createDefaultTypeContext(SchemaGeneratorConfig config) {
+        return TypeContextFactory.createTypeContext(AnnotationInclusion.INCLUDE_AND_INHERIT_IF_INHERITED, config);
+    }
+
+    /**
      * Create the a {@link TypeContext} with the given {@link AnnotationInclusion}.
      * <br>
      * This is equivalent to calling: {@code TypeContextFactory.createTypeContext(new AnnotationConfiguration.StdConfiguration(annotationInclusion))}
@@ -49,6 +61,19 @@ public class TypeContextFactory {
     }
 
     /**
+     * Create the a {@link TypeContext} with the given {@link AnnotationInclusion}.
+     * <br>
+     * This is equivalent to calling: {@code TypeContextFactory.createTypeContext(new AnnotationConfiguration.StdConfiguration(annotationInclusion))}
+     *
+     * @param annotationInclusion indication which annotations to include during type resolution/introspection
+     * @param config configuration to consider
+     * @return created {@link TypeContext} instance
+     */
+    public static TypeContext createTypeContext(AnnotationInclusion annotationInclusion, SchemaGeneratorConfig config) {
+        return TypeContextFactory.createTypeContext(new AnnotationConfiguration.StdConfiguration(annotationInclusion), config);
+    }
+
+    /**
      * Create the a {@link TypeContext} with the given {@link AnnotationConfiguration}.
      *
      * @param annotationConfig configuration determining which annotations to include during type resolution/introspection
@@ -56,5 +81,16 @@ public class TypeContextFactory {
      */
     public static TypeContext createTypeContext(AnnotationConfiguration annotationConfig) {
         return new TypeContext(annotationConfig);
+    }
+
+    /**
+     * Create the a {@link TypeContext} with the given {@link AnnotationConfiguration}.
+     *
+     * @param annotationConfig configuration determining which annotations to include during type resolution/introspection
+     * @param config configuration to consider
+     * @return created {@link TypeContext} instance
+     */
+    public static TypeContext createTypeContext(AnnotationConfiguration annotationConfig, SchemaGeneratorConfig config) {
+        return new TypeContext(annotationConfig, config);
     }
 }

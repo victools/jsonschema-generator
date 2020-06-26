@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator.impl;
 
 import com.github.victools.jsonschema.generator.MemberScope;
-import com.github.victools.jsonschema.generator.MethodScope;
 import java.util.Comparator;
 
 /**
@@ -29,7 +28,7 @@ public class PropertySortUtils {
      * {@link Comparator} sorting properties: with fields before methods.
      */
     public static final Comparator<MemberScope<?, ?>> SORT_PROPERTIES_FIELDS_BEFORE_METHODS
-            = (first, second) -> Boolean.compare(first instanceof MethodScope, second instanceof MethodScope);
+            = (first, second) -> Boolean.compare(first.getSchemaPropertyName().endsWith(")"), second.getSchemaPropertyName().endsWith(")"));
 
     /**
      * {@link Comparator} sorting properties: alphabetically by their name.

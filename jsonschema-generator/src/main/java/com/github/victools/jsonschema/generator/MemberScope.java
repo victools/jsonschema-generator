@@ -21,6 +21,7 @@ import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.classmate.members.ResolvedMember;
 import com.fasterxml.classmate.members.ResolvedMethod;
+import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.util.Optional;
@@ -39,6 +40,7 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
     private final ResolvedTypeWithMembers declaringTypeMembers;
     private boolean fakeContainerItemScope;
     private final TypeContext context;
+    private final LazyValue<String> schemaPropertyName = new LazyValue<>(this::doGetSchemaPropertyName);
 
     /**
      * Constructor.
@@ -297,7 +299,16 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      *
      * @return member's name in parent "properties"
      */
-    public abstract String getSchemaPropertyName();
+    public String getSchemaPropertyName() {
+        return this.schemaPropertyName.get();
+    }
+
+    /**
+     * Returns the name to be used to reference this member in its parent's "properties".
+     *
+     * @return member's name in parent "properties"
+     */
+    protected abstract String doGetSchemaPropertyName();
 
     @Override
     public String toString() {

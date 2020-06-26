@@ -36,6 +36,7 @@ public class TypeContext {
     private final TypeResolver typeResolver;
     private final MemberResolver memberResolver;
     private final AnnotationConfiguration annotationConfig;
+    private final boolean derivingFieldsFromArgumentFreeMethods;
 
     /**
      * Constructor.
@@ -43,9 +44,39 @@ public class TypeContext {
      * @param annotationConfig annotation configuration to apply when collecting resolved fields and methods
      */
     public TypeContext(AnnotationConfiguration annotationConfig) {
+        this(annotationConfig, false);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param annotationConfig annotation configuration to apply when collecting resolved fields and methods
+     * @param generatorConfig generator configuration indicating whether argument free methods should be represented as fields
+     */
+    public TypeContext(AnnotationConfiguration annotationConfig, SchemaGeneratorConfig generatorConfig) {
+        this(annotationConfig, generatorConfig.shouldDeriveFieldsFromArgumentFreeMethods());
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param annotationConfig annotation configuration to apply when collecting resolved fields and methods
+     * @param derivingFieldsFromArgumentFreeMethods whether argument free methods should be represented as fields
+     */
+    private TypeContext(AnnotationConfiguration annotationConfig, boolean derivingFieldsFromArgumentFreeMethods) {
         this.typeResolver = new TypeResolver();
         this.memberResolver = new MemberResolver(this.typeResolver);
         this.annotationConfig = annotationConfig;
+        this.derivingFieldsFromArgumentFreeMethods = derivingFieldsFromArgumentFreeMethods;
+    }
+
+    /**
+     * Getter for the flag indicating whether to derive fields from argument-free methods.
+     *
+     * @return whether argument-free methods should be represented as fields
+     */
+    public boolean isDerivingFieldsFromArgumentFreeMethods() {
+        return this.derivingFieldsFromArgumentFreeMethods;
     }
 
     /**

@@ -84,7 +84,7 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
      * @see #getName()
      */
     @Override
-    public String getSchemaPropertyName() {
+    protected String doGetSchemaPropertyName() {
         return this.getName();
     }
 

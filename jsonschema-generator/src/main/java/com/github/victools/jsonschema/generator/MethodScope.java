@@ -217,11 +217,22 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
      * @see TypeContext#getMethodPropertyArgumentTypeDescription(ResolvedType)
      */
     @Override
-    public String getSchemaPropertyName() {
+    protected String doGetSchemaPropertyName() {
         String result = this.getName();
-        result += this.getArgumentTypes().stream()
-                .map(this.getContext()::getMethodPropertyArgumentTypeDescription)
-                .collect(Collectors.joining(", ", "(", ")"));
+        if (this.getContext().isDerivingFieldsFromArgumentFreeMethods() && this.getArgumentCount() == 0) {
+            if (this.getOverriddenName() == null) {
+                // remove the "get"/"is" prefix from non-overridden method names
+                if (result.startsWith("get") && result.length() > 3) {
+                    result = Character.toLowerCase(result.charAt(3)) + result.substring(4);
+                } else if (result.startsWith("is") && result.length() > 2) {
+                    result = Character.toLowerCase(result.charAt(2)) + result.substring(3);
+                }
+            }
+        } else {
+            result += this.getArgumentTypes().stream()
+                    .map(this.getContext()::getMethodPropertyArgumentTypeDescription)
+                    .collect(Collectors.joining(", ", "(", ")"));
+        }
         return result;
     }
 }
