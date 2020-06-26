@@ -196,6 +196,10 @@ public enum Option {
      */
     NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT(null, null),
     /**
+     * Whether methods that do not expect any arguments, should be treated as fields: i.e. renaming the property.
+     */
+    FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS(null, null),
+    /**
      * Whether a {@link java.util.Map Map&lt;K, V&gt;} schema's "additionalProperties" should be set to its declared value type {@code V}.
      *
      * @since 4.11.0

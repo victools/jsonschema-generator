@@ -11,8 +11,7 @@
                 "type": "string"
             }
         },
-        "calculateSomething(Number, Number)": false,
-        "getGenericValue()": {
+        "genericValue": {
             "type": ["string", "null"],
             "title": "String",
             "description": "looked-up from method: String",
@@ -22,15 +21,16 @@
             "format": "date",
             "pattern": "^.{1,256}$"
         },
-        "getPrimitiveValue()": {
+        "primitiveValue": {
             "type": ["integer", "null"],
             "title": "int",
             "description": "looked-up from method: int"
         },
-        "isSimpleTestClass()": {
+        "simpleTestClass": {
             "type": ["boolean", "null"],
             "title": "boolean",
             "description": "looked-up from method: boolean"
-        }
+        },
+        "calculateSomething(Number, Number)": false
     }
 }
