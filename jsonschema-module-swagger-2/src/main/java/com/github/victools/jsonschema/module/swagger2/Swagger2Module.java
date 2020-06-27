@@ -20,6 +20,8 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.ConfigFunction;
+import com.github.victools.jsonschema.generator.CustomDefinition;
+import com.github.victools.jsonschema.generator.CustomPropertyDefinition;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
@@ -56,16 +58,18 @@ public class Swagger2Module implements Module {
     }
 
     private void applyToConfigBuilder(SchemaGeneratorGeneralConfigPart configPart) {
-        configPart.withDescriptionResolver(this.createTypePropertyResolver(Schema::description,
-                description -> !description.isEmpty()));
-        configPart.withTitleResolver(this.createTypePropertyResolver(Schema::title,
-                description -> !description.isEmpty()));
+        configPart.withDescriptionResolver(this.createTypePropertyResolver(Schema::description, description -> !description.isEmpty()));
+        configPart.withTitleResolver(this.createTypePropertyResolver(Schema::title, title -> !title.isEmpty()));
+
+        configPart.withSubtypeResolver(new Swagger2SubtypeResolver());
+        configPart.withDefinitionNamingStrategy(new Swagger2SchemaDefinitionNamingStrategy(configPart.getDefinitionNamingStrategy()));
     }
 
     private void applyToConfigBuilder(SchemaGeneratorConfigPart<?> configPart) {
         configPart.withTargetTypeOverridesResolver(this::resolveTargetTypeOverrides);
         configPart.withIgnoreCheck(this::shouldBeIgnored);
         configPart.withPropertyNameOverrideResolver(this::resolvePropertyNameOverride);
+        configPart.withCustomDefinitionProvider(this::provideCustomSchemaDefinition);
 
         configPart.withDescriptionResolver(this::resolveDescription);
         configPart.withTitleResolver(this::resolveTitle);
@@ -89,6 +93,7 @@ public class Swagger2Module implements Module {
         configPart.withArrayMaxItemsResolver(this::resolveArrayMaxItems);
         configPart.withArrayUniqueItemsResolver(this::resolveArrayUniqueItems);
 
+        // take care of various keywords that are not so straightforward to apply
         configPart.withInstanceAttributeOverride(this::overrideInstanceAttributes);
     }
 
@@ -204,8 +209,10 @@ public class Swagger2Module implements Module {
         if (member.isFakeContainerItemScope()) {
             return null;
         }
-        return this.getArraySchemaAnnotation(member).map(ArraySchema::minItems)
-                .filter(minItems -> minItems != Integer.MAX_VALUE).orElse(null);
+        return this.getArraySchemaAnnotation(member)
+                .map(ArraySchema::minItems)
+                .filter(minItems -> minItems != Integer.MAX_VALUE)
+                .orElse(null);
     }
 
     /**
@@ -218,8 +225,10 @@ public class Swagger2Module implements Module {
         if (member.isFakeContainerItemScope()) {
             return null;
         }
-        return this.getArraySchemaAnnotation(member).map(ArraySchema::maxItems)
-                .filter(maxItems -> maxItems != Integer.MIN_VALUE).orElse(null);
+        return this.getArraySchemaAnnotation(member)
+                .map(ArraySchema::maxItems)
+                .filter(maxItems -> maxItems != Integer.MIN_VALUE)
+                .orElse(null);
     }
 
     /**
@@ -232,8 +241,38 @@ public class Swagger2Module implements Module {
         if (member.isFakeContainerItemScope()) {
             return null;
         }
-        return this.getArraySchemaAnnotation(member).map(ArraySchema::uniqueItems)
-                .filter(uniqueItemsFlag -> uniqueItemsFlag).orElse(null);
+        return this.getArraySchemaAnnotation(member)
+                .map(ArraySchema::uniqueItems)
+                .filter(uniqueItemsFlag -> uniqueItemsFlag)
+                .orElse(null);
+    }
+
+    /**
+     * Implementation of the {@code CustomPropertyDefinitionProvider} to consider external references given in {@code @Schema(ref = ...)}.
+     *
+     * @param scope field/method to determine custom definition for
+     * @param context generation context
+     * @return custom definition containing the looked-up external reference or null
+     */
+    protected CustomPropertyDefinition provideCustomSchemaDefinition(MemberScope<?, ?> scope, SchemaGenerationContext context) {
+        Optional<String> externalReference = this.getSchemaAnnotationValue(scope, Schema::ref, ref -> !ref.isEmpty());
+        if (!externalReference.isPresent()) {
+            return null;
+        }
+        // in Draft 6 and Draft 7, no other keywords are allowed besides a "$ref"
+        CustomDefinition.AttributeInclusion attributeInclusion;
+        switch (context.getGeneratorConfig().getSchemaVersion()) {
+        case DRAFT_6:
+        // fall-through (same as Draft 7)
+        case DRAFT_7:
+            attributeInclusion = CustomDefinition.AttributeInclusion.NO;
+            break;
+        default:
+            attributeInclusion = CustomDefinition.AttributeInclusion.YES;
+        }
+        ObjectNode reference = context.getGeneratorConfig().createObjectNode()
+                .put(context.getKeyword(SchemaKeyword.TAG_REF), externalReference.get());
+        return new CustomPropertyDefinition(reference, attributeInclusion);
     }
 
     protected void overrideInstanceAttributes(ObjectNode memberAttributes, MemberScope<?, ?> member, SchemaGenerationContext context) {
@@ -300,18 +339,12 @@ public class Swagger2Module implements Module {
     }
 
     /**
-     * Create a {@link ConfigFunction} that extracts a value from the
-     * {@link Schema} annotation of a {@link TypeScope}.
-     * 
-     * @param valueExtractor
-     *            the getter for the value from the annotation
-     * @param valueFilter
-     *            filter that determines whether the value from a given
-     *            annotation matches our criteria
-     * @param <T>
-     *            the type of the returned value
-     * @return the value from the matching type's {@link Schema} annotation or
-     *         {@code Optional.empty()}
+     * Create a {@link ConfigFunction} that extracts a value from the {@link Schema} annotation of a {@link TypeScope}.
+     *
+     * @param valueExtractor the getter for the value from the annotation
+     * @param valueFilter filter that determines whether the value from a given annotation matches our criteria
+     * @param <T> the type of the returned value
+     * @return the value from the matching type's {@link Schema} annotation or {@code Optional.empty()}
      */
     private <T> ConfigFunction<TypeScope, T> createTypePropertyResolver(
             Function<Schema, T> valueExtractor, Predicate<T> valueFilter) {
