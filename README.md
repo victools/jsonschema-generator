@@ -12,6 +12,7 @@ This project consists of:
     - [victools/jsonschema-module-jackson](jsonschema-module-jackson) – deriving JSON Schema attributes from `jackson` annotations (e.g. "description", property name overrides, what properties to ignore) as well as looking up appropriate (annotated) subtypes
     - [victools/jsonschema-module-javax-validation](jsonschema-module-javax-validation) – deriving JSON Schema attributes from `javax.validation` annotations (e.g. which properties are nullable or not, their "minimum"/"maximum", "minItems"/"maxItems", "minLength"/"maxLength")
     - [victools/jsonschema-module-swagger-1.5](jsonschema-module-swagger-1.5) – deriving JSON Schema attributes from `swagger` (1.5.x) annotations (e.g. "description", property name overrides, what properties to ignore, their "minimum"/"maximum", "const"/"enum")
+    - [victools/jsonschema-module-swagger-2](jsonschema-module-swagger-2) – deriving JSON Schema attributes from `swagger` (2.x) `@Schema` annotations
 - the [victools/jsonschema-maven-plugin](jsonschema-maven-plugin) – allowing you to generate JSON Schemas as part of your Maven build
 
 Another example for such a module is:
@@ -33,7 +34,7 @@ Additional documentation can be found in the [Project Wiki](https://github.com/v
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>4.12.2</version>
+    <version>4.13.0</version>
 </dependency>
 ```
 
