@@ -430,7 +430,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private void addSwagger15Module(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
         if (module.options == null || module.options.length == 0) {
-            configBuilder.with(new Swagger2Module());
+            configBuilder.with(new SwaggerModule());
         } else {
             SwaggerOption[] swaggerOptions = new SwaggerOption[module.options.length];
             for (int i = 0; i < module.options.length; i++) {
