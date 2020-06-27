@@ -57,7 +57,7 @@ Additional documentation can be found in the [Project Wiki](https://github.com/v
 </dependency>
 ```
 
-Since version `4.7`, the release versions of the main generator library and this module are aligned.
+The release versions of the main generator library and this module are aligned.
 It is recommended to use identical versions for both dependencies to ensure compatibility.
 
 ### Code
@@ -65,10 +65,10 @@ It is recommended to use identical versions for both dependencies to ensure comp
 ```java
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.module.swagger2.SwaggerModule;
+import com.github.victools.jsonschema.module.swagger2.Swagger2Module;
 ```
 ```java
-SwaggerModule module = new SwaggerModule();
+Swagger2Module module = new Swagger2Module();
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09)
     .with(module);
 ```
@@ -81,11 +81,10 @@ import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.module.swagger2.SwaggerModule;
+import com.github.victools.jsonschema.module.swagger2.Swagger2Module;
 ```
 ```java
-ObjectMapper objectMapper = new ObjectMapper();
-SwaggerModule module = new SwaggerModule();
+Swagger2Module module = new Swagger2Module();
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
     .with(module);
 SchemaGeneratorConfig config = configBuilder.build();

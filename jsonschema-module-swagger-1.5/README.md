@@ -82,7 +82,6 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.swagger15.SwaggerModule;
 ```
 ```java
-ObjectMapper objectMapper = new ObjectMapper();
 SwaggerModule module = new SwaggerModule();
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
     .with(module);
