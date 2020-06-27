@@ -5,7 +5,9 @@
         "fieldWithDescriptionAndAllowableValues": {
             "type": ["string", "null"],
             "description": "field description",
-            "enum": ["A", "B", "C", "D"]
+            "enum": ["A", "B", "C", "D"],
+            "minLength": 1,
+            "maxLength": 1
         },
         "fieldWithExclusiveNumericRange": {
             "type": "integer",
@@ -15,15 +17,17 @@
         "fieldWithInclusiveNumericRange": {
             "type": "integer",
             "minimum": 15,
-            "maximum": 20
+            "maximum": 2E+1
         },
         "fieldWithOverriddenName": {
+            "minItems": 1,
+            "maxItems": 20,
             "type": "array",
             "items": {
-                "type": "boolean"
+                "type": "boolean",
+                "default": "true"
             }
         }
     },
-    "title": "test title",
-    "description": "test description"
+    "required": ["fieldWithExclusiveNumericRange", "fieldWithOverriddenName"]
 }

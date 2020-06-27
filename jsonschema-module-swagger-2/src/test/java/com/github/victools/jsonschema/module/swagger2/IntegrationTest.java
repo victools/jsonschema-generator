@@ -27,6 +27,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
@@ -34,6 +35,7 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.swagger2.IntegrationTest.IReference;
 import com.github.victools.jsonschema.module.swagger2.IntegrationTest.Person;
 import com.github.victools.jsonschema.module.swagger2.IntegrationTest.PersonReference;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import junitparams.JUnitParamsRunner;
@@ -58,6 +60,8 @@ public class IntegrationTest {
     public void testIntegration(Class<?> rawTargetType) throws Exception {
         Swagger2Module module = new Swagger2Module();
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
+                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS)
+                .with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
                 .with(module);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(rawTargetType);
@@ -81,31 +85,33 @@ public class IntegrationTest {
 
     }
 
-    @Schema(title = "test title", description = "test description")
+    @Schema(minProperties = 2, maxProperties = 5, requiredProperties = {"fieldWithInclusiveNumericRange"})
     static class TestClass {
 
         @Schema(hidden = true)
         public Object hiddenField;
 
-        @Schema(name = "fieldWithOverriddenName")
+        @ArraySchema(arraySchema = @Schema(name = "fieldWithOverriddenName", required = true),
+                schema = @Schema(defaultValue = "true"), minItems = 1, maxItems = 20)
         public List<Boolean> originalFieldName;
 
-        @Schema(description = "field description", nullable = true, allowableValues = {"A", "B", "C", "D"})
+        @Schema(description = "field description", nullable = true, allowableValues = {"A", "B", "C", "D"}, minLength = 1, maxLength = 1)
         public String fieldWithDescriptionAndAllowableValues;
 
         @Schema(minimum = "15", maximum = "20")
         public int fieldWithInclusiveNumericRange;
 
-        @Schema(minimum = "14", maximum = "21", exclusiveMinimum = true, exclusiveMaximum = true)
+        @Schema(minimum = "14", maximum = "21", exclusiveMinimum = true, exclusiveMaximum = true, required = true)
         public int fieldWithExclusiveNumericRange;
     }
 
-    interface IReference {
+    @Schema(subTypes = {Reference.class, PersonReference.class})
+    static interface IReference {
 
         String getName();
     }
 
-    class Reference<T> implements IReference {
+    static class Reference<T> implements IReference {
 
         private String name;
 
@@ -115,12 +121,12 @@ public class IntegrationTest {
         }
     }
 
-    class Person {
+    static class Person {
 
     }
 
-    @Schema(description = "the foo's person")
-    class PersonReference extends Reference<Person> {
+    @Schema(description = "the foo's person", title = "reference title", name = "referenceToPerson")
+    static class PersonReference extends Reference<Person> {
 
         @Override
         @Schema(description = "the person's name")
@@ -129,9 +135,12 @@ public class IntegrationTest {
         }
     }
 
-    class Foo {
+    static class Foo {
 
         @Schema(implementation = PersonReference.class)
         private Reference<Person> person;
+
+        @Schema(ref = "http://example.com/bar")
+        private Object bar;
     }
 }
