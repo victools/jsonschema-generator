@@ -97,6 +97,12 @@ public class Swagger2Module implements Module {
         configPart.withInstanceAttributeOverride(this::overrideInstanceAttributes);
     }
 
+    /**
+     * Derive target type override from {@code @Schema(implementation = ...)}.
+     *
+     * @param member field/method to determine target type override for
+     * @return single target type override or null
+     */
     protected List<ResolvedType> resolveTargetTypeOverrides(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::implementation, annotatedImplementation -> annotatedImplementation != Void.class)
                 .map(annotatedType -> member.getContext().resolve(annotatedType))
@@ -104,73 +110,157 @@ public class Swagger2Module implements Module {
                 .orElse(null);
     }
 
+    /**
+     * Determine whether the given field/method should be skipped, based on {@code @Schema(hidden = true)}.
+     *
+     * @param member field/method to check
+     * @return whether to skip the field/method
+     */
     protected boolean shouldBeIgnored(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::hidden, Boolean.TRUE::equals)
                 .isPresent();
     }
 
+    /**
+     * Determine an alternative name for the given field/method, based on {@code @Schema(name = ...)}.
+     *
+     * @param member field/method to look-up alternative property name for
+     * @return alternative property name
+     */
     protected String resolvePropertyNameOverride(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::name, name -> !name.isEmpty())
                 .orElse(null);
     }
 
+    /**
+     * Look-up description from {@code @Schema(description = ...)} for given field/method.
+     *
+     * @param member field/method to look-up description for
+     * @return schema description
+     */
     protected String resolveDescription(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::description, description -> !description.isEmpty())
                 .orElse(null);
     }
 
+    /**
+     * Look-up title from {@code @Schema(title = ...)} for given field/method.
+     *
+     * @param member field/method to look-up title for
+     * @return schema title
+     */
     protected String resolveTitle(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::title, title -> !title.isEmpty())
                 .orElse(null);
     }
 
+    /**
+     * Determine whether the given field/method is deemed required in its containing type based on {@code @Schema(required = true)}.
+     *
+     * @param member field/method to check
+     * @return whether the field/method is required
+     */
     protected boolean checkRequired(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::required, Boolean.TRUE::equals)
                 .isPresent();
     }
 
+    /**
+     * Determine whether the given field/method may be null based on {@code @Schema(nullable = true)}.
+     *
+     * @param member field/method to check
+     * @return whether the field/method is nullable
+     */
     protected boolean checkNullable(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::nullable, Boolean.TRUE::equals)
                 .isPresent();
     }
 
+    /**
+     * Look-up the finite list of possible values from {@code @Schema(allowableValues = ...)}.
+     *
+     * @param member field/method to determine allowed values for
+     * @return applicable "const"/"enum" values or null
+     */
     protected List<String> resolveEnum(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::allowableValues, values -> values.length > 0)
                 .map(Arrays::asList)
                 .orElse(null);
     }
 
+    /**
+     * Look-up the default value for the given field/method from {@code @Schema(defaultValue = ...)}.
+     *
+     * @param member field/method to determine default value for
+     * @return default property value or null
+     */
     protected String resolveDefault(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::defaultValue, defaultValue -> !defaultValue.isEmpty())
                 .orElse(null);
     }
 
+    /**
+     * Look-up the value from {@code @Schema(minLength = ...)} for the given field/method.
+     *
+     * @param member field/method to look-up minimum string length for
+     * @return minimum string length or null
+     */
     protected Integer resolveMinLength(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::minLength, minLength -> minLength > 0)
                 .orElse(null);
     }
 
+    /**
+     * Look-up the value from {@code @Schema(maxLength = ...)} for the given field/method.
+     *
+     * @param member field/method to look-up maximum string length for
+     * @return maximum string length or null
+     */
     protected Integer resolveMaxLength(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::maxLength, maxLength -> maxLength < Integer.MAX_VALUE && maxLength > -1)
                 .orElse(null);
     }
 
+    /**
+     * Look-up the value from {@code @Schema(format = ...)} for the given field/method.
+     *
+     * @param member field/method to look-up format for
+     * @return format value or null
+     */
     protected String resolveFormat(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::format, format -> !format.isEmpty())
                 .orElse(null);
     }
 
+    /**
+     * Look-up the value from {@code @Schema(pattern = ...)} for the given field/method.
+     *
+     * @param member field/method to look-up pattern for
+     * @return pattern value or null
+     */
     protected String resolvePattern(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::pattern, pattern -> !pattern.isEmpty())
                 .orElse(null);
     }
 
+    /**
+     * Look-up the value from {@code @Schema(multipleOf = ...)} for the given field/method.
+     *
+     * @param member field/method to look-up multipleOf for
+     * @return multipleOf value or null
+     */
     protected BigDecimal resolveMultipleOf(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::multipleOf, multipleOf -> multipleOf != 0)
                 .map(BigDecimal::new)
                 .orElse(null);
     }
 
+    /**
+     * Look-up the exclusive maximum value from {@code @Schema(maximum = ..., exclusiveMaxium = true)} for the given field/method.
+     *
+     * @param member field/method to look-up exclusiveMaximum for
+     * @return exclusiveMaximum value or null
+     */
     protected BigDecimal resolveExclusiveMaximum(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::maximum, maximum -> !maximum.isEmpty())
                 .filter(_maximum -> this.getSchemaAnnotationValue(member, Schema::exclusiveMaximum, Boolean.TRUE::equals).isPresent())
@@ -178,6 +268,12 @@ public class Swagger2Module implements Module {
                 .orElse(null);
     }
 
+    /**
+     * Look-up the inclusive maximum value from {@code @Schema(maximum = ..., exclusiveMaxium = false)} for the given field/method.
+     *
+     * @param member field/method to look-up maximum for
+     * @return maximum value or null
+     */
     protected BigDecimal resolveInclusiveMaximum(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::maximum, maximum -> !maximum.isEmpty())
                 .filter(_maximum -> this.getSchemaAnnotationValue(member, Schema::exclusiveMaximum, Boolean.FALSE::equals).isPresent())
@@ -185,6 +281,12 @@ public class Swagger2Module implements Module {
                 .orElse(null);
     }
 
+    /**
+     * Look-up the exclusive minimum value from {@code @Schema(minimum = ..., exclusiveMinium = true)} for the given field/method.
+     *
+     * @param member field/method to look-up exclusiveMinimum for
+     * @return exclusiveMinimum value or null
+     */
     protected BigDecimal resolveExclusiveMinimum(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::minimum, minimum -> !minimum.isEmpty())
                 .filter(_minimum -> this.getSchemaAnnotationValue(member, Schema::exclusiveMinimum, Boolean.TRUE::equals).isPresent())
@@ -192,6 +294,12 @@ public class Swagger2Module implements Module {
                 .orElse(null);
     }
 
+    /**
+     * Look-up the inclusive minimum value from {@code @Schema(minimum = ..., exclusiveMinium = false)} for the given field/method.
+     *
+     * @param member field/method to look-up minimum for
+     * @return minimum value or null
+     */
     protected BigDecimal resolveInclusiveMinimum(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::minimum, minimum -> !minimum.isEmpty())
                 .filter(_minimum -> this.getSchemaAnnotationValue(member, Schema::exclusiveMinimum, Boolean.FALSE::equals).isPresent())
@@ -275,6 +383,20 @@ public class Swagger2Module implements Module {
         return new CustomPropertyDefinition(reference, attributeInclusion);
     }
 
+    /**
+     * Consider various remaining aspects:
+     * <ul>
+     * <li>{@code @Schema(not = ...)}</li>
+     * <li>{@code @Schema(allOf = ...)}</li>
+     * <li>{@code @Schema(minProperties = ...)}</li>
+     * <li>{@code @Schema(maxProperties = ...)}</li>
+     * <li>{@code @Schema(requiredProperties = ...)}</li>
+     * </ul>
+     *
+     * @param memberAttributes
+     * @param member
+     * @param context
+     */
     protected void overrideInstanceAttributes(ObjectNode memberAttributes, MemberScope<?, ?> member, SchemaGenerationContext context) {
         Schema annotation = this.getSchemaAnnotationValue(member, Function.identity(), x -> true)
                 .orElse(null);
