@@ -133,6 +133,7 @@ There are three standard modules that can be used:
 - `Jackson`
 - `JavaxValidation`
 - `Swagger15` 
+- `Swagger2`
 
 ### Defining options for a module
 ```xml

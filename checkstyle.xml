@@ -84,7 +84,7 @@
                 value="Package name ''{0}'' must match pattern ''{1}''." />
         </module>
         <module name="TypeName">
-            <property name="format" value="^[A-Z][a-zA-Z]*[1-9]?$" />
+            <property name="format" value="^[A-Z]([a-zA-Z]*[1-9]?)*$" />
             <message key="name.invalidPattern" value="Type name ''{0}'' must match pattern ''{1}''." />
         </module>
         <module name="TypeName">

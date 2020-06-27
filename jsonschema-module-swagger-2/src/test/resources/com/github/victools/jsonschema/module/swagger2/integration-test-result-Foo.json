@@ -1,0 +1,25 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "$defs": {
+        "referenceToPerson": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "the person's name"
+                }
+            },
+            "title": "reference title",
+            "description": "the foo's person"
+        }
+    },
+    "type": "object",
+    "properties": {
+        "bar": {
+            "$ref": "http://example.com/bar"
+        },
+        "person": {
+            "$ref": "#/$defs/referenceToPerson"
+        }
+    }
+}

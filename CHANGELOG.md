@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Removed
 - Obsolete `TypeContext.getSchemaDefinitionName()`
 
+### `jsonschema-module-swagger-2`
+#### Added
+- Initial implementation of `Swagger2Module` for deriving schema attributes from OpenAPI `@Schema` annotations.
+
 ## [4.12.2] - 2020-06-10
 ### `jsonschema-generator`
 #### Fixed
