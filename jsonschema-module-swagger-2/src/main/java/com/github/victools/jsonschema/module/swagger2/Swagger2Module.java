@@ -384,7 +384,7 @@ public class Swagger2Module implements Module {
     }
 
     /**
-     * Consider various remaining aspects:
+     * Consider various remaining aspects.
      * <ul>
      * <li>{@code @Schema(not = ...)}</li>
      * <li>{@code @Schema(allOf = ...)}</li>
@@ -393,9 +393,9 @@ public class Swagger2Module implements Module {
      * <li>{@code @Schema(requiredProperties = ...)}</li>
      * </ul>
      *
-     * @param memberAttributes
-     * @param member
-     * @param context
+     * @param memberAttributes already collected schema for the field/method
+     * @param member targeted field/method
+     * @param context generation context
      */
     protected void overrideInstanceAttributes(ObjectNode memberAttributes, MemberScope<?, ?> member, SchemaGenerationContext context) {
         Schema annotation = this.getSchemaAnnotationValue(member, Function.identity(), x -> true)
