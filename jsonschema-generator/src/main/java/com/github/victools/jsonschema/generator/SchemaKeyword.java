@@ -57,10 +57,13 @@ public enum SchemaKeyword {
     TAG_REQUIRED("required"),
     TAG_ADDITIONAL_PROPERTIES("additionalProperties"),
     TAG_PATTERN_PROPERTIES("patternProperties"),
+    TAG_PROPERTIES_MIN("minProperties"),
+    TAG_PROPERTIES_MAX("maxProperties"),
 
     TAG_ALLOF("allOf"),
     TAG_ANYOF("anyOf"),
     TAG_ONEOF("oneOf"),
+    TAG_NOT("not"),
 
     TAG_TITLE("title"),
     TAG_DESCRIPTION("description"),
