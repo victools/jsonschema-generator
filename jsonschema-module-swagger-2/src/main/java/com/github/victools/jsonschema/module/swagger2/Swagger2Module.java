@@ -404,7 +404,8 @@ public class Swagger2Module implements Module {
             return;
         }
         if (annotation.not() != Void.class) {
-            memberAttributes.set("not", context.createDefinitionReference(context.getTypeContext().resolve(annotation.not())));
+            memberAttributes.set(context.getKeyword(SchemaKeyword.TAG_NOT),
+                    context.createDefinitionReference(context.getTypeContext().resolve(annotation.not())));
         }
         if (annotation.allOf().length > 0) {
             Stream.of(annotation.allOf())
@@ -413,10 +414,10 @@ public class Swagger2Module implements Module {
                     .withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))::add);
         }
         if (annotation.minProperties() > 0) {
-            memberAttributes.put("minProperties", annotation.minProperties());
+            memberAttributes.put(context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MIN), annotation.minProperties());
         }
         if (annotation.maxProperties() > 0) {
-            memberAttributes.put("maxProperties", annotation.maxProperties());
+            memberAttributes.put(context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MAX), annotation.maxProperties());
         }
         if (annotation.requiredProperties().length > 0) {
             Set<String> alreadyMentionedRequiredFields = new HashSet<>();

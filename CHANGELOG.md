@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Added
+- Entries in `SchemaKeyword` enum for `"not"`, `"minProperties"`, `"maxProperties"` (without further handling)
+
+### `jsonschema-module-swagger-2`
+#### Changed
+- Make use of new `SchemaKeyword` enum entries instead of hard-coded strings (no change in behaviour)
 
 ## [4.13.0] - 2020-06-27
 ### `jsonschema-generator`
