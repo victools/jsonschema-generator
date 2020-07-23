@@ -44,6 +44,9 @@ public class SchemaGeneratorMojoTest {
                 {"DefaultConfig"},
                 {"SchemaVersion"},
                 {"JacksonModule"},
+                {"JavaxValidationModule"},
+                {"Swagger15Module"},
+                {"Swagger2Module"},
                 {"Complete"}
         };
     }
@@ -62,7 +65,7 @@ public class SchemaGeneratorMojoTest {
         // Execute the pom
         executePom(new File(testCaseLocation, testCaseName + "-pom.xml"));
 
-        // Validate that the schema files is created.
+        // Validate that the schema file is created.
         File resultFile = new File(generationLocation,testCaseName + "/TestClass-schema.json");
         Assert.assertTrue(resultFile.exists());
         resultFile.deleteOnExit();
