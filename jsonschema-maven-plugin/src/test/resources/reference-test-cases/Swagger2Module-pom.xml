@@ -1,0 +1,19 @@
+<project>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-maven-plugin</artifactId>
+                <configuration>
+                    <classNames>com.github.victools.jsonschema.plugin.maven.TestClass</classNames>
+                    <schemaFilePath>target/generated-test-sources/Swagger2Module</schemaFilePath>
+                    <modules>
+                        <module>
+                            <name>Swagger2</name>
+                        </module>
+                    </modules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

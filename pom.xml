@@ -1,14 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-    
+    <modelVersion>4.0.0</modelVersion>
+
     <name>Java JSON Schema Generator (Parent)</name>
-    <description>Java JSON Schema Generator + Modules – creating a JSON Schema (Draft 6, Draft 7 or Draft 2019-09) from your Java classes</description>
+    <description>Java JSON Schema Generator + Modules – creating a JSON Schema (Draft 6, Draft 7 or Draft 2019-09) from
+        your Java classes
+    </description>
     <url>https://github.com/victools/jsonschema-generator</url>
 
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator-parent</artifactId>
     <version>4.14.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <packaging>pom</packaging>
 
     <licenses>
         <license>
@@ -77,14 +79,14 @@
         </repository>
     </distributionManagement>
 
-	<modules>
-		<module>jsonschema-generator</module>
-		<module>jsonschema-module-jackson</module>
-		<module>jsonschema-module-javax-validation</module>
-		<module>jsonschema-module-swagger-1.5</module>
-		<module>jsonschema-module-swagger-2</module>
+    <modules>
+        <module>jsonschema-generator</module>
+        <module>jsonschema-module-jackson</module>
+        <module>jsonschema-module-javax-validation</module>
+        <module>jsonschema-module-swagger-1.5</module>
+        <module>jsonschema-module-swagger-2</module>
         <module>jsonschema-maven-plugin</module>
-	</modules>
+    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -99,6 +101,7 @@
         <version.junitparams>1.1.1</version.junitparams>
         <version.log4j>2.13.3</version.log4j>
         <version.mockito>2.27.0</version.mockito>
+        <version.reflections>0.9.12</version.reflections>
         <version.slf4j>1.7.30</version.slf4j>
         <version.swagger-1.5>1.5.22</version.swagger-1.5>
         <version.swagger-2>2.1.2</version.swagger-2>
@@ -110,6 +113,26 @@
             <dependency>
                 <groupId>com.github.victools</groupId>
                 <artifactId>jsonschema-generator</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-module-jackson</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-module-javax-validation</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-module-swagger-1.5</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-module-swagger-2</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -146,6 +169,11 @@
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
                 <version>${version.swagger-2}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${version.reflections}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -217,7 +245,7 @@
         </dependency>
     </dependencies>
 
-	<build>
+    <build>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -337,5 +365,5 @@
                 </configuration>
             </plugin>
         </plugins>
-	</build>
+    </build>
 </project>
