@@ -1,0 +1,19 @@
+<project>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-maven-plugin</artifactId>
+                <configuration>
+                    <classNames>com.github.victools.jsonschema.plugin.maven.TestClass</classNames>
+                    <schemaFilePath>target/generated-test-sources/JavaxValidationModule</schemaFilePath>
+                    <modules>
+                        <module>
+                            <name>JavaxValidation</name>
+                        </module>
+                    </modules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
