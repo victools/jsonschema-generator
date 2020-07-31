@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Changed
 - Make use of new `SchemaKeyword` enum entries instead of hard-coded strings (no change in behaviour)
 
+### `jsonschema-maven-plugin`
+#### Fixed
+- Explicitly include dependencies of supported generator modules that they expect to be provided
+
 ## [4.13.0] - 2020-06-27
 ### `jsonschema-generator`
 #### Added
