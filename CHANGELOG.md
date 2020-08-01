@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Fixed
 - Explicitly include dependencies of supported generator modules that they expect to be provided
+- Avoid generating the same schema multiple times if there are overlaps between entries in `<classNames>` and/or `<packageNames>`
 
 ## [4.13.0] - 2020-06-27
 ### `jsonschema-generator`
