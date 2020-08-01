@@ -45,6 +45,9 @@ import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -66,16 +69,22 @@ import org.reflections.scanners.SubTypesScanner;
 public class SchemaGeneratorMojo extends AbstractMojo {
 
     /**
-     * Full name of the classes for which the JSON schema will be generated.
+     * Full name or glob pattern of the classes for which the JSON schema will be generated.
      */
     @Parameter(property = "classNames")
     private String[] classNames;
 
     /**
-     * Full name of the packages for which a JSON schema will be generated for each contained class.
+     * Full name or glob pattern of the packages for which a JSON schema will be generated for each contained class.
      */
     @Parameter(property = "packageNames")
     private String[] packageNames;
+
+    /**
+     * Full name or glob pattern of the classes NOT to generate a JSON schema for.
+     */
+    @Parameter(property = "excludeClassNames")
+    private String[] excludeClassNames;
 
     /**
      * The directory path where the schema files are generated.
@@ -133,7 +142,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     /**
      * The list of all the classes on the classpath.
      */
-    private Set<String> allTypes = null;
+    private List<PotentialSchemaClass> allTypes = null;
 
     /**
      * Invoke the schema generator.
@@ -147,15 +156,15 @@ public class SchemaGeneratorMojo extends AbstractMojo {
 
         if (this.classNames != null) {
             for (String className : this.classNames) {
-                this.getLog().info("Generating JSON Schema for class " + className);
-                generateSchema(className);
+                this.getLog().info("Generating JSON Schema for <className>" + className + "</className>");
+                generateSchema(className, false);
             }
         }
 
         if (this.packageNames != null) {
             for (String packageName : this.packageNames) {
-                this.getLog().info("Generating JSON Schema for package " + packageName);
-                generateSchemaForPackage(packageName);
+                this.getLog().info("Generating JSON Schema for <packageName>" + packageName + "</packageName>");
+                generateSchema(packageName, true);
             }
         }
     }
@@ -163,13 +172,34 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     /**
      * Generate the JSON schema for the given className.
      *
-     * @param className The name of the class
+     * @param classOrPackageName The name or glob pattern of the class or package
+     * @param targetPackage whether the given name or glob pattern refers to a package
      * @throws MojoExecutionException In case of problems
      */
-    private void generateSchema(String className) throws MojoExecutionException {
-        // Load the class for which the schema will be generated
-        Class<?> schemaClass = this.loadClass(className);
-        this.generateSchema(schemaClass);
+    private void generateSchema(String classOrPackageName, boolean targetPackage) throws MojoExecutionException {
+        Pattern filter = GlobHandler.createClassOrPackageNameFilter(classOrPackageName, targetPackage);
+        List<PotentialSchemaClass> matchingClasses = this.getAllClassNames().stream()
+                .filter(entry -> filter.matcher(entry.getAbsolutePathToMatch()).matches())
+                .collect(Collectors.toList());
+        for (PotentialSchemaClass potentialTarget : matchingClasses) {
+            if (potentialTarget.isAlreadyGenerated()) {
+                this.getLog().info("- Skipping already generated " + potentialTarget.getFullClassName());
+            } else {
+                // Load the class for which the schema will be generated
+                Class<?> schemaClass = this.loadClass(potentialTarget.getFullClassName());
+                this.generateSchema(schemaClass);
+                potentialTarget.setAlreadyGenerated();
+            }
+        }
+        if (matchingClasses.isEmpty()) {
+            StringBuilder message = new StringBuilder("No matching class found for \"")
+                    .append(classOrPackageName)
+                    .append("\" on classpath");
+            if (this.excludeClassNames != null && this.excludeClassNames.length > 0) {
+                message.append(" that wasn't excluded");
+            }
+            throw new MojoExecutionException(message.toString());
+        }
     }
 
     /**
@@ -186,37 +216,32 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     }
 
     /**
-     * Generate JSON schema's for all classes in a package and it's subpackages.
-     *
-     * @param packageName The name of the package
-     * @throws MojoExecutionException in case of problems
-     */
-    private void generateSchemaForPackage(String packageName) throws MojoExecutionException {
-        for (String className : this.getAllClassNames()) {
-            if (className.startsWith(packageName + ".")) {
-                this.generateSchema(className);
-            }
-        }
-    }
-
-    /**
      * Get all the names of classes on the classpath.
      *
-     * @return A set of class names as found on the classpath
+     * @return A set of classes as found on the classpath, that are not explicitly excluded
      */
-    private Set<String> getAllClassNames() {
+    private List<PotentialSchemaClass> getAllClassNames() {
         if (this.allTypes == null) {
             Reflections reflections = new Reflections("", new SubTypesScanner(false), this.getClassLoader());
-            allTypes = reflections.getAllTypes();
+            Stream<PotentialSchemaClass> allTypesStream = reflections.getAllTypes().stream()
+                    .map(PotentialSchemaClass::new);
+            if (this.excludeClassNames != null) {
+                Set<Pattern> exclusions = Stream.of(this.excludeClassNames)
+                        .map(excludeEntry -> GlobHandler.createClassOrPackageNameFilter(excludeEntry, false))
+                        .collect(Collectors.toSet());
+                allTypesStream = allTypesStream
+                        .filter(typeEntry -> exclusions.stream().noneMatch(pattern -> pattern.matcher(typeEntry.getAbsolutePathToMatch()).matches()));
+            }
+            this.allTypes = allTypesStream.sorted().collect(Collectors.toList());
         }
-
-        return allTypes;
+        return this.allTypes;
     }
 
     /**
      * Return the file in which the schema has to be written.
      *
-     * <p>The path is determined based on the {@link #schemaFilePath} parameter.
+     * <p>
+     * The path is determined based on the {@link #schemaFilePath} parameter.
      * <br>
      * The name of the file is determined based on the {@link #schemaFileName} parameter, which allows for two placeholders:
      * <ul>
@@ -425,7 +450,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Add the Swagger (1.5) module to the generator config.
      *
      * @param configBuilder The builder on which the config is added
-     * @param module        The modules section form the pom
+     * @param module The modules section form the pom
      * @throws MojoExecutionException in case of problems
      */
     private void addSwagger15Module(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
@@ -448,7 +473,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Add the Swagger (2.x) module to the generator config.
      *
      * @param configBuilder The builder on which the config is added
-     * @param module        The modules section form the pom
+     * @param module The modules section form the pom
      * @throws MojoExecutionException in case of problems
      */
     private void addSwagger2Module(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
@@ -459,7 +484,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Add the Javax Validation module to the generator config.
      *
      * @param configBuilder The builder on which the config is added
-     * @param module        The modules section form the pom
+     * @param module The modules section form the pom
      * @throws MojoExecutionException in case of problems
      */
     private void addJavaxValidationModule(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
@@ -482,7 +507,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Add the Jackson module to the generator config.
      *
      * @param configBuilder The builder on which the config is added
-     * @param module        The modules section form the pom
+     * @param module The modules section form the pom
      * @throws MojoExecutionException Exception in case of error
      */
     private void addJacksonModule(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
@@ -505,7 +530,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Write generated schema to a file.
      *
      * @param jsonSchema Generated schema to be written
-     * @param file       The file to write to
+     * @param file The file to write to
      * @throws MojoExecutionException In case of problems when writing the targeted file
      */
     private void writeToFile(JsonNode jsonSchema, File file) throws MojoExecutionException {
