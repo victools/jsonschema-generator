@@ -180,6 +180,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         Pattern filter = GlobHandler.createClassOrPackageNameFilter(classOrPackageName, targetPackage);
         List<PotentialSchemaClass> matchingClasses = this.getAllClassNames().stream()
                 .filter(entry -> filter.matcher(entry.getAbsolutePathToMatch()).matches())
+                .sorted()
                 .collect(Collectors.toList());
         for (PotentialSchemaClass potentialTarget : matchingClasses) {
             if (potentialTarget.isAlreadyGenerated()) {
@@ -232,7 +233,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                 allTypesStream = allTypesStream
                         .filter(typeEntry -> exclusions.stream().noneMatch(pattern -> pattern.matcher(typeEntry.getAbsolutePathToMatch()).matches()));
             }
-            this.allTypes = allTypesStream.sorted().collect(Collectors.toList());
+            this.allTypes = allTypesStream.collect(Collectors.toList());
         }
         return this.allTypes;
     }
