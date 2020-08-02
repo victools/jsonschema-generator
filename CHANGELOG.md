@@ -14,8 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Make use of new `SchemaKeyword` enum entries instead of hard-coded strings (no change in behaviour)
 
 ### `jsonschema-maven-plugin`
+#### Added
+- Support for including classes via glob patterns in `<classNames>` and `<packageNames>` (in addition to absolute paths)
+- Support for excluding classes via absolute paths or glob patterns in new `<excludeClassNames>`
+
 #### Fixed
 - Explicitly include dependencies of supported generator modules that they expect to be provided
+- Avoid generating the same schema multiple times if there are overlaps between entries in `<classNames>` and/or `<packageNames>`
 
 ## [4.13.0] - 2020-06-27
 ### `jsonschema-generator`

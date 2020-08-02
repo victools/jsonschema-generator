@@ -7,7 +7,7 @@
                 <configuration>
                     <classNames>
                         <className>com.github.victools.jsonschema.plugin.maven.testpackage.TestClassA</className>
-                        <className>com.github.victools.jsonschema.plugin.maven.testpackage.TestClassB</className>
+                        <className>com/github/victools/**/testpackage/TestClassB</className>
                     </classNames>
                     <schemaFilePath>target/generated-test-sources/TwoClasses</schemaFilePath>
                     <schemaFileName>{0}.schema</schemaFileName>

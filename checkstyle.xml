@@ -198,6 +198,7 @@
         <module name="InnerAssignment" />
         <module name="CyclomaticComplexity">
             <property name="max" value="16"/>
+            <property name="switchBlockAsSingleDecisionPoint" value="true"/>
         </module>
     </module>
 </module>

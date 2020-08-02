@@ -32,17 +32,31 @@ Maven plugin for the [jsonschema-generator](../jsonschema-generator) – Integra
 This will use the default configuration of the generator.
 
 ### Selecting the classes for generation
-The classes for which the JSON schema has to be generated are configured using the `<classNames>` and the `<packageNames>` elements.
-This can be either one element, or multiple by using nested elements.
+The classes for which a JSON schema should be generated are configured using the `<classNames>` and/or `<packageNames>` elements.
+Via `<excludeClassNames>` you can filter-out some classes again.
+These can be either a single element, or multiple by using nested elements.
 
 ```xml
-    <configuration>
-        <classNames>com.myOrg.myApp.MyClass</classNames>
-        <packageNames>
-            <packageName>com.myOrg.myApp.package1</packageName>
-            <packageName>com.myOrg.myApp.package2</packageName>
-        </packageNames>
-    </configuration>
+<configuration>
+    <classNames>com.myOrg.myApp.MyClass</classNames>
+    <packageNames>
+        <packageName>com.myOrg.myApp.package1</packageName>
+        <packageName>com.myOrg.myApp.package2</packageName>
+    </packageNames>
+    <excludeClassNames>com.myOrg.myApp.package2.HiddenClass</excludeClassNames>
+</configuration>
+```
+
+The content of each of these elements can be either:
+- an absolute path with dots (`.`) as package separators or
+- a glob pattern with slashes (`/`) as package separators and various types of placeholders (e.g. `?`, `*`, `**`).
+
+```xml
+<configuration>
+    <classNames>com/myOrg/myApp/My*</classNames>
+    <packageNames>com/myOrg/myApp/package?</packageNames>
+    <excludeClassNames>com/myOrg/myApp/**Hidden*</excludeClassNames>
+</configuration>
 ```
 
 ### Configuring generated file names and locations
