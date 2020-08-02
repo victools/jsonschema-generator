@@ -226,7 +226,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             Reflections reflections = new Reflections("", new SubTypesScanner(false), this.getClassLoader());
             Stream<PotentialSchemaClass> allTypesStream = reflections.getAllTypes().stream()
                     .map(PotentialSchemaClass::new);
-            if (this.excludeClassNames != null) {
+            if (this.excludeClassNames != null && this.excludeClassNames.length > 0) {
                 Set<Pattern> exclusions = Stream.of(this.excludeClassNames)
                         .map(excludeEntry -> GlobHandler.createClassOrPackageNameFilter(excludeEntry, false))
                         .collect(Collectors.toSet());
