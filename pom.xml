@@ -2,14 +2,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>Java JSON Schema Generator (Parent)</name>
-    <description>Java JSON Schema Generator + Modules – creating a JSON Schema (Draft 6, Draft 7 or Draft 2019-09) from
-        your Java classes
+    <description>
+        Java JSON Schema Generator + Modules – creating a JSON Schema (Draft 6, Draft 7 or Draft 2019-09) from your Java classes
     </description>
     <url>https://github.com/victools/jsonschema-generator</url>
 
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator-parent</artifactId>
-    <version>4.14.0</version>
+    <version>4.15.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <licenses>
@@ -28,7 +28,7 @@
         <connection>scm:git:https://github.com/victools/jsonschema-generator.git</connection>
         <developerConnection>scm:git:https://github.com/victools/jsonschema-generator.git</developerConnection>
         <url>https://github.com/victools/jsonschema-generator</url>
-        <tag>v4.14.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <organization>
