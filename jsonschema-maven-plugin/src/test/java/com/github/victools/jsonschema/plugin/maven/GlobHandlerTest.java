@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
+import java.util.regex.Pattern;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import junitparams.naming.TestCaseName;
@@ -31,10 +32,10 @@ public class GlobHandlerTest {
 
     public Object[] parametersForTestBasicPattern() {
         return new Object[][]{
-            {"single star becomes all but shlash star", "gl*b", "gl[^/]*b"},
+            {"single star becomes all-but-shlash star", "gl*b", "gl[^/]*b"},
             {"double star becomes dot star", "gl**b", "gl.*b"},
             {"escaped star is unchanged", "gl\\*b", "gl\\*b"},
-            {"question mark becomes all but shlash", "gl?b", "gl[^/]b"},
+            {"question mark becomes all-but-shlash", "gl?b", "gl[^/]b"},
             {"escaped question mark is unchanged", "gl\\?b", "gl\\?b"},
             {"character classes dont need conversion", "gl[-o]b", "gl[-o]b"},
             {"escaped classes are unchanged", "gl\\[-o\\]b", "gl\\[-o\\]b"},
@@ -51,34 +52,66 @@ public class GlobHandlerTest {
         };
     }
 
+    /**
+     * Testing the basic glob to regex conversion (with slash prefix to circumvent the backward compatible handling of absolute paths).
+     *
+     * @param testCaseName what to identify this test case by (not part of the actual test execution)
+     * @param globInput class name glob expression as defined in the {@code pom.xml}
+     * @param regexOutput expected regular expression for determining whether a class should be included or excluded in the schema generation
+     */
     @Test
     @TestCaseName("testBasicPattern: {0}")
     @Parameters
     public void testBasicPattern(String testCaseName, String globInput, String regexOutput) {
-        Assert.assertEquals(regexOutput, GlobHandler.convertGlobToRegex(globInput));
+        Assert.assertEquals(regexOutput, GlobHandler.createClassOrPackageNameFilter(globInput, false).pattern());
     }
 
-    /*
-     * Additional tests for more realistic patterns for classnames.
+    /**
+     * Additional tests for more realistic patterns for class names.
+     *
+     * @param inputPattern expression entered in the {@code pom.xml}
+     * @param clsOrPkg indicating whether the inputPattern is supposed to refer to a class ("cls") or a package ("pkg")
+     * @param matching whether the pattern is supposed to match the following classNamePath
+     * @param classNamePath full class name with slash ("/") instead of dots (".") as package separators
      */
     @Test
     @Parameters({
-        "com/**/testpackage/*, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
-        "com/**/testpackage/*, false, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
-        "com/**/testpackage/**, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
-        "com/**/testpackage/**, true, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
-        "com/**/testpackage, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
-        "com/**/testpackage, false, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
-        "**/subpackage/**, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
-        "**/subpackage/**, true, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
-        "**/subpackage, false, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
-        "subpackage/**, false, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
-        "com/*/victools/**, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
-        "com/*/jsonschema/**, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
-        "com/**/jsonschema/**, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com.github.victools.jsonschema, pkg, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com.github.victools.jsonschema, cls, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com.github.victools.jsonschema.plugin.maven.testpackage, pkg, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com.github.victools.jsonschema.plugin.maven.testpackage, cls, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com.github.victools.jsonschema.plugin.maven.testpackage.TestClassA, pkg, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com.github.victools.jsonschema.plugin.maven.testpackage.TestClassA, cls, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com/**/testpackage/*, pkg, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com/**/testpackage/*, pkg, true, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
+        "com/**/testpackage/*, cls, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com/**/testpackage/*, cls, false, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
+        "com/**/testpackage/**, pkg, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com/**/testpackage/**, pkg, true, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
+        "com/**/testpackage/**, cls, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com/**/testpackage/**, cls, true, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
+        "com/**/testpackage, pkg, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com/**/testpackage, pkg, true, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
+        "com/**/testpackage, cls, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com/**/testpackage, cls, false, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
+        "**/subpackage/**, pkg, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "**/subpackage/**, pkg, false, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
+        "**/subpackage/**, cls, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "**/subpackage/**, cls, true, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
+        "**/subpackage, pkg, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "**/subpackage, pkg, true, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
+        "**/subpackage, cls, false, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
+        "subpackage/**, pkg, false, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
+        "subpackage/**, cls, false, com/github/victools/jsonschema/plugin/maven/testpackage/subpackage/TestClassC",
+        "com/*/victools/**, pkg, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com/*/victools/**, cls, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com/*/jsonschema/**, pkg, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com/*/jsonschema/**, cls, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com/**/jsonschema/**, pkg, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
+        "com/**/jsonschema/**, cls, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
     })
-    public void testClassNamePattern(String inputPattern, boolean matching, String classNamePath) {
-        String regex = GlobHandler.convertGlobToRegex(inputPattern);
-        Assert.assertSame(matching, classNamePath.matches(regex));
+    public void testClassNamePattern(String inputPattern, String clsOrPkg, boolean matching, String classNamePath) {
+        Pattern regex = GlobHandler.createClassOrPackageNameFilter(inputPattern, clsOrPkg.equals("pkg"));
+        Assert.assertSame(matching, regex.matcher(classNamePath).matches());
     }
 }

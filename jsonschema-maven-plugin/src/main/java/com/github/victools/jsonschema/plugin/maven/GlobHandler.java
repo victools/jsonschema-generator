@@ -19,9 +19,32 @@ package com.github.victools.jsonschema.plugin.maven;
 import java.util.regex.Pattern;
 
 /**
- * Conversion logic from globs to regular expressions. Adapted from: https://stackoverflow.com/a/17369948
+ * Conversion logic from globs to regular expressions.
  */
 public class GlobHandler {
+
+    /**
+     * Generate regular expression from the given input for filtering classes on the classpath.
+     *
+     * @param input either absolute value (with "." as package separator) or glob pattern (with "/" as package separator)
+     * @param forPackage whether the given input identifies a package
+     * @return regular expression to filter classes on classpath by
+     */
+    public static Pattern createClassOrPackageNameFilter(String input, boolean forPackage) {
+        String inputRegex;
+        if (input.chars().anyMatch(c -> c == '/' || c == '*' || c == '?' || c == '+' || c == '[' || c == '{' || c == '\\')) {
+            // convert glob pattern into regular expression
+            inputRegex = GlobHandler.convertGlobToRegex(input);
+        } else {
+            // backward compatible support for absolute paths with "." as separator
+            inputRegex = input.replace('.', '/');
+        }
+        if (forPackage) {
+            // cater for any classname and any subpackages in between
+            inputRegex += inputRegex.charAt(inputRegex.length() - 1) == '/' ? ".+" : "/.+";
+        }
+        return Pattern.compile(inputRegex);
+    }
 
     /**
      * Converts a standard POSIX Shell globbing pattern into a regular expression pattern. The result can be used with the standard
@@ -29,11 +52,12 @@ public class GlobHandler {
      * <p>
      * See also, the POSIX Shell language: http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_13_01
      * </p>
+     * Adapted from https://stackoverflow.com/a/17369948 with the difference that a single * is not interpreted as including slashes ("/").
      *
      * @param pattern A glob pattern.
      * @return A regex pattern to recognize the given glob pattern.
      */
-    public static final String convertGlobToRegex(String pattern) {
+    private static String convertGlobToRegex(String pattern) {
         StringBuilder sb = new StringBuilder(pattern.length());
         int inGroup = 0;
         int inClass = 0;
@@ -129,28 +153,5 @@ public class GlobHandler {
             }
         }
         return sb.toString();
-    }
-
-    /**
-     * Generate regular expression from the given input for filtering classes on the classpath.
-     *
-     * @param input either absolute value (with "." as package separator) or glob pattern (with "/" as package separator)
-     * @param forPackage whether the given input identifies a package
-     * @return regular expression to filter classes on classpath by
-     */
-    public static Pattern createClassOrPackageNameFilter(String input, boolean forPackage) {
-        String inputRegex;
-        if (input.chars().anyMatch(singleChar -> singleChar == '/' || singleChar == '*')) {
-            // convert glob pattern into regular expression
-            inputRegex = GlobHandler.convertGlobToRegex(input);
-        } else {
-            // backward compatible support for absolute paths with "." as separator
-            inputRegex = input.replace('.', '/');
-        }
-        if (forPackage) {
-            // cater for any classname and any subpackages in between
-            inputRegex += inputRegex.endsWith("/") ? ".+" : "/.+";
-        }
-        return Pattern.compile(inputRegex);
     }
 }
