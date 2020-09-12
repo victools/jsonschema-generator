@@ -87,6 +87,13 @@ public interface SchemaGeneratorConfig {
     boolean shouldUsePlainDefinitionKeys();
 
     /**
+     * Determine whether extra {@link SchemaKeyword#TAG_FORMAT} values should be included for "simple types".
+     *
+     * @return whether to include extra {@link SchemaKeyword#TAG_FORMAT} values
+     */
+    boolean shouldIncludeExtraOpenApiFormatValues();
+
+    /**
      * Determine whether unnecessary {@link SchemaKeyword#TAG_ALLOF} elements should be removed and merged into their declaring schema when there are
      * no conflicts between the sub-schemas.
      *

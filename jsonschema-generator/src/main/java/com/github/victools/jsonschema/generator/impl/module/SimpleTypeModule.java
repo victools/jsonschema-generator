@@ -27,22 +27,9 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.OffsetTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -68,11 +55,17 @@ public class SimpleTypeModule implements Module {
         Stream.of(Boolean.class, boolean.class)
                 .forEach(module::withBooleanType);
 
-        Stream.of(Integer.class, int.class, Long.class, long.class, Short.class, short.class)
+        Stream.of(Integer.class, int.class)
+                .forEach(javaType -> module.withIntegerType(javaType, "int32"));
+        Stream.of(Long.class, long.class)
+                .forEach(javaType -> module.withIntegerType(javaType, "int64"));
+        Stream.of(Short.class, short.class)
                 .forEach(module::withIntegerType);
 
-        Stream.of(Double.class, double.class, Float.class, float.class)
-                .forEach(module::withNumberType);
+        Stream.of(Double.class, double.class)
+                .forEach(javaType -> module.withNumberType(javaType, "double"));
+        Stream.of(Float.class, float.class)
+                .forEach(javaType -> module.withNumberType(javaType, "float"));
 
         return module;
     }
@@ -80,7 +73,7 @@ public class SimpleTypeModule implements Module {
     /**
      * Factory method: creating an instance of the {@link SimpleTypeModule} containing mappings for various primitive types and their non-primitive
      * counter parts (e.g. {@code boolean} and {@code Boolean}) as well as other classes that are normally serialised in a JSON as non-objects, e.g.
-     * <br>{@link BigDecimal}, {@link BigInteger}, {@link UUID}, {@link LocalDate}, {@link LocalDateTime}, and a number of other date-time types.
+     * <br>{@code BigDecimal}, {@code BigInteger}, {@code UUID}, {@code LocalDate}, {@code LocalDateTime}, and a number of other date-time types.
      *
      * @return created module instance
      * @see #forPrimitiveTypes()
@@ -88,29 +81,37 @@ public class SimpleTypeModule implements Module {
     public static SimpleTypeModule forPrimitiveAndAdditionalTypes() {
         SimpleTypeModule module = SimpleTypeModule.forPrimitiveTypes();
 
-        Stream.of(LocalDate.class, LocalDateTime.class, LocalTime.class, ZonedDateTime.class, OffsetDateTime.class, OffsetTime.class,
-                Instant.class, ZoneId.class, Date.class, Calendar.class, UUID.class)
-                .forEach(module::withStringType);
+        module.withStringType(java.time.LocalDate.class, "date");
+        Stream.of(java.time.LocalDateTime.class, java.time.LocalTime.class, java.time.ZonedDateTime.class,
+                java.time.OffsetDateTime.class, java.time.OffsetTime.class, java.time.Instant.class,
+                java.util.Date.class, java.util.Calendar.class)
+                .forEach(javaType -> module.withStringType(javaType, "date-time"));
+        module.withStringType(java.util.UUID.class, "uuid");
+        module.withStringType(java.time.ZoneId.class);
+        module.withIntegerType(java.math.BigInteger.class);
 
-        module.withIntegerType(BigInteger.class);
-
-        Stream.of(BigDecimal.class, Number.class)
+        Stream.of(java.math.BigDecimal.class, Number.class)
                 .forEach(module::withNumberType);
 
         return module;
     }
 
     private final Map<Class<?>, SchemaKeyword> fixedJsonSchemaTypes = new HashMap<>();
+    private final Map<Class<?>, String> extraOpenApiFormatValues = new HashMap<>();
 
     /**
      * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute.
      *
      * @param javaType java class to map to a fixed JSON schema definition
      * @param jsonSchemaTypeValue "type" attribute value to set or {@link SchemaKeyword#TAG_TYPE_NULL} to indicate empty schema being desired
+     * @param openApiFormat optional {@link SchemaKeyword#TAG_FORMAT} value to set if the respective Option is enabled
      * @return this module instance (for chaining)
      */
-    private SimpleTypeModule with(Class<?> javaType, SchemaKeyword jsonSchemaTypeValue) {
+    private SimpleTypeModule with(Class<?> javaType, SchemaKeyword jsonSchemaTypeValue, String openApiFormat) {
         this.fixedJsonSchemaTypes.put(javaType, jsonSchemaTypeValue);
+        if (openApiFormat != null) {
+            this.extraOpenApiFormatValues.put(javaType, openApiFormat);
+        }
         return this;
     }
 
@@ -121,7 +122,7 @@ public class SimpleTypeModule implements Module {
      * @return this module instance (for chaining)
      */
     public final SimpleTypeModule withEmptySchema(Class<?> javaType) {
-        return this.with(javaType, SchemaKeyword.TAG_TYPE_NULL);
+        return this.with(javaType, SchemaKeyword.TAG_TYPE_NULL, null);
     }
 
     /**
@@ -133,7 +134,7 @@ public class SimpleTypeModule implements Module {
      */
     @Deprecated
     public final SimpleTypeModule withObjectType(Class<?> javaType) {
-        return this.with(javaType, SchemaKeyword.TAG_TYPE_OBJECT);
+        return this.with(javaType, SchemaKeyword.TAG_TYPE_OBJECT, null);
     }
 
     /**
@@ -143,7 +144,18 @@ public class SimpleTypeModule implements Module {
      * @return this module instance (for chaining)
      */
     public final SimpleTypeModule withStringType(Class<?> javaType) {
-        return this.with(javaType, SchemaKeyword.TAG_TYPE_STRING);
+        return this.withStringType(javaType, null);
+    }
+
+    /**
+     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@link SchemaKeyword#TAG_TYPE_STRING}".
+     *
+     * @param javaType java class to map to a fixed JSON schema definition
+     * @param openApiFormat optional {@link SchemaKeyword#TAG_FORMAT} value, to set if respective Option is enabled
+     * @return this module instance (for chaining)
+     */
+    public final SimpleTypeModule withStringType(Class<?> javaType, String openApiFormat) {
+        return this.with(javaType, SchemaKeyword.TAG_TYPE_STRING, openApiFormat);
     }
 
     /**
@@ -153,7 +165,7 @@ public class SimpleTypeModule implements Module {
      * @return this module instance (for chaining)
      */
     public final SimpleTypeModule withBooleanType(Class<?> javaType) {
-        return this.with(javaType, SchemaKeyword.TAG_TYPE_BOOLEAN);
+        return this.with(javaType, SchemaKeyword.TAG_TYPE_BOOLEAN, null);
     }
 
     /**
@@ -163,17 +175,39 @@ public class SimpleTypeModule implements Module {
      * @return this module instance (for chaining)
      */
     public final SimpleTypeModule withIntegerType(Class<?> javaType) {
-        return this.with(javaType, SchemaKeyword.TAG_TYPE_INTEGER);
+        return this.withIntegerType(javaType, null);
     }
 
     /**
-     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@link SchemaKeyword#TAG_TYPE_NUMBER}".
+     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@link SchemaKeyword#TAG_TYPE_INTEGER}".
+     *
+     * @param javaType java class to map to a fixed JSON schema definition
+     * @param openApiFormat optional {@link SchemaKeyword#TAG_FORMAT} value, to set if respective Option is enabled
+     * @return this module instance (for chaining)
+     */
+    public final SimpleTypeModule withIntegerType(Class<?> javaType, String openApiFormat) {
+        return this.with(javaType, SchemaKeyword.TAG_TYPE_INTEGER, openApiFormat);
+    }
+
+    /**
+     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute {@link SchemaKeyword#TAG_TYPE_NUMBER}.
      *
      * @param javaType java class to map to a fixed JSON schema definition
      * @return this module instance (for chaining)
      */
     public final SimpleTypeModule withNumberType(Class<?> javaType) {
-        return this.with(javaType, SchemaKeyword.TAG_TYPE_NUMBER);
+        return this.withNumberType(javaType, null);
+    }
+
+    /**
+     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute {@link SchemaKeyword#TAG_TYPE_NUMBER}.
+     *
+     * @param javaType java class to map to a fixed JSON schema definition
+     * @param openApiFormat optional {@link SchemaKeyword#TAG_FORMAT} value, to set if respective Option is enabled
+     * @return this module instance (for chaining)
+     */
+    public final SimpleTypeModule withNumberType(Class<?> javaType, String openApiFormat) {
+        return this.with(javaType, SchemaKeyword.TAG_TYPE_NUMBER, openApiFormat);
     }
 
     /**
@@ -248,8 +282,14 @@ public class SimpleTypeModule implements Module {
             if (jsonSchemaTypeValue != SchemaKeyword.TAG_TYPE_NULL) {
                 customSchema.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(jsonSchemaTypeValue));
             }
+            if (context.getGeneratorConfig().shouldIncludeExtraOpenApiFormatValues()) {
+                String formatValue = SimpleTypeModule.this.extraOpenApiFormatValues.get(javaType.getErasedType());
+                if (formatValue != null) {
+                    customSchema.put(context.getKeyword(SchemaKeyword.TAG_FORMAT), formatValue);
+                }
+            }
             // set true as second parameter to indicate simple types to be always in-lined (i.e. not put into definitions)
-            return new CustomDefinition(customSchema, true);
+            return new CustomDefinition(customSchema, CustomDefinition.DefinitionType.INLINE, CustomDefinition.AttributeInclusion.YES);
         }
     }
 }

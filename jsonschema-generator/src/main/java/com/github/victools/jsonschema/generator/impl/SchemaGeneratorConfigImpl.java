@@ -125,6 +125,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldIncludeExtraOpenApiFormatValues() {
+        return this.isOptionEnabled(Option.EXTRA_OPEN_API_FORMAT_VALUES);
+    }
+
+    @Override
     public boolean shouldCleanupUnnecessaryAllOfElements() {
         return this.isOptionEnabled(Option.ALLOF_CLEANUP_AT_THE_END);
     }
