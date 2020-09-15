@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.github.victools</groupId>
         <artifactId>jsonschema-generator-parent</artifactId>
-        <version>4.15.0</version>
+        <version>4.15.1-SNAPSHOT</version>
     </parent>
     <artifactId>jsonschema-module-jackson</artifactId>
 
