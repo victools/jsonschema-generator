@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Fixed
+- Missing parentheses on void argument-free methods that don't start with "get" or "is" when enabling `Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS`
 
 ## [4.15.0] - 2020-09-15
 ### `jsonschema-generator`

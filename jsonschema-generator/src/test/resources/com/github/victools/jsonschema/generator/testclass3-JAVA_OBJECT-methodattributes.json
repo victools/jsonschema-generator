@@ -3,7 +3,12 @@
         "RoundingMode": {
             "type": "object",
             "properties": {
-                "name": {
+                "compareTo(RoundingMode)": {
+                    "type": ["integer", "null"],
+                    "title": "int",
+                    "description": "looked-up from method: int"
+                },
+                "name()": {
                     "type": ["string", "null"],
                     "title": "String",
                     "description": "looked-up from method: String",
@@ -12,27 +17,6 @@
                     "maxLength": 256,
                     "format": "date",
                     "pattern": "^.{1,256}$"
-                },
-                "values": {
-                    "title": "RoundingMode[]",
-                    "description": "looked-up from method: RoundingMode[]",
-                    "minItems": 2,
-                    "maxItems": 100,
-                    "uniqueItems": false,
-                    "type": ["array", "null"],
-                    "items": {
-                        "allOf": [{
-                                "$ref": "#/definitions/RoundingMode"
-                            }, {
-                                "title": "RoundingMode",
-                                "description": "looked-up from method: RoundingMode"
-                            }]
-                    }
-                },
-                "compareTo(RoundingMode)": {
-                    "type": ["integer", "null"],
-                    "title": "int",
-                    "description": "looked-up from method: int"
                 },
                 "valueOf(String)": {
                     "allOf": [{
@@ -49,6 +33,22 @@
                             "title": "RoundingMode",
                             "description": "looked-up from method: RoundingMode"
                         }]
+                },
+                "values()": {
+                    "title": "RoundingMode[]",
+                    "description": "looked-up from method: RoundingMode[]",
+                    "minItems": 2,
+                    "maxItems": 100,
+                    "uniqueItems": false,
+                    "type": ["array", "null"],
+                    "items": {
+                        "allOf": [{
+                                "$ref": "#/definitions/RoundingMode"
+                            }, {
+                                "title": "RoundingMode",
+                                "description": "looked-up from method: RoundingMode"
+                            }]
+                    }
                 }
             }
         },
@@ -189,7 +189,12 @@
                 "optionalS": {
                     "type": "object",
                     "properties": {
-                        "get": {
+                        "present": {
+                            "type": ["boolean", "null"],
+                            "title": "boolean",
+                            "description": "looked-up from method: boolean"
+                        },
+                        "get()": {
                             "type": ["integer", "null"],
                             "title": "Integer",
                             "description": "looked-up from method: Integer",
@@ -200,11 +205,6 @@
                             "maximum": 1E+1,
                             "exclusiveMaximum": 11,
                             "multipleOf": 1
-                        },
-                        "present": {
-                            "type": ["boolean", "null"],
-                            "title": "boolean",
-                            "description": "looked-up from method: boolean"
                         },
                         "orElse(Integer)": {
                             "type": ["integer", "null"],

@@ -8,8 +8,7 @@
                     "type": ["array", "null"],
                     "items": {}
                 },
-                "genericValue": {},
-                "getGenericValue()": {}
+                "genericValue": {}
             }
         },
         "TestClass2...": {

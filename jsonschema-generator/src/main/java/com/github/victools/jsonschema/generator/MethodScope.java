@@ -226,6 +226,8 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
                     result = Character.toLowerCase(result.charAt(3)) + result.substring(4);
                 } else if (result.startsWith("is") && result.length() > 2) {
                     result = Character.toLowerCase(result.charAt(2)) + result.substring(3);
+                } else {
+                    result += "()";
                 }
             }
         } else {

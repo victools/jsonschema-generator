@@ -4,11 +4,11 @@
         "Optional_Integer_-nullable": {
             "type": ["object", "null"],
             "properties": {
+                "present": {
+                    "type": "boolean"
+                },
                 "get()": {
                     "type": ["integer", "null"]
-                },
-                "isPresent()": {
-                    "type": "boolean"
                 },
                 "orElse(Integer)": {
                     "type": ["integer", "null"]
@@ -77,16 +77,10 @@
                 "primitiveValue": {
                     "type": "integer"
                 },
-                "calculateSomething(Number, Number)": false,
-                "getGenericValue()": {
-                    "type": ["string", "null"]
-                },
-                "getPrimitiveValue()": {
-                    "type": "integer"
-                },
-                "isSimpleTestClass()": {
+                "simpleTestClass": {
                     "type": "boolean"
-                }
+                },
+                "calculateSomething(Number, Number)": false
             }
         },
         "TestClass2_Long_": {
@@ -99,9 +93,6 @@
                     }
                 },
                 "genericValue": {
-                    "type": ["integer", "null"]
-                },
-                "getGenericValue()": {
                     "type": ["integer", "null"]
                 }
             }
@@ -123,9 +114,6 @@
                     }
                 },
                 "genericValue": {
-                    "type": ["string", "null"]
-                },
-                "getGenericValue()": {
                     "type": ["string", "null"]
                 }
             }
@@ -154,12 +142,6 @@
                     "items": {
                         "$ref": "#/definitions/TestClass1"
                     }
-                },
-                "getGenericValue()": {
-                    "type": ["array", "null"],
-                    "items": {
-                        "$ref": "#/definitions/TestClass1"
-                    }
                 }
             }
         },
@@ -173,9 +155,6 @@
                     }
                 },
                 "genericValue": {
-                    "$ref": "#/definitions/TestClass2_String_-nullable"
-                },
-                "getGenericValue()": {
                     "$ref": "#/definitions/TestClass2_String_-nullable"
                 }
             }
@@ -193,21 +172,6 @@
                     "$ref": "#/definitions/TestClass2_Long_-nullable"
                 },
                 "nestedLongList": {
-                    "type": ["array", "null"],
-                    "items": {
-                        "$ref": "#/definitions/TestClass2_Long_"
-                    }
-                },
-                "getClass4()": {
-                    "$ref": "#/definitions/TestClass4_Integer.String_-nullable"
-                },
-                "getNestedClass1Array()": {
-                    "$ref": "#/definitions/TestClass2_TestClass1..._-nullable"
-                },
-                "getNestedLong()": {
-                    "$ref": "#/definitions/TestClass2_Long_-nullable"
-                },
-                "getNestedLongList()": {
                     "type": ["array", "null"],
                     "items": {
                         "$ref": "#/definitions/TestClass2_Long_"
@@ -230,9 +194,6 @@
                 },
                 "optionalS": {
                     "$ref": "#/definitions/Optional_Integer_-nullable"
-                },
-                "getClass2OfClass2OfT()": {
-                    "$ref": "#/definitions/TestClass2_TestClass2_String__-nullable"
                 }
             }
         }
