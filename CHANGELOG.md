@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.15.0] - 2020-09-15
 ### `jsonschema-generator`
 #### Added
 - New `Option.EXTRA_OPEN_API_FORMAT_VALUES` to support automatic inclusion of `"format"` values for certain simple/fixed types
@@ -445,7 +445,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.14.0...HEAD
+[4.15.0]: https://github.com/victools/jsonschema-generator/compare/v4.14.0...v4.15.0
 [4.14.0]: https://github.com/victools/jsonschema-generator/compare/v4.13.0...v4.14.0
 [4.13.0]: https://github.com/victools/jsonschema-generator/compare/v4.12.2...v4.13.0
 [4.12.2]: https://github.com/victools/jsonschema-generator/compare/v4.12.1...v4.12.2
