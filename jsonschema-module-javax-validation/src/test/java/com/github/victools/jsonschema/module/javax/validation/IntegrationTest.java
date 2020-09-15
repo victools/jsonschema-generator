@@ -17,7 +17,7 @@
 package com.github.victools.jsonschema.module.javax.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
@@ -59,7 +60,7 @@ public class IntegrationTest {
                 JavaxValidationOption.NOT_NULLABLE_FIELD_IS_REQUIRED,
                 JavaxValidationOption.NOT_NULLABLE_METHOD_IS_REQUIRED,
                 JavaxValidationOption.INCLUDE_PATTERN_EXPRESSIONS);
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_2019_09)
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(module)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
@@ -95,6 +96,17 @@ public class IntegrationTest {
         public List<@DecimalMin(value = "0", inclusive = false) @DecimalMax(value = "1", inclusive = false) Double> notEmptyList;
         @Size(min = 3, max = 25)
         public List<@NotEmpty @Size(max = 100) String> sizeRangeList;
+        @Size(min = 3, max = 25)
+        public List<String> sizeRangeListWithoutItemAnnotation;
+
+        @Size(min = 4, max = 18)
+        public Optional<Integer> optionalSizeRangeString1;
+        public Optional<@Size(min = 5, max = 10) Integer> optionalSizeRangeString2;
+
+        @Min(1)
+        @Max(8)
+        public Optional<Integer> optionalInclusiveRangeInt1;
+        public Optional<@Min(2) @Max(5) Integer> optionalInclusiveRangeInt2;
 
         @NotNull
         @Email(regexp = ".+@.+\\..+")

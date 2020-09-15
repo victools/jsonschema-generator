@@ -127,11 +127,8 @@ public class JacksonModule implements Module {
      * @return successfully looked-up description (or {@code null})
      */
     protected String resolveDescription(FieldScope field) {
-        if (field.isFakeContainerItemScope()) {
-            return null;
-        }
         // look for property specific description
-        JsonPropertyDescription propertyAnnotation = field.getAnnotationConsideringFieldAndGetter(JsonPropertyDescription.class);
+        JsonPropertyDescription propertyAnnotation = field.getAnnotationConsideringFieldAndGetterIfSupported(JsonPropertyDescription.class);
         if (propertyAnnotation != null) {
             return propertyAnnotation.value();
         }
@@ -204,8 +201,8 @@ public class JacksonModule implements Module {
                 .map(JsonNaming::value)
                 .map(strategyType -> {
                     try {
-                        return strategyType.newInstance();
-                    } catch (InstantiationException | IllegalAccessException ex) {
+                        return strategyType.getConstructor().newInstance();
+                    } catch (ReflectiveOperationException | SecurityException ex) {
                         return null;
                     }
                 })

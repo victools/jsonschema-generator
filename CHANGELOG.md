@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - New `Option.EXTRA_OPEN_API_FORMAT_VALUES` to support automatic inclusion of `"format"` values for certain simple/fixed types
 
+### `jsonschema-module-javax-validation`
+#### Added
+- Support picking up annotations on a (top-level) generic `Optional` parameter (e.g. `Optional<@Size(min=2) String>`)
+
 ## [4.14.0] - 2020-08-02
 ### `jsonschema-generator`
 #### Added

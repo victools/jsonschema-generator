@@ -123,10 +123,7 @@ public class SwaggerModule implements Module {
      * @return description (or {@code null})
      */
     protected String resolveDescription(MemberScope<?, ?> member) {
-        if (member.isFakeContainerItemScope()) {
-            return null;
-        }
-        return Optional.ofNullable(member.getAnnotationConsideringFieldAndGetter(ApiModelProperty.class))
+        return Optional.ofNullable(member.getAnnotationConsideringFieldAndGetterIfSupported(ApiModelProperty.class))
                 .map(ApiModelProperty::value)
                 .filter(value -> !value.isEmpty())
                 .orElse(null);
@@ -167,10 +164,7 @@ public class SwaggerModule implements Module {
      * @return {@link ApiModelProperty} annotation's non-empty {@code allowableValues} (or {@code null})
      */
     private Optional<String> findModelPropertyAllowableValues(MemberScope<?, ?> member) {
-        if (member.isFakeContainerItemScope()) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(member.getAnnotationConsideringFieldAndGetter(ApiModelProperty.class))
+        return Optional.ofNullable(member.getAnnotationConsideringFieldAndGetterIfSupported(ApiModelProperty.class))
                 .map(ApiModelProperty::allowableValues)
                 .filter(allowableValues -> !allowableValues.isEmpty());
     }
