@@ -140,7 +140,7 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
         AnnotatedType annotatedType = this.getRawMember().getAnnotatedType();
         if (annotatedType instanceof AnnotatedParameterizedType) {
             AnnotatedType[] typeArguments = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
-            if (typeArguments.length > 0) {
+            if (typeArguments.length == 1) {
                 return typeArguments[0].getAnnotation(annotationClass);
             }
         }

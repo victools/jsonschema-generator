@@ -182,7 +182,7 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
         AnnotatedType annotatedReturnType = this.getRawMember().getAnnotatedReturnType();
         if (annotatedReturnType instanceof AnnotatedParameterizedType) {
             AnnotatedType[] typeArguments = ((AnnotatedParameterizedType) annotatedReturnType).getAnnotatedActualTypeArguments();
-            if (typeArguments.length > 0) {
+            if (typeArguments.length == 1) {
                 return typeArguments[0].getAnnotation(annotationClass);
             }
         }

@@ -139,24 +139,43 @@ public class JavaxValidationModule implements Module {
      * @param annotationClass type of annotation
      * @param validationGroupsLookup how to look-up the associated validation groups of an annotation instance
      * @return annotation instance (or {@code null})
-     * @see MemberScope#getAnnotationConsideringFieldAndGetter(Class)
-     * @see MemberScope#getContainerItemAnnotationConsideringFieldAndGetter(Class)
+     * @see MemberScope#getAnnotationConsideringFieldAndGetterIfSupported(Class)
+     * @see MemberScope#getContainerItemAnnotationConsideringFieldAndGetterIfSupported(Class)
      */
     protected <A extends Annotation> A getAnnotationFromFieldOrGetter(MemberScope<?, ?> member, Class<A> annotationClass,
             Function<A, Class<?>[]> validationGroupsLookup) {
-        A annotation;
-        if (member.isFakeContainerItemScope()) {
-            annotation = member.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass);
-        } else {
-            annotation = member.getAnnotationConsideringFieldAndGetter(annotationClass);
+        A containerItemAnnotation = member.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(annotationClass);
+        if (this.shouldConsiderAnnotation(containerItemAnnotation, validationGroupsLookup)) {
+            return containerItemAnnotation;
         }
-        if (annotation != null && this.validationGroups != null) {
-            Class<?>[] associatedGroups = validationGroupsLookup.apply(annotation);
-            if (associatedGroups.length > 0 && Collections.disjoint(this.validationGroups, Arrays.asList(associatedGroups))) {
-                return null;
-            }
+        A annotation = member.getAnnotationConsideringFieldAndGetterIfSupported(annotationClass);
+        if (this.shouldConsiderAnnotation(annotation, validationGroupsLookup)) {
+            return annotation;
         }
-        return annotation;
+        return null;
+    }
+
+    /**
+     * Check whether a given annotation is supposed to be considered in the schema generation. I.e. if specific validation groups are defined, it must
+     * belong to at least one of them.
+     *
+     * @param <A> type of annotation
+     * @param annotation annotation instance (may be {@code null}, which will result in {@code false} to be returned)
+     * @param validationGroupsLookup how to look-up the associated validation groups of an annotation instance
+     * @return whether the given annotation should be considered in the current schema generation
+     */
+    private <A extends Annotation> boolean shouldConsiderAnnotation(A annotation, Function<A, Class<?>[]> validationGroupsLookup) {
+        // avoid repeated null checks by doing it here
+        if (annotation == null) {
+            return false;
+        }
+        // no specific validation groups means: all annotations are fair game
+        if (this.validationGroups == null) {
+            return true;
+        }
+        // check that the annotation's validation groups have at least one common entry to the configured groups on this module
+        Class<?>[] associatedGroups = validationGroupsLookup.apply(annotation);
+        return associatedGroups.length == 0 || !Collections.disjoint(this.validationGroups, Arrays.asList(associatedGroups));
     }
 
     /**
