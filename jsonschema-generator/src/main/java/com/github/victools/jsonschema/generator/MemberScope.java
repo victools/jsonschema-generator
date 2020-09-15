@@ -285,7 +285,22 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
     public abstract <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass);
 
     /**
-     * Return the annotation of the given type on the member's container item (i.e. first type parameter if there is one), if such an annotation is
+     * Return the annotation of the given type on the member, if such an annotation is present on either the field or its getter and this is not a
+     * {@link #isFakeContainerItemScope() fake container item scope}.
+     *
+     * @param <A> type of annotation
+     * @param annotationClass type of annotation
+     * @return annotation instance (or {@code null} if no annotation of the given type is present or the look-up is not supported by default)
+     */
+    public <A extends Annotation> A getAnnotationConsideringFieldAndGetterIfSupported(Class<A> annotationClass) {
+        if (this.isFakeContainerItemScope()) {
+            return null;
+        }
+        return this.getAnnotationConsideringFieldAndGetter(annotationClass);
+    }
+
+    /**
+     * Return the annotation of the given type on the member's container item (i.e. single type parameter if there is one), if such an annotation is
      * present on either the field or its getter.
      *
      * @param <A> type of annotation
@@ -293,6 +308,26 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @return annotation instance (or {@code null} if no annotation of the given type is present)
      */
     public abstract <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetter(Class<A> annotationClass);
+
+    /**
+     * Return the annotation of the given type on the member's container item (i.e. single type parameter if there is one), if such an annotation is
+     * present on either the field or its getter and this particular member is either a collection or special generic type (e.g. {@link Optional}).
+     *
+     * @param <A> type of annotation
+     * @param annotationClass type of annotation
+     * @return annotation instance (or {@code null} if no annotation of the given type is present or this look-up is not supported by default )
+     */
+    public <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetterIfSupported(Class<A> annotationClass) {
+        if (this.isFakeContainerItemScope()) {
+            return this.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass);
+        }
+        if (this.getOverriddenType() != null
+                && this.getDeclaredType().getErasedType() == Optional.class
+                && this.getOverriddenType().getErasedType() == this.getDeclaredType().getTypeParameters().get(0).getErasedType()) {
+            return this.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass);
+        }
+        return null;
+    }
 
     /**
      * Returns the name to be used to reference this member in its parent's "properties".
