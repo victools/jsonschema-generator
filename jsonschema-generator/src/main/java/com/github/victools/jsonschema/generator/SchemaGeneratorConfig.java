@@ -123,6 +123,14 @@ public interface SchemaGeneratorConfig {
     boolean shouldDeriveFieldsFromArgumentFreeMethods();
 
     /**
+     * Determine whether a single allowed values should be represented by a {@link SchemaKeyword#TAG_CONST}. Otherwise a
+     * {@link SchemaKeyword#TAG_ENUM} will be used even for a single allowed value.
+     *
+     * @return whether to automatically make use of the {@link SchemaKeyword#TAG_CONST "const"} keyword
+     */
+    boolean shouldRepresentSingleAllowedValueAsConst();
+
+    /**
      * Getter for the underlying object mapper.
      *
      * @return object mapper being used for generating JSON Schema structure

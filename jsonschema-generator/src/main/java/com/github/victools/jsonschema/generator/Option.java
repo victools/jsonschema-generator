@@ -206,10 +206,17 @@ public enum Option {
      */
     MAP_VALUES_AS_ADDITIONAL_PROPERTIES(AdditionalPropertiesModule::forMapValues, null),
     /**
+     * Whether allowed values should always be included in an {@link SchemaKeyword#TAG_ENUM "enum"} keyword. If there is exactly one allowed value, it
+     * will otherwise be represented by a {@link SchemaKeyword#TAG_CONST "const"} keyword instead.
+     *
+     * @since 4.16.0
+     */
+    ENUM_KEYWORD_FOR_SINGLE_VALUES(null, null),
+    /**
      * Whether a schema's "additionalProperties" should be set to "false" if no specific configuration says otherwise.
      * <br>
-     * Without this option, i.e. by default the "additionalProperties" keyword will be omitted and thereby allowing any additional properties in an
-     * object schema).
+     * Without this option, i.e. by default, the "additionalProperties" keyword will be omitted and thereby allowing any additional properties in an
+     * object schema.
      *
      * @since 4.2.0
      */

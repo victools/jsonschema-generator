@@ -404,7 +404,7 @@ public class AttributeCollector {
                     .filter(this::isSupportedEnumValue)
                     .filter(this::canBeConvertedToString)
                     .collect(Collectors.toList());
-            if (values.size() == 1) {
+            if (values.size() == 1 && generationContext.getGeneratorConfig().shouldRepresentSingleAllowedValueAsConst()) {
                 Object singleValue = values.get(0);
                 if (singleValue instanceof String) {
                     node.put(generationContext.getKeyword(SchemaKeyword.TAG_CONST), (String) singleValue);

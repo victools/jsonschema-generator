@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Added
+- New `Option.ENUM_KEYWORD_FOR_SINGLE_VALUES` to produce `"enum": ["A"]` instead of `"const": "A"` if there is only one allowed value.
 
 ## [4.15.1] - 2020-09-15
 ### `jsonschema-generator`

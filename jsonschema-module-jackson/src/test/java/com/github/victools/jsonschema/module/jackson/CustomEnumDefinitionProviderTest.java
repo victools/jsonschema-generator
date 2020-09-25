@@ -72,8 +72,10 @@ public class CustomEnumDefinitionProviderTest {
     }
 
     @Test
-    @Parameters
-    public void testProvideCustomSchemaDefinition(Class<?> erasedType, boolean considerJsonValue, boolean considerJsonProperty, List<String> values) {
+    @Parameters(method = "parametersForTestProvideCustomSchemaDefinition")
+    public void testProvideCustomSchemaDefinition_withConst(Class<?> erasedType, boolean considerJsonValue, boolean considerJsonProperty,
+            List<String> values) {
+        Mockito.when(this.generationContext.getGeneratorConfig().shouldRepresentSingleAllowedValueAsConst()).thenReturn(true);
         ResolvedType type = this.typeContext.resolve(erasedType);
         CustomDefinition result = new CustomEnumDefinitionProvider(considerJsonValue, considerJsonProperty)
                 .provideCustomSchemaDefinition(type, this.generationContext);
@@ -96,6 +98,30 @@ public class CustomEnumDefinitionProviderTest {
             for (int index = 0; index < expectedValueCount; index++) {
                 Assert.assertEquals(values.get(index), arrayNode.get(index).asText());
             }
+        }
+    }
+
+    @Test
+    @Parameters(method = "parametersForTestProvideCustomSchemaDefinition")
+    public void testProvideCustomSchemaDefinition_withoutConst(Class<?> erasedType, boolean considerJsonValue, boolean considerJsonProperty,
+            List<String> values) {
+        Mockito.when(this.generationContext.getGeneratorConfig().shouldRepresentSingleAllowedValueAsConst()).thenReturn(false);
+        ResolvedType type = this.typeContext.resolve(erasedType);
+        CustomDefinition result = new CustomEnumDefinitionProvider(considerJsonValue, considerJsonProperty)
+                .provideCustomSchemaDefinition(type, this.generationContext);
+        Assert.assertNotNull(result);
+        Assert.assertFalse(result.isMeantToBeInline());
+        ObjectNode customDefinitionNode = result.getValue();
+        Assert.assertEquals(2, customDefinitionNode.size());
+        Assert.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(SchemaVersion.DRAFT_2019_09),
+                customDefinitionNode.get(SchemaKeyword.TAG_TYPE.forVersion(SchemaVersion.DRAFT_2019_09)).asText());
+        JsonNode enumNode = customDefinitionNode.get(SchemaKeyword.TAG_ENUM.forVersion(SchemaVersion.DRAFT_2019_09));
+        Assert.assertTrue(enumNode.isArray());
+        int expectedValueCount = values.size();
+        ArrayNode arrayNode = (ArrayNode) enumNode;
+        Assert.assertEquals(expectedValueCount, arrayNode.size());
+        for (int index = 0; index < expectedValueCount; index++) {
+            Assert.assertEquals(values.get(index), arrayNode.get(index).asText());
         }
     }
 
