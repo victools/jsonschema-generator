@@ -150,6 +150,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldRepresentSingleAllowedValueAsConst() {
+        return !this.isOptionEnabled(Option.ENUM_KEYWORD_FOR_SINGLE_VALUES);
+    }
+
+    @Override
     public boolean shouldIncludeSchemaVersionIndicator() {
         return this.isOptionEnabled(Option.SCHEMA_VERSION_INDICATOR);
     }

@@ -20,6 +20,7 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
@@ -27,8 +28,11 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -59,15 +63,65 @@ public class AttributeCollectorTest {
      * @param schemaVersion designated JSON Schema version
      * @return schema generation context for the given JSON Schema version
      */
-    private SchemaGenerationContextImpl generateContext(SchemaVersion schemaVersion) {
+    private SchemaGenerationContextImpl generateContext(SchemaVersion schemaVersion, Option... options) {
         SchemaGeneratorConfig generatorConfig = new SchemaGeneratorConfigImpl(
                 this.objectMapper,
                 schemaVersion,
-                Collections.emptySet(),
+                Stream.of(options).collect(Collectors.toSet()),
                 new SchemaGeneratorGeneralConfigPart(),
                 new SchemaGeneratorConfigPart<>(),
                 new SchemaGeneratorConfigPart<>());
         return new SchemaGenerationContextImpl(generatorConfig, TypeContextFactory.createDefaultTypeContext());
+    }
+
+    @Test
+    @Parameters(source = SchemaVersion.class)
+    public void testSetEnum_Null(SchemaVersion schemaVersion) {
+        this.collector.setEnum(this.definitionNode, null, this.generateContext(schemaVersion));
+        Assert.assertTrue(this.definitionNode.isEmpty());
+    }
+
+    @Test
+    @Parameters(source = SchemaVersion.class)
+    public void testSetEnum_singleConstValue(SchemaVersion schemaVersion) {
+        this.collector.setEnum(this.definitionNode, Arrays.asList("A"), this.generateContext(schemaVersion));
+        JsonNode constNode = this.definitionNode.get(SchemaKeyword.TAG_CONST.forVersion(schemaVersion));
+        Assert.assertNotNull(constNode);
+        Assert.assertTrue(constNode.isTextual());
+        Assert.assertEquals("A", constNode.textValue());
+    }
+
+    @Test
+    @Parameters(source = SchemaVersion.class)
+    public void testSetEnum_singleEnumValue(SchemaVersion schemaVersion) {
+        this.collector.setEnum(this.definitionNode, Arrays.asList("A"), this.generateContext(schemaVersion, Option.ENUM_KEYWORD_FOR_SINGLE_VALUES));
+        JsonNode enumNode = this.definitionNode.get(SchemaKeyword.TAG_ENUM.forVersion(schemaVersion));
+        Assert.assertNotNull(enumNode);
+        Assert.assertTrue(enumNode.isArray());
+        Assert.assertEquals(1, enumNode.size());
+        JsonNode singleValueItem = enumNode.get(0);
+        Assert.assertNotNull(singleValueItem);
+        Assert.assertTrue(singleValueItem.isTextual());
+        Assert.assertEquals("A", singleValueItem.textValue());
+    }
+
+    @Test
+    @Parameters({"default", "ENUM_KEYWORD_FOR_SINGLE_VALUES"})
+    public void testSetEnum_twoEnumValues(String optionMode) {
+        Option[] options = optionMode.equals("default") ? new Option[0] : new Option[]{Option.ENUM_KEYWORD_FOR_SINGLE_VALUES};
+        this.collector.setEnum(this.definitionNode, Arrays.asList("A", "B"), this.generateContext(SchemaVersion.DRAFT_2019_09, options));
+        JsonNode enumNode = this.definitionNode.get(SchemaKeyword.TAG_ENUM.forVersion(SchemaVersion.DRAFT_2019_09));
+        Assert.assertNotNull(enumNode);
+        Assert.assertTrue(enumNode.isArray());
+        Assert.assertEquals(2, enumNode.size());
+        JsonNode firstValueItem = enumNode.get(0);
+        Assert.assertNotNull(firstValueItem);
+        Assert.assertTrue(firstValueItem.isTextual());
+        Assert.assertEquals("A", firstValueItem.textValue());
+        JsonNode secondValueItem = enumNode.get(1);
+        Assert.assertNotNull(secondValueItem);
+        Assert.assertTrue(secondValueItem.isTextual());
+        Assert.assertEquals("B", secondValueItem.textValue());
     }
 
     @Test
