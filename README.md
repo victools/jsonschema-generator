@@ -41,6 +41,8 @@ Additional documentation can be found in the [Project Wiki](https://github.com/v
 Since version `4.7`, the release versions of the main generator library and the (standard) `victools` modules listed above are aligned.
 It is recommended to use identical versions for all of them to ensure compatibility.
 
+It is discouraged to use a older/lower `jsonschema-generator` version than any of your `jsonschema-module-*` dependencies. If the module uses any feature only added to the `jsonschema-generator` in the newer version, runtime errors are to be expected.
+
 ### Code
 #### Complete/Minimal Example
 ```java
