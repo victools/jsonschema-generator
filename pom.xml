@@ -97,7 +97,7 @@
         <version.jackson>2.10.3</version.jackson>
         <version.javax.validation>2.0.1.Final</version.javax.validation>
         <version.jsonassert>1.5.0</version.jsonassert>
-        <version.junit>4.12</version.junit>
+        <version.junit>4.13.1</version.junit>
         <version.junitparams>1.1.1</version.junitparams>
         <version.log4j>2.13.3</version.log4j>
         <version.mockito>2.27.0</version.mockito>
