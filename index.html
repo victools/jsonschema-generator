@@ -487,8 +487,6 @@ Besides the main generator library itself, there are a few modules providing som
 Please refer to the <a href="https://github.com/victools/jsonschema-generator/blob/master/CHANGELOG.md">CHANGELOG</a> for a list of the incremental changes.</p>
 
 <hr>
-<hr>
-
 <p>The <a href="https://github.com/victools/jsonschema-generator/tree/master/jsonschema-generator">victools:jsonschema-generator</a> aims at allowing the generation of JSON Schema (Draft 6, Draft 7 or Draft 2019-09) to document Java code.
 This is expressly not limited to <em>JSON</em> but also allows for a Java API to be documented (i.e. including methods and the associated return values).</p>
 <h1 id='generator-options'>Generator – Options</h1>
@@ -1735,9 +1733,7 @@ Schema attributes derived from <code>@ApiModelProperty</code> on getter methods 
 <li>From <code>@Schema(description = …)</code> on fields/methods, derive <code>&quot;description&quot;</code>.</li>
 <li>From <code>@Schema(title = …)</code> on fields/methods, derive <code>&quot;title&quot;</code>.</li>
 <li>From <code>@Schema(implementation = …)</code> on fields/methods, override represented type.</li>
-<li>From <code>@Schema(hidden = true)</code> on fields/methods, skip certain properties.
-
-<ol>
+<li>From <code>@Schema(hidden = true)</code> on fields/methods, skip certain properties.</li>
 <li>From <code>@Schema(name = …)</code> on fields/methods, override property names.</li>
 <li>From <code>@Schema(ref = …)</code> on fields/methods, replace subschema with <code>&quot;$ref&quot;</code> to external/separate schema.</li>
 <li>From <code>@Schema(allOf = …)</code> on fields/methods, include <code>&quot;allOf&quot;</code> parts.</li>
@@ -1759,7 +1755,6 @@ Schema attributes derived from <code>@ApiModelProperty</code> on getter methods 
 <li>From <code>@ArraySchema(minItems = …)</code> on fields/methods, derive its <code>&quot;minItems&quot;</code>.</li>
 <li>From <code>@ArraySchema(maxItems = …)</code> on fields/methods, derive its <code>&quot;maxItems&quot;</code>.</li>
 <li>From <code>@ArraySchema(uniqueItems = …)</code> on fields/methods, derive its <code>&quot;uniqueItems&quot;</code>.</li>
-</ol></li>
 </ol>
 
 <p>Schema attributes derived from <code>@Schema</code>/<code>@ArraySchema</code> on fields are also applied to their respective getter methods.
@@ -1893,18 +1888,30 @@ CHeckout https://github.com/victools/jsonschema-gradle-example for the complete 
     <span class="o">}</span>
 <span class="o">}));</span>
 </code></pre></div>
-<p>Enums are a special construct for which there are multiple options:
-1. <code>Option.FLATTENED_ENUMS</code> (which is part of the <code>OptionPreset.PLAIN_JSON</code>)
-   * This defines an enum as <code>{ &quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;VALUE1&quot;, &quot;VALUE2&quot;] }</code> with the <code>name()</code> method being called on each possible enum value.
-   * If there is only one enum value, it will be set as <code>&quot;const&quot;</code> instead.
-   * Such an enum representation will always be in-lined and not moved into the <code>&quot;definitions&quot;</code>.
-2. <code>Option.SIMPLIFIED_ENUMS</code>(which is part of the <code>OptionPreset.JAVA_OBJECT</code> and <code>OptionPreset.FULL_DOCUMENTATION</code>)
-   * This treats enums like any other class but hiding some methods and listing the possible enum values as <code>&quot;enum&quot;</code>/<code>&quot;const&quot;</code> on the <code>name()</code> method.
-3. Using neither of the two <code>Option</code>s above will let them be handled like any other class (unless there are further configurations taking care of enums).
-4. The <code>JacksonModule</code> comes with two more alternatives:
-   * <code>JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE</code>, behaving like <code>Option.FLATTENED_ENUMS</code> but looking-up the respective values via the <code>@JsonValue</code> annotated method.
-   * <code>JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY</code>, behaving like <code>Option.FLATTENED_ENUMS</code> but looking-up the respective values via the <code>@JsonProperty</code> annotation on each enum value/constant.
-5. Write your own custom definition provider or re-use the <code>EnumModule</code> class as in the shown example.</p>
+<p>Enums are a special construct for which there are multiple options:</p>
+
+<ol>
+<li><code>Option.FLATTENED_ENUMS</code> (which is part of the <code>OptionPreset.PLAIN_JSON</code>)
+
+<ul>
+<li>This defines an enum as <code>{ &quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;VALUE1&quot;, &quot;VALUE2&quot;] }</code> with the <code>name()</code> method being called on each possible enum value.</li>
+<li>If there is only one enum value, it will be set as <code>&quot;const&quot;</code> instead.</li>
+<li>Such an enum representation will always be in-lined and not moved into the <code>&quot;definitions&quot;</code>.</li>
+</ul></li>
+<li><code>Option.SIMPLIFIED_ENUMS</code>(which is part of the <code>OptionPreset.JAVA_OBJECT</code> and <code>OptionPreset.FULL_DOCUMENTATION</code>)
+
+<ul>
+<li>This treats enums like any other class but hiding some methods and listing the possible enum values as <code>&quot;enum&quot;</code>/<code>&quot;const&quot;</code> on the <code>name()</code> method.</li>
+</ul></li>
+<li>Using neither of the two <code>Option</code>s above will let them be handled like any other class (unless there are further configurations taking care of enums).</li>
+<li>The <code>JacksonModule</code> comes with two more alternatives:
+
+<ul>
+<li><code>JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE</code>, behaving like <code>Option.FLATTENED_ENUMS</code> but looking-up the respective values via the <code>@JsonValue</code> annotated method.</li>
+<li><code>JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY</code>, behaving like <code>Option.FLATTENED_ENUMS</code> but looking-up the respective values via the <code>@JsonProperty</code> annotation on each enum value/constant.</li>
+</ul></li>
+<li>Write your own custom definition provider or re-use the <code>EnumModule</code> class as in the shown example.</li>
+</ol>
 <h2 id='where-can-i-find-some-more-configuration-examples'>Where can I find some more configuration examples?</h2>
 <p>Internally, a number of the standard <code>Option</code>s are realized via <a href="#individual-configurations">Individual Configurations</a> and/or <a href="#advanced-configurations">Advanced Configurations</a> – grouped into <code>Module</code>s.<br>
 These make for excellent <a href="https://github.com/victools/jsonschema-generator/tree/master/jsonschema-generator/src/main/java/com/github/victools/jsonschema/generator/impl/module">examples</a> to get you started into your own setup, if the existing <code>Option</code>s do not cover your specific requirements.</p>
@@ -1922,10 +1929,13 @@ These make for excellent <a href="https://github.com/victools/jsonschema-generat
     <span class="o">});</span>
 </code></pre></div>
 <p>By default, a <code>Map</code> will be treated like any other type – i.e. most likely a simple <code>{ &quot;type&quot;: &quot;object&quot; }</code> without many further details if you use the <code>OptionPreset.PLAIN_JSON</code> or otherwise ignore methods.
-The following are the two most common approaches:
- 1. Indicate the value type <code>V</code> as the expected type for any <code>&quot;additionalProperties&quot;</code> by including the <code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code>.<br>
-You may also want to consider including the <code>Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</code> to forbid <code>&quot;additionalProperties&quot;</code> everywhere else.
- 2. If you have a clear idea of how the key type <code>K</code> will be serialized, you could also describe valid keys via <code>&quot;patternProperties&quot;</code> instead – like this:</p>
+The following are the two most common approaches:</p>
+
+<ol>
+<li>Indicate the value type <code>V</code> as the expected type for any <code>&quot;additionalProperties&quot;</code> by including the <code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code>.<br>
+You may also want to consider including the <code>Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</code> to forbid <code>&quot;additionalProperties&quot;</code> everywhere else.</li>
+<li>If you have a clear idea of how the key type <code>K</code> will be serialized, you could also describe valid keys via <code>&quot;patternProperties&quot;</code> instead – as per the example on the right.</li>
+</ol>
 
 <p>Refer to https://json-schema.org/understanding-json-schema/reference/regular_expressions.html for a description of how to build valid patterns.</p>
 <h2 id='how-to-populate-default-values'>How to populate <code>default</code> values?</h2>
@@ -1960,9 +1970,12 @@ You may also want to consider including the <code>Option.FORBIDDEN_ADDITIONAL_PR
 <span class="o">});</span>
 </code></pre></div>
 <p>The short answer is: via the <code>withDefaultResolver()</code> – one of the <a href="#13-individual-configurations">Individual Configurations</a>.<br>
-The exact details depend on how the <code>default</code> value can be determined.
-1. If the <code>default</code> value is explicitly stated via some kind of annotation, it might be as simple as &quot;Example 1&quot; on the right.
-2. If the <code>default</code> value is only set in code, and you cannot or don&#39;t want to maintain that piece of information twice this can get a bit more advanced. Here assuming your own classes all have a default no-args constructor and conventional getters as in &quot;Example 2&quot; on the right.</p>
+The exact details depend on how the <code>default</code> value can be determined.</p>
+
+<ol>
+<li>If the <code>default</code> value is explicitly stated via some kind of annotation, it might be as simple as &quot;Example 1&quot; on the right.</li>
+<li>If the <code>default</code> value is only set in code, and you cannot or don&#39;t want to maintain that piece of information twice this can get a bit more advanced. Here assuming your own classes all have a default no-args constructor and conventional getters as in &quot;Example 2&quot; on the right.</li>
+</ol>
 <h1 id='motivation'>Motivation</h1>
 <p>This started out as (and still is) a personal project. After writing Java code professionally for over a decade,
 I am more and more consumed with rather theoretical work in my role as a business analyst and product owner –
