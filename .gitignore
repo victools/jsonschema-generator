@@ -38,6 +38,11 @@ release.properties
 pom.xml.releaseBackup
 
 ######################
+# Slate Docs
+######################
+slate-docs/build
+
+######################
 # OS
 ######################
 .DS_Store

@@ -23,7 +23,7 @@ Another example for such a module is:
 ## Documentation
 JavaDoc is being used throughout the codebase, offering contextual information in your respective IDE or being available online through services like [javadoc.io](https://www.javadoc.io/doc/com.github.victools/jsonschema-generator).
 
-Additional documentation can be found in the [Project Wiki](https://github.com/victools/jsonschema-generator/wiki).
+Additional documentation can be found here: (https://victools.github.io/jsonschema-generator/)
 
 ----
 
