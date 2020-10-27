@@ -1,0 +1,43 @@
+name: Slate Docs
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - created
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ruby-version: 2.7
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ env.ruby-version }}
+
+    - uses: actions/cache@v1
+      with:
+        path: vendor/bundle
+        key: gems-${{ runner.os }}-${{ env.ruby-version }}-${{ hashFiles('**/Gemfile.lock') }}
+
+    - run: bundle config set deployment 'true'
+      working-directory: ./slate-docs
+    - run: bundle install
+      working-directory: ./slate-docs
+
+    - run: bundle exec middleman build
+      working-directory: ./slate-docs
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      if: ${{ github.event_name == 'pull_request' }}
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./slate-docs/build
