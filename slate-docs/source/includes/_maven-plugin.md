@@ -44,7 +44,7 @@ There are some additional parameters available in the plugin `<configuration>`:
 </options>
 ```
 
-The standard generator [`Option`s](#configuration-through-options) can be included via the `<options>` tag.
+The standard generator [`Option`s](#generator-options) can be included via the `<options>` tag.
 
 ## Further configurations through Modules
 ```xml

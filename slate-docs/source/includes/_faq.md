@@ -68,7 +68,7 @@ Enums are a special construct for which there are multiple options:
 5. Write your own custom definition provider or re-use the `EnumModule` class as in the shown example.
 
 ## Where can I find some more configuration examples?
-Internally, a number of the standard `Option`s are realized via [Individual Configurations](#individual-configurations) and/or [Advanced Configurations](#advanced-configurations) – grouped into `Module`s.   
+Internally, a number of the standard `Option`s are realized via [Individual Configurations](#generator-individual-configurations) and/or [Advanced Configurations](#generator-advanced-configurations) – grouped into `Module`s.   
 These make for excellent [examples](https://github.com/victools/jsonschema-generator/tree/master/jsonschema-generator/src/main/java/com/github/victools/jsonschema/generator/impl/module) to get you started into your own setup, if the existing `Option`s do not cover your specific requirements.
 
 ## How to represent a `Map<K, V>` in a generated schema?
@@ -129,7 +129,7 @@ configBuilder.forFields().withDefaultResolver(field -> {
 });
 ```
 
-The short answer is: via the `withDefaultResolver()` – one of the [Individual Configurations](#13-individual-configurations).   
+The short answer is: via the `withDefaultResolver()` – one of the [Individual Configurations](#generator-individual-configurations).   
 The exact details depend on how the `default` value can be determined.
 
 1. If the `default` value is explicitly stated via some kind of annotation, it might be as simple as "Example 1" on the right.

@@ -13,7 +13,7 @@ of building custom applications for each customer. That means, such a product ne
 for every customer. Amongst other things, we do this through heaps of configuration options. In order to achieve the
 desired flexibility, these configurations are sometimes very technical. E.g. allowing our customers (i.e. users) to
 define JavaScript expressions based on our own Java DOM. In reality this means quite often: customers can configure it
-themselves but will still ask us/me to provide those expression. However, that poses the challenge of documenting our
+themselves but will still ask us/me to provide those expressions. However, that poses the challenge of documenting our
 DOM in a way that it can be used without having access to the code itself or its JavaDoc.
 I couldn't find a nice way of doing the above without sentencing myself to constantly maintain a huge amount of
 documentation.
@@ -26,7 +26,7 @@ While I had already spent considerable amounts of my spare time on this frontend
 – I really missed the strong Java typing!), I realized that the existing JSON Schema generation libraries typically
 expected some specific annotations throughout the code base for the sole purpose of generating a JSON Schema. I surely
 wasn't expecting our developers to go through hundreds of classes and specifying schema parts (by this time Draft
-version 7) throughout the codebase. And none of the existing generation library seemed to allow for methods to be
+version 7) throughout the codebase. And none of the existing generation libraries seemed to allow for methods to be
 documented (understandable, if you only aim at documenting a JSON structure, but not good enough for my purposes after
 all).
 
