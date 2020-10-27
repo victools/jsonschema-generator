@@ -1,5 +1,3 @@
-***
-
 The [victools:jsonschema-generator](https://github.com/victools/jsonschema-generator/tree/master/jsonschema-generator) aims at allowing the generation of JSON Schema (Draft 6, Draft 7 or Draft 2019-09) to document Java code.
 This is expressly not limited to _JSON_ but also allows for a Java API to be documented (i.e. including methods and the associated return values).
 

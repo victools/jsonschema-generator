@@ -54,6 +54,7 @@ configBuilder.with(new EnumModule(possibleEnumValue -> {
 ```
 
 Enums are a special construct for which there are multiple options:
+
 1. `Option.FLATTENED_ENUMS` (which is part of the `OptionPreset.PLAIN_JSON`)
    * This defines an enum as `{ "type": "string", "enum": ["VALUE1", "VALUE2"] }` with the `name()` method being called on each possible enum value.
    * If there is only one enum value, it will be set as `"const"` instead.
@@ -88,9 +89,10 @@ configBuilder.forTypesInGeneral()
 
 By default, a `Map` will be treated like any other type – i.e. most likely a simple `{ "type": "object" }` without many further details if you use the `OptionPreset.PLAIN_JSON` or otherwise ignore methods.
 The following are the two most common approaches:
+
  1. Indicate the value type `V` as the expected type for any `"additionalProperties"` by including the `Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES`.   
-You may also want to consider including the `Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` to forbid `"additionalProperties"` everywhere else.
- 2. If you have a clear idea of how the key type `K` will be serialized, you could also describe valid keys via `"patternProperties"` instead – like this:
+ You may also want to consider including the `Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` to forbid `"additionalProperties"` everywhere else.
+ 2. If you have a clear idea of how the key type `K` will be serialized, you could also describe valid keys via `"patternProperties"` instead – as per the example on the right.
 
 Refer to https://json-schema.org/understanding-json-schema/reference/regular_expressions.html for a description of how to build valid patterns.
 
@@ -129,5 +131,6 @@ configBuilder.forFields().withDefaultResolver(field -> {
 
 The short answer is: via the `withDefaultResolver()` – one of the [Individual Configurations](#13-individual-configurations).   
 The exact details depend on how the `default` value can be determined.
+
 1. If the `default` value is explicitly stated via some kind of annotation, it might be as simple as "Example 1" on the right.
 2. If the `default` value is only set in code, and you cannot or don't want to maintain that piece of information twice this can get a bit more advanced. Here assuming your own classes all have a default no-args constructor and conventional getters as in "Example 2" on the right.

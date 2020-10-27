@@ -12,15 +12,15 @@ SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(Sc
     .with(module);
 ```
 
- 1. From `@Schema(description = …)` on types in general, derive `"description"`.
- 2. From `@Schema(title = …)` on types in general, derive `"title"`.
- 3. From `@Schema(subTypes = …)` on types in general, derive `"anyOf"` alternatives.
- 4. From `@Schema(anyOf = …)` on types in general (as alternative to `subTypes`), derive `"anyOf"` alternatives.
- 5. From `@Schema(name = …)` on types in general, derive the keys/names in `"definitions"`/`"$defs"`.
- 6. From `@Schema(description = …)` on fields/methods, derive `"description"`.
- 7. From `@Schema(title = …)` on fields/methods, derive `"title"`.
- 8. From `@Schema(implementation = …)` on fields/methods, override represented type.
- 9. From `@Schema(hidden = true)` on fields/methods, skip certain properties.
+1. From `@Schema(description = …)` on types in general, derive `"description"`.
+2. From `@Schema(title = …)` on types in general, derive `"title"`.
+3. From `@Schema(subTypes = …)` on types in general, derive `"anyOf"` alternatives.
+4. From `@Schema(anyOf = …)` on types in general (as alternative to `subTypes`), derive `"anyOf"` alternatives.
+5. From `@Schema(name = …)` on types in general, derive the keys/names in `"definitions"`/`"$defs"`.
+6. From `@Schema(description = …)` on fields/methods, derive `"description"`.
+7. From `@Schema(title = …)` on fields/methods, derive `"title"`.
+8. From `@Schema(implementation = …)` on fields/methods, override represented type.
+9. From `@Schema(hidden = true)` on fields/methods, skip certain properties.
 10. From `@Schema(name = …)` on fields/methods, override property names.
 11. From `@Schema(ref = …)` on fields/methods, replace subschema with `"$ref"` to external/separate schema.
 12. From `@Schema(allOf = …)` on fields/methods, include `"allOf"` parts.
