@@ -8,6 +8,7 @@ toc_footers:
 includes:
   - main-generator
   - jackson-module
+  - jakarta-validation-module
   - javax-validation-module
   - swagger-15-module
   - swagger-2-module

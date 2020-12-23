@@ -66,6 +66,13 @@
                 <role>Provided PRs #116 and #118 (part of initial Swagger2Module)</role>
             </roles>
         </contributor>
+        <contributor>
+            <name>Sascha Kohlmann</name>
+            <url>https://github.com/skohlmann</url>
+            <roles>
+                <role>Provided PR #156 (port of JavaxValidationModule to JakartaValidationModule and its support in the maven plugin)</role>
+            </roles>
+        </contributor>
     </contributors>
 
     <distributionManagement>
