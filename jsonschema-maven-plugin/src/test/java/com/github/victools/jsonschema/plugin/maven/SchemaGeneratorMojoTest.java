@@ -45,6 +45,7 @@ public class SchemaGeneratorMojoTest {
                 {"SchemaVersion"},
                 {"JacksonModule"},
                 {"JavaxValidationModule"},
+                {"JakartaValidationModule"},
                 {"Swagger15Module"},
                 {"Swagger2Module"},
                 {"Complete"}

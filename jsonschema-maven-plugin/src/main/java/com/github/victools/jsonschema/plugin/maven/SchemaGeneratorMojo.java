@@ -26,6 +26,8 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
+import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationModule;
+import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationOption;
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationModule;
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationOption;
 import com.github.victools.jsonschema.module.swagger15.SwaggerModule;
@@ -380,6 +382,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                     this.getLog().debug("- Adding Jackson Module");
                     addJacksonModule(configBuilder, module);
                     break;
+                case "JakartaValidation":
+                    this.getLog().debug("- Adding Jakarta Validation Module");
+                    addJakartaValidationModule(configBuilder, module);
+                    break;
                 case "JavaxValidation":
                     this.getLog().debug("- Adding Javax Validation Module");
                     addJavaxValidationModule(configBuilder, module);
@@ -394,7 +400,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                     break;
                 default:
                     throw new MojoExecutionException("Error: Module does not have a name in "
-                            + "['Jackson', 'JavaxValidation', 'Swagger15', 'Swagger2'] or does not have a custom classname.");
+                            + "['Jackson', 'JakartaValidation', 'JavaxValidation', 'Swagger15', 'Swagger2'] or does not have a custom classname.");
                 }
             }
         }
@@ -501,6 +507,29 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                 }
             }
             configBuilder.with(new JavaxValidationModule(javaxValidationOptions));
+        }
+    }
+
+    /**
+     * Add the Jakarta Validation module to the generator config.
+     *
+     * @param configBuilder The builder on which the config is added
+     * @param module The modules section form the pom
+     * @throws MojoExecutionException in case of problems
+     */
+    private void addJakartaValidationModule(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
+        if (module.options == null || module.options.length == 0) {
+            configBuilder.with(new JakartaValidationModule());
+        } else {
+            JakartaValidationOption[] jakartaValidationOptions = new JakartaValidationOption[module.options.length];
+            for (int i = 0; i < module.options.length; i++) {
+                try {
+                    jakartaValidationOptions[i] = JakartaValidationOption.valueOf(module.options[i]);
+                } catch (IllegalArgumentException e) {
+                    throw new MojoExecutionException("Error: Unknown JakartaValidation option " + module.options[i], e);
+                }
+            }
+            configBuilder.with(new JakartaValidationModule(jakartaValidationOptions));
         }
     }
 
