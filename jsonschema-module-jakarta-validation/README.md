@@ -1,5 +1,5 @@
-# Java JSON Schema Generator – Module javax.validation
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-javax-validation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-jakarta-validation)
+# Java JSON Schema Generator – Module jakarta.validation
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-jakarta-validation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-module-jakarta-validation)
 
 Module for the [jsonschema-generator](../jsonschema-generator) – deriving JSON Schema attributes from `jakarta.validation.constraints` annotations.
 
@@ -31,7 +31,7 @@ Additional documentation can be found in the [Project Wiki](https://github.com/v
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-module-jakarta-validation</artifactId>
-    <version>[4.16.0,5.0.0)</version>
+    <version>[4.17.0,5.0.0)</version>
 </dependency>
 ```
 

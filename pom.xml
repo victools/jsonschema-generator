@@ -82,8 +82,8 @@
     <modules>
         <module>jsonschema-generator</module>
         <module>jsonschema-module-jackson</module>
-        <module>jsonschema-module-javax-validation</module>
         <module>jsonschema-module-jakarta-validation</module>
+        <module>jsonschema-module-javax-validation</module>
         <module>jsonschema-module-swagger-1.5</module>
         <module>jsonschema-module-swagger-2</module>
         <module>jsonschema-maven-plugin</module>
@@ -96,8 +96,8 @@
 
         <version.classmate>1.5.1</version.classmate>
         <version.jackson>2.10.3</version.jackson>
-        <version.javax.validation>2.0.1.Final</version.javax.validation>
         <version.jakarta.validation>3.0.0</version.jakarta.validation>
+        <version.javax.validation>2.0.1.Final</version.javax.validation>
         <version.jsonassert>1.5.0</version.jsonassert>
         <version.junit>4.13.1</version.junit>
         <version.junitparams>1.1.1</version.junitparams>
@@ -124,12 +124,12 @@
             </dependency>
             <dependency>
                 <groupId>com.github.victools</groupId>
-                <artifactId>jsonschema-module-javax-validation</artifactId>
+                <artifactId>jsonschema-module-jakarta-validation</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.victools</groupId>
-                <artifactId>jsonschema-module-jakarta-validation</artifactId>
+                <artifactId>jsonschema-module-javax-validation</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
