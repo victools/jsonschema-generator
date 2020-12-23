@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-module-jakarta-validation`
+#### Added
+- Initial implementation (initial features are equivalent to `jsonschema-module-javax-validation`)
+
+### `jsonschema-maven-plugin`
+#### Added
+- Support for new `jakarta.validation` module
 
 ## [4.16.0] - 2020-09-25
 ### `jsonschema-generator`

@@ -10,6 +10,7 @@ This project consists of:
 - the [victools/jsonschema-generator](jsonschema-generator) (the only thing you need to get started)
 - a few modules bundling standard configurations for your convenience:
     - [victools/jsonschema-module-jackson](jsonschema-module-jackson) – deriving JSON Schema attributes from `jackson` annotations (e.g. "description", property name overrides, what properties to ignore) as well as looking up appropriate (annotated) subtypes
+    - [victools/jsonschema-module-jakarta-validation](jsonschema-module-jakarta-validation) – deriving JSON Schema attributes from `jakarta.validation.constraints` annotations (e.g. which properties are nullable or not, their "minimum"/"maximum", "minItems"/"maxItems", "minLength"/"maxLength")
     - [victools/jsonschema-module-javax-validation](jsonschema-module-javax-validation) – deriving JSON Schema attributes from `javax.validation` annotations (e.g. which properties are nullable or not, their "minimum"/"maximum", "minItems"/"maxItems", "minLength"/"maxLength")
     - [victools/jsonschema-module-swagger-1.5](jsonschema-module-swagger-1.5) – deriving JSON Schema attributes from `swagger` (1.5.x) annotations (e.g. "description", property name overrides, what properties to ignore, their "minimum"/"maximum", "const"/"enum")
     - [victools/jsonschema-module-swagger-2](jsonschema-module-swagger-2) – deriving JSON Schema attributes from `swagger` (2.x) `@Schema` annotations
