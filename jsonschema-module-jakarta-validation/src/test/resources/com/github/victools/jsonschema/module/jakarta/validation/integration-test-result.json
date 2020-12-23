@@ -1,0 +1,88 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "type": "object",
+    "properties": {
+        "exclusiveRangeDouble": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "exclusiveMaximum": 1
+        },
+        "inclusiveRangeInt": {
+            "type": "integer",
+            "minimum": 7,
+            "maximum": 38
+        },
+        "notBlankText": {
+            "type": "string",
+            "minLength": 1
+        },
+        "notEmptyList": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "exclusiveMaximum": 1
+            }
+        },
+        "notEmptyPatternText": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\w+"
+        },
+        "notNullEmail": {
+            "type": "string",
+            "format": "email",
+            "pattern": ".+@.+\\..+"
+        },
+        "notNullList": {
+            "type": "array",
+            "items": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 2048
+            }
+        },
+        "nullObject": {},
+        "optionalInclusiveRangeInt1": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "maximum": 8
+        },
+        "optionalInclusiveRangeInt2": {
+            "type": ["integer", "null"],
+            "minimum": 2,
+            "maximum": 5
+        },
+        "optionalSizeRangeString1": {
+            "type": ["integer", "null"]
+        },
+        "optionalSizeRangeString2": {
+            "type": ["integer", "null"]
+        },
+        "sizeRangeList": {
+            "minItems": 3,
+            "maxItems": 25,
+            "type": "array",
+            "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+            }
+        },
+        "sizeRangeListWithoutItemAnnotation": {
+            "minItems": 3,
+            "maxItems": 25,
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "sizeRangeText": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 12
+        }
+    },
+    "required": ["notBlankText", "notEmptyList", "notEmptyPatternText", "notNullEmail", "notNullList"]
+}

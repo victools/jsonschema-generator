@@ -7,10 +7,10 @@
         <artifactId>jsonschema-generator-parent</artifactId>
         <version>4.17.0-SNAPSHOT</version>
     </parent>
-    <artifactId>jsonschema-module-javax-validation</artifactId>
+    <artifactId>jsonschema-module-jakarta-validation</artifactId>
 
-    <name>Java JSON Schema Generator Module – javax.validation</name>
-    <description>Module for the jsonschema-generator – deriving JSON Schema attributes from javax.validation annotations</description>
+    <name>Java JSON Schema Generator Module – jakarta.validation</name>
+    <description>Module for the jsonschema-generator – deriving JSON Schema attributes from jakarta.validation annotations</description>
 
     <dependencies>
         <dependency>
@@ -19,8 +19,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
