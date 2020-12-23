@@ -421,6 +421,9 @@
             <a href="#jackson-module" class="toc-h1 toc-link" data-title="Jackson Module">Jackson Module</a>
           </li>
           <li>
+            <a href="#jakarta-validation-module" class="toc-h1 toc-link" data-title="Jakarta Validation Module">Jakarta Validation Module</a>
+          </li>
+          <li>
             <a href="#javax-validation-module" class="toc-h1 toc-link" data-title="Javax Validation Module">Javax Validation Module</a>
           </li>
           <li>
@@ -1648,6 +1651,39 @@ In order to reflect Java&#39;s polymorphism, you can make use of the following c
 <p>Schema attributes derived from annotations on getter methods are also applied to their associated fields.</p>
 
 <p>To use it, just pass a module instance into <code>SchemaGeneratorConfigBuilder.with(Module)</code>, optionally providing <code>JacksonOption</code> values in the module&#39;s constructor.</p>
+<h1 id='jakarta-validation-module'>Jakarta Validation Module</h1>
+<p>The <a href="https://github.com/victools/jsonschema-generator/tree/master/jsonschema-module-jakarta-validation">victools:jsonschema-module-jakarta-validation</a> provides a number of standard configurations for deriving JSON Schema attributes from <code>jakarta.validation.constraints</code> annotations.</p>
+<div class="highlight"><pre class="highlight java tab-java"><code><span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.generator.SchemaVersion</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationModule</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationOption</span><span class="o">;</span>
+
+
+<span class="nc">JakartaValidationModule</span> <span class="n">module</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JakartaValidationModule</span><span class="o">(</span><span class="nc">JakartaValidationOption</span><span class="o">.</span><span class="na">PREFER_IDN_EMAIL_FORMAT</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">forValidationGroups</span><span class="o">(</span><span class="nc">YourGroupFlag</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+<span class="nc">SchemaGeneratorConfigBuilder</span> <span class="n">configBuilder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SchemaGeneratorConfigBuilder</span><span class="o">(</span><span class="nc">SchemaVersion</span><span class="o">.</span><span class="na">DRAFT_2019_09</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">with</span><span class="o">(</span><span class="n">module</span><span class="o">);</span>
+</code></pre></div>
+<ol>
+<li>Determine whether a member is not nullable, base assumption being that all fields and method return values are nullable if not annotated. Based on <code>@NotNull</code>/<code>@Null</code>/<code>@NotEmpty</code>/<code>@NotBlank</code>.</li>
+<li>Populate list of &quot;required&quot; fields/methods for objects if <code>JakartaValidationOption.NOT_NULLABLE_FIELD_IS_REQUIRED</code>/<code>JakartaValidationOption.NOT_NULLABLE_METHOD_IS_REQUIRED</code> is being provided respectively (i.e. this is an &quot;opt-in&quot;).</li>
+<li>Populate &quot;minItems&quot; and &quot;maxItems&quot; for containers (i.e. arrays and collections). Based on <code>@Size</code>/<code>@NotEmpty</code>.</li>
+<li>Populate &quot;minLength&quot; and &quot;maxLength&quot; for strings. Based on <code>@Size</code>/<code>@NotEmpty</code>/<code>@NotBlank</code>.</li>
+<li>Populate &quot;format&quot; for strings. Based on <code>@Email</code>, can be &quot;email&quot; or &quot;idn-email&quot; depending on whether <code>JakartaValidationOption.PREFER_IDN_EMAIL_FORMAT</code> is being provided.</li>
+<li>Populate &quot;pattern&quot; for strings. Based on <code>@Pattern</code>/<code>@Email</code>, if <code>JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS</code> is being provided (i.e. this is an &quot;opt-in&quot;).</li>
+<li>Populate &quot;minimum&quot;/&quot;exclusiveMinimum&quot; for numbers. Based on <code>@Min</code>/<code>@DecimalMin</code>/<code>@Positive</code>/<code>@PositiveOrZero</code>.</li>
+<li>Populate &quot;maximum&quot;/&quot;exclusiveMaximum&quot; for numbers. Based on <code>@Max</code>/<code>@DecimalMax</code>/<code>@Negative</code>/<code>@NegativeOrZero</code>.</li>
+</ol>
+
+<p>Schema attributes derived from validation annotations on fields are also applied to their respective getter methods.<br>
+Schema attributes derived from validation annotations on getter methods are also applied to their associated fields.</p>
+
+<p>To use it, just pass a module instance into <code>SchemaGeneratorConfigBuilder.with(Module)</code>, optionally providing <code>JakartaValidationOption</code> values in the module&#39;s constructor and/or specifying validation groups to filter by via <code>.forValidationGroups()</code>.</p>
+<div class="highlight"><pre class="highlight java tab-java"><code><span class="n">module</span><span class="o">.</span><span class="na">forValidationGroups</span><span class="o">(</span><span class="nc">JsonSchemaValidation</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</code></pre></div>
+<p>The <code>jakarta.validation.constraints</code> annotations cater for a <code>groups</code> parameter to be added, to allow different sets of validations to be applied under different circumstances.
+Via <code>.forValidationGroups()</code> you&#39;re able to indicate which <code>groups</code> should be considered during the schema generation.
+Without specifying particular groups via <code>.forValidationGroups()</code>, no filtering will be applied – i.e. all supported <code>jakarta.validation.constraints</code> annotations will be considered regardless of their respective <code>groups</code>.</p>
 <h1 id='javax-validation-module'>Javax Validation Module</h1>
 <p>The <a href="https://github.com/victools/jsonschema-generator/tree/master/jsonschema-module-javax-validation">victools:jsonschema-module-javax-validation</a> provides a number of standard configurations for deriving JSON Schema attributes from <code>javax.validation</code> annotations.</p>
 <div class="highlight"><pre class="highlight java tab-java"><code><span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder</span><span class="o">;</span>
@@ -1821,7 +1857,7 @@ There are a number of basic configuration options as well as the possibility to 
     <span class="nt">&lt;disabled&gt;</span>SCHEMA_VERSION_INDICATOR<span class="nt">&lt;/disabled&gt;</span>
 <span class="nt">&lt;/options&gt;</span>
 </code></pre></div>
-<p>The standard generator <a href="#configuration-through-options"><code>Option</code>s</a> can be included via the <code>&lt;options&gt;</code> tag.</p>
+<p>The standard generator <a href="#generator-options"><code>Option</code>s</a> can be included via the <code>&lt;options&gt;</code> tag.</p>
 <h2 id='further-configurations-through-modules'>Further configurations through Modules</h2><div class="highlight"><pre class="highlight xml tab-xml"><code><span class="nt">&lt;modules&gt;</span>
     <span class="nt">&lt;module&gt;</span>
         <span class="nt">&lt;name&gt;</span>Jackson<span class="nt">&lt;/name&gt;</span>
@@ -1913,7 +1949,7 @@ CHeckout https://github.com/victools/jsonschema-gradle-example for the complete 
 <li>Write your own custom definition provider or re-use the <code>EnumModule</code> class as in the shown example.</li>
 </ol>
 <h2 id='where-can-i-find-some-more-configuration-examples'>Where can I find some more configuration examples?</h2>
-<p>Internally, a number of the standard <code>Option</code>s are realized via <a href="#individual-configurations">Individual Configurations</a> and/or <a href="#advanced-configurations">Advanced Configurations</a> – grouped into <code>Module</code>s.<br>
+<p>Internally, a number of the standard <code>Option</code>s are realized via <a href="#generator-individual-configurations">Individual Configurations</a> and/or <a href="#generator-advanced-configurations">Advanced Configurations</a> – grouped into <code>Module</code>s.<br>
 These make for excellent <a href="https://github.com/victools/jsonschema-generator/tree/master/jsonschema-generator/src/main/java/com/github/victools/jsonschema/generator/impl/module">examples</a> to get you started into your own setup, if the existing <code>Option</code>s do not cover your specific requirements.</p>
 <h2 id='how-to-represent-a-map-lt-k-v-gt-in-a-generated-schema'>How to represent a <code>Map&lt;K, V&gt;</code> in a generated schema?</h2><div class="highlight"><pre class="highlight java tab-java"><code><span class="n">configBuilder</span><span class="o">.</span><span class="na">forTypesInGeneral</span><span class="o">()</span>
     <span class="o">.</span><span class="na">withPatternPropertiesResolver</span><span class="o">((</span><span class="n">scope</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
@@ -1969,7 +2005,7 @@ You may also want to consider including the <code>Option.FORBIDDEN_ADDITIONAL_PR
     <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
 <span class="o">});</span>
 </code></pre></div>
-<p>The short answer is: via the <code>withDefaultResolver()</code> – one of the <a href="#13-individual-configurations">Individual Configurations</a>.<br>
+<p>The short answer is: via the <code>withDefaultResolver()</code> – one of the <a href="#generator-individual-configurations">Individual Configurations</a>.<br>
 The exact details depend on how the <code>default</code> value can be determined.</p>
 
 <ol>
@@ -1991,7 +2027,7 @@ of building custom applications for each customer. That means, such a product ne
 for every customer. Amongst other things, we do this through heaps of configuration options. In order to achieve the
 desired flexibility, these configurations are sometimes very technical. E.g. allowing our customers (i.e. users) to
 define JavaScript expressions based on our own Java DOM. In reality this means quite often: customers can configure it
-themselves but will still ask us/me to provide those expression. However, that poses the challenge of documenting our
+themselves but will still ask us/me to provide those expressions. However, that poses the challenge of documenting our
 DOM in a way that it can be used without having access to the code itself or its JavaDoc.
 I couldn&#39;t find a nice way of doing the above without sentencing myself to constantly maintain a huge amount of
 documentation.</p>
@@ -2004,7 +2040,7 @@ While I had already spent considerable amounts of my spare time on this frontend
 – I really missed the strong Java typing!), I realized that the existing JSON Schema generation libraries typically
 expected some specific annotations throughout the code base for the sole purpose of generating a JSON Schema. I surely
 wasn&#39;t expecting our developers to go through hundreds of classes and specifying schema parts (by this time Draft
-version 7) throughout the codebase. And none of the existing generation library seemed to allow for methods to be
+version 7) throughout the codebase. And none of the existing generation libraries seemed to allow for methods to be
 documented (understandable, if you only aim at documenting a JSON structure, but not good enough for my purposes after
 all).</p>
 
