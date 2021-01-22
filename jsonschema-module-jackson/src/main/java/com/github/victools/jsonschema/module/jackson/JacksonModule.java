@@ -98,6 +98,10 @@ public class JacksonModule implements Module {
             generalConfigPart.withPropertySorter(new JsonPropertySorter(true));
         }
 
+        if (this.options.contains(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED)) {
+            fieldConfigPart.withRequiredCheck( this::getRequiredCheckBasedOnJsonPropertyAnnotation );
+        }
+
         boolean lookUpSubtypes = !this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP);
         boolean includeTypeInfoTransform = !this.options.contains(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM);
         if (lookUpSubtypes || includeTypeInfoTransform) {
@@ -248,4 +252,19 @@ public class JacksonModule implements Module {
         return beanDescription.findProperties().stream()
                 .noneMatch(propertyDefinition -> fieldName.equals(propertyDefinition.getInternalName()));
     }
+
+    /**
+     * Look-up the given field's {@link JsonProperty} annotation and its "required" attribute,  and calculate wether or not this field should be part of the required properties
+     *
+     * @param field field to look-up required strategy for
+     * @return whether the field should be in the "required" list or not
+     */
+    private boolean getRequiredCheckBasedOnJsonPropertyAnnotation(FieldScope field) {
+        JsonProperty jsonProperty = field.getAnnotationConsideringFieldAndGetter(JsonProperty.class) ;
+        if ( jsonProperty == null )
+            return false;
+        else
+            return jsonProperty.required();
+    }
+
 }

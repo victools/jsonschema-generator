@@ -132,9 +132,9 @@ public class JacksonModuleTest {
 
     public Object[] parametersForTestApplyToConfigBuilderWithEnumOptions() {
         return new Object[][]{
-            {new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE}},
-            {new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY}},
-            {new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE, JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY}}
+                {new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE}},
+                {new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY}},
+                {new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE, JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY}}
         };
     }
 
@@ -171,12 +171,12 @@ public class JacksonModuleTest {
 
     Object parametersForTestPropertyNameOverride() {
         return new Object[][]{
-            {"unannotatedField", null, "unannotated-field"},
-            {"fieldWithEmptyPropertyAnnotation", null, "field-with-empty-property-annotation"},
-            {"fieldWithSameValuePropertyAnnotation", null, "field-with-same-value-property-annotation"},
-            {"fieldWithNameOverride", "field override 1", "field-with-name-override"},
-            {"fieldWithNameOverrideOnGetter", "method override 1", "field-with-name-override-on-getter"},
-            {"fieldWithNameOverrideAndOnGetter", "field override 2", "field-with-name-override-and-on-getter"}
+                {"unannotatedField", null, "unannotated-field"},
+                {"fieldWithEmptyPropertyAnnotation", null, "field-with-empty-property-annotation"},
+                {"fieldWithSameValuePropertyAnnotation", null, "field-with-same-value-property-annotation"},
+                {"fieldWithNameOverride", "field override 1", "field-with-name-override"},
+                {"fieldWithNameOverrideOnGetter", "method override 1", "field-with-name-override-on-getter"},
+                {"fieldWithNameOverrideAndOnGetter", "field override 2", "field-with-name-override-and-on-getter"}
         };
     }
 
@@ -198,11 +198,11 @@ public class JacksonModuleTest {
 
     Object parametersForTestDescriptionResolver() {
         return new Object[][]{
-            {"unannotatedField", null},
-            {"fieldWithDescription", "field description 1"},
-            {"fieldWithDescriptionOnGetter", "getter description 1"},
-            {"fieldWithDescriptionAndOnGetter", "field description 2"},
-            {"fieldWithDescriptionOnType", null}
+                {"unannotatedField", null},
+                {"fieldWithDescription", "field description 1"},
+                {"fieldWithDescriptionOnGetter", "getter description 1"},
+                {"fieldWithDescriptionAndOnGetter", "field description 2"},
+                {"fieldWithDescriptionOnType", null}
         };
     }
 
@@ -219,13 +219,36 @@ public class JacksonModuleTest {
         Assert.assertEquals(expectedDescription, description);
     }
 
+    Object parametersForTestRequiredProperty() {
+        return new Object[][]{
+                {null,"requiredTrue", false},
+                {null,"requiredFalse", false},
+                {null,"requiredAbsent", false},
+                {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED,"requiredTrue", true},
+                {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED,"requiredFalse", false},
+                {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED,"requiredAbsent", false}
+        };
+    }
+
+    @Test
+    @Parameters
+    public void testRequiredProperty(JacksonOption requiredOption, String fieldName, boolean expectedRequired) {
+        new JacksonModule(requiredOption).applyToConfigBuilder(this.configBuilder);
+
+        FieldScope field = new TestType(TestClassWithRequiredAnnotatedFields.class).getMemberField(fieldName);
+        //this.fieldConfigPart.isRequired(field);
+
+        Assert.assertEquals(this.fieldConfigPart.isRequired(field), expectedRequired);
+    }
+
+
     Object parametersForTestDescriptionForTypeResolver() {
         return new Object[][]{
-            {"unannotatedField", null},
-            {"fieldWithDescription", null},
-            {"fieldWithDescriptionOnGetter", null},
-            {"fieldWithDescriptionAndOnGetter", null},
-            {"fieldWithDescriptionOnType", "class description text"}
+                {"unannotatedField", null},
+                {"fieldWithDescription", null},
+                {"fieldWithDescriptionOnGetter", null},
+                {"fieldWithDescriptionAndOnGetter", null},
+                {"fieldWithDescriptionOnType", "class description text"}
         };
     }
 
@@ -292,4 +315,16 @@ public class JacksonModuleTest {
             return fieldWithDescriptionAndOnGetter;
         }
     }
+
+    private static class TestClassWithRequiredAnnotatedFields {
+        @JsonProperty(required = true)
+        private String requiredTrue;
+
+        @JsonProperty(required = false)
+        private String requiredFalse;
+
+        private String requiredAbsent;
+
+    }
+
 }
