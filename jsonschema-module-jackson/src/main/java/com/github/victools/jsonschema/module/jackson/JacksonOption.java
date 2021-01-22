@@ -66,6 +66,8 @@ public enum JacksonOption {
     IGNORE_TYPE_INFO_TRANSFORM,
     /**
      * Use this option to include fields annotated with {@code @JsonProperty(required = true)} in the containing type's list of "required" properties.
+     *
+     * @since 4.18.0
      */
     RESPECT_JSONPROPERTY_REQUIRED
 }
