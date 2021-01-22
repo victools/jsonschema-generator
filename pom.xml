@@ -73,6 +73,13 @@
                 <role>Provided PR #156 (port of JavaxValidationModule to JakartaValidationModule and its support in the maven plugin)</role>
             </roles>
         </contributor>
+        <contributor>
+            <name>Jean-Marc Bourdaret</name>
+            <url>https://github.com/jjmbourdaret</url>
+            <roles>
+                <role>Provided PR #163 (introducing support for @JsonProperty(required))</role>
+            </roles>
+        </contributor>
     </contributors>
 
     <distributionManagement>

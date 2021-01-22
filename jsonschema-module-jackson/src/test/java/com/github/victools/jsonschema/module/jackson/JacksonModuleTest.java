@@ -219,6 +219,29 @@ public class JacksonModuleTest {
         Assert.assertEquals(expectedDescription, description);
     }
 
+    Object parametersForTestRequiredProperty() {
+        return new Object[][]{
+            {null, "requiredTrue", false},
+            {null, "requiredFalse", false},
+            {null, "requiredDefault", false},
+            {null, "requiredAbsent", false},
+            {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredTrue", true},
+            {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredFalse", false},
+            {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredDefault", false},
+            {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredAbsent", false}
+        };
+    }
+
+    @Test
+    @Parameters
+    public void testRequiredProperty(JacksonOption requiredOption, String fieldName, boolean expectedRequired) {
+        new JacksonModule(requiredOption).applyToConfigBuilder(this.configBuilder);
+
+        FieldScope field = new TestType(TestClassWithRequiredAnnotatedFields.class).getMemberField(fieldName);
+
+        Assert.assertEquals(this.fieldConfigPart.isRequired(field), expectedRequired);
+    }
+
     Object parametersForTestDescriptionForTypeResolver() {
         return new Object[][]{
             {"unannotatedField", null},
@@ -292,4 +315,19 @@ public class JacksonModuleTest {
             return fieldWithDescriptionAndOnGetter;
         }
     }
+
+    private static class TestClassWithRequiredAnnotatedFields {
+        @JsonProperty(required = true)
+        private String requiredTrue;
+
+        @JsonProperty(required = false)
+        private String requiredFalse;
+
+        @JsonProperty
+        private String requiredDefault;
+
+        private String requiredAbsent;
+
+    }
+
 }
