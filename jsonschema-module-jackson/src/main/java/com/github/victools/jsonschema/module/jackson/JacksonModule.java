@@ -99,7 +99,7 @@ public class JacksonModule implements Module {
         }
 
         if (this.options.contains(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED)) {
-            fieldConfigPart.withRequiredCheck( this::getRequiredCheckBasedOnJsonPropertyAnnotation );
+            fieldConfigPart.withRequiredCheck(this::getRequiredCheckBasedOnJsonPropertyAnnotation);
         }
 
         boolean lookUpSubtypes = !this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP);
@@ -254,17 +254,14 @@ public class JacksonModule implements Module {
     }
 
     /**
-     * Look-up the given field's {@link JsonProperty} annotation and its "required" attribute,  and calculate wether or not this field should be part of the required properties
+     * Look-up the given field's {@link JsonProperty} annotation and consider its "required" attribute.
      *
      * @param field field to look-up required strategy for
      * @return whether the field should be in the "required" list or not
      */
     private boolean getRequiredCheckBasedOnJsonPropertyAnnotation(FieldScope field) {
         JsonProperty jsonProperty = field.getAnnotationConsideringFieldAndGetter(JsonProperty.class) ;
-        if ( jsonProperty == null )
-            return false;
-        else
-            return jsonProperty.required();
+        return jsonProperty != null && jsonProperty.required();
     }
 
 }

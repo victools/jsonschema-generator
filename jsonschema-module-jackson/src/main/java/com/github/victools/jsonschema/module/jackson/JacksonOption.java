@@ -65,8 +65,7 @@ public enum JacksonOption {
      */
     IGNORE_TYPE_INFO_TRANSFORM,
     /**
-     * Use this option to follow the required flag based on {@code @JsonProperty} required attribute
-     * By default, for backward compatibility, the "required" attribute of @JsonProperty is not
+     * Use this option to include fields annotated with {@code @JsonProperty(required = true)} in the containing type's list of "required" properties.
      */
     RESPECT_JSONPROPERTY_REQUIRED
 }
