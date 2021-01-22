@@ -63,5 +63,9 @@ public enum JacksonOption {
     /**
      * Use this option to skip the transformation according to {@code @JsonTypeInfo} annotations (typically used to identify specific subtypes).
      */
-    IGNORE_TYPE_INFO_TRANSFORM;
+    IGNORE_TYPE_INFO_TRANSFORM,
+    /**
+     * Use this option to include fields annotated with {@code @JsonProperty(required = true)} in the containing type's list of "required" properties.
+     */
+    RESPECT_JSONPROPERTY_REQUIRED
 }
