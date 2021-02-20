@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Changed
+- Increase of Jackson dependency version to 2.12.1
+
 ### `jsonschema-module-jackson`
 #### Added
 - New `JacksonOption.RESPECT_JSONPROPERTY_REQUIRED` to set a field as "required" based on `@JsonProperty` annotations
