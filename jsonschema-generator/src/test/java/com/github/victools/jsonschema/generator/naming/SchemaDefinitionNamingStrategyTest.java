@@ -16,13 +16,11 @@
 
 package com.github.victools.jsonschema.generator.naming;
 
-import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy.PropertyNamingStrategyBase;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.TypeContext;
-import com.github.victools.jsonschema.generator.naming.DefaultSchemaDefinitionNamingStrategy;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import com.github.victools.jsonschema.generator.impl.SchemaCleanUpUtils;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
@@ -61,7 +59,7 @@ public class SchemaDefinitionNamingStrategyTest {
     }
 
     public Object[] parametersForTestExampleStrategy() {
-        PropertyNamingStrategyBase jacksonSnakeCase = new PropertyNamingStrategy.SnakeCaseStrategy();
+        NamingBase jacksonSnakeCase = (NamingBase) PropertyNamingStrategies.SNAKE_CASE;
         SchemaDefinitionNamingStrategy snakeCase = new DefaultSchemaDefinitionNamingStrategy() {
             @Override
             public String getDefinitionNameForKey(DefinitionKey key, SchemaGenerationContext generationContext) {
@@ -70,7 +68,7 @@ public class SchemaDefinitionNamingStrategyTest {
                         .replaceAll(", _", ",");
             }
         };
-        PropertyNamingStrategyBase jacksonDotCase = new PropertyNamingStrategy.LowerDotCaseStrategy();
+        NamingBase jacksonDotCase = (NamingBase) PropertyNamingStrategies.LOWER_DOT_CASE;
         SchemaDefinitionNamingStrategy dotCase = new DefaultSchemaDefinitionNamingStrategy() {
             @Override
             public String getDefinitionNameForKey(DefinitionKey key, SchemaGenerationContext generationContext) {

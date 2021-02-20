@@ -19,7 +19,7 @@ package com.github.victools.jsonschema.module.jackson;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.FieldScope;
@@ -265,7 +265,7 @@ public class JacksonModuleTest {
         Assert.assertEquals(expectedDescription, description);
     }
 
-    @JsonNaming(PropertyNamingStrategy.KebabCaseStrategy.class)
+    @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
     private static class TestClassForPropertyNameOverride {
 
         Integer unannotatedField;

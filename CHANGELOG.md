@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - New `JacksonOption.RESPECT_JSONPROPERTY_REQUIRED` to set a field as "required" based on `@JsonProperty` annotations
 
+#### Changed
+- Replace deprecated Jackson API usage, resulting in MINIMUM Jackson version 2.12.0
+
 ## [4.17.0] - 2020-12-24
 ### `jsonschema-module-jakarta-validation`
 #### Added
