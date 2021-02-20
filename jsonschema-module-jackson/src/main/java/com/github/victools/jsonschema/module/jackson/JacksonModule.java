@@ -243,7 +243,7 @@ public class JacksonModule implements Module {
         BeanDescription beanDescription = this.getBeanDescriptionForClass(field.getDeclaringType());
         // some kinds of field ignorals are only available via an annotation introspector
         Set<String> ignoredProperties = this.objectMapper.getSerializationConfig().getAnnotationIntrospector()
-                .findPropertyIgnorals(beanDescription.getClassInfo()).getIgnored();
+                .findPropertyIgnoralByName(null, beanDescription.getClassInfo()).getIgnored();
         String fieldName = field.getName();
         if (ignoredProperties.contains(fieldName)) {
             return true;
