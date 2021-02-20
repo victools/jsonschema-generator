@@ -58,7 +58,7 @@ Enums are a special construct for which there are multiple options:
 1. `Option.FLATTENED_ENUMS` (which is part of the `OptionPreset.PLAIN_JSON`)
    * This defines an enum as `{ "type": "string", "enum": ["VALUE1", "VALUE2"] }` with the `name()` method being called on each possible enum value.
    * If there is only one enum value, it will be set as `"const"` instead.
-   * Such an enum representation will always be in-lined and not moved into the `"definitions"`.
+   * Such an enum representation will always be in-lined and not moved into the `"definitions"`/`"$defs"`.
 2. `Option.SIMPLIFIED_ENUMS`(which is part of the `OptionPreset.JAVA_OBJECT` and `OptionPreset.FULL_DOCUMENTATION`)
    * This treats enums like any other class but hiding some methods and listing the possible enum values as `"enum"`/`"const"` on the `name()` method.
 3. Using neither of the two `Option`s above will let them be handled like any other class (unless there are further configurations taking care of enums).
@@ -134,3 +134,29 @@ The exact details depend on how the `default` value can be determined.
 
 1. If the `default` value is explicitly stated via some kind of annotation, it might be as simple as "Example 1" on the right.
 2. If the `default` value is only set in code, and you cannot or don't want to maintain that piece of information twice this can get a bit more advanced. Here assuming your own classes all have a default no-args constructor and conventional getters as in "Example 2" on the right.
+
+## How to reference a separate schema/file?
+
+```java
+configBuilder.forTypesInGeneral()
+        .withCustomDefinitionProvider((javaType, context) -> {
+            if (javaType.getErasedType() != MyExternalType.class) {
+                // other types should be treated normally
+                return null;
+            }
+            // define your custom reference value
+            String refValue = "./" + javaType.getErasedType().getSimpleName();
+            // produce the sub-schema that only contains your custom reference
+            ObjectNode customNode = context.getGeneratorConfig().createObjectNode()
+                    .put(context.getKeyword(SchemaKeyword.TAG_REF), refValue);
+            return new CustomDefinition(customNode,
+                    // avoid the creation of a reference to your custom reference schema
+                    CustomDefinition.DefinitionType.INLINE,
+                    // still allow for collected schema attributes to be added
+                    CustomDefinition.AttributeInclusion.YES);
+        });
+```
+
+By using `withCustomDefinitionProvider()` – one of the [advanced configurations](#generator-advanced-configurations) – you can fully control the contents of a type's sub-schema.
+Simply create a node that only contains your custom/external reference instead of the actual schema.
+It is recommended to mark the custom definition as "to be inlined", in order to avoid an extra entry in the `"definitions"`/`"$defs"`.
