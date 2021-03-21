@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `jsonschema-generator`
 #### Changed
 - Increase of Jackson dependency version to 2.12.1
+- Include `java.net.URI` in handling of `Option.ADDITIONAL_FIXED_TYPES`.
 
 ### `jsonschema-module-jackson`
 #### Added
