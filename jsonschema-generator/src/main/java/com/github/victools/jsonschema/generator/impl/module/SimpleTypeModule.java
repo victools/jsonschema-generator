@@ -87,6 +87,7 @@ public class SimpleTypeModule implements Module {
                 java.util.Date.class, java.util.Calendar.class)
                 .forEach(javaType -> module.withStringType(javaType, "date-time"));
         module.withStringType(java.util.UUID.class, "uuid");
+        module.withStringType(java.net.URI.class, "uri");
         module.withStringType(java.time.ZoneId.class);
         module.withIntegerType(java.math.BigInteger.class);
 
