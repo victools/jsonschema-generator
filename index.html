@@ -464,6 +464,9 @@
                   <li>
                     <a href="#how-to-populate-default-values" class="toc-h2 toc-link" data-title="How to populate default values?">How to populate <code>default</code> values?</a>
                   </li>
+                  <li>
+                    <a href="#how-to-reference-a-separate-schema-file" class="toc-h2 toc-link" data-title="How to reference a separate schema/file?">How to reference a separate schema/file?</a>
+                  </li>
               </ul>
           </li>
           <li>
@@ -1636,7 +1639,8 @@ In order to reflect Java&#39;s polymorphism, you can make use of the following c
 <li>Override a field&#39;s property name as per <code>@JsonProperty</code> annotations.</li>
 <li>Ignore fields that are marked with a <code>@JsonBackReference</code> annotation.</li>
 <li>Ignore fields that are deemed to be ignored according to various other <code>jackson-annotations</code> (e.g. <code>@JsonIgnore</code>, <code>@JsonIgnoreType</code>, <code>@JsonIgnoreProperties</code>) or are otherwise supposed to be excluded.</li>
-<li>Treat enum types as plain strings as per the <code>@JsonValue</code> annotated method, if there is one and the <code>JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE</code> was provided (i.e. this is an &quot;opt-in&quot;).</li>
+<li>Optionally: set a field as &quot;required&quot; as per <code>@JsonProperty</code> annotations, if the <code>JacksonOption.RESPECT_JSONPROPERTY_REQUIRED</code> was provided (i.e. this is an &quot;opt-in&quot;).</li>
+<li>Optionally: treat enum types as plain strings as per the <code>@JsonValue</code> annotated method, if there is one and the <code>JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE</code> was provided (i.e. this is an &quot;opt-in&quot;).</li>
 <li>Optionally: treat enum types as plain strings, as per each enum constant&#39;s <code>@JsonProperty</code> annotation, if all values of an enum have such annotations and the <code>JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY</code> was provided (i.e. this is an &quot;opt-in&quot;).</li>
 <li>Optionally: sort an object&#39;s properties according to its <code>@JsonPropertyOrder</code> annotation, if the <code>JacksonOption.RESPECT_JSONPROPERTY_ORDER</code> was provided (i.e. this is an &quot;opt-in&quot;).</li>
 <li>Subtype resolution according to <code>@JsonSubTypes</code> on a supertype in general or directly on specific fields/methods as an override of the per-type behavior unless <code>JacksonOption.SKIP_SUBTYPE_LOOKUP</code> was provided (i.e. this is an &quot;opt-out&quot;).</li>
@@ -1932,7 +1936,7 @@ CHeckout https://github.com/victools/jsonschema-gradle-example for the complete 
 <ul>
 <li>This defines an enum as <code>{ &quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;VALUE1&quot;, &quot;VALUE2&quot;] }</code> with the <code>name()</code> method being called on each possible enum value.</li>
 <li>If there is only one enum value, it will be set as <code>&quot;const&quot;</code> instead.</li>
-<li>Such an enum representation will always be in-lined and not moved into the <code>&quot;definitions&quot;</code>.</li>
+<li>Such an enum representation will always be in-lined and not moved into the <code>&quot;definitions&quot;</code>/<code>&quot;$defs&quot;</code>.</li>
 </ul></li>
 <li><code>Option.SIMPLIFIED_ENUMS</code>(which is part of the <code>OptionPreset.JAVA_OBJECT</code> and <code>OptionPreset.FULL_DOCUMENTATION</code>)
 
@@ -2012,6 +2016,27 @@ The exact details depend on how the <code>default</code> value can be determined
 <li>If the <code>default</code> value is explicitly stated via some kind of annotation, it might be as simple as &quot;Example 1&quot; on the right.</li>
 <li>If the <code>default</code> value is only set in code, and you cannot or don&#39;t want to maintain that piece of information twice this can get a bit more advanced. Here assuming your own classes all have a default no-args constructor and conventional getters as in &quot;Example 2&quot; on the right.</li>
 </ol>
+<h2 id='how-to-reference-a-separate-schema-file'>How to reference a separate schema/file?</h2><div class="highlight"><pre class="highlight java tab-java"><code><span class="n">configBuilder</span><span class="o">.</span><span class="na">forTypesInGeneral</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">withCustomDefinitionProvider</span><span class="o">((</span><span class="n">javaType</span><span class="o">,</span> <span class="n">context</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">javaType</span><span class="o">.</span><span class="na">getErasedType</span><span class="o">()</span> <span class="o">!=</span> <span class="nc">MyExternalType</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// other types should be treated normally</span>
+                <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+            <span class="o">}</span>
+            <span class="c1">// define your custom reference value</span>
+            <span class="nc">String</span> <span class="n">refValue</span> <span class="o">=</span> <span class="s">"./"</span> <span class="o">+</span> <span class="n">javaType</span><span class="o">.</span><span class="na">getErasedType</span><span class="o">().</span><span class="na">getSimpleName</span><span class="o">();</span>
+            <span class="c1">// produce the sub-schema that only contains your custom reference</span>
+            <span class="nc">ObjectNode</span> <span class="n">customNode</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="na">getGeneratorConfig</span><span class="o">().</span><span class="na">createObjectNode</span><span class="o">()</span>
+                    <span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">context</span><span class="o">.</span><span class="na">getKeyword</span><span class="o">(</span><span class="nc">SchemaKeyword</span><span class="o">.</span><span class="na">TAG_REF</span><span class="o">),</span> <span class="n">refValue</span><span class="o">);</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="nf">CustomDefinition</span><span class="o">(</span><span class="n">customNode</span><span class="o">,</span>
+                    <span class="c1">// avoid the creation of a reference to your custom reference schema</span>
+                    <span class="nc">CustomDefinition</span><span class="o">.</span><span class="na">DefinitionType</span><span class="o">.</span><span class="na">INLINE</span><span class="o">,</span>
+                    <span class="c1">// still allow for collected schema attributes to be added</span>
+                    <span class="nc">CustomDefinition</span><span class="o">.</span><span class="na">AttributeInclusion</span><span class="o">.</span><span class="na">YES</span><span class="o">);</span>
+        <span class="o">});</span>
+</code></pre></div>
+<p>By using <code>withCustomDefinitionProvider()</code> – one of the <a href="#generator-advanced-configurations">advanced configurations</a> – you can fully control the contents of a type&#39;s sub-schema.
+Simply create a node that only contains your custom/external reference instead of the actual schema.
+It is recommended to mark the custom definition as &quot;to be inlined&quot;, in order to avoid an extra entry in the <code>&quot;definitions&quot;</code>/<code>&quot;$defs&quot;</code>.</p>
 <h1 id='motivation'>Motivation</h1>
 <p>This started out as (and still is) a personal project. After writing Java code professionally for over a decade,
 I am more and more consumed with rather theoretical work in my role as a business analyst and product owner –
