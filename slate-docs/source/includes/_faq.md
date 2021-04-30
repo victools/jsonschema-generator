@@ -67,6 +67,28 @@ Enums are a special construct for which there are multiple options:
    * `JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY`, behaving like `Option.FLATTENED_ENUMS` but looking-up the respective values via the `@JsonProperty` annotation on each enum value/constant.
 5. Write your own custom definition provider or re-use the `EnumModule` class as in the shown example.
 
+## How to always inline enums?
+```java
+class InlineAllEnumsDefinitionProvider implements CustomDefinitionProviderV2 {
+    @Override
+    public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
+        if (javaType.isInstanceOf(Enum.class)) {
+            ObjectNode standardDefinition = context.createStandardDefinition(javaType, this);
+            return new CustomDefinition(standardDefinition,
+                    CustomDefinition.DefinitionType.INLINE,
+                    CustomDefinition.AttributeInclusion.YES);
+        }
+        return null;
+    }
+}
+```
+```java
+configBuilder.forTypesInGeneral()
+        .withCustomDefinitionProvider(new InlineAllEnumsDefinitionProvider())
+```
+If you want to generally avoid that enums are being referenced via the `$defs`/`definitions` (even with active `Option.DEFINITIONS_FOR_ALL_OBJECTS`), a construct like the `InlineAllEnumsDefinitionProvider` on the right can be used.   
+As usual, such a [Custom Type Definition](#custom-type-definitions) can be added via `configBuilder.forTypesInGeneral().withCustomDefinitionProvider()` accordingly.
+
 ## Where can I find some more configuration examples?
 Internally, a number of the standard `Option`s are realized via [Individual Configurations](#generator-individual-configurations) and/or [Advanced Configurations](#generator-advanced-configurations) – grouped into `Module`s.   
 These make for excellent [examples](https://github.com/victools/jsonschema-generator/tree/master/jsonschema-generator/src/main/java/com/github/victools/jsonschema/generator/impl/module) to get you started into your own setup, if the existing `Option`s do not cover your specific requirements.
