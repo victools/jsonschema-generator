@@ -1,0 +1,173 @@
+/*
+ * Copyright 2021 VicTools.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.github.victools.jsonschema.module.jackson;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.victools.jsonschema.generator.Option;
+import com.github.victools.jsonschema.generator.OptionPreset;
+import com.github.victools.jsonschema.generator.SchemaGenerator;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
+import com.networknt.schema.ValidationMessage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.junit.Assert;
+import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+
+/**
+ * Integration test of this module being used in a real SchemaGenerator instance, focusing on the subtype resolution.
+ */
+public class SubtypeResolutionFromInterfaceIntegrationTest {
+
+    @Test
+    public void testIntegration() throws Exception {
+        JacksonModule module = new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE);
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
+                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_FIELDS_BY_DEFAULT)
+                .with(module)
+                .build();
+        SchemaGenerator generator = new SchemaGenerator(config);
+        JsonNode result = generator.generateSchema(TestClassForSubtypeResolution.class);
+
+        String rawJsonSchema = result.toString();
+        JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
+                loadResource("subtype-interface-integration-test-result.json"), rawJsonSchema, JSONCompareMode.STRICT);
+
+        JsonSchema schemaForValidation = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909).getSchema(result);
+        String jsonInstance = config.getObjectMapper().writeValueAsString(new TestClassForSubtypeResolution());
+
+        Set<ValidationMessage> validationResult = schemaForValidation.validate(config.getObjectMapper().readTree(jsonInstance));
+        if (!validationResult.isEmpty()) {
+            Assert.fail("\n" + jsonInstance + "\n  " + validationResult.stream()
+                    .map(ValidationMessage::getMessage)
+                    .collect(Collectors.joining("\n  ")));
+        }
+    }
+
+    private static String loadResource(String resourcePath) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        try (InputStream inputStream = SubtypeResolutionFromInterfaceIntegrationTest.class
+                .getResourceAsStream(resourcePath);
+                Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
+            while (scanner.hasNext()) {
+                stringBuilder.append(scanner.nextLine()).append('\n');
+            }
+        }
+        String fileAsString = stringBuilder.toString();
+        return fileAsString;
+
+    }
+
+    private static class TestClassForSubtypeResolution {
+
+        public TestSuperInterface supertypeWithoutAnnotation;
+        @JsonSubTypes({
+            @JsonSubTypes.Type(value = TestSubClassWithTypeNameAnnotation.class, name = "SpecificSubClass1"),
+            @JsonSubTypes.Type(value = TestSubClass2.class, name = "SpecificSubClass2")
+        })
+        public TestSuperInterface supertypeWithJsonSubTypesAnnotation;
+        @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
+        public TestSuperInterface supertypeAsWrapperArray;
+
+        TestClassForSubtypeResolution() {
+            this.supertypeWithoutAnnotation = new TestSubClassWithTypeNameAnnotation(
+                    new TestSubClass2(new TestSubClass3(null))
+            );
+            this.supertypeWithJsonSubTypesAnnotation = new TestSubClass2(
+                    new TestSubClassWithTypeNameAnnotation(
+                            new TestSubClass2(new TestSubClassWithTypeNameAnnotation()),
+                            new TestSubClass2()
+                    )
+            );
+            this.supertypeAsWrapperArray = new TestSubClass3(
+                    new TestSubClass3(null)
+            );
+        }
+    }
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
+    @JsonSubTypes({
+        @JsonSubTypes.Type(value = TestSubClassWithTypeNameAnnotation.class, name = "SubClass1"),
+        @JsonSubTypes.Type(value = TestSubClass2.class, name = "SubClass2"),
+        @JsonSubTypes.Type(value = TestSubClass3.class, name = "SubClass3")
+    })
+    private interface TestSuperInterface {
+    }
+
+    @JsonTypeName("AnnotatedSubTypeName")
+    private static class TestSubClassWithTypeNameAnnotation implements TestSuperInterface {
+
+        public String typeString;
+        public List<TestSubClass2> directSubClass2;
+
+        TestSubClassWithTypeNameAnnotation(TestSubClass2... directSubClass2) {
+            this.directSubClass2 = Arrays.asList(directSubClass2);
+        }
+    }
+
+    private static class TestSubClass2 implements TestSuperInterface {
+
+        public String typeString;
+        @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "typeString")
+        @JsonSubTypes({
+            @JsonSubTypes.Type(value = TestSubClassWithTypeNameAnnotation.class, name = "Sub1"),
+            @JsonSubTypes.Type(value = TestSubClass3.class, name = "Sub3")
+        })
+        public TestSuperInterface superClassViaExistingProperty;
+
+        public TestSubClass2() {
+            this.superClassViaExistingProperty = null;
+        }
+
+        public TestSubClass2(TestSubClassWithTypeNameAnnotation superClassViaExistingProperty) {
+            this.superClassViaExistingProperty = superClassViaExistingProperty;
+            superClassViaExistingProperty.typeString = "Sub1";
+        }
+
+        public TestSubClass2(TestSubClass3 superClassViaExistingProperty) {
+            this.superClassViaExistingProperty = superClassViaExistingProperty;
+            superClassViaExistingProperty.typeString = "Sub3";
+        }
+    }
+
+    private static class TestSubClass3 implements TestSuperInterface {
+
+        public String typeString;
+        @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+        public TestSubClass3 recursiveSubClass3;
+
+        TestSubClass3(TestSubClass3 recursiveSubClass3) {
+            this.recursiveSubClass3 = recursiveSubClass3;
+        }
+    }
+}
