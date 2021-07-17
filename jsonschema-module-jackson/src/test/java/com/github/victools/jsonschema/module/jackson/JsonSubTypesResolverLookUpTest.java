@@ -57,7 +57,8 @@ public class JsonSubTypesResolverLookUpTest extends AbstractTypeAwareTest {
     public Object[] parametersForTestFindSubtypes() {
         return new Object[][]{
             {JsonSubTypesResolverLookUpTest.class, null},
-            {TestSuperClassWithNameProperty.class, Arrays.asList(TestSubClass1.class, TestSubClass2.class, TestSubClass3.class)}
+            {TestSuperClassWithNameProperty.class, Arrays.asList(TestSubClass1.class, TestSubClass2.class, TestSubClass3.class)},
+            {TestInterfaceWithTypeInfo.class, Arrays.asList(TestSubClass4.class, TestSubClass5.class)}
         };
     }
 
@@ -150,6 +151,14 @@ public class JsonSubTypesResolverLookUpTest extends AbstractTypeAwareTest {
         }
     }
 
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", include = JsonTypeInfo.As.PROPERTY)
+    @JsonSubTypes({
+        @JsonSubTypes.Type(TestSubClass4.class),
+        @JsonSubTypes.Type(TestSubClass5.class)
+    })
+    private interface TestInterfaceWithTypeInfo {
+    }
+
     @JsonTypeName("SUB_CLASS_1")
     private static class TestSubClass1 extends TestSuperClassWithNameProperty {
     }
@@ -160,5 +169,13 @@ public class JsonSubTypesResolverLookUpTest extends AbstractTypeAwareTest {
 
     @JsonTypeName("SUB_CLASS_3")
     private static class TestSubClass3 extends TestSuperClassWithNameProperty {
+    }
+
+    @JsonTypeName("SUB_CLASS_4")
+    private static class TestSubClass4 implements TestInterfaceWithTypeInfo {
+    }
+
+    @JsonTypeName("SUB_CLASS_5")
+    private static class TestSubClass5 implements TestInterfaceWithTypeInfo {
     }
 }

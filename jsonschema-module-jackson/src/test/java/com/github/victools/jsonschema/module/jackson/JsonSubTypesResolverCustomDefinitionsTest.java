@@ -89,29 +89,36 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
 
     public Object[] parametersForTestProvideCustomPropertySchemaDefinitionForField() {
         return new Object[][]{
-            {"supertypeNoAnnotation", null, null},
-            {"supertypeNoAnnotation", TestSubClass1.class, null},
-            {"supertypeNoAnnotation", TestSubClass2.class, null},
-            {"supertypeWithAnnotationOnField", null, null},
-            {"supertypeWithAnnotationOnField", TestSubClass1.class,
+            {"superTypeNoAnnotation", null, null},
+            {"superTypeNoAnnotation", TestSubClass1.class, null},
+            {"superTypeNoAnnotation", TestSubClass2.class, null},
+            {"superTypeWithAnnotationOnField", null, null},
+            {"superTypeWithAnnotationOnField", TestSubClass1.class,
                 "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass1\"}}}]}"},
-            {"supertypeWithAnnotationOnField", TestSubClass2.class,
+            {"superTypeWithAnnotationOnField", TestSubClass2.class,
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"}}}]}"},
-            {"supertypeWithAnnotationOnGetter", null, null},
-            {"supertypeWithAnnotationOnGetter", TestSubClass1.class,
+            {"superTypeWithAnnotationOnGetter", null, null},
+            {"superTypeWithAnnotationOnGetter", TestSubClass1.class,
                 "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}}}]}"},
-            {"supertypeWithAnnotationOnGetter", TestSubClass2.class,
+            {"superTypeWithAnnotationOnGetter", TestSubClass2.class,
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_2\"}}}]}"},
-            {"supertypeWithAnnotationOnFieldAndGetter", null, null},
-            {"supertypeWithAnnotationOnFieldAndGetter", TestSubClass1.class,
+            {"superTypeWithAnnotationOnFieldAndGetter", null, null},
+            {"superTypeWithAnnotationOnFieldAndGetter", TestSubClass1.class,
                 "{\"type\":\"array\",\"items\":[{\"type\":\"string\",\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass1\"},"
                 + "{\"allOf\":[{},{\"title\":\"property attribute\"}]}]}"},
-            {"supertypeWithAnnotationOnFieldAndGetter", TestSubClass2.class,
+            {"superTypeWithAnnotationOnFieldAndGetter", TestSubClass2.class,
                 "{\"type\":\"array\",\"items\":[{\"type\":\"string\",\"const\":"
-                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"},{}]}"}
+                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"},{}]}"},
+            {"superInterfaceWithAnnotationOnField", null, null},
+            {"superInterfaceWithAnnotationOnField", TestSubClass3.class,
+                "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
+                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass3\"}}}]}"},
+            {"superInterfaceWithAnnotationOnField", TestSubClass4.class,
+                "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
+                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass4\"}}}]}"}
         };
     }
 
@@ -129,25 +136,25 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
 
     public Object[] parametersForTestProvideCustomPropertySchemaDefinitionForMethod() {
         return new Object[][]{
-            {"getSupertypeNoAnnotation", null, null},
-            {"getSupertypeNoAnnotation", TestSubClass1.class, null},
-            {"getSupertypeNoAnnotation", TestSubClass2.class, null},
-            {"getSupertypeWithAnnotationOnField", null, null},
-            {"getSupertypeWithAnnotationOnField", TestSubClass1.class,
+            {"getSuperTypeNoAnnotation", null, null},
+            {"getSuperTypeNoAnnotation", TestSubClass1.class, null},
+            {"getSuperTypeNoAnnotation", TestSubClass2.class, null},
+            {"getSuperTypeWithAnnotationOnField", null, null},
+            {"getSuperTypeWithAnnotationOnField", TestSubClass1.class,
                 "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass1\"}}}]}"},
-            {"getSupertypeWithAnnotationOnField", TestSubClass2.class,
+            {"getSuperTypeWithAnnotationOnField", TestSubClass2.class,
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"}}}]}"},
-            {"getSupertypeWithAnnotationOnGetter", null, null},
-            {"getSupertypeWithAnnotationOnGetter", TestSubClass1.class,
+            {"getSuperTypeWithAnnotationOnGetter", null, null},
+            {"getSuperTypeWithAnnotationOnGetter", TestSubClass1.class,
                 "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}}}]}"},
-            {"getSupertypeWithAnnotationOnGetter", TestSubClass2.class,
+            {"getSuperTypeWithAnnotationOnGetter", TestSubClass2.class,
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_2\"}}}]}"},
-            {"getSupertypeWithAnnotationOnFieldAndGetter", null, null},
-            {"getSupertypeWithAnnotationOnFieldAndGetter", TestSubClass1.class,
+            {"getSuperTypeWithAnnotationOnFieldAndGetter", null, null},
+            {"getSuperTypeWithAnnotationOnFieldAndGetter", TestSubClass1.class,
                 "{\"type\":\"object\",\"properties\":{\"SUB_CLASS_1\":{\"allOf\":[{},{\"title\":\"property attribute\"}]}}}"},
-            {"getSupertypeWithAnnotationOnFieldAndGetter", TestSubClass2.class,
+            {"getSuperTypeWithAnnotationOnFieldAndGetter", TestSubClass2.class,
                 "{\"type\":\"object\",\"properties\":{\"SUB_CLASS_2\":{}}}"}
         };
     }
@@ -166,29 +173,31 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
 
     private static class TestClassWithSuperTypeReferences {
 
-        public TestSuperClassWithNameProperty supertypeNoAnnotation;
+        public TestSuperClassWithNameProperty superTypeNoAnnotation;
         @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "fullClass", include = JsonTypeInfo.As.EXISTING_PROPERTY)
-        public TestSuperClassWithNameProperty supertypeWithAnnotationOnField;
-        public TestSuperClassWithNameProperty supertypeWithAnnotationOnGetter;
+        public TestSuperClassWithNameProperty superTypeWithAnnotationOnField;
+        public TestSuperClassWithNameProperty superTypeWithAnnotationOnGetter;
         @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-        public TestSuperClassWithNameProperty supertypeWithAnnotationOnFieldAndGetter;
+        public TestSuperClassWithNameProperty superTypeWithAnnotationOnFieldAndGetter;
+        @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "fullClass", include = JsonTypeInfo.As.PROPERTY)
+        public TestSuperInterface superInterfaceWithAnnotationOnField;
 
-        public TestSuperClassWithNameProperty getSupertypeNoAnnotation() {
-            return this.supertypeNoAnnotation;
+        public TestSuperClassWithNameProperty getSuperTypeNoAnnotation() {
+            return this.superTypeNoAnnotation;
         }
 
-        public TestSuperClassWithNameProperty getSupertypeWithAnnotationOnField() {
-            return this.supertypeWithAnnotationOnField;
+        public TestSuperClassWithNameProperty getSuperTypeWithAnnotationOnField() {
+            return this.superTypeWithAnnotationOnField;
         }
 
         @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
-        public TestSuperClassWithNameProperty getSupertypeWithAnnotationOnGetter() {
-            return this.supertypeWithAnnotationOnGetter;
+        public TestSuperClassWithNameProperty getSuperTypeWithAnnotationOnGetter() {
+            return this.superTypeWithAnnotationOnGetter;
         }
 
         @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
-        public TestSuperClassWithNameProperty getSupertypeWithAnnotationOnFieldAndGetter() {
-            return this.supertypeWithAnnotationOnFieldAndGetter;
+        public TestSuperClassWithNameProperty getSuperTypeWithAnnotationOnFieldAndGetter() {
+            return this.superTypeWithAnnotationOnFieldAndGetter;
         }
     }
 
@@ -208,5 +217,21 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
 
     @JsonTypeName("SUB_CLASS_2")
     private static class TestSubClass2 extends TestSuperClassWithNameProperty {
+    }
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+    @JsonSubTypes({
+        @JsonSubTypes.Type(TestSubClass3.class),
+        @JsonSubTypes.Type(TestSubClass4.class)
+    })
+    private interface TestSuperInterface {
+    }
+
+    @JsonTypeName("SUB_CLASS_3")
+    private static class TestSubClass3 implements TestSuperInterface {
+    }
+
+    @JsonTypeName("SUB_CLASS_4")
+    private static class TestSubClass4 implements TestSuperInterface {
     }
 }

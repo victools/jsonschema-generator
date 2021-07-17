@@ -34,6 +34,7 @@ import com.github.victools.jsonschema.generator.SubtypeResolver;
 import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -109,6 +110,15 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         JsonTypeInfo typeInfoAnnotation;
         do {
             typeInfoAnnotation = targetSuperType.getAnnotation(JsonTypeInfo.class);
+            if (typeInfoAnnotation == null) {
+                // the @JsonTypeInfo annotation may also be present on a common interface rather than a super class
+                // assumption: there are never multiple interfaces with such an annotation on a single class
+                typeInfoAnnotation = Stream.of(targetSuperType.getInterfaces())
+                        .map(superInterface -> superInterface.getAnnotation(JsonTypeInfo.class))
+                        .filter(Objects::nonNull)
+                        .findFirst()
+                        .orElse(null);
+            }
             targetSuperType = targetSuperType.getSuperclass();
         } while (typeInfoAnnotation == null && targetSuperType != null);
 
