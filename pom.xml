@@ -118,7 +118,7 @@
         <version.log4j>2.13.3</version.log4j>
         <version.mockito>2.27.0</version.mockito>
         <version.reflections>0.9.12</version.reflections>
-        <version.slf4j>1.7.31</version.slf4j>
+        <version.slf4j>1.7.32</version.slf4j>
         <version.swagger-1.5>1.5.22</version.swagger-1.5>
         <version.swagger-2>2.1.2</version.swagger-2>
         <version.validator>1.0.36</version.validator>
