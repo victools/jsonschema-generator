@@ -548,9 +548,9 @@ configBuilder.forMethods()
 ## `"writeOnly"` Keyword
 ```java
 configBuilder.forFields()
-    .withRequiredCheck(field -> field.getAnnotationConsideringFieldAndGetter(WriteOnly.class) != null);
+    .withWriteOnlyCheck(field -> field.getAnnotationConsideringFieldAndGetter(WriteOnly.class) != null);
 configBuilder.forMethods()
-    .withRequiredCheck(method -> method.getAnnotationConsideringFieldAndGetter(WriteOnly.class) != null);
+    .withWriteOnlyCheck(method -> method.getAnnotationConsideringFieldAndGetter(WriteOnly.class) != null);
 ```
 
 `withWriteOnlyCheck()` is expecting the indication to be returned whether a given `FieldScope`/`MethodScope` should be included in the `"writeOnly"` attribute – if any check returns `true`, the field/method will be deemed `"writeOnly"`.
