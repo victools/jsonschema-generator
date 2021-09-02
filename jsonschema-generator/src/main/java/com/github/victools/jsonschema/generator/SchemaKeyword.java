@@ -70,6 +70,14 @@ public enum SchemaKeyword {
     TAG_CONST("const"),
     TAG_ENUM("enum"),
     TAG_DEFAULT("default"),
+    /**
+     * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
+     */
+    TAG_READ_ONLY("readOnly"),
+    /**
+     * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
+     */
+    TAG_WRITE_ONLY("writeOnly"),
 
     TAG_LENGTH_MIN("minLength"),
     TAG_LENGTH_MAX("maxLength"),

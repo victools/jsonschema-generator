@@ -46,6 +46,8 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
      */
     private final List<Predicate<M>> ignoreChecks = new ArrayList<>();
     private final List<Predicate<M>> requiredChecks = new ArrayList<>();
+    private final List<Predicate<M>> readOnlyChecks = new ArrayList<>();
+    private final List<Predicate<M>> writeOnlyChecks = new ArrayList<>();
     private final List<ConfigFunction<M, Boolean>> nullableChecks = new ArrayList<>();
 
     /*
@@ -148,6 +150,48 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
      */
     public boolean isRequired(M member) {
         return this.requiredChecks.stream().anyMatch(check -> check.test(member));
+    }
+
+    /**
+     * Setter for read-only check.
+     *
+     * @param check how to determine whether a given reference should be deemed read-only
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorConfigPart<M> withReadOnlyCheck(Predicate<M> check) {
+        this.readOnlyChecks.add(check);
+        return this;
+    }
+
+    /**
+     * Determine whether a given member should be deemed read-only in its declaring type.
+     *
+     * @param member member to check
+     * @return whether the member is read-only (defaults to false)
+     */
+    public boolean isReadOnly(M member) {
+        return this.readOnlyChecks.stream().anyMatch(check -> check.test(member));
+    }
+
+    /**
+     * Setter for write-only check.
+     *
+     * @param check how to determine whether a given reference should be deemed write-only
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorConfigPart<M> withWriteOnlyCheck(Predicate<M> check) {
+        this.writeOnlyChecks.add(check);
+        return this;
+    }
+
+    /**
+     * Determine whether a given member should be deemed write-only in its declaring type.
+     *
+     * @param member member to check
+     * @return whether the member is write-only (defaults to false)
+     */
+    public boolean isWriteOnly(M member) {
+        return this.writeOnlyChecks.stream().anyMatch(check -> check.test(member));
     }
 
     /**

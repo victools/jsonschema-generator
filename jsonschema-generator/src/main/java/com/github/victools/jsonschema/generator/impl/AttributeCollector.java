@@ -74,6 +74,8 @@ public class AttributeCollector {
         collector.setDescription(node, config.resolveDescription(field), generationContext);
         collector.setDefault(node, config.resolveDefault(field), generationContext);
         collector.setEnum(node, config.resolveEnum(field), generationContext);
+        collector.setReadOnly(node, config.isReadOnly(field), generationContext);
+        collector.setWriteOnly(node, config.isWriteOnly(field), generationContext);
         collector.setAdditionalProperties(node, config.resolveAdditionalProperties(field), generationContext);
         collector.setPatternProperties(node, config.resolvePatternProperties(field), generationContext);
         collector.setStringMinLength(node, config.resolveStringMinLength(field), generationContext);
@@ -108,6 +110,8 @@ public class AttributeCollector {
         collector.setDescription(node, config.resolveDescription(method), generationContext);
         collector.setDefault(node, config.resolveDefault(method), generationContext);
         collector.setEnum(node, config.resolveEnum(method), generationContext);
+        collector.setReadOnly(node, config.isReadOnly(method), generationContext);
+        collector.setWriteOnly(node, config.isWriteOnly(method), generationContext);
         collector.setAdditionalProperties(node, config.resolveAdditionalProperties(method), generationContext);
         collector.setPatternProperties(node, config.resolvePatternProperties(method), generationContext);
         collector.setStringMinLength(node, config.resolveStringMinLength(method), generationContext);
@@ -456,6 +460,36 @@ public class AttributeCollector {
             logger.warn("Failed to convert value to string via ObjectMapper: {}", target, ex);
             return false;
         }
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_READ_ONLY}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param readOnly attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setReadOnly(ObjectNode node, boolean readOnly, SchemaGenerationContext generationContext) {
+        if (readOnly) {
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_READ_ONLY), readOnly);
+        }
+        return this;
+    }
+
+    /**
+     * Setter for "{@link SchemaKeyword#TAG_WRITE_ONLY}" attribute.
+     *
+     * @param node schema node to set attribute on
+     * @param writeOnly attribute value to set
+     * @param generationContext generation context, including configuration to apply when looking-up attribute values
+     * @return this instance (for chaining)
+     */
+    public AttributeCollector setWriteOnly(ObjectNode node, boolean writeOnly, SchemaGenerationContext generationContext) {
+        if (writeOnly) {
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_WRITE_ONLY), writeOnly);
+        }
+        return this;
     }
 
     /**

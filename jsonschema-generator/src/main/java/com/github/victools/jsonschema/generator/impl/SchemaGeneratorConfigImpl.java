@@ -303,6 +303,26 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean isReadOnly(FieldScope field) {
+        return this.fieldConfigPart.isReadOnly(field);
+    }
+
+    @Override
+    public boolean isReadOnly(MethodScope method) {
+        return this.methodConfigPart.isReadOnly(method);
+    }
+
+    @Override
+    public boolean isWriteOnly(FieldScope field) {
+        return this.fieldConfigPart.isWriteOnly(field);
+    }
+
+    @Override
+    public boolean isWriteOnly(MethodScope method) {
+        return this.methodConfigPart.isWriteOnly(method);
+    }
+
+    @Override
     public List<ResolvedType> resolveTargetTypeOverrides(FieldScope field) {
         return this.fieldConfigPart.resolveTargetTypeOverrides(field);
     }
