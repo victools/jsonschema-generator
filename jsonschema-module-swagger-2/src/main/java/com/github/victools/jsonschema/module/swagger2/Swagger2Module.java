@@ -75,6 +75,8 @@ public class Swagger2Module implements Module {
         configPart.withTitleResolver(this::resolveTitle);
         configPart.withRequiredCheck(this::checkRequired);
         configPart.withNullableCheck(this::checkNullable);
+        configPart.withReadOnlyCheck(this::checkReadOnly);
+        configPart.withWriteOnlyCheck(this::checkWriteOnly);
         configPart.withEnumResolver(this::resolveEnum);
         configPart.withDefaultResolver(this::resolveDefault);
 
@@ -173,6 +175,28 @@ public class Swagger2Module implements Module {
      */
     protected boolean checkNullable(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::nullable, Boolean.TRUE::equals)
+                .isPresent();
+    }
+
+    /**
+     * Determine whether the given field/method is deemed read-only based on {@code @Schema(accessMode = AccessMode.READ_ONLY)}.
+     *
+     * @param member field/method to check
+     * @return whether the field/method is read-only
+     */
+    protected boolean checkReadOnly(MemberScope<?, ?> member) {
+        return this.getSchemaAnnotationValue(member, Schema::accessMode, Schema.AccessMode.READ_ONLY::equals)
+                .isPresent();
+    }
+
+    /**
+     * Determine whether the given field/method is deemed write-only based on {@code @Schema(accessMode = AccessMode.WRITE_ONLY)}.
+     *
+     * @param member field/method to check
+     * @return whether the field/method is write-only
+     */
+    protected boolean checkWriteOnly(MemberScope<?, ?> member) {
+        return this.getSchemaAnnotationValue(member, Schema::accessMode, Schema.AccessMode.WRITE_ONLY::equals)
                 .isPresent();
     }
 

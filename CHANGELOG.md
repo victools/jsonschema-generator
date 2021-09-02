@@ -5,9 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Added
+- Support `readOnly` and `writeOnly` keywords
+
 ### `jsonschema-module-jackson`
 #### Changed
 - subtype resolution now also respects `@JsonTypeInfo` annotation on common interface (and not just common super class)
+
+### `jsonschema-module-swagger-2`
+#### Added
+- Mark a subschema as `readOnly` or `writeOnly` based on a field or method's `@Schema.accessMode`
 
 ## [4.18.0] - 2021-03-21
 ### `jsonschema-generator`

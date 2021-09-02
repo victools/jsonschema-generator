@@ -82,6 +82,8 @@ public class Swagger2ModuleTest {
         Mockito.verify(configPart).withTitleResolver(Mockito.any());
         Mockito.verify(configPart).withRequiredCheck(Mockito.any());
         Mockito.verify(configPart).withNullableCheck(Mockito.any());
+        Mockito.verify(configPart).withReadOnlyCheck(Mockito.any());
+        Mockito.verify(configPart).withWriteOnlyCheck(Mockito.any());
         Mockito.verify(configPart).withEnumResolver(Mockito.any());
         Mockito.verify(configPart).withDefaultResolver(Mockito.any());
 

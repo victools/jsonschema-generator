@@ -535,6 +535,26 @@ configBuilder.forMethods()
 
 `withRequiredCheck()` is expecting the indication to be returned whether a given `FieldScope`/`MethodScope` should be included in the `"required"` attribute – if any check returns `true`, the field/method will be deemed `"required"`.
 
+## `"readOnly"` Keyword
+```java
+configBuilder.forFields()
+    .withReadOnlyCheck(field -> field.getAnnotationConsideringFieldAndGetter(ReadOnly.class) != null);
+configBuilder.forMethods()
+    .withReadOnlyCheck(method -> method.getAnnotationConsideringFieldAndGetter(ReadOnly.class) != null);
+```
+
+`withReadOnlyCheck()` is expecting the indication to be returned whether a given `FieldScope`/`MethodScope` should be included in the `"readOnly"` attribute – if any check returns `true`, the field/method will be deemed `"readOnly"`.
+
+## `"writeOnly"` Keyword
+```java
+configBuilder.forFields()
+    .withRequiredCheck(field -> field.getAnnotationConsideringFieldAndGetter(WriteOnly.class) != null);
+configBuilder.forMethods()
+    .withRequiredCheck(method -> method.getAnnotationConsideringFieldAndGetter(WriteOnly.class) != null);
+```
+
+`withWriteOnlyCheck()` is expecting the indication to be returned whether a given `FieldScope`/`MethodScope` should be included in the `"writeOnly"` attribute – if any check returns `true`, the field/method will be deemed `"writeOnly"`.
+
 ## `"title"` Keyword
 ```java
 configBuilder.forTypesInGeneral()

@@ -137,10 +137,10 @@ public class IntegrationTest {
 
     static class Foo {
 
-        @Schema(implementation = PersonReference.class)
+        @Schema(implementation = PersonReference.class, accessMode = Schema.AccessMode.WRITE_ONLY)
         private Reference<Person> person;
 
-        @Schema(ref = "http://example.com/bar")
+        @Schema(ref = "http://example.com/bar", accessMode = Schema.AccessMode.READ_ONLY)
         private Object bar;
     }
 }

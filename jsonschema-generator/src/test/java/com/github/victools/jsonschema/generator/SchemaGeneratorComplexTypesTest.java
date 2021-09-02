@@ -93,7 +93,9 @@ public class SchemaGeneratorComplexTypesTest {
         populateTypeConfigPart(configPart, descriptionPrefix);
         configPart
                 .withNullableCheck(member -> !member.getName().startsWith("nested"))
-                .withRequiredCheck(member -> member.getName().startsWith("nested"));
+                .withRequiredCheck(member -> member.getName().startsWith("nested"))
+                .withReadOnlyCheck(member -> member.isFinal())
+                .withWriteOnlyCheck(member -> member.getType() != null && TestClass4.class.isAssignableFrom(member.getType().getErasedType()));
     }
 
     Object parametersForTestGenerateSchema() {

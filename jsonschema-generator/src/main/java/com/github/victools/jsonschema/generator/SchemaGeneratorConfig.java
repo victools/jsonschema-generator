@@ -259,6 +259,38 @@ public interface SchemaGeneratorConfig {
     boolean isRequired(MethodScope method);
 
     /**
+     * Check whether a field/property value is deemed read-only, i.e., may be ignored or rejected when included in a request.
+     *
+     * @param field object's field/property to check
+     * @return whether the field/property value should be read-only
+     */
+    boolean isReadOnly(FieldScope field);
+
+    /**
+     * Check whether a method value is deemed read-only, i.e., may be ignored or rejected when included in a request.
+     *
+     * @param method method to check
+     * @return whether the method value should be read-only
+     */
+    boolean isReadOnly(MethodScope method);
+
+    /**
+     * Check whether a field/property value is deemed write-only, i.e., is not being returned in responses.
+     *
+     * @param field object's field/property to check
+     * @return whether the field/property value should be write-only
+     */
+    boolean isWriteOnly(FieldScope field);
+
+    /**
+     * Check whether a method value is deemed write-only, i.e., is not being returned in responses.
+     *
+     * @param method method to check
+     * @return whether the method value should be write-only
+     */
+    boolean isWriteOnly(MethodScope method);
+
+    /**
      * Check whether a field/property should be ignored.
      *
      * @param field object's field/property to check
