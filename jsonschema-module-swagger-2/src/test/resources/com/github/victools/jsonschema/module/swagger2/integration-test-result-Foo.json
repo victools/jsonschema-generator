@@ -16,10 +16,12 @@
     "type": "object",
     "properties": {
         "bar": {
-            "$ref": "http://example.com/bar"
+            "$ref": "http://example.com/bar",
+            "readOnly": true
         },
         "person": {
-            "$ref": "#/$defs/referenceToPerson"
+            "$ref": "#/$defs/referenceToPerson",
+            "writeOnly": true
         }
     }
 }
