@@ -131,6 +131,15 @@ public interface SchemaGeneratorConfig {
     boolean shouldRepresentSingleAllowedValueAsConst();
 
     /**
+     * Determine whether "fake" container/array items should be subject to the same nullable checks as the actual declared member type.
+     *
+     * @return whether to perform nullable checks for "fake" container/array item typees
+     *
+     * @since 4.20.0
+     */
+    boolean shouldAllowNullableArrayItems();
+
+    /**
      * Getter for the underlying object mapper.
      *
      * @return object mapper being used for generating JSON Schema structure

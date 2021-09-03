@@ -155,6 +155,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldAllowNullableArrayItems() {
+        return this.isOptionEnabled(Option.ALLOW_NULLABLE_ARRAY_ITEMS);
+    }
+
+    @Override
     public boolean shouldIncludeSchemaVersionIndicator() {
         return this.isOptionEnabled(Option.SCHEMA_VERSION_INDICATOR);
     }

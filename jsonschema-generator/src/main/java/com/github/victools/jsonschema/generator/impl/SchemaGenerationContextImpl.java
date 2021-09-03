@@ -569,7 +569,9 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                     .collect(Collectors.toList());
         }
         // consider declared type (instead of overridden one) for determining null-ability
-        boolean isNullable = !field.getRawMember().isEnumConstant() && !field.isFakeContainerItemScope() && this.generatorConfig.isNullable(field);
+        boolean isNullable = !field.getRawMember().isEnumConstant()
+                && (!field.isFakeContainerItemScope() || this.generatorConfig.shouldAllowNullableArrayItems())
+                && this.generatorConfig.isNullable(field);
         if (fieldOptions.size() == 1) {
             return this.createFieldSchema(fieldOptions.get(0), isNullable, false, null);
         }
@@ -649,7 +651,8 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         }
         // consider declared type (instead of overridden one) for determining null-ability
         boolean isNullable = method.isVoid()
-                || !method.isFakeContainerItemScope() && this.generatorConfig.isNullable(method);
+                || (!method.isFakeContainerItemScope() || this.generatorConfig.shouldAllowNullableArrayItems())
+                && this.generatorConfig.isNullable(method);
         if (methodOptions.size() == 1) {
             return this.createMethodSchema(methodOptions.get(0), isNullable, false, null);
         }
