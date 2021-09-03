@@ -24,7 +24,7 @@
             "maxItems": 20,
             "type": "array",
             "items": {
-                "type": "boolean",
+                "type": ["boolean", "null"],
                 "default": "true"
             }
         }
