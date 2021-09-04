@@ -204,7 +204,7 @@ public enum Option {
      *
      * @since 4.20.0
      */
-    ALLOW_NULLABLE_ARRAY_ITEMS(null, null),
+    NULLABLE_ARRAY_ITEMS_ALLOWED(null, null),
     /**
      * Whether methods that do not expect any arguments, should be treated as fields: i.e. renaming the property.
      */
