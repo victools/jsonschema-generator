@@ -196,6 +196,16 @@ public enum Option {
      */
     NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT(null, null),
     /**
+     * Whether a container/collection/array item should be subject to the standard nullable checks.
+     * <br>
+     * Without this option, no null values are allowed in any array.
+     * <br>
+     * Beware: with this option enabled, all nullable checks may need to consider the field/method's {@code isFakeContainerItemScope()} indication.
+     *
+     * @since 4.20.0
+     */
+    NULLABLE_ARRAY_ITEMS_ALLOWED(null, null),
+    /**
      * Whether methods that do not expect any arguments, should be treated as fields: i.e. renaming the property.
      */
     FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS(null, null),

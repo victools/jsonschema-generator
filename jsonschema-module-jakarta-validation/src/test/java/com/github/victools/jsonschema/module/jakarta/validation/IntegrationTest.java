@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.module.jakarta.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
@@ -61,6 +62,7 @@ public class IntegrationTest {
                 JakartaValidationOption.NOT_NULLABLE_METHOD_IS_REQUIRED,
                 JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS);
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
+                .with(Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
                 .with(module)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);

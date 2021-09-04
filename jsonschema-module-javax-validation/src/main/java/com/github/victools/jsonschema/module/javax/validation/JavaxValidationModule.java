@@ -186,7 +186,10 @@ public class JavaxValidationModule implements Module {
      */
     protected Boolean isNullable(MemberScope<?, ?> member) {
         Boolean result;
-        if (this.getAnnotationFromFieldOrGetter(member, NotNull.class, NotNull::groups) != null
+        if (member.isFakeContainerItemScope()) {
+            // annotations on the field/method are assumed to refer to the surrounding container
+            result = null;
+        } else if (this.getAnnotationFromFieldOrGetter(member, NotNull.class, NotNull::groups) != null
                 || this.getAnnotationFromFieldOrGetter(member, NotBlank.class, NotBlank::groups) != null
                 || this.getAnnotationFromFieldOrGetter(member, NotEmpty.class, NotEmpty::groups) != null) {
             // field is specifically NOT nullable

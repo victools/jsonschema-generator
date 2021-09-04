@@ -60,7 +60,7 @@ public class IntegrationTest {
     public void testIntegration(Class<?> rawTargetType) throws Exception {
         Swagger2Module module = new Swagger2Module();
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
-                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS)
+                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
                 .with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
                 .with(module);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
@@ -92,7 +92,7 @@ public class IntegrationTest {
         public Object hiddenField;
 
         @ArraySchema(arraySchema = @Schema(name = "fieldWithOverriddenName", required = true),
-                schema = @Schema(defaultValue = "true"), minItems = 1, maxItems = 20)
+                schema = @Schema(defaultValue = "true", nullable = true), minItems = 1, maxItems = 20)
         public List<Boolean> originalFieldName;
 
         @Schema(description = "field description", nullable = true, allowableValues = {"A", "B", "C", "D"}, minLength = 1, maxLength = 1)

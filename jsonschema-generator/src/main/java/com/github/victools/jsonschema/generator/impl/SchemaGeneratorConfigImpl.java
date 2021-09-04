@@ -155,6 +155,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldAllowNullableArrayItems() {
+        return this.isOptionEnabled(Option.NULLABLE_ARRAY_ITEMS_ALLOWED);
+    }
+
+    @Override
     public boolean shouldIncludeSchemaVersionIndicator() {
         return this.isOptionEnabled(Option.SCHEMA_VERSION_INDICATOR);
     }
@@ -273,13 +278,13 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public boolean isNullable(FieldScope field) {
         return Optional.ofNullable(this.fieldConfigPart.isNullable(field))
-                .orElseGet(() -> this.isOptionEnabled(Option.NULLABLE_FIELDS_BY_DEFAULT));
+                .orElseGet(() -> !field.isFakeContainerItemScope() && this.isOptionEnabled(Option.NULLABLE_FIELDS_BY_DEFAULT));
     }
 
     @Override
     public boolean isNullable(MethodScope method) {
         return Optional.ofNullable(this.methodConfigPart.isNullable(method))
-                .orElseGet(() -> this.isOptionEnabled(Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT));
+                .orElseGet(() -> !method.isFakeContainerItemScope() && this.isOptionEnabled(Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT));
     }
 
     @Override

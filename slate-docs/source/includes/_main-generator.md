@@ -204,7 +204,7 @@ configBuilder.without(
       <td colspan="2"><code>Option.NULLABLE_FIELDS_BY_DEFAULT</code></td>
     </tr>
     <tr>
-      <td>The schema <code>type</code> for a field allows <code>null</code> by default unless some configuration specifically says it is not null-able</td>
+      <td>The schema <code>type</code> for a field allows <code>null</code> by default unless some configuration specifically says it is not null-able.</td>
       <td>The schema <code>type</code> for a field does not allow for <code>null</code> by default unless some configuration specifically says it is null-able.</td>
     </tr>
     <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
@@ -213,27 +213,35 @@ configBuilder.without(
       <td colspan="2"><code>Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT</code></td>
     </tr>
     <tr>
-      <td>The schema <code>type</code> for a method's return type allows <code>null</code> by default unless some configuration specifically says it is not null-able</td>
+      <td>The schema <code>type</code> for a method's return type allows <code>null</code> by default unless some configuration specifically says it is not null-able.</td>
       <td>The schema <code>type</code> for a method's return type does not allow for <code>null</code> by default unless some configuration specifically says it is null-able.</td>
     </tr>
     <tr>
       <td rowspan="2" style="text-align: right">22</td>
-      <td colspan="2"><code>Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS</code></td>
+      <td colspan="2"><code>Option.NULLABLE_ARRAY ITEMS_ALLOWED</code></td>
     </tr>
     <tr>
-      <td>Include argument-free methods as fields, e.g. the return type of <code>getName()</code> will be included as <code>name</code> field</td>
-      <td>Argument-free methods will be included with the appended parentheses.</td>
+      <td>The schema <code>type</code> for the items in an array (in case of a field's value or method's return value being a container/array) allows <code>null</code>, if the corresponding configuration explicitly says so. Otherwise, they're still deemed not null-able by default.</td>
+      <td>The schema <code>type</code> for the items in an array (in case of a field's value or method's return value being a container/array) never allows <code>null</code>.</td>
     </tr>
     <tr>
       <td rowspan="2" style="text-align: right">23</td>
-      <td colspan="2"><code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code></td>
+      <td colspan="2"><code>Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS</code></td>
     </tr>
     <tr>
-      <td>Setting the <code>additionalProperties</code> attribute in each <code>Map<K, V></code> to a schema representing the declared value type <code>V</code></td>
-      <td>Omitting the <code>additionalProperties</code> attribute in <code>Map<K, V></code> schemas by default (thereby allowing additional properties of any type) unless some configuration specifically says something else.</td>
+      <td>Include argument-free methods as fields, e.g. the return type of <code>getName()</code> will be included as <code>name</code> field.</td>
+      <td>Argument-free methods will be included with the appended parentheses.</td>
     </tr>
     <tr>
       <td rowspan="2" style="text-align: right">24</td>
+      <td colspan="2"><code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code></td>
+    </tr>
+    <tr>
+      <td>Setting the <code>additionalProperties</code> attribute in each <code>Map<K, V></code> to a schema representing the declared value type <code>V</code>.</td>
+      <td>Omitting the <code>additionalProperties</code> attribute in <code>Map<K, V></code> schemas by default (thereby allowing additional properties of any type) unless some configuration specifically says something else.</td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="text-align: right">25</td>
       <td colspan="2"><code>Option.ENUM_KEYWORD_FOR_SINGLE_VALUES</code></td>
     </tr>
     <tr>
@@ -242,7 +250,7 @@ configBuilder.without(
     </tr>
     <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">25</td>
+      <td rowspan="2" style="text-align: right">26</td>
       <td colspan="2"><code>Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</code></td>
     </tr>
     <tr>
@@ -250,7 +258,7 @@ configBuilder.without(
       <td>Omitting the <code>additionalProperties</code> attribute in all object schemas by default (thereby allowing any additional properties) unless some configuration specifically says something else.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">26</td>
+      <td rowspan="2" style="text-align: right">27</td>
       <td colspan="2"><code>Option.DEFINITIONS_FOR_ALL_OBJECTS</code></td>
     </tr>
     <tr>
@@ -258,7 +266,7 @@ configBuilder.without(
       <td>Only include those entries in the <code>$defs</code>/<code>definitions</code> for object types that are referenced more than once and which are not explicitly declared as "inline" via a custom definition.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">27</td>
+      <td rowspan="2" style="text-align: right">28</td>
       <td colspan="2"><code>Option.DEFINITION_FOR_MAIN_SCHEMA</code></td>
     </tr>
     <tr>
@@ -266,7 +274,7 @@ configBuilder.without(
       <td>Define the main/target type "inline".</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">28</td>
+      <td rowspan="2" style="text-align: right">29</td>
       <td colspan="2"><code>Option.INLINE_ALL_SCHEMAS</code></td>
     </tr>
     <tr>
@@ -275,7 +283,7 @@ configBuilder.without(
     </tr>
     <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">29</td>
+      <td rowspan="2" style="text-align: right">30</td>
       <td colspan="2"><code>Option.PLAIN_DEFINITION_KEYS</code></td>
     </tr>
     <tr>
@@ -283,7 +291,7 @@ configBuilder.without(
       <td>Ensure that the keys for any <code>$defs</code>/<code>definitions</code> are URI compatible (as expected by the JSON Schema specification).</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">30</td>
+      <td rowspan="2" style="text-align: right">31</td>
       <td colspan="2"><code>Option.ALLOF_CLEANUP_AT_THE_END</code></td>
     </tr>
     <tr>
@@ -322,15 +330,16 @@ Below, you can find the lists of <code>Option</code>s included/excluded in the r
 | 19 | `NONSTATIC_NONVOID_NONGETTER_METHODS` | ✅ | ✅ | ⬜️ |
 | 20 | `NULLABLE_FIELDS_BY_DEFAULT` | ✅ | ⬜️ | ⬜️ |
 | 21 | `NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT` | ✅ | ⬜️ | ⬜️ |
-| 22 | `FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS` | ⬜️ | ⬜️ | ⬜️ |
-| 23 | `MAP_VALUES_AS_ADDITIONAL_PROPERTIES` | ⬜️ | ⬜️ | ⬜️ |
-| 24 | `ENUM_KEYWORD_FOR_SINGLE_VALUES` | ⬜️ | ⬜️ | ⬜️ |
-| 25 | `FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` | ⬜️ | ⬜️ | ⬜️ |
-| 26 | `DEFINITIONS_FOR_ALL_OBJECTS` | ⬜️ | ⬜️ | ⬜️ |
-| 27 | `DEFINITION_FOR_MAIN_SCHEMA` | ⬜️ | ⬜️ | ⬜️ |
-| 28 | `INLINE_ALL_SCHEMAS` | ⬜️ | ⬜️ | ⬜️ |
-| 29 | `PLAIN_DEFINITION_KEYS` | ⬜️ | ⬜️ | ⬜️ |
-| 30 | `ALLOF_CLEANUP_AT_THE_END` | ✅ | ✅ | ✅ |
+| 22 | `NULLABLE_ARRAY_ITEMS_ALLOWED` | ⬜️ | ⬜️ | ⬜️ |
+| 23 | `FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS` | ⬜️ | ⬜️ | ⬜️ |
+| 24 | `MAP_VALUES_AS_ADDITIONAL_PROPERTIES` | ⬜️ | ⬜️ | ⬜️ |
+| 25 | `ENUM_KEYWORD_FOR_SINGLE_VALUES` | ⬜️ | ⬜️ | ⬜️ |
+| 26 | `FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` | ⬜️ | ⬜️ | ⬜️ |
+| 27| `DEFINITIONS_FOR_ALL_OBJECTS` | ⬜️ | ⬜️ | ⬜️ |
+| 28 | `DEFINITION_FOR_MAIN_SCHEMA` | ⬜️ | ⬜️ | ⬜️ |
+| 29 | `INLINE_ALL_SCHEMAS` | ⬜️ | ⬜️ | ⬜️ |
+| 30 | `PLAIN_DEFINITION_KEYS` | ⬜️ | ⬜️ | ⬜️ |
+| 31 | `ALLOF_CLEANUP_AT_THE_END` | ✅ | ✅ | ✅ |
 
 # Generator – Modules
 Similar to an `OptionPreset` being a short-cut to including various `Option`s, the concept of `Module`s is a convenient way of including multiple [individual configurations](#generator-individual-configurations) or even [advanced configurations](#generator-advanced-configurations) (as per the following sections) at once.
