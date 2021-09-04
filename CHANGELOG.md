@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Added
+- Support for `null` values in collections/containers/arrays
+- New opt-in `Option.NULLABLE_ARRAY_ITEMS_ALLOWED` for enabling the respective "NullableCheck" to be considered for items in a field's array value or a method' array return value
+
+### `jsonschema-module-swagger-2`
+#### Added
+- Consider `@ArraySchema(schema = @Schema(nullable = true))` if the new `Option.NULLABLE_ARRAY_ITEMS_ALLOWED` is enabled
 
 ## [4.19.0] - 2021-09-02
 ### `jsonschema-generator`
