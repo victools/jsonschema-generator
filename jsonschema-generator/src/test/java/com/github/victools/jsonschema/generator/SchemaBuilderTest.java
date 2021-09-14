@@ -36,12 +36,12 @@ public class SchemaBuilderTest {
         this.config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(Option.PLAIN_DEFINITION_KEYS)
                 .build();
-        this.typeContext = TypeContextFactory.createDefaultTypeContext();
     }
 
     @Test
     public void testMultiTypeSchemaGeneration() throws Exception {
-        SchemaBuilder instance = SchemaBuilder.forMultipleTypes(this.config, this.typeContext);
+        SchemaGenerator generator = new SchemaGenerator(this.config);
+        SchemaBuilder instance = generator.buildMultipleSchemaDefinitions();
 
         ObjectNode result = this.config.createObjectNode();
         result.put("openapi", "3.0.0");
