@@ -50,7 +50,7 @@ public class SchemaBuilder {
      * @param typeParameters optional type parameters (in case of the {@code mainTargetType} being a parameterised type)
      * @return generated JSON Schema
      */
-    static ObjectNode createSingleTypeSchema(SchemaGeneratorConfig config, TypeContext typeContext,
+    public static ObjectNode createSingleTypeSchema(SchemaGeneratorConfig config, TypeContext typeContext,
             Type mainTargetType, Type... typeParameters) {
         SchemaBuilder instance = new SchemaBuilder(config, typeContext);
         return instance.createSchemaForSingleType(mainTargetType, typeParameters);
@@ -65,7 +65,7 @@ public class SchemaBuilder {
      * @see #createSchemaReference(Type, Type...) : adding a single type to the builder instance
      * @see #collectDefinitions(String) : generate an {@link ObjectNode} listing the common schema definitions
      */
-    static SchemaBuilder forMultipleTypes(SchemaGeneratorConfig config, TypeContext typeContext) {
+    public static SchemaBuilder forMultipleTypes(SchemaGeneratorConfig config, TypeContext typeContext) {
         return new SchemaBuilder(config, typeContext);
     }
 
