@@ -86,6 +86,7 @@ public class JacksonModule implements Module {
         this.applyToConfigBuilderPart(methodConfigPart);
 
         fieldConfigPart.withIgnoreCheck(this::shouldIgnoreField);
+        methodConfigPart.withIgnoreCheck(this::shouldIgnoreMethod);
         if (!this.options.contains(JacksonOption.IGNORE_PROPERTY_NAMING_STRATEGY)) {
             // only consider @JsonNaming as fall-back
             fieldConfigPart.withPropertyNameOverrideResolver(this::getPropertyNameOverrideBasedOnJsonNamingAnnotation);
@@ -267,6 +268,26 @@ public class JacksonModule implements Module {
         // other kinds of field ignorals are handled implicitly, i.e. are only available by way of being absent
         return beanDescription.findProperties().stream()
                 .noneMatch(propertyDefinition -> fieldName.equals(propertyDefinition.getInternalName()));
+    }
+
+    /**
+     * Determine whether a given method should be ignored, according to various jackson annotations for that purpose,
+     * <br>
+     * e.g. {@code JsonBackReference}, {@code JsonIgnore}, {@code JsonIgnoreType}, {@code JsonIgnoreProperties}
+     *
+     * @param method method to check
+     * @return whether method should be excluded
+     */
+    protected boolean shouldIgnoreMethod(MethodScope method) {
+        FieldScope getterField = method.findGetterField();
+        if (getterField != null && this.shouldIgnoreField(getterField)) {
+            return true;
+        }
+        if (getterField == null && method.getAnnotationConsideringFieldAndGetterIfSupported(JsonBackReference.class) != null) {
+            return true;
+        }
+        return !this.options.contains(JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS)
+                || method.getAnnotationConsideringFieldAndGetter(JsonProperty.class) != null;
     }
 
     /**

@@ -53,6 +53,15 @@ public enum JacksonOption {
      */
     RESPECT_JSONPROPERTY_ORDER,
     /**
+     * Use this option to ignore all methods that don't have a {@link com.fasterxml.jackson.annotation.JsonProperty JsonProperty} annotation
+     * themselves or in case of getter methods on their associated field. When including non-getter methods with annotated property names, you'll
+     * probably want to enable the general {@code Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS} as well, in order to avoid parentheses at the end.
+     *
+     * @see com.github.victools.jsonschema.generator.Option#FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS
+     * @since 4.21.0
+     */
+    INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS,
+    /**
      * Use this option to skip property name changes according to {@link com.fasterxml.jackson.databind.annotation.JsonNaming JsonNaming} annotations.
      */
     IGNORE_PROPERTY_NAMING_STRATEGY,
