@@ -80,7 +80,6 @@ public class JacksonModule implements Module {
         this.objectMapper = builder.getObjectMapper();
         SchemaGeneratorConfigPart<FieldScope> fieldConfigPart = builder.forFields();
         SchemaGeneratorConfigPart<MethodScope> methodConfigPart = builder.forMethods();
-        SchemaGeneratorGeneralConfigPart generalConfigPart = builder.forTypesInGeneral();
 
         this.applyToConfigBuilderPart(fieldConfigPart);
         this.applyToConfigBuilderPart(methodConfigPart);
@@ -92,6 +91,7 @@ public class JacksonModule implements Module {
             fieldConfigPart.withPropertyNameOverrideResolver(this::getPropertyNameOverrideBasedOnJsonNamingAnnotation);
         }
 
+        SchemaGeneratorGeneralConfigPart generalConfigPart = builder.forTypesInGeneral();
         generalConfigPart.withDescriptionResolver(this::resolveDescriptionForType);
 
         boolean considerEnumJsonValue = this.options.contains(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE);
@@ -286,8 +286,8 @@ public class JacksonModule implements Module {
         if (getterField == null && method.getAnnotationConsideringFieldAndGetterIfSupported(JsonBackReference.class) != null) {
             return true;
         }
-        return !this.options.contains(JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS)
-                || method.getAnnotationConsideringFieldAndGetter(JsonProperty.class) != null;
+        return this.options.contains(JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS)
+                && method.getAnnotationConsideringFieldAndGetter(JsonProperty.class) == null;
     }
 
     /**

@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### `jsonschema-module-jackson`
 #### Added
-- Consider `@JsonProperty.name` override for methods
-- Look-up `"description"` for methods (if included) based on `@JsonProperty.description`
+- Consider `@JsonProperty.value` override for methods
+- Look-up `"description"` for methods (if included) based on `@JsonPropertyDescription`
 - Consider `@JsonProperty(access = Access.READ_ONLY)` when determining whether a field/method should be marked as `readOnly`
 - Consider `@JsonProperty(access = Access.WRITE_ONLY)` when determining whether a field/method should be marked as `writeOnly`
 - Introduce `JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS` to enable easy inclusion of annotated non-getter methods (typically in combination with the general `Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS` and `Option.NONSTATIC_NONVOID_NONGETTER_METHODS`)
