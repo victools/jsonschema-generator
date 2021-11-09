@@ -64,6 +64,7 @@
             <url>https://github.com/jochenberger</url>
             <roles>
                 <role>Provided PRs #116 and #118 (part of initial Swagger2Module)</role>
+                <role>Provided implementation for #204 (readOnly/writeOnly in JacksonModule)</role>
             </roles>
         </contributor>
         <contributor>
