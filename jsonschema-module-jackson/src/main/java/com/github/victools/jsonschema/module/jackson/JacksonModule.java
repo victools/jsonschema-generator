@@ -128,6 +128,8 @@ public class JacksonModule implements Module {
     private void applyToConfigBuilderPart(SchemaGeneratorConfigPart<?> configPart) {
         configPart.withDescriptionResolver(this::resolveDescription);
         configPart.withPropertyNameOverrideResolver(this::getPropertyNameOverrideBasedOnJsonPropertyAnnotation);
+        configPart.withReadOnlyCheck(this::getReadOnlyCheck);
+        configPart.withWriteOnlyCheck(this::getWriteOnlyCheck);
 
         if (this.options.contains(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED)) {
             configPart.withRequiredCheck(this::getRequiredCheckBasedOnJsonPropertyAnnotation);
@@ -278,4 +280,25 @@ public class JacksonModule implements Module {
         return jsonProperty != null && jsonProperty.required();
     }
 
+    /**
+     * Determine whether the given field's/method's {@link JsonProperty} annotation marks it as read-only.
+     *
+     * @param member field/method to check read-only status for
+     * @return whether the field should be marked as read-only
+     */
+    protected boolean getReadOnlyCheck(MemberScope<?, ?> member) {
+        JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetter(JsonProperty.class);
+        return jsonProperty != null && jsonProperty.access() == JsonProperty.Access.READ_ONLY;
+    }
+
+    /**
+     * Determine whether the given field's/method's {@link JsonProperty} annotation marks it as write-only.
+     *
+     * @param member field/method to check write-only status for
+     * @return whether the field should be marked as write-only
+     */
+    protected boolean getWriteOnlyCheck(MemberScope<?, ?> member) {
+        JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetter(JsonProperty.class);
+        return jsonProperty != null && jsonProperty.access() == JsonProperty.Access.WRITE_ONLY;
+    }
 }
