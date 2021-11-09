@@ -5,6 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-module-jackson`
+#### Added
+- Consider `@JsonProperty.value` override for methods
+- Look-up `"description"` for methods (if included) based on `@JsonPropertyDescription`
+- Consider `@JsonProperty(access = Access.READ_ONLY)` when determining whether a field/method should be marked as `readOnly`
+- Consider `@JsonProperty(access = Access.WRITE_ONLY)` when determining whether a field/method should be marked as `writeOnly`
+- Introduce `JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS` to enable easy inclusion of annotated non-getter methods (typically in combination with the general `Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS` and `Option.NONSTATIC_NONVOID_NONGETTER_METHODS`)
+
+#### Changed
+- Ignore getter methods when their associated field is being ignored (according to various Jackson annotations)
+- Ignore methods when they or their associated field are marked as `@JsonBackReference`
 
 ## [4.20.0] - 2021-09-04
 ### `jsonschema-generator`

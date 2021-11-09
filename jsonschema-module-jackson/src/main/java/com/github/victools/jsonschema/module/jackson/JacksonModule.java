@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.github.victools.jsonschema.generator.FieldScope;
+import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
@@ -78,15 +79,20 @@ public class JacksonModule implements Module {
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         this.objectMapper = builder.getObjectMapper();
         SchemaGeneratorConfigPart<FieldScope> fieldConfigPart = builder.forFields();
-        fieldConfigPart.withDescriptionResolver(this::resolveDescription)
-                .withPropertyNameOverrideResolver(this::getPropertyNameOverrideBasedOnJsonPropertyAnnotation)
-                .withIgnoreCheck(this::shouldIgnoreField);
-        SchemaGeneratorGeneralConfigPart generalConfigPart = builder.forTypesInGeneral();
-        generalConfigPart.withDescriptionResolver(this::resolveDescriptionForType);
+        SchemaGeneratorConfigPart<MethodScope> methodConfigPart = builder.forMethods();
 
+        this.applyToConfigBuilderPart(fieldConfigPart);
+        this.applyToConfigBuilderPart(methodConfigPart);
+
+        fieldConfigPart.withIgnoreCheck(this::shouldIgnoreField);
+        methodConfigPart.withIgnoreCheck(this::shouldIgnoreMethod);
         if (!this.options.contains(JacksonOption.IGNORE_PROPERTY_NAMING_STRATEGY)) {
+            // only consider @JsonNaming as fall-back
             fieldConfigPart.withPropertyNameOverrideResolver(this::getPropertyNameOverrideBasedOnJsonNamingAnnotation);
         }
+
+        SchemaGeneratorGeneralConfigPart generalConfigPart = builder.forTypesInGeneral();
+        generalConfigPart.withDescriptionResolver(this::resolveDescriptionForType);
 
         boolean considerEnumJsonValue = this.options.contains(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE);
         boolean considerEnumJsonProperty = this.options.contains(JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY);
@@ -98,15 +104,10 @@ public class JacksonModule implements Module {
             generalConfigPart.withPropertySorter(new JsonPropertySorter(true));
         }
 
-        if (this.options.contains(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED)) {
-            fieldConfigPart.withRequiredCheck(this::getRequiredCheckBasedOnJsonPropertyAnnotation);
-        }
-
         boolean lookUpSubtypes = !this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP);
         boolean includeTypeInfoTransform = !this.options.contains(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM);
         if (lookUpSubtypes || includeTypeInfoTransform) {
             JsonSubTypesResolver subtypeResolver = new JsonSubTypesResolver();
-            SchemaGeneratorConfigPart<MethodScope> methodConfigPart = builder.forMethods();
             if (lookUpSubtypes) {
                 generalConfigPart.withSubtypeResolver(subtypeResolver);
                 fieldConfigPart.withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides);
@@ -121,18 +122,34 @@ public class JacksonModule implements Module {
     }
 
     /**
-     * Determine the given type's associated "description" in the following order of priority.
+     * Apply common member configurations.
+     *
+     * @param configPart config builder part for either fields or methods
+     */
+    private void applyToConfigBuilderPart(SchemaGeneratorConfigPart<?> configPart) {
+        configPart.withDescriptionResolver(this::resolveDescription);
+        configPart.withPropertyNameOverrideResolver(this::getPropertyNameOverrideBasedOnJsonPropertyAnnotation);
+        configPart.withReadOnlyCheck(this::getReadOnlyCheck);
+        configPart.withWriteOnlyCheck(this::getWriteOnlyCheck);
+
+        if (this.options.contains(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED)) {
+            configPart.withRequiredCheck(this::getRequiredCheckBasedOnJsonPropertyAnnotation);
+        }
+    }
+
+    /**
+     * Determine the given member's associated "description" in the following order of priority.
      * <ol>
-     * <li>{@link JsonPropertyDescription} annotation on the field itself</li>
-     * <li>{@link JsonPropertyDescription} annotation on the field's getter method</li>
+     * <li>{@link JsonPropertyDescription} annotation on the field/method itself</li>
+     * <li>{@link JsonPropertyDescription} annotation on the field's getter method or the getter method's associated field</li>
      * </ol>
      *
-     * @param field field for which to collect an available description
+     * @param member field/method for which to collect an available description
      * @return successfully looked-up description (or {@code null})
      */
-    protected String resolveDescription(FieldScope field) {
+    protected String resolveDescription(MemberScope<?, ?> member) {
         // look for property specific description
-        JsonPropertyDescription propertyAnnotation = field.getAnnotationConsideringFieldAndGetterIfSupported(JsonPropertyDescription.class);
+        JsonPropertyDescription propertyAnnotation = member.getAnnotationConsideringFieldAndGetterIfSupported(JsonPropertyDescription.class);
         if (propertyAnnotation != null) {
             return propertyAnnotation.value();
         }
@@ -160,19 +177,19 @@ public class JacksonModule implements Module {
     /**
      * Look-up an alternative name as per the following order of priority.
      * <ol>
-     * <li>{@link JsonProperty} annotation on the field itself</li>
-     * <li>{@link JsonProperty} annotation on the field's getter method</li>
+     * <li>{@link JsonProperty} annotation on the member itself</li>
+     * <li>{@link JsonProperty} annotation on the field's getter method or the getter method's associated field</li>
      * </ol>
      *
-     * @param field field to look-up alternative property name for
+     * @param member field/method to look-up alternative property name for
      * @return alternative property name (or {@code null})
      */
-    protected String getPropertyNameOverrideBasedOnJsonPropertyAnnotation(FieldScope field) {
-        JsonProperty annotation = field.getAnnotationConsideringFieldAndGetter(JsonProperty.class);
+    protected String getPropertyNameOverrideBasedOnJsonPropertyAnnotation(MemberScope<?, ?> member) {
+        JsonProperty annotation = member.getAnnotationConsideringFieldAndGetter(JsonProperty.class);
         if (annotation != null) {
             String nameOverride = annotation.value();
             // check for invalid overrides
-            if (nameOverride != null && !nameOverride.isEmpty() && !nameOverride.equals(field.getDeclaredName())) {
+            if (nameOverride != null && !nameOverride.isEmpty() && !nameOverride.equals(member.getDeclaredName())) {
                 return nameOverride;
             }
         }
@@ -236,7 +253,7 @@ public class JacksonModule implements Module {
      * @return whether field should be excluded
      */
     protected boolean shouldIgnoreField(FieldScope field) {
-        if (field.getAnnotationConsideringFieldAndGetter(JsonBackReference.class) != null) {
+        if (field.getAnnotationConsideringFieldAndGetterIfSupported(JsonBackReference.class) != null) {
             return true;
         }
         // instead of re-creating the various ways a property may be included/excluded in jackson: just use its built-in introspection
@@ -254,14 +271,55 @@ public class JacksonModule implements Module {
     }
 
     /**
-     * Look-up the given field's {@link JsonProperty} annotation and consider its "required" attribute.
+     * Determine whether a given method should be ignored, according to various jackson annotations for that purpose,
+     * <br>
+     * e.g. {@code JsonBackReference}, {@code JsonIgnore}, {@code JsonIgnoreType}, {@code JsonIgnoreProperties}
      *
-     * @param field field to look-up required strategy for
+     * @param method method to check
+     * @return whether method should be excluded
+     */
+    protected boolean shouldIgnoreMethod(MethodScope method) {
+        FieldScope getterField = method.findGetterField();
+        if (getterField != null && this.shouldIgnoreField(getterField)) {
+            return true;
+        }
+        if (getterField == null && method.getAnnotationConsideringFieldAndGetterIfSupported(JsonBackReference.class) != null) {
+            return true;
+        }
+        return this.options.contains(JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS)
+                && method.getAnnotationConsideringFieldAndGetter(JsonProperty.class) == null;
+    }
+
+    /**
+     * Look-up the given field's/method's {@link JsonProperty} annotation and consider its "required" attribute.
+     *
+     * @param member field/method to look-up required strategy for
      * @return whether the field should be in the "required" list or not
      */
-    private boolean getRequiredCheckBasedOnJsonPropertyAnnotation(FieldScope field) {
-        JsonProperty jsonProperty = field.getAnnotationConsideringFieldAndGetter(JsonProperty.class) ;
+    protected boolean getRequiredCheckBasedOnJsonPropertyAnnotation(MemberScope<?, ?> member) {
+        JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetterIfSupported(JsonProperty.class) ;
         return jsonProperty != null && jsonProperty.required();
     }
 
+    /**
+     * Determine whether the given field's/method's {@link JsonProperty} annotation marks it as read-only.
+     *
+     * @param member field/method to check read-only status for
+     * @return whether the field should be marked as read-only
+     */
+    protected boolean getReadOnlyCheck(MemberScope<?, ?> member) {
+        JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetter(JsonProperty.class);
+        return jsonProperty != null && jsonProperty.access() == JsonProperty.Access.READ_ONLY;
+    }
+
+    /**
+     * Determine whether the given field's/method's {@link JsonProperty} annotation marks it as write-only.
+     *
+     * @param member field/method to check write-only status for
+     * @return whether the field should be marked as write-only
+     */
+    protected boolean getWriteOnlyCheck(MemberScope<?, ?> member) {
+        JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetter(JsonProperty.class);
+        return jsonProperty != null && jsonProperty.access() == JsonProperty.Access.WRITE_ONLY;
+    }
 }

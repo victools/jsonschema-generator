@@ -2,6 +2,11 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
+        "calculated": {
+            "type": "number",
+            "description": "calculated value from non-getter method",
+            "readOnly": true
+        },
         "enumValueHandledByStandardOption": {
             "type": "string",
             "enum": ["A", "B", "C"]
@@ -19,7 +24,8 @@
             "description": "field description"
         },
         "fieldWithOverriddenName": {
-            "type": "boolean"
+            "type": "boolean",
+            "writeOnly": true
         }
     },
     "description": "test description"

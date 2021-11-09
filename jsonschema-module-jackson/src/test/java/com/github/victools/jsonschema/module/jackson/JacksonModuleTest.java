@@ -67,7 +67,6 @@ public class JacksonModuleTest {
 
         this.verifyCommonConfigurations(true);
 
-        Mockito.verify(this.configBuilder).forMethods();
         Mockito.verify(this.typesInGeneralConfigPart).withSubtypeResolver(Mockito.any());
         Mockito.verify(this.fieldConfigPart).withTargetTypeOverridesResolver(Mockito.any());
         Mockito.verify(this.methodConfigPart).withTargetTypeOverridesResolver(Mockito.any());
@@ -107,7 +106,6 @@ public class JacksonModuleTest {
 
         this.verifyCommonConfigurations(true);
 
-        Mockito.verify(this.configBuilder).forMethods();
         Mockito.verify(this.typesInGeneralConfigPart).withCustomDefinitionProvider(Mockito.any());
         Mockito.verify(this.fieldConfigPart).withCustomDefinitionProvider(Mockito.any());
         Mockito.verify(this.methodConfigPart).withCustomDefinitionProvider(Mockito.any());
@@ -122,7 +120,6 @@ public class JacksonModuleTest {
 
         this.verifyCommonConfigurations(true);
 
-        Mockito.verify(this.configBuilder).forMethods();
         Mockito.verify(this.typesInGeneralConfigPart).withSubtypeResolver(Mockito.any());
         Mockito.verify(this.fieldConfigPart).withTargetTypeOverridesResolver(Mockito.any());
         Mockito.verify(this.methodConfigPart).withTargetTypeOverridesResolver(Mockito.any());
@@ -146,7 +143,6 @@ public class JacksonModuleTest {
 
         this.verifyCommonConfigurations(true);
 
-        Mockito.verify(this.configBuilder).forMethods();
         Mockito.verify(this.typesInGeneralConfigPart).withSubtypeResolver(Mockito.any());
         Mockito.verify(this.typesInGeneralConfigPart, Mockito.times(2)).withCustomDefinitionProvider(Mockito.any());
         Mockito.verify(this.fieldConfigPart).withTargetTypeOverridesResolver(Mockito.any());
@@ -160,11 +156,20 @@ public class JacksonModuleTest {
     private void verifyCommonConfigurations(boolean considerNamingStrategy) {
         Mockito.verify(this.configBuilder).getObjectMapper();
         Mockito.verify(this.configBuilder).forFields();
+        Mockito.verify(this.configBuilder).forMethods();
         Mockito.verify(this.configBuilder).forTypesInGeneral();
 
         Mockito.verify(this.fieldConfigPart).withDescriptionResolver(Mockito.any());
         Mockito.verify(this.fieldConfigPart).withIgnoreCheck(Mockito.any());
         Mockito.verify(this.fieldConfigPart, Mockito.times(considerNamingStrategy ? 2 : 1)).withPropertyNameOverrideResolver(Mockito.any());
+        Mockito.verify(this.fieldConfigPart).withReadOnlyCheck(Mockito.any());
+        Mockito.verify(this.fieldConfigPart).withWriteOnlyCheck(Mockito.any());
+
+        Mockito.verify(this.methodConfigPart).withDescriptionResolver(Mockito.any());
+        Mockito.verify(this.methodConfigPart).withIgnoreCheck(Mockito.any());
+        Mockito.verify(this.methodConfigPart).withPropertyNameOverrideResolver(Mockito.any());
+        Mockito.verify(this.methodConfigPart).withReadOnlyCheck(Mockito.any());
+        Mockito.verify(this.methodConfigPart).withWriteOnlyCheck(Mockito.any());
 
         Mockito.verify(this.typesInGeneralConfigPart).withDescriptionResolver(Mockito.any());
     }
@@ -222,12 +227,12 @@ public class JacksonModuleTest {
     Object parametersForTestRequiredProperty() {
         return new Object[][]{
             {null, "requiredTrue", false},
-            {null, "requiredFalse", false},
-            {null, "requiredDefault", false},
+            {null, "requiredFalseWriteOnly", false},
+            {null, "requiredDefaultReadOnly", false},
             {null, "requiredAbsent", false},
             {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredTrue", true},
-            {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredFalse", false},
-            {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredDefault", false},
+            {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredFalseWriteOnly", false},
+            {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredDefaultReadOnly", false},
             {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredAbsent", false}
         };
     }
@@ -240,6 +245,26 @@ public class JacksonModuleTest {
         FieldScope field = new TestType(TestClassWithRequiredAnnotatedFields.class).getMemberField(fieldName);
 
         Assert.assertEquals(this.fieldConfigPart.isRequired(field), expectedRequired);
+    }
+
+    Object parametersForTestReadOnlyWriteOnly() {
+        return new Object[][]{
+            {"requiredTrue", false, false},
+            {"requiredFalseWriteOnly", false, true},
+            {"requiredDefaultReadOnly", true, false},
+            {"requiredAbsent", false, false}
+        };
+    }
+
+    @Test
+    @Parameters
+    public void testReadOnlyWriteOnly(String fieldName, boolean expectedReadOnly, boolean expectedWriteOnly) {
+        new JacksonModule().applyToConfigBuilder(this.configBuilder);
+
+        FieldScope field = new TestType(TestClassWithRequiredAnnotatedFields.class).getMemberField(fieldName);
+
+        Assert.assertEquals(this.fieldConfigPart.isReadOnly(field), expectedReadOnly);
+        Assert.assertEquals(this.fieldConfigPart.isWriteOnly(field), expectedWriteOnly);
     }
 
     Object parametersForTestDescriptionForTypeResolver() {
@@ -317,14 +342,14 @@ public class JacksonModuleTest {
     }
 
     private static class TestClassWithRequiredAnnotatedFields {
-        @JsonProperty(required = true)
+        @JsonProperty(required = true, access = JsonProperty.Access.READ_WRITE)
         private String requiredTrue;
 
-        @JsonProperty(required = false)
-        private String requiredFalse;
+        @JsonProperty(required = false, access = JsonProperty.Access.WRITE_ONLY)
+        private String requiredFalseWriteOnly;
 
-        @JsonProperty
-        private String requiredDefault;
+        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+        private String requiredDefaultReadOnly;
 
         private String requiredAbsent;
 
