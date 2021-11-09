@@ -48,9 +48,11 @@ public class IntegrationTest {
      */
     @Test
     public void testIntegration() throws Exception {
-        JacksonModule module = new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE, JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY);
+        JacksonModule module = new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE, JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY,
+                JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS);
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_7, OptionPreset.PLAIN_JSON)
                 .with(Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
+                .with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
                 .with(module)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
@@ -81,7 +83,7 @@ public class IntegrationTest {
         @JsonPropertyDescription("field description")
         public String fieldWithDescription;
 
-        @JsonProperty("fieldWithOverriddenName")
+        @JsonProperty(value = "fieldWithOverriddenName", access = JsonProperty.Access.WRITE_ONLY)
         public boolean originalFieldName;
 
         public TestEnum enumValueHandledByStandardOption;
@@ -89,6 +91,16 @@ public class IntegrationTest {
         public TestEnumWithJsonValueAnnotation enumValueWithJsonValueAnnotation;
 
         public TestEnumWithJsonPropertyAnnotations enumValueWithJsonPropertyAnnotations;
+
+        public String ignoredUnannotatedMethod() {
+            return "nothing";
+        }
+
+        @JsonProperty(value = "calculated", access = JsonProperty.Access.READ_ONLY)
+        @JsonPropertyDescription("calculated value from non-getter method")
+        public double getCalculatedValue() {
+            return 19.75;
+        }
     }
 
     static enum TestEnum {
