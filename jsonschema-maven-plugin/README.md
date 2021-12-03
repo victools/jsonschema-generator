@@ -188,7 +188,7 @@ It is not possible to configure options for custom modules.
         <plugin>
             <groupId>com.github.victools</groupId>
             <artifactId>jsonschema-maven-plugin</artifactId>
-            <version>[4.16.0,5.0.0)</version>
+            <version>[4.21.0,5.0.0)</version>
             <executions>
                 <execution>
                     <goals>

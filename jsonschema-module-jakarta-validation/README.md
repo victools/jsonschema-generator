@@ -31,7 +31,7 @@ Additional documentation can be found in the [Project Wiki](https://github.com/v
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-module-jakarta-validation</artifactId>
-    <version>[4.17.0,5.0.0)</version>
+    <version>[4.21.0,5.0.0)</version>
 </dependency>
 ```
 
