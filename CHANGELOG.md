@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### `jsonschema-generator`
+#### Fixed
+- prevent mixing of `type: null` with `const`/`enum` in order to avoid validation error when `const`/`enum` does not include `null`
+
 #### Changed
 - default `ObjectMapper` when none is given in `SchemaGeneratorConfigBuilder` constructor now enables `JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS`
 

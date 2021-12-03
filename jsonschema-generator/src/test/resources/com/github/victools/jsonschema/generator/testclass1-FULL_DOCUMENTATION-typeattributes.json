@@ -2,15 +2,19 @@
     "type": "object",
     "properties": {
         "genericValue": {
-            "type": ["string", "null"],
-            "$anchor": "#anchor",
-            "title": "String",
-            "description": "for type in general: String",
-            "const": "constant string value",
-            "minLength": 1,
-            "maxLength": 256,
-            "format": "date",
-            "pattern": "^.{1,256}$"
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "type": "string",
+                    "$anchor": "#anchor",
+                    "title": "String",
+                    "description": "for type in general: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
+                }]
         },
         "genericArray": {
             "type": ["array", "null"],
@@ -38,17 +42,28 @@
             "description": "for type in general: int"
         },
         "ignoredInternalValue": {
-            "type": ["integer", "null"],
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "type": "integer",
+                    "$anchor": "#anchor",
+                    "title": "Integer",
+                    "description": "for type in general: Integer",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 1E+1,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
+                }]
+        },
+        "calculateSomething(Number, Number)": false,
+        "getPrimitiveValue()": {
+            "type": "integer",
             "$anchor": "#anchor",
-            "title": "Integer",
-            "description": "for type in general: Integer",
-            "default": 1,
-            "enum": [1, 2, 3, 4, 5],
-            "minimum": 1,
-            "exclusiveMinimum": 0,
-            "maximum": 1E+1,
-            "exclusiveMaximum": 11,
-            "multipleOf": 1
+            "title": "int",
+            "description": "for type in general: int"
         },
         "isSimpleTestClass()": {
             "type": "boolean",
@@ -56,23 +71,20 @@
             "title": "boolean",
             "description": "for type in general: boolean"
         },
-        "getPrimitiveValue()": {
-            "type": "integer",
-            "$anchor": "#anchor",
-            "title": "int",
-            "description": "for type in general: int"
-        },
-        "calculateSomething(Number, Number)": false,
         "getGenericValue()": {
-            "type": ["string", "null"],
-            "$anchor": "#anchor",
-            "title": "String",
-            "description": "for type in general: String",
-            "const": "constant string value",
-            "minLength": 1,
-            "maxLength": 256,
-            "format": "date",
-            "pattern": "^.{1,256}$"
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "type": "string",
+                    "$anchor": "#anchor",
+                    "title": "String",
+                    "description": "for type in general: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
+                }]
         },
         "CONSTANT": {
             "type": "integer",
