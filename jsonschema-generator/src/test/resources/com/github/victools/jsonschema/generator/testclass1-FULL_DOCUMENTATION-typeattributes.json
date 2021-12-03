@@ -53,7 +53,7 @@
                     "enum": [1, 2, 3, 4, 5],
                     "minimum": 1,
                     "exclusiveMinimum": 0,
-                    "maximum": 1E+1,
+                    "maximum": 10,
                     "exclusiveMaximum": 11,
                     "multipleOf": 1
                 }]
@@ -96,7 +96,7 @@
             "enum": [1, 2, 3, 4, 5],
             "minimum": 1,
             "exclusiveMinimum": 0,
-            "maximum": 1E+1,
+            "maximum": 10,
             "exclusiveMaximum": 11,
             "multipleOf": 1
         }
