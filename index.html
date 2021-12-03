@@ -1672,10 +1672,10 @@ In order to reflect Java&#39;s polymorphism, you can make use of the following c
 <ol>
 <li>Set a field/method&#39;s &quot;description&quot; as per <code>@JsonPropertyDescription</code></li>
 <li>Set a type&#39;s &quot;description&quot; as per <code>@JsonClassDescription</code>.</li>
-<li>Override a field&#39;s property name as per <code>@JsonProperty</code> annotations.</li>
-<li>Ignore fields that are marked with a <code>@JsonBackReference</code> annotation.</li>
-<li>Ignore fields that are deemed to be ignored according to various other <code>jackson-annotations</code> (e.g. <code>@JsonIgnore</code>, <code>@JsonIgnoreType</code>, <code>@JsonIgnoreProperties</code>) or are otherwise supposed to be excluded.</li>
-<li>Optionally: set a field as &quot;required&quot; as per <code>@JsonProperty</code> annotations, if the <code>JacksonOption.RESPECT_JSONPROPERTY_REQUIRED</code> was provided (i.e. this is an &quot;opt-in&quot;).</li>
+<li>Override a field&#39;s/method&#39;s property name as per <code>@JsonProperty</code> annotations.</li>
+<li>Ignore fields/methods that are marked with a <code>@JsonBackReference</code> annotation.</li>
+<li>Ignore fields (and their associated getter methods) that are deemed to be ignored according to various other <code>jackson-annotations</code> (e.g. <code>@JsonIgnore</code>, <code>@JsonIgnoreType</code>, <code>@JsonIgnoreProperties</code>) or are otherwise supposed to be excluded.</li>
+<li>Optionally: set a field/method as &quot;required&quot; as per <code>@JsonProperty</code> annotations, if the <code>JacksonOption.RESPECT_JSONPROPERTY_REQUIRED</code> was provided (i.e. this is an &quot;opt-in&quot;).</li>
 <li>Optionally: treat enum types as plain strings as per the <code>@JsonValue</code> annotated method, if there is one and the <code>JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE</code> was provided (i.e. this is an &quot;opt-in&quot;).</li>
 <li>Optionally: treat enum types as plain strings, as per each enum constant&#39;s <code>@JsonProperty</code> annotation, if all values of an enum have such annotations and the <code>JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY</code> was provided (i.e. this is an &quot;opt-in&quot;).</li>
 <li>Optionally: sort an object&#39;s properties according to its <code>@JsonPropertyOrder</code> annotation, if the <code>JacksonOption.RESPECT_JSONPROPERTY_ORDER</code> was provided (i.e. this is an &quot;opt-in&quot;).</li>
@@ -1686,6 +1686,8 @@ In order to reflect Java&#39;s polymorphism, you can make use of the following c
 <li>Considering <code>@JsonTypeInfo.include</code> with values <code>As.PROPERTY</code>, <code>As.EXISTING_PROPERTY</code>, <code>As.WRAPPER_ARRAY</code>, <code>As.WRAPPER_OBJECT</code></li>
 <li>Considering <code>@JsonTypeInfo.use</code> with values <code>Id.CLASS</code>, <code>Id.NAME</code></li>
 </ul></li>
+<li>Consider <code>@JsonProperty.access</code> for marking a field/method as <code>readOnly</code> or <code>writeOnly</code></li>
+<li>Optionally: ignore all methods but those with a <code>@JsonProperty</code> annotation, if the <code>JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS</code> was provided (i.e. this is an &quot;opt-in&quot;).</li>
 </ol>
 
 <p>Schema attributes derived from annotations on getter methods are also applied to their associated fields.</p>
