@@ -17,7 +17,7 @@
         "fieldWithInclusiveNumericRange": {
             "type": "integer",
             "minimum": 15,
-            "maximum": 2E+1
+            "maximum": 20
         },
         "fieldWithOverriddenName": {
             "minItems": 1,

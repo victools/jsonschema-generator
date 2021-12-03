@@ -17,8 +17,8 @@
 package com.github.victools.jsonschema.module.swagger15;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.Option;
+import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
@@ -50,7 +50,7 @@ public class IntegrationTest {
         SwaggerModule module = new SwaggerModule(
                 SwaggerOption.ENABLE_PROPERTY_NAME_OVERRIDES,
                 SwaggerOption.IGNORING_HIDDEN_PROPERTIES);
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_2019_09)
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.FULL_DOCUMENTATION)
                 .with(Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
                 .with(module)
                 .build();

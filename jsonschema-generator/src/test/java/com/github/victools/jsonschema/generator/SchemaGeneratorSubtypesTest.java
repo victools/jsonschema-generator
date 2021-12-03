@@ -18,7 +18,6 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -54,7 +53,7 @@ public class SchemaGeneratorSubtypesTest {
     @Parameters
     @TestCaseName(value = "{method}({0}) [{index}]")
     public void testGenerateSchema(String caseTitle, List<Class<?>> subtypes, SchemaVersion schemaVersion) throws Exception {
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion, OptionPreset.PLAIN_JSON)
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON)
                 .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_FIELDS_BY_DEFAULT);
         configBuilder.forTypesInGeneral()
                 .withSubtypeResolver(new TestSubtypeResolver(subtypes))
