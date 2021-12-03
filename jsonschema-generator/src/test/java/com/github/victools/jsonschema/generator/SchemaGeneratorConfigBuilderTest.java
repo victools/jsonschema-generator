@@ -16,7 +16,6 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +29,7 @@ public class SchemaGeneratorConfigBuilderTest {
 
     @Before
     public void setUp() {
-        this.builder = new SchemaGeneratorConfigBuilder(new ObjectMapper(), SchemaVersion.DRAFT_2019_09);
+        this.builder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09);
     }
 
     @Test

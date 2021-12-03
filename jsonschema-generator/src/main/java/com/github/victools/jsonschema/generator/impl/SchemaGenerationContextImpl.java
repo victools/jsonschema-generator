@@ -747,16 +747,19 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         if (node.has(this.getKeyword(SchemaKeyword.TAG_REF))
                 || node.has(this.getKeyword(SchemaKeyword.TAG_ALLOF))
                 || node.has(this.getKeyword(SchemaKeyword.TAG_ANYOF))
-                || node.has(this.getKeyword(SchemaKeyword.TAG_ONEOF))) {
-            // cannot be sure what is specified in those other schema parts, instead simply create a oneOf wrapper
+                || node.has(this.getKeyword(SchemaKeyword.TAG_ONEOF))
+                // since version 4.21.0
+                || node.has(this.getKeyword(SchemaKeyword.TAG_CONST))
+                || node.has(this.getKeyword(SchemaKeyword.TAG_ENUM))) {
+            // cannot be sure what is specified in those other schema parts, instead simply create an anyOf wrapper
             ObjectNode nullSchema = this.generatorConfig.createObjectNode()
                     .put(this.getKeyword(SchemaKeyword.TAG_TYPE), nullTypeName);
             ArrayNode anyOf = this.generatorConfig.createArrayNode()
-                    // one option in the oneOf should be null
+                    // one option in the anyOf should be null
                     .add(nullSchema)
                     // the other option is the given (assumed to be) not-nullable node
                     .add(this.generatorConfig.createObjectNode().setAll(node));
-            // replace all existing (and already copied properties with the oneOf wrapper
+            // replace all existing (and already copied properties with the anyOf wrapper
             node.removeAll();
             node.set(this.getKeyword(SchemaKeyword.TAG_ANYOF), anyOf);
         } else {

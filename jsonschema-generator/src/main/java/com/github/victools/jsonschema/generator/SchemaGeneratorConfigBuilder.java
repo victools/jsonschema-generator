@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.impl.SchemaGeneratorConfigImpl;
 import java.util.EnumSet;
@@ -30,6 +31,19 @@ import java.util.stream.Collectors;
  * Builder class for creating a configuration object to be passed into the SchemaGenerator's constructor.
  */
 public class SchemaGeneratorConfigBuilder {
+
+    /**
+     * Instantiate an ObjectMapper to be used in case no specific instance is provided in constructor.
+     *
+     * @return default ObjectMapper instance
+     */
+    private static ObjectMapper createDefaultObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.getSerializationConfig()
+                // since version 4.21.0
+                .with(JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS);
+        return mapper;
+    }
 
     private final ObjectMapper objectMapper;
     private final OptionPreset preset;
@@ -73,7 +87,7 @@ public class SchemaGeneratorConfigBuilder {
      * @see #SchemaGeneratorConfigBuilder(ObjectMapper, SchemaVersion, OptionPreset)
      */
     public SchemaGeneratorConfigBuilder(SchemaVersion schemaVersion) {
-        this(new ObjectMapper(), schemaVersion, OptionPreset.FULL_DOCUMENTATION);
+        this(createDefaultObjectMapper(), schemaVersion, OptionPreset.FULL_DOCUMENTATION);
     }
 
     /**
@@ -96,7 +110,7 @@ public class SchemaGeneratorConfigBuilder {
      * @param preset default settings for standard {@link Option} values
      */
     public SchemaGeneratorConfigBuilder(SchemaVersion schemaVersion, OptionPreset preset) {
-        this(new ObjectMapper(), schemaVersion, preset);
+        this(createDefaultObjectMapper(), schemaVersion, preset);
     }
 
     /**

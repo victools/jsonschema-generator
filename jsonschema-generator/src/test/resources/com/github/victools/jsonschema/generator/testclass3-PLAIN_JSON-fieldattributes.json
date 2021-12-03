@@ -37,14 +37,18 @@
                                         }
                                     },
                                     "genericValue": {
-                                        "type": ["string", "null"],
-                                        "title": "String",
-                                        "description": "looked-up from field: String",
-                                        "const": "constant string value",
-                                        "minLength": 1,
-                                        "maxLength": 256,
-                                        "format": "date",
-                                        "pattern": "^.{1,256}$"
+                                        "anyOf": [{
+                                                "type": "null"
+                                            }, {
+                                                "type": "string",
+                                                "title": "String",
+                                                "description": "looked-up from field: String",
+                                                "const": "constant string value",
+                                                "minLength": 1,
+                                                "maxLength": 256,
+                                                "format": "date",
+                                                "pattern": "^.{1,256}$"
+                                            }]
                                     }
                                 },
                                 "title": "TestClass2<String>",
@@ -79,14 +83,18 @@
                                     }
                                 },
                                 "genericValue": {
-                                    "type": ["string", "null"],
-                                    "title": "String",
-                                    "description": "looked-up from field: String",
-                                    "const": "constant string value",
-                                    "minLength": 1,
-                                    "maxLength": 256,
-                                    "format": "date",
-                                    "pattern": "^.{1,256}$"
+                                    "anyOf": [{
+                                            "type": "null"
+                                        }, {
+                                            "type": "string",
+                                            "title": "String",
+                                            "description": "looked-up from field: String",
+                                            "const": "constant string value",
+                                            "minLength": 1,
+                                            "maxLength": 256,
+                                            "format": "date",
+                                            "pattern": "^.{1,256}$"
+                                        }]
                                 }
                             },
                             "title": "TestClass2<String>",
@@ -125,30 +133,38 @@
                                     }
                                 },
                                 "genericValue": {
-                                    "type": ["string", "null"],
-                                    "title": "String",
-                                    "description": "looked-up from field: String",
-                                    "const": "constant string value",
-                                    "minLength": 1,
-                                    "maxLength": 256,
-                                    "format": "date",
-                                    "pattern": "^.{1,256}$"
+                                    "anyOf": [{
+                                            "type": "null"
+                                        }, {
+                                            "type": "string",
+                                            "title": "String",
+                                            "description": "looked-up from field: String",
+                                            "const": "constant string value",
+                                            "minLength": 1,
+                                            "maxLength": 256,
+                                            "format": "date",
+                                            "pattern": "^.{1,256}$"
+                                        }]
                                 }
                             }
                         }
                     }
                 },
                 "optionalS": {
-                    "type": ["integer", "null"],
-                    "title": "Integer",
-                    "description": "looked-up from field: Integer",
-                    "default": 1,
-                    "enum": [1, 2, 3, 4, 5],
-                    "minimum": 1,
-                    "exclusiveMinimum": 0,
-                    "maximum": 1E+1,
-                    "exclusiveMaximum": 11,
-                    "multipleOf": 1
+                    "anyOf": [{
+                            "type": "null"
+                        }, {
+                            "type": "integer",
+                            "title": "Integer",
+                            "description": "looked-up from field: Integer",
+                            "default": 1,
+                            "enum": [1, 2, 3, 4, 5],
+                            "minimum": 1,
+                            "exclusiveMinimum": 0,
+                            "maximum": 10,
+                            "exclusiveMaximum": 11,
+                            "multipleOf": 1
+                        }]
                 }
             },
             "title": "TestClass4<Integer, String>",
@@ -197,26 +213,34 @@
                                     }
                                 },
                                 "genericValue": {
-                                    "type": ["string", "null"],
-                                    "title": "String",
-                                    "description": "looked-up from field: String",
-                                    "const": "constant string value",
-                                    "minLength": 1,
-                                    "maxLength": 256,
-                                    "format": "date",
-                                    "pattern": "^.{1,256}$"
+                                    "anyOf": [{
+                                            "type": "null"
+                                        }, {
+                                            "type": "string",
+                                            "title": "String",
+                                            "description": "looked-up from field: String",
+                                            "const": "constant string value",
+                                            "minLength": 1,
+                                            "maxLength": 256,
+                                            "format": "date",
+                                            "pattern": "^.{1,256}$"
+                                        }]
                                 },
                                 "ignoredInternalValue": {
-                                    "type": ["integer", "null"],
-                                    "title": "Integer",
-                                    "description": "looked-up from field: Integer",
-                                    "default": 1,
-                                    "enum": [1, 2, 3, 4, 5],
-                                    "minimum": 1,
-                                    "exclusiveMinimum": 0,
-                                    "maximum": 1E+1,
-                                    "exclusiveMaximum": 11,
-                                    "multipleOf": 1
+                                    "anyOf": [{
+                                            "type": "null"
+                                        }, {
+                                            "type": "integer",
+                                            "title": "Integer",
+                                            "description": "looked-up from field: Integer",
+                                            "default": 1,
+                                            "enum": [1, 2, 3, 4, 5],
+                                            "minimum": 1,
+                                            "exclusiveMinimum": 0,
+                                            "maximum": 10,
+                                            "exclusiveMaximum": 11,
+                                            "multipleOf": 1
+                                        }]
                                 },
                                 "primitiveValue": {
                                     "type": ["integer", "null"],
@@ -256,26 +280,34 @@
                                 }
                             },
                             "genericValue": {
-                                "type": ["string", "null"],
-                                "title": "String",
-                                "description": "looked-up from field: String",
-                                "const": "constant string value",
-                                "minLength": 1,
-                                "maxLength": 256,
-                                "format": "date",
-                                "pattern": "^.{1,256}$"
+                                "anyOf": [{
+                                        "type": "null"
+                                    }, {
+                                        "type": "string",
+                                        "title": "String",
+                                        "description": "looked-up from field: String",
+                                        "const": "constant string value",
+                                        "minLength": 1,
+                                        "maxLength": 256,
+                                        "format": "date",
+                                        "pattern": "^.{1,256}$"
+                                    }]
                             },
                             "ignoredInternalValue": {
-                                "type": ["integer", "null"],
-                                "title": "Integer",
-                                "description": "looked-up from field: Integer",
-                                "default": 1,
-                                "enum": [1, 2, 3, 4, 5],
-                                "minimum": 1,
-                                "exclusiveMinimum": 0,
-                                "maximum": 1E+1,
-                                "exclusiveMaximum": 11,
-                                "multipleOf": 1
+                                "anyOf": [{
+                                        "type": "null"
+                                    }, {
+                                        "type": "integer",
+                                        "title": "Integer",
+                                        "description": "looked-up from field: Integer",
+                                        "default": 1,
+                                        "enum": [1, 2, 3, 4, 5],
+                                        "minimum": 1,
+                                        "exclusiveMinimum": 0,
+                                        "maximum": 10,
+                                        "exclusiveMaximum": 11,
+                                        "multipleOf": 1
+                                    }]
                             },
                             "primitiveValue": {
                                 "type": ["integer", "null"],
@@ -322,26 +354,34 @@
                                 }
                             },
                             "genericValue": {
-                                "type": ["string", "null"],
-                                "title": "String",
-                                "description": "looked-up from field: String",
-                                "const": "constant string value",
-                                "minLength": 1,
-                                "maxLength": 256,
-                                "format": "date",
-                                "pattern": "^.{1,256}$"
+                                "anyOf": [{
+                                        "type": "null"
+                                    }, {
+                                        "type": "string",
+                                        "title": "String",
+                                        "description": "looked-up from field: String",
+                                        "const": "constant string value",
+                                        "minLength": 1,
+                                        "maxLength": 256,
+                                        "format": "date",
+                                        "pattern": "^.{1,256}$"
+                                    }]
                             },
                             "ignoredInternalValue": {
-                                "type": ["integer", "null"],
-                                "title": "Integer",
-                                "description": "looked-up from field: Integer",
-                                "default": 1,
-                                "enum": [1, 2, 3, 4, 5],
-                                "minimum": 1,
-                                "exclusiveMinimum": 0,
-                                "maximum": 1E+1,
-                                "exclusiveMaximum": 11,
-                                "multipleOf": 1
+                                "anyOf": [{
+                                        "type": "null"
+                                    }, {
+                                        "type": "integer",
+                                        "title": "Integer",
+                                        "description": "looked-up from field: Integer",
+                                        "default": 1,
+                                        "enum": [1, 2, 3, 4, 5],
+                                        "minimum": 1,
+                                        "exclusiveMinimum": 0,
+                                        "maximum": 10,
+                                        "exclusiveMaximum": 11,
+                                        "multipleOf": 1
+                                    }]
                             },
                             "primitiveValue": {
                                 "type": ["integer", "null"],
@@ -371,22 +411,26 @@
                         "enum": [1, 2, 3, 4, 5],
                         "minimum": 1,
                         "exclusiveMinimum": 0,
-                        "maximum": 1E+1,
+                        "maximum": 10,
                         "exclusiveMaximum": 11,
                         "multipleOf": 1
                     }
                 },
                 "genericValue": {
-                    "type": ["integer", "null"],
-                    "title": "Long",
-                    "description": "looked-up from field: Long",
-                    "default": 1,
-                    "enum": [1, 2, 3, 4, 5],
-                    "minimum": 1,
-                    "exclusiveMinimum": 0,
-                    "maximum": 1E+1,
-                    "exclusiveMaximum": 11,
-                    "multipleOf": 1
+                    "anyOf": [{
+                            "type": "null"
+                        }, {
+                            "type": "integer",
+                            "title": "Long",
+                            "description": "looked-up from field: Long",
+                            "default": 1,
+                            "enum": [1, 2, 3, 4, 5],
+                            "minimum": 1,
+                            "exclusiveMinimum": 0,
+                            "maximum": 10,
+                            "exclusiveMaximum": 11,
+                            "multipleOf": 1
+                        }]
                 }
             },
             "title": "TestClass2<Long>",
@@ -423,22 +467,26 @@
                             "enum": [1, 2, 3, 4, 5],
                             "minimum": 1,
                             "exclusiveMinimum": 0,
-                            "maximum": 1E+1,
+                            "maximum": 10,
                             "exclusiveMaximum": 11,
                             "multipleOf": 1
                         }
                     },
                     "genericValue": {
-                        "type": ["integer", "null"],
-                        "title": "Long",
-                        "description": "looked-up from field: Long",
-                        "default": 1,
-                        "enum": [1, 2, 3, 4, 5],
-                        "minimum": 1,
-                        "exclusiveMinimum": 0,
-                        "maximum": 1E+1,
-                        "exclusiveMaximum": 11,
-                        "multipleOf": 1
+                        "anyOf": [{
+                                "type": "null"
+                            }, {
+                                "type": "integer",
+                                "title": "Long",
+                                "description": "looked-up from field: Long",
+                                "default": 1,
+                                "enum": [1, 2, 3, 4, 5],
+                                "minimum": 1,
+                                "exclusiveMinimum": 0,
+                                "maximum": 10,
+                                "exclusiveMaximum": 11,
+                                "multipleOf": 1
+                            }]
                     }
                 },
                 "title": "TestClass2<Long>",

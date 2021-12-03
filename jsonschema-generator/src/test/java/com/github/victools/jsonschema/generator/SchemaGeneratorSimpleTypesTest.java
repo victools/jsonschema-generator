@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.EnumSet;
 import junitparams.JUnitParamsRunner;
@@ -88,7 +87,7 @@ public class SchemaGeneratorSimpleTypesTest {
     @Parameters
     public void testGenerateSchema_SimpleTypeWithoutFormat(Class<?> targetType, SchemaKeyword expectedJsonSchemaType, SchemaVersion schemaVersion)
             throws Exception {
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(schemaVersion)
                 .with(Option.ADDITIONAL_FIXED_TYPES)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
@@ -106,7 +105,7 @@ public class SchemaGeneratorSimpleTypesTest {
     @Parameters
     public void testGenerateSchema_SimpleTypeWithFormat(Class<?> targetType, SchemaKeyword expectedJsonSchemaType, String expectedFormat,
             SchemaVersion schemaVersion) throws Exception {
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(schemaVersion)
                 .with(Option.ADDITIONAL_FIXED_TYPES, Option.EXTRA_OPEN_API_FORMAT_VALUES)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
@@ -129,7 +128,7 @@ public class SchemaGeneratorSimpleTypesTest {
     @Parameters(method = "parametersForTestGenerateSchema_SimpleTypeWithoutFormat")
     public void testGenerateSchema_SimpleType_withAdditionalPropertiesOption(Class<?> targetType, SchemaKeyword expectedJsonSchemaType,
             SchemaVersion schemaVersion) throws Exception {
-        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(new ObjectMapper(), schemaVersion)
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(schemaVersion)
                 .with(Option.ADDITIONAL_FIXED_TYPES, Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);

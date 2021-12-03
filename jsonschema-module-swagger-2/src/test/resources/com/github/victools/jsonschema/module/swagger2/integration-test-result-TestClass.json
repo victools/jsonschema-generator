@@ -3,11 +3,15 @@
     "type": "object",
     "properties": {
         "fieldWithDescriptionAndAllowableValues": {
-            "type": ["string", "null"],
-            "description": "field description",
-            "enum": ["A", "B", "C", "D"],
-            "minLength": 1,
-            "maxLength": 1
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "type": "string",
+                    "description": "field description",
+                    "enum": ["A", "B", "C", "D"],
+                    "minLength": 1,
+                    "maxLength": 1
+                }]
         },
         "fieldWithExclusiveNumericRange": {
             "type": "integer",
@@ -17,7 +21,7 @@
         "fieldWithInclusiveNumericRange": {
             "type": "integer",
             "minimum": 15,
-            "maximum": 2E+1
+            "maximum": 20
         },
         "fieldWithOverriddenName": {
             "minItems": 1,

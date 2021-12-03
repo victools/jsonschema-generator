@@ -2,9 +2,13 @@
     "type": "object",
     "properties": {
         "fieldWithDescriptionAndAllowableValues": {
-            "type": ["string", "null"],
-            "description": "field description",
-            "enum": ["A", "B", "C", "D"]
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "type": "string",
+                    "description": "field description",
+                    "enum": ["A", "B", "C", "D"]
+                }]
         },
         "fieldWithExclusiveNumericRange": {
             "type": "integer",
