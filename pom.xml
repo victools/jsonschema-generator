@@ -116,7 +116,7 @@
         <version.jsonassert>1.5.0</version.jsonassert>
         <version.junit>4.13.1</version.junit>
         <version.junitparams>1.1.1</version.junitparams>
-        <version.log4j>2.15.0</version.log4j>
+        <version.logback>1.2.7</version.logback>
         <version.mockito>2.27.0</version.mockito>
         <version.reflections>0.9.12</version.reflections>
         <version.slf4j>1.7.32</version.slf4j>
@@ -211,23 +211,11 @@
             <artifactId>slf4j-api</artifactId>
             <version>${version.slf4j}</version>
         </dependency>
-        <!-- log4j implementation is optional and left up to the library users to determine whether it is desired -->
+        <!-- slf4j implementation is optional and left up to the library users to determine whether it is desired -->
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${version.log4j}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${version.log4j}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${version.log4j}</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${version.logback}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
