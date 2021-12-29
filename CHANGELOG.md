@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### `jsonschema-generator`
+#### Added
+- Introduce support for `SchemaVersion.DRAFT_2020_12`
+
 #### Dependency Update
 - Replace `log4j` test dependency with `logback` (still only test dependency)
 
