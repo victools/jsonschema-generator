@@ -59,7 +59,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.Scanner;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.ConfigurationBuilder;
 
 /**
  * Maven plugin for the victools/jsonschema-generator.
@@ -225,8 +227,12 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private List<PotentialSchemaClass> getAllClassNames() {
         if (this.allTypes == null) {
-            Reflections reflections = new Reflections("", new SubTypesScanner(false), this.getClassLoader());
-            Stream<PotentialSchemaClass> allTypesStream = reflections.getAllTypes().stream()
+            Scanner subTypeScanner = Scanners.SubTypes.filterResultsBy(c -> true);
+            Reflections reflections = new Reflections(new ConfigurationBuilder()
+                    .forPackage("", this.getClassLoader())
+                    .addScanners(subTypeScanner));
+            Stream<PotentialSchemaClass> allTypesStream = reflections.getAll(subTypeScanner)
+                    .stream()
                     .map(PotentialSchemaClass::new);
             if (this.excludeClassNames != null && this.excludeClassNames.length > 0) {
                 Set<Pattern> exclusions = Stream.of(this.excludeClassNames)

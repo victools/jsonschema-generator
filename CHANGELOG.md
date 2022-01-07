@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Dependency Update
 - Replace `log4j` test dependency with `logback` (still only test dependency)
 
+### `jsonschema-maven-plugin`
+#### Fixed
+- Enable usage under JDK11 (by adjusting usage of `reflections`)
+
+#### Dependency Update
+- Update `reflections` runtime dependency from 0.9.12 to 0.10.2
+
 ## [4.21.0] - 2021-12-03
 ### `jsonschema-generator`
 #### Fixed
