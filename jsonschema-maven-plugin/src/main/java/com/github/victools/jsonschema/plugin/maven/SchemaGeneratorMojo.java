@@ -228,10 +228,14 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private List<PotentialSchemaClass> getAllClassNames() {
         if (this.allTypes == null) {
             Scanner subTypeScanner = Scanners.SubTypes.filterResultsBy(c -> true);
-            Reflections reflections = new Reflections(new ConfigurationBuilder()
-                    .forPackage("", this.getClassLoader())
-                    .addUrls(this.getClassLoader().getURLs())
-                    .addScanners(subTypeScanner));
+            URLClassLoader urlClassLoader = this.getClassLoader();
+            ConfigurationBuilder configBuilder = new ConfigurationBuilder()
+                    .forPackage("", urlClassLoader)
+                    .addScanners(subTypeScanner);
+            if (urlClassLoader != null) {
+                configBuilder.addUrls(urlClassLoader.getURLs());
+            }
+            Reflections reflections = new Reflections(configBuilder);
             Stream<PotentialSchemaClass> allTypesStream = reflections.getAll(subTypeScanner)
                     .stream()
                     .map(PotentialSchemaClass::new);
