@@ -110,7 +110,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private String schemaFileName;
 
     /**
-     * The schema version to be used: DRAFT_6, DRAFT_7 or DRAFT_2019_09.
+     * The schema version to be used: DRAFT_6, DRAFT_7, DRAFT_2019_09 or DRAFT_2020_12.
      */
     @Parameter(property = "schemaVersion", defaultValue = "DRAFT_7")
     private SchemaVersion schemaVersion;

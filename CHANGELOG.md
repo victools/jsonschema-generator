@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `jsonschema-maven-plugin`
 #### Fixed
-- Enable usage under JDK11 (by adjusting usage of `reflections`)
+- Enable usage under JDK11 (by adjusting usage of `reflections`, in order to allow finding classes in dependencies/jar)
 
 #### Dependency Update
 - Update `reflections` runtime dependency from 0.9.12 to 0.10.2
