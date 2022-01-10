@@ -101,6 +101,7 @@ The version of JSON Schema that is to be used can be configured with the `<schem
 </configuration>
 ```
 Allowed values are (as per `com.github.victools.jsonschema.generator.SchemaVersion`):
+- `DRAFT_2020_12`
 - `DRAFT_2019_09`
 - `DRAFT_7`
 - `DRAFT_6`
