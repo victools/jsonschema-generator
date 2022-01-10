@@ -141,7 +141,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     /**
      * The classloader used for loading generator modules and classes.
      */
-    private ClassLoader classLoader = null;
+    private URLClassLoader classLoader = null;
 
     /**
      * The list of all the classes on the classpath.
@@ -230,6 +230,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             Scanner subTypeScanner = Scanners.SubTypes.filterResultsBy(c -> true);
             Reflections reflections = new Reflections(new ConfigurationBuilder()
                     .forPackage("", this.getClassLoader())
+                    .addUrls(this.getClassLoader().getURLs())
                     .addScanners(subTypeScanner));
             Stream<PotentialSchemaClass> allTypesStream = reflections.getAll(subTypeScanner)
                     .stream()
@@ -417,7 +418,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      *
      * @return The classloader
      */
-    private ClassLoader getClassLoader() {
+    private URLClassLoader getClassLoader() {
         if (this.classLoader == null) {
             List<String> runtimeClasspathElements = null;
             try {
