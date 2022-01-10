@@ -2,7 +2,7 @@
 [![Build Status](https://github.com/victools/jsonschema-generator/workflows/Java%20CI%20(Maven)/badge.svg)](https://github.com/victools/jsonschema-generator/actions?query=workflow%3A%22Java+CI+%28Maven%29%22)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-generator/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.victools/jsonschema-generator)
 
-Creating JSON Schema (Draft 6, Draft 7 or Draft 2019-09) from your Java classes utilising Jackson.
+Creating JSON Schema (Draft 6, Draft 7, Draft 2019-09 or Draft 2020-12) from your Java classes utilising Jackson.
 
 ----
 
@@ -35,7 +35,7 @@ Additional documentation and configuration examples can be found here: https://v
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>4.21.0</version>
+    <version>4.22.0</version>
 </dependency>
 ```
 
