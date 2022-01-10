@@ -31,7 +31,7 @@ There are some additional parameters available in the plugin `<configuration>`:
 | --- | --- | --- | --- |
 |  1 | `<schemaFilePath>` | `src/main/resources` | Directory to generate all schemas in |
 |  2 | `<schemaFileName>` | `{0}-schema.json` | Relative path from the `<schemaFilePath>` including the file name pattern. Two placeholders are supported: `{0}` will be replaced with the respective simple class name (e.g. `TypeA`) `{1}` will be replaced with the respective package path (e.g. `com/myOrg/myApp`) in case you want to preserve the original package structure |
-|  3 | `<schemaVersion>` | `DRAFT_7` | JSON Schema version to apply (`DRAFT_6`, `DRAFT_7` or `DRAFT_2019_09`) |
+|  3 | `<schemaVersion>` | `DRAFT_7` | JSON Schema version to apply (`DRAFT_6`, `DRAFT_7`, `DRAFT_2019_09` or `DRAFT_2020_12`) |
 
 ```xml
 <options>

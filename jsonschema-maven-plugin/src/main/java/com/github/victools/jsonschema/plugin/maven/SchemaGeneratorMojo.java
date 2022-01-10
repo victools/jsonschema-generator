@@ -59,7 +59,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.Scanner;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.ConfigurationBuilder;
 
 /**
  * Maven plugin for the victools/jsonschema-generator.
@@ -108,7 +110,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private String schemaFileName;
 
     /**
-     * The schema version to be used: DRAFT_6, DRAFT_7 or DRAFT_2019_09.
+     * The schema version to be used: DRAFT_6, DRAFT_7, DRAFT_2019_09 or DRAFT_2020_12.
      */
     @Parameter(property = "schemaVersion", defaultValue = "DRAFT_7")
     private SchemaVersion schemaVersion;
@@ -139,7 +141,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     /**
      * The classloader used for loading generator modules and classes.
      */
-    private ClassLoader classLoader = null;
+    private URLClassLoader classLoader = null;
 
     /**
      * The list of all the classes on the classpath.
@@ -225,8 +227,17 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private List<PotentialSchemaClass> getAllClassNames() {
         if (this.allTypes == null) {
-            Reflections reflections = new Reflections("", new SubTypesScanner(false), this.getClassLoader());
-            Stream<PotentialSchemaClass> allTypesStream = reflections.getAllTypes().stream()
+            Scanner subTypeScanner = Scanners.SubTypes.filterResultsBy(c -> true);
+            URLClassLoader urlClassLoader = this.getClassLoader();
+            ConfigurationBuilder configBuilder = new ConfigurationBuilder()
+                    .forPackage("", urlClassLoader)
+                    .addScanners(subTypeScanner);
+            if (urlClassLoader != null) {
+                configBuilder.addUrls(urlClassLoader.getURLs());
+            }
+            Reflections reflections = new Reflections(configBuilder);
+            Stream<PotentialSchemaClass> allTypesStream = reflections.getAll(subTypeScanner)
+                    .stream()
                     .map(PotentialSchemaClass::new);
             if (this.excludeClassNames != null && this.excludeClassNames.length > 0) {
                 Set<Pattern> exclusions = Stream.of(this.excludeClassNames)
@@ -411,7 +422,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      *
      * @return The classloader
      */
-    private ClassLoader getClassLoader() {
+    private URLClassLoader getClassLoader() {
         if (this.classLoader == null) {
             List<String> runtimeClasspathElements = null;
             try {
