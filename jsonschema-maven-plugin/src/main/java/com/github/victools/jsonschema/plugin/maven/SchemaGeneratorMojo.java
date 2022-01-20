@@ -69,7 +69,8 @@ import org.reflections.util.ConfigurationBuilder;
 @Mojo(name = "generate",
         defaultPhase = LifecyclePhase.COMPILE,
         requiresDependencyResolution = ResolutionScope.COMPILE,
-        requiresDependencyCollection = ResolutionScope.COMPILE)
+        requiresDependencyCollection = ResolutionScope.COMPILE,
+        threadSafe = true)
 public class SchemaGeneratorMojo extends AbstractMojo {
 
     /**
