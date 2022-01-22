@@ -137,17 +137,17 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     /**
      * The generator to be used for all schema generations.
      */
-    private SchemaGenerator generator = null;
+    private SchemaGenerator generator;
 
     /**
      * The classloader used for loading generator modules and classes.
      */
-    private URLClassLoader classLoader = null;
+    private URLClassLoader classLoader;
 
     /**
      * The list of all the classes on the classpath.
      */
-    private List<PotentialSchemaClass> allTypes = null;
+    private List<PotentialSchemaClass> allTypes;
 
     /**
      * Invoke the schema generator.
@@ -155,7 +155,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @throws MojoExecutionException An exception in case of errors and unexpected behavior
      */
     @Override
-    public void execute() throws MojoExecutionException {
+    public synchronized void execute() throws MojoExecutionException {
         // trigger initialization of the generator instance
         this.getGenerator();
 
