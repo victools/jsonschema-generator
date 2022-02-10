@@ -3,7 +3,7 @@
 
     <name>Java JSON Schema Generator (Parent)</name>
     <description>
-        Java JSON Schema Generator + Modules – creating a JSON Schema (Draft 6, Draft 7 or Draft 2019-09) from your Java classes
+        Java JSON Schema Generator + Modules – creating a JSON Schema from your Java classes
     </description>
     <url>https://github.com/victools/jsonschema-generator</url>
 
@@ -109,6 +109,7 @@
         <module>jsonschema-module-swagger-1.5</module>
         <module>jsonschema-module-swagger-2</module>
         <module>jsonschema-maven-plugin</module>
+        <module>jsonschema-generator-bom</module>
     </modules>
 
     <properties>
