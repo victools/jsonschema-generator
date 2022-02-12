@@ -124,7 +124,7 @@ Refer to https://json-schema.org/understanding-json-schema/reference/regular_exp
 ```java
 configBuilder.forFields().withDefaultResolver(field -> {
     JsonProperty annotation = field.getAnnotationConsideringFieldAndGetter(JsonProperty.class);
-    return annotation == null || annotation.defaultValue().isEmpty() ? null : annotation.defaultValue());
+    return annotation == null || annotation.defaultValue().isEmpty() ? null : annotation.defaultValue();
 });
 ```
 
