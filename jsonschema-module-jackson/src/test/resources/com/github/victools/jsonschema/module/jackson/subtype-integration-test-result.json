@@ -4,7 +4,7 @@
         "TestSubClass2-1": {
             "type": "object",
             "properties": {
-                "superClassViaExistingProperty": {
+                "superClassViaProperty": {
                     "anyOf": [{
                             "type": "null"
                         }, {
@@ -24,16 +24,13 @@
                                 }
                             }
                         }]
-                },
-                "typeString": {
-                    "type": ["string", "null"]
                 }
             }
         },
         "TestSubClass2-2": {
             "type": "object",
             "properties": {
-                "SubtypeResolutionIntegrationTest$TestSubClass2": {
+                "SubClass2": {
                     "$ref": "#/$defs/TestSubClass2-1"
                 }
             }
@@ -53,16 +50,13 @@
                                 }
                             }
                         }]
-                },
-                "typeString": {
-                    "type": ["string", "null"]
                 }
             }
         },
         "TestSubClass3-2": {
             "type": "object",
             "properties": {
-                "SubtypeResolutionIntegrationTest$TestSubClass3": {
+                "SubClass3": {
                     "$ref": "#/$defs/TestSubClass3-1"
                 }
             }
@@ -75,16 +69,13 @@
                     "items": {
                         "$ref": "#/$defs/TestSubClass2-2"
                     }
-                },
-                "typeString": {
-                    "type": ["string", "null"]
                 }
             }
         },
         "TestSubClassWithTypeNameAnnotation-2": {
             "type": "object",
             "properties": {
-                "AnnotatedSubTypeName": {
+                "SubClass1": {
                     "$ref": "#/$defs/TestSubClassWithTypeNameAnnotation-1"
                 }
             }

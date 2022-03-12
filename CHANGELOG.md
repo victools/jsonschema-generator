@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - Declare thread-safety, to avoid warnings at runtime
 
+### `jsonschema-module-jackson`
+#### Fixed
+- Sub type resolution utilising `JsonTypeInfo.Id.NAME` now considers `@JsonSubTypes.value[].name` instead of relying on `@JsonTypeName` being present
+
 ## [4.22.0] - 2022-01-10
 ### `jsonschema-generator`
 #### Added
