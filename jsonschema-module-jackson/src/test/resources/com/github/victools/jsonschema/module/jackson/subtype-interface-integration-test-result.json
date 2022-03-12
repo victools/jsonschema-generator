@@ -14,7 +14,8 @@
                                 "typeString": {
                                     "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionFromInterfaceIntegrationTest$TestSubClassWithTypeNameAnnotation"
                                 }
-                            }
+                            },
+                            "required": ["typeString"]
                         }, {
                             "$ref": "#/$defs/TestSubClass3-1",
                             "type": "object",
@@ -22,7 +23,8 @@
                                 "typeString": {
                                     "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionFromInterfaceIntegrationTest$TestSubClass3"
                                 }
-                            }
+                            },
+                            "required": ["typeString"]
                         }]
                 }
             }
@@ -33,7 +35,8 @@
                 "SubClass2": {
                     "$ref": "#/$defs/TestSubClass2-1"
                 }
-            }
+            },
+            "required": ["SubClass2"]
         },
         "TestSubClass3-1": {
             "type": "object",
@@ -48,7 +51,8 @@
                                 "@type": {
                                     "const": "SubtypeResolutionFromInterfaceIntegrationTest$TestSubClass3"
                                 }
-                            }
+                            },
+                            "required": ["@type"]
                         }]
                 }
             }
@@ -59,7 +63,8 @@
                 "SubClass3": {
                     "$ref": "#/$defs/TestSubClass3-1"
                 }
-            }
+            },
+            "required": ["SubClass3"]
         },
         "TestSubClassWithTypeNameAnnotation-1": {
             "type": "object",
@@ -78,7 +83,8 @@
                 "AnnotatedSubTypeName": {
                     "$ref": "#/$defs/TestSubClassWithTypeNameAnnotation-1"
                 }
-            }
+            },
+            "required": ["AnnotatedSubTypeName"]
         }
     },
     "type": "object",

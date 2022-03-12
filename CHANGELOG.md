@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Fixed
 - Sub type resolution utilising `JsonTypeInfo.Id.NAME` now considers `@JsonSubTypes.value[].name` instead of relying on `@JsonTypeName` being present
 
+#### Changed
+- Sub type resolution utilising `JsonTypeInfo.As.PROPERTY`/`JsonTypeInfo.As.EXISTING_PROPERTY` now marks discriminator property as `"required"`
+- Sub type resolution utilising `JsonTypeInfo.As.WRAPPER_OBJECT` now marks discriminator value as `"required"` in wrapper object
+
 ## [4.22.0] - 2022-01-10
 ### `jsonschema-generator`
 #### Added

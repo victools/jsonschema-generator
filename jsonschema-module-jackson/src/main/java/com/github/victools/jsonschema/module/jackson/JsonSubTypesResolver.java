@@ -284,6 +284,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
                         .add(context.createStandardDefinitionReference(javaType, this))
                         .add(attributesToInclude);
             }
+            definition.withArray(context.getKeyword(SchemaKeyword.TAG_REQUIRED)).add(typeIdentifier);
             break;
         case PROPERTY:
         case EXISTING_PROPERTY:
@@ -300,6 +301,8 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
                     .with(context.getKeyword(SchemaKeyword.TAG_PROPERTIES))
                     .with(propertyName)
                     .put(context.getKeyword(SchemaKeyword.TAG_CONST), typeIdentifier);
+            additionalPart.withArray(context.getKeyword(SchemaKeyword.TAG_REQUIRED))
+                    .add(propertyName);
             break;
         default:
             return null;
