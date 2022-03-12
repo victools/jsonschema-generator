@@ -116,7 +116,7 @@ public class SubtypeResolutionFromInterfaceIntegrationTest {
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
     @JsonSubTypes({
-        @JsonSubTypes.Type(value = TestSubClassWithTypeNameAnnotation.class, name = "SubClass1"),
+        @JsonSubTypes.Type(value = TestSubClassWithTypeNameAnnotation.class),
         @JsonSubTypes.Type(value = TestSubClass2.class, name = "SubClass2"),
         @JsonSubTypes.Type(value = TestSubClass3.class, name = "SubClass3")
     })
@@ -126,7 +126,6 @@ public class SubtypeResolutionFromInterfaceIntegrationTest {
     @JsonTypeName("AnnotatedSubTypeName")
     private static class TestSubClassWithTypeNameAnnotation implements TestSuperInterface {
 
-        public String typeString;
         public List<TestSubClass2> directSubClass2;
 
         TestSubClassWithTypeNameAnnotation(TestSubClass2... directSubClass2) {
@@ -136,32 +135,28 @@ public class SubtypeResolutionFromInterfaceIntegrationTest {
 
     private static class TestSubClass2 implements TestSuperInterface {
 
-        public String typeString;
-        @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "typeString")
+        @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "typeString")
         @JsonSubTypes({
             @JsonSubTypes.Type(value = TestSubClassWithTypeNameAnnotation.class, name = "Sub1"),
             @JsonSubTypes.Type(value = TestSubClass3.class, name = "Sub3")
         })
-        public TestSuperInterface superClassViaExistingProperty;
+        public TestSuperInterface superClassViaProperty;
 
         public TestSubClass2() {
-            this.superClassViaExistingProperty = null;
+            this.superClassViaProperty = null;
         }
 
-        public TestSubClass2(TestSubClassWithTypeNameAnnotation superClassViaExistingProperty) {
-            this.superClassViaExistingProperty = superClassViaExistingProperty;
-            superClassViaExistingProperty.typeString = "Sub1";
+        public TestSubClass2(TestSubClassWithTypeNameAnnotation superClassViaProperty) {
+            this.superClassViaProperty = superClassViaProperty;
         }
 
-        public TestSubClass2(TestSubClass3 superClassViaExistingProperty) {
-            this.superClassViaExistingProperty = superClassViaExistingProperty;
-            superClassViaExistingProperty.typeString = "Sub3";
+        public TestSubClass2(TestSubClass3 superClassViaProperty) {
+            this.superClassViaProperty = superClassViaProperty;
         }
     }
 
     private static class TestSubClass3 implements TestSuperInterface {
 
-        public String typeString;
         @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
         public TestSubClass3 recursiveSubClass3;
 

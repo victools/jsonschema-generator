@@ -84,7 +84,6 @@ public class SubtypeResolutionIntegrationTest {
         }
         String fileAsString = stringBuilder.toString();
         return fileAsString;
-
     }
 
     private static class TestClassForSubtypeResolution {
@@ -122,7 +121,6 @@ public class SubtypeResolutionIntegrationTest {
     })
     private static class TestSuperClass {
 
-        public String typeString;
     }
 
     @JsonTypeName("AnnotatedSubTypeName")
@@ -137,25 +135,23 @@ public class SubtypeResolutionIntegrationTest {
 
     private static class TestSubClass2 extends TestSuperClass {
 
-        @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "typeString")
+        @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "typeString")
         @JsonSubTypes({
             @JsonSubTypes.Type(value = TestSubClassWithTypeNameAnnotation.class, name = "Sub1"),
             @JsonSubTypes.Type(value = TestSubClass3.class, name = "Sub3")
         })
-        public TestSuperClass superClassViaExistingProperty;
+        public TestSuperClass superClassViaProperty;
 
         public TestSubClass2() {
-            this.superClassViaExistingProperty = null;
+            this.superClassViaProperty = null;
         }
 
-        public TestSubClass2(TestSubClassWithTypeNameAnnotation superClassViaExistingProperty) {
-            this.superClassViaExistingProperty = superClassViaExistingProperty;
-            this.superClassViaExistingProperty.typeString = "Sub1";
+        public TestSubClass2(TestSubClassWithTypeNameAnnotation superClassViaProperty) {
+            this.superClassViaProperty = superClassViaProperty;
         }
 
-        public TestSubClass2(TestSubClass3 superClassViaExistingProperty) {
-            this.superClassViaExistingProperty = superClassViaExistingProperty;
-            this.superClassViaExistingProperty.typeString = "Sub3";
+        public TestSubClass2(TestSubClass3 superClassViaProperty) {
+            this.superClassViaProperty = superClassViaProperty;
         }
     }
 

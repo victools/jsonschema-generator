@@ -4,7 +4,7 @@
         "TestSubClass2-1": {
             "type": "object",
             "properties": {
-                "superClassViaExistingProperty": {
+                "superClassViaProperty": {
                     "anyOf": [{
                             "type": "null"
                         }, {
@@ -14,7 +14,8 @@
                                 "typeString": {
                                     "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionIntegrationTest$TestSubClassWithTypeNameAnnotation"
                                 }
-                            }
+                            },
+                            "required": ["typeString"]
                         }, {
                             "$ref": "#/$defs/TestSubClass3-1",
                             "type": "object",
@@ -22,21 +23,20 @@
                                 "typeString": {
                                     "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionIntegrationTest$TestSubClass3"
                                 }
-                            }
+                            },
+                            "required": ["typeString"]
                         }]
-                },
-                "typeString": {
-                    "type": ["string", "null"]
                 }
             }
         },
         "TestSubClass2-2": {
             "type": "object",
             "properties": {
-                "SubtypeResolutionIntegrationTest$TestSubClass2": {
+                "SubClass2": {
                     "$ref": "#/$defs/TestSubClass2-1"
                 }
-            }
+            },
+            "required": ["SubClass2"]
         },
         "TestSubClass3-1": {
             "type": "object",
@@ -51,21 +51,20 @@
                                 "@type": {
                                     "const": "SubtypeResolutionIntegrationTest$TestSubClass3"
                                 }
-                            }
+                            },
+                            "required": ["@type"]
                         }]
-                },
-                "typeString": {
-                    "type": ["string", "null"]
                 }
             }
         },
         "TestSubClass3-2": {
             "type": "object",
             "properties": {
-                "SubtypeResolutionIntegrationTest$TestSubClass3": {
+                "SubClass3": {
                     "$ref": "#/$defs/TestSubClass3-1"
                 }
-            }
+            },
+            "required": ["SubClass3"]
         },
         "TestSubClassWithTypeNameAnnotation-1": {
             "type": "object",
@@ -75,19 +74,17 @@
                     "items": {
                         "$ref": "#/$defs/TestSubClass2-2"
                     }
-                },
-                "typeString": {
-                    "type": ["string", "null"]
                 }
             }
         },
         "TestSubClassWithTypeNameAnnotation-2": {
             "type": "object",
             "properties": {
-                "AnnotatedSubTypeName": {
+                "SubClass1": {
                     "$ref": "#/$defs/TestSubClassWithTypeNameAnnotation-1"
                 }
-            }
+            },
+            "required": ["SubClass1"]
         }
     },
     "type": "object",

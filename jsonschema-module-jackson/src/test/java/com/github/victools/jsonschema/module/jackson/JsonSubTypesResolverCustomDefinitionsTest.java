@@ -75,7 +75,8 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
         return new Object[][]{
             {TestClassWithSuperTypeReferences.class, null},
             {TestSuperClassWithNameProperty.class, null},
-            {TestSubClass1.class, "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}}}]}"}
+            {TestSubClass1.class, "{\"allOf\":[{},"
+                + "{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}},\"required\":[\"@type\"]}]}"}
         };
     }
 
@@ -95,15 +96,18 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
             {"superTypeWithAnnotationOnField", null, null},
             {"superTypeWithAnnotationOnField", TestSubClass1.class,
                 "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
-                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass1\"}}}]}"},
+                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass1\"}},"
+                + "\"required\":[\"fullClass\"]}]}"},
             {"superTypeWithAnnotationOnField", TestSubClass2.class,
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
-                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"}}}]}"},
+                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"}},"
+                + "\"required\":[\"fullClass\"]}]}"},
             {"superTypeWithAnnotationOnGetter", null, null},
             {"superTypeWithAnnotationOnGetter", TestSubClass1.class,
-                "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}}}]}"},
+                "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\","
+                + "\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}},\"required\":[\"@type\"]}]}"},
             {"superTypeWithAnnotationOnGetter", TestSubClass2.class,
-                "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_2\"}}}]}"},
+                "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_2\"}},\"required\":[\"@type\"]}]}"},
             {"superTypeWithAnnotationOnFieldAndGetter", null, null},
             {"superTypeWithAnnotationOnFieldAndGetter", TestSubClass1.class,
                 "{\"type\":\"array\",\"items\":[{\"type\":\"string\",\"const\":"
@@ -115,10 +119,12 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
             {"superInterfaceWithAnnotationOnField", null, null},
             {"superInterfaceWithAnnotationOnField", TestSubClass3.class,
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
-                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass3\"}}}]}"},
+                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass3\"}},"
+                + "\"required\":[\"fullClass\"]}]}"},
             {"superInterfaceWithAnnotationOnField", TestSubClass4.class,
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
-                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass4\"}}}]}"}
+                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass4\"}},"
+                + "\"required\":[\"fullClass\"]}]}"}
         };
     }
 
@@ -142,20 +148,24 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
             {"getSuperTypeWithAnnotationOnField", null, null},
             {"getSuperTypeWithAnnotationOnField", TestSubClass1.class,
                 "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
-                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass1\"}}}]}"},
+                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass1\"}},"
+                + "\"required\":[\"fullClass\"]}]}"},
             {"getSuperTypeWithAnnotationOnField", TestSubClass2.class,
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
-                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"}}}]}"},
+                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"}},"
+                + "\"required\":[\"fullClass\"]}]}"},
             {"getSuperTypeWithAnnotationOnGetter", null, null},
             {"getSuperTypeWithAnnotationOnGetter", TestSubClass1.class,
-                "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}}}]}"},
+                "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\","
+                + "\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}},\"required\":[\"@type\"]}]}"},
             {"getSuperTypeWithAnnotationOnGetter", TestSubClass2.class,
-                "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_2\"}}}]}"},
+                "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_2\"}},\"required\":[\"@type\"]}]}"},
             {"getSuperTypeWithAnnotationOnFieldAndGetter", null, null},
             {"getSuperTypeWithAnnotationOnFieldAndGetter", TestSubClass1.class,
-                "{\"type\":\"object\",\"properties\":{\"SUB_CLASS_1\":{\"allOf\":[{},{\"title\":\"property attribute\"}]}}}"},
+                "{\"type\":\"object\",\"properties\":{\"SUB_CLASS_1\":{\"allOf\":[{},{\"title\":\"property attribute\"}]}},"
+                + "\"required\":[\"SUB_CLASS_1\"]}"},
             {"getSuperTypeWithAnnotationOnFieldAndGetter", TestSubClass2.class,
-                "{\"type\":\"object\",\"properties\":{\"SUB_CLASS_2\":{}}}"}
+                "{\"type\":\"object\",\"properties\":{\"SUB_CLASS_2\":{}},\"required\":[\"SUB_CLASS_2\"]}"}
         };
     }
 
