@@ -132,8 +132,15 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         }
         JsonTypeInfo typeInfoAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonTypeInfo.class);
         if (typeInfoAnnotation == null) {
-            // neither of the two annotations is overriding the per-type behaviour, i.e., no need for inline custom property schema
+            // the normal per-type behaviour is not being overridden, i.e., no need for an inline custom property schema
             return null;
+        }
+        if (typeInfoAnnotation.use() == JsonTypeInfo.Id.NONE) {
+            ObjectNode definition = context.getGeneratorConfig().createObjectNode();
+            // wrap reference into "allOf" in order to force correct handling, in case the field/method being nullable
+            definition.withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))
+                    .add(context.createStandardDefinitionReference(scope.getType(), this));
+            return new CustomPropertyDefinition(definition, CustomDefinition.AttributeInclusion.YES);
         }
         ObjectNode attributes;
         if (scope instanceof FieldScope) {
