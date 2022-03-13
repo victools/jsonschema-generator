@@ -74,6 +74,13 @@
                     "items": {
                         "$ref": "#/$defs/TestSubClass2-2"
                     }
+                },
+                "unwrappedSubClass2": {
+                    "anyOf": [{
+                            "type": "null"
+                        }, {
+                            "$ref": "#/$defs/TestSubClass2-1"
+                        }]
                 }
             }
         },

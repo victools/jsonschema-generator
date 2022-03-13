@@ -127,9 +127,16 @@ public class SubtypeResolutionIntegrationTest {
     private static class TestSubClassWithTypeNameAnnotation extends TestSuperClass {
 
         public List<TestSubClass2> directSubClass2;
+        @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
+        public TestSubClass2 unwrappedSubClass2;
 
         TestSubClassWithTypeNameAnnotation(TestSubClass2... directSubClass2) {
             this.directSubClass2 = Arrays.asList(directSubClass2);
+            if (this.directSubClass2.isEmpty()) {
+                this.unwrappedSubClass2 = null;
+            } else {
+                this.unwrappedSubClass2 = directSubClass2[0];
+            }
         }
     }
 
