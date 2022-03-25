@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.classmate.members.HierarchicType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -257,7 +258,8 @@ public class JacksonModule implements Module {
             return true;
         }
         // instead of re-creating the various ways a property may be included/excluded in jackson: just use its built-in introspection
-        BeanDescription beanDescription = this.getBeanDescriptionForClass(field.getDeclaringType());
+        HierarchicType topMostHierarchyType = field.getDeclaringTypeMembers().allTypesAndOverrides().get(0);
+        BeanDescription beanDescription = this.getBeanDescriptionForClass(topMostHierarchyType.getType());
         // some kinds of field ignorals are only available via an annotation introspector
         Set<String> ignoredProperties = this.objectMapper.getSerializationConfig().getAnnotationIntrospector()
                 .findPropertyIgnoralByName(null, beanDescription.getClassInfo()).getIgnored();
