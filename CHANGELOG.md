@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - Support for sub type resolution on properties with `JsonTypeInfo.Id.NONE` override avoiding the default wrapping/modification
 
+#### Fixed
+- Correctly consider `@JsonIgnoreProperties` targeting fields in super type
+
 ## [4.23.0] - 2022-03-13
 ### `jsonschema-generator-bom`
 #### Added
