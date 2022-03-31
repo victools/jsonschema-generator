@@ -44,27 +44,32 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
 
     Object parametersForTestFindGetterField() {
         return new String[][]{
-            {"getFieldWithPrivateGetter", null},
-            {"getFieldWithPublicGetter", "fieldWithPublicGetter"},
-            {"isFieldWithPublicBooleanGetter", "fieldWithPublicBooleanGetter"},
-            {"getCalculatedValue", null},
-            {"isBehavingSomehow", null},
-            {"get", null},
-            {"is", null},
-            {"calculateSomething", null}};
+            {"getFieldWithPrivateGetter", null, null},
+            {"getFieldWithPrivateGetter", "getFieldWithPublicGetter", null},
+            {"getFieldWithPublicGetter", null, "fieldWithPublicGetter"},
+            {"getFieldWithPublicGetter", "getFieldWithPrivateGetter", "fieldWithPublicGetter"},
+            {"isFieldWithPublicBooleanGetter", null, "fieldWithPublicBooleanGetter"},
+            {"isFieldWithPublicBooleanGetter", "isBehavingSomehow", "fieldWithPublicBooleanGetter"},
+            {"getCalculatedValue", null, null},
+            {"isBehavingSomehow", null, null},
+            {"isBehavingSomehow", "isFieldWithPublicBooleanGetter", null},
+            {"get", null, null},
+            {"is", null, null},
+            {"calculateSomething", null, null}};
     }
 
     @Test
     @Parameters
-    public void testFindGetterField(String methodName, String fieldName) throws Exception {
-        MethodScope method = this.getTestClassMethod(methodName);
+    public void testFindGetterField(String methodName, String methodNameOverride, String fieldName) throws Exception {
+        MethodScope method = this.getTestClassMethod(methodName)
+                .withOverriddenName(methodNameOverride);
         FieldScope field = method.findGetterField();
 
         if (fieldName == null) {
             Assert.assertNull(field);
         } else {
             Assert.assertNotNull(field);
-            Assert.assertEquals(fieldName, field.getName());
+            Assert.assertEquals(fieldName, field.getDeclaredName());
         }
     }
 
