@@ -127,7 +127,7 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
             // void and non-public methods or those with arguments are not deemed to be getters
             return null;
         }
-        String methodName = this.getName();
+        String methodName = this.getDeclaredName();
         String fieldName;
         if (methodName.startsWith("get") && methodName.length() > 3 && Character.isUpperCase(methodName.charAt(3))) {
             // ensure that the variable starts with a lower-case letter

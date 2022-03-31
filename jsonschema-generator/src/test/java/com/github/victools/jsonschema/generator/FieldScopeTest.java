@@ -44,16 +44,19 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
 
     Object parametersForTestFindGetter() {
         return new String[][]{
-            {"fieldWithoutGetter", null},
-            {"fieldWithPrivateGetter", null},
-            {"fieldWithPublicGetter", "getFieldWithPublicGetter"},
-            {"fieldWithPublicBooleanGetter", "isFieldWithPublicBooleanGetter"}};
+            {"fieldWithoutGetter", null, null},
+            {"fieldWithoutGetter", "fieldWithPublicGetter", null},
+            {"fieldWithPrivateGetter", null, null},
+            {"fieldWithPublicGetter", null, "getFieldWithPublicGetter"},
+            {"fieldWithPublicGetter", "fieldWithoutGetter", "getFieldWithPublicGetter"},
+            {"fieldWithPublicBooleanGetter", null, "isFieldWithPublicBooleanGetter"}};
     }
 
     @Test
     @Parameters
-    public void testFindGetter(String fieldName, String methodName) throws Exception {
-        FieldScope field = this.getTestClassField(fieldName);
+    public void testFindGetter(String fieldName, String fieldNameOverride, String methodName) throws Exception {
+        FieldScope field = this.getTestClassField(fieldName)
+                .withOverriddenName(fieldNameOverride);
         MethodScope getter = field.findGetter();
 
         if (methodName == null) {

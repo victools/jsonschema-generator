@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Fixed
+- When looking-up a matching field or getter, only consider the declared property names and not any overrides
+
 ### `jsonschema-module-jackson`
 #### Added
 - Support for sub type resolution on properties with `JsonTypeInfo.Id.NONE` override avoiding the default wrapping/modification

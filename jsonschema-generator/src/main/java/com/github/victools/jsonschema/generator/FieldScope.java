@@ -112,7 +112,7 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
      * @return public getter from within the field's declaring class
      */
     private MethodScope doFindGetter() {
-        String capitalisedFieldName = this.getName().substring(0, 1).toUpperCase() + this.getName().substring(1);
+        String capitalisedFieldName = this.getDeclaredName().substring(0, 1).toUpperCase() + this.getDeclaredName().substring(1);
         String getterName1 = "get" + capitalisedFieldName;
         String getterName2 = "is" + capitalisedFieldName;
         ResolvedMethod[] methods = this.getDeclaringTypeMembers().getMemberMethods();
