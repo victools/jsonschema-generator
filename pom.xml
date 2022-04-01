@@ -118,7 +118,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <version.classmate>1.5.1</version.classmate>
-        <version.jackson>2.12.1</version.jackson>
+        <version.jackson>2.13.2.20220328</version.jackson>
         <version.jakarta.validation>3.0.0</version.jakarta.validation>
         <version.javax.validation>2.0.1.Final</version.javax.validation>
         <version.jsonassert>1.5.0</version.jsonassert>
@@ -171,19 +171,11 @@
                 <version>${version.classmate}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
                 <version>${version.jackson}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${version.jackson}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${version.jackson}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>jakarta.validation</groupId>
