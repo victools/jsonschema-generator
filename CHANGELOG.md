@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.24.1] - 2022-04-01
 ### `jsonschema-generator`
 #### Dependency Update
-- Bump `jackson` dependencies to `2.13.2.2` (and `2.13.2`) to avoid security vulnerability
+- Bump `jackson-databind` dependency to `2.13.2.2` to avoid security vulnerability
+- Bump other `jackson` dependencies to `2.13.2`
 
 ## [4.24.0] - 2022-04-01
 ### `jsonschema-generator`
@@ -569,7 +570,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.24.0...HEAD
+[4.24.1]: https://github.com/victools/jsonschema-generator/compare/v4.24.0...v4.24.1
 [4.24.0]: https://github.com/victools/jsonschema-generator/compare/v4.23.0...v4.24.0
 [4.23.0]: https://github.com/victools/jsonschema-generator/compare/v4.22.0...v4.23.0
 [4.22.0]: https://github.com/victools/jsonschema-generator/compare/v4.21.0...v4.22.0
