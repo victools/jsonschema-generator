@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Set;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,18 +64,25 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
     @Mock
     private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
 
+    private AutoCloseable mockProvider;
+
     public SchemaGeneratorConfigImplTest() {
         super(TestClass.class);
     }
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        this.mockProvider = MockitoAnnotations.openMocks(this);
         this.enabledOptions = new HashSet<>();
 
         this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, SchemaVersion.DRAFT_2019_09, this.enabledOptions,
                 this.typesInGeneralConfigPart, this.fieldConfigPart, this.methodConfigPart);
         this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        this.mockProvider.close();
     }
 
     @Test
