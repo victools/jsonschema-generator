@@ -28,19 +28,19 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 /**
  * Test for the {@link AdditionalPropertiesModule} class.
  */
-@RunWith(JUnitParamsRunner.class)
 public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
 
     private SchemaGeneratorConfigBuilder builder;
@@ -50,7 +50,7 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
         super(TestMapSubType.class);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.builder = Mockito.mock(SchemaGeneratorConfigBuilder.class);
         this.generalConfigPart = Mockito.spy(new SchemaGeneratorGeneralConfigPart());
@@ -80,23 +80,23 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
         Mockito.verifyNoMoreInteractions(this.generalConfigPart);
     }
 
-    public Object[] parametersForTestResolveAdditionalProperties() {
+    static Stream<Arguments> parametersForTestResolveAdditionalProperties() {
         AdditionalPropertiesModule mapValuesInstance = AdditionalPropertiesModule.forMapValues();
         AdditionalPropertiesModule noneButContainersInstance = AdditionalPropertiesModule.forbiddenForAllObjectsButContainers();
-        return new Object[][]{
-            {mapValuesInstance, null, String.class, new Type[0]},
-            {noneButContainersInstance, Void.class, String.class, new Type[0]},
-            {mapValuesInstance, Integer.class, Map.class, new Type[]{String.class, Integer.class}},
-            {noneButContainersInstance, Void.class, Map.class, new Type[]{String.class, Integer.class}},
-            {mapValuesInstance, String.class, TestMapSubType.class, new Type[0]},
-            {noneButContainersInstance, Void.class, TestMapSubType.class, new Type[0]},
-            {mapValuesInstance, null, List.class, new Type[]{String.class}},
-            {noneButContainersInstance, null, List.class, new Type[]{String.class}}
-        };
+        return Stream.of(
+            Arguments.of(mapValuesInstance, null, String.class, new Type[0]),
+            Arguments.of(noneButContainersInstance, Void.class, String.class, new Type[0]),
+            Arguments.of(mapValuesInstance, Integer.class, Map.class, new Type[]{String.class, Integer.class}),
+            Arguments.of(noneButContainersInstance, Void.class, Map.class, new Type[]{String.class, Integer.class}),
+            Arguments.of(mapValuesInstance, String.class, TestMapSubType.class, new Type[0]),
+            Arguments.of(noneButContainersInstance, Void.class, TestMapSubType.class, new Type[0]),
+            Arguments.of(mapValuesInstance, null, List.class, new Type[]{String.class}),
+            Arguments.of(noneButContainersInstance, null, List.class, new Type[]{String.class})
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestResolveAdditionalProperties")
     @SuppressWarnings("unchecked")
     public void testResolveAdditionalProperties(Module moduleInstance, Type expectedAdditionalProperties, Type type, Type[] typeParameters) {
         moduleInstance.applyToConfigBuilder(this.builder);
@@ -109,9 +109,9 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
         Type result = additionalPropertiesResolver.apply(scope);
 
         if (expectedAdditionalProperties == null || expectedAdditionalProperties == Void.class) {
-            Assert.assertEquals(expectedAdditionalProperties, result);
+            Assertions.assertEquals(expectedAdditionalProperties, result);
         } else {
-            Assert.assertEquals(typeContext.resolve(expectedAdditionalProperties), result);
+            Assertions.assertEquals(typeContext.resolve(expectedAdditionalProperties), result);
         }
     }
 

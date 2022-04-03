@@ -38,8 +38,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -67,7 +67,7 @@ public class SubtypeResolutionFromInterfaceIntegrationTest {
 
         Set<ValidationMessage> validationResult = schemaForValidation.validate(config.getObjectMapper().readTree(jsonInstance));
         if (!validationResult.isEmpty()) {
-            Assert.fail("\n" + jsonInstance + "\n  " + validationResult.stream()
+            Assertions.fail("\n" + jsonInstance + "\n  " + validationResult.stream()
                     .map(ValidationMessage::getMessage)
                     .collect(Collectors.joining("\n  ")));
         }

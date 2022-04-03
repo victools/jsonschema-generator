@@ -22,18 +22,17 @@ import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Test for {@link SimpleTypeModule} class.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class SimpleTypeModuleTest {
 
     private SimpleTypeModule instance;
@@ -42,10 +41,18 @@ public class SimpleTypeModuleTest {
     @Mock(answer = Answers.RETURNS_SELF)
     private SchemaGeneratorGeneralConfigPart typeConfigPart;
 
-    @Before
+    private AutoCloseable mockProvider;
+
+    @BeforeEach
     public void setUp() {
+        this.mockProvider = MockitoAnnotations.openMocks(this);
         this.instance = new SimpleTypeModule();
         Mockito.when(this.builder.forTypesInGeneral()).thenReturn(this.typeConfigPart);
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        this.mockProvider.close();
     }
 
     @Test

@@ -30,27 +30,26 @@ import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.Set;
 import java.util.TreeSet;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test for the ignored properties being exclude as expected.
  */
-@RunWith(JUnitParamsRunner.class)
 public class IgnorePropertyTest {
 
-    Object[][] parametersForTestJsonIgnoreProperties() {
-        return new Object[][]{
-            {SubType.class, "[includedChildField, includedParentField1, includedParentField2]"},
-            {SuperType.class, "[ignoredParentField2, includedParentField1]"},
-        };
+    static Stream<Arguments> parametersForTestJsonIgnoreProperties() {
+        return Stream.of(
+            Arguments.of(SubType.class, "[includedChildField, includedParentField1, includedParentField2]"),
+            Arguments.of(SuperType.class, "[ignoredParentField2, includedParentField1]")
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestJsonIgnoreProperties")
     public void testJsonIgnoreProperties(Class<?> targetType, String expectedIncludedPropertyNames) throws JsonProcessingException {
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
                 .with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT)
@@ -62,7 +61,7 @@ public class IgnorePropertyTest {
         JsonNode propertiesNode = result.get(config.getKeyword(SchemaKeyword.TAG_PROPERTIES));
         Set<String> propertyNames = new TreeSet<>();
         propertiesNode.fieldNames().forEachRemaining(propertyNames::add);
-        Assert.assertEquals(expectedIncludedPropertyNames, propertyNames.toString());
+        Assertions.assertEquals(expectedIncludedPropertyNames, propertyNames.toString());
     }
 
     @JsonIgnoreProperties({"ignoredChildField2","ignoredParentField2"})

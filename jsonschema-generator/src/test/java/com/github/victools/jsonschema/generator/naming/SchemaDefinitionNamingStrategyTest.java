@@ -26,39 +26,37 @@ import com.github.victools.jsonschema.generator.impl.SchemaCleanUpUtils;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.math.BigDecimal;
 import java.util.Map;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import junitparams.naming.TestCaseName;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 /**
  * Test/examples of possible {@link SchemaDefinitionNamingStrategy} implementations.
  */
-@RunWith(JUnitParamsRunner.class)
 public class SchemaDefinitionNamingStrategyTest {
 
     private static TypeContext typeContext = TypeContextFactory.createDefaultTypeContext();
     private DefinitionKey key;
     private SchemaGenerationContext generationContext;
 
-    @AfterClass
+    @AfterAll
     public static void discardTypeContext() {
         SchemaDefinitionNamingStrategyTest.typeContext = null;
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.key = Mockito.mock(DefinitionKey.class);
         this.generationContext = Mockito.mock(SchemaGenerationContext.class);
         Mockito.when(this.generationContext.getTypeContext()).thenReturn(SchemaDefinitionNamingStrategyTest.typeContext);
     }
 
-    public Object[] parametersForTestExampleStrategy() {
+    static Stream<Arguments> parametersForTestExampleStrategy() {
         NamingBase jacksonSnakeCase = (NamingBase) PropertyNamingStrategies.SNAKE_CASE;
         SchemaDefinitionNamingStrategy snakeCase = new DefaultSchemaDefinitionNamingStrategy() {
             @Override
@@ -80,29 +78,28 @@ public class SchemaDefinitionNamingStrategyTest {
         SchemaDefinitionNamingStrategy inclPackage = (definitionKey, context) -> context.getTypeContext()
                 .getFullTypeDescription(definitionKey.getType());
 
-        return new Object[][]{
-            {"Snake Case", snakeCase, typeContext.resolve(BigDecimal.class), "big_decimal", "big_decimal"},
-            {"Snake Case", snakeCase, typeContext.resolve(Map.class, String.class, BigDecimal.class),
-                "map(string,big_decimal)", "map_string.big_decimal_"},
-            {"Dot Case", dotCase, typeContext.resolve(BigDecimal.class), "big.decimal", "big.decimal"},
-            {"Dot Case", dotCase, typeContext.resolve(Map.class, String.class, BigDecimal.class),
-                "map(string-big.decimal)", "map_string-big.decimal_"},
-            {"Incl. Package", inclPackage, typeContext.resolve(BigDecimal.class), "java.math.BigDecimal", "java.math.BigDecimal"},
-            {"Incl. Package", inclPackage, typeContext.resolve(Map.class, String.class, BigDecimal.class),
-                "java.util.Map(java.lang.String,java.math.BigDecimal)", "java.util.Map_java.lang.String.java.math.BigDecimal_"}
-        };
+        return Stream.of(
+            Arguments.of("Snake Case", snakeCase, typeContext.resolve(BigDecimal.class), "big_decimal", "big_decimal"),
+            Arguments.of("Snake Case", snakeCase, typeContext.resolve(Map.class, String.class, BigDecimal.class),
+                "map(string,big_decimal)", "map_string.big_decimal_"),
+            Arguments.of("Dot Case", dotCase, typeContext.resolve(BigDecimal.class), "big.decimal", "big.decimal"),
+            Arguments.of("Dot Case", dotCase, typeContext.resolve(Map.class, String.class, BigDecimal.class),
+                "map(string-big.decimal)", "map_string-big.decimal_"),
+            Arguments.of("Incl. Package", inclPackage, typeContext.resolve(BigDecimal.class), "java.math.BigDecimal", "java.math.BigDecimal"),
+            Arguments.of("Incl. Package", inclPackage, typeContext.resolve(Map.class, String.class, BigDecimal.class),
+                "java.util.Map(java.lang.String,java.math.BigDecimal)", "java.util.Map_java.lang.String.java.math.BigDecimal_")
+        );
     }
 
-    @Test
-    @Parameters
-    @TestCaseName(value = "{method}({0}, {3} | {4}) [{index}]")
+    @ParameterizedTest
+    @MethodSource("parametersForTestExampleStrategy")
     public void testExampleStrategy(String caseTitle, SchemaDefinitionNamingStrategy strategy, ResolvedType type,
             String expectedUriCompatibleName, String expectedPlainName) {
         Mockito.when(this.key.getType()).thenReturn(type);
         String result = strategy.getDefinitionNameForKey(this.key, this.generationContext);
         // before the produced name is used in an actual schema, the SchemaCleanUpUtils come into play one way or another
         SchemaCleanUpUtils cleanUpUtils = new SchemaCleanUpUtils(null);
-        Assert.assertEquals(expectedUriCompatibleName, cleanUpUtils.ensureDefinitionKeyIsUriCompatible(result));
-        Assert.assertEquals(expectedPlainName, cleanUpUtils.ensureDefinitionKeyIsPlain(result));
+        Assertions.assertEquals(expectedUriCompatibleName, cleanUpUtils.ensureDefinitionKeyIsUriCompatible(result));
+        Assertions.assertEquals(expectedPlainName, cleanUpUtils.ensureDefinitionKeyIsPlain(result));
     }
 }

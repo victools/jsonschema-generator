@@ -19,60 +19,57 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for {@link SchemaGenerator} class.
  */
-@RunWith(JUnitParamsRunner.class)
 public class SchemaGeneratorAllOfCleanUpTest {
 
-    public Object[] parametersForTestAllOfCleanUp() {
+    static Stream<Arguments> parametersForTestAllOfCleanUp() {
         String differentValueInMainSchema = "{ \"type\":\"object\", \"title\":\"main schema\", \"allOf\":[{ \"title\":\"different title\" }, {}] }";
         String differentValueInAllOfPart = "{ \"type\":\"object\", \"allOf\":[{ \"title\":\"title X\" }, { \"title\":\"title Y\" }] }";
         String equalIfTagInMainSchema = "{ \"type\":\"object\", \"if\":{ \"const\": 1 }, \"then\":{}, "
                 + "\"allOf\":[{ \"if\":{ \"const\": 1 }, \"then\":{}, \"else\": { \"title\": \"otherwise...\" } }, {}] }";
         String equalIfTagInAllOfPart = "{ \"type\":\"object\", \"allOf\":[{ \"if\":{ \"const\": 1 }, \"then\":{} }, "
                 + "{ \"if\":{ \"const\": 1 }, \"then\":{}, \"else\": { \"title\": \"otherwise...\" } }] }";
-        List<Object[]> testCases = EnumSet.allOf(SchemaVersion.class).stream()
-                .map(schemaVersion -> new Object[][]{
-                    {schemaVersion, differentValueInMainSchema, differentValueInMainSchema},
-                    {schemaVersion, differentValueInAllOfPart, differentValueInAllOfPart},
-                    {schemaVersion, equalIfTagInMainSchema, equalIfTagInMainSchema},
-                    {schemaVersion, equalIfTagInAllOfPart, equalIfTagInAllOfPart},
-                    {schemaVersion,
+        List<Arguments> testCases = EnumSet.allOf(SchemaVersion.class).stream()
+                .flatMap(schemaVersion -> Stream.of(
+                    Arguments.of(schemaVersion, differentValueInMainSchema, differentValueInMainSchema),
+                    Arguments.of(schemaVersion, differentValueInAllOfPart, differentValueInAllOfPart),
+                    Arguments.of(schemaVersion, equalIfTagInMainSchema, equalIfTagInMainSchema),
+                    Arguments.of(schemaVersion, equalIfTagInAllOfPart, equalIfTagInAllOfPart),
+                    Arguments.of(schemaVersion,
                         "{ \"type\": \"object\", \"title\":\"same in all three\", "
                                 + "\"allOf\": [{ \"title\":\"same in all three\" }, { \"title\":\"same in all three\" }] }",
-                        "{ \"type\": \"object\", \"title\":\"same in all three\" }"},
-                    {schemaVersion,
+                        "{ \"type\": \"object\", \"title\":\"same in all three\" }"),
+                    Arguments.of(schemaVersion,
                         "{ \"type\": \"object\",\"allOf\": [{ \"title\":\"from allOf[0]\" }, { \"description\":\"from allOf[1]\" }] }",
-                        "{ \"type\": \"object\", \"title\":\"from allOf[0]\", \"description\":\"from allOf[1]\" }"}
-                })
-                .flatMap(oneVersion -> Arrays.asList(oneVersion).stream())
+                        "{ \"type\": \"object\", \"title\":\"from allOf[0]\", \"description\":\"from allOf[1]\" }")
+                ))
                 .collect(Collectors.toList());
 
         // in Drafts 6/7, alongside $ref all other attributes are being ignored and should therefore not be merged
         EnumSet<SchemaVersion> versionsWithSpecialRefHandling = EnumSet.of(SchemaVersion.DRAFT_6, SchemaVersion.DRAFT_7);
         String refInAllOfPart = "{ \"type\": \"object\", \"allOf\": [{ \"$ref\": \"#\" }, { \"title\": \"value\" }] }";
         versionsWithSpecialRefHandling.stream()
-                .forEach(schemaVersion -> testCases.add(new Object[]{ schemaVersion, refInAllOfPart, refInAllOfPart }));
+                .forEach(schemaVersion -> testCases.add(Arguments.of(schemaVersion, refInAllOfPart, refInAllOfPart)));
         EnumSet.complementOf(versionsWithSpecialRefHandling).stream()
                 .forEach(schemaVersion ->
-        testCases.add(new Object[]{ schemaVersion, refInAllOfPart, "{ \"type\": \"object\", \"$ref\": \"#\", \"title\": \"value\" }" }));
-        return testCases.toArray();
+        testCases.add(Arguments.of(schemaVersion, refInAllOfPart, "{ \"type\": \"object\", \"$ref\": \"#\", \"title\": \"value\" }")));
+        return testCases.stream();
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestAllOfCleanUp")
     public void testAllOfCleanUp(SchemaVersion schemaVersion, String inputSchema, String outputSchema) throws Exception {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON)
                 .without(Option.SCHEMA_VERSION_INDICATOR);

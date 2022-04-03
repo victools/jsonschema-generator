@@ -16,9 +16,9 @@
 
 package com.github.victools.jsonschema.generator;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test for the {@link SchemaGeneratorConfigBuilder} class.
@@ -27,35 +27,35 @@ public class SchemaGeneratorConfigBuilderTest {
 
     private SchemaGeneratorConfigBuilder builder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.builder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09);
     }
 
     @Test
     public void testGetSetting_WithoutSetting() {
-        Assert.assertNull(this.builder.getSetting(Option.DEFINITIONS_FOR_ALL_OBJECTS));
+        Assertions.assertNull(this.builder.getSetting(Option.DEFINITIONS_FOR_ALL_OBJECTS));
     }
 
     @Test
     public void testGetSetting_WithOption() {
-        Assert.assertSame(this.builder, this.builder.with(Option.DEFINITIONS_FOR_ALL_OBJECTS));
-        Assert.assertTrue(this.builder.getSetting(Option.DEFINITIONS_FOR_ALL_OBJECTS));
+        Assertions.assertSame(this.builder, this.builder.with(Option.DEFINITIONS_FOR_ALL_OBJECTS));
+        Assertions.assertTrue(this.builder.getSetting(Option.DEFINITIONS_FOR_ALL_OBJECTS));
     }
 
     @Test
     public void testGetSetting_WithoutOption() {
-        Assert.assertSame(this.builder, this.builder.without(Option.DEFINITIONS_FOR_ALL_OBJECTS));
-        Assert.assertFalse(this.builder.getSetting(Option.DEFINITIONS_FOR_ALL_OBJECTS));
+        Assertions.assertSame(this.builder, this.builder.without(Option.DEFINITIONS_FOR_ALL_OBJECTS));
+        Assertions.assertFalse(this.builder.getSetting(Option.DEFINITIONS_FOR_ALL_OBJECTS));
     }
 
     @Test
     public void testForFields() {
-        Assert.assertNotNull(this.builder.forFields());
+        Assertions.assertNotNull(this.builder.forFields());
     }
 
     @Test
     public void testForMethods() {
-        Assert.assertNotNull(this.builder.forMethods());
+        Assertions.assertNotNull(this.builder.forMethods());
     }
 }

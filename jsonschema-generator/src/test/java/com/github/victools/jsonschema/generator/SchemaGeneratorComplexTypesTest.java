@@ -29,19 +29,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import junitparams.naming.TestCaseName;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for {@link SchemaGenerator} class.
  */
-@RunWith(JUnitParamsRunner.class)
 public class SchemaGeneratorComplexTypesTest {
 
     private static void populateTypeConfigPart(SchemaGeneratorTypeConfigPart<?> configPart, String descriptionPrefix) {
@@ -98,7 +97,7 @@ public class SchemaGeneratorComplexTypesTest {
                 .withWriteOnlyCheck(member -> member.getType() != null && TestClass4.class.isAssignableFrom(member.getType().getErasedType()));
     }
 
-    Object parametersForTestGenerateSchema() {
+    static Stream<Arguments> parametersForTestGenerateSchema() {
         Module neutralModule = configBuilder -> configBuilder.forTypesInGeneral().withCustomDefinitionProvider((javaType, _context) -> {
             if (Integer.class == javaType.getErasedType()) {
                 ObjectNode customNode = configBuilder.getObjectMapper()
@@ -120,25 +119,24 @@ public class SchemaGeneratorComplexTypesTest {
                 .forMethods(), "looked-up from method: ");
         Module fieldModule = configBuilder -> populateConfigPart(configBuilder.with(Option.INLINE_ALL_SCHEMAS).forFields(), "looked-up from field: ");
         Module enumToStringModule = configBuilder -> configBuilder.with(Option.FLATTENED_ENUMS_FROM_TOSTRING);
-        return new Object[][]{
-            {"testclass1-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, neutralModule},
-            {"testclass1-FULL_DOCUMENTATION-typeattributes", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, typeInGeneralModule},
-            {"testclass1-JAVA_OBJECT-methodattributes", OptionPreset.JAVA_OBJECT, TestClass1.class, methodModule},
-            {"testclass1-PLAIN_JSON-fieldattributes", OptionPreset.PLAIN_JSON, TestClass1.class, fieldModule},
-            {"testclass2-array", OptionPreset.FULL_DOCUMENTATION, TestClass2[].class, alternativeDefinitionModule},
-            {"testclass3-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, alternativeDefinitionModule},
-            {"testclass3-FULL_DOCUMENTATION-typeattributes", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, typeInGeneralModule},
-            {"testclass3-JAVA_OBJECT-methodattributes", OptionPreset.JAVA_OBJECT, TestClass3.class, methodModule},
-            {"testclass3-PLAIN_JSON-fieldattributes", OptionPreset.PLAIN_JSON, TestClass3.class, fieldModule},
-            {"testenum-PLAIN_JSON-default", OptionPreset.PLAIN_JSON, TestEnum.class, neutralModule},
-            {"testenum-FULL_DOCUMENTATION-default", OptionPreset.FULL_DOCUMENTATION, TestEnum.class, alternativeDefinitionModule},
-            {"testenum-PLAIN_JSON-viaToString", OptionPreset.PLAIN_JSON, TestEnum.class, enumToStringModule}
-        };
+        return Stream.of(
+            Arguments.of("testclass1-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, neutralModule),
+            Arguments.of("testclass1-FULL_DOCUMENTATION-typeattributes", OptionPreset.FULL_DOCUMENTATION, TestClass1.class, typeInGeneralModule),
+            Arguments.of("testclass1-JAVA_OBJECT-methodattributes", OptionPreset.JAVA_OBJECT, TestClass1.class, methodModule),
+            Arguments.of("testclass1-PLAIN_JSON-fieldattributes", OptionPreset.PLAIN_JSON, TestClass1.class, fieldModule),
+            Arguments.of("testclass2-array", OptionPreset.FULL_DOCUMENTATION, TestClass2[].class, alternativeDefinitionModule),
+            Arguments.of("testclass3-FULL_DOCUMENTATION", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, alternativeDefinitionModule),
+            Arguments.of("testclass3-FULL_DOCUMENTATION-typeattributes", OptionPreset.FULL_DOCUMENTATION, TestClass3.class, typeInGeneralModule),
+            Arguments.of("testclass3-JAVA_OBJECT-methodattributes", OptionPreset.JAVA_OBJECT, TestClass3.class, methodModule),
+            Arguments.of("testclass3-PLAIN_JSON-fieldattributes", OptionPreset.PLAIN_JSON, TestClass3.class, fieldModule),
+            Arguments.of("testenum-PLAIN_JSON-default", OptionPreset.PLAIN_JSON, TestEnum.class, neutralModule),
+            Arguments.of("testenum-FULL_DOCUMENTATION-default", OptionPreset.FULL_DOCUMENTATION, TestEnum.class, alternativeDefinitionModule),
+            Arguments.of("testenum-PLAIN_JSON-viaToString", OptionPreset.PLAIN_JSON, TestEnum.class, enumToStringModule)
+        );
     }
 
-    @Test
-    @Parameters
-    @TestCaseName(value = "{method}({0}) [{index}]")
+    @ParameterizedTest
+    @MethodSource("parametersForTestGenerateSchema")
     public void testGenerateSchema(String caseTitle, OptionPreset preset, Class<?> targetType, Module testModule) throws Exception {
         final SchemaVersion schemaVersion = SchemaVersion.DRAFT_7;
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, preset);
@@ -152,20 +150,21 @@ public class SchemaGeneratorComplexTypesTest {
             Iterator<String> definitionKeys = ((ObjectNode) definitions).fieldNames();
             while (definitionKeys.hasNext()) {
                 String key = definitionKeys.next();
-                Assert.assertEquals(key, new URI(key).toASCIIString());
+                Assertions.assertEquals(key, new URI(key).toASCIIString());
             }
         }
         JSONAssert.assertEquals('\n' + result.toString() + '\n',
                 TestUtils.loadResource(this.getClass(), caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGenerateInlineSchemaWithCircularReference() {
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(Option.INLINE_ALL_SCHEMAS)
                 .build();
 
-        new SchemaGenerator(config).generateSchema(TestClassCircular.class);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new SchemaGenerator(config).generateSchema(TestClassCircular.class));
     }
 
     private static class TestClass1 extends TestClass2<String> {

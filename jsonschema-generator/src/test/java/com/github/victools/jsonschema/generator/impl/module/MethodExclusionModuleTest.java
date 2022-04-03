@@ -22,19 +22,18 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.function.Predicate;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import junitparams.naming.TestCaseName;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 /**
  * Test for the {@link MethodExclusionModule} class.
  */
-@RunWith(JUnitParamsRunner.class)
 public class MethodExclusionModuleTest extends AbstractTypeAwareTest {
 
     private SchemaGeneratorConfigBuilder builder;
@@ -44,7 +43,7 @@ public class MethodExclusionModuleTest extends AbstractTypeAwareTest {
         super(TestClass.class);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.builder = Mockito.mock(SchemaGeneratorConfigBuilder.class);
         this.methodConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
@@ -65,41 +64,40 @@ public class MethodExclusionModuleTest extends AbstractTypeAwareTest {
         Mockito.verifyNoMoreInteractions(this.methodConfigPart);
     }
 
-    Object parametersForTestIgnoreCheck() {
-        return new Object[][]{
-            {"getIntValue", "forVoidMethods", false},
-            {"getIntValue", "forGetterMethods", true},
-            {"getIntValue", "forNonStaticNonVoidNonGetterMethods", false},
-            {"isGetterFlag", "forVoidMethods", false},
-            {"isGetterFlag", "forGetterMethods", true},
-            {"isGetterFlag", "forNonStaticNonVoidNonGetterMethods", false},
-            {"isNoGetter", "forVoidMethods", false},
-            {"isNoGetter", "forGetterMethods", false},
-            {"isNoGetter", "forNonStaticNonVoidNonGetterMethods", true},
-            {"getCalculatedValue", "forVoidMethods", false},
-            {"getCalculatedValue", "forGetterMethods", false},
-            {"getCalculatedValue", "forNonStaticNonVoidNonGetterMethods", true},
-            {"returningVoid", "forVoidMethods", true},
-            {"returningVoid", "forGetterMethods", false},
-            {"returningVoid", "forNonStaticNonVoidNonGetterMethods", false},
-            {"staticReturningVoid", "forVoidMethods", true},
-            {"staticReturningVoid", "forGetterMethods", false},
-            {"staticReturningVoid", "forNonStaticNonVoidNonGetterMethods", false},
-            {"staticCalculation", "forVoidMethods", false},
-            {"staticCalculation", "forGetterMethods", false},
-            {"staticCalculation", "forNonStaticNonVoidNonGetterMethods", false}
-        };
+    static Stream<Arguments> parametersForTestIgnoreCheck() {
+        return Stream.of(
+            Arguments.of("getIntValue", "forVoidMethods", false),
+            Arguments.of("getIntValue", "forGetterMethods", true),
+            Arguments.of("getIntValue", "forNonStaticNonVoidNonGetterMethods", false),
+            Arguments.of("isGetterFlag", "forVoidMethods", false),
+            Arguments.of("isGetterFlag", "forGetterMethods", true),
+            Arguments.of("isGetterFlag", "forNonStaticNonVoidNonGetterMethods", false),
+            Arguments.of("isNoGetter", "forVoidMethods", false),
+            Arguments.of("isNoGetter", "forGetterMethods", false),
+            Arguments.of("isNoGetter", "forNonStaticNonVoidNonGetterMethods", true),
+            Arguments.of("getCalculatedValue", "forVoidMethods", false),
+            Arguments.of("getCalculatedValue", "forGetterMethods", false),
+            Arguments.of("getCalculatedValue", "forNonStaticNonVoidNonGetterMethods", true),
+            Arguments.of("returningVoid", "forVoidMethods", true),
+            Arguments.of("returningVoid", "forGetterMethods", false),
+            Arguments.of("returningVoid", "forNonStaticNonVoidNonGetterMethods", false),
+            Arguments.of("staticReturningVoid", "forVoidMethods", true),
+            Arguments.of("staticReturningVoid", "forGetterMethods", false),
+            Arguments.of("staticReturningVoid", "forNonStaticNonVoidNonGetterMethods", false),
+            Arguments.of("staticCalculation", "forVoidMethods", false),
+            Arguments.of("staticCalculation", "forGetterMethods", false),
+            Arguments.of("staticCalculation", "forNonStaticNonVoidNonGetterMethods", false)
+        );
     }
 
-    @Test
-    @Parameters
-    @TestCaseName("{method}({1}: {0} => {2}) [{index}]")
+    @ParameterizedTest
+    @MethodSource("parametersForTestIgnoreCheck")
     public void testIgnoreCheck(String testMethodName, String supplierMethodName, boolean ignored) throws Exception {
         MethodExclusionModule moduleInstance = (MethodExclusionModule) MethodExclusionModule.class.getMethod(supplierMethodName).invoke(null);
         moduleInstance.applyToConfigBuilder(this.builder);
 
         MethodScope method = this.getTestClassMethod(testMethodName);
-        Assert.assertEquals(ignored, this.methodConfigPart.shouldIgnore(method));
+        Assertions.assertEquals(ignored, this.methodConfigPart.shouldIgnore(method));
     }
 
     private static class TestClass {

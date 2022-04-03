@@ -17,39 +17,38 @@
 package com.github.victools.jsonschema.plugin.maven;
 
 import java.util.regex.Pattern;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import junitparams.naming.TestCaseName;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test for conversion logic from globs to regular expressions. Adapted from: https://stackoverflow.com/a/17369948
  */
-@RunWith(JUnitParamsRunner.class)
 public class GlobHandlerTest {
 
-    public Object[] parametersForTestBasicPattern() {
-        return new Object[][]{
-            {"single star becomes all-but-shlash star", "gl*b", "gl[^/]*b"},
-            {"double star becomes dot star", "gl**b", "gl.*b"},
-            {"escaped star is unchanged", "gl\\*b", "gl\\*b"},
-            {"question mark becomes all-but-shlash", "gl?b", "gl[^/]b"},
-            {"escaped question mark is unchanged", "gl\\?b", "gl\\?b"},
-            {"character classes dont need conversion", "gl[-o]b", "gl[-o]b"},
-            {"escaped classes are unchanged", "gl\\[-o\\]b", "gl\\[-o\\]b"},
-            {"negation in character classes", "gl[!a-n!p-z]b", "gl[^a-n!p-z]b"},
-            {"nested negation in character classes", "gl[[!a-n]!p-z]b", "gl[[^a-n]!p-z]b"},
-            {"escape carat if it is the first char in a character class", "gl[^o]b", "gl[\\^o]b"},
-            {"metachars are escaped", "gl?*.()+|^$@%b", "gl[^/][^/]*\\.\\(\\)\\+\\|\\^\\$\\@\\%b"},
-            {"metachars in character classes dont need escaping", "gl[?*.()+|^$@%]b", "gl[?*.()+|^$@%]b"},
-            {"escaped backslash is unchanged", "gl\\\\b", "gl\\\\b"},
-            {"slash-Q and slash-E are escaped", "\\Qglob\\E", "\\\\Qglob\\\\E"},
-            {"braces are turned into groups", "{glob,regex}", "(glob|regex)"},
-            {"escaped braces are unchanged", "\\{glob\\}", "\\{glob\\}"},
-            {"commas dont need escaping", "{glob\\,regex},", "(glob,regex),"},
-        };
+    static Stream<Arguments> parametersForTestBasicPattern() {
+        return Stream.of(
+            Arguments.of("single star becomes all-but-shlash star", "gl*b", "gl[^/]*b"),
+            Arguments.of("double star becomes dot star", "gl**b", "gl.*b"),
+            Arguments.of("escaped star is unchanged", "gl\\*b", "gl\\*b"),
+            Arguments.of("question mark becomes all-but-shlash", "gl?b", "gl[^/]b"),
+            Arguments.of("escaped question mark is unchanged", "gl\\?b", "gl\\?b"),
+            Arguments.of("character classes dont need conversion", "gl[-o]b", "gl[-o]b"),
+            Arguments.of("escaped classes are unchanged", "gl\\[-o\\]b", "gl\\[-o\\]b"),
+            Arguments.of("negation in character classes", "gl[!a-n!p-z]b", "gl[^a-n!p-z]b"),
+            Arguments.of("nested negation in character classes", "gl[[!a-n]!p-z]b", "gl[[^a-n]!p-z]b"),
+            Arguments.of("escape carat if it is the first char in a character class", "gl[^o]b", "gl[\\^o]b"),
+            Arguments.of("metachars are escaped", "gl?*.()+|^$@%b", "gl[^/][^/]*\\.\\(\\)\\+\\|\\^\\$\\@\\%b"),
+            Arguments.of("metachars in character classes dont need escaping", "gl[?*.()+|^$@%]b", "gl[?*.()+|^$@%]b"),
+            Arguments.of("escaped backslash is unchanged", "gl\\\\b", "gl\\\\b"),
+            Arguments.of("slash-Q and slash-E are escaped", "\\Qglob\\E", "\\\\Qglob\\\\E"),
+            Arguments.of("braces are turned into groups", "{glob,regex}", "(glob|regex)"),
+            Arguments.of("escaped braces are unchanged", "\\{glob\\}", "\\{glob\\}"),
+            Arguments.of("commas dont need escaping", "{glob\\,regex},", "(glob,regex),")
+        );
     }
 
     /**
@@ -59,11 +58,10 @@ public class GlobHandlerTest {
      * @param globInput class name glob expression as defined in the {@code pom.xml}
      * @param regexOutput expected regular expression for determining whether a class should be included or excluded in the schema generation
      */
-    @Test
-    @TestCaseName("testBasicPattern: {0}")
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestBasicPattern")
     public void testBasicPattern(String testCaseName, String globInput, String regexOutput) {
-        Assert.assertEquals(regexOutput, GlobHandler.createClassOrPackageNameFilter(globInput, false).pattern());
+        Assertions.assertEquals(regexOutput, GlobHandler.createClassOrPackageNameFilter(globInput, false).pattern());
     }
 
     /**
@@ -74,8 +72,8 @@ public class GlobHandlerTest {
      * @param matching whether the pattern is supposed to match the following classNamePath
      * @param classNamePath full class name with slash ("/") instead of dots (".") as package separators
      */
-    @Test
-    @Parameters({
+    @ParameterizedTest
+    @CsvSource({
         "com.github.victools.jsonschema, pkg, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
         "com.github.victools.jsonschema, cls, false, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
         "com.github.victools.jsonschema.plugin.maven.testpackage, pkg, true, com/github/victools/jsonschema/plugin/maven/testpackage/TestClassA",
@@ -112,6 +110,6 @@ public class GlobHandlerTest {
     })
     public void testClassNamePattern(String inputPattern, String clsOrPkg, boolean matching, String classNamePath) {
         Pattern regex = GlobHandler.createClassOrPackageNameFilter(inputPattern, clsOrPkg.equals("pkg"));
-        Assert.assertSame(matching, regex.matcher(classNamePath).matches());
+        Assertions.assertSame(matching, regex.matcher(classNamePath).matches());
     }
 }

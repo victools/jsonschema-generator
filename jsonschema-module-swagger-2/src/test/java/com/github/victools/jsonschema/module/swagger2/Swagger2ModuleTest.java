@@ -22,18 +22,17 @@ import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Test for the {@link SwaggerModule} class.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class Swagger2ModuleTest {
 
     @Mock
@@ -45,11 +44,19 @@ public class Swagger2ModuleTest {
     @Spy
     private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
 
-    @Before
+    private AutoCloseable mockProvider;
+
+    @BeforeEach
     public void setUp() {
+        this.mockProvider = MockitoAnnotations.openMocks(this);
         Mockito.when(this.configBuilder.forTypesInGeneral()).thenReturn(this.typesInGeneralConfigPart);
         Mockito.when(this.configBuilder.forFields()).thenReturn(this.fieldConfigPart);
         Mockito.when(this.configBuilder.forMethods()).thenReturn(this.methodConfigPart);
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        this.mockProvider.close();
     }
 
     @Test

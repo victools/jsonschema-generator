@@ -23,18 +23,18 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.Collection;
 import java.util.Collections;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 /**
  * Test for the {@link ConstantValueModule} class.
  */
-@RunWith(JUnitParamsRunner.class)
 public class ConstantValueModuleTest extends AbstractTypeAwareTest {
 
     private ConstantValueModule instance;
@@ -45,7 +45,7 @@ public class ConstantValueModuleTest extends AbstractTypeAwareTest {
         super(TestClass.class);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.instance = new ConstantValueModule();
         this.builder = Mockito.mock(SchemaGeneratorConfigBuilder.class);
@@ -66,44 +66,44 @@ public class ConstantValueModuleTest extends AbstractTypeAwareTest {
         Mockito.verifyNoMoreInteractions(this.fieldConfigPart);
     }
 
-    Object parametersForTestEnumResolver() {
-        return new Object[][]{
-            {"staticFinalValueField", Collections.singletonList(42)},
-            {"staticFinalNullField", Collections.singletonList(null)},
-            {"staticField", null},
-            {"finalField", null},
-            {"normalField", null}
-        };
+    static Stream<Arguments> parametersForTestEnumResolver() {
+        return Stream.of(
+            Arguments.of("staticFinalValueField", Collections.singletonList(42)),
+            Arguments.of("staticFinalNullField", Collections.singletonList(null)),
+            Arguments.of("staticField", null),
+            Arguments.of("finalField", null),
+            Arguments.of("normalField", null)
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestEnumResolver")
     public void testEnumResolver(String fieldName, Collection<?> expectedResult) throws Exception {
         this.instance.applyToConfigBuilder(this.builder);
 
         FieldScope field = this.getTestClassField(fieldName);
         Collection<?> result = this.fieldConfigPart.resolveEnum(field);
-        Assert.assertEquals(expectedResult, result);
+        Assertions.assertEquals(expectedResult, result);
     }
 
-    Object parametersForTestNullableCheck() {
-        return new Object[][]{
-            {"staticFinalValueField", Boolean.FALSE},
-            {"staticFinalNullField", Boolean.TRUE},
-            {"staticField", null},
-            {"finalField", null},
-            {"normalField", null}
-        };
+    static Stream<Arguments> parametersForTestNullableCheck() {
+        return Stream.of(
+            Arguments.of("staticFinalValueField", Boolean.FALSE),
+            Arguments.of("staticFinalNullField", Boolean.TRUE),
+            Arguments.of("staticField", null),
+            Arguments.of("finalField", null),
+            Arguments.of("normalField", null)
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestNullableCheck")
     public void testNullableCheck(String fieldName, Boolean expectedResult) throws Exception {
         this.instance.applyToConfigBuilder(this.builder);
 
         FieldScope field = this.getTestClassField(fieldName);
         Boolean result = this.fieldConfigPart.isNullable(field);
-        Assert.assertEquals(expectedResult, result);
+        Assertions.assertEquals(expectedResult, result);
     }
 
     private static class TestClass {

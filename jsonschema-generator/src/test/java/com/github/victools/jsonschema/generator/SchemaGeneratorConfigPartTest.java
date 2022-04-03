@@ -22,9 +22,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /**
@@ -38,7 +38,7 @@ public class SchemaGeneratorConfigPartTest {
 
     private SchemaGeneratorConfigPart<FieldScope> instance;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.instance = new SchemaGeneratorConfigPart<>();
         this.field1 = Mockito.mock(FieldScope.class);
@@ -49,63 +49,63 @@ public class SchemaGeneratorConfigPartTest {
     @Test
     public void testInstanceAttributeOverride() {
         InstanceAttributeOverrideV2<FieldScope> instanceOverride = (node, _field, _context) -> node.put("$comment", "test");
-        Assert.assertSame(this.instance, this.instance.withInstanceAttributeOverride(instanceOverride));
+        Assertions.assertSame(this.instance, this.instance.withInstanceAttributeOverride(instanceOverride));
 
         List<InstanceAttributeOverrideV2<FieldScope>> instanceOverrideList = this.instance.getInstanceAttributeOverrides();
-        Assert.assertEquals(1, instanceOverrideList.size());
-        Assert.assertSame(instanceOverride, instanceOverrideList.get(0));
+        Assertions.assertEquals(1, instanceOverrideList.size());
+        Assertions.assertSame(instanceOverride, instanceOverrideList.get(0));
     }
 
     @Test
     public void testIgnoreCheck() {
-        Assert.assertFalse(this.instance.shouldIgnore(this.field1));
+        Assertions.assertFalse(this.instance.shouldIgnore(this.field1));
 
-        Assert.assertSame(this.instance, this.instance.withIgnoreCheck(member -> member == this.field1));
-        Assert.assertTrue(this.instance.shouldIgnore(this.field1));
-        Assert.assertFalse(this.instance.shouldIgnore(this.field2));
+        Assertions.assertSame(this.instance, this.instance.withIgnoreCheck(member -> member == this.field1));
+        Assertions.assertTrue(this.instance.shouldIgnore(this.field1));
+        Assertions.assertFalse(this.instance.shouldIgnore(this.field2));
 
-        Assert.assertSame(this.instance, this.instance.withIgnoreCheck(member -> member == this.field2));
-        Assert.assertTrue(this.instance.shouldIgnore(this.field1));
-        Assert.assertTrue(this.instance.shouldIgnore(this.field2));
-        Assert.assertFalse(this.instance.shouldIgnore(this.field3));
+        Assertions.assertSame(this.instance, this.instance.withIgnoreCheck(member -> member == this.field2));
+        Assertions.assertTrue(this.instance.shouldIgnore(this.field1));
+        Assertions.assertTrue(this.instance.shouldIgnore(this.field2));
+        Assertions.assertFalse(this.instance.shouldIgnore(this.field3));
     }
 
     @Test
     public void testRequiredCheck() {
-        Assert.assertFalse(this.instance.isRequired(this.field1));
+        Assertions.assertFalse(this.instance.isRequired(this.field1));
 
-        Assert.assertSame(this.instance, this.instance.withRequiredCheck(member -> member == this.field1));
-        Assert.assertTrue(this.instance.isRequired(this.field1));
-        Assert.assertFalse(this.instance.isRequired(this.field2));
+        Assertions.assertSame(this.instance, this.instance.withRequiredCheck(member -> member == this.field1));
+        Assertions.assertTrue(this.instance.isRequired(this.field1));
+        Assertions.assertFalse(this.instance.isRequired(this.field2));
 
-        Assert.assertSame(this.instance, this.instance.withRequiredCheck(member -> member == this.field2));
-        Assert.assertTrue(this.instance.isRequired(this.field1));
-        Assert.assertTrue(this.instance.isRequired(this.field2));
-        Assert.assertFalse(this.instance.isRequired(this.field3));
+        Assertions.assertSame(this.instance, this.instance.withRequiredCheck(member -> member == this.field2));
+        Assertions.assertTrue(this.instance.isRequired(this.field1));
+        Assertions.assertTrue(this.instance.isRequired(this.field2));
+        Assertions.assertFalse(this.instance.isRequired(this.field3));
     }
 
     @Test
     public void testNullableCheck() {
-        Assert.assertNull(this.instance.isNullable(this.field1));
+        Assertions.assertNull(this.instance.isNullable(this.field1));
 
-        Assert.assertSame(this.instance, this.instance.withNullableCheck(member -> member == this.field1 ? true : null));
-        Assert.assertTrue(this.instance.isNullable(this.field1));
-        Assert.assertNull(this.instance.isNullable(this.field2));
+        Assertions.assertSame(this.instance, this.instance.withNullableCheck(member -> member == this.field1 ? true : null));
+        Assertions.assertTrue(this.instance.isNullable(this.field1));
+        Assertions.assertNull(this.instance.isNullable(this.field2));
 
-        Assert.assertSame(this.instance, this.instance.withNullableCheck(member -> member == this.field2 ? false : null));
-        Assert.assertTrue(this.instance.isNullable(this.field1));
-        Assert.assertFalse(this.instance.isNullable(this.field2));
-        Assert.assertNull(this.instance.isNullable(this.field3));
+        Assertions.assertSame(this.instance, this.instance.withNullableCheck(member -> member == this.field2 ? false : null));
+        Assertions.assertTrue(this.instance.isNullable(this.field1));
+        Assertions.assertFalse(this.instance.isNullable(this.field2));
+        Assertions.assertNull(this.instance.isNullable(this.field3));
 
-        Assert.assertSame(this.instance, this.instance.withNullableCheck(member -> member == this.field1));
-        Assert.assertTrue(this.instance.isNullable(this.field1));
-        Assert.assertFalse(this.instance.isNullable(this.field2));
-        Assert.assertFalse(this.instance.isNullable(this.field3));
+        Assertions.assertSame(this.instance, this.instance.withNullableCheck(member -> member == this.field1));
+        Assertions.assertTrue(this.instance.isNullable(this.field1));
+        Assertions.assertFalse(this.instance.isNullable(this.field2));
+        Assertions.assertFalse(this.instance.isNullable(this.field3));
 
-        Assert.assertSame(this.instance, this.instance.withNullableCheck(member -> member == this.field2));
-        Assert.assertTrue(this.instance.isNullable(this.field1));
-        Assert.assertTrue(this.instance.isNullable(this.field2));
-        Assert.assertFalse(this.instance.isNullable(this.field3));
+        Assertions.assertSame(this.instance, this.instance.withNullableCheck(member -> member == this.field2));
+        Assertions.assertTrue(this.instance.isNullable(this.field1));
+        Assertions.assertTrue(this.instance.isNullable(this.field2));
+        Assertions.assertFalse(this.instance.isNullable(this.field3));
     }
 
     @Test
@@ -115,25 +115,25 @@ public class SchemaGeneratorConfigPartTest {
         ResolvedType type2 = Mockito.mock(ResolvedType.class);
         ResolvedType type3 = Mockito.mock(ResolvedType.class);
 
-        Assert.assertNull(this.instance.resolveTargetTypeOverrides(this.field1));
+        Assertions.assertNull(this.instance.resolveTargetTypeOverrides(this.field1));
 
         ConfigFunction<FieldScope, ResolvedType> resolver1 = member -> member == this.field1 ? type1 : null;
-        Assert.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver1));
-        Assert.assertEquals(Collections.singletonList(type1), this.instance.resolveTargetTypeOverrides(this.field1));
-        Assert.assertNull(this.instance.resolveTargetTypeOverrides(this.field2));
-        Assert.assertNull(this.instance.resolveTargetTypeOverrides(this.field3));
+        Assertions.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver1));
+        Assertions.assertEquals(Collections.singletonList(type1), this.instance.resolveTargetTypeOverrides(this.field1));
+        Assertions.assertNull(this.instance.resolveTargetTypeOverrides(this.field2));
+        Assertions.assertNull(this.instance.resolveTargetTypeOverrides(this.field3));
 
         ConfigFunction<FieldScope, ResolvedType> resolver2 = member -> member == this.field1 ? type2 : null;
-        Assert.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver2));
-        Assert.assertEquals(Collections.singletonList(type1), this.instance.resolveTargetTypeOverrides(this.field1));
-        Assert.assertNull(this.instance.resolveTargetTypeOverrides(this.field2));
-        Assert.assertNull(this.instance.resolveTargetTypeOverrides(this.field3));
+        Assertions.assertSame(this.instance, this.instance.withTargetTypeOverrideResolver(resolver2));
+        Assertions.assertEquals(Collections.singletonList(type1), this.instance.resolveTargetTypeOverrides(this.field1));
+        Assertions.assertNull(this.instance.resolveTargetTypeOverrides(this.field2));
+        Assertions.assertNull(this.instance.resolveTargetTypeOverrides(this.field3));
 
         ConfigFunction<FieldScope, List<ResolvedType>> resolver3 = member -> member == this.field2 ? Arrays.asList(type2, type3) : null;
-        Assert.assertSame(this.instance, this.instance.withTargetTypeOverridesResolver(resolver3));
-        Assert.assertEquals(Collections.singletonList(type1), this.instance.resolveTargetTypeOverrides(this.field1));
-        Assert.assertEquals(Arrays.asList(type2, type3), this.instance.resolveTargetTypeOverrides(this.field2));
-        Assert.assertNull(this.instance.resolveTargetTypeOverrides(this.field3));
+        Assertions.assertSame(this.instance, this.instance.withTargetTypeOverridesResolver(resolver3));
+        Assertions.assertEquals(Collections.singletonList(type1), this.instance.resolveTargetTypeOverrides(this.field1));
+        Assertions.assertEquals(Arrays.asList(type2, type3), this.instance.resolveTargetTypeOverrides(this.field2));
+        Assertions.assertNull(this.instance.resolveTargetTypeOverrides(this.field3));
     }
 
     @Test
@@ -142,25 +142,25 @@ public class SchemaGeneratorConfigPartTest {
         String name2 = "name2";
         String name3 = "name3";
 
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(this.field1));
+        Assertions.assertNull(this.instance.resolvePropertyNameOverride(this.field1));
 
         ConfigFunction<FieldScope, String> resolver1 = member -> member == this.field1 ? name1 : null;
-        Assert.assertSame(this.instance, this.instance.withPropertyNameOverrideResolver(resolver1));
-        Assert.assertSame(name1, this.instance.resolvePropertyNameOverride(this.field1));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(this.field2));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(this.field3));
+        Assertions.assertSame(this.instance, this.instance.withPropertyNameOverrideResolver(resolver1));
+        Assertions.assertSame(name1, this.instance.resolvePropertyNameOverride(this.field1));
+        Assertions.assertNull(this.instance.resolvePropertyNameOverride(this.field2));
+        Assertions.assertNull(this.instance.resolvePropertyNameOverride(this.field3));
 
         ConfigFunction<FieldScope, String> resolver2 = member -> member == this.field1 ? name2 : null;
-        Assert.assertSame(this.instance, this.instance.withPropertyNameOverrideResolver(resolver2));
-        Assert.assertSame(name1, this.instance.resolvePropertyNameOverride(this.field1));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(this.field2));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(this.field3));
+        Assertions.assertSame(this.instance, this.instance.withPropertyNameOverrideResolver(resolver2));
+        Assertions.assertSame(name1, this.instance.resolvePropertyNameOverride(this.field1));
+        Assertions.assertNull(this.instance.resolvePropertyNameOverride(this.field2));
+        Assertions.assertNull(this.instance.resolvePropertyNameOverride(this.field3));
 
         ConfigFunction<FieldScope, String> resolver3 = member -> member == this.field2 ? name3 : null;
-        Assert.assertSame(this.instance, this.instance.withPropertyNameOverrideResolver(resolver3));
-        Assert.assertSame(name1, this.instance.resolvePropertyNameOverride(this.field1));
-        Assert.assertSame(name3, this.instance.resolvePropertyNameOverride(this.field2));
-        Assert.assertNull(this.instance.resolvePropertyNameOverride(this.field3));
+        Assertions.assertSame(this.instance, this.instance.withPropertyNameOverrideResolver(resolver3));
+        Assertions.assertSame(name1, this.instance.resolvePropertyNameOverride(this.field1));
+        Assertions.assertSame(name3, this.instance.resolvePropertyNameOverride(this.field2));
+        Assertions.assertNull(this.instance.resolvePropertyNameOverride(this.field3));
     }
 
     @Test
@@ -256,20 +256,20 @@ public class SchemaGeneratorConfigPartTest {
     private <R> void testFirstDefinedValueConfig(R value1, R value2,
             Function<ConfigFunction<FieldScope, R>, SchemaGeneratorConfigPart<FieldScope>> addConfig,
             ConfigFunction<FieldScope, R> resolveValue) {
-        Assert.assertNull(resolveValue.apply(this.field1));
+        Assertions.assertNull(resolveValue.apply(this.field1));
 
-        Assert.assertSame(this.instance, addConfig.apply(member -> member == this.field1 ? value1 : null));
-        Assert.assertEquals(value1, resolveValue.apply(this.field1));
-        Assert.assertNull(resolveValue.apply(this.field2));
+        Assertions.assertSame(this.instance, addConfig.apply(member -> member == this.field1 ? value1 : null));
+        Assertions.assertEquals(value1, resolveValue.apply(this.field1));
+        Assertions.assertNull(resolveValue.apply(this.field2));
 
-        Assert.assertSame(this.instance, addConfig.apply(member -> member == this.field1 ? value2 : null));
-        Assert.assertEquals(value1, resolveValue.apply(this.field1));
-        Assert.assertNull(resolveValue.apply(this.field2));
-        Assert.assertNull(resolveValue.apply(this.field3));
+        Assertions.assertSame(this.instance, addConfig.apply(member -> member == this.field1 ? value2 : null));
+        Assertions.assertEquals(value1, resolveValue.apply(this.field1));
+        Assertions.assertNull(resolveValue.apply(this.field2));
+        Assertions.assertNull(resolveValue.apply(this.field3));
 
-        Assert.assertSame(this.instance, addConfig.apply(member -> member == this.field2 ? value2 : null));
-        Assert.assertEquals(value1, resolveValue.apply(this.field1));
-        Assert.assertEquals(value2, resolveValue.apply(this.field2));
-        Assert.assertNull(resolveValue.apply(this.field3));
+        Assertions.assertSame(this.instance, addConfig.apply(member -> member == this.field2 ? value2 : null));
+        Assertions.assertEquals(value1, resolveValue.apply(this.field1));
+        Assertions.assertEquals(value2, resolveValue.apply(this.field2));
+        Assertions.assertNull(resolveValue.apply(this.field3));
     }
 }

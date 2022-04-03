@@ -32,25 +32,24 @@ import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.util.Arrays;
 import java.util.List;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Answers;
 import org.mockito.Mockito;
 
 /**
  * Test for the {@link CustomEnumDefinitionProvider}.
  */
-@RunWith(JUnitParamsRunner.class)
 public class CustomEnumDefinitionProviderTest {
 
     private final TypeContext typeContext = TypeContextFactory.createDefaultTypeContext();
     private SchemaGenerationContext generationContext;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.generationContext = Mockito.mock(SchemaGenerationContext.class, Answers.RETURNS_DEEP_STUBS);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -62,117 +61,120 @@ public class CustomEnumDefinitionProviderTest {
                 .thenAnswer(invocation -> ((SchemaKeyword) invocation.getArgument(0)).forVersion(SchemaVersion.DRAFT_2019_09));
     }
 
-    public Object[] parametersForTestProvideCustomSchemaDefinition() {
-        return new Object[][]{
-            {EnumWithInactiveJsonValueAndJsonProperty.class, true, true, Arrays.asList("entry")},
-            {EnumWithInactiveJsonValueAndJsonProperty.class, false, true, Arrays.asList("entry")},
-            {EnumWithJsonValueAndJsonProperty.class, true, false, Arrays.asList("json-value-ENTRY1", "json-value-ENTRY2")},
-            {EnumWithJsonValueAndJsonProperty.class, true, true, Arrays.asList("json-value-ENTRY1", "json-value-ENTRY2")},
-            {EnumWithJsonValueAndJsonProperty.class, false, true, Arrays.asList("entry1", "ENTRY2")}};
+    static Stream<Arguments> parametersForTestProvideCustomSchemaDefinition() {
+        return Stream.of(
+            Arguments.of(EnumWithInactiveJsonValueAndJsonProperty.class, true, true, Arrays.asList("entry")),
+            Arguments.of(EnumWithInactiveJsonValueAndJsonProperty.class, false, true, Arrays.asList("entry")),
+            Arguments.of(EnumWithJsonValueAndJsonProperty.class, true, false, Arrays.asList("json-value-ENTRY1", "json-value-ENTRY2")),
+            Arguments.of(EnumWithJsonValueAndJsonProperty.class, true, true, Arrays.asList("json-value-ENTRY1", "json-value-ENTRY2")),
+            Arguments.of(EnumWithJsonValueAndJsonProperty.class, false, true, Arrays.asList("entry1", "ENTRY2"))
+        );
     }
 
-    @Test
-    @Parameters(method = "parametersForTestProvideCustomSchemaDefinition")
+    @ParameterizedTest
+    @MethodSource("parametersForTestProvideCustomSchemaDefinition")
     public void testProvideCustomSchemaDefinition_withConst(Class<?> erasedType, boolean considerJsonValue, boolean considerJsonProperty,
             List<String> values) {
         Mockito.when(this.generationContext.getGeneratorConfig().shouldRepresentSingleAllowedValueAsConst()).thenReturn(true);
         ResolvedType type = this.typeContext.resolve(erasedType);
         CustomDefinition result = new CustomEnumDefinitionProvider(considerJsonValue, considerJsonProperty)
                 .provideCustomSchemaDefinition(type, this.generationContext);
-        Assert.assertNotNull(result);
-        Assert.assertFalse(result.isMeantToBeInline());
+        Assertions.assertNotNull(result);
+        Assertions.assertFalse(result.isMeantToBeInline());
         ObjectNode customDefinitionNode = result.getValue();
-        Assert.assertEquals(2, customDefinitionNode.size());
-        Assert.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(SchemaVersion.DRAFT_2019_09),
+        Assertions.assertEquals(2, customDefinitionNode.size());
+        Assertions.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(SchemaVersion.DRAFT_2019_09),
                 customDefinitionNode.get(SchemaKeyword.TAG_TYPE.forVersion(SchemaVersion.DRAFT_2019_09)).asText());
         int expectedValueCount = values.size();
         if (expectedValueCount == 1) {
             JsonNode constNode = customDefinitionNode.get(SchemaKeyword.TAG_CONST.forVersion(SchemaVersion.DRAFT_2019_09));
-            Assert.assertTrue(constNode.isTextual());
-            Assert.assertEquals(values.get(0), constNode.asText());
+            Assertions.assertTrue(constNode.isTextual());
+            Assertions.assertEquals(values.get(0), constNode.asText());
         } else {
             JsonNode enumNode = customDefinitionNode.get(SchemaKeyword.TAG_ENUM.forVersion(SchemaVersion.DRAFT_2019_09));
-            Assert.assertTrue(enumNode.isArray());
+            Assertions.assertTrue(enumNode.isArray());
             ArrayNode arrayNode = (ArrayNode) enumNode;
-            Assert.assertEquals(expectedValueCount, arrayNode.size());
+            Assertions.assertEquals(expectedValueCount, arrayNode.size());
             for (int index = 0; index < expectedValueCount; index++) {
-                Assert.assertEquals(values.get(index), arrayNode.get(index).asText());
+                Assertions.assertEquals(values.get(index), arrayNode.get(index).asText());
             }
         }
     }
 
-    @Test
-    @Parameters(method = "parametersForTestProvideCustomSchemaDefinition")
+    @ParameterizedTest
+    @MethodSource("parametersForTestProvideCustomSchemaDefinition")
     public void testProvideCustomSchemaDefinition_withoutConst(Class<?> erasedType, boolean considerJsonValue, boolean considerJsonProperty,
             List<String> values) {
         Mockito.when(this.generationContext.getGeneratorConfig().shouldRepresentSingleAllowedValueAsConst()).thenReturn(false);
         ResolvedType type = this.typeContext.resolve(erasedType);
         CustomDefinition result = new CustomEnumDefinitionProvider(considerJsonValue, considerJsonProperty)
                 .provideCustomSchemaDefinition(type, this.generationContext);
-        Assert.assertNotNull(result);
-        Assert.assertFalse(result.isMeantToBeInline());
+        Assertions.assertNotNull(result);
+        Assertions.assertFalse(result.isMeantToBeInline());
         ObjectNode customDefinitionNode = result.getValue();
-        Assert.assertEquals(2, customDefinitionNode.size());
-        Assert.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(SchemaVersion.DRAFT_2019_09),
+        Assertions.assertEquals(2, customDefinitionNode.size());
+        Assertions.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(SchemaVersion.DRAFT_2019_09),
                 customDefinitionNode.get(SchemaKeyword.TAG_TYPE.forVersion(SchemaVersion.DRAFT_2019_09)).asText());
         JsonNode enumNode = customDefinitionNode.get(SchemaKeyword.TAG_ENUM.forVersion(SchemaVersion.DRAFT_2019_09));
-        Assert.assertTrue(enumNode.isArray());
+        Assertions.assertTrue(enumNode.isArray());
         int expectedValueCount = values.size();
         ArrayNode arrayNode = (ArrayNode) enumNode;
-        Assert.assertEquals(expectedValueCount, arrayNode.size());
+        Assertions.assertEquals(expectedValueCount, arrayNode.size());
         for (int index = 0; index < expectedValueCount; index++) {
-            Assert.assertEquals(values.get(index), arrayNode.get(index).asText());
+            Assertions.assertEquals(values.get(index), arrayNode.get(index).asText());
         }
     }
 
-    public Object[] parametersForTestProvideForInvalidTargetType() {
-        return new Object[][]{
-            {Enum.class, true, false},
-            {Enum.class, false, true},
-            {Enum.class, true, true},
-            {ClassWithJsonValue.class, true, false},
-            {ClassWithJsonValue.class, false, true},
-            {ClassWithJsonValue.class, true, true},
-            {EmptyEnumWithJsonValue.class, true, false},
-            {EmptyEnumWithJsonValue.class, false, true},
-            {EmptyEnumWithJsonValue.class, true, true},
-            {EnumWithInvalidJsonValue.class, true, false},
-            {EnumWithInvalidJsonValue.class, false, true},
-            {EnumWithInvalidJsonValue.class, true, true},
-            {EnumWithInactiveJsonValueAndJsonProperty.class, true, false},
-            {EnumWithTwoJsonValuesAndIncompleteJsonProperty.class, true, true},
-            {EnumWithTwoJsonValuesAndIncompleteJsonProperty.class, false, true},
-            {EnumWithTwoJsonValuesAndIncompleteJsonProperty.class, true, false}};
+    static Stream<Arguments> parametersForTestProvideForInvalidTargetType() {
+        return Stream.of(
+            Arguments.of(Enum.class, true, false),
+            Arguments.of(Enum.class, false, true),
+            Arguments.of(Enum.class, true, true),
+            Arguments.of(ClassWithJsonValue.class, true, false),
+            Arguments.of(ClassWithJsonValue.class, false, true),
+            Arguments.of(ClassWithJsonValue.class, true, true),
+            Arguments.of(EmptyEnumWithJsonValue.class, true, false),
+            Arguments.of(EmptyEnumWithJsonValue.class, false, true),
+            Arguments.of(EmptyEnumWithJsonValue.class, true, true),
+            Arguments.of(EnumWithInvalidJsonValue.class, true, false),
+            Arguments.of(EnumWithInvalidJsonValue.class, false, true),
+            Arguments.of(EnumWithInvalidJsonValue.class, true, true),
+            Arguments.of(EnumWithInactiveJsonValueAndJsonProperty.class, true, false),
+            Arguments.of(EnumWithTwoJsonValuesAndIncompleteJsonProperty.class, true, true),
+            Arguments.of(EnumWithTwoJsonValuesAndIncompleteJsonProperty.class, false, true),
+            Arguments.of(EnumWithTwoJsonValuesAndIncompleteJsonProperty.class, true, false)
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestProvideForInvalidTargetType")
     public void testProvideForInvalidTargetType(Class<?> erasedType, boolean considerJsonValue, boolean considerJsonProperty) {
         CustomDefinition result = new CustomEnumDefinitionProvider(considerJsonValue, considerJsonProperty)
                 .provideCustomSchemaDefinition(this.typeContext.resolve(erasedType), this.generationContext);
-        Assert.assertNull(result);
+        Assertions.assertNull(result);
     }
 
-    public Object[] parametersForTestGetJsonValueAnnotatedMethod() {
-        return new Object[][]{
-            {Enum.class, null},
-            {ClassWithJsonValue.class, "serialise"},
-            {EmptyEnumWithJsonValue.class, "asText"},
-            {EnumWithInvalidJsonValue.class, null},
-            {EnumWithInactiveJsonValueAndJsonProperty.class, null},
-            {EnumWithTwoJsonValuesAndIncompleteJsonProperty.class, null},
-            {EnumWithJsonValueAndJsonProperty.class, "getJsonValue"}};
+    static Stream<Arguments> parametersForTestGetJsonValueAnnotatedMethod() {
+        return Stream.of(
+            Arguments.of(Enum.class, null),
+            Arguments.of(ClassWithJsonValue.class, "serialise"),
+            Arguments.of(EmptyEnumWithJsonValue.class, "asText"),
+            Arguments.of(EnumWithInvalidJsonValue.class, null),
+            Arguments.of(EnumWithInactiveJsonValueAndJsonProperty.class, null),
+            Arguments.of(EnumWithTwoJsonValuesAndIncompleteJsonProperty.class, null),
+            Arguments.of(EnumWithJsonValueAndJsonProperty.class, "getJsonValue")
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestGetJsonValueAnnotatedMethod")
     public void testGetJsonValueAnnotatedMethod(Class<?> erasedType, String methodName) {
         ResolvedMethod result = new CustomEnumDefinitionProvider(true, false)
                 .getJsonValueAnnotatedMethod(this.typeContext.resolve(erasedType), this.generationContext);
         if (methodName == null) {
-            Assert.assertNull(result);
+            Assertions.assertNull(result);
         } else {
-            Assert.assertEquals(methodName, result.getRawMember().getName());
+            Assertions.assertEquals(methodName, result.getRawMember().getName());
         }
     }
 

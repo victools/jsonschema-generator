@@ -30,19 +30,19 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.util.List;
 import java.util.stream.Collectors;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 /**
  * Test for the {@link JacksonModule}.
  */
-@RunWith(JUnitParamsRunner.class)
 public class JacksonModuleTest {
 
     private SchemaGeneratorConfigBuilder configBuilder;
@@ -50,7 +50,7 @@ public class JacksonModuleTest {
     private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
     private SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.configBuilder = Mockito.mock(SchemaGeneratorConfigBuilder.class);
         this.fieldConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
@@ -127,16 +127,16 @@ public class JacksonModuleTest {
         Mockito.verifyNoMoreInteractions(this.configBuilder, this.fieldConfigPart, this.methodConfigPart, this.typesInGeneralConfigPart);
     }
 
-    public Object[] parametersForTestApplyToConfigBuilderWithEnumOptions() {
-        return new Object[][]{
-            {new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE}},
-            {new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY}},
-            {new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE, JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY}}
-        };
+    static Stream<Arguments> parametersForTestApplyToConfigBuilderWithEnumOptions() {
+        return Stream.of(
+            Arguments.of((Object) new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE}),
+            Arguments.of((Object) new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY}),
+            Arguments.of((Object) new JacksonOption[]{JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE, JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY})
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestApplyToConfigBuilderWithEnumOptions")
     public void testApplyToConfigBuilderWithEnumOptions(JacksonOption[] options) {
         new JacksonModule(options)
                 .applyToConfigBuilder(this.configBuilder);
@@ -174,19 +174,19 @@ public class JacksonModuleTest {
         Mockito.verify(this.typesInGeneralConfigPart).withDescriptionResolver(Mockito.any());
     }
 
-    Object parametersForTestPropertyNameOverride() {
-        return new Object[][]{
-            {"unannotatedField", null, "unannotated-field"},
-            {"fieldWithEmptyPropertyAnnotation", null, "field-with-empty-property-annotation"},
-            {"fieldWithSameValuePropertyAnnotation", null, "field-with-same-value-property-annotation"},
-            {"fieldWithNameOverride", "field override 1", "field-with-name-override"},
-            {"fieldWithNameOverrideOnGetter", "method override 1", "field-with-name-override-on-getter"},
-            {"fieldWithNameOverrideAndOnGetter", "field override 2", "field-with-name-override-and-on-getter"}
-        };
+    static Stream<Arguments> parametersForTestPropertyNameOverride() {
+        return Stream.of(
+            Arguments.of("unannotatedField", null, "unannotated-field"),
+            Arguments.of("fieldWithEmptyPropertyAnnotation", null, "field-with-empty-property-annotation"),
+            Arguments.of("fieldWithSameValuePropertyAnnotation", null, "field-with-same-value-property-annotation"),
+            Arguments.of("fieldWithNameOverride", "field override 1", "field-with-name-override"),
+            Arguments.of("fieldWithNameOverrideOnGetter", "method override 1", "field-with-name-override-on-getter"),
+            Arguments.of("fieldWithNameOverrideAndOnGetter", "field override 2", "field-with-name-override-and-on-getter")
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestPropertyNameOverride")
     public void testPropertyNameOverride(String fieldName, String expectedOverrideValue, String kebabCaseName) throws Exception {
         new JacksonModule().applyToConfigBuilder(this.configBuilder);
 
@@ -197,22 +197,22 @@ public class JacksonModuleTest {
         List<String> overrideValues = captor.getAllValues().stream()
                 .map(nameOverride -> nameOverride.apply(field))
                 .collect(Collectors.toList());
-        Assert.assertEquals(expectedOverrideValue, overrideValues.get(0));
-        Assert.assertEquals(kebabCaseName, overrideValues.get(1));
+        Assertions.assertEquals(expectedOverrideValue, overrideValues.get(0));
+        Assertions.assertEquals(kebabCaseName, overrideValues.get(1));
     }
 
-    Object parametersForTestDescriptionResolver() {
-        return new Object[][]{
-            {"unannotatedField", null},
-            {"fieldWithDescription", "field description 1"},
-            {"fieldWithDescriptionOnGetter", "getter description 1"},
-            {"fieldWithDescriptionAndOnGetter", "field description 2"},
-            {"fieldWithDescriptionOnType", null}
-        };
+    static Stream<Arguments> parametersForTestDescriptionResolver() {
+        return Stream.of(
+            Arguments.of("unannotatedField", null),
+            Arguments.of("fieldWithDescription", "field description 1"),
+            Arguments.of("fieldWithDescriptionOnGetter", "getter description 1"),
+            Arguments.of("fieldWithDescriptionAndOnGetter", "field description 2"),
+            Arguments.of("fieldWithDescriptionOnType", null)
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestDescriptionResolver")
     public void testDescriptionResolver(String fieldName, String expectedDescription) throws Exception {
         new JacksonModule().applyToConfigBuilder(this.configBuilder);
 
@@ -221,64 +221,64 @@ public class JacksonModuleTest {
         ArgumentCaptor<ConfigFunction<FieldScope, String>> captor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withDescriptionResolver(captor.capture());
         String description = captor.getValue().apply(field);
-        Assert.assertEquals(expectedDescription, description);
+        Assertions.assertEquals(expectedDescription, description);
     }
 
-    Object parametersForTestRequiredProperty() {
-        return new Object[][]{
-            {null, "requiredTrue", false},
-            {null, "requiredFalseWriteOnly", false},
-            {null, "requiredDefaultReadOnly", false},
-            {null, "requiredAbsent", false},
-            {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredTrue", true},
-            {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredFalseWriteOnly", false},
-            {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredDefaultReadOnly", false},
-            {JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredAbsent", false}
-        };
+    static Stream<Arguments> parametersForTestRequiredProperty() {
+        return Stream.of(
+            Arguments.of(null, "requiredTrue", false),
+            Arguments.of(null, "requiredFalseWriteOnly", false),
+            Arguments.of(null, "requiredDefaultReadOnly", false),
+            Arguments.of(null, "requiredAbsent", false),
+            Arguments.of(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredTrue", true),
+            Arguments.of(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredFalseWriteOnly", false),
+            Arguments.of(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredDefaultReadOnly", false),
+            Arguments.of(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED, "requiredAbsent", false)
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestRequiredProperty")
     public void testRequiredProperty(JacksonOption requiredOption, String fieldName, boolean expectedRequired) {
         new JacksonModule(requiredOption).applyToConfigBuilder(this.configBuilder);
 
         FieldScope field = new TestType(TestClassWithRequiredAnnotatedFields.class).getMemberField(fieldName);
 
-        Assert.assertEquals(this.fieldConfigPart.isRequired(field), expectedRequired);
+        Assertions.assertEquals(this.fieldConfigPart.isRequired(field), expectedRequired);
     }
 
-    Object parametersForTestReadOnlyWriteOnly() {
-        return new Object[][]{
-            {"requiredTrue", false, false},
-            {"requiredFalseWriteOnly", false, true},
-            {"requiredDefaultReadOnly", true, false},
-            {"requiredAbsent", false, false}
-        };
+    static Stream<Arguments> parametersForTestReadOnlyWriteOnly() {
+        return Stream.of(
+            Arguments.of("requiredTrue", false, false),
+            Arguments.of("requiredFalseWriteOnly", false, true),
+            Arguments.of("requiredDefaultReadOnly", true, false),
+            Arguments.of("requiredAbsent", false, false)
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestReadOnlyWriteOnly")
     public void testReadOnlyWriteOnly(String fieldName, boolean expectedReadOnly, boolean expectedWriteOnly) {
         new JacksonModule().applyToConfigBuilder(this.configBuilder);
 
         FieldScope field = new TestType(TestClassWithRequiredAnnotatedFields.class).getMemberField(fieldName);
 
-        Assert.assertEquals(this.fieldConfigPart.isReadOnly(field), expectedReadOnly);
-        Assert.assertEquals(this.fieldConfigPart.isWriteOnly(field), expectedWriteOnly);
+        Assertions.assertEquals(this.fieldConfigPart.isReadOnly(field), expectedReadOnly);
+        Assertions.assertEquals(this.fieldConfigPart.isWriteOnly(field), expectedWriteOnly);
     }
 
-    Object parametersForTestDescriptionForTypeResolver() {
-        return new Object[][]{
-            {"unannotatedField", null},
-            {"fieldWithDescription", null},
-            {"fieldWithDescriptionOnGetter", null},
-            {"fieldWithDescriptionAndOnGetter", null},
-            {"fieldWithDescriptionOnType", "class description text"}
-        };
+    static Stream<Arguments> parametersForTestDescriptionForTypeResolver() {
+        return Stream.of(
+            Arguments.of("unannotatedField", null),
+            Arguments.of("fieldWithDescription", null),
+            Arguments.of("fieldWithDescriptionOnGetter", null),
+            Arguments.of("fieldWithDescriptionAndOnGetter", null),
+            Arguments.of("fieldWithDescriptionOnType", "class description text")
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestDescriptionForTypeResolver")
     public void testDescriptionForTypeResolver(String fieldName, String expectedDescription) throws Exception {
         new JacksonModule().applyToConfigBuilder(this.configBuilder);
 
@@ -287,7 +287,7 @@ public class JacksonModuleTest {
         ArgumentCaptor<ConfigFunction<TypeScope, String>> captor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.typesInGeneralConfigPart).withDescriptionResolver(captor.capture());
         String description = captor.getValue().apply(field);
-        Assert.assertEquals(expectedDescription, description);
+        Assertions.assertEquals(expectedDescription, description);
     }
 
     @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)

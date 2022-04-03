@@ -18,38 +18,26 @@ package com.github.victools.jsonschema.plugin.maven;
 
 import java.io.File;
 import java.io.FileReader;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.testing.MojoRule;
+import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.configurator.ComponentConfigurationException;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-@RunWith(JUnitParamsRunner.class)
-public class SchemaGeneratorMojoTest {
+public class SchemaGeneratorMojoTest extends AbstractMojoTestCase{
 
-    @Rule
-    public MojoRule rule = new MojoRule();
-
-    public Object[] parametersForTestGeneration() {
-        return new Object[][]{
-                {"DefaultConfig"},
-                {"SchemaVersion"},
-                {"JacksonModule"},
-                {"JavaxValidationModule"},
-                {"JakartaValidationModule"},
-                {"Swagger15Module"},
-                {"Swagger2Module"},
-                {"Complete"}
-        };
+    @BeforeEach
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
     }
 
     /**
@@ -57,8 +45,17 @@ public class SchemaGeneratorMojoTest {
      *
      * @throws Exception In case something goes wrong
      */
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "DefaultConfig",
+        "SchemaVersion",
+        "JacksonModule",
+        "JavaxValidationModule",
+        "JakartaValidationModule",
+        "Swagger15Module",
+        "Swagger2Module",
+        "Complete"
+    })
     public void testGeneration(String testCaseName) throws Exception {
         File testCaseLocation = new File("src/test/resources/reference-test-cases");
         File generationLocation = new File("target/generated-test-sources");
@@ -68,21 +65,14 @@ public class SchemaGeneratorMojoTest {
 
         // Validate that the schema file is created.
         File resultFile = new File(generationLocation,testCaseName + "/TestClass-schema.json");
-        Assert.assertTrue(resultFile.exists());
+        Assertions.assertTrue(resultFile.exists());
         resultFile.deleteOnExit();
 
         // Validate that is the same as the reference
         File referenceFile = new File(testCaseLocation + "/" + testCaseName + "-reference.json");
-        Assert.assertTrue(referenceFile.exists());
-        Assert.assertTrue("Generated schema for " + testCaseName + " is not equal to the expected reference.",
-                FileUtils.contentEquals(resultFile, referenceFile));
-    }
-
-    public Object[] parametersForTestPomErrors() {
-        return new Object[][]{
-                {"ClassNotFound"},
-                {"UnknownModule"}
-        };
+        Assertions.assertTrue(referenceFile.exists());
+        Assertions.assertTrue(FileUtils.contentEquals(resultFile, referenceFile),
+                "Generated schema for " + testCaseName + " is not equal to the expected reference.");
     }
 
     /**
@@ -91,18 +81,12 @@ public class SchemaGeneratorMojoTest {
      * @param testCaseName Name of the test case and file name prefix of the example {@code pom.xml}
      * @throws Exception In case something goes wrong
      */
-    @Test(expected = MojoExecutionException.class)
-    @Parameters
+    @ParameterizedTest
+    @ValueSource(strings = { "ClassNotFound", "UnknownModule" })
     public void testPomErrors(String testCaseName) throws Exception {
         File testCaseLocation = new File("src/test/resources/error-test-cases");
-        executePom(new File(testCaseLocation, testCaseName + "-pom.xml"));
-    }
-
-    public Object[] parametersForTestPomConfigurationErrors() {
-        return new Object[][]{
-                {"UnknownSchemaVersion"},
-                {"UnknownGeneratorPreset"}
-        };
+        Assertions.assertThrows(MojoExecutionException.class,
+                () -> executePom(new File(testCaseLocation, testCaseName + "-pom.xml")));
     }
 
     /**
@@ -111,11 +95,12 @@ public class SchemaGeneratorMojoTest {
      * @param testCaseName Name of the test case and file name prefix of the example {@code pom.xml}
      * @throws Exception In case something goes wrong
      */
-    @Test(expected = ComponentConfigurationException.class)
-    @Parameters
+    @ParameterizedTest
+    @ValueSource(strings = { "UnknownSchemaVersion", "UnknownGeneratorPreset" })
     public void testPomConfigurationErrors(String testCaseName) throws Exception {
         File testCaseLocation = new File("src/test/resources/error-test-cases");
-        executePom(new File(testCaseLocation, testCaseName + "-pom.xml"));
+        Assertions.assertThrows(ComponentConfigurationException.class,
+                () -> executePom(new File(testCaseLocation, testCaseName + "-pom.xml")));
     }
 
     /**
@@ -131,23 +116,23 @@ public class SchemaGeneratorMojoTest {
 
         // Validate that the schema files are created.
         File resultFileA = new File(generationLocation,"TestClassA.schema");
-        Assert.assertTrue(resultFileA.exists());
+        Assertions.assertTrue(resultFileA.exists());
         resultFileA.deleteOnExit();
 
         File resultFileB = new File(generationLocation,"TestClassB.schema");
-        Assert.assertTrue(resultFileB.exists());
+        Assertions.assertTrue(resultFileB.exists());
         resultFileB.deleteOnExit();
 
         // Validate that they are the same as the reference
         File referenceFileA = new File(testCaseLocation + "/" + "TestClassA-reference.json");
-        Assert.assertTrue(referenceFileA.exists());
-        Assert.assertTrue("Generated schema for TestClassA is not equal to the expected reference.",
-                FileUtils.contentEquals(resultFileA, referenceFileA));
+        Assertions.assertTrue(referenceFileA.exists());
+        Assertions.assertTrue(FileUtils.contentEquals(resultFileA, referenceFileA),
+                "Generated schema for TestClassA is not equal to the expected reference.");
 
         File referenceFileB = new File(testCaseLocation + "/" + "TestClassB-reference.json");
-        Assert.assertTrue(referenceFileB.exists());
-        Assert.assertTrue("Generated schema for TestClassB is not equal to the expected reference.",
-                FileUtils.contentEquals(resultFileB, referenceFileB));
+        Assertions.assertTrue(referenceFileB.exists());
+        Assertions.assertTrue(FileUtils.contentEquals(resultFileB, referenceFileB),
+                "Generated schema for TestClassB is not equal to the expected reference.");
     }
 
     /**
@@ -163,32 +148,32 @@ public class SchemaGeneratorMojoTest {
 
         // Validate that the schema files are created.
         File resultFileA = new File(generationLocation,"TestClassA-schema.json");
-        Assert.assertTrue(resultFileA.exists());
+        Assertions.assertTrue(resultFileA.exists());
         resultFileA.deleteOnExit();
 
         File resultFileB = new File(generationLocation,"TestClassB-schema.json");
-        Assert.assertTrue(resultFileB.exists());
+        Assertions.assertTrue(resultFileB.exists());
         resultFileB.deleteOnExit();
 
         File resultFileC = new File(generationLocation,"TestClassC-schema.json");
-        Assert.assertTrue(resultFileC.exists());
+        Assertions.assertTrue(resultFileC.exists());
         resultFileC.deleteOnExit();
 
         // Validate that they are the same as the reference
         File referenceFileA = new File(testCaseLocation + "/" + "TestClassA-reference.json");
-        Assert.assertTrue(referenceFileA.exists());
-        Assert.assertTrue("Generated schema for TestClassA is not equal to the expected reference.",
-                FileUtils.contentEquals(resultFileA, referenceFileA));
+        Assertions.assertTrue(referenceFileA.exists());
+        Assertions.assertTrue(FileUtils.contentEquals(resultFileA, referenceFileA),
+                "Generated schema for TestClassA is not equal to the expected reference.");
 
         File referenceFileB = new File(testCaseLocation + "/" + "TestClassB-reference.json");
-        Assert.assertTrue(referenceFileB.exists());
-        Assert.assertTrue("Generated schema for TestClassB is not equal to the expected reference.",
-                FileUtils.contentEquals(resultFileB, referenceFileB));
+        Assertions.assertTrue(referenceFileB.exists());
+        Assertions.assertTrue(FileUtils.contentEquals(resultFileB, referenceFileB),
+                "Generated schema for TestClassB is not equal to the expected reference.");
 
         File referenceFileC = new File(testCaseLocation + "/" + "TestClassC-reference.json");
-        Assert.assertTrue(referenceFileC.exists());
-        Assert.assertTrue("Generated schema for TestClassC is not equal to the expected reference.",
-                FileUtils.contentEquals(resultFileC, referenceFileC));
+        Assertions.assertTrue(referenceFileC.exists());
+        Assertions.assertTrue(FileUtils.contentEquals(resultFileC, referenceFileC),
+                "Generated schema for TestClassC is not equal to the expected reference.");
     }
 
     /**
@@ -205,23 +190,23 @@ public class SchemaGeneratorMojoTest {
 
         // Validate that the schema files are created.
         File resultFileA = new File(generationLocation,"TestClassA.schema");
-        Assert.assertTrue(resultFileA.exists());
+        Assertions.assertTrue(resultFileA.exists());
         resultFileA.deleteOnExit();
 
         File resultFileB = new File(generationLocation,"TestClassB.schema");
-        Assert.assertTrue(resultFileB.exists());
+        Assertions.assertTrue(resultFileB.exists());
         resultFileB.deleteOnExit();
 
         // Validate that they are the same as the reference
         File referenceFileA = new File(testCaseLocation + "/" + "TestClassA-reference.json");
-        Assert.assertTrue(referenceFileA.exists());
-        Assert.assertTrue("Generated schema for TestClassA is not equal to the expected reference.",
-                FileUtils.contentEquals(resultFileA, referenceFileA));
+        Assertions.assertTrue(referenceFileA.exists());
+        Assertions.assertTrue(FileUtils.contentEquals(resultFileA, referenceFileA),
+                "Generated schema for TestClassA is not equal to the expected reference.");
 
         File referenceFileB = new File(testCaseLocation + "/" + "TestClassB-reference.json");
-        Assert.assertTrue(referenceFileB.exists());
-        Assert.assertTrue("Generated schema for TestClassB is not equal to the expected reference.",
-                FileUtils.contentEquals(resultFileB, referenceFileB));
+        Assertions.assertTrue(referenceFileB.exists());
+        Assertions.assertTrue(FileUtils.contentEquals(resultFileB, referenceFileB),
+                "Generated schema for TestClassB is not equal to the expected reference.");
     }
 
     /**
@@ -232,12 +217,16 @@ public class SchemaGeneratorMojoTest {
      */
     private void executePom(File pomFile) throws Exception {
         // Get the maven pom file content
-        Xpp3Dom pomDom = Xpp3DomBuilder.build(new FileReader(pomFile));
-        PlexusConfiguration configuration = rule.extractPluginConfiguration("jsonschema-maven-plugin", pomDom);
+        Xpp3Dom pomDom;
+        PlexusConfiguration configuration;
+        try (FileReader pomReader = new FileReader(pomFile)) {
+            pomDom = Xpp3DomBuilder.build(pomReader);
+            configuration = this.extractPluginConfiguration("jsonschema-maven-plugin", pomDom);
+        }
 
         // Configure the Mojo
-        SchemaGeneratorMojo myMojo = (SchemaGeneratorMojo) rule.lookupConfiguredMojo(new MavenProject(), "generate");
-        myMojo = (SchemaGeneratorMojo) rule.configureMojo(myMojo, configuration);
+        SchemaGeneratorMojo myMojo = (SchemaGeneratorMojo) this.lookupConfiguredMojo(new MavenProject(), "generate");
+        myMojo = (SchemaGeneratorMojo) this.configureMojo(myMojo, configuration);
 
         // And execute
         myMojo.execute();

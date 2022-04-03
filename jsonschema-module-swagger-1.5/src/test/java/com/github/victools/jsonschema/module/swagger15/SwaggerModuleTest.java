@@ -29,19 +29,19 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.function.Predicate;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 /**
  * Test for the {@link SwaggerModule} class.
  */
-@RunWith(JUnitParamsRunner.class)
 public class SwaggerModuleTest {
 
     private SchemaGeneratorConfigBuilder configBuilder;
@@ -49,7 +49,7 @@ public class SwaggerModuleTest {
     private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
     private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.configBuilder = Mockito.mock(SchemaGeneratorConfigBuilder.class);
         this.typesInGeneralConfigPart = Mockito.spy(new SchemaGeneratorGeneralConfigPart());
@@ -168,18 +168,18 @@ public class SwaggerModuleTest {
         Mockito.verify(this.methodConfigPart).withEnumResolver(Mockito.any());
     }
 
-    Object parametersForTestIgnoreCheck() {
-        return new Object[][]{
-            {"unannotatedField", false},
-            {"annotatedAsNotHiddenField", false},
-            {"annotatedAsNotHiddenGetterField", false},
-            {"annotatedField", true},
-            {"annotatedGetterField", true}
-        };
+    static Stream<Arguments> parametersForTestIgnoreCheck() {
+        return Stream.of(
+            Arguments.of("unannotatedField", false),
+            Arguments.of("annotatedAsNotHiddenField", false),
+            Arguments.of("annotatedAsNotHiddenGetterField", false),
+            Arguments.of("annotatedField", true),
+            Arguments.of("annotatedGetterField", true)
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestIgnoreCheck")
     public void testIgnoreCheck(String fieldName, boolean expectedResult) {
         new SwaggerModule(SwaggerOption.IGNORING_HIDDEN_PROPERTIES).applyToConfigBuilder(this.configBuilder);
 
@@ -189,23 +189,23 @@ public class SwaggerModuleTest {
         ArgumentCaptor<Predicate<FieldScope>> captor = ArgumentCaptor.forClass(Predicate.class);
         Mockito.verify(this.fieldConfigPart).withIgnoreCheck(captor.capture());
         boolean result = captor.getValue().test(field);
-        Assert.assertEquals(expectedResult, result);
+        Assertions.assertEquals(expectedResult, result);
     }
 
-    Object parametersForTestPropertyNameOverrideResolver() {
-        return new Object[][]{
-            {"unannotatedField", null},
-            {"annotatedWithoutValueField", null},
-            {"annotatedWithoutValueGetterField", null},
-            {"annotatedWithSameNameField", null},
-            {"annotatedWithSameNameGetterField", null},
-            {"annotatedField", "overrideOne"},
-            {"annotatedGetterField", "overrideTwo"}
-        };
+    static Stream<Arguments> parametersForTestPropertyNameOverrideResolver() {
+        return Stream.of(
+            Arguments.of("unannotatedField", null),
+            Arguments.of("annotatedWithoutValueField", null),
+            Arguments.of("annotatedWithoutValueGetterField", null),
+            Arguments.of("annotatedWithSameNameField", null),
+            Arguments.of("annotatedWithSameNameGetterField", null),
+            Arguments.of("annotatedField", "overrideOne"),
+            Arguments.of("annotatedGetterField", "overrideTwo")
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestPropertyNameOverrideResolver")
     public void testPropertyNameOverrideResolver(String fieldName, String expectedNameOverride) {
         new SwaggerModule(SwaggerOption.ENABLE_PROPERTY_NAME_OVERRIDES).applyToConfigBuilder(this.configBuilder);
 
@@ -215,21 +215,21 @@ public class SwaggerModuleTest {
         ArgumentCaptor<ConfigFunction<FieldScope, String>> captor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withPropertyNameOverrideResolver(captor.capture());
         String override = captor.getValue().apply(field);
-        Assert.assertEquals(expectedNameOverride, override);
+        Assertions.assertEquals(expectedNameOverride, override);
     }
 
-    Object parametersForTestTitleResolver() {
-        return new Object[][]{
-            {"unannotatedField", false, null},
-            {"exampleWithEmptyApiModel", false, null},
-            {"exampleWithApiModelTitle", false, "example title"},
-            {"listExampleWithApiModelTitle", false, null},
-            {"listExampleWithApiModelTitle", true, "example title"}
-        };
+    static Stream<Arguments> parametersForTestTitleResolver() {
+        return Stream.of(
+            Arguments.of("unannotatedField", false, null),
+            Arguments.of("exampleWithEmptyApiModel", false, null),
+            Arguments.of("exampleWithApiModelTitle", false, "example title"),
+            Arguments.of("listExampleWithApiModelTitle", false, null),
+            Arguments.of("listExampleWithApiModelTitle", true, "example title")
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestTitleResolver")
     public void testTitleResolver(String fieldName, boolean asContainerItem, String expectedTitle) {
         new SwaggerModule().applyToConfigBuilder(this.configBuilder);
 
@@ -242,27 +242,27 @@ public class SwaggerModuleTest {
         ArgumentCaptor<ConfigFunction<TypeScope, String>> captor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.typesInGeneralConfigPart).withTitleResolver(captor.capture());
         String title = captor.getValue().apply(field);
-        Assert.assertEquals(expectedTitle, title);
+        Assertions.assertEquals(expectedTitle, title);
     }
 
-    Object parametersForTestDescriptionResolver() {
-        return new Object[][]{
-            {"unannotatedField", false, null, null},
-            {"annotatedWithoutValueField", false, null, null},
-            {"annotatedWithoutValueGetterField", false, null, null},
-            {"annotatedField", false, "annotation value 1", null},
-            {"annotatedGetterField", false, "annotation value 2", null},
-            {"exampleWithEmptyApiModel", false, null, null},
-            {"exampleWithApiModelDescription", false, null, "type description"},
-            {"arrayExampleWithApiModelDescription", false, null, null},
-            {"arrayExampleWithApiModelDescription", true, null, "type description"},
-            {"exampleWithTwoDescriptions", false, "property description", "type description"},
-            {"exampleWithApiModelTitle", false, null, null}
-        };
+    static Stream<Arguments> parametersForTestDescriptionResolver() {
+        return Stream.of(
+            Arguments.of("unannotatedField", false, null, null),
+            Arguments.of("annotatedWithoutValueField", false, null, null),
+            Arguments.of("annotatedWithoutValueGetterField", false, null, null),
+            Arguments.of("annotatedField", false, "annotation value 1", null),
+            Arguments.of("annotatedGetterField", false, "annotation value 2", null),
+            Arguments.of("exampleWithEmptyApiModel", false, null, null),
+            Arguments.of("exampleWithApiModelDescription", false, null, "type description"),
+            Arguments.of("arrayExampleWithApiModelDescription", false, null, null),
+            Arguments.of("arrayExampleWithApiModelDescription", true, null, "type description"),
+            Arguments.of("exampleWithTwoDescriptions", false, "property description", "type description"),
+            Arguments.of("exampleWithApiModelTitle", false, null, null)
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestDescriptionResolver")
     public void testDescriptionResolver(String fieldName, boolean asContainerItem, String expectedMemberDescription, String expectedTypeDescription) {
         new SwaggerModule().applyToConfigBuilder(this.configBuilder);
 
@@ -275,32 +275,32 @@ public class SwaggerModuleTest {
         ArgumentCaptor<ConfigFunction<FieldScope, String>> memberCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withDescriptionResolver(memberCaptor.capture());
         String memberDescription = memberCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMemberDescription, memberDescription);
+        Assertions.assertEquals(expectedMemberDescription, memberDescription);
 
         ArgumentCaptor<ConfigFunction<TypeScope, String>> typeCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.typesInGeneralConfigPart).withDescriptionResolver(typeCaptor.capture());
         TypeScope scope = Mockito.mock(TypeScope.class);
         Mockito.when(scope.getType()).thenReturn(field.getType());
         String typeDescription = typeCaptor.getValue().apply(scope);
-        Assert.assertEquals(expectedTypeDescription, typeDescription);
+        Assertions.assertEquals(expectedTypeDescription, typeDescription);
     }
 
-    Object parametersForTestDescriptionResolverWithNoApiModelDescription() {
-        return new Object[][]{
-            {"unannotatedField", null},
-            {"annotatedWithoutValueField", null},
-            {"annotatedWithoutValueGetterField", null},
-            {"annotatedField", "annotation value 1"},
-            {"annotatedGetterField", "annotation value 2"},
-            {"exampleWithEmptyApiModel", null},
-            {"exampleWithApiModelDescription", null},
-            {"exampleWithTwoDescriptions", "property description"},
-            {"exampleWithApiModelTitle", null}
-        };
+    static Stream<Arguments> parametersForTestDescriptionResolverWithNoApiModelDescription() {
+        return Stream.of(
+            Arguments.of("unannotatedField", null),
+            Arguments.of("annotatedWithoutValueField", null),
+            Arguments.of("annotatedWithoutValueGetterField", null),
+            Arguments.of("annotatedField", "annotation value 1"),
+            Arguments.of("annotatedGetterField", "annotation value 2"),
+            Arguments.of("exampleWithEmptyApiModel", null),
+            Arguments.of("exampleWithApiModelDescription", null),
+            Arguments.of("exampleWithTwoDescriptions", "property description"),
+            Arguments.of("exampleWithApiModelTitle", null)
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestDescriptionResolverWithNoApiModelDescription")
     public void testDescriptionResolverWithNoApiModelDescription(String fieldName, String expectedMemberDescription) {
         new SwaggerModule(SwaggerOption.NO_APIMODEL_DESCRIPTION).applyToConfigBuilder(this.configBuilder);
 
@@ -310,38 +310,38 @@ public class SwaggerModuleTest {
         ArgumentCaptor<ConfigFunction<FieldScope, String>> captor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withDescriptionResolver(captor.capture());
         String description = captor.getValue().apply(field);
-        Assert.assertEquals(expectedMemberDescription, description);
+        Assertions.assertEquals(expectedMemberDescription, description);
 
         Mockito.verify(this.typesInGeneralConfigPart).withTitleResolver(Mockito.any());
         Mockito.verifyNoMoreInteractions(this.typesInGeneralConfigPart);
     }
 
-    Object parametersForTestNumberMinMaxResolvers() {
-        return new Object[][]{
-            {"unannotatedInt", false, null, null, null, null},
-            {"unannotatedIntArray", false, null, null, null, null},
-            {"unannotatedIntArray", true, null, null, null, null},
-            {"minMinusHundredLong", false, "-100", null, null, null},
-            {"minMinusHundredOnGetterLong", false, "-100", null, null, null},
-            {"maxFiftyShort", false, null, null, "50", null},
-            {"maxFiftyOnGetterShort", false, null, null, "50", null},
-            {"tenToTwentyInclusiveDouble", false, "10.1", null, "20.2", null},
-            {"tenToTwentyInclusiveOnGetterDouble", false, "10.1", null, "20.2", null},
-            {"tenToTwentyExclusiveDecimal", false, null, "10.1", null, "20.2"},
-            {"tenToTwentyExclusiveOnGetterDecimal", false, null, "10.1", null, "20.2"},
-            {"positiveByte", false, null, BigDecimal.ZERO, null, null},
-            {"positiveOnGetterByte", false, null, BigDecimal.ZERO, null, null},
-            {"positiveOrZeroBigInteger", false, BigDecimal.ZERO, null, null, null},
-            {"positiveOrZeroOnGetterBigInteger", false, BigDecimal.ZERO, null, null, null},
-            {"negativeDecimal", false, null, null, null, BigDecimal.ZERO},
-            {"negativeOnGetterDecimal", false, null, null, null, BigDecimal.ZERO},
-            {"negativeOrZeroLong", false, null, null, BigDecimal.ZERO, null},
-            {"negativeOrZeroOnGetterLong", false, null, null, BigDecimal.ZERO, null}
-        };
+    static Stream<Arguments> parametersForTestNumberMinMaxResolvers() {
+        return Stream.of(
+            Arguments.of("unannotatedInt", false, null, null, null, null),
+            Arguments.of("unannotatedIntArray", false, null, null, null, null),
+            Arguments.of("unannotatedIntArray", true, null, null, null, null),
+            Arguments.of("minMinusHundredLong", false, "-100", null, null, null),
+            Arguments.of("minMinusHundredOnGetterLong", false, "-100", null, null, null),
+            Arguments.of("maxFiftyShort", false, null, null, "50", null),
+            Arguments.of("maxFiftyOnGetterShort", false, null, null, "50", null),
+            Arguments.of("tenToTwentyInclusiveDouble", false, "10.1", null, "20.2", null),
+            Arguments.of("tenToTwentyInclusiveOnGetterDouble", false, "10.1", null, "20.2", null),
+            Arguments.of("tenToTwentyExclusiveDecimal", false, null, "10.1", null, "20.2"),
+            Arguments.of("tenToTwentyExclusiveOnGetterDecimal", false, null, "10.1", null, "20.2"),
+            Arguments.of("positiveByte", false, null, BigDecimal.ZERO, null, null),
+            Arguments.of("positiveOnGetterByte", false, null, BigDecimal.ZERO, null, null),
+            Arguments.of("positiveOrZeroBigInteger", false, BigDecimal.ZERO, null, null, null),
+            Arguments.of("positiveOrZeroOnGetterBigInteger", false, BigDecimal.ZERO, null, null, null),
+            Arguments.of("negativeDecimal", false, null, null, null, BigDecimal.ZERO),
+            Arguments.of("negativeOnGetterDecimal", false, null, null, null, BigDecimal.ZERO),
+            Arguments.of("negativeOrZeroLong", false, null, null, BigDecimal.ZERO, null),
+            Arguments.of("negativeOrZeroOnGetterLong", false, null, null, BigDecimal.ZERO, null)
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestNumberMinMaxResolvers")
     public void testNumberMinMaxResolvers(String fieldName, boolean asContainerItem, BigDecimal expectedMinInclusive, BigDecimal expectedMinExclusive,
             BigDecimal expectedMaxInclusive, BigDecimal expectedMaxExclusive) throws Exception {
         new SwaggerModule().applyToConfigBuilder(this.configBuilder);
@@ -355,22 +355,22 @@ public class SwaggerModuleTest {
         ArgumentCaptor<ConfigFunction<FieldScope, BigDecimal>> minInclusiveCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withNumberInclusiveMinimumResolver(minInclusiveCaptor.capture());
         BigDecimal minInclusive = minInclusiveCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMinInclusive, minInclusive);
+        Assertions.assertEquals(expectedMinInclusive, minInclusive);
 
         ArgumentCaptor<ConfigFunction<FieldScope, BigDecimal>> minExclusiveCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withNumberExclusiveMinimumResolver(minExclusiveCaptor.capture());
         BigDecimal minExclusive = minExclusiveCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMinExclusive, minExclusive);
+        Assertions.assertEquals(expectedMinExclusive, minExclusive);
 
         ArgumentCaptor<ConfigFunction<FieldScope, BigDecimal>> maxInclusiveCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withNumberInclusiveMaximumResolver(maxInclusiveCaptor.capture());
         BigDecimal maxInclusive = maxInclusiveCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMaxInclusive, maxInclusive);
+        Assertions.assertEquals(expectedMaxInclusive, maxInclusive);
 
         ArgumentCaptor<ConfigFunction<FieldScope, BigDecimal>> maxExclusiveCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withNumberExclusiveMaximumResolver(maxExclusiveCaptor.capture());
         BigDecimal maxExclusive = maxExclusiveCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMaxExclusive, maxExclusive);
+        Assertions.assertEquals(expectedMaxExclusive, maxExclusive);
     }
 
     private static class TestClassForPropertyNameOverride {
