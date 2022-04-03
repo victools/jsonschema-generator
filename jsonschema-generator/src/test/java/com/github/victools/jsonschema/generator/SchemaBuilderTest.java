@@ -18,8 +18,8 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -31,7 +31,7 @@ public class SchemaBuilderTest {
     private SchemaGeneratorConfig config;
     private TypeContext typeContext;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(Option.PLAIN_DEFINITION_KEYS)

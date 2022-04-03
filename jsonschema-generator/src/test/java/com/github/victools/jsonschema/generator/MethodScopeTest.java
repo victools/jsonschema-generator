@@ -20,61 +20,62 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test for the {@link MethodSCope} class.
  */
-@RunWith(JUnitParamsRunner.class)
 public class MethodScopeTest extends AbstractTypeAwareTest {
 
     public MethodScopeTest() {
         super(TestClass.class);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
     }
 
-    Object parametersForTestFindGetterField() {
-        return new String[][]{
-            {"getFieldWithPrivateGetter", null, null},
-            {"getFieldWithPrivateGetter", "getFieldWithPublicGetter", null},
-            {"getFieldWithPublicGetter", null, "fieldWithPublicGetter"},
-            {"getFieldWithPublicGetter", "getFieldWithPrivateGetter", "fieldWithPublicGetter"},
-            {"isFieldWithPublicBooleanGetter", null, "fieldWithPublicBooleanGetter"},
-            {"isFieldWithPublicBooleanGetter", "isBehavingSomehow", "fieldWithPublicBooleanGetter"},
-            {"getCalculatedValue", null, null},
-            {"isBehavingSomehow", null, null},
-            {"isBehavingSomehow", "isFieldWithPublicBooleanGetter", null},
-            {"get", null, null},
-            {"is", null, null},
-            {"calculateSomething", null, null}};
+    static Stream<Arguments> parametersForTestFindGetterField() {
+        return Stream.of(
+            Arguments.of("getFieldWithPrivateGetter", null, null),
+            Arguments.of("getFieldWithPrivateGetter", "getFieldWithPublicGetter", null),
+            Arguments.of("getFieldWithPublicGetter", null, "fieldWithPublicGetter"),
+            Arguments.of("getFieldWithPublicGetter", "getFieldWithPrivateGetter", "fieldWithPublicGetter"),
+            Arguments.of("isFieldWithPublicBooleanGetter", null, "fieldWithPublicBooleanGetter"),
+            Arguments.of("isFieldWithPublicBooleanGetter", "isBehavingSomehow", "fieldWithPublicBooleanGetter"),
+            Arguments.of("getCalculatedValue", null, null),
+            Arguments.of("isBehavingSomehow", null, null),
+            Arguments.of("isBehavingSomehow", "isFieldWithPublicBooleanGetter", null),
+            Arguments.of("get", null, null),
+            Arguments.of("is", null, null),
+            Arguments.of("calculateSomething", null, null)
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestFindGetterField")
     public void testFindGetterField(String methodName, String methodNameOverride, String fieldName) throws Exception {
         MethodScope method = this.getTestClassMethod(methodName)
                 .withOverriddenName(methodNameOverride);
         FieldScope field = method.findGetterField();
 
         if (fieldName == null) {
-            Assert.assertNull(field);
+            Assertions.assertNull(field);
         } else {
-            Assert.assertNotNull(field);
-            Assert.assertEquals(fieldName, field.getDeclaredName());
+            Assertions.assertNotNull(field);
+            Assertions.assertEquals(fieldName, field.getDeclaredName());
         }
     }
 
-    @Test
-    @Parameters({
+    @ParameterizedTest
+    @CsvSource({
         "getFieldWithPrivateGetter, false",
         "getFieldWithPublicGetter, true",
         "isFieldWithPublicBooleanGetter, true",
@@ -88,11 +89,11 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
         MethodScope method = this.getTestClassMethod(methodName);
         boolean result = method.isGetter();
 
-        Assert.assertEquals(expectedResult, result);
+        Assertions.assertEquals(expectedResult, result);
     }
 
-    @Test
-    @Parameters({
+    @ParameterizedTest
+    @CsvSource({
         "calculateSomething, false",
         "getFieldWithPrivateGetter, true",
         "getFieldWithPublicGetter, false",
@@ -103,9 +104,9 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
         TestAnnotation annotation = method.getAnnotationConsideringFieldAndGetter(TestAnnotation.class);
 
         if (annotationExpectedToBeFound) {
-            Assert.assertNotNull(annotation);
+            Assertions.assertNotNull(annotation);
         } else {
-            Assert.assertNull(annotation);
+            Assertions.assertNull(annotation);
         }
     }
 

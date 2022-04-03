@@ -24,34 +24,29 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import junitparams.naming.TestCaseName;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for {@link SchemaGenerator} class.
  */
-@RunWith(JUnitParamsRunner.class)
 public class SchemaGeneratorSubtypesTest {
 
-    Object parametersForTestGenerateSchema() {
-        return new Object[][]{
-            {"testclass-withsupertypereferences-NO_SUBTYPES", Collections.emptyList(), SchemaVersion.DRAFT_7},
-            {"testclass-withsupertypereferences-ONE_SUBTYPE_VALID", Collections.singletonList(TestSubClass1.class), SchemaVersion.DRAFT_7},
-            {"testclass-withsupertypereferences-ONE_SUBTYPE_INVALID", Collections.singletonList(TestSubClass3.class), SchemaVersion.DRAFT_7},
-            {"testclass-withsupertypereferences-TWO_SUBTYPES", Arrays.asList(TestSubClass2.class, TestSubClass3.class), SchemaVersion.DRAFT_7},
-            {"testclass-withsupertypereferences-THREE_SUBTYPES", Arrays.asList(TestSubClass1.class, TestSubClass2.class, TestSubClass3.class),
-                SchemaVersion.DRAFT_7}
-        };
+    static Stream<Arguments> parametersForTestGenerateSchema() {
+        return Stream.of(
+            Arguments.of("NO_SUBTYPES", Collections.emptyList(), SchemaVersion.DRAFT_7),
+            Arguments.of("ONE_SUBTYPE_VALID", Collections.singletonList(TestSubClass1.class), SchemaVersion.DRAFT_7),
+            Arguments.of("ONE_SUBTYPE_INVALID", Collections.singletonList(TestSubClass3.class), SchemaVersion.DRAFT_7),
+            Arguments.of("TWO_SUBTYPES", Arrays.asList(TestSubClass2.class, TestSubClass3.class), SchemaVersion.DRAFT_7),
+            Arguments.of("THREE_SUBTYPES", Arrays.asList(TestSubClass1.class, TestSubClass2.class, TestSubClass3.class), SchemaVersion.DRAFT_7)
+        );
     }
 
-    @Test
-    @Parameters
-    @TestCaseName(value = "{method}({0}) [{index}]")
+    @ParameterizedTest
+    @MethodSource("parametersForTestGenerateSchema")
     public void testGenerateSchema(String caseTitle, List<Class<?>> subtypes, SchemaVersion schemaVersion) throws Exception {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON)
                 .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_FIELDS_BY_DEFAULT);
@@ -66,8 +61,8 @@ public class SchemaGeneratorSubtypesTest {
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(TestClassWithSuperTypeReferences.class);
-        JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                TestUtils.loadResource(SchemaGeneratorSubtypesTest.class, caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
+        JSONAssert.assertEquals('\n' + result.toString() + '\n', TestUtils.loadResource(SchemaGeneratorSubtypesTest.class,
+                "testclass-withsupertypereferences-" + caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
     }
 
     private List<ResolvedType> determineTargetTypeOverrides(FieldScope field) {

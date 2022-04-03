@@ -20,55 +20,56 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test for the {@link FieldScope} class.
  */
-@RunWith(JUnitParamsRunner.class)
 public class FieldScopeTest extends AbstractTypeAwareTest {
 
     public FieldScopeTest() {
         super(TestClass.class);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
     }
 
-    Object parametersForTestFindGetter() {
-        return new String[][]{
-            {"fieldWithoutGetter", null, null},
-            {"fieldWithoutGetter", "fieldWithPublicGetter", null},
-            {"fieldWithPrivateGetter", null, null},
-            {"fieldWithPublicGetter", null, "getFieldWithPublicGetter"},
-            {"fieldWithPublicGetter", "fieldWithoutGetter", "getFieldWithPublicGetter"},
-            {"fieldWithPublicBooleanGetter", null, "isFieldWithPublicBooleanGetter"}};
+    static Stream<Arguments> parametersForTestFindGetter() {
+        return Stream.of(
+            Arguments.of("fieldWithoutGetter", null, null),
+            Arguments.of("fieldWithoutGetter", "fieldWithPublicGetter", null),
+            Arguments.of("fieldWithPrivateGetter", null, null),
+            Arguments.of("fieldWithPublicGetter", null, "getFieldWithPublicGetter"),
+            Arguments.of("fieldWithPublicGetter", "fieldWithoutGetter", "getFieldWithPublicGetter"),
+            Arguments.of("fieldWithPublicBooleanGetter", null, "isFieldWithPublicBooleanGetter")
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestFindGetter")
     public void testFindGetter(String fieldName, String fieldNameOverride, String methodName) throws Exception {
         FieldScope field = this.getTestClassField(fieldName)
                 .withOverriddenName(fieldNameOverride);
         MethodScope getter = field.findGetter();
 
         if (methodName == null) {
-            Assert.assertNull(getter);
+            Assertions.assertNull(getter);
         } else {
-            Assert.assertNotNull(getter);
-            Assert.assertEquals(methodName, getter.getName());
+            Assertions.assertNotNull(getter);
+            Assertions.assertEquals(methodName, getter.getName());
         }
     }
 
-    @Test
-    @Parameters({
+    @ParameterizedTest
+    @CsvSource({
         "fieldWithoutGetter, false",
         "fieldWithPrivateGetter, false",
         "fieldWithPublicGetter, true",
@@ -78,11 +79,11 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
         FieldScope field = this.getTestClassField(fieldName);
         boolean result = field.hasGetter();
 
-        Assert.assertEquals(expectedResult, result);
+        Assertions.assertEquals(expectedResult, result);
     }
 
-    @Test
-    @Parameters({
+    @ParameterizedTest
+    @CsvSource({
         "fieldWithoutGetter, false",
         "fieldWithPrivateGetter, true",
         "fieldWithPublicGetter, false",
@@ -93,9 +94,9 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
         TestAnnotation annotation = field.getAnnotationConsideringFieldAndGetter(TestAnnotation.class);
 
         if (annotationExpectedToBeFound) {
-            Assert.assertNotNull(annotation);
+            Assertions.assertNotNull(annotation);
         } else {
-            Assert.assertNull(annotation);
+            Assertions.assertNull(annotation);
         }
     }
 

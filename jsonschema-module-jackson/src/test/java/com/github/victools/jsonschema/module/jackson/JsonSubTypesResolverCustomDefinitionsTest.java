@@ -25,12 +25,12 @@ import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -39,7 +39,6 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 /**
  * Test for the {@link JsonSubTypesResolver}.
  */
-@RunWith(JUnitParamsRunner.class)
 public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAwareTest {
 
     private final JsonSubTypesResolver instance = new JsonSubTypesResolver();
@@ -48,7 +47,7 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
         super(TestClassWithSuperTypeReferences.class);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
         Answer<String> memberTitleLookUp = invocation -> ((MemberScope<?, ?>) invocation.getArgument(0))
@@ -60,76 +59,76 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
     private void assertCustomDefinitionsAreEqual(String customDefinition, CustomDefinition result, CustomDefinition.DefinitionType definitionType)
             throws Exception {
         if (customDefinition == null) {
-            Assert.assertNull(result);
+            Assertions.assertNull(result);
         } else {
-            Assert.assertNotNull(result);
-            Assert.assertNotNull(result.getValue());
+            Assertions.assertNotNull(result);
+            Assertions.assertNotNull(result.getValue());
             JSONAssert.assertEquals('\n' + result.getValue().toString() + '\n',
                     customDefinition, result.getValue().toString(), JSONCompareMode.STRICT);
-            Assert.assertEquals(definitionType, result.getDefinitionType());
-            Assert.assertEquals(CustomDefinition.AttributeInclusion.NO, result.getAttributeInclusion());
+            Assertions.assertEquals(definitionType, result.getDefinitionType());
+            Assertions.assertEquals(CustomDefinition.AttributeInclusion.NO, result.getAttributeInclusion());
         }
     }
 
-    public Object[] parametersForTestProvideCustomSchemaDefinition() {
-        return new Object[][]{
-            {TestClassWithSuperTypeReferences.class, null},
-            {TestSuperClassWithNameProperty.class, null},
-            {TestSubClass1.class, "{\"allOf\":[{},"
-                + "{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}},\"required\":[\"@type\"]}]}"}
-        };
+    static Stream<Arguments> parametersForTestProvideCustomSchemaDefinition() {
+        return Stream.of(
+            Arguments.of(TestClassWithSuperTypeReferences.class, null),
+            Arguments.of(TestSuperClassWithNameProperty.class, null),
+            Arguments.of(TestSubClass1.class, "{\"allOf\":[{},"
+                + "{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}},\"required\":[\"@type\"]}]}")
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestProvideCustomSchemaDefinition")
     public void testProvideCustomSchemaDefinition(Class<?> erasedTargetType, String customDefinition) throws Exception {
         ResolvedType javaType = this.getContext().getTypeContext().resolve(erasedTargetType);
         CustomDefinition result = this.instance.provideCustomSchemaDefinition(javaType, this.getContext());
         this.assertCustomDefinitionsAreEqual(customDefinition, result, CustomDefinition.DefinitionType.STANDARD);
     }
 
-    public Object[] parametersForTestProvideCustomPropertySchemaDefinitionForField() {
-        return new Object[][]{
-            {"superTypeNoAnnotation", null, null},
-            {"superTypeNoAnnotation", TestSubClass1.class, null},
-            {"superTypeNoAnnotation", TestSubClass2.class, null},
-            {"superTypeWithAnnotationOnField", null, null},
-            {"superTypeWithAnnotationOnField", TestSubClass1.class,
+    static Stream<Arguments> parametersForTestProvideCustomPropertySchemaDefinitionForField() {
+        return Stream.of(
+            Arguments.of("superTypeNoAnnotation", null, null),
+            Arguments.of("superTypeNoAnnotation", TestSubClass1.class, null),
+            Arguments.of("superTypeNoAnnotation", TestSubClass2.class, null),
+            Arguments.of("superTypeWithAnnotationOnField", null, null),
+            Arguments.of("superTypeWithAnnotationOnField", TestSubClass1.class,
                 "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass1\"}},"
-                + "\"required\":[\"fullClass\"]}]}"},
-            {"superTypeWithAnnotationOnField", TestSubClass2.class,
+                + "\"required\":[\"fullClass\"]}]}"),
+            Arguments.of("superTypeWithAnnotationOnField", TestSubClass2.class,
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"}},"
-                + "\"required\":[\"fullClass\"]}]}"},
-            {"superTypeWithAnnotationOnGetter", null, null},
-            {"superTypeWithAnnotationOnGetter", TestSubClass1.class,
+                + "\"required\":[\"fullClass\"]}]}"),
+            Arguments.of("superTypeWithAnnotationOnGetter", null, null),
+            Arguments.of("superTypeWithAnnotationOnGetter", TestSubClass1.class,
                 "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\","
-                + "\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}},\"required\":[\"@type\"]}]}"},
-            {"superTypeWithAnnotationOnGetter", TestSubClass2.class,
-                "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_2\"}},\"required\":[\"@type\"]}]}"},
-            {"superTypeWithAnnotationOnFieldAndGetter", null, null},
-            {"superTypeWithAnnotationOnFieldAndGetter", TestSubClass1.class,
+                + "\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}},\"required\":[\"@type\"]}]}"),
+            Arguments.of("superTypeWithAnnotationOnGetter", TestSubClass2.class,
+                "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_2\"}},\"required\":[\"@type\"]}]}"),
+            Arguments.of("superTypeWithAnnotationOnFieldAndGetter", null, null),
+            Arguments.of("superTypeWithAnnotationOnFieldAndGetter", TestSubClass1.class,
                 "{\"type\":\"array\",\"items\":[{\"type\":\"string\",\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass1\"},"
-                + "{\"allOf\":[{},{\"title\":\"property attribute\"}]}]}"},
-            {"superTypeWithAnnotationOnFieldAndGetter", TestSubClass2.class,
+                + "{\"allOf\":[{},{\"title\":\"property attribute\"}]}]}"),
+            Arguments.of("superTypeWithAnnotationOnFieldAndGetter", TestSubClass2.class,
                 "{\"type\":\"array\",\"items\":[{\"type\":\"string\",\"const\":"
-                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"},{}]}"},
-            {"superInterfaceWithAnnotationOnField", null, null},
-            {"superInterfaceWithAnnotationOnField", TestSubClass3.class,
+                + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"},{}]}"),
+            Arguments.of("superInterfaceWithAnnotationOnField", null, null),
+            Arguments.of("superInterfaceWithAnnotationOnField", TestSubClass3.class,
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass3\"}},"
-                + "\"required\":[\"fullClass\"]}]}"},
-            {"superInterfaceWithAnnotationOnField", TestSubClass4.class,
+                + "\"required\":[\"fullClass\"]}]}"),
+            Arguments.of("superInterfaceWithAnnotationOnField", TestSubClass4.class,
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass4\"}},"
-                + "\"required\":[\"fullClass\"]}]}"}
-        };
+                + "\"required\":[\"fullClass\"]}]}")
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestProvideCustomPropertySchemaDefinitionForField")
     public void testProvideCustomPropertySchemaDefinitionForField(String fieldName, Class<?> typeOverride, String customDefinition)
             throws Exception {
         FieldScope field = this.getTestClassField(fieldName);
@@ -140,37 +139,37 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
         this.assertCustomDefinitionsAreEqual(customDefinition, result, CustomDefinition.DefinitionType.INLINE);
     }
 
-    public Object[] parametersForTestProvideCustomPropertySchemaDefinitionForMethod() {
-        return new Object[][]{
-            {"getSuperTypeNoAnnotation", null, null},
-            {"getSuperTypeNoAnnotation", TestSubClass1.class, null},
-            {"getSuperTypeNoAnnotation", TestSubClass2.class, null},
-            {"getSuperTypeWithAnnotationOnField", null, null},
-            {"getSuperTypeWithAnnotationOnField", TestSubClass1.class,
+    static Stream<Arguments> parametersForTestProvideCustomPropertySchemaDefinitionForMethod() {
+        return Stream.of(
+            Arguments.of("getSuperTypeNoAnnotation", null, null),
+            Arguments.of("getSuperTypeNoAnnotation", TestSubClass1.class, null),
+            Arguments.of("getSuperTypeNoAnnotation", TestSubClass2.class, null),
+            Arguments.of("getSuperTypeWithAnnotationOnField", null, null),
+            Arguments.of("getSuperTypeWithAnnotationOnField", TestSubClass1.class,
                 "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass1\"}},"
-                + "\"required\":[\"fullClass\"]}]}"},
-            {"getSuperTypeWithAnnotationOnField", TestSubClass2.class,
+                + "\"required\":[\"fullClass\"]}]}"),
+            Arguments.of("getSuperTypeWithAnnotationOnField", TestSubClass2.class,
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"fullClass\":{\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"}},"
-                + "\"required\":[\"fullClass\"]}]}"},
-            {"getSuperTypeWithAnnotationOnGetter", null, null},
-            {"getSuperTypeWithAnnotationOnGetter", TestSubClass1.class,
+                + "\"required\":[\"fullClass\"]}]}"),
+            Arguments.of("getSuperTypeWithAnnotationOnGetter", null, null),
+            Arguments.of("getSuperTypeWithAnnotationOnGetter", TestSubClass1.class,
                 "{\"allOf\":[{},{\"title\":\"property attribute\",\"type\":\"object\","
-                + "\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}},\"required\":[\"@type\"]}]}"},
-            {"getSuperTypeWithAnnotationOnGetter", TestSubClass2.class,
-                "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_2\"}},\"required\":[\"@type\"]}]}"},
-            {"getSuperTypeWithAnnotationOnFieldAndGetter", null, null},
-            {"getSuperTypeWithAnnotationOnFieldAndGetter", TestSubClass1.class,
+                + "\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_1\"}},\"required\":[\"@type\"]}]}"),
+            Arguments.of("getSuperTypeWithAnnotationOnGetter", TestSubClass2.class,
+                "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_2\"}},\"required\":[\"@type\"]}]}"),
+            Arguments.of("getSuperTypeWithAnnotationOnFieldAndGetter", null, null),
+            Arguments.of("getSuperTypeWithAnnotationOnFieldAndGetter", TestSubClass1.class,
                 "{\"type\":\"object\",\"properties\":{\"SUB_CLASS_1\":{\"allOf\":[{},{\"title\":\"property attribute\"}]}},"
-                + "\"required\":[\"SUB_CLASS_1\"]}"},
-            {"getSuperTypeWithAnnotationOnFieldAndGetter", TestSubClass2.class,
-                "{\"type\":\"object\",\"properties\":{\"SUB_CLASS_2\":{}},\"required\":[\"SUB_CLASS_2\"]}"}
-        };
+                + "\"required\":[\"SUB_CLASS_1\"]}"),
+            Arguments.of("getSuperTypeWithAnnotationOnFieldAndGetter", TestSubClass2.class,
+                "{\"type\":\"object\",\"properties\":{\"SUB_CLASS_2\":{}},\"required\":[\"SUB_CLASS_2\"]}")
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestProvideCustomPropertySchemaDefinitionForMethod")
     public void testProvideCustomPropertySchemaDefinitionForMethod(String methodName, Class<?> typeOverride, String customDefinition)
             throws Exception {
         MethodScope method = this.getTestClassMethod(methodName);

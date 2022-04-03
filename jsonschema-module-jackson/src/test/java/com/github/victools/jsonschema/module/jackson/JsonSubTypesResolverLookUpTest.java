@@ -24,16 +24,15 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeContext;
 import java.util.Arrays;
 import java.util.List;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test for the {@link JsonSubTypesResolver}.
  */
-@RunWith(JUnitParamsRunner.class)
 public class JsonSubTypesResolverLookUpTest extends AbstractTypeAwareTest {
 
     private final JsonSubTypesResolver instance = new JsonSubTypesResolver();
@@ -44,26 +43,26 @@ public class JsonSubTypesResolverLookUpTest extends AbstractTypeAwareTest {
 
     private void assertErasedSubtypesAreEquals(List<Class<?>> erasedSubtypes, List<ResolvedType> subtypes) {
         if (erasedSubtypes == null) {
-            Assert.assertNull(subtypes);
+            Assertions.assertNull(subtypes);
         } else {
-            Assert.assertNotNull(subtypes);
-            Assert.assertEquals(erasedSubtypes.size(), subtypes.size());
+            Assertions.assertNotNull(subtypes);
+            Assertions.assertEquals(erasedSubtypes.size(), subtypes.size());
             for (int index = 0; index < erasedSubtypes.size(); index++) {
-                Assert.assertSame(erasedSubtypes.get(index), subtypes.get(index).getErasedType());
+                Assertions.assertSame(erasedSubtypes.get(index), subtypes.get(index).getErasedType());
             }
         }
     }
 
-    public Object[] parametersForTestFindSubtypes() {
-        return new Object[][]{
-            {JsonSubTypesResolverLookUpTest.class, null},
-            {TestSuperClassWithNameProperty.class, Arrays.asList(TestSubClass1.class, TestSubClass2.class, TestSubClass3.class)},
-            {TestInterfaceWithTypeInfo.class, Arrays.asList(TestSubClass4.class, TestSubClass5.class)}
-        };
+    static Stream<Arguments> parametersForTestFindSubtypes() {
+        return Stream.of(
+            Arguments.of(JsonSubTypesResolverLookUpTest.class, null),
+            Arguments.of(TestSuperClassWithNameProperty.class, Arrays.asList(TestSubClass1.class, TestSubClass2.class, TestSubClass3.class)),
+            Arguments.of(TestInterfaceWithTypeInfo.class, Arrays.asList(TestSubClass4.class, TestSubClass5.class))
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestFindSubtypes")
     public void testFindSubtypes(Class<?> targetType, List<Class<?>> erasedSubtypes) {
         this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
         TypeContext typeContext = this.getContext().getTypeContext();
@@ -71,34 +70,34 @@ public class JsonSubTypesResolverLookUpTest extends AbstractTypeAwareTest {
         this.assertErasedSubtypesAreEquals(erasedSubtypes, subtypes);
     }
 
-    public Object[] parametersForTestFindTargetTypeOverridesForField() {
-        return new Object[][]{
-            {"supertypeNoAnnotation", null},
-            {"supertypeWithAnnotationOnField", Arrays.asList(TestSubClass1.class, TestSubClass2.class)},
-            {"supertypeWithAnnotationOnGetter", Arrays.asList(TestSubClass2.class, TestSubClass3.class)},
-            {"supertypeWithAnnotationOnFieldAndGetter", Arrays.asList(TestSubClass1.class, TestSubClass2.class)}
-        };
+    static Stream<Arguments> parametersForTestFindTargetTypeOverridesForField() {
+        return Stream.of(
+            Arguments.of("supertypeNoAnnotation", null),
+            Arguments.of("supertypeWithAnnotationOnField", Arrays.asList(TestSubClass1.class, TestSubClass2.class)),
+            Arguments.of("supertypeWithAnnotationOnGetter", Arrays.asList(TestSubClass2.class, TestSubClass3.class)),
+            Arguments.of("supertypeWithAnnotationOnFieldAndGetter", Arrays.asList(TestSubClass1.class, TestSubClass2.class))
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestFindTargetTypeOverridesForField")
     public void testFindTargetTypeOverridesForField(String fieldName, List<Class<?>> erasedSubtypes) {
         this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
         List<ResolvedType> subtypes = this.instance.findTargetTypeOverrides(this.getTestClassField(fieldName));
         this.assertErasedSubtypesAreEquals(erasedSubtypes, subtypes);
     }
 
-    public Object[] parametersForTestFindTargetTypeOverridesForMethod() {
-        return new Object[][]{
-            {"getSupertypeNoAnnotation", null},
-            {"getSupertypeWithAnnotationOnField", Arrays.asList(TestSubClass1.class, TestSubClass2.class)},
-            {"getSupertypeWithAnnotationOnGetter", Arrays.asList(TestSubClass2.class, TestSubClass3.class)},
-            {"getSupertypeWithAnnotationOnFieldAndGetter", Arrays.asList(TestSubClass2.class, TestSubClass3.class)}
-        };
+    static Stream<Arguments> parametersForTestFindTargetTypeOverridesForMethod() {
+        return Stream.of(
+            Arguments.of("getSupertypeNoAnnotation", null),
+            Arguments.of("getSupertypeWithAnnotationOnField", Arrays.asList(TestSubClass1.class, TestSubClass2.class)),
+            Arguments.of("getSupertypeWithAnnotationOnGetter", Arrays.asList(TestSubClass2.class, TestSubClass3.class)),
+            Arguments.of("getSupertypeWithAnnotationOnFieldAndGetter", Arrays.asList(TestSubClass2.class, TestSubClass3.class))
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestFindTargetTypeOverridesForMethod")
     public void testFindTargetTypeOverridesForMethod(String methodName, List<Class<?>> erasedSubtypes) {
         this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
         List<ResolvedType> subtypes = this.instance.findTargetTypeOverrides(this.getTestClassMethod(methodName));

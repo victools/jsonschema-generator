@@ -22,16 +22,13 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import junitparams.JUnitParamsRunner;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test for the {@link JsonPropertySorter}.
  */
-@RunWith(JUnitParamsRunner.class)
 public class JsonPropertySorterTest extends AbstractTypeAwareTest {
 
     private List<MemberScope<?, ?>> memberList;
@@ -40,7 +37,7 @@ public class JsonPropertySorterTest extends AbstractTypeAwareTest {
         super(AnnotatedTestClass.class);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
         this.memberList = Arrays.asList(
@@ -66,7 +63,7 @@ public class JsonPropertySorterTest extends AbstractTypeAwareTest {
                 .sorted(new JsonPropertySorter(true))
                 .map(MemberScope::getSchemaPropertyName)
                 .collect(Collectors.joining(" "));
-        Assert.assertEquals("a c e b f d x getA() getC() getE() getB() getF() getD() getX()", sortingResult);
+        Assertions.assertEquals("a c e b f d x getA() getC() getE() getB() getF() getD() getX()", sortingResult);
     }
 
     @JsonPropertyOrder(value = {"a", "c", "e", "b", "f"}, alphabetic = true)

@@ -21,30 +21,30 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test for the {@link MemberScope} class.
  */
-@RunWith(JUnitParamsRunner.class)
 public class MemberScopeTest extends AbstractTypeAwareTest {
 
     public MemberScopeTest() {
         super(TestClass.class);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
     }
 
-    @Test
-    @Parameters({
+    @ParameterizedTest
+    @CsvSource({
         "privateVisibleField, true, false, false",
         "packageVisibleField, false, false, false",
         "protectedVisibleField, false, true, false",
@@ -53,54 +53,56 @@ public class MemberScopeTest extends AbstractTypeAwareTest {
     public void testGetVisibility(String fieldName, boolean isPrivate, boolean isProtected, boolean isPublic) {
         FieldScope field = this.getTestClassField(fieldName);
 
-        Assert.assertEquals(isPrivate, field.isPrivate());
-        Assert.assertEquals(isProtected, field.isProtected());
-        Assert.assertEquals(isPublic, field.isPublic());
+        Assertions.assertEquals(isPrivate, field.isPrivate());
+        Assertions.assertEquals(isProtected, field.isProtected());
+        Assertions.assertEquals(isPublic, field.isPublic());
     }
 
-    Object parametersForTestContainerType() {
-        return new Object[][]{
-            {"getStringArray", true, String.class},
-            {"getRawCollection", true, Object.class},
-            {"getListOfIntArrays", true, int[].class},
-            {"getMapWithNestedGenerics", false, null},
-            {"getBooleanField", false, null},
-            {"executeVoidMethod", false, null}};
+    static Stream<Arguments> parametersForTestContainerType() {
+        return Stream.of(
+            Arguments.of("getStringArray", true, String.class),
+            Arguments.of("getRawCollection", true, Object.class),
+            Arguments.of("getListOfIntArrays", true, int[].class),
+            Arguments.of("getMapWithNestedGenerics", false, null),
+            Arguments.of("getBooleanField", false, null),
+            Arguments.of("executeVoidMethod", false, null)
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestContainerType")
     public void testContainerType(String methodName, boolean isContainerType, Class<?> expectedItemType) throws Exception {
         MethodScope method = this.getTestClassMethod(methodName);
 
-        Assert.assertEquals(isContainerType, method.isContainerType());
+        Assertions.assertEquals(isContainerType, method.isContainerType());
         ResolvedType itemType = method.getContainerItemType();
         if (expectedItemType == null) {
-            Assert.assertNull(itemType);
+            Assertions.assertNull(itemType);
         } else {
-            Assert.assertNotNull(itemType);
-            Assert.assertSame(expectedItemType, itemType.getErasedType());
+            Assertions.assertNotNull(itemType);
+            Assertions.assertSame(expectedItemType, itemType.getErasedType());
         }
     }
 
-    Object parametersForTestTypeDescription() {
-        return new Object[][]{
-            {"getStringArray", "String[]", "java.lang.String[]"},
-            {"getRawCollection", "Collection", "java.util.Collection"},
-            {"getListOfIntArrays", "List<int[]>", "java.util.List<int[]>"},
-            {"getMapWithNestedGenerics", "Map<String, Map<String, List<Set<Class<Object>>>>>",
-                "java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.util.List<java.util.Set<java.lang.Class<java.lang.Object>>>>>"},
-            {"getBooleanField", "Boolean", "java.lang.Boolean"},
-            {"executeVoidMethod", "void", "void"}};
+    static Stream<Arguments> parametersForTestTypeDescription() {
+        return Stream.of(
+            Arguments.of("getStringArray", "String[]", "java.lang.String[]"),
+            Arguments.of("getRawCollection", "Collection", "java.util.Collection"),
+            Arguments.of("getListOfIntArrays", "List<int[]>", "java.util.List<int[]>"),
+            Arguments.of("getMapWithNestedGenerics", "Map<String, Map<String, List<Set<Class<Object>>>>>",
+                "java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.util.List<java.util.Set<java.lang.Class<java.lang.Object>>>>>"),
+            Arguments.of("getBooleanField", "Boolean", "java.lang.Boolean"),
+            Arguments.of("executeVoidMethod", "void", "void")
+        );
     }
 
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @MethodSource("parametersForTestTypeDescription")
     public void testTypeDescription(String methodName, String simpleTypeDescription, String fullTypeDescription) throws Exception {
         MethodScope method = this.getTestClassMethod(methodName);
 
-        Assert.assertEquals(simpleTypeDescription, method.getSimpleTypeDescription());
-        Assert.assertEquals(fullTypeDescription, method.getFullTypeDescription());
+        Assertions.assertEquals(simpleTypeDescription, method.getSimpleTypeDescription());
+        Assertions.assertEquals(fullTypeDescription, method.getFullTypeDescription());
     }
 
     private static class TestClass {

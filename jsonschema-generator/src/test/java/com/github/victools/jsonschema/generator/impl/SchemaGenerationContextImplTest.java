@@ -31,9 +31,9 @@ import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.Arrays;
 import java.util.Collections;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /**
@@ -47,7 +47,7 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
         super(TestClass.class);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         SchemaVersion schemaVersion = SchemaVersion.DRAFT_2019_09;
         this.prepareContextForVersion(schemaVersion);
@@ -88,11 +88,11 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
         ObjectNode definitionInput = Mockito.mock(ObjectNode.class);
         SchemaGenerationContextImpl returnValue = this.contextImpl.putDefinition(javaType, definitionInput, null);
 
-        Assert.assertSame(this.contextImpl, returnValue);
-        Assert.assertTrue(this.contextImpl.containsDefinition(javaType, null));
+        Assertions.assertSame(this.contextImpl, returnValue);
+        Assertions.assertTrue(this.contextImpl.containsDefinition(javaType, null));
         DefinitionKey key = new DefinitionKey(javaType, null);
-        Assert.assertSame(definitionInput, this.contextImpl.getDefinition(key));
-        Assert.assertEquals(Collections.singleton(key), this.contextImpl.getDefinedTypes());
+        Assertions.assertSame(definitionInput, this.contextImpl.getDefinition(key));
+        Assertions.assertEquals(Collections.singleton(key), this.contextImpl.getDefinedTypes());
     }
 
     @Test
@@ -100,9 +100,9 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
         ResolvedType javaType = Mockito.mock(ResolvedType.class);
         DefinitionKey key = new DefinitionKey(javaType, null);
 
-        Assert.assertFalse(this.contextImpl.containsDefinition(javaType, null));
-        Assert.assertNull(this.contextImpl.getDefinition(key));
-        Assert.assertEquals(Collections.<DefinitionKey>emptySet(), this.contextImpl.getDefinedTypes());
+        Assertions.assertFalse(this.contextImpl.containsDefinition(javaType, null));
+        Assertions.assertNull(this.contextImpl.getDefinition(key));
+        Assertions.assertEquals(Collections.<DefinitionKey>emptySet(), this.contextImpl.getDefinedTypes());
     }
 
     @Test
@@ -111,29 +111,29 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
         DefinitionKey key = new DefinitionKey(javaType, null);
 
         // initially, all lists are empty
-        Assert.assertEquals(Collections.<ObjectNode>emptyList(), this.contextImpl.getReferences(key));
-        Assert.assertEquals(Collections.<ObjectNode>emptyList(), this.contextImpl.getNullableReferences(key));
+        Assertions.assertEquals(Collections.<ObjectNode>emptyList(), this.contextImpl.getReferences(key));
+        Assertions.assertEquals(Collections.<ObjectNode>emptyList(), this.contextImpl.getNullableReferences(key));
 
         // adding a not-nullable entry creates the "references" list
         ObjectNode referenceInputOne = Mockito.mock(ObjectNode.class);
         SchemaGenerationContextImpl returnValue = this.contextImpl.addReference(javaType, referenceInputOne, null, false);
-        Assert.assertSame(this.contextImpl, returnValue);
-        Assert.assertEquals(Collections.singletonList(referenceInputOne), this.contextImpl.getReferences(key));
-        Assert.assertEquals(Collections.<ObjectNode>emptyList(), this.contextImpl.getNullableReferences(key));
+        Assertions.assertSame(this.contextImpl, returnValue);
+        Assertions.assertEquals(Collections.singletonList(referenceInputOne), this.contextImpl.getReferences(key));
+        Assertions.assertEquals(Collections.<ObjectNode>emptyList(), this.contextImpl.getNullableReferences(key));
 
         // adding another not-nullable entry adds it to the existing "references" list
         ObjectNode referenceInputTwo = Mockito.mock(ObjectNode.class);
         returnValue = this.contextImpl.addReference(javaType, referenceInputTwo, null, false);
-        Assert.assertSame(this.contextImpl, returnValue);
-        Assert.assertEquals(Arrays.asList(referenceInputOne, referenceInputTwo), this.contextImpl.getReferences(key));
-        Assert.assertEquals(Collections.<ObjectNode>emptyList(), this.contextImpl.getNullableReferences(key));
+        Assertions.assertSame(this.contextImpl, returnValue);
+        Assertions.assertEquals(Arrays.asList(referenceInputOne, referenceInputTwo), this.contextImpl.getReferences(key));
+        Assertions.assertEquals(Collections.<ObjectNode>emptyList(), this.contextImpl.getNullableReferences(key));
 
         // adding a nullable entry creates the "nullableReferences" list
         ObjectNode referenceInputThree = Mockito.mock(ObjectNode.class);
         returnValue = this.contextImpl.addReference(javaType, referenceInputThree, null, true);
-        Assert.assertSame(this.contextImpl, returnValue);
-        Assert.assertEquals(Arrays.asList(referenceInputOne, referenceInputTwo), this.contextImpl.getReferences(key));
-        Assert.assertEquals(Collections.singletonList(referenceInputThree), this.contextImpl.getNullableReferences(key));
+        Assertions.assertSame(this.contextImpl, returnValue);
+        Assertions.assertEquals(Arrays.asList(referenceInputOne, referenceInputTwo), this.contextImpl.getReferences(key));
+        Assertions.assertEquals(Collections.singletonList(referenceInputThree), this.contextImpl.getNullableReferences(key));
     }
 
     @Test
@@ -146,14 +146,14 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
         // adding an entry creates the "references" list for that type
         ObjectNode referenceInputOne = Mockito.mock(ObjectNode.class);
         this.contextImpl.addReference(javaTypeOne, referenceInputOne, null, false);
-        Assert.assertEquals(Collections.singletonList(referenceInputOne), this.contextImpl.getReferences(keyOne));
-        Assert.assertEquals(Collections.<ObjectNode>emptyList(), this.contextImpl.getReferences(keyTwo));
+        Assertions.assertEquals(Collections.singletonList(referenceInputOne), this.contextImpl.getReferences(keyOne));
+        Assertions.assertEquals(Collections.<ObjectNode>emptyList(), this.contextImpl.getReferences(keyTwo));
 
         // adding an entry for another type creates a separate "references" list for this other type
         ObjectNode referenceInputTwo = Mockito.mock(ObjectNode.class);
         this.contextImpl.addReference(javaTypeTwo, referenceInputTwo, null, false);
-        Assert.assertEquals(Collections.singletonList(referenceInputOne), this.contextImpl.getReferences(keyOne));
-        Assert.assertEquals(Collections.singletonList(referenceInputTwo), this.contextImpl.getReferences(keyTwo));
+        Assertions.assertEquals(Collections.singletonList(referenceInputOne), this.contextImpl.getReferences(keyOne));
+        Assertions.assertEquals(Collections.singletonList(referenceInputTwo), this.contextImpl.getReferences(keyTwo));
     }
 
     @Test
@@ -167,21 +167,21 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
         // adding an entry creates the "references" list for that type
         ObjectNode referenceInputOne = Mockito.mock(ObjectNode.class);
         this.contextImpl.addReference(javaType, referenceInputOne, providerOne, false);
-        Assert.assertEquals(Collections.singletonList(referenceInputOne), this.contextImpl.getReferences(keyOne));
-        Assert.assertEquals(Collections.<ObjectNode>emptyList(), this.contextImpl.getReferences(keyTwo));
+        Assertions.assertEquals(Collections.singletonList(referenceInputOne), this.contextImpl.getReferences(keyOne));
+        Assertions.assertEquals(Collections.<ObjectNode>emptyList(), this.contextImpl.getReferences(keyTwo));
 
         // adding an entry for the same type but other ignored definition provider creates a separate "references" list for this other type
         ObjectNode referenceInputTwo = Mockito.mock(ObjectNode.class);
         this.contextImpl.addReference(javaType, referenceInputTwo, providerTwo, false);
-        Assert.assertEquals(Collections.singletonList(referenceInputOne), this.contextImpl.getReferences(keyOne));
-        Assert.assertEquals(Collections.singletonList(referenceInputTwo), this.contextImpl.getReferences(keyTwo));
+        Assertions.assertEquals(Collections.singletonList(referenceInputOne), this.contextImpl.getReferences(keyOne));
+        Assertions.assertEquals(Collections.singletonList(referenceInputTwo), this.contextImpl.getReferences(keyTwo));
     }
 
     @Test
     public void testCreateStandardDefinitionReferenceForField_noCustomDefinition() {
         FieldScope targetField = this.getTestClassField("booleanField");
         ObjectNode result = this.contextImpl.createStandardDefinitionReference(targetField, null);
-        Assert.assertEquals("{\"allOf\":[{},{\"title\":\"Field Title\"}]}", result.toString());
+        Assertions.assertEquals("{\"allOf\":[{},{\"title\":\"Field Title\"}]}", result.toString());
     }
 
     @Test
@@ -191,7 +191,7 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
                 .getCustomDefinition(Mockito.any(ResolvedType.class), Mockito.any(), Mockito.any());
         FieldScope targetField = this.getTestClassField("booleanField");
         ObjectNode result = this.contextImpl.createStandardDefinitionReference(targetField, null);
-        Assert.assertEquals("{\"allOf\":[{\"$comment\":\"custom type\",\"description\":\"Type Description\"},{\"title\":\"Field Title\"}]}",
+        Assertions.assertEquals("{\"allOf\":[{\"$comment\":\"custom type\",\"description\":\"Type Description\"},{\"title\":\"Field Title\"}]}",
                 result.toString());
     }
 
@@ -202,7 +202,7 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
                 .getCustomDefinition(Mockito.any(FieldScope.class), Mockito.any(), Mockito.any());
         FieldScope targetField = this.getTestClassField("booleanField");
         ObjectNode result = this.contextImpl.createStandardDefinitionReference(targetField, null);
-        Assert.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Field Title\",\"description\":\"Type Description\"}", result.toString());
+        Assertions.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Field Title\",\"description\":\"Type Description\"}", result.toString());
     }
 
     @Test
@@ -215,14 +215,14 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
                 .getCustomDefinition(Mockito.any(FieldScope.class), Mockito.any(), Mockito.any());
         FieldScope targetField = this.getTestClassField("booleanField");
         ObjectNode result = this.contextImpl.createStandardDefinitionReference(targetField, null);
-        Assert.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Field Title\",\"description\":\"Type Description\"}", result.toString());
+        Assertions.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Field Title\",\"description\":\"Type Description\"}", result.toString());
     }
 
     @Test
     public void testCreateStandardDefinitionReferenceForMethod_noCustomDefinition() {
         MethodScope targetMethod = this.getTestClassMethod("isBooleanField");
         JsonNode result = this.contextImpl.createStandardDefinitionReference(targetMethod, null);
-        Assert.assertEquals("{\"allOf\":[{},{\"title\":\"Method Title\"}]}", result.toString());
+        Assertions.assertEquals("{\"allOf\":[{},{\"title\":\"Method Title\"}]}", result.toString());
     }
 
     @Test
@@ -232,7 +232,7 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
                 .getCustomDefinition(Mockito.any(ResolvedType.class), Mockito.any(), Mockito.any());
         MethodScope targetMethod = this.getTestClassMethod("isBooleanField");
         JsonNode result = this.contextImpl.createStandardDefinitionReference(targetMethod, null);
-        Assert.assertEquals("{\"allOf\":[{\"$comment\":\"custom type\",\"description\":\"Type Description\"},{\"title\":\"Method Title\"}]}",
+        Assertions.assertEquals("{\"allOf\":[{\"$comment\":\"custom type\",\"description\":\"Type Description\"},{\"title\":\"Method Title\"}]}",
                 result.toString());
     }
 
@@ -243,7 +243,7 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
                 .getCustomDefinition(Mockito.any(MethodScope.class), Mockito.any(), Mockito.any());
         MethodScope targetMethod = this.getTestClassMethod("isBooleanField");
         JsonNode result = this.contextImpl.createStandardDefinitionReference(targetMethod, null);
-        Assert.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Method Title\",\"description\":\"Type Description\"}", result.toString());
+        Assertions.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Method Title\",\"description\":\"Type Description\"}", result.toString());
     }
 
     @Test
@@ -256,7 +256,7 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
                 .getCustomDefinition(Mockito.any(MethodScope.class), Mockito.any(), Mockito.any());
         MethodScope targetMethod = this.getTestClassMethod("isBooleanField");
         JsonNode result = this.contextImpl.createStandardDefinitionReference(targetMethod, null);
-        Assert.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Method Title\",\"description\":\"Type Description\"}", result.toString());
+        Assertions.assertEquals("{\"$comment\":\"custom property\",\"title\":\"Method Title\",\"description\":\"Type Description\"}", result.toString());
     }
 
     @Test
@@ -267,7 +267,7 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
                 .getCustomDefinition(Mockito.any(ResolvedType.class), Mockito.any(), Mockito.any());
         FieldScope targetField = this.getTestClassField("booleanField");
         ObjectNode result = this.contextImpl.createStandardDefinitionReference(targetField, null);
-        Assert.assertEquals("{\"allOf\":[{\"$comment\":\"custom type\"},{\"title\":\"Field Title\"}]}", result.toString());
+        Assertions.assertEquals("{\"allOf\":[{\"$comment\":\"custom type\"},{\"title\":\"Field Title\"}]}", result.toString());
     }
 
     @Test
@@ -278,7 +278,7 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
                 .getCustomDefinition(Mockito.any(FieldScope.class), Mockito.any(), Mockito.any());
         FieldScope targetField = this.getTestClassField("booleanField");
         ObjectNode result = this.contextImpl.createStandardDefinitionReference(targetField, null);
-        Assert.assertEquals("{\"$comment\":\"custom property\"}", result.toString());
+        Assertions.assertEquals("{\"$comment\":\"custom property\"}", result.toString());
     }
 
     private static class TestClass {

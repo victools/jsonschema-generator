@@ -22,19 +22,18 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.function.Predicate;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import junitparams.naming.TestCaseName;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 /**
  * Test for the {@link FieldExclusionModule} class.
  */
-@RunWith(JUnitParamsRunner.class)
 public class FieldExclusionModuleTest extends AbstractTypeAwareTest {
 
     private SchemaGeneratorConfigBuilder builder;
@@ -44,7 +43,7 @@ public class FieldExclusionModuleTest extends AbstractTypeAwareTest {
         super(TestClass.class);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.builder = Mockito.mock(SchemaGeneratorConfigBuilder.class);
         this.fieldConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
@@ -65,29 +64,28 @@ public class FieldExclusionModuleTest extends AbstractTypeAwareTest {
         Mockito.verifyNoMoreInteractions(this.fieldConfigPart);
     }
 
-    Object parametersForTestIgnoreCheck() {
-        return new Object[][]{
-            {"publicStaticField", "forPublicNonStaticFields", false},
-            {"nonPublicStaticField", "forPublicNonStaticFields", false},
-            {"publicNonStaticField", "forPublicNonStaticFields", true},
-            {"nonPublicNonStaticFieldWithGetter", "forNonPublicNonStaticFieldsWithGetter", true},
-            {"nonPublicNonStaticFieldWithGetter", "forNonPublicNonStaticFieldsWithoutGetter", false},
-            {"nonPublicNonStaticFieldWithoutGetter", "forNonPublicNonStaticFieldsWithGetter", false},
-            {"nonPublicNonStaticFieldWithoutGetter", "forNonPublicNonStaticFieldsWithoutGetter", true},
-            {"transientField", "forNonPublicNonStaticFieldsWithoutGetter", true},
-            {"transientField", "forTransientFields", true}
-        };
+    static Stream<Arguments> parametersForTestIgnoreCheck() {
+        return Stream.of(
+            Arguments.of("publicStaticField", "forPublicNonStaticFields", false),
+            Arguments.of("nonPublicStaticField", "forPublicNonStaticFields", false),
+            Arguments.of("publicNonStaticField", "forPublicNonStaticFields", true),
+            Arguments.of("nonPublicNonStaticFieldWithGetter", "forNonPublicNonStaticFieldsWithGetter", true),
+            Arguments.of("nonPublicNonStaticFieldWithGetter", "forNonPublicNonStaticFieldsWithoutGetter", false),
+            Arguments.of("nonPublicNonStaticFieldWithoutGetter", "forNonPublicNonStaticFieldsWithGetter", false),
+            Arguments.of("nonPublicNonStaticFieldWithoutGetter", "forNonPublicNonStaticFieldsWithoutGetter", true),
+            Arguments.of("transientField", "forNonPublicNonStaticFieldsWithoutGetter", true),
+            Arguments.of("transientField", "forTransientFields", true)
+        );
     }
 
-    @Test
-    @Parameters
-    @TestCaseName("{method}({1}: {0} => {2}) [{index}]")
+    @ParameterizedTest
+    @MethodSource("parametersForTestIgnoreCheck")
     public void testIgnoreCheck(String testFieldName, String supplierMethodName, boolean ignored) throws Exception {
         FieldExclusionModule moduleInstance = (FieldExclusionModule) FieldExclusionModule.class.getMethod(supplierMethodName).invoke(null);
         moduleInstance.applyToConfigBuilder(this.builder);
 
         FieldScope field = this.getTestClassField(testFieldName);
-        Assert.assertEquals(ignored, this.fieldConfigPart.shouldIgnore(field));
+        Assertions.assertEquals(ignored, this.fieldConfigPart.shouldIgnore(field));
     }
 
     private static class TestClass {

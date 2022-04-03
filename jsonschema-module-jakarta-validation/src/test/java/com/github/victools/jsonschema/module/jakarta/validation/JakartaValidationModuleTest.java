@@ -40,27 +40,26 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import junitparams.naming.TestCaseName;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 /**
  * Test for the {@link JakartaValidationModule}.
  */
-@RunWith(JUnitParamsRunner.class)
 public class JakartaValidationModuleTest {
 
     private SchemaGeneratorConfigBuilder configBuilder;
     private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
     private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.configBuilder = Mockito.mock(SchemaGeneratorConfigBuilder.class);
         this.fieldConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
@@ -158,30 +157,30 @@ public class JakartaValidationModuleTest {
         Mockito.verify(this.methodConfigPart).withNumberExclusiveMaximumResolver(Mockito.any());
     }
 
-    Object parametersForTestNullableCheck() {
-        return new Object[][]{
-            {"unannotatedField", null},
-            {"notNullNumber", Boolean.FALSE},
-            {"notNullOnGetterNumber", Boolean.FALSE},
-            {"notEmptyList", Boolean.FALSE},
-            {"notEmptyOnGetterList", Boolean.FALSE},
-            {"notBlankString", Boolean.FALSE},
-            {"notBlankOnGetterString", Boolean.FALSE},
-            {"nullField", Boolean.TRUE},
-            {"nullGetter", Boolean.TRUE}
-        };
+    static Stream<Arguments> parametersForTestNullableCheck() {
+        return Stream.of(
+            Arguments.of("unannotatedField", null),
+            Arguments.of("notNullNumber", Boolean.FALSE),
+            Arguments.of("notNullOnGetterNumber", Boolean.FALSE),
+            Arguments.of("notEmptyList", Boolean.FALSE),
+            Arguments.of("notEmptyOnGetterList", Boolean.FALSE),
+            Arguments.of("notBlankString", Boolean.FALSE),
+            Arguments.of("notBlankOnGetterString", Boolean.FALSE),
+            Arguments.of("nullField", Boolean.TRUE),
+            Arguments.of("nullGetter", Boolean.TRUE)
+        );
     }
 
-    @Test
-    @Parameters(method = "parametersForTestNullableCheck")
+    @ParameterizedTest
+    @MethodSource("parametersForTestNullableCheck")
     public void testNullableCheckOnFieldNoValidationGroup(String fieldName, Boolean expectedResult) throws Exception {
         new JakartaValidationModule().applyToConfigBuilder(this.configBuilder);
 
         this.testNullableCheckOnField(fieldName, expectedResult);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestNullableCheck")
+    @ParameterizedTest
+    @MethodSource("parametersForTestNullableCheck")
     public void testNullableCheckOnFieldMatchingValidationGroup(String fieldName, Boolean expectedResult) throws Exception {
         new JakartaValidationModule()
                 .forValidationGroups(Test.class)
@@ -190,9 +189,8 @@ public class JakartaValidationModuleTest {
         this.testNullableCheckOnField(fieldName, expectedResult);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestNullableCheck")
-    @TestCaseName("{method}({0}) [{index}]")
+    @ParameterizedTest
+    @MethodSource("parametersForTestNullableCheck")
     public void testNullableCheckOnFieldDifferentValidationGroup(String fieldName, Boolean ignoredResult) throws Exception {
         new JakartaValidationModule()
                 .forValidationGroups(Object.class)
@@ -209,19 +207,19 @@ public class JakartaValidationModuleTest {
         FieldScope field = testType.getMemberField(fieldName);
 
         Boolean result = captor.getValue().apply(field);
-        Assert.assertEquals(expectedResult, result);
+        Assertions.assertEquals(expectedResult, result);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestNullableCheck")
+    @ParameterizedTest
+    @MethodSource("parametersForTestNullableCheck")
     public void testNullableCheckOnMethodNoValidationGroup(String fieldName, Boolean expectedResult) throws Exception {
         new JakartaValidationModule().applyToConfigBuilder(this.configBuilder);
 
         this.testNullableCheckOnMethod(fieldName, expectedResult);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestNullableCheck")
+    @ParameterizedTest
+    @MethodSource("parametersForTestNullableCheck")
     public void testNullableCheckOnMethodMatchingValidationGroup(String fieldName, Boolean expectedResult) throws Exception {
         new JakartaValidationModule()
                 .forValidationGroups(Test.class)
@@ -230,9 +228,8 @@ public class JakartaValidationModuleTest {
         this.testNullableCheckOnMethod(fieldName, expectedResult);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestNullableCheck")
-    @TestCaseName("{method}({0}) [{index}]")
+    @ParameterizedTest
+    @MethodSource("parametersForTestNullableCheck")
     public void testNullableCheckOnMethodDifferentValidationGroup(String fieldName, Boolean ignoredResult) throws Exception {
         new JakartaValidationModule()
                 .forValidationGroups(Object.class)
@@ -250,35 +247,35 @@ public class JakartaValidationModuleTest {
         MethodScope method = testType.getMemberMethod(methodName);
 
         Boolean result = captor.getValue().apply(method);
-        Assert.assertEquals(expectedResult, result);
+        Assertions.assertEquals(expectedResult, result);
     }
 
-    Object parametersForTestArrayItemCountResolvers() {
-        return new Object[][]{
-            {"unannotatedArray", null, null},
-            {"sizeTenToTwentyString", null, null},
-            {"sizeTenToTwentyOnGetterString", null, null},
-            {"minSizeFiveArray", 5, null},
-            {"minSizeFiveOnGetterArray", 5, null},
-            {"maxSizeFiftyArray", null, 50},
-            {"maxSizeFiftyOnGetterArray", null, 50},
-            {"sizeTenToTwentySet", 10, 20},
-            {"sizeTenToTwentyOnGetterSet", 10, 20},
-            {"nonEmptyMaxSizeHundredList", 1, 100},
-            {"nonEmptyMaxSizeHundredOnGetterList", 1, 100}
-        };
+    static Stream<Arguments> parametersForTestArrayItemCountResolvers() {
+        return Stream.of(
+            Arguments.of("unannotatedArray", null, null),
+            Arguments.of("sizeTenToTwentyString", null, null),
+            Arguments.of("sizeTenToTwentyOnGetterString", null, null),
+            Arguments.of("minSizeFiveArray", 5, null),
+            Arguments.of("minSizeFiveOnGetterArray", 5, null),
+            Arguments.of("maxSizeFiftyArray", null, 50),
+            Arguments.of("maxSizeFiftyOnGetterArray", null, 50),
+            Arguments.of("sizeTenToTwentySet", 10, 20),
+            Arguments.of("sizeTenToTwentyOnGetterSet", 10, 20),
+            Arguments.of("nonEmptyMaxSizeHundredList", 1, 100),
+            Arguments.of("nonEmptyMaxSizeHundredOnGetterList", 1, 100)
+        );
     }
 
-    @Test
-    @Parameters(method = "parametersForTestArrayItemCountResolvers")
+    @ParameterizedTest
+    @MethodSource("parametersForTestArrayItemCountResolvers")
     public void testArrayItemCountResolversNoValidationGroup(String fieldName, Integer expectedMinItems, Integer expectedMaxItems) throws Exception {
         new JakartaValidationModule().applyToConfigBuilder(this.configBuilder);
 
         this.testArrayItemCountResolvers(fieldName, expectedMinItems, expectedMaxItems);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestArrayItemCountResolvers")
+    @ParameterizedTest
+    @MethodSource("parametersForTestArrayItemCountResolvers")
     public void testArrayItemCountResolversMatchingValidationGroup(String fieldName, Integer expectedMinItems, Integer expectedMaxItems)
             throws Exception {
         new JakartaValidationModule()
@@ -288,9 +285,8 @@ public class JakartaValidationModuleTest {
         this.testArrayItemCountResolvers(fieldName, expectedMinItems, expectedMaxItems);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestArrayItemCountResolvers")
-    @TestCaseName("{method}({0}) [{index}]")
+    @ParameterizedTest
+    @MethodSource("parametersForTestArrayItemCountResolvers")
     public void testArrayItemCountResolversDifferentValidationGroup(String fieldName, Integer ignoredMinItems, Integer ignoredMaxItems)
             throws Exception {
         new JakartaValidationModule()
@@ -308,42 +304,42 @@ public class JakartaValidationModuleTest {
         ArgumentCaptor<ConfigFunction<FieldScope, Integer>> minItemCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withArrayMinItemsResolver(minItemCaptor.capture());
         Integer minItemCount = minItemCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMinItems, minItemCount);
+        Assertions.assertEquals(expectedMinItems, minItemCount);
 
         ArgumentCaptor<ConfigFunction<FieldScope, Integer>> maxItemCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withArrayMaxItemsResolver(maxItemCaptor.capture());
         Integer maxItemCount = maxItemCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMaxItems, maxItemCount);
+        Assertions.assertEquals(expectedMaxItems, maxItemCount);
     }
 
-    Object parametersForTestStringLengthResolvers() {
-        return new Object[][]{
-            {"unannotatedString", null, null},
-            {"sizeTenToTwentyArray", null, null},
-            {"sizeTenToTwentyOnGetterArray", null, null},
-            {"minSizeFiveSequence", 5, null},
-            {"minSizeFiveOnGetterSequence", 5, null},
-            {"maxSizeFiftyString", null, 50},
-            {"maxSizeFiftyOnGetterString", null, 50},
-            {"sizeTenToTwentyString", 10, 20},
-            {"sizeTenToTwentyOnGetterString", 10, 20},
-            {"nonEmptyMaxSizeHundredString", 1, 100},
-            {"nonEmptyMaxSizeHundredOnGetterString", 1, 100},
-            {"nonBlankString", 1, null},
-            {"nonBlankOnGetterString", 1, null}
-        };
+    static Stream<Arguments> parametersForTestStringLengthResolvers() {
+        return Stream.of(
+            Arguments.of("unannotatedString", null, null),
+            Arguments.of("sizeTenToTwentyArray", null, null),
+            Arguments.of("sizeTenToTwentyOnGetterArray", null, null),
+            Arguments.of("minSizeFiveSequence", 5, null),
+            Arguments.of("minSizeFiveOnGetterSequence", 5, null),
+            Arguments.of("maxSizeFiftyString", null, 50),
+            Arguments.of("maxSizeFiftyOnGetterString", null, 50),
+            Arguments.of("sizeTenToTwentyString", 10, 20),
+            Arguments.of("sizeTenToTwentyOnGetterString", 10, 20),
+            Arguments.of("nonEmptyMaxSizeHundredString", 1, 100),
+            Arguments.of("nonEmptyMaxSizeHundredOnGetterString", 1, 100),
+            Arguments.of("nonBlankString", 1, null),
+            Arguments.of("nonBlankOnGetterString", 1, null)
+        );
     }
 
-    @Test
-    @Parameters(method = "parametersForTestStringLengthResolvers")
+    @ParameterizedTest
+    @MethodSource("parametersForTestStringLengthResolvers")
     public void testStringLengthResolversNoValidationGroup(String fieldName, Integer expectedMinLength, Integer expectedMaxLength) throws Exception {
         new JakartaValidationModule().applyToConfigBuilder(this.configBuilder);
 
         this.testStringLengthResolvers(fieldName, expectedMinLength, expectedMaxLength);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestStringLengthResolvers")
+    @ParameterizedTest
+    @MethodSource("parametersForTestStringLengthResolvers")
     public void testStringLengthResolversMatchingValidationGroup(String fieldName, Integer expectedMinLength, Integer expectedMaxLength)
             throws Exception {
         new JakartaValidationModule()
@@ -353,9 +349,8 @@ public class JakartaValidationModuleTest {
         this.testStringLengthResolvers(fieldName, expectedMinLength, expectedMaxLength);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestStringLengthResolvers")
-    @TestCaseName("{method}({0}) [{index}]")
+    @ParameterizedTest
+    @MethodSource("parametersForTestStringLengthResolvers")
     public void testStringLengthResolversDifferentValidationGroup(String fieldName, Integer ignoredMinLength, Integer ignoredMaxLength)
             throws Exception {
         new JakartaValidationModule()
@@ -373,38 +368,38 @@ public class JakartaValidationModuleTest {
         ArgumentCaptor<ConfigFunction<FieldScope, Integer>> minLengthCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withStringMinLengthResolver(minLengthCaptor.capture());
         Integer minLength = minLengthCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMinLength, minLength);
+        Assertions.assertEquals(expectedMinLength, minLength);
 
         ArgumentCaptor<ConfigFunction<FieldScope, Integer>> maxLengthCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withStringMaxLengthResolver(maxLengthCaptor.capture());
         Integer maxLength = maxLengthCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMaxLength, maxLength);
+        Assertions.assertEquals(expectedMaxLength, maxLength);
     }
 
-    Object parametersForTestStringFormatAndPatternResolvers() {
+    static Stream<Arguments> parametersForTestStringFormatAndPatternResolvers() {
         JakartaValidationOption[] onlyPatternOption = new JakartaValidationOption[]{
             JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS
         };
         JakartaValidationOption[] patternAndIdnEmailOptions = new JakartaValidationOption[]{
             JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS, JakartaValidationOption.PREFER_IDN_EMAIL_FORMAT
         };
-        return new Object[][]{
-            {"unannotatedString", onlyPatternOption, null, null},
-            {"sizeTenToTwentyArray", onlyPatternOption, null, null},
-            {"sizeTenToTwentyOnGetterArray", onlyPatternOption, null, null},
-            {"minSizeFiveSequence", onlyPatternOption, null, "^\\d+$"},
-            {"minSizeFiveOnGetterSequence", onlyPatternOption, null, "^\\d+$"},
-            {"nonEmptyMaxSizeHundredString", onlyPatternOption, "email", null},
-            {"nonEmptyMaxSizeHundredString", patternAndIdnEmailOptions, "idn-email", null},
-            {"nonEmptyMaxSizeHundredOnGetterString", onlyPatternOption, "email", null},
-            {"nonEmptyMaxSizeHundredOnGetterString", patternAndIdnEmailOptions, "idn-email", null},
-            {"nonBlankString", onlyPatternOption, "email", "^.+your-company\\.com$"},
-            {"nonBlankOnGetterString", onlyPatternOption, "email", "^.+your-company\\.com$"}
-        };
+        return Stream.of(
+            Arguments.of("unannotatedString", onlyPatternOption, null, null),
+            Arguments.of("sizeTenToTwentyArray", onlyPatternOption, null, null),
+            Arguments.of("sizeTenToTwentyOnGetterArray", onlyPatternOption, null, null),
+            Arguments.of("minSizeFiveSequence", onlyPatternOption, null, "^\\d+$"),
+            Arguments.of("minSizeFiveOnGetterSequence", onlyPatternOption, null, "^\\d+$"),
+            Arguments.of("nonEmptyMaxSizeHundredString", onlyPatternOption, "email", null),
+            Arguments.of("nonEmptyMaxSizeHundredString", patternAndIdnEmailOptions, "idn-email", null),
+            Arguments.of("nonEmptyMaxSizeHundredOnGetterString", onlyPatternOption, "email", null),
+            Arguments.of("nonEmptyMaxSizeHundredOnGetterString", patternAndIdnEmailOptions, "idn-email", null),
+            Arguments.of("nonBlankString", onlyPatternOption, "email", "^.+your-company\\.com$"),
+            Arguments.of("nonBlankOnGetterString", onlyPatternOption, "email", "^.+your-company\\.com$")
+        );
     }
 
-    @Test
-    @Parameters(method = "parametersForTestStringFormatAndPatternResolvers")
+    @ParameterizedTest
+    @MethodSource("parametersForTestStringFormatAndPatternResolvers")
     public void testStringFormatAndPatternResolversNoValidationGroup(String fieldName, JakartaValidationOption[] options,
             String expectedFormat, String expectedPattern) throws Exception {
         new JakartaValidationModule(options).applyToConfigBuilder(this.configBuilder);
@@ -412,8 +407,8 @@ public class JakartaValidationModuleTest {
         this.testStringFormatAndPatternResolvers(fieldName, expectedFormat, expectedPattern);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestStringFormatAndPatternResolvers")
+    @ParameterizedTest
+    @MethodSource("parametersForTestStringFormatAndPatternResolvers")
     public void testStringFormatAndPatternResolversMatchingValidationGroup(String fieldName, JakartaValidationOption[] options,
             String expectedFormat, String expectedPattern) throws Exception {
         new JakartaValidationModule(options)
@@ -423,9 +418,8 @@ public class JakartaValidationModuleTest {
         this.testStringFormatAndPatternResolvers(fieldName, expectedFormat, expectedPattern);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestStringFormatAndPatternResolvers")
-    @TestCaseName("{method}({0}, {1}) [{index}]")
+    @ParameterizedTest
+    @MethodSource("parametersForTestStringFormatAndPatternResolvers")
     public void testStringFormatAndPatternResolversDifferentValidationGroup(String fieldName, JakartaValidationOption[] options,
             String ignoredFormat, String ignoredPattern) throws Exception {
         new JakartaValidationModule(options)
@@ -444,38 +438,38 @@ public class JakartaValidationModuleTest {
         ArgumentCaptor<ConfigFunction<FieldScope, String>> formatCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withStringFormatResolver(formatCaptor.capture());
         String formatValue = formatCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedFormat, formatValue);
+        Assertions.assertEquals(expectedFormat, formatValue);
 
         ArgumentCaptor<ConfigFunction<FieldScope, String>> patternCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withStringPatternResolver(patternCaptor.capture());
         String patternValue = patternCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedPattern, patternValue);
+        Assertions.assertEquals(expectedPattern, patternValue);
     }
 
-    Object parametersForTestNumberMinMaxResolvers() {
-        return new Object[][]{
-            {"unannotatedInt", null, null, null, null},
-            {"minMinusHundredLong", "-100", null, null, null},
-            {"minMinusHundredOnGetterLong", "-100", null, null, null},
-            {"maxFiftyShort", null, null, "50", null},
-            {"maxFiftyOnGetterShort", null, null, "50", null},
-            {"tenToTwentyInclusiveInteger", "10.1", null, "20.2", null},
-            {"tenToTwentyInclusiveOnGetterInteger", "10.1", null, "20.2", null},
-            {"tenToTwentyExclusiveInteger", null, "10.1", null, "20.2"},
-            {"tenToTwentyExclusiveOnGetterInteger", null, "10.1", null, "20.2"},
-            {"positiveByte", null, BigDecimal.ZERO, null, null},
-            {"positiveOnGetterByte", null, BigDecimal.ZERO, null, null},
-            {"positiveOrZeroBigInteger", BigDecimal.ZERO, null, null, null},
-            {"positiveOrZeroOnGetterBigInteger", BigDecimal.ZERO, null, null, null},
-            {"negativeDecimal", null, null, null, BigDecimal.ZERO},
-            {"negativeOnGetterDecimal", null, null, null, BigDecimal.ZERO},
-            {"negativeOrZeroLong", null, null, BigDecimal.ZERO, null},
-            {"negativeOrZeroOnGetterLong", null, null, BigDecimal.ZERO, null}
-        };
+    static Stream<Arguments> parametersForTestNumberMinMaxResolvers() {
+        return Stream.of(
+            Arguments.of("unannotatedInt", null, null, null, null),
+            Arguments.of("minMinusHundredLong", "-100", null, null, null),
+            Arguments.of("minMinusHundredOnGetterLong", "-100", null, null, null),
+            Arguments.of("maxFiftyShort", null, null, "50", null),
+            Arguments.of("maxFiftyOnGetterShort", null, null, "50", null),
+            Arguments.of("tenToTwentyInclusiveInteger", "10.1", null, "20.2", null),
+            Arguments.of("tenToTwentyInclusiveOnGetterInteger", "10.1", null, "20.2", null),
+            Arguments.of("tenToTwentyExclusiveInteger", null, "10.1", null, "20.2"),
+            Arguments.of("tenToTwentyExclusiveOnGetterInteger", null, "10.1", null, "20.2"),
+            Arguments.of("positiveByte", null, BigDecimal.ZERO, null, null),
+            Arguments.of("positiveOnGetterByte", null, BigDecimal.ZERO, null, null),
+            Arguments.of("positiveOrZeroBigInteger", BigDecimal.ZERO, null, null, null),
+            Arguments.of("positiveOrZeroOnGetterBigInteger", BigDecimal.ZERO, null, null, null),
+            Arguments.of("negativeDecimal", null, null, null, BigDecimal.ZERO),
+            Arguments.of("negativeOnGetterDecimal", null, null, null, BigDecimal.ZERO),
+            Arguments.of("negativeOrZeroLong", null, null, BigDecimal.ZERO, null),
+            Arguments.of("negativeOrZeroOnGetterLong", null, null, BigDecimal.ZERO, null)
+        );
     }
 
-    @Test
-    @Parameters(method = "parametersForTestNumberMinMaxResolvers")
+    @ParameterizedTest
+    @MethodSource("parametersForTestNumberMinMaxResolvers")
     public void testNumberMinMaxResolversNoValidationGroup(String fieldName, BigDecimal expectedMinInclusive, BigDecimal expectedMinExclusive,
             BigDecimal expectedMaxInclusive, BigDecimal expectedMaxExclusive) throws Exception {
         new JakartaValidationModule().applyToConfigBuilder(this.configBuilder);
@@ -483,8 +477,8 @@ public class JakartaValidationModuleTest {
         this.testNumberMinMaxResolvers(fieldName, expectedMinInclusive, expectedMinExclusive, expectedMaxInclusive, expectedMaxExclusive);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestNumberMinMaxResolvers")
+    @ParameterizedTest
+    @MethodSource("parametersForTestNumberMinMaxResolvers")
     public void testNumberMinMaxResolversMatchingValidationGroup(String fieldName, BigDecimal expectedMinInclusive, BigDecimal expectedMinExclusive,
             BigDecimal expectedMaxInclusive, BigDecimal expectedMaxExclusive) throws Exception {
         new JakartaValidationModule()
@@ -494,9 +488,8 @@ public class JakartaValidationModuleTest {
         this.testNumberMinMaxResolvers(fieldName, expectedMinInclusive, expectedMinExclusive, expectedMaxInclusive, expectedMaxExclusive);
     }
 
-    @Test
-    @Parameters(method = "parametersForTestNumberMinMaxResolvers")
-    @TestCaseName("{method}({0}) [{index}]")
+    @ParameterizedTest
+    @MethodSource("parametersForTestNumberMinMaxResolvers")
     public void testNumberMinMaxResolversDifferentValidationGroup(String fieldName, BigDecimal ignoredMinInclusive, BigDecimal ignoredMinExclusive,
             BigDecimal ignoredMaxInclusive, BigDecimal ignoredMaxExclusive) throws Exception {
         new JakartaValidationModule()
@@ -515,49 +508,51 @@ public class JakartaValidationModuleTest {
         ArgumentCaptor<ConfigFunction<FieldScope, BigDecimal>> minInclusiveCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withNumberInclusiveMinimumResolver(minInclusiveCaptor.capture());
         BigDecimal minInclusive = minInclusiveCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMinInclusive, minInclusive);
+        Assertions.assertEquals(expectedMinInclusive, minInclusive);
 
         ArgumentCaptor<ConfigFunction<FieldScope, BigDecimal>> minExclusiveCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withNumberExclusiveMinimumResolver(minExclusiveCaptor.capture());
         BigDecimal minExclusive = minExclusiveCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMinExclusive, minExclusive);
+        Assertions.assertEquals(expectedMinExclusive, minExclusive);
 
         ArgumentCaptor<ConfigFunction<FieldScope, BigDecimal>> maxInclusiveCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withNumberInclusiveMaximumResolver(maxInclusiveCaptor.capture());
         BigDecimal maxInclusive = maxInclusiveCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMaxInclusive, maxInclusive);
+        Assertions.assertEquals(expectedMaxInclusive, maxInclusive);
 
         ArgumentCaptor<ConfigFunction<FieldScope, BigDecimal>> maxExclusiveCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart).withNumberExclusiveMaximumResolver(maxExclusiveCaptor.capture());
         BigDecimal maxExclusive = maxExclusiveCaptor.getValue().apply(field);
-        Assert.assertEquals(expectedMaxExclusive, maxExclusive);
+        Assertions.assertEquals(expectedMaxExclusive, maxExclusive);
     }
 
-    public Object[] parametersForTestValidationGroupSetting() {
-        return new Object[][]{
-            {"skippedConfiguringGroups", "fieldWithoutValidationGroup", Boolean.TRUE, null},
-            {"skippedConfiguringGroups", "fieldWithSingleValidationGroup", Boolean.TRUE, null},
-            {"skippedConfiguringGroups", "fieldWithMultipleValidationGroups", Boolean.TRUE, null},
-            {"noConfiguredGroups", "fieldWithoutValidationGroup", Boolean.TRUE, new Class<?>[0]},
-            {"noConfiguredGroups", "fieldWithSingleValidationGroup", null, new Class<?>[0]},
-            {"noConfiguredGroups", "fieldWithMultipleValidationGroups", null, new Class<?>[0]},
-            {"singleConfiguredGroup", "fieldWithoutValidationGroup", Boolean.TRUE, new Class<?>[]{Test.class}},
-            {"singleConfiguredMatchingGroup", "fieldWithSingleValidationGroup", Boolean.TRUE, new Class<?>[]{Test.class}},
-            {"singleConfiguredMatchingGroup", "fieldWithMultipleValidationGroups", Boolean.TRUE, new Class<?>[]{Test.class}},
-            {"singleConfiguredDifferentGroup", "fieldWithSingleValidationGroup", null, new Class<?>[]{Object.class}},
-            {"singleConfiguredDifferentGroup", "fieldWithMultipleValidationGroups", null, new Class<?>[]{Object.class}},
-            {"multipleConfiguredGroups", "fieldWithoutValidationGroup", Boolean.TRUE, new Class<?>[]{Test.class, Object.class}},
-            {"multipleConfiguredGroupsSingleMatch", "fieldWithSingleValidationGroup", Boolean.TRUE, new Class<?>[]{Test.class, Object.class}},
-            {"multipleConfiguredGroupsSingleMatch", "fieldWithMultipleValidationGroups", Boolean.TRUE, new Class<?>[]{Test.class, Object.class}},
-            {"multipleConfiguredGroupsMultipleMatches", "fieldWithMultipleValidationGroups", Boolean.TRUE, new Class<?>[]{Test.class, Assert.class}},
-            {"multipleConfiguredGroupsNoMatch", "fieldWithSingleValidationGroup", null, new Class<?>[]{Integer.class, Double.class}},
-            {"multipleConfiguredGroupsNoMatch", "fieldWithMultipleValidationGroups", null, new Class<?>[]{Integer.class, Double.class}}
-        };
+    static Stream<Arguments> parametersForTestValidationGroupSetting() {
+        return Stream.of(
+            Arguments.of("skippedConfiguringGroups", "fieldWithoutValidationGroup", Boolean.TRUE, null),
+            Arguments.of("skippedConfiguringGroups", "fieldWithSingleValidationGroup", Boolean.TRUE, null),
+            Arguments.of("skippedConfiguringGroups", "fieldWithMultipleValidationGroups", Boolean.TRUE, null),
+            Arguments.of("noConfiguredGroups", "fieldWithoutValidationGroup", Boolean.TRUE, new Class<?>[0]),
+            Arguments.of("noConfiguredGroups", "fieldWithSingleValidationGroup", null, new Class<?>[0]),
+            Arguments.of("noConfiguredGroups", "fieldWithMultipleValidationGroups", null, new Class<?>[0]),
+            Arguments.of("singleConfiguredGroup", "fieldWithoutValidationGroup", Boolean.TRUE, new Class<?>[]{Test.class}),
+            Arguments.of("singleConfiguredMatchingGroup", "fieldWithSingleValidationGroup", Boolean.TRUE, new Class<?>[]{Test.class}),
+            Arguments.of("singleConfiguredMatchingGroup", "fieldWithMultipleValidationGroups", Boolean.TRUE, new Class<?>[]{Test.class}),
+            Arguments.of("singleConfiguredDifferentGroup", "fieldWithSingleValidationGroup", null, new Class<?>[]{Object.class}),
+            Arguments.of("singleConfiguredDifferentGroup", "fieldWithMultipleValidationGroups", null, new Class<?>[]{Object.class}),
+            Arguments.of("multipleConfiguredGroups", "fieldWithoutValidationGroup", Boolean.TRUE, new Class<?>[]{Test.class, Object.class}),
+            Arguments.of("multipleConfiguredGroupsSingleMatch", "fieldWithSingleValidationGroup",
+                    Boolean.TRUE, new Class<?>[]{Test.class, Object.class}),
+            Arguments.of("multipleConfiguredGroupsSingleMatch", "fieldWithMultipleValidationGroups",
+                    Boolean.TRUE, new Class<?>[]{Test.class, Object.class}),
+            Arguments.of("multipleConfiguredGroupsMultipleMatches", "fieldWithMultipleValidationGroups",
+                    Boolean.TRUE, new Class<?>[]{Test.class, Assertions.class}),
+            Arguments.of("multipleConfiguredGroupsNoMatch", "fieldWithSingleValidationGroup", null, new Class<?>[]{Integer.class, Double.class}),
+            Arguments.of("multipleConfiguredGroupsNoMatch", "fieldWithMultipleValidationGroups", null, new Class<?>[]{Integer.class, Double.class})
+        );
     }
 
-    @Test
-    @Parameters
-    @TestCaseName("{method}({0}, {1}, {2}) [{index}]")
+    @ParameterizedTest
+    @MethodSource("parametersForTestValidationGroupSetting")
     public void testValidationGroupSetting(String testCase, String fieldName, Boolean expectedResult, Class<?>[] validationGroups) {
         JakartaValidationModule module = new JakartaValidationModule();
         if (validationGroups != null) {
@@ -571,7 +566,7 @@ public class JakartaValidationModuleTest {
         FieldScope field = testType.getMemberField(fieldName);
 
         Boolean result = captor.getValue().apply(field);
-        Assert.assertEquals(expectedResult, result);
+        Assertions.assertEquals(expectedResult, result);
     }
 
     private static class TestClassForNullableCheck {
@@ -822,7 +817,7 @@ public class JakartaValidationModuleTest {
         String fieldWithoutValidationGroup;
         @Null(groups = Test.class)
         String fieldWithSingleValidationGroup;
-        @Null(groups = {Test.class, Assert.class})
+        @Null(groups = {Test.class, Assertions.class})
         String fieldWithMultipleValidationGroups;
     }
 }

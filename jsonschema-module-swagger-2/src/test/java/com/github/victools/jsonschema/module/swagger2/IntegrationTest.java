@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Scanner;
 
-import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -38,25 +37,16 @@ import com.github.victools.jsonschema.module.swagger2.IntegrationTest.PersonRefe
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Integration test of this module being used in a real SchemaGenerator instance.
  */
-@RunWith(JUnitParamsRunner.class)
 public class IntegrationTest {
 
-    public Object[] parametersForTestIntegration() {
-        return new Object[][]{
-            {TestClass.class},
-            {Foo.class}
-        };
-    }
-
-    @Test
-    @Parameters
+    @ParameterizedTest
+    @ValueSource(classes = {TestClass.class, Foo.class})
     public void testIntegration(Class<?> rawTargetType) throws Exception {
         Swagger2Module module = new Swagger2Module();
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
