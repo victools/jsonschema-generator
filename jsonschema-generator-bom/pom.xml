@@ -3,14 +3,43 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>Java JSON Schema Generator (BOM)</name>
-    <description>
-        Bill of Materials for the Java JSON Schema Generator and its (standard) Modules
-    </description>
+    <description>Bill of Materials for the Java JSON Schema Generator and its (standard) Modules</description>
+    <url>https://github.com/victools/jsonschema-generator</url>
 
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator-bom</artifactId>
+    <version>4.24.2-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <version>4.25.0-SNAPSHOT</version>
+
+    <properties>
+        <signAndStage.skip>true</signAndStage.skip>
+    </properties>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:https://github.com/victools/jsonschema-generator.git</connection>
+        <developerConnection>scm:git:https://github.com/victools/jsonschema-generator.git</developerConnection>
+        <url>https://github.com/victools/jsonschema-generator</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <organization>
+        <name>VicTools</name>
+        <url>https://github.com/victools</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>CarstenWickner</id>
+            <name>Carsten Wickner</name>
+        </developer>
+    </developers>
 
     <distributionManagement>
         <snapshotRepository>
@@ -52,9 +81,43 @@
             </dependency>
             <dependency>
                 <groupId>com.github.victools</groupId>
-                <artifactId>jsonschema-module-swagger-2s</artifactId>
+                <artifactId>jsonschema-module-swagger-2</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>${signAndStage.skip}</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                    <skip>${signAndStage.skip}</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -26,7 +26,7 @@ jobs:
       with:
         java-version: ${{ matrix.java-version }}
     - name: Build
-      run: mvn install -DskipTests=true -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -Dgpg.skip=true -B -V
+      run: mvn install -DskipTests=true -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -B -V
       env:
         CI: true
 
@@ -62,7 +62,7 @@ jobs:
       with:
         java-version: 11
     - name: Checkstyle
-      run: mvn verify -DskipTests=true -Dmaven.javadoc.skip=true -Dgpg.skip=true -B
+      run: mvn verify -DskipTests=true -Dmaven.javadoc.skip=true -B
       env:
         CI: true
 
@@ -78,6 +78,6 @@ jobs:
       with:
         java-version: 11
     - name: Generate JavaDoc
-      run: mvn verify -DskipTests=true -Dcheckstyle.skip=true -Dgpg.skip=true -B
+      run: mvn verify -DskipTests=true -Dcheckstyle.skip=true -B
       env:
         CI: true
