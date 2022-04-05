@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.module.jackson;
 
+import com.fasterxml.classmate.members.HierarchicType;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
@@ -69,8 +70,9 @@ public class JsonPropertySorter implements Comparator<MemberScope<?, ?>> {
      * @return specific property index or {@link Integer#MAX_VALUE}
      */
     protected int getPropertyIndex(MemberScope<?, ?> property) {
+        HierarchicType topMostHierarchyType = property.getDeclaringTypeMembers().allTypesAndOverrides().get(0);
         List<String> sortedProperties = this.propertyOrderPerDeclaringType
-                .computeIfAbsent(property.getDeclaringType().getErasedType(), this::getAnnotatedPropertyOrder);
+                .computeIfAbsent(topMostHierarchyType.getErasedType(), this::getAnnotatedPropertyOrder);
         String fieldName;
         if (property instanceof MethodScope) {
             fieldName = Optional.ofNullable(((MethodScope) property).findGetterField()).map(MemberScope::getSchemaPropertyName).orElse(null);

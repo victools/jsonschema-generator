@@ -67,14 +67,12 @@ public class JsonPropertySorterTest extends AbstractTypeAwareTest {
     }
 
     @JsonPropertyOrder(value = {"a", "c", "e", "b", "f"}, alphabetic = true)
-    private static class AnnotatedTestClass {
+    private static class AnnotatedTestClass extends TestSuperClass {
 
         private char x;
         private String a;
         private int b;
-        private long c;
         private Boolean d;
-        private Object e;
         private double f;
 
         public char getX() {
@@ -89,20 +87,26 @@ public class JsonPropertySorterTest extends AbstractTypeAwareTest {
             return this.b;
         }
 
-        public long getC() {
-            return this.c;
-        }
-
         public Boolean getD() {
             return this.d;
         }
 
-        public Object getE() {
-            return this.e;
-        }
-
         public double getF() {
             return this.f;
+        }
+    }
+
+    private static class TestSuperClass {
+
+        private Object e;
+        private long c;
+
+        public long getC() {
+            return this.c;
+        }
+
+        public Object getE() {
+            return this.e;
         }
     }
 }

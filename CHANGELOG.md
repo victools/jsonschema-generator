@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-module-jackson`
+#### Fixed
+-  `@JsonPropertyOrder` is only considered on the targeted type, i.e., no attempt is made to respect a super type's property order
 
 ## [4.24.2]
 ### `jsonschema-generator-bom`
