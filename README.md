@@ -60,5 +60,5 @@ SchemaGeneratorConfig config = configBuilder.build();
 SchemaGenerator generator = new SchemaGenerator(config);
 JsonNode jsonSchema = generator.generateSchema(YourClass.class);
 
-System.out.println(jsonSchema.toString());
+System.out.println(jsonSchema.toPrettyString());
 ```
