@@ -23,15 +23,15 @@ import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.LinkedList;
 
 /**
  * Default module being included if {@code Option.INLINE_ALL_SCHEMAS} is enabled.
  */
 public class InlineSchemaModule implements Module, CustomDefinitionProviderV2 {
 
-    private final ThreadLocal<Deque<ResolvedType>> declaringTypes = ThreadLocal.withInitial(LinkedList::new);
+    private final ThreadLocal<Deque<ResolvedType>> declaringTypes = ThreadLocal.withInitial(ArrayDeque::new);
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
