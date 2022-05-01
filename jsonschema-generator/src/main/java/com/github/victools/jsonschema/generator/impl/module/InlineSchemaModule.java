@@ -31,7 +31,7 @@ import java.util.LinkedList;
  */
 public class InlineSchemaModule implements Module, CustomDefinitionProviderV2 {
 
-    private final Deque<ResolvedType> declaringTypes = new LinkedList<>();
+    private final ThreadLocal<Deque<ResolvedType>> declaringTypes = ThreadLocal.withInitial(LinkedList::new);
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
@@ -40,7 +40,8 @@ public class InlineSchemaModule implements Module, CustomDefinitionProviderV2 {
 
     @Override
     public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
-        if (this.declaringTypes.contains(javaType)) {
+        final Deque<ResolvedType> declaringParents = this.declaringTypes.get();
+        if (declaringParents.contains(javaType)) {
             throw new IllegalArgumentException("Option.INLINE_ALL_SCHEMAS cannot be fulfilled due to a circular reference to "
                     + context.getTypeContext().getFullTypeDescription(javaType));
         }
@@ -48,9 +49,9 @@ public class InlineSchemaModule implements Module, CustomDefinitionProviderV2 {
             // container types are being in-lined by default and only handle container-item-scope if the container itself is not a custom definition
             return null;
         }
-        this.declaringTypes.addLast(javaType);
+        declaringParents.addLast(javaType);
         ObjectNode definition = context.createStandardDefinition(javaType, this);
-        this.declaringTypes.removeLast();
+        declaringParents.removeLast();
         return new CustomDefinition(definition, true);
     }
 }

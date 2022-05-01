@@ -5,9 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Fixed
+- ensure thread-safety when `Option.INLINE_ALL_SCHEMAS` is enabled
+
 ### `jsonschema-module-jackson`
 #### Fixed
 -  `@JsonPropertyOrder` is only considered on the targeted type, i.e., no attempt is made to respect a super type's property order
+- ensure thread-safety when loading bean descriptions
 
 ## [4.24.2]
 ### `jsonschema-generator-bom`

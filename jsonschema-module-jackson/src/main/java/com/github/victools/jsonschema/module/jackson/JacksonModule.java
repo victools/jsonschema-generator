@@ -55,8 +55,8 @@ public class JacksonModule implements Module {
 
     private final Set<JacksonOption> options;
     private ObjectMapper objectMapper;
-    private final Map<Class<?>, BeanDescription> beanDescriptions = new HashMap<>();
-    private final Map<Class<?>, PropertyNamingStrategy> namingStrategies = new HashMap<>();
+    private final Map<Class<?>, BeanDescription> beanDescriptions = Collections.synchronizedMap(new HashMap<>());
+    private final Map<Class<?>, PropertyNamingStrategy> namingStrategies = Collections.synchronizedMap(new HashMap<>());
 
     /**
      * Constructor, without any additional options.
@@ -204,8 +204,11 @@ public class JacksonModule implements Module {
      * @return altered property name (or {@code null})
      */
     protected String getPropertyNameOverrideBasedOnJsonNamingAnnotation(FieldScope field) {
-        PropertyNamingStrategy strategy = this.namingStrategies.computeIfAbsent(field.getDeclaringType().getErasedType(),
-                this::getAnnotatedNamingStrategy);
+        final PropertyNamingStrategy strategy;
+        synchronized (this.namingStrategies) {
+            strategy = this.namingStrategies.computeIfAbsent(field.getDeclaringType().getErasedType(),
+                    this::getAnnotatedNamingStrategy);
+        }
         if (strategy == null) {
             return null;
         }
@@ -241,8 +244,10 @@ public class JacksonModule implements Module {
      */
     protected final BeanDescription getBeanDescriptionForClass(ResolvedType targetType) {
         // use a map to cater for some caching (and thereby performance improvement)
-        return this.beanDescriptions.computeIfAbsent(targetType.getErasedType(),
-                type -> this.objectMapper.getSerializationConfig().introspect(this.objectMapper.getTypeFactory().constructType(type)));
+        synchronized (this.beanDescriptions) {
+            return this.beanDescriptions.computeIfAbsent(targetType.getErasedType(),
+                    type -> this.objectMapper.getSerializationConfig().introspect(this.objectMapper.getTypeFactory().constructType(type)));
+        }
     }
 
     /**
