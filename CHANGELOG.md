@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  `@JsonPropertyOrder` is only considered on the targeted type, i.e., no attempt is made to respect a super type's property order
 - ensure thread-safety when loading bean descriptions
 
-## [4.24.2]
+## [4.24.2] - 2022-04-04
 ### `jsonschema-generator-bom`
 #### Fixed
 - Actually publish BOM during release
