@@ -165,10 +165,26 @@
                             "exclusiveMaximum": 11,
                             "multipleOf": 1
                         }]
+                },
+                "supplierP": {
+                    "anyOf": [{
+                            "type": "null"
+                        }, {
+                            "type": "integer",
+                            "title": "Long",
+                            "description": "looked-up from field: Long",
+                            "default": 1,
+                            "enum": [1, 2, 3, 4, 5],
+                            "minimum": 1,
+                            "exclusiveMinimum": 0,
+                            "maximum": 10,
+                            "exclusiveMaximum": 11,
+                            "multipleOf": 1
+                        }]
                 }
             },
-            "title": "TestClass4<Integer, String>",
-            "description": "looked-up from field: TestClass4<Integer, String>",
+            "title": "TestClass4<Integer, String, Long>",
+            "description": "looked-up from field: TestClass4<Integer, String, Long>",
             "writeOnly": true,
             "additionalProperties": {
                 "type": "string"

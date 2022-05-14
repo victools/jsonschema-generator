@@ -57,6 +57,7 @@ public class OptionPreset {
             Option.ADDITIONAL_FIXED_TYPES,
             Option.FLATTENED_ENUMS,
             Option.FLATTENED_OPTIONALS,
+            Option.FLATTENED_SUPPLIERS,
             Option.VALUES_FROM_CONSTANT_FIELDS,
             Option.PUBLIC_NONSTATIC_FIELDS,
             Option.NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS,

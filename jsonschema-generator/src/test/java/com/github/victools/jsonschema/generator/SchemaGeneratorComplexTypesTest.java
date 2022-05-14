@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -202,7 +203,7 @@ public class SchemaGeneratorComplexTypesTest {
         private TestClass2<Long> nestedLong;
         private TestClass2<TestClass1[]> nestedClass1Array;
         private List<? extends TestClass2<Long>> nestedLongList;
-        private TestClass4<Integer, String> class4;
+        private TestClass4<Integer, String, Long> class4;
 
         public TestClass2<Long> getNestedLong() {
             return this.nestedLong;
@@ -216,15 +217,16 @@ public class SchemaGeneratorComplexTypesTest {
             return this.nestedLongList;
         }
 
-        public TestClass4<Integer, String> getClass4() {
+        public TestClass4<Integer, String, Long> getClass4() {
             return this.class4;
         }
     }
 
-    private static class TestClass4<S, T> {
+    private static class TestClass4<S, T, P> {
 
         private TestClass2<TestClass2<T>> class2OfClass2OfT;
         public Optional<S> optionalS;
+        public Supplier<P> supplierP;
         public static final RoundingMode DEFAULT_ROUNDING_MODE = RoundingMode.HALF_UP;
 
         public TestClass2<TestClass2<T>> getClass2OfClass2OfT() {

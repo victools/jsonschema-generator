@@ -244,10 +244,31 @@
                                 }]
                         }
                     }
+                },
+                "supplierP": {
+                    "type": "object",
+                    "properties": {
+                        "get()": {
+                            "anyOf": [{
+                                    "type": "null"
+                                }, {
+                                    "type": "integer",
+                                    "title": "Long",
+                                    "description": "looked-up from method: Long",
+                                    "default": 1,
+                                    "enum": [1, 2, 3, 4, 5],
+                                    "minimum": 1,
+                                    "exclusiveMinimum": 0,
+                                    "maximum": 10,
+                                    "exclusiveMaximum": 11,
+                                    "multipleOf": 1
+                                }]
+                        }
+                    }
                 }
             },
-            "title": "TestClass4<Integer, String>",
-            "description": "looked-up from method: TestClass4<Integer, String>",
+            "title": "TestClass4<Integer, String, Long>",
+            "description": "looked-up from method: TestClass4<Integer, String, Long>",
             "writeOnly": true,
             "additionalProperties": {
                 "type": "string"

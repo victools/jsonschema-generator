@@ -127,6 +127,44 @@
                     "$ref": "#/definitions/RoundingMode"
                 }]
         },
+        "Supplier(Long)-nullable": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "get()": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "integer",
+                  "$anchor": "#anchor",
+                  "title": "Long",
+                  "description": "for type in general: Long",
+                  "default": 1,
+                  "enum": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                  ],
+                  "minimum": 1,
+                  "exclusiveMinimum": 0,
+                  "maximum": 10,
+                  "exclusiveMaximum": 11,
+                  "multipleOf": 1
+                }
+              ]
+            }
+          },
+          "$anchor": "#anchor",
+          "title": "Supplier<Long>",
+          "description": "for type in general: Supplier<Long>",
+          "additionalProperties": false
+        },
         "TestClass1": {
             "type": "object",
             "properties": {
@@ -517,7 +555,7 @@
                 }
             }
         },
-        "TestClass4(Integer,String)-nullable": {
+        "TestClass4(Integer,String,Long)-nullable": {
             "type": ["object", "null"],
             "properties": {
                 "class2OfClass2OfT": {
@@ -525,6 +563,9 @@
                 },
                 "optionalS": {
                     "$ref": "#/definitions/Optional(Integer)-nullable"
+                },
+                "supplierP": {
+                    "$ref": "#/definitions/Supplier(Long)-nullable"
                 },
                 "getClass2OfClass2OfT()": {
                     "$ref": "#/definitions/TestClass2(TestClass2(String))-nullable"
@@ -537,10 +578,10 @@
                         }]
                 }
             },
-            "$id": "id-TestClass4<Integer, String>",
+            "$id": "id-TestClass4<Integer, String, Long>",
             "$anchor": "#anchor",
-            "title": "TestClass4<Integer, String>",
-            "description": "for type in general: TestClass4<Integer, String>",
+            "title": "TestClass4<Integer, String, Long>",
+            "description": "for type in general: TestClass4<Integer, String, Long>",
             "additionalProperties": {
                 "type": "string",
                 "$anchor": "#anchor",
@@ -575,7 +616,7 @@
             "uniqueItems": false
         },
         "class4": {
-            "$ref": "#/definitions/TestClass4(Integer,String)-nullable"
+            "$ref": "#/definitions/TestClass4(Integer,String,Long)-nullable"
         },
         "getNestedLong()": {
             "$ref": "#/definitions/TestClass2(Long)-nullable"
@@ -596,7 +637,7 @@
             "uniqueItems": false
         },
         "getClass4()": {
-            "$ref": "#/definitions/TestClass4(Integer,String)-nullable"
+            "$ref": "#/definitions/TestClass4(Integer,String,Long)-nullable"
         }
     },
     "$id": "id-TestClass3",
