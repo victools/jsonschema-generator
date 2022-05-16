@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
@@ -142,6 +143,7 @@ public class SchemaGeneratorComplexTypesTest {
         final SchemaVersion schemaVersion = SchemaVersion.DRAFT_7;
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, preset);
         configBuilder.with(testModule);
+        configBuilder.with(Option.NULLABLE_ARRAY_ITEMS_ALLOWED);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(targetType);
@@ -203,7 +205,7 @@ public class SchemaGeneratorComplexTypesTest {
         private TestClass2<Long> nestedLong;
         private TestClass2<TestClass1[]> nestedClass1Array;
         private List<? extends TestClass2<Long>> nestedLongList;
-        private TestClass4<Integer, String, Long> class4;
+        private TestClass4<Integer, String> class4;
 
         public TestClass2<Long> getNestedLong() {
             return this.nestedLong;
@@ -217,16 +219,18 @@ public class SchemaGeneratorComplexTypesTest {
             return this.nestedLongList;
         }
 
-        public TestClass4<Integer, String, Long> getClass4() {
+        public TestClass4<Integer, String> getClass4() {
             return this.class4;
         }
     }
 
-    private static class TestClass4<S, T, P> {
+    private static class TestClass4<S, T> {
 
         private TestClass2<TestClass2<T>> class2OfClass2OfT;
         public Optional<S> optionalS;
-        public Supplier<P> supplierP;
+        public List<Optional<S>> listOfOptionalS;
+        public Supplier<S> supplierS;
+        public Set<LazyStringSupplier> setOfStringSupplier;
         public static final RoundingMode DEFAULT_ROUNDING_MODE = RoundingMode.HALF_UP;
 
         public TestClass2<TestClass2<T>> getClass2OfClass2OfT() {
@@ -245,6 +249,14 @@ public class SchemaGeneratorComplexTypesTest {
         @Override
         public String toString() {
             return "toString_" + this.name();
+        }
+    }
+
+    private static class LazyStringSupplier implements Supplier<String> {
+
+        @Override
+        public String get() {
+            return "wait for it...";
         }
     }
 }

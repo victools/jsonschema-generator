@@ -83,6 +83,13 @@
                 <role>Provided PR #224 (declaring maven plugin thread safety)</role>
             </roles>
         </contributor>
+        <contributor>
+            <name>Antoine Musso</name>
+            <url>https://github.com/hashar</url>
+            <roles>
+                <role>Provided PR #254 (introducing Option.FLATTENED_SUPPLIERS)</role>
+            </roles>
+        </contributor>
     </contributors>
 
     <properties>

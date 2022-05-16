@@ -16,7 +16,7 @@
                             "uniqueItems": false,
                             "type": ["array", "null"],
                             "items": {
-                                "type": "object",
+                                "type": ["object", "null"],
                                 "properties": {
                                     "genericArray": {
                                         "title": "String[]<String>",
@@ -26,14 +26,18 @@
                                         "uniqueItems": false,
                                         "type": ["array", "null"],
                                         "items": {
-                                            "type": "string",
-                                            "title": "String",
-                                            "description": "looked-up from field: String",
-                                            "const": "constant string value",
-                                            "minLength": 1,
-                                            "maxLength": 256,
-                                            "format": "date",
-                                            "pattern": "^.{1,256}$"
+                                            "anyOf": [{
+                                                    "type": "null"
+                                                }, {
+                                                    "type": "string",
+                                                    "title": "String",
+                                                    "description": "looked-up from field: String",
+                                                    "const": "constant string value",
+                                                    "minLength": 1,
+                                                    "maxLength": 256,
+                                                    "format": "date",
+                                                    "pattern": "^.{1,256}$"
+                                                }]
                                         }
                                     },
                                     "genericValue": {
@@ -72,14 +76,18 @@
                                     "uniqueItems": false,
                                     "type": ["array", "null"],
                                     "items": {
-                                        "type": "string",
-                                        "title": "String",
-                                        "description": "looked-up from field: String",
-                                        "const": "constant string value",
-                                        "minLength": 1,
-                                        "maxLength": 256,
-                                        "format": "date",
-                                        "pattern": "^.{1,256}$"
+                                        "anyOf": [{
+                                                "type": "null"
+                                            }, {
+                                                "type": "string",
+                                                "title": "String",
+                                                "description": "looked-up from field: String",
+                                                "const": "constant string value",
+                                                "minLength": 1,
+                                                "maxLength": 256,
+                                                "format": "date",
+                                                "pattern": "^.{1,256}$"
+                                            }]
                                     }
                                 },
                                 "genericValue": {
@@ -122,14 +130,18 @@
                                     "uniqueItems": false,
                                     "type": ["array", "null"],
                                     "items": {
-                                        "type": "string",
-                                        "title": "String",
-                                        "description": "looked-up from field: String",
-                                        "const": "constant string value",
-                                        "minLength": 1,
-                                        "maxLength": 256,
-                                        "format": "date",
-                                        "pattern": "^.{1,256}$"
+                                        "anyOf": [{
+                                                "type": "null"
+                                            }, {
+                                                "type": "string",
+                                                "title": "String",
+                                                "description": "looked-up from field: String",
+                                                "const": "constant string value",
+                                                "minLength": 1,
+                                                "maxLength": 256,
+                                                "format": "date",
+                                                "pattern": "^.{1,256}$"
+                                            }]
                                     }
                                 },
                                 "genericValue": {
@@ -150,6 +162,30 @@
                         }
                     }
                 },
+                "listOfOptionalS": {
+                    "title": "List<Optional<Integer>>",
+                    "description": "looked-up from field: List<Optional<Integer>>",
+                    "minItems": 2,
+                    "maxItems": 100,
+                    "uniqueItems": false,
+                    "type": ["array", "null"],
+                    "items": {
+                        "anyOf": [{
+                                "type": "null"
+                            }, {
+                                "type": "integer",
+                                "title": "Integer",
+                                "description": "looked-up from field: Integer",
+                                "default": 1,
+                                "enum": [1, 2, 3, 4, 5],
+                                "minimum": 1,
+                                "exclusiveMinimum": 0,
+                                "maximum": 10,
+                                "exclusiveMaximum": 11,
+                                "multipleOf": 1
+                            }]
+                    }
+                },
                 "optionalS": {
                     "anyOf": [{
                             "type": "null"
@@ -166,13 +202,35 @@
                             "multipleOf": 1
                         }]
                 },
-                "supplierP": {
+                "setOfStringSupplier": {
+                    "title": "Set<LazyStringSupplier>",
+                    "description": "looked-up from field: Set<LazyStringSupplier>",
+                    "minItems": 2,
+                    "maxItems": 100,
+                    "uniqueItems": false,
+                    "type": ["array", "null"],
+                    "items": {
+                        "anyOf": [{
+                                "type": "null"
+                            }, {
+                                "type": "string",
+                                "title": "String",
+                                "description": "looked-up from field: String",
+                                "const": "constant string value",
+                                "minLength": 1,
+                                "maxLength": 256,
+                                "format": "date",
+                                "pattern": "^.{1,256}$"
+                            }]
+                    }
+                },
+                "supplierS": {
                     "anyOf": [{
                             "type": "null"
                         }, {
                             "type": "integer",
-                            "title": "Long",
-                            "description": "looked-up from field: Long",
+                            "title": "Integer",
+                            "description": "looked-up from field: Integer",
                             "default": 1,
                             "enum": [1, 2, 3, 4, 5],
                             "minimum": 1,
@@ -183,8 +241,8 @@
                         }]
                 }
             },
-            "title": "TestClass4<Integer, String, Long>",
-            "description": "looked-up from field: TestClass4<Integer, String, Long>",
+            "title": "TestClass4<Integer, String>",
+            "description": "looked-up from field: TestClass4<Integer, String>",
             "writeOnly": true,
             "additionalProperties": {
                 "type": "string"
@@ -206,7 +264,7 @@
                         "minItems": 2,
                         "maxItems": 100,
                         "uniqueItems": false,
-                        "type": "array",
+                        "type": ["array", "null"],
                         "items": {
                             "type": "object",
                             "properties": {
@@ -218,14 +276,18 @@
                                     "uniqueItems": false,
                                     "type": ["array", "null"],
                                     "items": {
-                                        "type": "string",
-                                        "title": "String",
-                                        "description": "looked-up from field: String",
-                                        "const": "constant string value",
-                                        "minLength": 1,
-                                        "maxLength": 256,
-                                        "format": "date",
-                                        "pattern": "^.{1,256}$"
+                                        "anyOf": [{
+                                                "type": "null"
+                                            }, {
+                                                "type": "string",
+                                                "title": "String",
+                                                "description": "looked-up from field: String",
+                                                "const": "constant string value",
+                                                "minLength": 1,
+                                                "maxLength": 256,
+                                                "format": "date",
+                                                "pattern": "^.{1,256}$"
+                                            }]
                                     }
                                 },
                                 "genericValue": {
@@ -275,7 +337,7 @@
                     "uniqueItems": false,
                     "type": ["array", "null"],
                     "items": {
-                        "type": "object",
+                        "type": ["object", "null"],
                         "properties": {
                             "genericArray": {
                                 "title": "String[]<String>",
@@ -285,14 +347,18 @@
                                 "uniqueItems": false,
                                 "type": ["array", "null"],
                                 "items": {
-                                    "type": "string",
-                                    "title": "String",
-                                    "description": "looked-up from field: String",
-                                    "const": "constant string value",
-                                    "minLength": 1,
-                                    "maxLength": 256,
-                                    "format": "date",
-                                    "pattern": "^.{1,256}$"
+                                    "anyOf": [{
+                                            "type": "null"
+                                        }, {
+                                            "type": "string",
+                                            "title": "String",
+                                            "description": "looked-up from field: String",
+                                            "const": "constant string value",
+                                            "minLength": 1,
+                                            "maxLength": 256,
+                                            "format": "date",
+                                            "pattern": "^.{1,256}$"
+                                        }]
                                 }
                             },
                             "genericValue": {
@@ -359,14 +425,18 @@
                                 "uniqueItems": false,
                                 "type": ["array", "null"],
                                 "items": {
-                                    "type": "string",
-                                    "title": "String",
-                                    "description": "looked-up from field: String",
-                                    "const": "constant string value",
-                                    "minLength": 1,
-                                    "maxLength": 256,
-                                    "format": "date",
-                                    "pattern": "^.{1,256}$"
+                                    "anyOf": [{
+                                            "type": "null"
+                                        }, {
+                                            "type": "string",
+                                            "title": "String",
+                                            "description": "looked-up from field: String",
+                                            "const": "constant string value",
+                                            "minLength": 1,
+                                            "maxLength": 256,
+                                            "format": "date",
+                                            "pattern": "^.{1,256}$"
+                                        }]
                                 }
                             },
                             "genericValue": {
@@ -420,16 +490,20 @@
                     "uniqueItems": false,
                     "type": ["array", "null"],
                     "items": {
-                        "type": "integer",
-                        "title": "Long",
-                        "description": "looked-up from field: Long",
-                        "default": 1,
-                        "enum": [1, 2, 3, 4, 5],
-                        "minimum": 1,
-                        "exclusiveMinimum": 0,
-                        "maximum": 10,
-                        "exclusiveMaximum": 11,
-                        "multipleOf": 1
+                        "anyOf": [{
+                                "type": "null"
+                            }, {
+                                "type": "integer",
+                                "title": "Long",
+                                "description": "looked-up from field: Long",
+                                "default": 1,
+                                "enum": [1, 2, 3, 4, 5],
+                                "minimum": 1,
+                                "exclusiveMinimum": 0,
+                                "maximum": 10,
+                                "exclusiveMaximum": 11,
+                                "multipleOf": 1
+                            }]
                     }
                 },
                 "genericValue": {
@@ -476,16 +550,20 @@
                         "uniqueItems": false,
                         "type": ["array", "null"],
                         "items": {
-                            "type": "integer",
-                            "title": "Long",
-                            "description": "looked-up from field: Long",
-                            "default": 1,
-                            "enum": [1, 2, 3, 4, 5],
-                            "minimum": 1,
-                            "exclusiveMinimum": 0,
-                            "maximum": 10,
-                            "exclusiveMaximum": 11,
-                            "multipleOf": 1
+                            "anyOf": [{
+                                    "type": "null"
+                                }, {
+                                    "type": "integer",
+                                    "title": "Long",
+                                    "description": "looked-up from field: Long",
+                                    "default": 1,
+                                    "enum": [1, 2, 3, 4, 5],
+                                    "minimum": 1,
+                                    "exclusiveMinimum": 0,
+                                    "maximum": 10,
+                                    "exclusiveMaximum": 11,
+                                    "multipleOf": 1
+                                }]
                         }
                     },
                     "genericValue": {

@@ -1,7 +1,31 @@
 {
     "definitions": {
-        "Optional(Integer)-nullable": {
-            "type": ["object", "null"],
+        "LazyStringSupplier": {
+            "type": "object",
+            "properties": {
+                "get()": {
+                    "anyOf": [{
+                            "type": "null"
+                        }, {
+                            "type": "string",
+                            "$anchor": "#anchor",
+                            "title": "String",
+                            "description": "for type in general: String",
+                            "const": "constant string value",
+                            "minLength": 1,
+                            "maxLength": 256,
+                            "format": "date",
+                            "pattern": "^.{1,256}$"
+                        }]
+                }
+            },
+            "$anchor": "#anchor",
+            "title": "LazyStringSupplier",
+            "description": "for type in general: LazyStringSupplier",
+            "additionalProperties": false
+        },
+        "Optional(Integer)": {
+            "type": "object",
             "properties": {
                 "orElse(Integer)": {
                     "anyOf": [{
@@ -48,6 +72,13 @@
             "title": "Optional<Integer>",
             "description": "for type in general: Optional<Integer>",
             "additionalProperties": false
+        },
+        "Optional(Integer)-nullable": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/Optional(Integer)"
+                }]
         },
         "RoundingMode": {
             "type": "object",
@@ -127,43 +158,31 @@
                     "$ref": "#/definitions/RoundingMode"
                 }]
         },
-        "Supplier(Long)-nullable": {
-          "type": [
-            "object",
-            "null"
-          ],
-          "properties": {
-            "get()": {
-              "anyOf": [
-                {
-                  "type": "null"
-                },
-                {
-                  "type": "integer",
-                  "$anchor": "#anchor",
-                  "title": "Long",
-                  "description": "for type in general: Long",
-                  "default": 1,
-                  "enum": [
-                    1,
-                    2,
-                    3,
-                    4,
-                    5
-                  ],
-                  "minimum": 1,
-                  "exclusiveMinimum": 0,
-                  "maximum": 10,
-                  "exclusiveMaximum": 11,
-                  "multipleOf": 1
+        "Supplier(Integer)-nullable": {
+            "type": ["object", "null"],
+            "properties": {
+                "get()": {
+                    "anyOf": [{
+                            "type": "null"
+                        }, {
+                            "type": "integer",
+                            "$anchor": "#anchor",
+                            "title": "Integer",
+                            "description": "for type in general: Integer",
+                            "default": 1,
+                            "enum": [1, 2, 3, 4, 5],
+                            "minimum": 1,
+                            "exclusiveMinimum": 0,
+                            "maximum": 10,
+                            "exclusiveMaximum": 11,
+                            "multipleOf": 1
+                        }]
                 }
-              ]
-            }
-          },
-          "$anchor": "#anchor",
-          "title": "Supplier<Long>",
-          "description": "for type in general: Supplier<Long>",
-          "additionalProperties": false
+            },
+            "$anchor": "#anchor",
+            "title": "Supplier<Integer>",
+            "description": "for type in general: Supplier<Integer>",
+            "additionalProperties": false
         },
         "TestClass1": {
             "type": "object",
@@ -555,7 +574,7 @@
                 }
             }
         },
-        "TestClass4(Integer,String,Long)-nullable": {
+        "TestClass4(Integer,String)-nullable": {
             "type": ["object", "null"],
             "properties": {
                 "class2OfClass2OfT": {
@@ -564,8 +583,30 @@
                 "optionalS": {
                     "$ref": "#/definitions/Optional(Integer)-nullable"
                 },
-                "supplierP": {
-                    "$ref": "#/definitions/Supplier(Long)-nullable"
+                "listOfOptionalS": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/Optional(Integer)"
+                    },
+                    "title": "List<Optional<Integer>>",
+                    "description": "for type in general: List<Optional<Integer>>",
+                    "minItems": 2,
+                    "maxItems": 100,
+                    "uniqueItems": false
+                },
+                "supplierS": {
+                    "$ref": "#/definitions/Supplier(Integer)-nullable"
+                },
+                "setOfStringSupplier": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/LazyStringSupplier"
+                    },
+                    "title": "Set<LazyStringSupplier>",
+                    "description": "for type in general: Set<LazyStringSupplier>",
+                    "minItems": 2,
+                    "maxItems": 100,
+                    "uniqueItems": false
                 },
                 "getClass2OfClass2OfT()": {
                     "$ref": "#/definitions/TestClass2(TestClass2(String))-nullable"
@@ -578,10 +619,10 @@
                         }]
                 }
             },
-            "$id": "id-TestClass4<Integer, String, Long>",
+            "$id": "id-TestClass4<Integer, String>",
             "$anchor": "#anchor",
-            "title": "TestClass4<Integer, String, Long>",
-            "description": "for type in general: TestClass4<Integer, String, Long>",
+            "title": "TestClass4<Integer, String>",
+            "description": "for type in general: TestClass4<Integer, String>",
             "additionalProperties": {
                 "type": "string",
                 "$anchor": "#anchor",
@@ -616,7 +657,7 @@
             "uniqueItems": false
         },
         "class4": {
-            "$ref": "#/definitions/TestClass4(Integer,String,Long)-nullable"
+            "$ref": "#/definitions/TestClass4(Integer,String)-nullable"
         },
         "getNestedLong()": {
             "$ref": "#/definitions/TestClass2(Long)-nullable"
@@ -637,7 +678,7 @@
             "uniqueItems": false
         },
         "getClass4()": {
-            "$ref": "#/definitions/TestClass4(Integer,String,Long)-nullable"
+            "$ref": "#/definitions/TestClass4(Integer,String)-nullable"
         }
     },
     "$id": "id-TestClass3",
