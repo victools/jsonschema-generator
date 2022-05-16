@@ -1,8 +1,16 @@
 {
     "$ref": "#/definitions/TestClass3",
     "definitions": {
-        "Optional_Integer_-nullable": {
-            "type": ["object", "null"],
+        "LazyStringSupplier": {
+            "type": "object",
+            "properties": {
+                "get()": {
+                    "type": ["string", "null"]
+                }
+            }
+        },
+        "Optional_Integer_": {
+            "type": "object",
             "properties": {
                 "present": {
                     "type": "boolean"
@@ -15,13 +23,12 @@
                 }
             }
         },
-        "Supplier_Long_-nullable": {
-            "type": ["object", "null"],
-            "properties": {
-                "get()": {
-                    "type": ["integer", "null"]
-                }
-            }
+        "Optional_Integer_-nullable": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/Optional_Integer_"
+                }]
         },
         "RoundingMode": {
             "type": "object",
@@ -62,6 +69,14 @@
                 }, {
                     "$ref": "#/definitions/RoundingMode"
                 }]
+        },
+        "Supplier_Integer_-nullable": {
+            "type": ["object", "null"],
+            "properties": {
+                "get()": {
+                    "type": ["integer", "null"]
+                }
+            }
         },
         "TestClass1": {
             "type": "object",
@@ -171,7 +186,7 @@
             "type": "object",
             "properties": {
                 "class4": {
-                    "$ref": "#/definitions/TestClass4_Integer.String.Long_-nullable"
+                    "$ref": "#/definitions/TestClass4_Integer.String_-nullable"
                 },
                 "nestedClass1Array": {
                     "$ref": "#/definitions/TestClass2_TestClass1..._-nullable"
@@ -187,7 +202,7 @@
                 }
             }
         },
-        "TestClass4_Integer.String.Long_-nullable": {
+        "TestClass4_Integer.String_-nullable": {
             "type": ["object", "null"],
             "properties": {
                 "DEFAULT_ROUNDING_MODE": {
@@ -200,11 +215,23 @@
                 "class2OfClass2OfT": {
                     "$ref": "#/definitions/TestClass2_TestClass2_String__-nullable"
                 },
+                "listOfOptionalS": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/Optional_Integer_"
+                    }
+                },
                 "optionalS": {
                     "$ref": "#/definitions/Optional_Integer_-nullable"
                 },
-                "supplierP": {
-                    "$ref": "#/definitions/Supplier_Long_-nullable"
+                "setOfStringSupplier": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/LazyStringSupplier"
+                    }
+                },
+                "supplierS": {
+                    "$ref": "#/definitions/Supplier_Integer_-nullable"
                 }
             }
         }

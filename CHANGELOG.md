@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### `jsonschema-generator`
 #### Added
-- New `Option.FLATTENED_SUPPLIERS` to unwrap the supplied type. `Supplier<T>` would thus be a `type: "T"`.
+- new `Option.FLATTENED_SUPPLIERS` to unwrap the supplied type; `Supplier<T>` would thus be a type `T`
+
+#### Changed
+- new `Option.FLATTENED_SUPPLIERS` is enabled by default in the `OptionPreset.PLAIN_JSON`
+- existing `Option.FLATTENED_OPTIONALS` now also considers `Optional` container items (e.g., `List<Optional<T>>`).
 
 ## [4.24.3] - 2022-05-03
 ### `jsonschema-generator`

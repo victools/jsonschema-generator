@@ -10,14 +10,18 @@
             "uniqueItems": false,
             "type": ["array", "null"],
             "items": {
-                "type": "string",
-                "title": "String",
-                "description": "looked-up from field: String",
-                "const": "constant string value",
-                "minLength": 1,
-                "maxLength": 256,
-                "format": "date",
-                "pattern": "^.{1,256}$"
+                "anyOf": [{
+                        "type": "null"
+                    }, {
+                        "type": "string",
+                        "title": "String",
+                        "description": "looked-up from field: String",
+                        "const": "constant string value",
+                        "minLength": 1,
+                        "maxLength": 256,
+                        "format": "date",
+                        "pattern": "^.{1,256}$"
+                    }]
             }
         },
         "genericValue": {

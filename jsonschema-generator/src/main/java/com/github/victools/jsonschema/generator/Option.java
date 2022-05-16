@@ -21,7 +21,7 @@ import com.github.victools.jsonschema.generator.impl.module.ConstantValueModule;
 import com.github.victools.jsonschema.generator.impl.module.EnumModule;
 import com.github.victools.jsonschema.generator.impl.module.FieldExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.FlattenedOptionalModule;
-import com.github.victools.jsonschema.generator.impl.module.FlattenedSupplierModule;
+import com.github.victools.jsonschema.generator.impl.module.FlattenedWrapperModule;
 import com.github.victools.jsonschema.generator.impl.module.InlineSchemaModule;
 import com.github.victools.jsonschema.generator.impl.module.MethodExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
@@ -89,11 +89,11 @@ public enum Option {
      */
     FLATTENED_OPTIONALS(FlattenedOptionalModule::new, null, Option.SIMPLIFIED_OPTIONALS),
     /**
-     * Wheter a {@link java.util.function.Supplier Supplier&lt;T&gt;} instance should be treated as nullable value of the wrapped type {@code T}.
+     * Whether a {@link java.util.function.Supplier Supplier&lt;T&gt;} instance should be treated as the wrapped type {@code T}.
      *
      * @since 4.25.0
      */
-    FLATTENED_SUPPLIERS(FlattenedSupplierModule::new, null),
+    FLATTENED_SUPPLIERS(() -> new FlattenedWrapperModule<>(Supplier.class), null),
     /**
      * Whether the constant values of static final fields should be included.
      */

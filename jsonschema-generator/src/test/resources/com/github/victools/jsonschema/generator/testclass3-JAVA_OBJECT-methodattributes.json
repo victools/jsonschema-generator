@@ -1,5 +1,47 @@
 {
     "definitions": {
+        "Optional(Integer)": {
+            "type": "object",
+            "properties": {
+                "present": {
+                    "type": ["boolean", "null"],
+                    "title": "boolean",
+                    "description": "looked-up from method: boolean"
+                },
+                "get()": {
+                    "anyOf": [{
+                            "type": "null"
+                        }, {
+                            "type": "integer",
+                            "title": "Integer",
+                            "description": "looked-up from method: Integer",
+                            "default": 1,
+                            "enum": [1, 2, 3, 4, 5],
+                            "minimum": 1,
+                            "exclusiveMinimum": 0,
+                            "maximum": 10,
+                            "exclusiveMaximum": 11,
+                            "multipleOf": 1
+                        }]
+                },
+                "orElse(Integer)": {
+                    "anyOf": [{
+                            "type": "null"
+                        }, {
+                            "type": "integer",
+                            "title": "Integer",
+                            "description": "looked-up from method: Integer",
+                            "default": 1,
+                            "enum": [1, 2, 3, 4, 5],
+                            "minimum": 1,
+                            "exclusiveMinimum": 0,
+                            "maximum": 10,
+                            "exclusiveMaximum": 11,
+                            "multipleOf": 1
+                        }]
+                }
+            }
+        },
         "RoundingMode": {
             "type": "object",
             "properties": {
@@ -48,7 +90,7 @@
                     "type": ["array", "null"],
                     "items": {
                         "allOf": [{
-                                "$ref": "#/definitions/RoundingMode"
+                                "$ref": "#/definitions/RoundingMode-nullable"
                             }, {
                                 "title": "RoundingMode",
                                 "description": "looked-up from method: RoundingMode"
@@ -104,8 +146,8 @@
                 "calculateSomething(Number, Number)": false
             }
         },
-        "TestClass2(Long)": {
-            "type": "object",
+        "TestClass2(Long)-nullable": {
+            "type": ["object", "null"],
             "properties": {
                 "genericArray": {
                     "type": "array",
@@ -203,49 +245,38 @@
                         }
                     }
                 },
+                "listOfOptionalS": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Optional(Integer)"
+                    }
+                },
                 "optionalS": {
-                    "type": "object",
-                    "properties": {
-                        "present": {
-                            "type": ["boolean", "null"],
-                            "title": "boolean",
-                            "description": "looked-up from method: boolean"
-                        },
-                        "get()": {
-                            "anyOf": [{
-                                    "type": "null"
-                                }, {
-                                    "type": "integer",
-                                    "title": "Integer",
-                                    "description": "looked-up from method: Integer",
-                                    "default": 1,
-                                    "enum": [1, 2, 3, 4, 5],
-                                    "minimum": 1,
-                                    "exclusiveMinimum": 0,
-                                    "maximum": 10,
-                                    "exclusiveMaximum": 11,
-                                    "multipleOf": 1
-                                }]
-                        },
-                        "orElse(Integer)": {
-                            "anyOf": [{
-                                    "type": "null"
-                                }, {
-                                    "type": "integer",
-                                    "title": "Integer",
-                                    "description": "looked-up from method: Integer",
-                                    "default": 1,
-                                    "enum": [1, 2, 3, 4, 5],
-                                    "minimum": 1,
-                                    "exclusiveMinimum": 0,
-                                    "maximum": 10,
-                                    "exclusiveMaximum": 11,
-                                    "multipleOf": 1
-                                }]
+                    "$ref": "#/definitions/Optional(Integer)"
+                },
+                "setOfStringSupplier": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "get()": {
+                                "anyOf": [{
+                                        "type": "null"
+                                    }, {
+                                        "type": "string",
+                                        "title": "String",
+                                        "description": "looked-up from method: String",
+                                        "const": "constant string value",
+                                        "minLength": 1,
+                                        "maxLength": 256,
+                                        "format": "date",
+                                        "pattern": "^.{1,256}$"
+                                    }]
+                            }
                         }
                     }
                 },
-                "supplierP": {
+                "supplierS": {
                     "type": "object",
                     "properties": {
                         "get()": {
@@ -253,8 +284,8 @@
                                     "type": "null"
                                 }, {
                                     "type": "integer",
-                                    "title": "Long",
-                                    "description": "looked-up from method: Long",
+                                    "title": "Integer",
+                                    "description": "looked-up from method: Integer",
                                     "default": 1,
                                     "enum": [1, 2, 3, 4, 5],
                                     "minimum": 1,
@@ -267,8 +298,8 @@
                     }
                 }
             },
-            "title": "TestClass4<Integer, String, Long>",
-            "description": "looked-up from method: TestClass4<Integer, String, Long>",
+            "title": "TestClass4<Integer, String>",
+            "description": "looked-up from method: TestClass4<Integer, String>",
             "writeOnly": true,
             "additionalProperties": {
                 "type": "string"
@@ -294,18 +325,19 @@
                     "uniqueItems": false,
                     "type": ["array", "null"],
                     "items": {
-                        "allOf": [{
-                                "$ref": "#/definitions/TestClass1"
+                        "anyOf": [{
+                                "type": "null"
                             }, {
-                                "title": "TestClass1",
-                                "description": "looked-up from method: TestClass1",
-                                "additionalProperties": false,
-                                "patternProperties": {
-                                    "^generic.+$": {
-                                        "type": "string"
-                                    }
-                                }
-                            }]
+                                "$ref": "#/definitions/TestClass1"
+                            }],
+                        "title": "TestClass1",
+                        "description": "looked-up from method: TestClass1",
+                        "additionalProperties": false,
+                        "patternProperties": {
+                            "^generic.+$": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             },
@@ -322,19 +354,18 @@
             }
         },
         "nestedLong": {
-            "anyOf": [{
-                    "type": "null"
+            "allOf": [{
+                    "$ref": "#/definitions/TestClass2(Long)-nullable"
                 }, {
-                    "$ref": "#/definitions/TestClass2(Long)"
-                }],
-            "title": "TestClass2<Long>",
-            "description": "looked-up from method: TestClass2<Long>",
-            "additionalProperties": false,
-            "patternProperties": {
-                "^generic.+$": {
-                    "type": "integer"
-                }
-            }
+                    "title": "TestClass2<Long>",
+                    "description": "looked-up from method: TestClass2<Long>",
+                    "additionalProperties": false,
+                    "patternProperties": {
+                        "^generic.+$": {
+                            "type": "integer"
+                        }
+                    }
+                }]
         },
         "nestedLongList": {
             "title": "List<TestClass2<Long>>",
@@ -345,7 +376,7 @@
             "type": ["array", "null"],
             "items": {
                 "allOf": [{
-                        "$ref": "#/definitions/TestClass2(Long)"
+                        "$ref": "#/definitions/TestClass2(Long)-nullable"
                     }, {
                         "title": "TestClass2<Long>",
                         "description": "looked-up from method: TestClass2<Long>",

@@ -108,15 +108,15 @@ configBuilder.without(
       <td>Replacing encountered <code>Optional</code> instances as null-able forms of their generic parameter type.</td>
       <td>-</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">9</td>
       <td colspan="2"><code>Option.FLATTENED_SUPPLIERS</code></td>
     </tr>
     <tr>
-      <td>Replacing encountered <code>Supplier</code> instances as null-able forms of the results they supply.</td>
+      <td>Replacing encountered <code>Supplier</code> instances with their generic parameter type.</td>
       <td>-</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">10</td>
       <td colspan="2"><code>Option.VALUES_FROM_CONSTANT_FIELDS</code></td>
@@ -141,6 +141,7 @@ configBuilder.without(
       <td>Include <code>public</code> non-<code>static</code> fields in an object's <code>properties</code>.</td>
       <td>No <code>public</code> non-<code>static</code> fields are included in an object's <code>properties</code>.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">13</td>
       <td colspan="2"><code>Option.NONPUBLIC_STATIC_FIELDS</code></td>
@@ -149,7 +150,6 @@ configBuilder.without(
       <td>Include <code>protected</code>/package-visible/<code>private</code> <code>static</code> fields in an object's <code>properties</code>.</td>
       <td>No <code>protected</code>/package-visible/<code>private</code> <code>static</code> fields are included in an object's <code>properties</code>.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">14</td>
       <td colspan="2"><code>Option.NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS</code></td>
@@ -174,6 +174,7 @@ configBuilder.without(
       <td>Include <code>transient</code> fields in an object's <code>properties</code> if they would otherwise be included according to the <code>Option</code>s above.</td>
       <td>No <code>transient</code> fields are included in an object's <code>properties</code> even if they would otherwise be included according to the <code>Option</code>s above.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">17</td>
       <td colspan="2"><code>Option.STATIC_METHODS</code></td>
@@ -182,7 +183,6 @@ configBuilder.without(
       <td>Include <code>public</code> <code>static</code> methods in an object's <code>properties</code></td>
       <td>No <code>static</code> methods are included in an object's <code>properties</code> even if they would be included according to the <code>Option.VOID_METHODS</code> below.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">18</td>
       <td colspan="2"><code>Option.VOID_METHODS</code></td>
@@ -207,6 +207,7 @@ configBuilder.without(
       <td>Include <code>public</code> non-<code>static</code> non-<code>void</code> methods in an object's <code>properties</code> for which no field exists that fulfills the usual getter naming conventions.</td>
       <td>No non-<code>static</code>/non-<code>void</code>/non-getter methods are included in an object's <code>properties</code>.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">21</td>
       <td colspan="2"><code>Option.NULLABLE_FIELDS_BY_DEFAULT</code></td>
@@ -215,7 +216,6 @@ configBuilder.without(
       <td>The schema <code>type</code> for a field allows <code>null</code> by default unless some configuration specifically says it is not null-able.</td>
       <td>The schema <code>type</code> for a field does not allow for <code>null</code> by default unless some configuration specifically says it is null-able.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">22</td>
       <td colspan="2"><code>Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT</code></td>
@@ -240,6 +240,7 @@ configBuilder.without(
       <td>Include argument-free methods as fields, e.g. the return type of <code>getName()</code> will be included as <code>name</code> field.</td>
       <td>Argument-free methods will be included with the appended parentheses.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">25</td>
       <td colspan="2"><code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code></td>
@@ -256,7 +257,6 @@ configBuilder.without(
       <td>Using the <code>enum</code> keyword for allowed values, even if there is only one.</td>
       <td>In case of a single allowed value, use the <code>const</code> keyword instead of <code>enum</code>.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">27</td>
       <td colspan="2"><code>Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</code></td>
@@ -273,6 +273,7 @@ configBuilder.without(
       <td>Include an entry in the <code>$defs</code>/<code>definitions</code> for each encountered object type that is not explicitly declared as "inline" via a custom definition.</td>
       <td>Only include those entries in the <code>$defs</code>/<code>definitions</code> for object types that are referenced more than once and which are not explicitly declared as "inline" via a custom definition.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">29</td>
       <td colspan="2"><code>Option.DEFINITION_FOR_MAIN_SCHEMA</code></td>
@@ -289,7 +290,6 @@ configBuilder.without(
       <td>Do not include any <code>$defs</code>/<code>definitions</code> but rather define all sub-schemas "inline" – however, this results in an exception being thrown if the given type contains any kind of circular reference.</td>
       <td>Depending on whether <code>DEFINITIONS_FOR_ALL_OBJECTS</code> is included or excluded.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">31</td>
       <td colspan="2"><code>Option.PLAIN_DEFINITION_KEYS</code></td>
@@ -344,7 +344,7 @@ Below, you can find the lists of <code>Option</code>s included/excluded in the r
 | 25 | `MAP_VALUES_AS_ADDITIONAL_PROPERTIES` | ⬜️ | ⬜️ | ⬜️ |
 | 26 | `ENUM_KEYWORD_FOR_SINGLE_VALUES` | ⬜️ | ⬜️ | ⬜️ |
 | 27 | `FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` | ⬜️ | ⬜️ | ⬜️ |
-| 28| `DEFINITIONS_FOR_ALL_OBJECTS` | ⬜️ | ⬜️ | ⬜️ |
+| 28 | `DEFINITIONS_FOR_ALL_OBJECTS` | ⬜️ | ⬜️ | ⬜️ |
 | 29 | `DEFINITION_FOR_MAIN_SCHEMA` | ⬜️ | ⬜️ | ⬜️ |
 | 30 | `INLINE_ALL_SCHEMAS` | ⬜️ | ⬜️ | ⬜️ |
 | 31 | `PLAIN_DEFINITION_KEYS` | ⬜️ | ⬜️ | ⬜️ |
