@@ -15,6 +15,14 @@
                 }
             }
         },
+        "Supplier_Long_-nullable": {
+            "type": ["object", "null"],
+            "properties": {
+                "get()": {
+                    "type": ["integer", "null"]
+                }
+            }
+        },
         "RoundingMode": {
             "type": "object",
             "properties": {
@@ -163,7 +171,7 @@
             "type": "object",
             "properties": {
                 "class4": {
-                    "$ref": "#/definitions/TestClass4_Integer.String_-nullable"
+                    "$ref": "#/definitions/TestClass4_Integer.String.Long_-nullable"
                 },
                 "nestedClass1Array": {
                     "$ref": "#/definitions/TestClass2_TestClass1..._-nullable"
@@ -179,7 +187,7 @@
                 }
             }
         },
-        "TestClass4_Integer.String_-nullable": {
+        "TestClass4_Integer.String.Long_-nullable": {
             "type": ["object", "null"],
             "properties": {
                 "DEFAULT_ROUNDING_MODE": {
@@ -194,6 +202,9 @@
                 },
                 "optionalS": {
                     "$ref": "#/definitions/Optional_Integer_-nullable"
+                },
+                "supplierP": {
+                    "$ref": "#/definitions/Supplier_Long_-nullable"
                 }
             }
         }

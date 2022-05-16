@@ -108,9 +108,17 @@ configBuilder.without(
       <td>Replacing encountered <code>Optional</code> instances as null-able forms of their generic parameter type.</td>
       <td>-</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">9</td>
+      <td colspan="2"><code>Option.FLATTENED_SUPPLIERS</code></td>
+    </tr>
+    <tr>
+      <td>Replacing encountered <code>Supplier</code> instances as null-able forms of the results they supply.</td>
+      <td>-</td>
+    </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
+    <tr>
+      <td rowspan="2" style="text-align: right">10</td>
       <td colspan="2"><code>Option.VALUES_FROM_CONSTANT_FIELDS</code></td>
     </tr>
     <tr>
@@ -118,7 +126,7 @@ configBuilder.without(
       <td>No <code>const</code> values are populated for <code>static</code> <code>final</code> fields.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">10</td>
+      <td rowspan="2" style="text-align: right">11</td>
       <td colspan="2"><code>Option.PUBLIC_STATIC_FIELDS</code></td>
     </tr>
     <tr>
@@ -126,7 +134,7 @@ configBuilder.without(
       <td>No <code>public</code> <code>static</code> fields are included in an object's <code>properties</code>.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">11</td>
+      <td rowspan="2" style="text-align: right">12</td>
       <td colspan="2"><code>Option.PUBLIC_NONSTATIC_FIELDS</code></td>
     </tr>
     <tr>
@@ -134,7 +142,7 @@ configBuilder.without(
       <td>No <code>public</code> non-<code>static</code> fields are included in an object's <code>properties</code>.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">12</td>
+      <td rowspan="2" style="text-align: right">13</td>
       <td colspan="2"><code>Option.NONPUBLIC_STATIC_FIELDS</code></td>
     </tr>
     <tr>
@@ -143,7 +151,7 @@ configBuilder.without(
     </tr>
     <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">13</td>
+      <td rowspan="2" style="text-align: right">14</td>
       <td colspan="2"><code>Option.NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS</code></td>
     </tr>
     <tr>
@@ -151,7 +159,7 @@ configBuilder.without(
       <td>No <code>protected</code>/package-visible/<code>private</code> non-<code>static</code> fields with getter methods are included in an object's <code>properties</code>.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">14</td>
+      <td rowspan="2" style="text-align: right">15</td>
       <td colspan="2"><code>Option.NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS</code></td>
     </tr>
     <tr>
@@ -159,7 +167,7 @@ configBuilder.without(
       <td>No <code>protected</code>/package-visible/<code>private</code> non-<code>static</code> fields without getter methods are included in an object's <code>properties</code>.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">15</td>
+      <td rowspan="2" style="text-align: right">16</td>
       <td colspan="2"><code>Option.TRANSIENT_FIELDS</code></td>
     </tr>
     <tr>
@@ -167,7 +175,7 @@ configBuilder.without(
       <td>No <code>transient</code> fields are included in an object's <code>properties</code> even if they would otherwise be included according to the <code>Option</code>s above.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">16</td>
+      <td rowspan="2" style="text-align: right">17</td>
       <td colspan="2"><code>Option.STATIC_METHODS</code></td>
     </tr>
     <tr>
@@ -176,7 +184,7 @@ configBuilder.without(
     </tr>
     <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">17</td>
+      <td rowspan="2" style="text-align: right">18</td>
       <td colspan="2"><code>Option.VOID_METHODS</code></td>
     </tr>
     <tr>
@@ -184,7 +192,7 @@ configBuilder.without(
       <td>No <code>void</code> methods are included in an object's <code>properties</code> even if they would be included according to the <code>Option.STATIC_METHODS</code> above.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">18</td>
+      <td rowspan="2" style="text-align: right">19</td>
       <td colspan="2"><code>Option.GETTER_METHODS</code></td>
     </tr>
     <tr>
@@ -192,7 +200,7 @@ configBuilder.without(
       <td>No methods are included in an object's <code>properties</code>> for which a field exists that fulfills the usual naming conventions.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">19</td>
+      <td rowspan="2" style="text-align: right">20</td>
       <td colspan="2"><code>Option.NONSTATIC_NONVOID_NONGETTER_METHODS</code></td>
     </tr>
     <tr>
@@ -200,7 +208,7 @@ configBuilder.without(
       <td>No non-<code>static</code>/non-<code>void</code>/non-getter methods are included in an object's <code>properties</code>.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">20</td>
+      <td rowspan="2" style="text-align: right">21</td>
       <td colspan="2"><code>Option.NULLABLE_FIELDS_BY_DEFAULT</code></td>
     </tr>
     <tr>
@@ -209,7 +217,7 @@ configBuilder.without(
     </tr>
     <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">21</td>
+      <td rowspan="2" style="text-align: right">22</td>
       <td colspan="2"><code>Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT</code></td>
     </tr>
     <tr>
@@ -217,7 +225,7 @@ configBuilder.without(
       <td>The schema <code>type</code> for a method's return type does not allow for <code>null</code> by default unless some configuration specifically says it is null-able.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">22</td>
+      <td rowspan="2" style="text-align: right">23</td>
       <td colspan="2"><code>Option.NULLABLE_ARRAY ITEMS_ALLOWED</code></td>
     </tr>
     <tr>
@@ -225,7 +233,7 @@ configBuilder.without(
       <td>The schema <code>type</code> for the items in an array (in case of a field's value or method's return value being a container/array) never allows <code>null</code>.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">23</td>
+      <td rowspan="2" style="text-align: right">24</td>
       <td colspan="2"><code>Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS</code></td>
     </tr>
     <tr>
@@ -233,7 +241,7 @@ configBuilder.without(
       <td>Argument-free methods will be included with the appended parentheses.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">24</td>
+      <td rowspan="2" style="text-align: right">25</td>
       <td colspan="2"><code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code></td>
     </tr>
     <tr>
@@ -241,7 +249,7 @@ configBuilder.without(
       <td>Omitting the <code>additionalProperties</code> attribute in <code>Map<K, V></code> schemas by default (thereby allowing additional properties of any type) unless some configuration specifically says something else.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">25</td>
+      <td rowspan="2" style="text-align: right">26</td>
       <td colspan="2"><code>Option.ENUM_KEYWORD_FOR_SINGLE_VALUES</code></td>
     </tr>
     <tr>
@@ -250,7 +258,7 @@ configBuilder.without(
     </tr>
     <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">26</td>
+      <td rowspan="2" style="text-align: right">27</td>
       <td colspan="2"><code>Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</code></td>
     </tr>
     <tr>
@@ -258,7 +266,7 @@ configBuilder.without(
       <td>Omitting the <code>additionalProperties</code> attribute in all object schemas by default (thereby allowing any additional properties) unless some configuration specifically says something else.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">27</td>
+      <td rowspan="2" style="text-align: right">28</td>
       <td colspan="2"><code>Option.DEFINITIONS_FOR_ALL_OBJECTS</code></td>
     </tr>
     <tr>
@@ -266,7 +274,7 @@ configBuilder.without(
       <td>Only include those entries in the <code>$defs</code>/<code>definitions</code> for object types that are referenced more than once and which are not explicitly declared as "inline" via a custom definition.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">28</td>
+      <td rowspan="2" style="text-align: right">29</td>
       <td colspan="2"><code>Option.DEFINITION_FOR_MAIN_SCHEMA</code></td>
     </tr>
     <tr>
@@ -274,7 +282,7 @@ configBuilder.without(
       <td>Define the main/target type "inline".</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">29</td>
+      <td rowspan="2" style="text-align: right">30</td>
       <td colspan="2"><code>Option.INLINE_ALL_SCHEMAS</code></td>
     </tr>
     <tr>
@@ -283,7 +291,7 @@ configBuilder.without(
     </tr>
     <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">30</td>
+      <td rowspan="2" style="text-align: right">31</td>
       <td colspan="2"><code>Option.PLAIN_DEFINITION_KEYS</code></td>
     </tr>
     <tr>
@@ -291,7 +299,7 @@ configBuilder.without(
       <td>Ensure that the keys for any <code>$defs</code>/<code>definitions</code> are URI compatible (as expected by the JSON Schema specification).</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">31</td>
+      <td rowspan="2" style="text-align: right">32</td>
       <td colspan="2"><code>Option.ALLOF_CLEANUP_AT_THE_END</code></td>
     </tr>
     <tr>
@@ -317,29 +325,30 @@ Below, you can find the lists of <code>Option</code>s included/excluded in the r
 |  6 | `FLATTENED_ENUMS_FROM_TOSTRING` | ⬜️ | ⬜️ | ⬜️ |
 |  7 | `SIMPLIFIED_OPTIONALS` | ✅ | ✅ | ⬜️ 
 |  8 | `FLATTENED_OPTIONALS` | ⬜️ | ⬜️ | ✅ |
-|  9 | `VALUES_FROM_CONSTANT_FIELDS` | ✅ | ✅ | ✅ |
-| 10 | `PUBLIC_STATIC_FIELDS` | ✅ | ✅ | ⬜️ |
-| 11 | `PUBLIC_NONSTATIC_FIELDS` | ✅ | ✅ | ✅ |
-| 12 | `NONPUBLIC_STATIC_FIELDS` | ✅ | ⬜️ | ⬜️ |
-| 13 | `NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS` | ✅ | ⬜️ | ✅ |
-| 14 | `NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS` | ✅ | ⬜️ | ✅ |
-| 15 | `TRANSIENT_FIELDS` | ✅ | ⬜️ | ⬜️ |
-| 16 | `STATIC_METHODS` | ✅ | ✅ | ⬜️ |
-| 17 | `VOID_METHODS` | ✅ | ✅ | ⬜️ |
-| 18 | `GETTER_METHODS` | ✅ | ✅ | ⬜️ |
-| 19 | `NONSTATIC_NONVOID_NONGETTER_METHODS` | ✅ | ✅ | ⬜️ |
-| 20 | `NULLABLE_FIELDS_BY_DEFAULT` | ✅ | ⬜️ | ⬜️ |
-| 21 | `NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT` | ✅ | ⬜️ | ⬜️ |
-| 22 | `NULLABLE_ARRAY_ITEMS_ALLOWED` | ⬜️ | ⬜️ | ⬜️ |
-| 23 | `FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS` | ⬜️ | ⬜️ | ⬜️ |
-| 24 | `MAP_VALUES_AS_ADDITIONAL_PROPERTIES` | ⬜️ | ⬜️ | ⬜️ |
-| 25 | `ENUM_KEYWORD_FOR_SINGLE_VALUES` | ⬜️ | ⬜️ | ⬜️ |
-| 26 | `FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` | ⬜️ | ⬜️ | ⬜️ |
-| 27| `DEFINITIONS_FOR_ALL_OBJECTS` | ⬜️ | ⬜️ | ⬜️ |
-| 28 | `DEFINITION_FOR_MAIN_SCHEMA` | ⬜️ | ⬜️ | ⬜️ |
-| 29 | `INLINE_ALL_SCHEMAS` | ⬜️ | ⬜️ | ⬜️ |
-| 30 | `PLAIN_DEFINITION_KEYS` | ⬜️ | ⬜️ | ⬜️ |
-| 31 | `ALLOF_CLEANUP_AT_THE_END` | ✅ | ✅ | ✅ |
+|  8 | `FLATTENED_SUPPLIERS` | ⬜️ | ⬜️ | ✅ |
+| 10 | `VALUES_FROM_CONSTANT_FIELDS` | ✅ | ✅ | ✅ |
+| 11 | `PUBLIC_STATIC_FIELDS` | ✅ | ✅ | ⬜️ |
+| 12 | `PUBLIC_NONSTATIC_FIELDS` | ✅ | ✅ | ✅ |
+| 13 | `NONPUBLIC_STATIC_FIELDS` | ✅ | ⬜️ | ⬜️ |
+| 14 | `NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS` | ✅ | ⬜️ | ✅ |
+| 15 | `NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS` | ✅ | ⬜️ | ✅ |
+| 16 | `TRANSIENT_FIELDS` | ✅ | ⬜️ | ⬜️ |
+| 17 | `STATIC_METHODS` | ✅ | ✅ | ⬜️ |
+| 18 | `VOID_METHODS` | ✅ | ✅ | ⬜️ |
+| 19 | `GETTER_METHODS` | ✅ | ✅ | ⬜️ |
+| 20 | `NONSTATIC_NONVOID_NONGETTER_METHODS` | ✅ | ✅ | ⬜️ |
+| 21 | `NULLABLE_FIELDS_BY_DEFAULT` | ✅ | ⬜️ | ⬜️ |
+| 22 | `NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT` | ✅ | ⬜️ | ⬜️ |
+| 23 | `NULLABLE_ARRAY_ITEMS_ALLOWED` | ⬜️ | ⬜️ | ⬜️ |
+| 24 | `FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS` | ⬜️ | ⬜️ | ⬜️ |
+| 25 | `MAP_VALUES_AS_ADDITIONAL_PROPERTIES` | ⬜️ | ⬜️ | ⬜️ |
+| 26 | `ENUM_KEYWORD_FOR_SINGLE_VALUES` | ⬜️ | ⬜️ | ⬜️ |
+| 27 | `FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` | ⬜️ | ⬜️ | ⬜️ |
+| 28| `DEFINITIONS_FOR_ALL_OBJECTS` | ⬜️ | ⬜️ | ⬜️ |
+| 29 | `DEFINITION_FOR_MAIN_SCHEMA` | ⬜️ | ⬜️ | ⬜️ |
+| 30 | `INLINE_ALL_SCHEMAS` | ⬜️ | ⬜️ | ⬜️ |
+| 31 | `PLAIN_DEFINITION_KEYS` | ⬜️ | ⬜️ | ⬜️ |
+| 32 | `ALLOF_CLEANUP_AT_THE_END` | ✅ | ✅ | ✅ |
 
 # Generator – Modules
 Similar to an `OptionPreset` being a short-cut to including various `Option`s, the concept of `Module`s is a convenient way of including multiple [individual configurations](#generator-individual-configurations) or even [advanced configurations](#generator-advanced-configurations) (as per the following sections) at once.
