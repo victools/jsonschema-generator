@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - new `Option.FLATTENED_SUPPLIERS` to unwrap the supplied type; `Supplier<T>` would thus be a type `T`
 
+#### Fixed
+- set default `ObjectMapper` node factory to `JsonNodeFactory.withExactBigDecimals(true)` to avoid scientific notation for numbers
+
 #### Changed
 - new `Option.FLATTENED_SUPPLIERS` is enabled by default in the `OptionPreset.PLAIN_JSON`
 - existing `Option.FLATTENED_OPTIONALS` now also considers `Optional` container items (e.g., `List<Optional<T>>`).

@@ -18,6 +18,7 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.github.victools.jsonschema.generator.impl.SchemaGeneratorConfigImpl;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -42,6 +43,9 @@ public class SchemaGeneratorConfigBuilder {
         mapper.getSerializationConfig()
                 // since version 4.21.0
                 .with(JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS);
+        // since version 4.25.0; as the above doesn't always work
+        mapper.setNodeFactory(JsonNodeFactory.withExactBigDecimals(true));
+
         return mapper;
     }
 
