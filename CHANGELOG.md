@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.25.0] - 2022-06-24
 ### `jsonschema-generator`
 #### Added
 - new `Option.FLATTENED_SUPPLIERS` to unwrap the supplied type; `Supplier<T>` would thus be a type `T`
@@ -602,7 +602,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.24.3...HEAD
+[4.25.0]: https://github.com/victools/jsonschema-generator/compare/v4.24.3...v4.25.0
 [4.24.3]: https://github.com/victools/jsonschema-generator/compare/v4.24.2...v4.24.3
 [4.24.2]: https://github.com/victools/jsonschema-generator/compare/v4.24.1...v4.24.2
 [4.24.1]: https://github.com/victools/jsonschema-generator/compare/v4.24.0...v4.24.1
