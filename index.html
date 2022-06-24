@@ -610,6 +610,14 @@ Various aspects can be toggled on/off by including or excluding respective <code
     <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">9</td>
+      <td colspan="2"><code>Option.FLATTENED_SUPPLIERS</code></td>
+    </tr>
+    <tr>
+      <td>Replacing encountered <code>Supplier</code> instances with their generic parameter type.</td>
+      <td>-</td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="text-align: right">10</td>
       <td colspan="2"><code>Option.VALUES_FROM_CONSTANT_FIELDS</code></td>
     </tr>
     <tr>
@@ -617,7 +625,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>No <code>const</code> values are populated for <code>static</code> <code>final</code> fields.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">10</td>
+      <td rowspan="2" style="text-align: right">11</td>
       <td colspan="2"><code>Option.PUBLIC_STATIC_FIELDS</code></td>
     </tr>
     <tr>
@@ -625,24 +633,24 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>No <code>public</code> <code>static</code> fields are included in an object's <code>properties</code>.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">11</td>
+      <td rowspan="2" style="text-align: right">12</td>
       <td colspan="2"><code>Option.PUBLIC_NONSTATIC_FIELDS</code></td>
     </tr>
     <tr>
       <td>Include <code>public</code> non-<code>static</code> fields in an object's <code>properties</code>.</td>
       <td>No <code>public</code> non-<code>static</code> fields are included in an object's <code>properties</code>.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">12</td>
+      <td rowspan="2" style="text-align: right">13</td>
       <td colspan="2"><code>Option.NONPUBLIC_STATIC_FIELDS</code></td>
     </tr>
     <tr>
       <td>Include <code>protected</code>/package-visible/<code>private</code> <code>static</code> fields in an object's <code>properties</code>.</td>
       <td>No <code>protected</code>/package-visible/<code>private</code> <code>static</code> fields are included in an object's <code>properties</code>.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">13</td>
+      <td rowspan="2" style="text-align: right">14</td>
       <td colspan="2"><code>Option.NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS</code></td>
     </tr>
     <tr>
@@ -650,7 +658,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>No <code>protected</code>/package-visible/<code>private</code> non-<code>static</code> fields with getter methods are included in an object's <code>properties</code>.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">14</td>
+      <td rowspan="2" style="text-align: right">15</td>
       <td colspan="2"><code>Option.NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS</code></td>
     </tr>
     <tr>
@@ -658,24 +666,24 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>No <code>protected</code>/package-visible/<code>private</code> non-<code>static</code> fields without getter methods are included in an object's <code>properties</code>.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">15</td>
+      <td rowspan="2" style="text-align: right">16</td>
       <td colspan="2"><code>Option.TRANSIENT_FIELDS</code></td>
     </tr>
     <tr>
       <td>Include <code>transient</code> fields in an object's <code>properties</code> if they would otherwise be included according to the <code>Option</code>s above.</td>
       <td>No <code>transient</code> fields are included in an object's <code>properties</code> even if they would otherwise be included according to the <code>Option</code>s above.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">16</td>
+      <td rowspan="2" style="text-align: right">17</td>
       <td colspan="2"><code>Option.STATIC_METHODS</code></td>
     </tr>
     <tr>
       <td>Include <code>public</code> <code>static</code> methods in an object's <code>properties</code></td>
       <td>No <code>static</code> methods are included in an object's <code>properties</code> even if they would be included according to the <code>Option.VOID_METHODS</code> below.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">17</td>
+      <td rowspan="2" style="text-align: right">18</td>
       <td colspan="2"><code>Option.VOID_METHODS</code></td>
     </tr>
     <tr>
@@ -683,7 +691,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>No <code>void</code> methods are included in an object's <code>properties</code> even if they would be included according to the <code>Option.STATIC_METHODS</code> above.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">18</td>
+      <td rowspan="2" style="text-align: right">19</td>
       <td colspan="2"><code>Option.GETTER_METHODS</code></td>
     </tr>
     <tr>
@@ -691,24 +699,24 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>No methods are included in an object's <code>properties</code>> for which a field exists that fulfills the usual naming conventions.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">19</td>
+      <td rowspan="2" style="text-align: right">20</td>
       <td colspan="2"><code>Option.NONSTATIC_NONVOID_NONGETTER_METHODS</code></td>
     </tr>
     <tr>
       <td>Include <code>public</code> non-<code>static</code> non-<code>void</code> methods in an object's <code>properties</code> for which no field exists that fulfills the usual getter naming conventions.</td>
       <td>No non-<code>static</code>/non-<code>void</code>/non-getter methods are included in an object's <code>properties</code>.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">20</td>
+      <td rowspan="2" style="text-align: right">21</td>
       <td colspan="2"><code>Option.NULLABLE_FIELDS_BY_DEFAULT</code></td>
     </tr>
     <tr>
       <td>The schema <code>type</code> for a field allows <code>null</code> by default unless some configuration specifically says it is not null-able.</td>
       <td>The schema <code>type</code> for a field does not allow for <code>null</code> by default unless some configuration specifically says it is null-able.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">21</td>
+      <td rowspan="2" style="text-align: right">22</td>
       <td colspan="2"><code>Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT</code></td>
     </tr>
     <tr>
@@ -716,7 +724,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>The schema <code>type</code> for a method's return type does not allow for <code>null</code> by default unless some configuration specifically says it is null-able.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">22</td>
+      <td rowspan="2" style="text-align: right">23</td>
       <td colspan="2"><code>Option.NULLABLE_ARRAY ITEMS_ALLOWED</code></td>
     </tr>
     <tr>
@@ -724,15 +732,16 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>The schema <code>type</code> for the items in an array (in case of a field's value or method's return value being a container/array) never allows <code>null</code>.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">23</td>
+      <td rowspan="2" style="text-align: right">24</td>
       <td colspan="2"><code>Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS</code></td>
     </tr>
     <tr>
       <td>Include argument-free methods as fields, e.g. the return type of <code>getName()</code> will be included as <code>name</code> field.</td>
       <td>Argument-free methods will be included with the appended parentheses.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">24</td>
+      <td rowspan="2" style="text-align: right">25</td>
       <td colspan="2"><code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code></td>
     </tr>
     <tr>
@@ -740,16 +749,15 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>Omitting the <code>additionalProperties</code> attribute in <code>Map<K, V></code> schemas by default (thereby allowing additional properties of any type) unless some configuration specifically says something else.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">25</td>
+      <td rowspan="2" style="text-align: right">26</td>
       <td colspan="2"><code>Option.ENUM_KEYWORD_FOR_SINGLE_VALUES</code></td>
     </tr>
     <tr>
       <td>Using the <code>enum</code> keyword for allowed values, even if there is only one.</td>
       <td>In case of a single allowed value, use the <code>const</code> keyword instead of <code>enum</code>.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">26</td>
+      <td rowspan="2" style="text-align: right">27</td>
       <td colspan="2"><code>Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</code></td>
     </tr>
     <tr>
@@ -757,15 +765,16 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>Omitting the <code>additionalProperties</code> attribute in all object schemas by default (thereby allowing any additional properties) unless some configuration specifically says something else.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">27</td>
+      <td rowspan="2" style="text-align: right">28</td>
       <td colspan="2"><code>Option.DEFINITIONS_FOR_ALL_OBJECTS</code></td>
     </tr>
     <tr>
       <td>Include an entry in the <code>$defs</code>/<code>definitions</code> for each encountered object type that is not explicitly declared as "inline" via a custom definition.</td>
       <td>Only include those entries in the <code>$defs</code>/<code>definitions</code> for object types that are referenced more than once and which are not explicitly declared as "inline" via a custom definition.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">28</td>
+      <td rowspan="2" style="text-align: right">29</td>
       <td colspan="2"><code>Option.DEFINITION_FOR_MAIN_SCHEMA</code></td>
     </tr>
     <tr>
@@ -773,16 +782,15 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>Define the main/target type "inline".</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">29</td>
+      <td rowspan="2" style="text-align: right">30</td>
       <td colspan="2"><code>Option.INLINE_ALL_SCHEMAS</code></td>
     </tr>
     <tr>
       <td>Do not include any <code>$defs</code>/<code>definitions</code> but rather define all sub-schemas "inline" – however, this results in an exception being thrown if the given type contains any kind of circular reference.</td>
       <td>Depending on whether <code>DEFINITIONS_FOR_ALL_OBJECTS</code> is included or excluded.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">30</td>
+      <td rowspan="2" style="text-align: right">31</td>
       <td colspan="2"><code>Option.PLAIN_DEFINITION_KEYS</code></td>
     </tr>
     <tr>
@@ -790,7 +798,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>Ensure that the keys for any <code>$defs</code>/<code>definitions</code> are URI compatible (as expected by the JSON Schema specification).</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">31</td>
+      <td rowspan="2" style="text-align: right">32</td>
       <td colspan="2"><code>Option.ALLOF_CLEANUP_AT_THE_END</code></td>
     </tr>
     <tr>
@@ -874,161 +882,168 @@ Various aspects can be toggled on/off by including or excluding respective <code
 <td>✅</td>
 </tr>
 <tr>
-<td>9</td>
+<td>8</td>
+<td><code>FLATTENED_SUPPLIERS</code></td>
+<td>⬜️</td>
+<td>⬜️</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>10</td>
 <td><code>VALUES_FROM_CONSTANT_FIELDS</code></td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
 </tr>
 <tr>
-<td>10</td>
+<td>11</td>
 <td><code>PUBLIC_STATIC_FIELDS</code></td>
 <td>✅</td>
 <td>✅</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>11</td>
+<td>12</td>
 <td><code>PUBLIC_NONSTATIC_FIELDS</code></td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
 </tr>
 <tr>
-<td>12</td>
+<td>13</td>
 <td><code>NONPUBLIC_STATIC_FIELDS</code></td>
 <td>✅</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>13</td>
+<td>14</td>
 <td><code>NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS</code></td>
 <td>✅</td>
 <td>⬜️</td>
 <td>✅</td>
 </tr>
 <tr>
-<td>14</td>
+<td>15</td>
 <td><code>NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS</code></td>
 <td>✅</td>
 <td>⬜️</td>
 <td>✅</td>
 </tr>
 <tr>
-<td>15</td>
+<td>16</td>
 <td><code>TRANSIENT_FIELDS</code></td>
 <td>✅</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>16</td>
+<td>17</td>
 <td><code>STATIC_METHODS</code></td>
 <td>✅</td>
 <td>✅</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>17</td>
+<td>18</td>
 <td><code>VOID_METHODS</code></td>
 <td>✅</td>
 <td>✅</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>18</td>
+<td>19</td>
 <td><code>GETTER_METHODS</code></td>
 <td>✅</td>
 <td>✅</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>19</td>
+<td>20</td>
 <td><code>NONSTATIC_NONVOID_NONGETTER_METHODS</code></td>
 <td>✅</td>
 <td>✅</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>20</td>
+<td>21</td>
 <td><code>NULLABLE_FIELDS_BY_DEFAULT</code></td>
 <td>✅</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>21</td>
+<td>22</td>
 <td><code>NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT</code></td>
 <td>✅</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>22</td>
+<td>23</td>
 <td><code>NULLABLE_ARRAY_ITEMS_ALLOWED</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>23</td>
+<td>24</td>
 <td><code>FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>24</td>
+<td>25</td>
 <td><code>MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>25</td>
+<td>26</td>
 <td><code>ENUM_KEYWORD_FOR_SINGLE_VALUES</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>26</td>
+<td>27</td>
 <td><code>FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>27</td>
+<td>28</td>
 <td><code>DEFINITIONS_FOR_ALL_OBJECTS</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>28</td>
+<td>29</td>
 <td><code>DEFINITION_FOR_MAIN_SCHEMA</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>29</td>
+<td>30</td>
 <td><code>INLINE_ALL_SCHEMAS</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>30</td>
+<td>31</td>
 <td><code>PLAIN_DEFINITION_KEYS</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
-<td>31</td>
+<td>32</td>
 <td><code>ALLOF_CLEANUP_AT_THE_END</code></td>
 <td>✅</td>
 <td>✅</td>
