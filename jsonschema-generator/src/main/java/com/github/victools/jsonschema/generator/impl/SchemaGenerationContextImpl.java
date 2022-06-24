@@ -332,14 +332,10 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             this.generateObjectDefinition(targetType, definition);
             return false;
         }
-        if (subtypes.size() == 1) {
-            // avoid unnecessary "anyOf" by making the definition a direct reference to the subtype's definition
-            this.traverseGenericType(subtypes.get(0), definition, false);
-        } else {
-            ArrayNode anyOfArrayNode = this.generatorConfig.createArrayNode();
-            subtypes.forEach(subtype -> this.traverseGenericType(subtype, anyOfArrayNode.addObject(), false));
-            definition.set(this.getKeyword(SchemaKeyword.TAG_ANYOF), anyOfArrayNode);
-        }
+        // always wrap subtype definitions, in order to avoid pointing at the same definition node as the super type
+        SchemaKeyword arrayNodeName = subtypes.size() == 1 ? SchemaKeyword.TAG_ALLOF : SchemaKeyword.TAG_ANYOF;
+        ArrayNode subtypeDefinitionArrayNode = definition.withArray(this.getKeyword(arrayNodeName));
+        subtypes.forEach(subtype -> this.traverseGenericType(subtype, subtypeDefinitionArrayNode.addObject(), false));
         return true;
     }
 
