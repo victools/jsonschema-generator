@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new `Option.FLATTENED_SUPPLIERS` to unwrap the supplied type; `Supplier<T>` would thus be a type `T`
 
 #### Fixed
+- when resolving subtypes with a single other type, under some circumstances the type definition gets lost
 - set default `ObjectMapper` node factory to `JsonNodeFactory.withExactBigDecimals(true)` to avoid scientific notation for numbers
 
 #### Changed

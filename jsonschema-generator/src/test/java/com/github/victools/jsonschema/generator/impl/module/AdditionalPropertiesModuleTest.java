@@ -16,19 +16,27 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.Module;
+import com.github.victools.jsonschema.generator.Option;
+import com.github.victools.jsonschema.generator.OptionPreset;
+import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.generator.TestUtils;
 import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.TypeScope;
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +45,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for the {@link AdditionalPropertiesModule} class.
@@ -115,7 +125,46 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
         }
     }
 
+    @Test
+    public void testAdditionalPropertyWithSubtype() throws JSONException, IOException {
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON);
+        configBuilder.with(Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES)
+                .without(Option.SCHEMA_VERSION_INDICATOR)
+                .forTypesInGeneral()
+                .withSubtypeResolver((declaredType, context) -> declaredType.getErasedType() == B.class
+                        ? Collections.singletonList(context.getTypeContext().resolve(BImpl.class))
+                        : null);
+        SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
+        JsonNode result = generator.generateSchema(A.class);
+        JSONAssert.assertEquals(TestUtils.loadResource(AdditionalPropertiesModuleTest.class, "additional-property-with-subtype.json"),
+                result.toString(), JSONCompareMode.STRICT);
+    }
+
     private static class TestMapSubType extends HashMap<Object, String> {
         // no further fields
+    }
+
+    private static class A {
+
+        private Map<String, B> map;
+
+        Map<String, B> getMap() {
+            return this.map;
+        }
+    }
+
+    private interface B {
+
+        String getName();
+    }
+
+    private static class BImpl implements B {
+
+        private String name;
+
+        @Override
+        public String getName() {
+            return this.name;
+        }
     }
 }
