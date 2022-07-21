@@ -24,26 +24,28 @@ SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(Sc
 10. From `@Schema(name = …)` on fields/methods, override property names.
 11. From `@Schema(ref = …)` on fields/methods, replace subschema with `"$ref"` to external/separate schema.
 12. From `@Schema(allOf = …)` on fields/methods, include `"allOf"` parts.
-13. From `@Schema(not = …)` on fields/methods, include the indicated `"not"` subschema.
-14. From `@Schema(required = true)` on fields/methods, mark property as `"required"` in the schema containing the property.
-15. From `@Schema(requiredProperties = …)` on fields/methods, derive its `"required"` properties.
-16. From `@Schema(minProperties = …)` on fields/methods, derive its `"minProperties"`.
-17. From `@Schema(maxProperties = …)` on fields/methods, derive its `"maxProperties"`.
-18. From `@Schema(nullable = true)` on fields/methods and potentially array items (if `Option.NULLABLE_ARRAY_ITEMS_ALLOWED` is enabled), include `null` in its `"type"`.
-19. From `@Schema(allowableValues = …)` on fields/methods, derive its `"const"`/`"enum"`.
-20. From `@Schema(defaultValue = …)` on fields/methods, derive its `"default"`.
-21. From `@Schema(accessMode = AccessMode.READ_ONLY)` on fields/methods, to mark them as `"readOnly"`.
-22. From `@Schema(accessMode = AccessMode.WRITE_ONLY)` on fields/methods, to mark them as `"writeOnly"`.
-23. From `@Schema(minLength = …)` on fields/methods, derive its `"minLength"`.
-24. From `@Schema(maxLength = …)` on fields/methods, derive its `"maxLength"`.
-25. From `@Schema(format = …)` on fields/methods, derive its `"format"`.
-26. From `@Schema(pattern = …)` on fields/methods, derive its `"pattern"`.
-27. From `@Schema(multipleOf = …)` on fields/methods, derive its `"multipleOf"`.
-28. From `@Schema(minimum = …, exclusiveMinimum = …)` on fields/methods, derive its `"minimum"`/`"exclusiveMinimum"`.
-29. From `@Schema(maximum = …, exclusiveMaximum = …)` on fields/methods, derive its `"maximum"`/`"exclusiveMaximum"`.
-30. From `@ArraySchema(minItems = …)` on fields/methods, derive its `"minItems"`.
-31. From `@ArraySchema(maxItems = …)` on fields/methods, derive its `"maxItems"`.
-32. From `@ArraySchema(uniqueItems = …)` on fields/methods, derive its `"uniqueItems"`.
+13. From `@Schema(anyOf = …)` on fields/methods, include `"anyOf"` parts.
+14. From `@Schema(oneOf = …)` on fields/methods, include `"oneOf"` parts.
+15. From `@Schema(not = …)` on fields/methods, include the indicated `"not"` subschema.
+16. From `@Schema(required = true)` on fields/methods, mark property as `"required"` in the schema containing the property.
+17. From `@Schema(requiredProperties = …)` on fields/methods, derive its `"required"` properties.
+18. From `@Schema(minProperties = …)` on fields/methods, derive its `"minProperties"`.
+19. From `@Schema(maxProperties = …)` on fields/methods, derive its `"maxProperties"`.
+20. From `@Schema(nullable = true)` on fields/methods, include `null` in its `"type"`.
+21. From `@Schema(allowableValues = …)` on fields/methods, derive its `"const"`/`"enum"`.
+22. From `@Schema(defaultValue = …)` on fields/methods, derive its `"default"`.
+23. From `@Schema(accessMode = AccessMode.READ_ONLY)` on fields/methods, to mark them as `"readOnly"`.
+24. From `@Schema(accessMode = AccessMode.WRITE_ONLY)` on fields/methods, to mark them as `"writeOnly"`.
+25. From `@Schema(minLength = …)` on fields/methods, derive its `"minLength"`.
+26. From `@Schema(maxLength = …)` on fields/methods, derive its `"maxLength"`.
+27. From `@Schema(format = …)` on fields/methods, derive its `"format"`.
+28. From `@Schema(pattern = …)` on fields/methods, derive its `"pattern"`.
+29. From `@Schema(multipleOf = …)` on fields/methods, derive its `"multipleOf"`.
+30. From `@Schema(minimum = …, exclusiveMinimum = …)` on fields/methods, derive its `"minimum"`/`"exclusiveMinimum"`.
+31. From `@Schema(maximum = …, exclusiveMaximum = …)` on fields/methods, derive its `"maximum"`/`"exclusiveMaximum"`.
+32. From `@ArraySchema(minItems = …)` on fields/methods, derive its `"minItems"`.
+33. From `@ArraySchema(maxItems = …)` on fields/methods, derive its `"maxItems"`.
+34. From `@ArraySchema(uniqueItems = …)` on fields/methods, derive its `"uniqueItems"`.
 
 Schema attributes derived from `@Schema`/`@ArraySchema` on fields are also applied to their respective getter methods.
 Schema attributes derived from `@Schema`/`@ArraySchema` on getter methods are also applied to their associated fields.
