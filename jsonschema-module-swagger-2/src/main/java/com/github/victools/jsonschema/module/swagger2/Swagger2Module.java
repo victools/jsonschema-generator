@@ -432,10 +432,29 @@ public class Swagger2Module implements Module {
                     context.createDefinitionReference(context.getTypeContext().resolve(annotation.not())));
         }
         if (annotation.allOf().length > 0) {
+            ArrayNode allOfArray = memberAttributes.withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF));
             Stream.of(annotation.allOf())
-                    .map(rawType -> context.getTypeContext().resolve(rawType))
-                    .map(context::createDefinitionReference).forEach(memberAttributes
-                    .withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))::add);
+                    .map(context.getTypeContext()::resolve)
+                    .map(context::createDefinitionReference)
+                    .forEach(allOfArray::add);
+        }
+        if (annotation.anyOf().length > 0) {
+            // since 4.26.0
+            ArrayNode allOfArray = memberAttributes.withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF));
+            ArrayNode anyOfArray = allOfArray.addObject().withArray(context.getKeyword(SchemaKeyword.TAG_ANYOF));
+            Stream.of(annotation.anyOf())
+                    .map(context.getTypeContext()::resolve)
+                    .map(context::createDefinitionReference)
+                    .forEach(anyOfArray::add);
+        }
+        if (annotation.oneOf().length > 0) {
+            // since 4.26.0
+            ArrayNode allOfArray = memberAttributes.withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF));
+            ArrayNode oneOfArray = allOfArray.addObject().withArray(context.getKeyword(SchemaKeyword.TAG_ONEOF));
+            Stream.of(annotation.oneOf())
+                    .map(context.getTypeContext()::resolve)
+                    .map(context::createDefinitionReference)
+                    .forEach(oneOfArray::add);
         }
         if (annotation.minProperties() > 0) {
             memberAttributes.put(context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MIN), annotation.minProperties());
