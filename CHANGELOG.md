@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-module-swagger-2`
+#### Added
+- support `@Schema.anyOf` and `@Schema.oneOf` on fields/methods
 
 ## [4.25.0] - 2022-06-24
 ### `jsonschema-generator`

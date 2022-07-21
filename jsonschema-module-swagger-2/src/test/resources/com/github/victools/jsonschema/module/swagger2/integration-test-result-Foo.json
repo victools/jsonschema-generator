@@ -15,9 +15,23 @@
     },
     "type": "object",
     "properties": {
+        "anyOfDoubleOrInt": {
+            "anyOf": [{
+                    "type": "number"
+                }, {
+                    "type": "integer"
+                }]
+        },
         "bar": {
             "$ref": "http://example.com/bar",
             "readOnly": true
+        },
+        "oneOfBooleanOrString": {
+            "oneOf": [{
+                    "type": "boolean"
+                }, {
+                    "type": "string"
+                }]
         },
         "person": {
             "$ref": "#/$defs/referenceToPerson",

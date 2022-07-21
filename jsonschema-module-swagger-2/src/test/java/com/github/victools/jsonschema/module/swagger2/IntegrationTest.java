@@ -132,5 +132,11 @@ public class IntegrationTest {
 
         @Schema(ref = "http://example.com/bar", accessMode = Schema.AccessMode.READ_ONLY)
         private Object bar;
+
+        @Schema(anyOf = {Double.class, Integer.class})
+        private Object anyOfDoubleOrInt;
+
+        @Schema(oneOf = {Boolean.class, String.class})
+        private Object oneOfBooleanOrString;
     }
 }
