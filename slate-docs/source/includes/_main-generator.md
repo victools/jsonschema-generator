@@ -1014,8 +1014,8 @@ configBuilder.forTypesInGeneral()
     .withCustomDefinitionProvider((javaType, context) ->
         javaType.isInstanceOf(UUID.class)
             ? new CustomDefinition(context.createDefinition(
-                    context.getTypeContext().resolve(String.class)
-                        .put("format", "uuid")))
+                    context.getTypeContext().resolve(String.class))
+                        .put("format", "uuid"))
             : null);
 ```
 
