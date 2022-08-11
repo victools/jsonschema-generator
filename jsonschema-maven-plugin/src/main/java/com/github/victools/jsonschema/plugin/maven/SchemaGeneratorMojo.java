@@ -203,14 +203,18 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                 potentialTarget.setAlreadyGenerated();
             }
         }
-        if (matchingClasses.isEmpty() && failIfNoClassesMatch) {
+        if (matchingClasses.isEmpty()) {
             StringBuilder message = new StringBuilder("No matching class found for \"")
                     .append(classOrPackageName)
                     .append("\" on classpath");
             if (this.excludeClassNames != null && this.excludeClassNames.length > 0) {
                 message.append(" that wasn't excluded");
             }
-            throw new MojoExecutionException(message.toString());
+            if (failIfNoClassesMatch) {
+                throw new MojoExecutionException(message.toString());
+            } else {
+                getLog().warn(message.toString());
+            }
         }
     }
 
