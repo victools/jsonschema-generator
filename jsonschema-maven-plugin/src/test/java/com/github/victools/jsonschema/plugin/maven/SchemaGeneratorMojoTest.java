@@ -90,6 +90,18 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase{
     }
 
     /**
+     * Unit test that will generate from a maven pom file fragment and expect no exception being thrown although no classes matches pattern.
+     *
+     * @throws Exception In case something goes wrong
+     */
+    @Test
+    public void testDontFailIfNoClassesMatch() throws Exception {
+        File testCaseLocation = new File("src/test/resources/error-test-cases");
+        this.executePom(new File(testCaseLocation, "ClassNotFound-dontFailIfNoClassesMatch-pom.xml"));
+        // no error thrown, i.e., build proceeds even without any schema having been generated
+    }
+
+    /**
      * Unit test that will generate from a maven pom file fragment and expect a ComponentConfigurationException.
      *
      * @param testCaseName Name of the test case and file name prefix of the example {@code pom.xml}
