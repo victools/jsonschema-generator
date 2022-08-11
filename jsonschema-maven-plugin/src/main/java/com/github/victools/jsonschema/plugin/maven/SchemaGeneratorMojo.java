@@ -128,6 +128,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     @Parameter
     private GeneratorModule[] modules;
 
+
+    @Parameter(property = "failIfNoClassesMatch", defaultValue = "true")
+    private boolean failIfNoClassesMatch;
+
     /**
      * The Maven project.
      */
@@ -197,7 +201,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                 potentialTarget.setAlreadyGenerated();
             }
         }
-        if (matchingClasses.isEmpty()) {
+        if (matchingClasses.isEmpty() && failIfNoClassesMatch) {
             StringBuilder message = new StringBuilder("No matching class found for \"")
                     .append(classOrPackageName)
                     .append("\" on classpath");
