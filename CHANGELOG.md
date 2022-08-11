@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - support `@Schema.anyOf` and `@Schema.oneOf` on fields/methods
 
+### `jsonschema-maven-plugin`
+#### Added
+- support `<failIfNoClassesMatch>false</failIfNoClassesMatch>` parameter, in order to continue build even if no class matches the defined pattern(s)
+
 ## [4.25.0] - 2022-06-24
 ### `jsonschema-generator`
 #### Added
