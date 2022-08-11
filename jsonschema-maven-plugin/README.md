@@ -59,6 +59,9 @@ The content of each of these elements can be either:
 </configuration>
 ```
 
+By default, the plugin aborts if the glob pattern does not match any class. If this is not desired,
+the `<failIfNoClassesMatch>` property can be set to `false`.
+
 ### Configuring generated file names and locations
 The location where the files will be generated can be specified with the `<schemaFilePath>` element.
 ```xml

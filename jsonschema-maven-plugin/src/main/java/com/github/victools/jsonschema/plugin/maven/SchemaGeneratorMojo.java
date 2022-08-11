@@ -129,6 +129,12 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private GeneratorModule[] modules;
 
     /**
+     * Variable to control whether the build shall abort if no classes matching the pattern are found.
+     */
+    @Parameter(property = "failIfNoClassesMatch", defaultValue = "true")
+    private boolean failIfNoClassesMatch;
+
+    /**
      * The Maven project.
      */
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
@@ -204,7 +210,11 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             if (this.excludeClassNames != null && this.excludeClassNames.length > 0) {
                 message.append(" that wasn't excluded");
             }
-            throw new MojoExecutionException(message.toString());
+            if (failIfNoClassesMatch) {
+                throw new MojoExecutionException(message.toString());
+            } else {
+                getLog().warn(message.toString());
+            }
         }
     }
 
