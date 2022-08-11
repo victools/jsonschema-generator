@@ -128,7 +128,9 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     @Parameter
     private GeneratorModule[] modules;
 
-
+    /**
+     * Variable to control whether the build shall abort if no classes matching the pattern are found.
+     */
     @Parameter(property = "failIfNoClassesMatch", defaultValue = "true")
     private boolean failIfNoClassesMatch;
 
