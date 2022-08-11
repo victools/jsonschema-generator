@@ -210,11 +210,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             if (this.excludeClassNames != null && this.excludeClassNames.length > 0) {
                 message.append(" that wasn't excluded");
             }
-            if (failIfNoClassesMatch) {
+            if (this.failIfNoClassesMatch) {
                 throw new MojoExecutionException(message.toString());
-            } else {
-                getLog().warn(message.toString());
             }
+            this.getLog().warn(message.toString());
         }
     }
 

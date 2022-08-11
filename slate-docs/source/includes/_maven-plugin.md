@@ -24,6 +24,15 @@ There are a number of basic configuration options as well as the possibility to 
 
 The designated types can be mentioned separately (with dots as package separator) or in the form of glob patterns (with `/` as package separator) in `<classNames>` and/or included as part of their packages through `<packageNames>`. Through `<excludeClassNames>` you can further narrow down the type selection.
 
+```xml
+<configuration>
+    ...
+    <failIfNoClassesMatch>false</failIfNoClassesMatch>
+</configuration>
+```
+
+By default, the plugin aborts if the glob pattern does not match any class. If this is not desired, the `<failIfNoClassesMatch>` property can be set to `false`.
+
 ## Basic Configuration Options
 There are some additional parameters available in the plugin `<configuration>`:
 
