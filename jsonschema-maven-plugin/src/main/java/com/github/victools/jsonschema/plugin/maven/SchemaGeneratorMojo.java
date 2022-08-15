@@ -45,6 +45,8 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -90,6 +92,18 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     @Parameter(property = "excludeClassNames")
     private String[] excludeClassNames;
+
+    /**
+     * Full name of annotations for whose annotated classes the JSON schema will be generated.
+     */
+    @Parameter(property = "annotations")
+    private List<String> annotations = new ArrayList<>();
+
+    /**
+     * The classpath to look for classes to generate schema files.
+     */
+    @Parameter(property = "classpath", defaultValue = "WITH_RUNTIME_DEPENDENCIES")
+    private Classpath classpath;
 
     /**
      * The directory path where the schema files are generated.
@@ -184,7 +198,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Generate the JSON schema for the given className.
      *
      * @param classOrPackageName The name or glob pattern of the class or package
-     * @param targetPackage whether the given name or glob pattern refers to a package
+     * @param targetPackage      whether the given name or glob pattern refers to a package
      * @throws MojoExecutionException In case of problems
      */
     private void generateSchema(String classOrPackageName, boolean targetPackage) throws MojoExecutionException {
@@ -238,15 +252,23 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private List<PotentialSchemaClass> getAllClassNames() {
         if (this.allTypes == null) {
             Scanner subTypeScanner = Scanners.SubTypes.filterResultsBy(c -> true);
-            URLClassLoader urlClassLoader = this.getClassLoader();
             ConfigurationBuilder configBuilder = new ConfigurationBuilder()
-                    .forPackage("", urlClassLoader)
                     .addScanners(subTypeScanner);
-            if (urlClassLoader != null) {
-                configBuilder.addUrls(urlClassLoader.getURLs());
+            if (annotations != null && !annotations.isEmpty()) {
+                configBuilder.addScanners(Scanners.TypesAnnotated);
             }
+
+            configBuilder.addUrls(getUrls(classpath));
+
             Reflections reflections = new Reflections(configBuilder);
-            Stream<PotentialSchemaClass> allTypesStream = reflections.getAll(subTypeScanner)
+            Set<String> allTypesSet;
+            if (annotations != null && !annotations.isEmpty()) {
+                allTypesSet = reflections.get(Scanners.TypesAnnotated.with(annotations));
+            } else {
+                allTypesSet = reflections.getAll(subTypeScanner);
+            }
+
+            Stream<PotentialSchemaClass> allTypesStream = allTypesSet
                     .stream()
                     .map(PotentialSchemaClass::new);
             if (this.excludeClassNames != null && this.excludeClassNames.length > 0) {
@@ -254,7 +276,8 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                         .map(excludeEntry -> GlobHandler.createClassOrPackageNameFilter(excludeEntry, false))
                         .collect(Collectors.toSet());
                 allTypesStream = allTypesStream
-                        .filter(typeEntry -> exclusions.stream().noneMatch(pattern -> pattern.matcher(typeEntry.getAbsolutePathToMatch()).matches()));
+                        .filter(typeEntry -> exclusions.stream()
+                        .noneMatch(pattern -> pattern.matcher(typeEntry.getAbsolutePathToMatch()).matches()));
             }
             this.allTypes = allTypesStream.collect(Collectors.toList());
         }
@@ -434,29 +457,45 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private URLClassLoader getClassLoader() {
         if (this.classLoader == null) {
-            List<String> runtimeClasspathElements = null;
-            try {
-                runtimeClasspathElements = project.getRuntimeClasspathElements();
-            } catch (DependencyResolutionRequiredException e) {
-                this.getLog().error("Failed to resolve runtime classpath elements", e);
-            }
+            List<URL> urls = getUrls(Classpath.WITH_COMPILE_DEPENDENCIES);
+            this.classLoader = new URLClassLoader(urls.toArray(new URL[0]),
+                Thread.currentThread().getContextClassLoader());
+        }
+        return this.classLoader;
+    }
 
-            if (runtimeClasspathElements != null) {
-                URL[] runtimeUrls = new URL[runtimeClasspathElements.size()];
-                for (int i = 0; i < runtimeClasspathElements.size(); i++) {
-                    String element = runtimeClasspathElements.get(i);
-                    try {
-                        runtimeUrls[i] = new File(element).toURI().toURL();
-                    } catch (MalformedURLException e) {
-                        this.getLog().error("Failed to resolve runtime classpath element", e);
-                    }
-                }
-                this.classLoader = new URLClassLoader(runtimeUrls,
-                        Thread.currentThread().getContextClassLoader());
+    private List<URL> getUrls(Classpath classpath) {
+
+        List<String> classPathElements = null;
+        try {
+            switch (classpath) {
+            case WITH_COMPILE_DEPENDENCIES:
+                classPathElements = project.getCompileClasspathElements();
+                break;
+            case WITH_RUNTIME_DEPENDENCIES:
+                classPathElements = project.getRuntimeClasspathElements();
+                break;
+            case PROJECT_ONLY:
+                classPathElements = Collections.singletonList(project.getBuild().getOutputDirectory());
+                break;
+            default:
+                throw new IllegalArgumentException("Classpath " + classpath + " not supported");
             }
+        } catch (DependencyResolutionRequiredException e) {
+            this.getLog().error("Failed to resolve classpath elements", e);
+            return Collections.emptyList();
         }
 
-        return this.classLoader;
+        List<URL> urls = new ArrayList<>(classPathElements.size());
+        for (int i = 0; i < classPathElements.size(); i++) {
+            String element = classPathElements.get(i);
+            try {
+                urls.add(new File(element).toURI().toURL());
+            } catch (MalformedURLException e) {
+                this.getLog().error("Failed to resolve classpath element", e);
+            }
+        }
+        return urls;
     }
 
     /**
