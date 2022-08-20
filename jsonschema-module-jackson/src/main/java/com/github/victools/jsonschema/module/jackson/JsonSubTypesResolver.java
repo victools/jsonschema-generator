@@ -308,8 +308,10 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
                     .with(context.getKeyword(SchemaKeyword.TAG_PROPERTIES))
                     .with(propertyName)
                     .put(context.getKeyword(SchemaKeyword.TAG_CONST), typeIdentifier);
-            additionalPart.withArray(context.getKeyword(SchemaKeyword.TAG_REQUIRED))
-                    .add(propertyName);
+            if (!javaType.getErasedType().equals(typeInfoAnnotation.defaultImpl())) {
+                additionalPart.withArray(context.getKeyword(SchemaKeyword.TAG_REQUIRED))
+                        .add(propertyName);
+            }
             break;
         default:
             return null;

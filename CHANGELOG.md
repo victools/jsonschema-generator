@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-module-jackson`
+#### Changed
+- support `@JsonTypeInfo.defaultImpl` in combination with `As.PROPERTY`, to no longer require the type property for the specified default subtype
+
 ### `jsonschema-module-swagger-2`
 #### Added
 - support `@Schema.anyOf` and `@Schema.oneOf` on fields/methods
