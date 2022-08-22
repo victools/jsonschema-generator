@@ -1596,8 +1596,8 @@ In order to reflect Java&#39;s polymorphism, you can make use of the following c
     <span class="o">.</span><span class="na">withCustomDefinitionProvider</span><span class="o">((</span><span class="n">javaType</span><span class="o">,</span> <span class="n">context</span><span class="o">)</span> <span class="o">-&gt;</span>
         <span class="n">javaType</span><span class="o">.</span><span class="na">isInstanceOf</span><span class="o">(</span><span class="no">UUID</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
             <span class="o">?</span> <span class="k">new</span> <span class="nc">CustomDefinition</span><span class="o">(</span><span class="n">context</span><span class="o">.</span><span class="na">createDefinition</span><span class="o">(</span>
-                    <span class="n">context</span><span class="o">.</span><span class="na">getTypeContext</span><span class="o">().</span><span class="na">resolve</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
-                        <span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"format"</span><span class="o">,</span> <span class="s">"uuid"</span><span class="o">)))</span>
+                    <span class="n">context</span><span class="o">.</span><span class="na">getTypeContext</span><span class="o">().</span><span class="na">resolve</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">class</span><span class="o">))</span>
+                        <span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"format"</span><span class="o">,</span> <span class="s">"uuid"</span><span class="o">))</span>
             <span class="o">:</span> <span class="kc">null</span><span class="o">);</span>
 </code></pre></div>
 <blockquote>
@@ -1830,12 +1830,14 @@ Schema attributes derived from <code>@ApiModelProperty</code> on getter methods 
 <li>From <code>@Schema(name = …)</code> on fields/methods, override property names.</li>
 <li>From <code>@Schema(ref = …)</code> on fields/methods, replace subschema with <code>&quot;$ref&quot;</code> to external/separate schema.</li>
 <li>From <code>@Schema(allOf = …)</code> on fields/methods, include <code>&quot;allOf&quot;</code> parts.</li>
+<li>From <code>@Schema(anyOf = …)</code> on fields/methods, include <code>&quot;anyOf&quot;</code> parts.</li>
+<li>From <code>@Schema(oneOf = …)</code> on fields/methods, include <code>&quot;oneOf&quot;</code> parts.</li>
 <li>From <code>@Schema(not = …)</code> on fields/methods, include the indicated <code>&quot;not&quot;</code> subschema.</li>
 <li>From <code>@Schema(required = true)</code> on fields/methods, mark property as <code>&quot;required&quot;</code> in the schema containing the property.</li>
 <li>From <code>@Schema(requiredProperties = …)</code> on fields/methods, derive its <code>&quot;required&quot;</code> properties.</li>
 <li>From <code>@Schema(minProperties = …)</code> on fields/methods, derive its <code>&quot;minProperties&quot;</code>.</li>
 <li>From <code>@Schema(maxProperties = …)</code> on fields/methods, derive its <code>&quot;maxProperties&quot;</code>.</li>
-<li>From <code>@Schema(nullable = true)</code> on fields/methods and potentially array items (if <code>Option.NULLABLE_ARRAY_ITEMS_ALLOWED</code> is enabled), include <code>null</code> in its <code>&quot;type&quot;</code>.</li>
+<li>From <code>@Schema(nullable = true)</code> on fields/methods, include <code>null</code> in its <code>&quot;type&quot;</code>.</li>
 <li>From <code>@Schema(allowableValues = …)</code> on fields/methods, derive its <code>&quot;const&quot;</code>/<code>&quot;enum&quot;</code>.</li>
 <li>From <code>@Schema(defaultValue = …)</code> on fields/methods, derive its <code>&quot;default&quot;</code>.</li>
 <li>From <code>@Schema(accessMode = AccessMode.READ_ONLY)</code> on fields/methods, to mark them as <code>&quot;readOnly&quot;</code>.</li>
@@ -1877,6 +1879,12 @@ There are a number of basic configuration options as well as the possibility to 
 <span class="nt">&lt;/plugin&gt;</span>
 </code></pre></div>
 <p>The designated types can be mentioned separately (with dots as package separator) or in the form of glob patterns (with <code>/</code> as package separator) in <code>&lt;classNames&gt;</code> and/or included as part of their packages through <code>&lt;packageNames&gt;</code>. Through <code>&lt;excludeClassNames&gt;</code> you can further narrow down the type selection.</p>
+<div class="highlight"><pre class="highlight xml tab-xml"><code><span class="nt">&lt;configuration&gt;</span>
+    ...
+    <span class="nt">&lt;failIfNoClassesMatch&gt;</span>false<span class="nt">&lt;/failIfNoClassesMatch&gt;</span>
+<span class="nt">&lt;/configuration&gt;</span>
+</code></pre></div>
+<p>By default, the plugin aborts if the glob pattern does not match any class. If this is not desired, the <code>&lt;failIfNoClassesMatch&gt;</code> property can be set to <code>false</code>.</p>
 <h2 id='basic-configuration-options'>Basic Configuration Options</h2>
 <p>There are some additional parameters available in the plugin <code>&lt;configuration&gt;</code>:</p>
 
