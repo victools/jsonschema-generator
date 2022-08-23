@@ -485,7 +485,8 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                 classPathElements = project.getRuntimeClasspathElements();
                 break;
             case PROJECT_ONLY:
-                classPathElements = Collections.singletonList(project.getBuild().getOutputDirectory());
+                classPathElements = new ArrayList<>();
+                classPathElements.add(project.getBuild().getOutputDirectory());
                 break;
             default:
                 throw new IllegalArgumentException("Classpath " + classpath + " not supported");
