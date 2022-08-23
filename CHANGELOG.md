@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [4.26.0] - 2022-08-22
+### `jsonschema-module-jackson`
+#### Changed
+- support `@JsonTypeInfo.defaultImpl` in combination with `As.PROPERTY`, to no longer require the type property for the specified default subtype
+
 ### `jsonschema-module-swagger-2`
 #### Added
 - support `@Schema.anyOf` and `@Schema.oneOf` on fields/methods
@@ -611,7 +617,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.25.0...HEAD
+[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.26.0...HEAD
+[4.26.0]: https://github.com/victools/jsonschema-generator/compare/v4.25.0...v4.26.0
 [4.25.0]: https://github.com/victools/jsonschema-generator/compare/v4.24.3...v4.25.0
 [4.24.3]: https://github.com/victools/jsonschema-generator/compare/v4.24.2...v4.24.3
 [4.24.2]: https://github.com/victools/jsonschema-generator/compare/v4.24.1...v4.24.2

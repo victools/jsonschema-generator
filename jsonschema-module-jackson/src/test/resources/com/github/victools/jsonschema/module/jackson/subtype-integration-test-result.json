@@ -23,8 +23,7 @@
                                 "typeString": {
                                     "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionIntegrationTest$TestSubClass3"
                                 }
-                            },
-                            "required": ["typeString"]
+                            }
                         }]
                 }
             }

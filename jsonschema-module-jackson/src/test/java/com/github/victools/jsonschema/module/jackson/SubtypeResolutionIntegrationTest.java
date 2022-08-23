@@ -142,7 +142,7 @@ public class SubtypeResolutionIntegrationTest {
 
     private static class TestSubClass2 extends TestSuperClass {
 
-        @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "typeString")
+        @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "typeString", defaultImpl = TestSubClass3.class)
         @JsonSubTypes({
             @JsonSubTypes.Type(value = TestSubClassWithTypeNameAnnotation.class, name = "Sub1"),
             @JsonSubTypes.Type(value = TestSubClass3.class, name = "Sub3")
