@@ -1,0 +1,17 @@
+<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.github.victools</groupId>
+        <artifactId>jsonschema-maven-plugin</artifactId>
+        <configuration>
+          <annotations>
+            <annotation>com.github.victools.jsonschema.plugin.maven.annotations.TestAnnotation</annotation>
+            <annotation>com.github.victools.jsonschema.plugin.maven.annotations.AnotherTestAnnotation</annotation>
+          </annotations>
+          <schemaFilePath>target/generated-test-sources/AnnotationMulti</schemaFilePath>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

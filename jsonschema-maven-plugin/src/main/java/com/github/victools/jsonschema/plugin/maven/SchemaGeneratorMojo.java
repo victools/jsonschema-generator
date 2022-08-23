@@ -179,10 +179,13 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         // trigger initialization of the generator instance
         this.getGenerator();
 
+        boolean executedGenerator = false;
+
         if (this.classNames != null) {
             for (String className : this.classNames) {
                 this.getLog().info("Generating JSON Schema for <className>" + className + "</className>");
                 generateSchema(className, false);
+                executedGenerator = true;
             }
         }
 
@@ -190,7 +193,13 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             for (String packageName : this.packageNames) {
                 this.getLog().info("Generating JSON Schema for <packageName>" + packageName + "</packageName>");
                 generateSchema(packageName, true);
+                executedGenerator = true;
             }
+        }
+
+        if (!executedGenerator && annotations != null && !annotations.isEmpty()) {
+            this.getLog().info("Generating JSON Schema for all annotated classes");
+            generateSchema("**/*", false);
         }
     }
 
