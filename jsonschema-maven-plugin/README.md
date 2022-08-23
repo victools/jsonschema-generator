@@ -32,6 +32,10 @@ Maven plugin for the [jsonschema-generator](../jsonschema-generator) – Integra
 This will use the default configuration of the generator.
 
 ### Selecting the classes for generation
+
+
+#### Based on name (`<classNames>` and `<packageNames>`)
+
 The classes for which a JSON schema should be generated are configured using the `<classNames>` and/or `<packageNames>` elements.
 Via `<excludeClassNames>` you can filter-out some classes again.
 These can be either a single element, or multiple by using nested elements.
@@ -59,7 +63,35 @@ The content of each of these elements can be either:
 </configuration>
 ```
 
-By default, the plugin aborts if the glob pattern does not match any class. If this is not desired,
+#### Based on Annotations (`<annotations>`)
+
+Alternatively classes can be selected based on annotations using the `<annotations>` element. Then
+all classes annotated with at least one of the specified annotations are considered for schema generation.
+
+```xml
+<configuration>
+    <annotations>
+      <annotation>com.myOrg.myApp.MyAnnotation</annotation>
+      <annotation>com.myOrg.myApp.MyOtherAnnotation</annotation>
+    </annotations>
+</configuration>
+```
+
+If used together with the `<classNames>` and `<packageNames>` elements, both the name and the 
+annotation as to match.
+
+
+#### Restricting the classpath (`<classpath>`)
+
+By default, the plugin considers all classes of the current project and all runtime dependencies of
+the project. This can be changed by setting `<classpath>` to one of
+
++ `PROJECT_ONLY` : only source files of the current project
++ `WITH_RUNTIME_DEPENDENCIES` : `PROJECT_ONLY` and runtime dependencies
++ `WITH_COMPILE_DEPENDENCIES` : `PROJECT_ONLY` and compile dependencies
+
+
+By default, the plugin aborts if no matching classes are found by the rules above. If this is not desired,
 the `<failIfNoClassesMatch>` property can be set to `false`.
 
 ### Configuring generated file names and locations
