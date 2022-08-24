@@ -267,7 +267,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                 configBuilder.addScanners(Scanners.TypesAnnotated);
             }
 
-            configBuilder.addUrls(getUrls(classpath));
+            configBuilder.addUrls(classpath.getUrls(this.project));
 
             Reflections reflections = new Reflections(configBuilder);
             Set<String> allTypesSet;
@@ -468,52 +468,11 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         if (this.classLoader == null) {
             // fix the classpath such that the classloader can get classes from any possible dependency
             // this does not affect filtering, as the reflections library uses its own url list and allows for caching
-            List<URL> urls = getUrls(ClasspathType.WITH_ALL_DEPENDENCIES);
+            List<URL> urls = ClasspathType.WITH_ALL_DEPENDENCIES.getUrls(this.project);
             this.classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]),
                 Thread.currentThread().getContextClassLoader());
         }
         return this.classLoader;
-    }
-
-    private List<URL> getUrls(ClasspathType classpathType) {
-
-        List<String> classPathElements = null;
-        try {
-            switch (classpathType) {
-            case PROJECT_ONLY:
-                classPathElements = new ArrayList<>();
-                classPathElements.add(project.getBuild().getOutputDirectory());
-                break;
-            case WITH_COMPILE_DEPENDENCIES:
-                classPathElements = project.getCompileClasspathElements();
-                break;
-            case WITH_RUNTIME_DEPENDENCIES:
-                classPathElements = project.getRuntimeClasspathElements();
-                break;
-            case WITH_ALL_DEPENDENCIES:
-                // to remove duplicates
-                HashSet<String> set = new HashSet<>();
-                set.addAll(project.getRuntimeClasspathElements());
-                set.addAll(project.getCompileClasspathElements());
-                classPathElements = new ArrayList<>(set);
-                break;
-            default:
-                throw new IllegalArgumentException("ClasspathType " + classpathType + " not supported");
-            }
-        } catch (DependencyResolutionRequiredException e) {
-            this.getLog().error("Failed to resolve classpathType elements", e);
-            return Collections.emptyList();
-        }
-
-        List<URL> urls = new ArrayList<>(classPathElements.size());
-        for (String element : classPathElements) {
-            try {
-                urls.add(new File(element).toURI().toURL());
-            } catch (MalformedURLException e) {
-                this.getLog().error("Failed to resolve classpath element", e);
-            }
-        }
-        return urls;
     }
 
     /**
