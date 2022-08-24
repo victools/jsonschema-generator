@@ -39,21 +39,17 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -98,7 +94,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Full name of annotations for whose annotated classes the JSON schema will be generated.
      */
     @Parameter(property = "annotations")
-    private List<String> annotations = new ArrayList<>();
+    private List<AnnotationParameter> annotations = new ArrayList<>();
 
     /**
      * The classpath to look for classes to generate schema files.
@@ -274,7 +270,9 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             if (annotations == null || annotations.isEmpty()) {
                 allTypesSet = reflections.getAll(subTypeScanner);
             } else {
-                allTypesSet = reflections.get(Scanners.TypesAnnotated.with(annotations));
+                List<String> annotationsNames = annotations.stream().map(l -> l.className).collect(
+                        Collectors.toList());
+                allTypesSet = reflections.get(Scanners.TypesAnnotated.with(annotationsNames));
             }
 
             Stream<PotentialSchemaClass> allTypesStream = allTypesSet

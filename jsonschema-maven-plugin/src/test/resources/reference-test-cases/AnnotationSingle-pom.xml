@@ -6,7 +6,9 @@
         <artifactId>jsonschema-maven-plugin</artifactId>
         <configuration>
           <annotations>
-            <annotation>com.github.victools.jsonschema.plugin.maven.annotations.TestAnnotation</annotation>
+            <annotation>
+              <className>com.github.victools.jsonschema.plugin.maven.annotations.TestAnnotation</className>
+            </annotation>
           </annotations>
           <schemaFilePath>target/generated-test-sources/AnnotationSingle</schemaFilePath>
         </configuration>
