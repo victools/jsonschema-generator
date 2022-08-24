@@ -195,7 +195,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         }
 
         boolean classAndPackageEmpty = (this.classNames == null || this.classNames.length == 0)
-            && (this.packageNames == null || this.packageNames.length == 0);
+                && (this.packageNames == null || this.packageNames.length == 0);
 
         if (classAndPackageEmpty && annotations != null && !annotations.isEmpty()) {
             this.getLog().info("Generating JSON Schema for all annotated classes");

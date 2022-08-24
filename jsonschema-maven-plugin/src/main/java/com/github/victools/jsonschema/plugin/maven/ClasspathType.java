@@ -4,7 +4,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -24,34 +23,33 @@ public enum ClasspathType {
      */
     WITH_COMPILE_DEPENDENCIES,
     /**
-     * Classes from the project, compile time and runtime dependencies
+     * Classes from the project, compile time and runtime dependencies.
      */
     WITH_ALL_DEPENDENCIES;
 
-
-    public List<URL> getUrls(MavenProject project){
+    public List<URL> getUrls(MavenProject project) {
         List<String> classPathElements = null;
         try {
             switch (this) {
-                case PROJECT_ONLY:
-                    classPathElements = new ArrayList<>();
-                    classPathElements.add(project.getBuild().getOutputDirectory());
-                    break;
-                case WITH_COMPILE_DEPENDENCIES:
-                    classPathElements = project.getCompileClasspathElements();
-                    break;
-                case WITH_RUNTIME_DEPENDENCIES:
-                    classPathElements = project.getRuntimeClasspathElements();
-                    break;
-                case WITH_ALL_DEPENDENCIES:
-                    // to remove duplicates
-                    HashSet<String> set = new HashSet<>();
-                    set.addAll(project.getRuntimeClasspathElements());
-                    set.addAll(project.getCompileClasspathElements());
-                    classPathElements = new ArrayList<>(set);
-                    break;
-                default:
-                    throw new IllegalArgumentException("ClasspathType " + this + " not supported");
+            case PROJECT_ONLY:
+                classPathElements = new ArrayList<>();
+                classPathElements.add(project.getBuild().getOutputDirectory());
+                break;
+            case WITH_COMPILE_DEPENDENCIES:
+                classPathElements = project.getCompileClasspathElements();
+                break;
+            case WITH_RUNTIME_DEPENDENCIES:
+                classPathElements = project.getRuntimeClasspathElements();
+                break;
+            case WITH_ALL_DEPENDENCIES:
+                // to remove duplicates
+                HashSet<String> set = new HashSet<>();
+                set.addAll(project.getRuntimeClasspathElements());
+                set.addAll(project.getCompileClasspathElements());
+                classPathElements = new ArrayList<>(set);
+                break;
+            default:
+                throw new IllegalArgumentException("ClasspathType " + this + " not supported");
             }
         } catch (DependencyResolutionRequiredException e) {
             throw new IllegalStateException("Failed to resolve classpathType elements", e);
