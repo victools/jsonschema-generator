@@ -89,6 +89,7 @@ the project. This can be changed by setting `<classpath>` to one of
 + `PROJECT_ONLY` : only source files of the current project
 + `WITH_RUNTIME_DEPENDENCIES` : `PROJECT_ONLY` and runtime dependencies
 + `WITH_COMPILE_DEPENDENCIES` : `PROJECT_ONLY` and compile dependencies
++ `WITH_ALL_DEPENDENCIES` : all of the above
 
 
 By default, the plugin aborts if no matching classes are found by the rules above. If this is not desired,

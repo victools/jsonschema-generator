@@ -47,6 +47,7 @@ import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -103,7 +104,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * The classpath to look for classes to generate schema files.
      */
     @Parameter(property = "classpath", defaultValue = "WITH_RUNTIME_DEPENDENCIES")
-    private Classpath classpath;
+    private ClasspathType classpath;
 
     /**
      * The directory path where the schema files are generated.
@@ -179,13 +180,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         // trigger initialization of the generator instance
         this.getGenerator();
 
-        boolean executedGenerator = false;
-
         if (this.classNames != null) {
             for (String className : this.classNames) {
                 this.getLog().info("Generating JSON Schema for <className>" + className + "</className>");
                 generateSchema(className, false);
-                executedGenerator = true;
             }
         }
 
@@ -193,11 +191,13 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             for (String packageName : this.packageNames) {
                 this.getLog().info("Generating JSON Schema for <packageName>" + packageName + "</packageName>");
                 generateSchema(packageName, true);
-                executedGenerator = true;
             }
         }
 
-        if (!executedGenerator && annotations != null && !annotations.isEmpty()) {
+        boolean classAndPackageEmpty = (this.classNames == null || this.classNames.length == 0)
+            && (this.packageNames == null || this.packageNames.length == 0);
+
+        if (classAndPackageEmpty && annotations != null && !annotations.isEmpty()) {
             this.getLog().info("Generating JSON Schema for all annotated classes");
             generateSchema("**/*", false);
         }
@@ -207,7 +207,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Generate the JSON schema for the given className.
      *
      * @param classOrPackageName The name or glob pattern of the class or package
-     * @param targetPackage      whether the given name or glob pattern refers to a package
+     * @param targetPackage whether the given name or glob pattern refers to a package
      * @throws MojoExecutionException In case of problems
      */
     private void generateSchema(String classOrPackageName, boolean targetPackage) throws MojoExecutionException {
@@ -271,10 +271,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
 
             Reflections reflections = new Reflections(configBuilder);
             Set<String> allTypesSet;
-            if (annotations != null && !annotations.isEmpty()) {
-                allTypesSet = reflections.get(Scanners.TypesAnnotated.with(annotations));
-            } else {
+            if (annotations == null || annotations.isEmpty()) {
                 allTypesSet = reflections.getAll(subTypeScanner);
+            } else {
+                allTypesSet = reflections.get(Scanners.TypesAnnotated.with(annotations));
             }
 
             Stream<PotentialSchemaClass> allTypesStream = allTypesSet
@@ -466,39 +466,47 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private URLClassLoader getClassLoader() {
         if (this.classLoader == null) {
-            List<URL> urls = getUrls(Classpath.WITH_COMPILE_DEPENDENCIES);
-            this.classLoader = new URLClassLoader(urls.toArray(new URL[0]),
+            // fix the classpath such that the classloader can get classes from any possible dependency
+            // this does not affect filtering, as the reflections library uses its own url list and allows for caching
+            List<URL> urls = getUrls(ClasspathType.WITH_ALL_DEPENDENCIES);
+            this.classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]),
                 Thread.currentThread().getContextClassLoader());
         }
         return this.classLoader;
     }
 
-    private List<URL> getUrls(Classpath classpath) {
+    private List<URL> getUrls(ClasspathType classpathType) {
 
         List<String> classPathElements = null;
         try {
-            switch (classpath) {
+            switch (classpathType) {
+            case PROJECT_ONLY:
+                classPathElements = new ArrayList<>();
+                classPathElements.add(project.getBuild().getOutputDirectory());
+                break;
             case WITH_COMPILE_DEPENDENCIES:
                 classPathElements = project.getCompileClasspathElements();
                 break;
             case WITH_RUNTIME_DEPENDENCIES:
                 classPathElements = project.getRuntimeClasspathElements();
                 break;
-            case PROJECT_ONLY:
-                classPathElements = new ArrayList<>();
-                classPathElements.add(project.getBuild().getOutputDirectory());
+            case WITH_ALL_DEPENDENCIES:
+                // to remove duplicates
+                HashSet<String> set = new HashSet<>();
+                set.addAll(project.getRuntimeClasspathElements());
+                set.addAll(project.getCompileClasspathElements());
+                classPathElements = new ArrayList<>(set);
                 break;
             default:
-                throw new IllegalArgumentException("Classpath " + classpath + " not supported");
+                throw new IllegalArgumentException("ClasspathType " + classpathType + " not supported");
             }
         } catch (DependencyResolutionRequiredException e) {
-            this.getLog().error("Failed to resolve classpath elements", e);
+            this.getLog().error("Failed to resolve classpathType elements", e);
             return Collections.emptyList();
         }
 
         List<URL> urls = new ArrayList<>(classPathElements.size());
-        for (int i = 0; i < classPathElements.size(); i++) {
-            String element = classPathElements.get(i);
+        for (String element : classPathElements) {
             try {
                 urls.add(new File(element).toURI().toURL());
             } catch (MalformedURLException e) {

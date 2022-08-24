@@ -75,7 +75,7 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         File referenceFile = new File(testCaseLocation, testCaseName + "-reference.json");
         Assertions.assertTrue(referenceFile.exists());
         Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFile, referenceFile, CHARSET_NAME),
-            "Generated schema for " + testCaseName + " is not equal to the expected reference.");
+                "Generated schema for " + testCaseName + " is not equal to the expected reference.");
     }
 
     /**
@@ -85,11 +85,11 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
      * @throws Exception In case something goes wrong
      */
     @ParameterizedTest
-    @ValueSource(strings = {"ClassNotFound", "UnknownModule"})
+    @ValueSource(strings = { "ClassNotFound", "UnknownModule" })
     public void testPomErrors(String testCaseName) throws Exception {
         File testCaseLocation = new File("src/test/resources/error-test-cases");
         Assertions.assertThrows(MojoExecutionException.class,
-            () -> executePom(new File(testCaseLocation, testCaseName + "-pom.xml")));
+                () -> executePom(new File(testCaseLocation, testCaseName + "-pom.xml")));
     }
 
     /**
@@ -111,11 +111,11 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
      * @throws Exception In case something goes wrong
      */
     @ParameterizedTest
-    @ValueSource(strings = {"UnknownSchemaVersion", "UnknownGeneratorPreset"})
+    @ValueSource(strings = { "UnknownSchemaVersion", "UnknownGeneratorPreset" })
     public void testPomConfigurationErrors(String testCaseName) throws Exception {
         File testCaseLocation = new File("src/test/resources/error-test-cases");
         Assertions.assertThrows(ComponentConfigurationException.class,
-            () -> executePom(new File(testCaseLocation, testCaseName + "-pom.xml")));
+                () -> executePom(new File(testCaseLocation, testCaseName + "-pom.xml")));
     }
 
     /**
@@ -130,11 +130,11 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         executePom(new File("src/test/resources/reference-test-cases/TwoClasses-pom.xml"));
 
         // Validate that the schema files are created.
-        File resultFileA = new File(generationLocation, "TestClassA.schema");
+        File resultFileA = new File(generationLocation,"TestClassA.schema");
         Assertions.assertTrue(resultFileA.exists());
         resultFileA.deleteOnExit();
 
-        File resultFileB = new File(generationLocation, "TestClassB.schema");
+        File resultFileB = new File(generationLocation,"TestClassB.schema");
         Assertions.assertTrue(resultFileB.exists());
         resultFileB.deleteOnExit();
 
@@ -142,12 +142,12 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         File referenceFileA = new File(testCaseLocation, "TestClassA-reference.json");
         Assertions.assertTrue(referenceFileA.exists());
         Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileA, referenceFileA, CHARSET_NAME),
-            "Generated schema for TestClassA is not equal to the expected reference.");
+                "Generated schema for TestClassA is not equal to the expected reference.");
 
         File referenceFileB = new File(testCaseLocation, "TestClassB-reference.json");
         Assertions.assertTrue(referenceFileB.exists());
         Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileB, referenceFileB, CHARSET_NAME),
-            "Generated schema for TestClassB is not equal to the expected reference.");
+                "Generated schema for TestClassB is not equal to the expected reference.");
     }
 
     /**
@@ -162,15 +162,15 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         executePom(new File("src/test/resources/reference-test-cases/PackageName-pom.xml"));
 
         // Validate that the schema files are created.
-        File resultFileA = new File(generationLocation, "TestClassA-schema.json");
+        File resultFileA = new File(generationLocation,"TestClassA-schema.json");
         Assertions.assertTrue(resultFileA.exists());
         resultFileA.deleteOnExit();
 
-        File resultFileB = new File(generationLocation, "TestClassB-schema.json");
+        File resultFileB = new File(generationLocation,"TestClassB-schema.json");
         Assertions.assertTrue(resultFileB.exists());
         resultFileB.deleteOnExit();
 
-        File resultFileC = new File(generationLocation, "TestClassC-schema.json");
+        File resultFileC = new File(generationLocation,"TestClassC-schema.json");
         Assertions.assertTrue(resultFileC.exists());
         resultFileC.deleteOnExit();
 
@@ -178,17 +178,17 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         File referenceFileA = new File(testCaseLocation, "TestClassA-reference.json");
         Assertions.assertTrue(referenceFileA.exists());
         Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileA, referenceFileA, CHARSET_NAME),
-            "Generated schema for TestClassA is not equal to the expected reference.");
+                "Generated schema for TestClassA is not equal to the expected reference.");
 
         File referenceFileB = new File(testCaseLocation, "TestClassB-reference.json");
         Assertions.assertTrue(referenceFileB.exists());
         Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileB, referenceFileB, CHARSET_NAME),
-            "Generated schema for TestClassB is not equal to the expected reference.");
+                "Generated schema for TestClassB is not equal to the expected reference.");
 
         File referenceFileC = new File(testCaseLocation, "TestClassC-reference.json");
         Assertions.assertTrue(referenceFileC.exists());
         Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileC, referenceFileC, CHARSET_NAME),
-            "Generated schema for TestClassC is not equal to the expected reference.");
+                "Generated schema for TestClassC is not equal to the expected reference.");
     }
 
     /**
@@ -197,18 +197,18 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
     @Test
     public void testFileNamePattern() throws Exception {
         File testCaseLocation = new File("src/test/resources/reference-test-cases");
-        File generationLocation = new File("target/generated-test-sources/SchemaFileName/schemas/" +
-            "com/github/victools/jsonschema/plugin/maven/testpackage");
+        File generationLocation = new File("target/generated-test-sources/SchemaFileName/schemas/"+
+                "com/github/victools/jsonschema/plugin/maven/testpackage");
 
         // Execute the pom
         executePom(new File("src/test/resources/reference-test-cases/SchemaFileName-pom.xml"));
 
         // Validate that the schema files are created.
-        File resultFileA = new File(generationLocation, "TestClassA.schema");
+        File resultFileA = new File(generationLocation,"TestClassA.schema");
         Assertions.assertTrue(resultFileA.exists());
         resultFileA.deleteOnExit();
 
-        File resultFileB = new File(generationLocation, "TestClassB.schema");
+        File resultFileB = new File(generationLocation,"TestClassB.schema");
         Assertions.assertTrue(resultFileB.exists());
         resultFileB.deleteOnExit();
 
@@ -216,14 +216,13 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         File referenceFileA = new File(testCaseLocation, "TestClassA-reference.json");
         Assertions.assertTrue(referenceFileA.exists());
         Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileA, referenceFileA, CHARSET_NAME),
-            "Generated schema for TestClassA is not equal to the expected reference.");
+                "Generated schema for TestClassA is not equal to the expected reference.");
 
         File referenceFileB = new File(testCaseLocation, "TestClassB-reference.json");
         Assertions.assertTrue(referenceFileB.exists());
         Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileB, referenceFileB, CHARSET_NAME),
-            "Generated schema for TestClassB is not equal to the expected reference.");
+                "Generated schema for TestClassB is not equal to the expected reference.");
     }
-
 
     /**
      * Unit test to test the generation of schemas for multiple classes bases on annotations
@@ -247,7 +246,6 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         File resultFileB = new File(generationLocation, "TestClassB-schema.json");
         Assertions.assertTrue(resultFileB.exists());
         resultFileB.deleteOnExit();
-
 
         // Validate that they are the same as the reference
         File referenceFileB = new File(testCaseLocation, "TestClassB-reference.json");
@@ -284,14 +282,13 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         File referenceFileA = new File(testCaseLocation, "TestClassA-reference.json");
         Assertions.assertTrue(referenceFileA.exists());
         Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileA, referenceFileA, CHARSET_NAME),
-            "Generated schema for TestClassA is not equal to the expected reference.");
+                "Generated schema for TestClassA is not equal to the expected reference.");
 
         File referenceFileB = new File(testCaseLocation, "TestClassB-reference.json");
         Assertions.assertTrue(referenceFileB.exists());
         Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileB, referenceFileB, CHARSET_NAME),
-            "Generated schema for TestClassB is not equal to the expected reference.");
+                "Generated schema for TestClassB is not equal to the expected reference.");
     }
-
 
     /**
      * Unit test to test the generation of schemas for multiple classes bases on multiple annotations

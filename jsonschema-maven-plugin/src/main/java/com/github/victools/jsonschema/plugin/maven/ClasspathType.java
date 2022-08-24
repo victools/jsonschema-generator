@@ -1,6 +1,6 @@
 package com.github.victools.jsonschema.plugin.maven;
 
-public enum Classpath {
+public enum ClasspathType {
     /**
      * Only classes in the project.
      */
@@ -12,5 +12,9 @@ public enum Classpath {
     /**
      * Classes from the project and any compile time dependencies.
      */
-    WITH_COMPILE_DEPENDENCIES
+    WITH_COMPILE_DEPENDENCIES,
+    /**
+     * Classes from the project, compile time and runtime dependencies
+     */
+    WITH_ALL_DEPENDENCIES
 }
