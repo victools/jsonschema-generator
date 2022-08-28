@@ -17,7 +17,9 @@
 package com.github.victools.jsonschema.plugin.maven.testpackage;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
+import com.github.victools.jsonschema.plugin.maven.annotations.AnotherTestAnnotation;
 
+@AnotherTestAnnotation
 @JsonClassDescription("Jackson annotation class for Test Class A")
 public class TestClassA {
 
