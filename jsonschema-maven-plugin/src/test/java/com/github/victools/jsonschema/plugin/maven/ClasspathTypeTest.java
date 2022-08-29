@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.plugin.maven;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.maven.model.Build;
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
@@ -37,8 +38,8 @@ public class ClasspathTypeTest {
     @BeforeEach
     public void setUp() {
         this.project = new MavenProjectStub();
-        this.project.setRuntimeClasspathElements(List.of(RUNTIME_PATH, RUN_AND_COMPILE_PATH));
-        this.project.setCompileSourceRoots(List.of(COMPILE_PATH, RUN_AND_COMPILE_PATH));
+        this.project.setRuntimeClasspathElements(Arrays.asList(RUNTIME_PATH, RUN_AND_COMPILE_PATH));
+        this.project.setCompileSourceRoots(Arrays.asList(COMPILE_PATH, RUN_AND_COMPILE_PATH));
 
         Build build = new Build();
         build.setOutputDirectory(PROJECT_PATH);

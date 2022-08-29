@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -49,7 +50,7 @@ public enum ClasspathType {
         try {
             switch (this) {
             case PROJECT_ONLY:
-                classPathElements = List.of(project.getBuild().getOutputDirectory());
+                classPathElements = Collections.singleton(project.getBuild().getOutputDirectory());
                 break;
             case WITH_COMPILE_DEPENDENCIES:
                 classPathElements = project.getCompileClasspathElements();
