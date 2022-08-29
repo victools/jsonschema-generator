@@ -95,6 +95,7 @@
             <url>https://github.com/Emmeral</url>
             <roles>
                 <role>Provided PR #273 (introducing failIfNoClassesMatch parameter on maven plugin)</role>
+                <role>Provided PR #276 (introducing annotations and classpath parameters on maven plugin)</role>
             </roles>
         </contributor>
     </contributors>

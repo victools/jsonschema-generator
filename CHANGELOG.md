@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-maven-plugin`
+#### Added
+- support `<classpath>` parameter in order to also consider compile dependencies for the schema generation (and/or ignoring runtime dependencies)
+- support `<annotations>` parameter in order to allow selecting classes to generate a schema for by the presence of certain type annotations
 
 ## [4.26.0] - 2022-08-22
 ### `jsonschema-module-jackson`
