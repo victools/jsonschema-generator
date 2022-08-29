@@ -179,23 +179,23 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         if (this.classNames != null) {
             for (String className : this.classNames) {
                 this.getLog().info("Generating JSON Schema for <className>" + className + "</className>");
-                generateSchema(className, false);
+                this.generateSchema(className, false);
             }
         }
 
         if (this.packageNames != null) {
             for (String packageName : this.packageNames) {
                 this.getLog().info("Generating JSON Schema for <packageName>" + packageName + "</packageName>");
-                generateSchema(packageName, true);
+                this.generateSchema(packageName, true);
             }
         }
 
         boolean classAndPackageEmpty = (this.classNames == null || this.classNames.length == 0)
                 && (this.packageNames == null || this.packageNames.length == 0);
 
-        if (classAndPackageEmpty && annotations != null && !annotations.isEmpty()) {
+        if (classAndPackageEmpty && this.annotations != null && !this.annotations.isEmpty()) {
             this.getLog().info("Generating JSON Schema for all annotated classes");
-            generateSchema("**/*", false);
+            this.generateSchema("**/*", false);
         }
     }
 
@@ -259,7 +259,8 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             Scanner subTypeScanner = Scanners.SubTypes.filterResultsBy(c -> true);
             ConfigurationBuilder configBuilder = new ConfigurationBuilder()
                     .addScanners(subTypeScanner);
-            if (annotations != null && !annotations.isEmpty()) {
+            boolean considerAnnotations = this.annotations != null && !this.annotations.isEmpty();
+            if (considerAnnotations) {
                 configBuilder.addScanners(Scanners.TypesAnnotated);
             }
 
@@ -267,12 +268,13 @@ public class SchemaGeneratorMojo extends AbstractMojo {
 
             Reflections reflections = new Reflections(configBuilder);
             Set<String> allTypesSet;
-            if (annotations == null || annotations.isEmpty()) {
-                allTypesSet = reflections.getAll(subTypeScanner);
+            if (considerAnnotations) {
+                List<String> annotationNames = this.annotations.stream()
+                        .map(l -> l.className)
+                        .collect(Collectors.toList());
+                allTypesSet = reflections.get(Scanners.TypesAnnotated.with(annotationNames));
             } else {
-                List<String> annotationsNames = annotations.stream().map(l -> l.className).collect(
-                        Collectors.toList());
-                allTypesSet = reflections.get(Scanners.TypesAnnotated.with(annotationsNames));
+                allTypesSet = reflections.getAll(subTypeScanner);
             }
 
             Stream<PotentialSchemaClass> allTypesStream = allTypesSet

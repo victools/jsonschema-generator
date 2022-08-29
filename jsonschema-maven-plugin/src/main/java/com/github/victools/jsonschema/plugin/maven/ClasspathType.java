@@ -1,9 +1,26 @@
+/*
+ * Copyright 2022 VicTools.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.github.victools.jsonschema.plugin.maven;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -28,12 +45,11 @@ public enum ClasspathType {
     WITH_ALL_DEPENDENCIES;
 
     public List<URL> getUrls(MavenProject project) {
-        List<String> classPathElements = null;
+        Collection<String> classPathElements;
         try {
             switch (this) {
             case PROJECT_ONLY:
-                classPathElements = new ArrayList<>();
-                classPathElements.add(project.getBuild().getOutputDirectory());
+                classPathElements = List.of(project.getBuild().getOutputDirectory());
                 break;
             case WITH_COMPILE_DEPENDENCIES:
                 classPathElements = project.getCompileClasspathElements();
@@ -43,10 +59,9 @@ public enum ClasspathType {
                 break;
             case WITH_ALL_DEPENDENCIES:
                 // to remove duplicates
-                HashSet<String> set = new HashSet<>();
-                set.addAll(project.getRuntimeClasspathElements());
-                set.addAll(project.getCompileClasspathElements());
-                classPathElements = new ArrayList<>(set);
+                classPathElements = new HashSet<>();
+                classPathElements.addAll(project.getRuntimeClasspathElements());
+                classPathElements.addAll(project.getCompileClasspathElements());
                 break;
             default:
                 throw new IllegalArgumentException("ClasspathType " + this + " not supported");

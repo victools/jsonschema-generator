@@ -277,7 +277,6 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         Assertions.assertTrue(resultFileB.exists());
         resultFileB.deleteOnExit();
 
-
         // Validate that they are the same as the reference
         File referenceFileA = new File(testCaseLocation, "TestClassA-reference.json");
         Assertions.assertTrue(referenceFileA.exists());
@@ -312,7 +311,6 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         File resultFileB = new File(generationLocation, "TestClassB-schema.json");
         Assertions.assertFalse(resultFileB.exists());
         resultFileB.deleteOnExit();
-
 
         // Validate that they are the same as the reference
         File referenceFileA = new File(testCaseLocation, "TestClassA-reference.json");

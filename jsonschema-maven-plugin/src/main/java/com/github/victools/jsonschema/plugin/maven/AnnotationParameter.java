@@ -1,30 +1,33 @@
-package com.github.victools.jsonschema.plugin.maven;
+/*
+ * Copyright 2022 VicTools.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import java.util.HashMap;
-import java.util.Map;
+package com.github.victools.jsonschema.plugin.maven;
 
 public class AnnotationParameter {
 
     /**
-     * The className of the annotation to filter by.
+     * The class name of the annotation to filter by.
      */
     public String className;
-    /**
-     * Properties of the annotation to filter.
-     * This parameter has no effect currently but might be used in future versions.
-     */
-    public Map<String, Object> properties;
-
-    public Object getProperty(String name) {
-        return properties.get(name);
-    }
 
     /**
      * This is the default setter for maven parameter injection.
-     * @param className the classname of the annotation
+     * @param className the class name of the annotation
      */
     public void set(String className) {
         this.className = className;
-        this.properties = new HashMap<>();
     }
 }
