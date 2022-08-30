@@ -225,6 +225,101 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
     }
 
     /**
+     * Unit test to test the generation of schemas for multiple classes bases on annotations
+     */
+    @Test
+    public void testFileSingleAnnotation() throws Exception {
+        File testCaseLocation = new File("src/test/resources/reference-test-cases");
+        File generationLocation = new File("target/generated-test-sources/AnnotationSingle");
+
+        // Execute the pom
+        executePom(new File("src/test/resources/reference-test-cases/AnnotationSingle-pom.xml"));
+
+        // Validate that the correct schema files are created.
+
+        // TestClassA is annotated with the wrong annotation
+        File resultFileA = new File(generationLocation, "TestClassA-schema.json");
+        Assertions.assertFalse(resultFileA.exists());
+        resultFileA.deleteOnExit();
+
+        // TestClassB has the correct annotation
+        File resultFileB = new File(generationLocation, "TestClassB-schema.json");
+        Assertions.assertTrue(resultFileB.exists());
+        resultFileB.deleteOnExit();
+
+        // Validate that they are the same as the reference
+        File referenceFileB = new File(testCaseLocation, "TestClassB-reference.json");
+        Assertions.assertTrue(referenceFileB.exists());
+        Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileB, referenceFileB, CHARSET_NAME),
+            "Generated schema for TestClassB is not equal to the expected reference.");
+    }
+
+    /**
+     * Unit test to test the generation of schemas for multiple classes bases on multiple annotations
+     */
+    @Test
+    public void testFileMultipleAnnotations() throws Exception {
+        File testCaseLocation = new File("src/test/resources/reference-test-cases");
+        File generationLocation = new File("target/generated-test-sources/AnnotationMulti");
+
+        // Execute the pom
+        executePom(new File("src/test/resources/reference-test-cases/AnnotationMulti-pom.xml"));
+
+        // Validate that the correct schema files are created.
+
+        // TestClassA is annotated with one annotation
+        File resultFileA = new File(generationLocation, "TestClassA-schema.json");
+        Assertions.assertTrue(resultFileA.exists());
+        resultFileA.deleteOnExit();
+
+        // TestClassB has the correct annotation
+        File resultFileB = new File(generationLocation, "TestClassB-schema.json");
+        Assertions.assertTrue(resultFileB.exists());
+        resultFileB.deleteOnExit();
+
+        // Validate that they are the same as the reference
+        File referenceFileA = new File(testCaseLocation, "TestClassA-reference.json");
+        Assertions.assertTrue(referenceFileA.exists());
+        Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileA, referenceFileA, CHARSET_NAME),
+                "Generated schema for TestClassA is not equal to the expected reference.");
+
+        File referenceFileB = new File(testCaseLocation, "TestClassB-reference.json");
+        Assertions.assertTrue(referenceFileB.exists());
+        Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileB, referenceFileB, CHARSET_NAME),
+                "Generated schema for TestClassB is not equal to the expected reference.");
+    }
+
+    /**
+     * Unit test to test the generation of schemas for multiple classes bases on multiple annotations
+     */
+    @Test
+    public void testFileAnnotationClassnameMixed() throws Exception {
+        File testCaseLocation = new File("src/test/resources/reference-test-cases");
+        File generationLocation = new File("target/generated-test-sources/AnnotationMixed");
+
+        // Execute the pom
+        executePom(new File("src/test/resources/reference-test-cases/AnnotationMixed-pom.xml"));
+
+        // Validate that the correct schema files are created.
+
+        // TestClassA is annotated with one annotation and mentioned by classname
+        File resultFileA = new File(generationLocation, "TestClassA-schema.json");
+        Assertions.assertTrue(resultFileA.exists());
+        resultFileA.deleteOnExit();
+
+        // TestClassB has the correct annotation but is not mentioned by classname
+        File resultFileB = new File(generationLocation, "TestClassB-schema.json");
+        Assertions.assertFalse(resultFileB.exists());
+        resultFileB.deleteOnExit();
+
+        // Validate that they are the same as the reference
+        File referenceFileA = new File(testCaseLocation, "TestClassA-reference.json");
+        Assertions.assertTrue(referenceFileA.exists());
+        Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileA, referenceFileA, CHARSET_NAME),
+            "Generated schema for TestClassA is not equal to the expected reference.");
+    }
+
+    /**
      * Execute the schema-generator plugin as define the the given pom file
      *
      * @param pomFile The pom file
@@ -238,9 +333,11 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
             pomDom = Xpp3DomBuilder.build(pomReader);
             configuration = this.extractPluginConfiguration("jsonschema-maven-plugin", pomDom);
         }
-
+        MavenProject project = new MavenProject();
+        // hack to get the plugin think that the classes in the testpackage are part of the project and get scanned
+        project.getBuild().setOutputDirectory("target/test-classes");
         // Configure the Mojo
-        SchemaGeneratorMojo myMojo = (SchemaGeneratorMojo) this.lookupConfiguredMojo(new MavenProject(), "generate");
+        SchemaGeneratorMojo myMojo = (SchemaGeneratorMojo) this.lookupConfiguredMojo(project, "generate");
         myMojo = (SchemaGeneratorMojo) this.configureMojo(myMojo, configuration);
 
         // And execute

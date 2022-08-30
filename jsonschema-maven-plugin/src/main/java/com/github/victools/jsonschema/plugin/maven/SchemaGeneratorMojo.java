@@ -39,18 +39,17 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -90,6 +89,18 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     @Parameter(property = "excludeClassNames")
     private String[] excludeClassNames;
+
+    /**
+     * Full name of annotations for whose annotated classes the JSON schema will be generated.
+     */
+    @Parameter(property = "annotations")
+    private List<AnnotationParameter> annotations = new ArrayList<>();
+
+    /**
+     * The classpath to look for classes to generate schema files.
+     */
+    @Parameter(property = "classpath", defaultValue = "WITH_RUNTIME_DEPENDENCIES")
+    private ClasspathType classpath;
 
     /**
      * The directory path where the schema files are generated.
@@ -168,15 +179,23 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         if (this.classNames != null) {
             for (String className : this.classNames) {
                 this.getLog().info("Generating JSON Schema for <className>" + className + "</className>");
-                generateSchema(className, false);
+                this.generateSchema(className, false);
             }
         }
 
         if (this.packageNames != null) {
             for (String packageName : this.packageNames) {
                 this.getLog().info("Generating JSON Schema for <packageName>" + packageName + "</packageName>");
-                generateSchema(packageName, true);
+                this.generateSchema(packageName, true);
             }
+        }
+
+        boolean classAndPackageEmpty = (this.classNames == null || this.classNames.length == 0)
+                && (this.packageNames == null || this.packageNames.length == 0);
+
+        if (classAndPackageEmpty && this.annotations != null && !this.annotations.isEmpty()) {
+            this.getLog().info("Generating JSON Schema for all annotated classes");
+            this.generateSchema("**/*", false);
         }
     }
 
@@ -238,15 +257,27 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private List<PotentialSchemaClass> getAllClassNames() {
         if (this.allTypes == null) {
             Scanner subTypeScanner = Scanners.SubTypes.filterResultsBy(c -> true);
-            URLClassLoader urlClassLoader = this.getClassLoader();
             ConfigurationBuilder configBuilder = new ConfigurationBuilder()
-                    .forPackage("", urlClassLoader)
                     .addScanners(subTypeScanner);
-            if (urlClassLoader != null) {
-                configBuilder.addUrls(urlClassLoader.getURLs());
+            boolean considerAnnotations = this.annotations != null && !this.annotations.isEmpty();
+            if (considerAnnotations) {
+                configBuilder.addScanners(Scanners.TypesAnnotated);
             }
+
+            configBuilder.addUrls(classpath.getUrls(this.project));
+
             Reflections reflections = new Reflections(configBuilder);
-            Stream<PotentialSchemaClass> allTypesStream = reflections.getAll(subTypeScanner)
+            Set<String> allTypesSet;
+            if (considerAnnotations) {
+                List<String> annotationNames = this.annotations.stream()
+                        .map(l -> l.className)
+                        .collect(Collectors.toList());
+                allTypesSet = reflections.get(Scanners.TypesAnnotated.with(annotationNames));
+            } else {
+                allTypesSet = reflections.getAll(subTypeScanner);
+            }
+
+            Stream<PotentialSchemaClass> allTypesStream = allTypesSet
                     .stream()
                     .map(PotentialSchemaClass::new);
             if (this.excludeClassNames != null && this.excludeClassNames.length > 0) {
@@ -254,7 +285,8 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                         .map(excludeEntry -> GlobHandler.createClassOrPackageNameFilter(excludeEntry, false))
                         .collect(Collectors.toSet());
                 allTypesStream = allTypesStream
-                        .filter(typeEntry -> exclusions.stream().noneMatch(pattern -> pattern.matcher(typeEntry.getAbsolutePathToMatch()).matches()));
+                        .filter(typeEntry -> exclusions.stream()
+                        .noneMatch(pattern -> pattern.matcher(typeEntry.getAbsolutePathToMatch()).matches()));
             }
             this.allTypes = allTypesStream.collect(Collectors.toList());
         }
@@ -434,28 +466,12 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private URLClassLoader getClassLoader() {
         if (this.classLoader == null) {
-            List<String> runtimeClasspathElements = null;
-            try {
-                runtimeClasspathElements = project.getRuntimeClasspathElements();
-            } catch (DependencyResolutionRequiredException e) {
-                this.getLog().error("Failed to resolve runtime classpath elements", e);
-            }
-
-            if (runtimeClasspathElements != null) {
-                URL[] runtimeUrls = new URL[runtimeClasspathElements.size()];
-                for (int i = 0; i < runtimeClasspathElements.size(); i++) {
-                    String element = runtimeClasspathElements.get(i);
-                    try {
-                        runtimeUrls[i] = new File(element).toURI().toURL();
-                    } catch (MalformedURLException e) {
-                        this.getLog().error("Failed to resolve runtime classpath element", e);
-                    }
-                }
-                this.classLoader = new URLClassLoader(runtimeUrls,
-                        Thread.currentThread().getContextClassLoader());
-            }
+            // fix the classpath such that the classloader can get classes from any possible dependency
+            // this does not affect filtering, as the reflections library uses its own url list and allows for caching
+            List<URL> urls = ClasspathType.WITH_ALL_DEPENDENCIES.getUrls(this.project);
+            this.classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]),
+                Thread.currentThread().getContextClassLoader());
         }
-
         return this.classLoader;
     }
 

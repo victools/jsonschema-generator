@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 VicTools.
+ * Copyright 2022 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.plugin.maven.testpackage;
+package com.github.victools.jsonschema.plugin.maven.annotations;
 
-import com.fasterxml.jackson.annotation.JsonClassDescription;
-import com.github.victools.jsonschema.plugin.maven.annotations.AnotherTestAnnotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@AnotherTestAnnotation
-@JsonClassDescription("Jackson annotation class for Test Class A")
-public class TestClassA {
-
-    private String aString;
-
-    public TestClassA(String aString) {
-        this.aString = aString;
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface TestAnnotation {
 }

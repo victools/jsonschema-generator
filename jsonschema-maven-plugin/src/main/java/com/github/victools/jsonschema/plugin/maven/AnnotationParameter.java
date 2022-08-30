@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 VicTools.
+ * Copyright 2022 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.plugin.maven.testpackage;
+package com.github.victools.jsonschema.plugin.maven;
 
-import com.fasterxml.jackson.annotation.JsonClassDescription;
-import com.github.victools.jsonschema.plugin.maven.annotations.AnotherTestAnnotation;
+public class AnnotationParameter {
 
-@AnotherTestAnnotation
-@JsonClassDescription("Jackson annotation class for Test Class A")
-public class TestClassA {
+    /**
+     * The class name of the annotation to filter by.
+     */
+    public String className;
 
-    private String aString;
-
-    public TestClassA(String aString) {
-        this.aString = aString;
+    /**
+     * This is the default setter for maven parameter injection.
+     * @param className the class name of the annotation
+     */
+    public void set(String className) {
+        this.className = className;
     }
 }
