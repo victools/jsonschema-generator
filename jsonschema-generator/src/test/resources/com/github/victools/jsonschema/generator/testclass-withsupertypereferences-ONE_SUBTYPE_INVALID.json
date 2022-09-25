@@ -30,9 +30,7 @@
             "anyOf": [{
                     "type": "null"
                 }, {
-                    "allOf": [{
-                            "$ref": "#/definitions/TestSubClass3"
-                        }]
+                    "$ref": "#/definitions/TestSubClass3"
                 }]
         }
     },

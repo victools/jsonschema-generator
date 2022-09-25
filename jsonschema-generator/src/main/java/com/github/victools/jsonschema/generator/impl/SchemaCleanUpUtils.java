@@ -182,25 +182,25 @@ public class SchemaCleanUpUtils {
                 .filter(part -> part instanceof ObjectNode)
                 .map(part -> (ObjectNode) part)
                 .collect(Collectors.toList());
-
         // collect all defined attributes from the separate parts and check whether there are incompatible differences
         Map<String, List<JsonNode>> fieldsFromAllParts = Stream.concat(Stream.of(schemaNode), parts.stream())
                 .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) () -> part.fields()).spliterator(), false))
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
         if ((this.config.getSchemaVersion() == SchemaVersion.DRAFT_6 || this.config.getSchemaVersion() == SchemaVersion.DRAFT_7)
-                && fieldsFromAllParts.containsKey(this.config.getKeyword(SchemaKeyword.TAG_REF))) {
+                && fieldsFromAllParts.containsKey(this.config.getKeyword(SchemaKeyword.TAG_REF))
+                && (schemaNode.size() > 1 || parts.size() > 1)) {
             // in Draft 7, any other attributes besides the $ref keyword were ignored
             return;
         }
         String ifTagName = this.config.getKeyword(SchemaKeyword.TAG_IF);
         for (Map.Entry<String, List<JsonNode>> fieldEntries : fieldsFromAllParts.entrySet()) {
-            if (fieldEntries.getValue().size() == 1) {
-                // no conflicts, no further checks
-                continue;
-            }
             if (ifTagName.equals(fieldEntries.getKey())) {
                 // "if"/"then"/"else" tags should remain isolated in their sub-schemas
                 return;
+            }
+            if (fieldEntries.getValue().size() == 1) {
+                // no conflicts, no further checks
+                continue;
             }
             int offset;
             if (!allOfTagName.equals(fieldEntries.getKey())) {

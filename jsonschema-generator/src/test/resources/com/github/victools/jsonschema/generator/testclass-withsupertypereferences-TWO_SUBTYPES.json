@@ -47,9 +47,7 @@
             "anyOf": [{
                     "type": "null"
                 }, {
-                    "allOf": [{
-                            "$ref": "#/definitions/TestSubClass2(Boolean)"
-                        }]
+                    "$ref": "#/definitions/TestSubClass2(Boolean)"
                 }]
         },
         "TestSuperClass(String)-nullable": {
