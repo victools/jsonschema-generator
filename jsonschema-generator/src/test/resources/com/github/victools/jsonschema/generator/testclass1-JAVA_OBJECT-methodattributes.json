@@ -12,18 +12,14 @@
             }
         },
         "genericValue": {
-            "anyOf": [{
-                    "type": "null"
-                }, {
-                    "type": "string",
-                    "title": "String",
-                    "description": "looked-up from method: String",
-                    "const": "constant string value",
-                    "minLength": 1,
-                    "maxLength": 256,
-                    "format": "date",
-                    "pattern": "^.{1,256}$"
-                }]
+            "type": ["string", "null"],
+            "title": "String",
+            "description": "looked-up from method: String",
+            "const": "constant string value",
+            "minLength": 1,
+            "maxLength": 256,
+            "format": "date",
+            "pattern": "^.{1,256}$"
         },
         "primitiveValue": {
             "type": ["integer", "null"],

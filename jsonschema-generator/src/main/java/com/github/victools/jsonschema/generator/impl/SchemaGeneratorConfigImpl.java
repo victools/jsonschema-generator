@@ -191,9 +191,9 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <M extends MemberScope<?, ?>> CustomDefinition getCustomDefinition(M scope, SchemaGenerationContext context,
+    public <M extends MemberScope<?, ?>> CustomPropertyDefinition getCustomDefinition(M scope, SchemaGenerationContext context,
             CustomPropertyDefinitionProvider<M> ignoredDefinitionProvider) {
-        CustomDefinition result;
+        CustomPropertyDefinition result;
         if (scope instanceof FieldScope) {
             result = this.getCustomDefinition(this.fieldConfigPart, (FieldScope) scope, context,
                     (CustomPropertyDefinitionProvider<FieldScope>) ignoredDefinitionProvider);
@@ -202,9 +202,6 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
                     (CustomPropertyDefinitionProvider<MethodScope>) ignoredDefinitionProvider);
         } else {
             throw new IllegalArgumentException("Unexpected member scope: " + (scope == null ? null : scope.getClass().getName()));
-        }
-        if (result == null) {
-            result = this.getCustomDefinition(scope.getType(), context, null);
         }
         return result;
     }
@@ -225,9 +222,9 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
         final List<CustomPropertyDefinitionProvider<M>> providers = configPart.getCustomDefinitionProviders();
         CustomPropertyDefinition result;
         if (ignoredDefinitionProvider == null || providers.contains(ignoredDefinitionProvider)) {
-            int firstRelevantProviderIndex = 1 + providers.indexOf(ignoredDefinitionProvider);
-            result = providers.subList(firstRelevantProviderIndex, providers.size())
-                    .stream()
+            int providerCountToIgnore = 1 + providers.indexOf(ignoredDefinitionProvider);
+            result = providers.stream()
+                    .skip(providerCountToIgnore)
                     .map(provider -> provider.provideCustomSchemaDefinition(scope, context))
                     .filter(Objects::nonNull)
                     .findFirst()
@@ -242,9 +239,9 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     public CustomDefinition getCustomDefinition(ResolvedType javaType, SchemaGenerationContext context,
             CustomDefinitionProviderV2 ignoredDefinitionProvider) {
         final List<CustomDefinitionProviderV2> providers = this.typesInGeneralConfigPart.getCustomDefinitionProviders();
-        int firstRelevantProviderIndex = 1 + providers.indexOf(ignoredDefinitionProvider);
-        return providers.subList(firstRelevantProviderIndex, providers.size())
-                .stream()
+        int providerCountToIgnore = 1 + providers.indexOf(ignoredDefinitionProvider);
+        return providers.stream()
+                .skip(providerCountToIgnore)
                 .map(provider -> provider.provideCustomSchemaDefinition(javaType, context))
                 .filter(Objects::nonNull)
                 .findFirst()

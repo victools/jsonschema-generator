@@ -9,36 +9,28 @@
                     "description": "looked-up from method: boolean"
                 },
                 "get()": {
-                    "anyOf": [{
-                            "type": "null"
-                        }, {
-                            "type": "integer",
-                            "title": "Integer",
-                            "description": "looked-up from method: Integer",
-                            "default": 1,
-                            "enum": [1, 2, 3, 4, 5],
-                            "minimum": 1,
-                            "exclusiveMinimum": 0,
-                            "maximum": 10,
-                            "exclusiveMaximum": 11,
-                            "multipleOf": 1
-                        }]
+                    "type": ["integer", "null"],
+                    "title": "Integer",
+                    "description": "looked-up from method: Integer",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 10,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
                 },
                 "orElse(Integer)": {
-                    "anyOf": [{
-                            "type": "null"
-                        }, {
-                            "type": "integer",
-                            "title": "Integer",
-                            "description": "looked-up from method: Integer",
-                            "default": 1,
-                            "enum": [1, 2, 3, 4, 5],
-                            "minimum": 1,
-                            "exclusiveMinimum": 0,
-                            "maximum": 10,
-                            "exclusiveMaximum": 11,
-                            "multipleOf": 1
-                        }]
+                    "type": ["integer", "null"],
+                    "title": "Integer",
+                    "description": "looked-up from method: Integer",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 10,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
                 }
             }
         },
@@ -51,19 +43,15 @@
                     "description": "looked-up from method: int"
                 },
                 "name()": {
-                    "anyOf": [{
-                            "type": "null"
-                        }, {
-                            "type": "string",
-                            "title": "String",
-                            "description": "looked-up from method: String",
-                            "const": "constant string value",
-                            "readOnly": true,
-                            "minLength": 1,
-                            "maxLength": 256,
-                            "format": "date",
-                            "pattern": "^.{1,256}$"
-                        }]
+                    "type": ["string", "null"],
+                    "title": "String",
+                    "description": "looked-up from method: String",
+                    "const": "constant string value",
+                    "readOnly": true,
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
                 },
                 "valueOf(String)": {
                     "allOf": [{
@@ -120,18 +108,14 @@
                     }
                 },
                 "genericValue": {
-                    "anyOf": [{
-                            "type": "null"
-                        }, {
-                            "type": "string",
-                            "title": "String",
-                            "description": "looked-up from method: String",
-                            "const": "constant string value",
-                            "minLength": 1,
-                            "maxLength": 256,
-                            "format": "date",
-                            "pattern": "^.{1,256}$"
-                        }]
+                    "type": ["string", "null"],
+                    "title": "String",
+                    "description": "looked-up from method: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
                 },
                 "primitiveValue": {
                     "type": ["integer", "null"],
@@ -156,20 +140,16 @@
                     }
                 },
                 "genericValue": {
-                    "anyOf": [{
-                            "type": "null"
-                        }, {
-                            "type": "integer",
-                            "title": "Long",
-                            "description": "looked-up from method: Long",
-                            "default": 1,
-                            "enum": [1, 2, 3, 4, 5],
-                            "minimum": 1,
-                            "exclusiveMinimum": 0,
-                            "maximum": 10,
-                            "exclusiveMaximum": 11,
-                            "multipleOf": 1
-                        }]
+                    "type": ["integer", "null"],
+                    "title": "Long",
+                    "description": "looked-up from method: Long",
+                    "default": 1,
+                    "enum": [1, 2, 3, 4, 5],
+                    "minimum": 1,
+                    "exclusiveMinimum": 0,
+                    "maximum": 10,
+                    "exclusiveMaximum": 11,
+                    "multipleOf": 1
                 }
             }
         },
@@ -183,18 +163,14 @@
                     }
                 },
                 "genericValue": {
-                    "anyOf": [{
-                            "type": "null"
-                        }, {
-                            "type": "string",
-                            "title": "String",
-                            "description": "looked-up from method: String",
-                            "const": "constant string value",
-                            "minLength": 1,
-                            "maxLength": 256,
-                            "format": "date",
-                            "pattern": "^.{1,256}$"
-                        }]
+                    "type": ["string", "null"],
+                    "title": "String",
+                    "description": "looked-up from method: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
                 }
             }
         }
@@ -260,18 +236,14 @@
                         "type": "object",
                         "properties": {
                             "get()": {
-                                "anyOf": [{
-                                        "type": "null"
-                                    }, {
-                                        "type": "string",
-                                        "title": "String",
-                                        "description": "looked-up from method: String",
-                                        "const": "constant string value",
-                                        "minLength": 1,
-                                        "maxLength": 256,
-                                        "format": "date",
-                                        "pattern": "^.{1,256}$"
-                                    }]
+                                "type": ["string", "null"],
+                                "title": "String",
+                                "description": "looked-up from method: String",
+                                "const": "constant string value",
+                                "minLength": 1,
+                                "maxLength": 256,
+                                "format": "date",
+                                "pattern": "^.{1,256}$"
                             }
                         }
                     }
@@ -280,20 +252,16 @@
                     "type": "object",
                     "properties": {
                         "get()": {
-                            "anyOf": [{
-                                    "type": "null"
-                                }, {
-                                    "type": "integer",
-                                    "title": "Integer",
-                                    "description": "looked-up from method: Integer",
-                                    "default": 1,
-                                    "enum": [1, 2, 3, 4, 5],
-                                    "minimum": 1,
-                                    "exclusiveMinimum": 0,
-                                    "maximum": 10,
-                                    "exclusiveMaximum": 11,
-                                    "multipleOf": 1
-                                }]
+                            "type": ["integer", "null"],
+                            "title": "Integer",
+                            "description": "looked-up from method: Integer",
+                            "default": 1,
+                            "enum": [1, 2, 3, 4, 5],
+                            "minimum": 1,
+                            "exclusiveMinimum": 0,
+                            "maximum": 10,
+                            "exclusiveMaximum": 11,
+                            "multipleOf": 1
                         }
                     }
                 }
