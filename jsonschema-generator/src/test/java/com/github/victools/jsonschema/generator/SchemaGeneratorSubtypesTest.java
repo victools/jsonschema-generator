@@ -49,7 +49,7 @@ public class SchemaGeneratorSubtypesTest {
     @MethodSource("parametersForTestGenerateSchema")
     public void testGenerateSchema(String caseTitle, List<Class<?>> subtypes, SchemaVersion schemaVersion) throws Exception {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON)
-                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_FIELDS_BY_DEFAULT);
+                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_FIELDS_BY_DEFAULT, Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES);
         configBuilder.forTypesInGeneral()
                 .withSubtypeResolver(new TestSubtypeResolver(subtypes))
                 .withTitleResolver(TypeScope::getSimpleTypeDescription)

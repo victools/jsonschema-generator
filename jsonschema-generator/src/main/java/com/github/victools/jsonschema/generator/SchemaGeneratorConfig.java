@@ -65,6 +65,17 @@ public interface SchemaGeneratorConfig {
     boolean shouldCreateDefinitionForMainSchema();
 
     /**
+     * Determine whether a member (field/method), having a declared type for which subtypes are being detected, should be merely a collection of its
+     * subtype schemas – each being treated like the member had declared the subtype directly – or whether it should be included as standalone
+     * definition with any collected member attributes assigned directly and the subtypes only being handled as generic types.
+     *
+     * @return whether to produce sub-schema for each subtype of a member's declared type, like the member had declared that subtype instead
+     *
+     * @since 4.27.0
+     */
+    boolean shouldTransparentlyResolveSubtypesOfMembers();
+
+    /**
      * Determine whether all sub-schemas should be included in-line, even if they occur multiple times, and not in the schema's "definitions"/"$defs".
      *
      * @return whether to include all sub-schemas in-line

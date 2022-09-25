@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Added
+- new `Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES` to disable the transparent member subtype resolution, i.e., enable inclusion of a supertype schema
+
+#### Changed
+- enable moving subtype schema into `$defs` and thereby reduce number of unnecessary `anyOf` wrappers
+
 ### `jsonschema-maven-plugin`
 #### Added
 - support `<classpath>` parameter in order to also consider compile dependencies for the schema generation (and/or ignoring runtime dependencies)

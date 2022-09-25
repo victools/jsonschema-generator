@@ -335,7 +335,9 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         // always wrap subtype definitions, in order to avoid pointing at the same definition node as the super type
         SchemaKeyword arrayNodeName = subtypes.size() == 1 ? SchemaKeyword.TAG_ALLOF : SchemaKeyword.TAG_ANYOF;
         ArrayNode subtypeDefinitionArrayNode = definition.withArray(this.getKeyword(arrayNodeName));
-        subtypes.forEach(subtype -> this.traverseGenericType(subtype, subtypeDefinitionArrayNode.addObject(), false));
+        subtypes.stream()
+                .map(this::createDefinitionReference)
+                .forEach(subtypeDefinitionArrayNode::add);
         return true;
     }
 
@@ -553,7 +555,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      */
     private ObjectNode populateFieldSchema(FieldScope field) {
         List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(field);
-        if (typeOverrides == null) {
+        if (typeOverrides == null && this.generatorConfig.shouldTransparentlyResolveSubtypesOfMembers()) {
             typeOverrides = this.generatorConfig.resolveSubtypes(field.getType(), this);
         }
         List<FieldScope> fieldOptions;
