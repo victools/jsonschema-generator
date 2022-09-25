@@ -48,7 +48,9 @@ public class SchemaCleanUpUtils {
     }
 
     /**
-     * Remove and merge {@link SchemaKeyword#TAG_ALLOF} parts when there are no conflicts between the sub-schemas.
+     * Remove and merge {@link SchemaKeyword#TAG_ALLOF} parts when there are no conflicts between the sub-schemas. This makes for more readable
+     * schemas being generated but has the side-effect that any manually added {@link SchemaKeyword#TAG_ALLOF} (e.g. through a custom definition of
+     * attribute overrides) may be removed as well if it isn't strictly speaking necessary.
      *
      * @param jsonSchemas generated schemas that may contain unnecessary {@link SchemaKeyword#TAG_ALLOF} nodes
      */
@@ -58,7 +60,9 @@ public class SchemaCleanUpUtils {
     }
 
     /**
-     * Reduce nested {@link SchemaKeyword#TAG_ANYOF} parts when one contains an entry with only another {@link SchemaKeyword#TAG_ANYOF} inside.
+     * Reduce nested {@link SchemaKeyword#TAG_ANYOF} parts when one contains an entry with only another {@link SchemaKeyword#TAG_ANYOF} inside. This
+     * makes for more readable schemas being generated but has the side-effect that any manually added {@link SchemaKeyword#TAG_ANYOF} (e.g. through a
+     * custom definition of attribute overrides) may be removed as well if it isn't strictly speaking necessary.
      *
      * @param jsonSchemas generated schemas that may contain unnecessary nested {@link SchemaKeyword#TAG_ANYOF} nodes
      */
@@ -110,10 +114,10 @@ public class SchemaCleanUpUtils {
     }
 
     /**
-     * Iterate through a generated and fully populated schema and remove extraneous {@link SchemaKeyword#TAG_ANYOF} nodes, where one entry of the
-     * array is again a {@link SchemaKeyword#TAG_ANYOF} wrapper and nothing else. This makes for more readable schemas being generated but has the
-     * side-effect that any manually added {@link SchemaKeyword#TAG_ANYOF} (e.g. through a custom definition of attribute overrides) may be removed as
-     * well if it isn't strictly speaking necessary.
+     * Iterate through a generated and fully populated schema and perform the provided clean-up remove extraneous {@link SchemaKeyword#TAG_ANYOF}
+     * nodes, where one entry of the array is again a {@link SchemaKeyword#TAG_ANYOF} wrapper and nothing else. This makes for more readable schemas
+     * being generated but has the side-effect that any manually added {@link SchemaKeyword#TAG_ANYOF} (e.g. through a custom definition of attribute
+     * overrides) may be removed as well if it isn't strictly speaking necessary.
      *
      * @param schemaNodes generated schemas to clean-up
      * @param performCleanUpOnSingleSchemaNode clean up task to execute before looking for deeper nested sub-schemas for which to apply the same
