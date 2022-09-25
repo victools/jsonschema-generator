@@ -1,8 +1,8 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
-        "TestSubClass3-nullable": {
-            "type": ["object", "null"],
+        "TestSubClass3": {
+            "type": "object",
             "properties": {
                 "fieldInSubtype": {
                     "type": "integer",
@@ -25,6 +25,15 @@
             },
             "title": "TestSuperClass<Boolean>",
             "description": "supertype-only description"
+        },
+        "TestSuperClass(String)-nullable": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "allOf": [{
+                            "$ref": "#/definitions/TestSubClass3"
+                        }]
+                }]
         }
     },
     "type": "object",
@@ -44,7 +53,7 @@
                 }]
         },
         "stringSupertypeField": {
-            "$ref": "#/definitions/TestSubClass3-nullable"
+            "$ref": "#/definitions/TestSuperClass(String)-nullable"
         }
     },
     "title": "TestClassWithSuperTypeReferences"

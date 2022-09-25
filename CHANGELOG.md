@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### `jsonschema-generator`
+#### Added
+- new `Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES` to disable the transparent member subtype resolution, i.e., enable inclusion of a supertype schema
+
 #### Changed
 - enable moving subtype schema into `$defs` and thereby reduce number of unnecessary `anyOf` wrappers
 

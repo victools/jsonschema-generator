@@ -115,6 +115,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldTransparentlyResolveSubtypesOfMembers() {
+        return !this.isOptionEnabled(Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES);
+    }
+
+    @Override
     public boolean shouldInlineAllSchemas() {
         return this.isOptionEnabled(Option.INLINE_ALL_SCHEMAS);
     }

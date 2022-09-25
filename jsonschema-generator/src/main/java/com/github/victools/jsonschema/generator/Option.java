@@ -258,6 +258,14 @@ public enum Option {
      */
     DEFINITION_FOR_MAIN_SCHEMA(null, null),
     /**
+     * Whether a member (field/method), having a declared type for which subtypes are being detected, should be included as standalone definition with
+     * any collected member attributes assigned directly – and the subtypes only being handled as generic types – or each of its subtypes should be
+     * treated as alternative sub-schema for this member (field/method) including any attributes derived from that member.
+     *
+     * @since 4.27.0
+     */
+    DEFINITIONS_FOR_MEMBER_SUPERTYPES(null, null),
+    /**
      * Whether all sub-schemas should be defined in-line, i.e. including no "definitions"/"$defs". This takes precedence over
      * {@link #DEFINITIONS_FOR_ALL_OBJECTS} and {@link #DEFINITION_FOR_MAIN_SCHEMA}.
      * <p>

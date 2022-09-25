@@ -555,7 +555,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      */
     private ObjectNode populateFieldSchema(FieldScope field) {
         List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(field);
-        if (typeOverrides == null) {
+        if (typeOverrides == null && this.generatorConfig.shouldTransparentlyResolveSubtypesOfMembers()) {
             typeOverrides = this.generatorConfig.resolveSubtypes(field.getType(), this);
         }
         List<FieldScope> fieldOptions;

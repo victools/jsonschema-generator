@@ -1,8 +1,8 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
-        "TestSubClass1(Boolean)-nullable": {
-            "type": ["object", "null"],
+        "TestSubClass1(Boolean)": {
+            "type": "object",
             "properties": {
                 "dependentGenericFieldInSubtype": {
                     "type": ["array", "null"],
@@ -23,8 +23,8 @@
             },
             "title": "TestSubClass1<Boolean>"
         },
-        "TestSubClass1(String)-nullable": {
-            "type": ["object", "null"],
+        "TestSubClass1(String)": {
+            "type": "object",
             "properties": {
                 "dependentGenericFieldInSubtype": {
                     "type": ["array", "null"],
@@ -44,12 +44,30 @@
                 }
             },
             "title": "TestSubClass1<String>"
+        },
+        "TestSuperClass(Boolean)-nullable": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "allOf": [{
+                            "$ref": "#/definitions/TestSubClass1(Boolean)"
+                        }]
+                }]
+        },
+        "TestSuperClass(String)-nullable": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "allOf": [{
+                            "$ref": "#/definitions/TestSubClass1(String)"
+                        }]
+                }]
         }
     },
     "type": "object",
     "properties": {
         "booleanSupertypeField": {
-            "$ref": "#/definitions/TestSubClass1(Boolean)-nullable"
+            "$ref": "#/definitions/TestSuperClass(Boolean)-nullable"
         },
         "numberOrStringObjectField": {
             "anyOf": [{
@@ -63,7 +81,7 @@
                 }]
         },
         "stringSupertypeField": {
-            "$ref": "#/definitions/TestSubClass1(String)-nullable"
+            "$ref": "#/definitions/TestSuperClass(String)-nullable"
         }
     },
     "title": "TestClassWithSuperTypeReferences"

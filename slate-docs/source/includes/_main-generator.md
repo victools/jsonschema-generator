@@ -284,6 +284,14 @@ configBuilder.without(
     </tr>
     <tr>
       <td rowspan="2" style="text-align: right">30</td>
+      <td colspan="2"><code>Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES</code></td>
+    </tr>
+    <tr>
+      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a single definition with any collected member attributes assigned directly. Any subtypes are only being handled as generic types, i.e., outside of the member context.</td>
+      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a list of definittions: one for each subtype in the given member's context. This allows independently interpreting contextual information (e.g., member annotations) for each subtype.</td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="text-align: right">31</td>
       <td colspan="2"><code>Option.INLINE_ALL_SCHEMAS</code></td>
     </tr>
     <tr>
@@ -291,7 +299,7 @@ configBuilder.without(
       <td>Depending on whether <code>DEFINITIONS_FOR_ALL_OBJECTS</code> is included or excluded.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">31</td>
+      <td rowspan="2" style="text-align: right">32</td>
       <td colspan="2"><code>Option.PLAIN_DEFINITION_KEYS</code></td>
     </tr>
     <tr>
@@ -299,7 +307,7 @@ configBuilder.without(
       <td>Ensure that the keys for any <code>$defs</code>/<code>definitions</code> are URI compatible (as expected by the JSON Schema specification).</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">32</td>
+      <td rowspan="2" style="text-align: right">33</td>
       <td colspan="2"><code>Option.ALLOF_CLEANUP_AT_THE_END</code></td>
     </tr>
     <tr>
@@ -346,9 +354,10 @@ Below, you can find the lists of <code>Option</code>s included/excluded in the r
 | 27 | `FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` | ⬜️ | ⬜️ | ⬜️ |
 | 28 | `DEFINITIONS_FOR_ALL_OBJECTS` | ⬜️ | ⬜️ | ⬜️ |
 | 29 | `DEFINITION_FOR_MAIN_SCHEMA` | ⬜️ | ⬜️ | ⬜️ |
-| 30 | `INLINE_ALL_SCHEMAS` | ⬜️ | ⬜️ | ⬜️ |
-| 31 | `PLAIN_DEFINITION_KEYS` | ⬜️ | ⬜️ | ⬜️ |
-| 32 | `ALLOF_CLEANUP_AT_THE_END` | ✅ | ✅ | ✅ |
+| 30 | `DEFINITIONS_FOR_MEMBER_SUPERTYPES` | ⬜️ | ⬜️ | ⬜️ |
+| 31 | `INLINE_ALL_SCHEMAS` | ⬜️ | ⬜️ | ⬜️ |
+| 32 | `PLAIN_DEFINITION_KEYS` | ⬜️ | ⬜️ | ⬜️ |
+| 33 | `ALLOF_CLEANUP_AT_THE_END` | ✅ | ✅ | ✅ |
 
 # Generator – Modules
 Similar to an `OptionPreset` being a short-cut to including various `Option`s, the concept of `Module`s is a convenient way of including multiple [individual configurations](#generator-individual-configurations) or even [advanced configurations](#generator-advanced-configurations) (as per the following sections) at once.
