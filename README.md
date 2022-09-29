@@ -35,7 +35,7 @@ Additional documentation and configuration examples can be found here: https://v
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>4.26.0</version>
+    <version>4.27.0</version>
 </dependency>
 ```
 
