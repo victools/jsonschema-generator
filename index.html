@@ -783,6 +783,14 @@ Various aspects can be toggled on/off by including or excluding respective <code
     </tr>
     <tr>
       <td rowspan="2" style="text-align: right">30</td>
+      <td colspan="2"><code>Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES</code></td>
+    </tr>
+    <tr>
+      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a single definition with any collected member attributes assigned directly. Any subtypes are only being handled as generic types, i.e., outside of the member context. That means, certain relevent annotations may be ignored (e.g. a jackson <code>@JsonTypeInfo</code> override on a single member would not be correctly reflected in the produced schema).</td>
+      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a list of definittions: one for each subtype in the given member's context. This allows independently interpreting contextual information (e.g., member annotations) for each subtype.</td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="text-align: right">31</td>
       <td colspan="2"><code>Option.INLINE_ALL_SCHEMAS</code></td>
     </tr>
     <tr>
@@ -790,7 +798,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>Depending on whether <code>DEFINITIONS_FOR_ALL_OBJECTS</code> is included or excluded.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">31</td>
+      <td rowspan="2" style="text-align: right">32</td>
       <td colspan="2"><code>Option.PLAIN_DEFINITION_KEYS</code></td>
     </tr>
     <tr>
@@ -798,7 +806,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>Ensure that the keys for any <code>$defs</code>/<code>definitions</code> are URI compatible (as expected by the JSON Schema specification).</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">32</td>
+      <td rowspan="2" style="text-align: right">33</td>
       <td colspan="2"><code>Option.ALLOF_CLEANUP_AT_THE_END</code></td>
     </tr>
     <tr>
@@ -1030,20 +1038,27 @@ Various aspects can be toggled on/off by including or excluding respective <code
 </tr>
 <tr>
 <td>30</td>
-<td><code>INLINE_ALL_SCHEMAS</code></td>
+<td><code>DEFINITIONS_FOR_MEMBER_SUPERTYPES</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
 <td>31</td>
-<td><code>PLAIN_DEFINITION_KEYS</code></td>
+<td><code>INLINE_ALL_SCHEMAS</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
 <td>32</td>
+<td><code>PLAIN_DEFINITION_KEYS</code></td>
+<td>⬜️</td>
+<td>⬜️</td>
+<td>⬜️</td>
+</tr>
+<tr>
+<td>33</td>
 <td><code>ALLOF_CLEANUP_AT_THE_END</code></td>
 <td>✅</td>
 <td>✅</td>
@@ -1632,7 +1647,7 @@ In order to reflect Java&#39;s polymorphism, you can make use of the following c
 </ul>
 
 <aside class="notice">
-    On the <code>CustomDefinition</code>'s constructor, you are able to decide whether it should be "inlined" and
+    On the <code>CustomDefinition</code>'s constructor, you are able to decide whether it should be "inlined" or always result in a referenced/central definition and
     whether or not the attributes collected through the various other <a href="#generator-individual-configurations">Individual Configurations</a> shall be added.
 </aside>
 <h2 id='custom-property-definitions'>Custom Property Definitions</h2><div class="highlight"><pre class="highlight java tab-java"><code><span class="c1">// read a static schema string from an annotation</span>
@@ -1646,7 +1661,7 @@ In order to reflect Java&#39;s polymorphism, you can make use of the following c
                 <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
             <span class="o">}</span>
         <span class="o">})</span>
-        <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nl">CustomDefinition:</span><span class="o">:</span><span class="k">new</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nl">CustomPropertyDefinition:</span><span class="o">:</span><span class="k">new</span><span class="o">)</span>
         <span class="o">.</span><span class="na">orElse</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
 <span class="c1">// if you don't rely on specific field/method functionality,</span>
 <span class="c1">// you can reuse the same provider for both of them</span>
@@ -1708,6 +1723,10 @@ In order to reflect Java&#39;s polymorphism, you can make use of the following c
 <p>Schema attributes derived from annotations on getter methods are also applied to their associated fields.</p>
 
 <p>To use it, just pass a module instance into <code>SchemaGeneratorConfigBuilder.with(Module)</code>, optionally providing <code>JacksonOption</code> values in the module&#39;s constructor.</p>
+
+<hr>
+
+<p>For a description of the available <code>JacksonOption</code> values and their meaning (apart from their mentionings in above enumeration), please refer to the <code>JacksonOption</code> class or its JavaDoc.</p>
 <h1 id='jakarta-validation-module'>Jakarta Validation Module</h1>
 <p>The <a href="https://github.com/victools/jsonschema-generator/tree/master/jsonschema-module-jakarta-validation">victools:jsonschema-module-jakarta-validation</a> provides a number of standard configurations for deriving JSON Schema attributes from <code>jakarta.validation.constraints</code> annotations.</p>
 <div class="highlight"><pre class="highlight java tab-java"><code><span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder</span><span class="o">;</span>
@@ -1875,15 +1894,24 @@ There are a number of basic configuration options as well as the possibility to 
         <span class="nt">&lt;classNames&gt;</span>com/myOrg/myApp/My*<span class="nt">&lt;/classNames&gt;</span>
         <span class="nt">&lt;packageNames&gt;</span>com/myOrg/myApp/package?<span class="nt">&lt;/packageNames&gt;</span>
         <span class="nt">&lt;excludeClassNames&gt;</span>com/myOrg/myApp/**Hidden*<span class="nt">&lt;/excludeClassNames&gt;</span>
+        <span class="nt">&lt;annotations&gt;</span>
+            <span class="nt">&lt;annotation&gt;</span>com.myOrg.MySchemaAnnotation<span class="nt">&lt;/annotation&gt;</span>
+        <span class="nt">&lt;/annotations&gt;</span>
+        <span class="nt">&lt;classpath&gt;</span>PROJECT_ONLY<span class="nt">&lt;/classpath&gt;</span>
+        <span class="nt">&lt;failIfNoClassesMatch&gt;</span>false<span class="nt">&lt;/failIfNoClassesMatch&gt;</span>
     <span class="nt">&lt;/configuration&gt;</span>
 <span class="nt">&lt;/plugin&gt;</span>
 </code></pre></div>
-<p>The designated types can be mentioned separately (with dots as package separator) or in the form of glob patterns (with <code>/</code> as package separator) in <code>&lt;classNames&gt;</code> and/or included as part of their packages through <code>&lt;packageNames&gt;</code>. Through <code>&lt;excludeClassNames&gt;</code> you can further narrow down the type selection.</p>
-<div class="highlight"><pre class="highlight xml tab-xml"><code><span class="nt">&lt;configuration&gt;</span>
-    ...
-    <span class="nt">&lt;failIfNoClassesMatch&gt;</span>false<span class="nt">&lt;/failIfNoClassesMatch&gt;</span>
-<span class="nt">&lt;/configuration&gt;</span>
-</code></pre></div>
+<p>The designated types can be mentioned separately (with dots as package separator) or in the form of glob patterns (with <code>/</code> as package separator) in <code>&lt;classNames&gt;</code> and/or included as part of their packages through <code>&lt;packageNames&gt;</code>. Through <code>&lt;excludeClassNames&gt;</code> you can further narrow down the type selection.<br>
+When specifying expected <code>&lt;annotations&gt;</code>, at least one of them need to be present on a given type to be considered – in addition to matching the aforementioned criteria, if those are present.<br>
+The considered <code>&lt;classpath&gt;</code> may be further specified as one of four values:
+- <code>PROJECT_ONLY</code> : only source files of the current project
+- <code>WITH_COMPILE_DEPENDENCIES</code> : <code>PROJECT_ONLY</code> and compile dependencies
+- <code>WITH_RUNTIME_DEPENDENCIES</code> : <code>PROJECT_ONLY</code> and runtime dependencies (default, if unspecified)
+- <code>WITH_ALL_DEPENDENCIES</code> : all of the above</p>
+
+<hr>
+
 <p>By default, the plugin aborts if the glob pattern does not match any class. If this is not desired, the <code>&lt;failIfNoClassesMatch&gt;</code> property can be set to <code>false</code>.</p>
 <h2 id='basic-configuration-options'>Basic Configuration Options</h2>
 <p>There are some additional parameters available in the plugin <code>&lt;configuration&gt;</code>:</p>
@@ -1915,7 +1943,33 @@ There are a number of basic configuration options as well as the possibility to 
 <td>JSON Schema version to apply (<code>DRAFT_6</code>, <code>DRAFT_7</code>, <code>DRAFT_2019_09</code> or <code>DRAFT_2020_12</code>)</td>
 </tr>
 </tbody></table>
-<div class="highlight"><pre class="highlight xml tab-xml"><code><span class="nt">&lt;options&gt;</span>
+<h3 id='configuring-generated-file-names-and-locations'>Configuring generated file names and locations</h3><div class="highlight"><pre class="highlight xml tab-xml"><code><span class="nt">&lt;configuration&gt;</span>
+    <span class="nt">&lt;classNames&gt;</span>com.myOrg.myApp.MyClass<span class="nt">&lt;/classNames&gt;</span>
+    <span class="nt">&lt;schemaFilePath&gt;</span>src/main/resources/schemas<span class="nt">&lt;/schemaFilePath&gt;</span>
+<span class="nt">&lt;/configuration&gt;</span>
+</code></pre></div>
+<p>The location where the files will be generated can be specified with the <code>&lt;schemaFilePath&gt;</code> element.
+The default path is <code>src/main/resources</code></p>
+<div class="highlight"><pre class="highlight xml tab-xml"><code><span class="nt">&lt;configuration&gt;</span>
+    <span class="nt">&lt;classNames&gt;</span>com.myOrg.myApp.MyClass<span class="nt">&lt;/classNames&gt;</span>
+    <span class="nt">&lt;schemaFileName&gt;</span>{0}.schema<span class="nt">&lt;/schemaFileName&gt;</span>
+<span class="nt">&lt;/configuration&gt;</span>
+</code></pre></div>
+<p>The name of the generated schema files can be configured with the <code>&lt;schemaFileName&gt;</code> element.
+This is a substitution pattern that is used for all generated files. It following the <code>MessageFormat</code> syntax,
+where the following variables can be used:
+ - <code>{0}</code> : This is the name of the class
+ - <code>{1}</code> : This is the package path of the class</p>
+
+<p>For example, the given configuration will create a <code>MyClass.schema</code> file.</p>
+<div class="highlight"><pre class="highlight xml tab-xml"><code><span class="nt">&lt;configuration&gt;</span>
+    <span class="nt">&lt;packageNames&gt;</span>com.myOrg.myApp.utils<span class="nt">&lt;/packageNames&gt;</span>
+    <span class="nt">&lt;schemaFileName&gt;</span>{1}/{0}.schema<span class="nt">&lt;/schemaFileName&gt;</span>
+<span class="nt">&lt;/configuration&gt;</span>
+</code></pre></div>
+<p>To store the generated schema files in the same directory structure as the originating classes, the following can be used <code>&lt;schemaFileName&gt;{1}/{0}-schema.json&lt;/schemaFileName&gt;</code>.<br>
+The default <code>&lt;schemaFileName&gt;</code> is <code>{0}-schema.json</code>.</p>
+<h3 id='selecting-options'>Selecting Options</h3><div class="highlight"><pre class="highlight xml tab-xml"><code><span class="nt">&lt;options&gt;</span>
     <span class="nt">&lt;preset&gt;</span>FULL_DOCUMENTATION<span class="nt">&lt;/preset&gt;</span>
     <span class="nt">&lt;enabled&gt;</span>
         <span class="nt">&lt;option&gt;</span>DEFINITIONS_FOR_ALL_OBJECTS<span class="nt">&lt;/option&gt;</span>
@@ -1941,7 +1995,9 @@ There are a number of basic configuration options as well as the possibility to 
     <span class="nt">&lt;/module&gt;</span>
 <span class="nt">&lt;/modules&gt;</span>
 </code></pre></div>
-<p>You can also group any kind of configurations into a Module of your own and include it via its full class name.</p>
+<p>You can also group any kind of configurations into a Module of your own and include it via its full class name.<br>
+Make sure your custom module is on the classpath (considering the project itself as well as all compile and runtime dependencies) and has a default constructor.<br>
+It is not possible to configure options for custom modules.</p>
 <h1 id='faq'>FAQ</h1><h2 id='is-there-a-gradle-plugin'>Is there a Gradle Plugin?</h2><div class="highlight"><pre class="highlight groovy tab-groovy"><code><span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.generator.OptionPreset</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.generator.SchemaGenerator</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder</span><span class="o">;</span>
