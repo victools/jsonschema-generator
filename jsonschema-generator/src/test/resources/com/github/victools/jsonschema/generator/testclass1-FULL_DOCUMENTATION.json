@@ -1,7 +1,15 @@
 {
     "definitions": {
-        "Integer-nullable": {
+        "Integer": {
+            "type": "integer",
             "$comment": "custom definition for Integer.class"
+        },
+        "Integer-nullable": {
+            "anyOf": [{
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/Integer"
+                }]
         }
     },
     "type": "object",

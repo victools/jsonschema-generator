@@ -64,6 +64,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     private final Map<DefinitionKey, ObjectNode> definitions = new LinkedHashMap<>();
     private final Map<DefinitionKey, List<ObjectNode>> references = new HashMap<>();
     private final Map<DefinitionKey, List<ObjectNode>> nullableReferences = new HashMap<>();
+    private final Set<DefinitionKey> neverInlinedDefinitions  = new HashSet<>();
 
     /**
      * Constructor initialising type resolution context.
@@ -108,6 +109,25 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     SchemaGenerationContextImpl putDefinition(ResolvedType javaType, ObjectNode definitionNode,
             CustomDefinitionProviderV2 ignoredDefinitionProvider) {
         this.definitions.put(new DefinitionKey(javaType, ignoredDefinitionProvider), definitionNode);
+        return this;
+    }
+
+    /**
+     * Based on the given custom definition for the given type, potentially mark it as never to be inlined, i.e., that it should always be included in
+     * the {@link SchemaKeyword#TAG_DEFINITIONS}.
+     *
+     * @param customDefinition custom definition to potentially mark as never to be inlined
+     * @param javaType type to which the definition belongs
+     * @param ignoredDefinitionProvider first custom definition provider that was ignored when creating the definition (is null in most cases)
+     * @return this context (for chaining)
+     *
+     * @since 4.27.0
+     */
+    SchemaGenerationContextImpl markDefinitionAsNeverInlinedIfRequired(CustomDefinition customDefinition, ResolvedType javaType,
+            CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        if (customDefinition.shouldAlwaysProduceDefinition()) {
+            this.neverInlinedDefinitions.add(new DefinitionKey(javaType, ignoredDefinitionProvider));
+        }
         return this;
     }
 
@@ -178,6 +198,19 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      */
     public List<ObjectNode> getNullableReferences(DefinitionKey key) {
         return Collections.unmodifiableList(this.nullableReferences.getOrDefault(key, Collections.emptyList()));
+    }
+
+    /**
+     * Determine whether the definition for the given type should always be included in the {@link SchemaKeyword#TAG_DEFINITIONS}, even if only
+     * occurring once.
+     *
+     * @param key definition key to determine desired definition behaviour for
+     * @return whether to always produce a referenced definition for the given type
+     *
+     * @since 4.27.0
+     */
+    public boolean shouldNeverInlineDefinition(DefinitionKey key) {
+        return this.neverInlinedDefinitions.contains(key);
     }
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -293,6 +326,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 }
             }
             if (customDefinition != null) {
+                this.markDefinitionAsNeverInlinedIfRequired(customDefinition, targetType, ignoredDefinitionProvider);
                 logger.debug("applying configured custom definition for {}", targetType);
                 definition.setAll(customDefinition.getValue());
                 includeTypeAttributes = customDefinition.shouldIncludeAttributes();

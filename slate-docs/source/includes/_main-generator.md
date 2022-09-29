@@ -287,7 +287,7 @@ configBuilder.without(
       <td colspan="2"><code>Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES</code></td>
     </tr>
     <tr>
-      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a single definition with any collected member attributes assigned directly. Any subtypes are only being handled as generic types, i.e., outside of the member context.</td>
+      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a single definition with any collected member attributes assigned directly. Any subtypes are only being handled as generic types, i.e., outside of the member context. That means, certain relevent annotations may be ignored (e.g. a jackson <code>@JsonTypeInfo</code> override on a single member would not be correctly reflected in the produced schema).</td>
       <td>For a member (field/method), having a declared type for which subtypes are being detected, include a list of definittions: one for each subtype in the given member's context. This allows independently interpreting contextual information (e.g., member annotations) for each subtype.</td>
     </tr>
     <tr>
@@ -1057,7 +1057,7 @@ Other useful methods available in the context of a custom definition provider ar
 * `SchemaGenerationContext.getTypeContext().resolve()` allowing you to produce `ResolvedType` instances which are expected by various other methods.
 
 <aside class="notice">
-    On the <code>CustomDefinition</code>'s constructor, you are able to decide whether it should be "inlined" and
+    On the <code>CustomDefinition</code>'s constructor, you are able to decide whether it should be "inlined" or always result in a referenced/central definition and
     whether or not the attributes collected through the various other <a href="#generator-individual-configurations">Individual Configurations</a> shall be added.
 </aside>
 
@@ -1074,7 +1074,7 @@ CustomPropertyDefinitionProvider provider = (member, context) -> Optional
                 return null;
             }
         })
-        .map(CustomDefinition::new)
+        .map(CustomPropertyDefinition::new)
         .orElse(null);
 // if you don't rely on specific field/method functionality,
 // you can reuse the same provider for both of them

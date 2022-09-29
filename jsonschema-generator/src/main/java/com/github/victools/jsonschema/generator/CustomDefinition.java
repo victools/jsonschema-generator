@@ -100,6 +100,18 @@ public class CustomDefinition {
     }
 
     /**
+     * Getter for the flag indicating whether this custom definition should always be included in the {@link SchemaKeyword#TAG_DEFINITIONS} even if it
+     * occurs only once.
+     *
+     * @return whether an occurrence of this custom definition should always be replaced by a reference
+     *
+     * @since 4.27.0
+     */
+    public final boolean shouldAlwaysProduceDefinition() {
+        return this.definitionType == DefinitionType.ALWAYS_REF;
+    }
+
+    /**
      * Getter for the associated extent of additional attributes being collected and applied.
      *
      * @return indication whether the normal attribute collection should be performed and any attributes should be added to the custom definition
@@ -122,9 +134,16 @@ public class CustomDefinition {
         INLINE,
         /**
          * Follow the standard behaviour of being moved into the {@link SchemaKeyword#TAG_DEFINITIONS} if it is being referenced multiple times or
-         * {@link Option#DEFINITIONS_FOR_ALL_OBJECTS} is enabled.
+         * {@link Option#DEFINITIONS_FOR_ALL_OBJECTS} is enabled. Unless {@link Option#INLINE_ALL_SCHEMAS} is enabled, forcing this to be inlined.
          */
-        STANDARD;
+        STANDARD,
+        /**
+         * Always include this entry in the {@link SchemaKeyword#TAG_DEFINITIONS} even if it is just referenced once. This bypasses even
+         * {@link Option#INLINE_ALL_SCHEMAS}.
+         *
+         * @since 4.27.0
+         */
+        ALWAYS_REF;
     }
 
     /**

@@ -100,12 +100,13 @@ public class SchemaGeneratorComplexTypesTest {
     }
 
     static Stream<Arguments> parametersForTestGenerateSchema() {
-        Module neutralModule = configBuilder -> configBuilder.forTypesInGeneral().withCustomDefinitionProvider((javaType, _context) -> {
+        Module neutralModule = configBuilder -> configBuilder.forTypesInGeneral().withCustomDefinitionProvider((javaType, context) -> {
             if (Integer.class == javaType.getErasedType()) {
                 ObjectNode customNode = configBuilder.getObjectMapper()
                         .createObjectNode()
+                        .put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_INTEGER))
                         .put("$comment", "custom definition for Integer.class");
-                return new CustomDefinition(customNode, false);
+                return new CustomDefinition(customNode, CustomDefinition.DefinitionType.ALWAYS_REF, CustomDefinition.AttributeInclusion.YES);
             }
             return null;
         });

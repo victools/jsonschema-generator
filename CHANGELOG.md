@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `jsonschema-generator`
 #### Added
 - new `Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES` to disable the transparent member subtype resolution, i.e., enable inclusion of a supertype schema
+- new `DefinitionType.ALWAYS_REF` for custom definitions, to produce centralised definition even if just referenced once
+
+#### Fixed
+- under some circumstances, even after the general schema clean-up procedure there were unnecessary `allOf` wrappers containing just a single entry
 
 #### Changed
 - enable moving subtype schema into `$defs` and thereby reduce number of unnecessary `anyOf` wrappers
