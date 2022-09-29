@@ -261,6 +261,9 @@ public enum Option {
      * Whether a member (field/method), having a declared type for which subtypes are being detected, should be included as standalone definition with
      * any collected member attributes assigned directly – and the subtypes only being handled as generic types – or each of its subtypes should be
      * treated as alternative sub-schema for this member (field/method) including any attributes derived from that member.
+     * <br>
+     * Warning: this should only be enabled if there are no relevant annotations (e.g. like jackson {@code @JsonTypeInfo}) on individual properties,
+     * that override the general behavior exclusively for single subtypes.
      *
      * @since 4.27.0
      */

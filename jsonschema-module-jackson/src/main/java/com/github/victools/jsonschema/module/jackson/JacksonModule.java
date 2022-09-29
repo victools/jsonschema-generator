@@ -108,7 +108,7 @@ public class JacksonModule implements Module {
         boolean lookUpSubtypes = !this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP);
         boolean includeTypeInfoTransform = !this.options.contains(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM);
         if (lookUpSubtypes || includeTypeInfoTransform) {
-            JsonSubTypesResolver subtypeResolver = new JsonSubTypesResolver();
+            JsonSubTypesResolver subtypeResolver = new JsonSubTypesResolver(this.options);
             if (lookUpSubtypes) {
                 generalConfigPart.withSubtypeResolver(subtypeResolver);
                 fieldConfigPart.withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides);

@@ -1,41 +1,47 @@
 {
     "$schema": "https://json-schema.org/draft/2019-09/schema",
     "$defs": {
+        "TestSubClassA": {
+            "allOf": [{
+                    "type": "object",
+                    "properties": {
+                        "aProperty": {
+                            "type": "string"
+                        }
+                    }
+                }, {
+                    "type": "object",
+                    "properties": {
+                        "@type": {
+                            "const": "SubClassA"
+                        }
+                    },
+                    "required": ["@type"]
+                }]
+        },
+        "TestSubClassB": {
+            "allOf": [{
+                    "type": "object",
+                    "properties": {
+                        "bProperty": {
+                            "type": "integer"
+                        }
+                    }
+                }, {
+                    "type": "object",
+                    "properties": {
+                        "@type": {
+                            "const": "SubClassB"
+                        }
+                    },
+                    "required": ["@type"]
+                }]
+        },
         "TestSuperClass": {
             "anyOf": [{
-                    "allOf": [{
-                            "type": "object",
-                            "properties": {
-                                "aProperty": {
-                                    "type": "string"
-                                }
-                            }
-                        }, {
-                            "type": "object",
-                            "properties": {
-                                "@type": {
-                                    "const": "SubClassA"
-                                }
-                            },
-                            "required": ["@type"]
-                        }]
+                    "$ref": "#/$defs/TestSubClassA"
                 }, {
-                    "allOf": [{
-                            "type": "object",
-                            "properties": {
-                                "bProperty": {
-                                    "type": "integer"
-                                }
-                            }
-                        }, {
-                            "type": "object",
-                            "properties": {
-                                "@type": {
-                                    "const": "SubClassB"
-                                }
-                            },
-                            "required": ["@type"]
-                        }]
+                    "$ref": "#/$defs/TestSubClassB"
                 }]
         }
     },

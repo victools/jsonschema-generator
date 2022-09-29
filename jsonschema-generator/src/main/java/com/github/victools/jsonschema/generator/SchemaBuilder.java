@@ -202,20 +202,8 @@ public class SchemaBuilder {
         final boolean inlineAllSchemas = this.config.shouldInlineAllSchemas();
 
         final AtomicBoolean considerOnlyDirectReferences = new AtomicBoolean(false);
-        Predicate<DefinitionKey> shouldProduceDefinition = definitionKey -> {
-            if (inlineAllSchemas) {
-                return false;
-            }
-            if (definitionKey.equals(mainSchemaKey)) {
-                return true;
-            }
-            List<ObjectNode> references = generationContext.getReferences(definitionKey);
-            if (considerOnlyDirectReferences.get() && references.isEmpty()) {
-                return false;
-            }
-            List<ObjectNode> nullableReferences = generationContext.getNullableReferences(definitionKey);
-            return createDefinitionsForAll || (references.size() + nullableReferences.size()) > 1;
-        };
+        Predicate<DefinitionKey> shouldProduceDefinition = this.getShouldProduceDefinitionCheck(mainSchemaKey, considerOnlyDirectReferences,
+                createDefinitionsForAll, inlineAllSchemas);
         Map<DefinitionKey, String> baseReferenceKeys = this.getReferenceKeys(mainSchemaKey, shouldProduceDefinition, generationContext);
         considerOnlyDirectReferences.set(true);
         final boolean createDefinitionForMainSchema = this.config.shouldCreateDefinitionForMainSchema();
@@ -250,7 +238,8 @@ public class SchemaBuilder {
                     definition = this.config.createObjectNode().put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey);
                 }
                 generationContext.makeNullable(definition);
-                if (!inlineAllSchemas && (createDefinitionsForAll || nullableReferences.size() > 1)) {
+                if (generationContext.shouldNeverInlineDefinition(definitionKey)
+                        || (!inlineAllSchemas && (createDefinitionsForAll || nullableReferences.size() > 1))) {
                     String nullableDefinitionName = this.definitionNamingStrategy
                             .adjustNullableName(definitionKey, definitionName, generationContext);
                     definitionsNode.set(nullableDefinitionName, definition);
@@ -263,6 +252,41 @@ public class SchemaBuilder {
         }
         definitionsNode.forEach(node -> this.schemaNodes.add((ObjectNode) node));
         return definitionsNode;
+    }
+
+    /**
+     * Produce reusable predicate for checking whether a given type should produce an entry in the {@link SchemaKeyword#TAG_DEFINITIONS} or not.
+     *
+     * @param mainSchemaKey main type to consider
+     * @param considerOnlyDirectReferences whether to ignore nullable references when determing about definition vs. inlining
+     * @param createDefinitionsForAll whether to produce definitions for all schemas by default (unless explicitly stated otherwise)
+     * @param inlineAllSchemas whether to inline all schemas by default (unless explicitly stated otherwise)
+     * @return reusable predicate
+     */
+    private Predicate<DefinitionKey> getShouldProduceDefinitionCheck(DefinitionKey mainSchemaKey, AtomicBoolean considerOnlyDirectReferences,
+            boolean createDefinitionsForAll, boolean inlineAllSchemas) {
+        return definitionKey -> {
+            if (generationContext.shouldNeverInlineDefinition(definitionKey)) {
+                // e.g. custom definition explicitly marked to always produce a definition
+                return true;
+            }
+            if (inlineAllSchemas) {
+                // global setting: always inline schemas by default
+                return false;
+            }
+            if (definitionKey.equals(mainSchemaKey)) {
+                return true;
+            }
+            List<ObjectNode> references = generationContext.getReferences(definitionKey);
+            if (considerOnlyDirectReferences.get() && references.isEmpty()) {
+                return false;
+            }
+            if (createDefinitionsForAll || references.size() > 1) {
+                return true;
+            }
+            List<ObjectNode> nullableReferences = generationContext.getNullableReferences(definitionKey);
+            return (references.size() + nullableReferences.size()) > 1;
+        };
     }
 
     /**
