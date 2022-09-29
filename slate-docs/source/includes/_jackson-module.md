@@ -34,3 +34,7 @@ SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(Sc
 Schema attributes derived from annotations on getter methods are also applied to their associated fields.
 
 To use it, just pass a module instance into `SchemaGeneratorConfigBuilder.with(Module)`, optionally providing `JacksonOption` values in the module's constructor.
+
+----
+
+For a description of the available `JacksonOption` values and their meaning (apart from their mentionings in above enumeration), please refer to the `JacksonOption` class or its JavaDoc.

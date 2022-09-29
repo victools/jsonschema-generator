@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Changed
 - enable moving subtype schema into `$defs` and thereby reduce number of unnecessary `anyOf` wrappers
 
+### `jsonschema-module-jackson`
+#### Added
+- new `JacksonOption.ALWAYS_REF_SUBTYPES`, to produce centralised definition for each resolved subtype (wrapper) even if just referenced once
+
 ### `jsonschema-maven-plugin`
 #### Added
 - support `<classpath>` parameter in order to also consider compile dependencies for the schema generation (and/or ignoring runtime dependencies)

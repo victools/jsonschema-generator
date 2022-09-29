@@ -33,6 +33,8 @@ import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SubtypeResolver;
 import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,6 +44,29 @@ import java.util.stream.Stream;
  * Look-up of subtypes from a {@link JsonSubTypes} annotation.
  */
 public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionProviderV2 {
+
+    private final CustomDefinition.DefinitionType subtypeDefinitionType;
+
+    /**
+     * Default constructor equivalent to calling {@code new JsonSubTypesResolver(Collections.emptyList())}.
+     */
+    public JsonSubTypesResolver() {
+        this(Collections.emptyList());
+        // default constructor for backward compatibility, in case this was extended by someone
+    }
+
+    /**
+     * Constructor expecting list of enabled module options.
+     * <br>
+     * Currently, only the {@link JacksonOption#ALWAYS_REF_SUBTYPES} is considered here. Other relevant options are handled by the module class.
+     *
+     * @param options module options to derive differing behavior from
+     */
+    public JsonSubTypesResolver(Collection<JacksonOption> options) {
+        this.subtypeDefinitionType = options.contains(JacksonOption.ALWAYS_REF_SUBTYPES)
+                ? CustomDefinition.DefinitionType.ALWAYS_REF
+                : CustomDefinition.DefinitionType.STANDARD;
+    }
 
     /*
      * Looking-up declared subtypes for encountered supertype in general.
@@ -116,7 +141,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         if (definition == null) {
             return null;
         }
-        return new CustomDefinition(definition, CustomDefinition.DefinitionType.STANDARD, CustomDefinition.AttributeInclusion.NO);
+        return new CustomDefinition(definition, this.subtypeDefinitionType, CustomDefinition.AttributeInclusion.NO);
     }
 
     /**

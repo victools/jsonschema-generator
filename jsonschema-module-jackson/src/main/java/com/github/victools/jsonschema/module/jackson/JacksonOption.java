@@ -66,6 +66,13 @@ public enum JacksonOption {
      */
     IGNORE_PROPERTY_NAMING_STRATEGY,
     /**
+     * Use this option to ensure all looked-up subtypes according to {@code @JsonSubTypes} annotations are referenced via the central "$defs". This
+     * applies to the wrapping schema produced based on {@code @JsonTypeInfo} annotations, e.g., with wrapping object/array or additional property.
+     *
+     * @since 4.27.0
+     */
+    ALWAYS_REF_SUBTYPES,
+    /**
      * Use this option to skip the automatic look-up of subtypes according to {@code @JsonSubTypes} annotations.
      */
     SKIP_SUBTYPE_LOOKUP,
