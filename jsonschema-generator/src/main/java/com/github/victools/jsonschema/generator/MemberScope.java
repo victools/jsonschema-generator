@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 VicTools.
+ * Copyright 2020 VicTools & Sascha Kohlmann
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Representation of a single introspected field or method.
@@ -321,12 +322,19 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
         if (this.isFakeContainerItemScope()) {
             return this.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass);
         }
-        if (this.getOverriddenType() != null
-                && this.getDeclaredType().getErasedType() == Optional.class
-                && this.getOverriddenType().getErasedType() == this.getDeclaredType().getTypeParameters().get(0).getErasedType()) {
+        if (this.getOverriddenType() != null && (isSupplier() || isOptional())) {
             return this.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass);
         }
         return null;
+    }
+
+    private boolean isSupplier() {
+        return this.member.getType().isInstanceOf(Supplier.class);
+    }
+
+    private boolean isOptional() {
+        return this.getDeclaredType().getErasedType() == Optional.class
+                && this.getOverriddenType().getErasedType() == this.getDeclaredType().getTypeParameters().get(0).getErasedType();
     }
 
     /**

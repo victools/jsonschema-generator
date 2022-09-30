@@ -82,6 +82,14 @@
             "type": "string",
             "minLength": 5,
             "maxLength": 12
+        },
+        "supplierPositiveOrZero": {
+            "type": "integer",
+            "minimum": 0
+        },
+        "supplierWithAnnotationPositiveOrZero": {
+            "type": "integer",
+            "minimum": 0
         }
     },
     "required": ["notBlankText", "notEmptyList", "notEmptyPatternText", "notNullEmail", "notNullList"]

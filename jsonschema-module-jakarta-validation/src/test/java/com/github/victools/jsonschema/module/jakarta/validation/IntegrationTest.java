@@ -33,6 +33,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +41,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -63,6 +65,7 @@ public class IntegrationTest {
                 JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS);
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
+                .with(Option.FLATTENED_SUPPLIERS)
                 .with(module)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
@@ -77,7 +80,7 @@ public class IntegrationTest {
         StringBuilder stringBuilder = new StringBuilder();
         try (InputStream inputStream = IntegrationTest.class
                 .getResourceAsStream(resourcePath);
-                Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
+             Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
             while (scanner.hasNext()) {
                 stringBuilder.append(scanner.nextLine()).append('\n');
             }
@@ -128,5 +131,27 @@ public class IntegrationTest {
         @DecimalMin(value = "0", inclusive = false)
         @DecimalMax(value = "1", inclusive = false)
         public double exclusiveRangeDouble;
+
+        @PositiveOrZero
+        public IntegrationTest.TestSupplier supplierPositiveOrZero;
+
+        public TestSupplierWithAnnotation supplierWithAnnotationPositiveOrZero;
+    }
+
+    static class TestSupplier implements Supplier<Integer> {
+
+        @Override
+        public Integer get() {
+            return 0;
+        }
+    }
+
+    static class TestSupplierWithAnnotation implements Supplier<Integer> {
+
+        @Override
+        @PositiveOrZero
+        public Integer get() {
+            return 0;
+        }
     }
 }

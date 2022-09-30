@@ -25,6 +25,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -112,6 +113,14 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
      * @return public getter from within the field's declaring class
      */
     private MethodScope doFindGetter() {
+        if (this.getMember().getType().isInstanceOf(Supplier.class)) {
+            ResolvedMethod[] methods = getContext().resolveWithMembers(this.getMember().getType()).getMemberMethods();
+            return Stream.of(methods)
+                    .filter(method -> method.getName().equals("get"))
+                    .findFirst()
+                    .map(method -> this.getContext().createMethodScope(method, this.getDeclaringTypeMembers()))
+                    .orElse(null);
+        }
         String capitalisedFieldName = this.getDeclaredName().substring(0, 1).toUpperCase() + this.getDeclaredName().substring(1);
         String getterName1 = "get" + capitalisedFieldName;
         String getterName2 = "is" + capitalisedFieldName;

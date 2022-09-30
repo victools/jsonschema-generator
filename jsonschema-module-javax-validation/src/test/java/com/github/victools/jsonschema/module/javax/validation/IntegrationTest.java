@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.function.Supplier;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Email;
@@ -39,6 +40,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -128,5 +130,27 @@ public class IntegrationTest {
         @DecimalMin(value = "0", inclusive = false)
         @DecimalMax(value = "1", inclusive = false)
         public double exclusiveRangeDouble;
+
+        @PositiveOrZero
+        public IntegrationTest.TestSupplier supplierPositiveOrZero;
+
+        public TestSupplierWithAnnotation supplierWithAnnotationPositiveOrZero;
+    }
+
+    static class TestSupplier implements Supplier<Integer> {
+
+        @Override
+        public Integer get() {
+            return 0;
+        }
+    }
+
+    static class TestSupplierWithAnnotation implements Supplier<Integer> {
+
+        @Override
+        @PositiveOrZero
+        public Integer get() {
+            return 0;
+        }
     }
 }
