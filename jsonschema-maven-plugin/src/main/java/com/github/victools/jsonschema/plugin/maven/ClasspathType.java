@@ -45,24 +45,24 @@ public enum ClasspathType {
      */
     WITH_ALL_DEPENDENCIES;
 
-    public List<URL> getUrls(MavenProject project) {
-        Collection<String> classPathElements;
+    public Collection<String> getClasspathElements(MavenProject project) {
+        Collection<String> classpathElements;
         try {
             switch (this) {
             case PROJECT_ONLY:
-                classPathElements = Collections.singleton(project.getBuild().getOutputDirectory());
+                classpathElements = Collections.singleton(project.getBuild().getOutputDirectory());
                 break;
             case WITH_COMPILE_DEPENDENCIES:
-                classPathElements = project.getCompileClasspathElements();
+                classpathElements = project.getCompileClasspathElements();
                 break;
             case WITH_RUNTIME_DEPENDENCIES:
-                classPathElements = project.getRuntimeClasspathElements();
+                classpathElements = project.getRuntimeClasspathElements();
                 break;
             case WITH_ALL_DEPENDENCIES:
                 // to remove duplicates
-                classPathElements = new HashSet<>();
-                classPathElements.addAll(project.getRuntimeClasspathElements());
-                classPathElements.addAll(project.getCompileClasspathElements());
+                classpathElements = new HashSet<>();
+                classpathElements.addAll(project.getRuntimeClasspathElements());
+                classpathElements.addAll(project.getCompileClasspathElements());
                 break;
             default:
                 throw new IllegalArgumentException("ClasspathType " + this + " not supported");
@@ -70,9 +70,13 @@ public enum ClasspathType {
         } catch (DependencyResolutionRequiredException e) {
             throw new IllegalStateException("Failed to resolve classpathType elements", e);
         }
+        return classpathElements;
+    }
 
-        List<URL> urls = new ArrayList<>(classPathElements.size());
-        for (String element : classPathElements) {
+    public List<URL> getUrls(MavenProject project) {
+        Collection<String> classpathElements = this.getClasspathElements(project);
+        List<URL> urls = new ArrayList<>(classpathElements.size());
+        for (String element : classpathElements) {
             try {
                 urls.add(new File(element).toURI().toURL());
             } catch (MalformedURLException e) {

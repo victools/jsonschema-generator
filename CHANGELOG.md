@@ -23,6 +23,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bump `swagger-annotations` compile dependency version from `2.1.2` to `2.2.3`
 - bump `swagger-core` compile dependency version from `2.1.2` to `2.2.3`
 
+### `jsonschema-maven-plugin`
+#### Changed
+- use `classgraph` dependency for classpath scanning determining entry points for schema generation
+
+#### Removed
+- allow non-public classes as entry points for schema generation
+- `reflections` dependency
+
 ## [4.27.0] - 2022-09-29
 ### `jsonschema-generator`
 #### Added
