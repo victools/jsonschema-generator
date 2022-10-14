@@ -16,6 +16,8 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
+import io.github.classgraph.ClassInfo;
+
 /**
  * Wrapper for a class on the classpath for which a schema may be generated.
  */
@@ -26,13 +28,13 @@ public class PotentialSchemaClass implements Comparable<PotentialSchemaClass> {
     private boolean alreadyGenerated;
 
     /**
-     * Constructor expecting the full class name including its package path with "." as separators.
+     * Constructor expecting the collected class info for a single type.
      *
-     * @param fullClassName targeted class's full name
+     * @param classInfo targeted class's info
      */
-    public PotentialSchemaClass(String fullClassName) {
-        this.fullClassName = fullClassName;
-        this.absolutePathToMatch = fullClassName.replace('.', '/');
+    public PotentialSchemaClass(ClassInfo classInfo) {
+        this.fullClassName = classInfo.getName();
+        this.absolutePathToMatch = this.fullClassName.replace('.', '/');
         this.alreadyGenerated = false;
     }
 

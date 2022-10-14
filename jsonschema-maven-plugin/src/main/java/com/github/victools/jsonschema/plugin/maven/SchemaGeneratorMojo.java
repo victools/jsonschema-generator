@@ -33,6 +33,9 @@ import com.github.victools.jsonschema.module.javax.validation.JavaxValidationOpt
 import com.github.victools.jsonschema.module.swagger15.SwaggerModule;
 import com.github.victools.jsonschema.module.swagger15.SwaggerOption;
 import com.github.victools.jsonschema.module.swagger2.Swagger2Module;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -57,10 +60,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.reflections.Reflections;
-import org.reflections.scanners.Scanner;
-import org.reflections.scanners.Scanners;
-import org.reflections.util.ConfigurationBuilder;
 
 /**
  * Maven plugin for the victools/jsonschema-generator.
@@ -256,39 +255,33 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     private List<PotentialSchemaClass> getAllClassNames() {
         if (this.allTypes == null) {
-            Scanner subTypeScanner = Scanners.SubTypes.filterResultsBy(c -> true);
-            ConfigurationBuilder configBuilder = new ConfigurationBuilder()
-                    .addScanners(subTypeScanner);
+            ClassGraph classGraph = new ClassGraph()
+                    .overrideClasspath(classpath.getClasspathElements(this.project))
+                    .enableClassInfo();
             boolean considerAnnotations = this.annotations != null && !this.annotations.isEmpty();
             if (considerAnnotations) {
-                configBuilder.addScanners(Scanners.TypesAnnotated);
+                classGraph.enableAnnotationInfo();
             }
-
-            configBuilder.addUrls(classpath.getUrls(this.project));
-
-            Reflections reflections = new Reflections(configBuilder);
-            Set<String> allTypesSet;
-            if (considerAnnotations) {
-                List<String> annotationNames = this.annotations.stream()
-                        .map(l -> l.className)
-                        .collect(Collectors.toList());
-                allTypesSet = reflections.get(Scanners.TypesAnnotated.with(annotationNames));
-            } else {
-                allTypesSet = reflections.getAll(subTypeScanner);
-            }
-
-            Stream<PotentialSchemaClass> allTypesStream = allTypesSet
-                    .stream()
-                    .map(PotentialSchemaClass::new);
             if (this.excludeClassNames != null && this.excludeClassNames.length > 0) {
                 Set<Pattern> exclusions = Stream.of(this.excludeClassNames)
                         .map(excludeEntry -> GlobHandler.createClassOrPackageNameFilter(excludeEntry, false))
                         .collect(Collectors.toSet());
-                allTypesStream = allTypesStream
-                        .filter(typeEntry -> exclusions.stream()
-                        .noneMatch(pattern -> pattern.matcher(typeEntry.getAbsolutePathToMatch()).matches()));
+                classGraph.filterClasspathElements(element -> exclusions.stream()
+                        .noneMatch(pattern -> pattern.matcher(element).matches()));
             }
-            this.allTypes = allTypesStream.collect(Collectors.toList());
+            Stream<ClassInfo> allTypesStream;
+            try (ScanResult scanResult = classGraph.scan()) {
+                if (considerAnnotations) {
+                    allTypesStream = this.annotations.stream()
+                            .flatMap(a -> scanResult.getClassesWithAnnotation(a.className).stream())
+                            .distinct();
+                } else {
+                    allTypesStream = scanResult.getAllClasses().stream();
+                }
+                this.allTypes = allTypesStream
+                        .map(PotentialSchemaClass::new)
+                        .collect(Collectors.toList());
+            }
         }
         return this.allTypes;
     }
@@ -467,7 +460,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private URLClassLoader getClassLoader() {
         if (this.classLoader == null) {
             // fix the classpath such that the classloader can get classes from any possible dependency
-            // this does not affect filtering, as the reflections library uses its own url list and allows for caching
+            // this does not affect filtering, as the classgraph library uses its own classloader and allows for caching
             List<URL> urls = ClasspathType.WITH_ALL_DEPENDENCIES.getUrls(this.project);
             this.classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]),
                 Thread.currentThread().getContextClassLoader());
