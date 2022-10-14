@@ -121,7 +121,7 @@
         <!-- test dependencies -->
         <version.jsonassert>1.5.1</version.jsonassert>
         <version.junit>5.9.1</version.junit>
-        <version.logback>1.4.4</version.logback>
+        <version.logback>1.2.11</version.logback>
         <version.mockito>4.8.0</version.mockito>
         <version.validator>1.0.73</version.validator>
         <!-- provided module dependencies -->
