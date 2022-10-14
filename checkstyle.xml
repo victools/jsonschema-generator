@@ -176,7 +176,7 @@
         </module>
         <module name="JavadocType" />
         <module name="JavadocMethod">
-            <property name="scope" value="private" />
+            <property name="accessModifiers" value="private, package, protected, public" />
             <property name="allowMissingParamTags" value="false" />
             <property name="allowMissingReturnTag" value="false" />
             <property name="allowedAnnotations" value="Override, Test" />

@@ -5,6 +5,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Changed
+- bump `slf4j-api` dependency version from `1.7.35` to `2.0.3`
+- bump `jackson-core` dependency version from `2.13.2` to `2.13.4`
+- bump `jackson-databind` dependency version from `2.13.2.2` to `2.13.4.2`
+
+### `jsonschema-module-jakarta
+- bump `jakarta-validation-api` compile dependency version from `3.0.0` to `3.0.2`
+
+### `jsonschema-module-swagger-1.5`
+#### Changed
+- bump `swagger-annotations` compile dependency version from `1.5.22` to `1.6.7`
+
+### `jsonschema-module-swagger-2`
+#### Changed
+- bump `swagger-annotations` compile dependency version from `2.1.2` to `2.2.3`
+- bump `swagger-core` compile dependency version from `2.1.2` to `2.2.3`
 
 ## [4.27.0] - 2022-09-29
 ### `jsonschema-generator`

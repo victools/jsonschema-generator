@@ -104,20 +104,32 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <!-- maven plugins -->
+        <maven.plugin.version.checkstyle>3.2.0</maven.plugin.version.checkstyle>
+        <version.checkstyle>9.3</version.checkstyle>
+        <maven.plugin.version.compiler>3.10.1</maven.plugin.version.compiler>
+        <maven.plugin.version.jacoco>0.8.8</maven.plugin.version.jacoco>
+        <maven.plugin.version.javadoc>3.4.1</maven.plugin.version.javadoc>
+        <maven.plugin.version.release>2.5.3</maven.plugin.version.release>
+        <maven.plugin.version.source>3.2.1</maven.plugin.version.source>
+        <maven.plugin.version.surefire>3.0.0-M7</maven.plugin.version.surefire>
 
+        <!-- included dependencies -->
         <version.classmate>1.5.1</version.classmate>
-        <version.jackson>2.13.2.20220328</version.jackson>
-        <version.jakarta.validation>3.0.0</version.jakarta.validation>
+        <version.jackson>2.13.4.20221013</version.jackson>
+        <version.slf4j>2.0.3</version.slf4j>
+        <!-- test dependencies -->
+        <version.jsonassert>1.5.1</version.jsonassert>
+        <version.junit>5.9.1</version.junit>
+        <version.logback>1.4.4</version.logback>
+        <version.mockito>4.8.0</version.mockito>
+        <version.validator>1.0.73</version.validator>
+        <!-- provided module dependencies -->
+        <version.jakarta.validation>3.0.2</version.jakarta.validation>
         <version.javax.validation>2.0.1.Final</version.javax.validation>
-        <version.jsonassert>1.5.0</version.jsonassert>
-        <version.junit>5.8.2</version.junit>
-        <version.logback>1.2.7</version.logback>
-        <version.mockito>4.4.0</version.mockito>
         <version.reflections>0.10.2</version.reflections>
-        <version.slf4j>1.7.35</version.slf4j>
-        <version.swagger-1.5>1.5.22</version.swagger-1.5>
-        <version.swagger-2>2.1.2</version.swagger-2>
-        <version.validator>1.0.36</version.validator>
+        <version.swagger-1.5>1.6.7</version.swagger-1.5>
+        <version.swagger-2>2.2.3</version.swagger-2>
     </properties>
 
     <dependencyManagement>
@@ -227,7 +239,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>${maven.plugin.version.compiler}</version>
                     <configuration>
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.target}</target>
@@ -236,14 +248,14 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M5</version>
+                    <version>${maven.plugin.version.surefire}</version>
                     <configuration>
                         <trimStackTrace>false</trimStackTrace>
                     </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>${maven.plugin.version.checkstyle}</version>
                     <executions>
                         <execution>
                             <configuration>
@@ -260,11 +272,18 @@
                             <phase>prepare-package</phase>
                         </execution>
                     </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${version.checkstyle}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.3</version>
+                    <version>${maven.plugin.version.jacoco}</version>
                     <executions>
                         <execution>
                             <goals>
@@ -290,7 +309,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>${maven.plugin.version.source}</version>
                     <executions>
                         <execution>
                             <id>attach-sources</id>
@@ -303,7 +322,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.4.0</version>
+                    <version>${maven.plugin.version.javadoc}</version>
                     <configuration>
                         <source>${maven.compiler.source}</source>
                     </configuration>
@@ -318,7 +337,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
+                    <version>$maven.plugin.version.release{}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
