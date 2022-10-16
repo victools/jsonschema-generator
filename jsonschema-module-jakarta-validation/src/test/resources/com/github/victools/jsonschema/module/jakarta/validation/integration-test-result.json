@@ -25,6 +25,13 @@
                 "exclusiveMaximum": 1
             }
         },
+        "notEmptyMap": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "integer"
+            },
+            "minProperties": 1
+        },
         "notEmptyPatternText": {
             "type": "string",
             "minLength": 1,
@@ -55,10 +62,14 @@
             "maximum": 5
         },
         "optionalSizeRangeString1": {
-            "type": ["integer", "null"]
+            "type": ["string", "null"],
+            "minLength": 4,
+            "maxLength": 18
         },
         "optionalSizeRangeString2": {
-            "type": ["integer", "null"]
+            "type": ["string", "null"],
+            "minLength": 5,
+            "maxLength": 10
         },
         "sizeRangeList": {
             "minItems": 3,
@@ -78,11 +89,19 @@
                 "type": "string"
             }
         },
+        "sizeRangeMap": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            },
+            "minProperties": 3,
+            "maxProperties": 25
+        },
         "sizeRangeText": {
             "type": "string",
             "minLength": 5,
             "maxLength": 12
         }
     },
-    "required": ["notBlankText", "notEmptyList", "notEmptyPatternText", "notNullEmail", "notNullList"]
+    "required": ["notBlankText", "notEmptyList", "notEmptyMap", "notEmptyPatternText", "notNullEmail", "notNullList"]
 }

@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bump `jackson-databind` dependency version from `2.13.2.2` to `2.13.4.2`
 
 ### `jsonschema-module-jakarta
+#### Added
+- set `minProperties`/`maxProperties` for `Map` types with `@NotEmpty` or `@Size` annotation
+
+#### Changed
 - bump `jakarta-validation-api` compile dependency version from `3.0.0` to `3.0.2`
 
 ### `jsonschema-module-swagger-1.5`

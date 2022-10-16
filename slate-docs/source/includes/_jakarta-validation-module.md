@@ -18,11 +18,12 @@ SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(Sc
 1. Determine whether a member is not nullable, base assumption being that all fields and method return values are nullable if not annotated. Based on `@NotNull`/`@Null`/`@NotEmpty`/`@NotBlank`.
 2. Populate list of "required" fields/methods for objects if `JakartaValidationOption.NOT_NULLABLE_FIELD_IS_REQUIRED`/`JakartaValidationOption.NOT_NULLABLE_METHOD_IS_REQUIRED` is being provided respectively (i.e. this is an "opt-in").
 3. Populate "minItems" and "maxItems" for containers (i.e. arrays and collections). Based on `@Size`/`@NotEmpty`.
-4. Populate "minLength" and "maxLength" for strings. Based on `@Size`/`@NotEmpty`/`@NotBlank`.
-5. Populate "format" for strings. Based on `@Email`, can be "email" or "idn-email" depending on whether `JakartaValidationOption.PREFER_IDN_EMAIL_FORMAT` is being provided.
-6. Populate "pattern" for strings. Based on `@Pattern`/`@Email`, if `JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS` is being provided (i.e. this is an "opt-in").
-7. Populate "minimum"/"exclusiveMinimum" for numbers. Based on `@Min`/`@DecimalMin`/`@Positive`/`@PositiveOrZero`.
-8. Populate "maximum"/"exclusiveMaximum" for numbers. Based on `@Max`/`@DecimalMax`/`@Negative`/`@NegativeOrZero`.
+4. Populate "minProperties" and "maxProperties" for map types. Based on `@Size`/`@NotEmpty`.
+5. Populate "minLength" and "maxLength" for strings. Based on `@Size`/`@NotEmpty`/`@NotBlank`.
+6. Populate "format" for strings. Based on `@Email`, can be "email" or "idn-email" depending on whether `JakartaValidationOption.PREFER_IDN_EMAIL_FORMAT` is being provided.
+7. Populate "pattern" for strings. Based on `@Pattern`/`@Email`, if `JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS` is being provided (i.e. this is an "opt-in").
+8. Populate "minimum"/"exclusiveMinimum" for numbers. Based on `@Min`/`@DecimalMin`/`@Positive`/`@PositiveOrZero`.
+9. Populate "maximum"/"exclusiveMaximum" for numbers. Based on `@Max`/`@DecimalMax`/`@Negative`/`@NegativeOrZero`.
 
 Schema attributes derived from validation annotations on fields are also applied to their respective getter methods.  
 Schema attributes derived from validation annotations on getter methods are also applied to their associated fields.

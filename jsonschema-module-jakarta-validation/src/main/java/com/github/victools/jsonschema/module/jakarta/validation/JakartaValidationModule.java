@@ -16,12 +16,16 @@
 
 package com.github.victools.jsonschema.module.jakarta.validation;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import com.github.victools.jsonschema.generator.SchemaKeyword;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
@@ -42,6 +46,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -123,6 +128,7 @@ public class JakartaValidationModule implements Module {
         configPart.withNumberExclusiveMinimumResolver(this::resolveNumberExclusiveMinimum);
         configPart.withNumberInclusiveMaximumResolver(this::resolveNumberInclusiveMaximum);
         configPart.withNumberExclusiveMaximumResolver(this::resolveNumberExclusiveMaximum);
+        configPart.withInstanceAttributeOverride(this::overrideInstanceAttributes);
 
         if (this.options.contains(JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS)) {
             configPart.withStringPatternResolver(this::resolveStringPattern);
@@ -220,6 +226,7 @@ public class JakartaValidationModule implements Module {
      * @param member the field or method to check
      * @return specified minimum number of array items (or null)
      * @see Size
+     * @see NotEmpty
      */
     protected Integer resolveArrayMinItems(MemberScope<?, ?> member) {
         if (member.isContainerType()) {
@@ -249,6 +256,46 @@ public class JakartaValidationModule implements Module {
                 // maximum length below the default 2147483647 was specified
                 return sizeAnnotation.max();
             }
+        }
+        return null;
+    }
+
+    /**
+     * Determine a given {@link Map} type's minimum number of entries.
+     *
+     * @param member the field or method to check (assumption: the member has a Map type)
+     * @return specified minimum number of map entries (or null)
+     * @see Size
+     * @see NotEmpty
+     *
+     * @since 4.28.0
+     */
+    private Integer resolveMapMinEntries(MemberScope<?, ?> member) {
+        Size sizeAnnotation = this.getAnnotationFromFieldOrGetter(member, Size.class, Size::groups);
+        if (sizeAnnotation != null && sizeAnnotation.min() > 0) {
+            // minimum value greater than the default 0 was specified
+            return sizeAnnotation.min();
+        }
+        if (this.getAnnotationFromFieldOrGetter(member, NotEmpty.class, NotEmpty::groups) != null) {
+            return 1;
+        }
+        return null;
+    }
+
+    /**
+     * Determine a given {@link Map} type's maximum number of entries.
+     *
+     * @param member the field or method to check (assumption: the member has a Map type)
+     * @return specified maximum number of map entries (or null)
+     * @see Size
+     *
+     * @since 4.28.0
+     */
+    private Integer resolveMapMaxEntries(MemberScope<?, ?> member) {
+        Size sizeAnnotation = this.getAnnotationFromFieldOrGetter(member, Size.class, Size::groups);
+        if (sizeAnnotation != null && sizeAnnotation.max() < 2147483647) {
+            // maximum value below the default 2147483647 was specified
+            return sizeAnnotation.max();
         }
         return null;
     }
@@ -429,5 +476,37 @@ public class JakartaValidationModule implements Module {
             return BigDecimal.ZERO;
         }
         return null;
+    }
+
+    /**
+     * Implementation of the functional {@code InstanceAttributeOverrideV2} interface.
+     *
+     * @param memberAttributes already collected type attributes to add the min/max properties to
+     * @param member the field or method for which additional attributes may be collected
+     * @param context generation context
+     *
+     * @since 4.28.0 setting "minProperties" and "maxProperties" for "Map" types
+     */
+    protected void overrideInstanceAttributes(ObjectNode memberAttributes, MemberScope<?, ?> member, SchemaGenerationContext context) {
+        if (!member.getType().isInstanceOf(Map.class)) {
+            // in its current version, this instance attribute override is only considering Map types
+            return;
+        }
+        Integer mapMinEntries = this.resolveMapMinEntries(member);
+        if (mapMinEntries != null) {
+            String minPropertiesAttribute = context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MIN);
+            JsonNode existingValue = memberAttributes.get(minPropertiesAttribute);
+            if (existingValue == null || (existingValue.isNumber() && existingValue.asInt() < mapMinEntries)) {
+                memberAttributes.put(minPropertiesAttribute, mapMinEntries);
+            }
+        }
+        Integer mapMaxEntries = this.resolveMapMaxEntries(member);
+        if (mapMaxEntries != null) {
+            String maxPropertiesAttribute = context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MAX);
+            JsonNode existingValue = memberAttributes.get(maxPropertiesAttribute);
+            if (existingValue == null || (existingValue.isNumber() && existingValue.asInt() > mapMaxEntries)) {
+                memberAttributes.put(maxPropertiesAttribute, mapMaxEntries);
+            }
+        }
     }
 }

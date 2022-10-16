@@ -18,6 +18,7 @@ package com.github.victools.jsonschema.module.jakarta.validation;
 
 import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.FieldScope;
+import com.github.victools.jsonschema.generator.InstanceAttributeOverrideV2;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
@@ -144,6 +145,7 @@ public class JakartaValidationModuleTest {
         Mockito.verify(this.fieldConfigPart).withNumberExclusiveMinimumResolver(Mockito.any());
         Mockito.verify(this.fieldConfigPart).withNumberInclusiveMaximumResolver(Mockito.any());
         Mockito.verify(this.fieldConfigPart).withNumberExclusiveMaximumResolver(Mockito.any());
+        Mockito.verify(this.fieldConfigPart).withInstanceAttributeOverride(Mockito.any(InstanceAttributeOverrideV2.class));
 
         Mockito.verify(this.methodConfigPart).withNullableCheck(Mockito.any());
         Mockito.verify(this.methodConfigPart).withArrayMinItemsResolver(Mockito.any());
@@ -155,6 +157,7 @@ public class JakartaValidationModuleTest {
         Mockito.verify(this.methodConfigPart).withNumberExclusiveMinimumResolver(Mockito.any());
         Mockito.verify(this.methodConfigPart).withNumberInclusiveMaximumResolver(Mockito.any());
         Mockito.verify(this.methodConfigPart).withNumberExclusiveMaximumResolver(Mockito.any());
+        Mockito.verify(this.methodConfigPart).withInstanceAttributeOverride(Mockito.any(InstanceAttributeOverrideV2.class));
     }
 
     static Stream<Arguments> parametersForTestNullableCheck() {
