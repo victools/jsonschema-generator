@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 import org.junit.jupiter.api.Test;
@@ -62,7 +63,7 @@ public class IntegrationTest {
                 JakartaValidationOption.NOT_NULLABLE_METHOD_IS_REQUIRED,
                 JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS);
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
-                .with(Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
+                .with(Option.NULLABLE_ARRAY_ITEMS_ALLOWED, Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES)
                 .with(module)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
@@ -101,9 +102,14 @@ public class IntegrationTest {
         @Size(min = 3, max = 25)
         public List<String> sizeRangeListWithoutItemAnnotation;
 
+        @NotEmpty
+        public Map<String, @Min(13) Integer> notEmptyMap;
+        @Size(min = 3, max = 25)
+        public Map<String, @NotEmpty String> sizeRangeMap;
+
         @Size(min = 4, max = 18)
-        public Optional<Integer> optionalSizeRangeString1;
-        public Optional<@Size(min = 5, max = 10) Integer> optionalSizeRangeString2;
+        public Optional<String> optionalSizeRangeString1;
+        public Optional<@Size(min = 5, max = 10) String> optionalSizeRangeString2;
 
         @Min(1)
         @Max(8)
