@@ -58,7 +58,7 @@ public abstract class TestUtils {
      * @return file contents
      * @throws IOException when the file loading failed
      */
-    public static String loadResource(Class<?> testClass, String resourcePath) throws IOException {
+    private static String loadResource(Class<?> testClass, String resourcePath) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         try (InputStream inputStream = testClass.getResourceAsStream(resourcePath);
                 Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
