@@ -30,7 +30,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -293,7 +292,7 @@ public class SchemaCleanUpUtils {
         }
         Map<String, List<JsonNode>> unsupportedTagValues = fieldsFromAllParts.entrySet().stream()
                 .filter(entry -> !reverseKeywordMap.containsKey(entry.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, throwingMerger(), LinkedHashMap::new));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, SchemaCleanUpUtils::throwingMerger, LinkedHashMap::new));
         if (unsupportedTagValues.entrySet().stream().anyMatch(entry -> entry.getValue().size() > 1)) {
             // unsupported tag with more than one occurrence: be conservative and don't merge
             return null;
@@ -319,7 +318,8 @@ public class SchemaCleanUpUtils {
             Map<String, SchemaKeyword> reverseKeywordMap, ObjectNode mainNodeIncludingAllOf) {
         Map<SchemaKeyword, List<JsonNode>> supportedTagValues = fieldsFromAllParts.entrySet().stream()
                 .filter(entry -> reverseKeywordMap.containsKey(entry.getKey()))
-                .collect(Collectors.toMap(entry -> reverseKeywordMap.get(entry.getKey()), Map.Entry::getValue, throwingMerger(), LinkedHashMap::new));
+                .collect(Collectors.toMap(entry -> reverseKeywordMap.get(entry.getKey()), Map.Entry::getValue,
+                        SchemaCleanUpUtils::throwingMerger, LinkedHashMap::new));
         if (supportedTagValues.containsKey(SchemaKeyword.TAG_IF)) {
             // "if"/"then"/"else" tags should remain isolated in their sub-schemas
             return null;
@@ -482,14 +482,12 @@ public class SchemaCleanUpUtils {
     }
 
     /**
-     * Helper function, that returns a BinaryOperator for use in Collectors.toMap() that assumes that there are no duplicate keys.
+     * Helper function, that represents a BinaryOperator for use in Collectors.toMap() that assumes that there are no duplicate keys.
      *
      * @param <T> value type
      * @return merge function that throws an IllegalStateException when invoked
      */
-    private static <T> BinaryOperator<T> throwingMerger() {
-        return (u,v) -> {
-            throw new IllegalStateException("Duplicate key " + u);
-        };
+    private static <T> T throwingMerger(T a, T b) {
+        throw new IllegalStateException("Duplicate key " + a);
     }
 }

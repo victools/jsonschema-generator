@@ -61,7 +61,7 @@ public class AdditionalPropertiesModule implements Module {
         // within a Map<Key, Value> allow additionalProperties of the Value type
         // if no type parameters are defined, this will result in additionalProperties to be omitted (by way of returning Object.class)
         ResolvedType valueType = member.getTypeParameterFor(Map.class, 1);
-        if (valueType.getErasedType() == Object.class) {
+        if (valueType == null || valueType.getErasedType() == Object.class) {
             return null;
         }
         MemberScope<?, ?> mapValueScope = member.asFakeContainerItemScope(Map.class, 1);
