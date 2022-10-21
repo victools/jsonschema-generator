@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Changed
 - consider annotations on `Map` value types when using `Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES`
+- enhanced schema clean-up at the end: consolidating `allOf` with distinct `properties` (mostly relevant in jackson subtype resolution)
 - bump `slf4j-api` dependency version from `1.7.35` to `2.0.3`
 - bump `jackson-core` dependency version from `2.13.2` to `2.13.4`
 - bump `jackson-databind` dependency version from `2.13.2.2` to `2.13.4.2`
