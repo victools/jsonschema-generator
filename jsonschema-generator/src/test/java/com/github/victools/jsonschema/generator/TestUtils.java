@@ -16,10 +16,14 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import org.json.JSONException;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Common helper functions within tests.
@@ -28,6 +32,22 @@ public abstract class TestUtils {
 
     private TestUtils() {
         // not intended for sub-typing
+    }
+
+    /**
+     * Assert that the given schema node is equal to the contents of a prepared file. In case of a mismatch, print the result and compared file name.
+     *
+     * @param generatedSchema schema generation test result to compare
+     * @param testClass test class requesting a file to be loaded
+     * @param resourcePath relative path to the target file
+     * @throws IOException when the file loading failed
+     * @throws JSONException when the JSON comparison failed
+     */
+    public static void assertGeneratedSchema(JsonNode generatedSchema, Class<?> testClass, String resourcePath)
+            throws IOException, JSONException {
+        String schemaString = generatedSchema.toString();
+        JSONAssert.assertEquals('\n' + testClass.getPackage().getName() + ": " + resourcePath + '\n' + schemaString + '\n',
+                TestUtils.loadResource(testClass, resourcePath), schemaString, JSONCompareMode.STRICT);
     }
 
     /**

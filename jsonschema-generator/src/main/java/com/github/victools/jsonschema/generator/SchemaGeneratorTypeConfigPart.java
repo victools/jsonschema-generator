@@ -16,6 +16,9 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -23,6 +26,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 /**
  * Generic collection of reflection based analysis for populating a JSON Schema.
@@ -32,7 +37,7 @@ import java.util.Objects;
 public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
 
     /**
-     * Helper function for invoking a given function with the provided inputs or returning null no function returning anything but null themselves.
+     * Helper function for invoking a given function with the provided inputs or returning null, if all functions return null themselves.
      *
      * @param <S> type of the targeted scope/type representation (to be forwarded as parameter to the given function)
      * @param <R> type of the expected return value (of the given function)
@@ -48,6 +53,25 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
                 .orElse(null);
     }
 
+    /**
+     * Helper function for invoking a given function with the provided inputs or returning null, if all functions return null themselves.
+     *
+     * @param <S> type of the targeted scope/type representation (to be forwarded as first parameter to the given function)
+     * @param <R> type of the expected return value (of the given function)
+     * @param resolvers functions to invoke and return the first non-null result from
+     * @param scope targeted scope (to be forwarded as first argument to a given function)
+     * @param context generation context enabling advanced features within the given configuration
+     * @return return value of successfully invoked function or null
+     */
+    protected static <S extends TypeScope, R> R getFirstDefinedValue(List<BiFunction<S, SchemaGenerationContext, R>> resolvers, S scope,
+            SchemaGenerationContext context) {
+        return resolvers.stream()
+                .map(resolver -> resolver.apply(scope, context))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+    }
+
     /*
      * General fields independent of "type".
      */
@@ -55,8 +79,8 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
     private final List<ConfigFunction<S, String>> descriptionResolvers = new ArrayList<>();
     private final List<ConfigFunction<S, Object>> defaultResolvers = new ArrayList<>();
     private final List<ConfigFunction<S, Collection<?>>> enumResolvers = new ArrayList<>();
-    private final List<ConfigFunction<S, Type>> additionalPropertiesResolvers = new ArrayList<>();
-    private final List<ConfigFunction<S, Map<String, Type>>> patternPropertiesResolvers = new ArrayList<>();
+    private final List<BiFunction<S, SchemaGenerationContext, JsonNode>> additionalPropertiesResolvers = new ArrayList<>();
+    private final List<BiFunction<S, SchemaGenerationContext, Map<String, JsonNode>>> patternPropertiesResolvers = new ArrayList<>();
 
     /*
      * Validation fields relating to a schema with "type": "string".
@@ -173,6 +197,29 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
      * @return this config part (for chaining)
      */
     public SchemaGeneratorTypeConfigPart<S> withAdditionalPropertiesResolver(ConfigFunction<S, Type> resolver) {
+        return this.withAdditionalPropertiesResolver((scope, context) -> {
+            Type additionalPropertiesType = resolver.apply(scope);
+            if (additionalPropertiesType == null) {
+                return null;
+            }
+            if (additionalPropertiesType == Void.class || additionalPropertiesType == Void.TYPE) {
+                return BooleanNode.FALSE;
+            }
+            ResolvedType resolvedAdditionalPropertiesType = context.getTypeContext().resolve(additionalPropertiesType);
+            if (resolvedAdditionalPropertiesType.getErasedType() == Object.class) {
+                return BooleanNode.TRUE;
+            }
+            return context.createDefinitionReference(resolvedAdditionalPropertiesType);
+        });
+    }
+
+    /**
+     * Setter for "additionalProperties" resolver. If the returned type is {@link Void} "false" will be set, otherwise an appropriate sub-schema.
+     *
+     * @param resolver how to determine the "additionalProperties" of a JSON Schema, returning {@link Void} will result in "false"
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorTypeConfigPart<S> withAdditionalPropertiesResolver(BiFunction<S, SchemaGenerationContext, JsonNode> resolver) {
         this.additionalPropertiesResolvers.add(resolver);
         return this;
     }
@@ -181,10 +228,11 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
      * Determine the "additionalProperties" of a given scope/type representation.
      *
      * @param scope scope to determine "additionalProperties" value for
+     * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
      * @return "additionalProperties" in a JSON Schema (may be null)
      */
-    public Type resolveAdditionalProperties(S scope) {
-        return getFirstDefinedValue(this.additionalPropertiesResolvers, scope);
+    public JsonNode resolveAdditionalProperties(S scope, SchemaGenerationContext context) {
+        return SchemaGeneratorTypeConfigPart.getFirstDefinedValue(this.additionalPropertiesResolvers, scope, context);
     }
 
     /**
@@ -194,6 +242,24 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
      * @return this config part (for chaining)
      */
     public SchemaGeneratorTypeConfigPart<S> withPatternPropertiesResolver(ConfigFunction<S, Map<String, Type>> resolver) {
+        return this.withPatternPropertiesResolver((scope, context) -> {
+            Map<String, Type> patternTypes = resolver.apply(scope);
+            if (patternTypes == null) {
+                return null;
+            }
+            return patternTypes.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                    entry -> context.createDefinitionReference(context.getTypeContext().resolve(entry.getValue()))));
+        });
+    }
+
+    /**
+     * Setter for "patternProperties" resolver. The map's keys are representing the patterns and the mapped values their corresponding types.
+     *
+     * @param resolver how to determine the "patternProperties" of a JSON Schema
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorTypeConfigPart<S> withPatternPropertiesResolver(
+            BiFunction<S, SchemaGenerationContext, Map<String, JsonNode>> resolver) {
         this.patternPropertiesResolvers.add(resolver);
         return this;
     }
@@ -202,10 +268,11 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
      * Determine the "patternProperties" of a given scope/type representation.
      *
      * @param scope scope to determine "patternProperties" value for
+     * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
      * @return "patternProperties" in a JSON Schema (may be null), the keys representing the patterns and the mapped values their corresponding types
      */
-    public Map<String, Type> resolvePatternProperties(S scope) {
-        return getFirstDefinedValue(this.patternPropertiesResolvers, scope);
+    public Map<String, JsonNode> resolvePatternProperties(S scope, SchemaGenerationContext context) {
+        return SchemaGeneratorTypeConfigPart.getFirstDefinedValue(this.patternPropertiesResolvers, scope, context);
     }
 
     /**

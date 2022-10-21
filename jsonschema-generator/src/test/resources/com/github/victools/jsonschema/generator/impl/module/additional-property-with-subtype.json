@@ -1,16 +1,28 @@
 {
-  "type" : "object",
-  "properties" : {
-    "map" : {
-      "type" : "object",
-      "additionalProperties" : {
-        "type" : "object",
-        "properties" : {
-          "name" : {
-            "type" : "string"
-          }
+    "$defs": {
+        "B": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
         }
-      }
+    },
+    "type": "object",
+    "properties": {
+        "map": {
+            "allOf": [{
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/$defs/B"
+                    }
+                }, {
+                    "additionalProperties": {
+                        "$ref": "#/$defs/B",
+                        "description": "annotated super value"
+                    }
+                }]
+        }
     }
-  }
 }

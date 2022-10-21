@@ -22,7 +22,6 @@ import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.classmate.members.ResolvedMethod;
 import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.util.stream.Stream;
@@ -42,7 +41,7 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
      * @param context the overall type resolution context
      */
     protected FieldScope(ResolvedField field, ResolvedTypeWithMembers declaringTypeMembers, TypeContext context) {
-        this(field, null, null, declaringTypeMembers, false, context);
+        this(field, null, null, declaringTypeMembers, null, context);
     }
 
     /**
@@ -52,24 +51,24 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
      * @param overriddenType alternative type for this field
      * @param overriddenName alternative name for this field
      * @param declaringTypeMembers collection of the declaring type's (other) fields and methods
-     * @param fakeContainerItemScope whether this field/method scope represents only the container item type of the actual field/method
+     * @param fakeContainerItemIndex index of the container item on the generic field/method scope's declared type (e.g., in case of a List, it is 0)
      * @param context the overall type resolution context
      */
     protected FieldScope(ResolvedField field, ResolvedType overriddenType, String overriddenName,
-            ResolvedTypeWithMembers declaringTypeMembers, boolean fakeContainerItemScope, TypeContext context) {
-        super(field, overriddenType, overriddenName, declaringTypeMembers, fakeContainerItemScope, context);
+            ResolvedTypeWithMembers declaringTypeMembers, Integer fakeContainerItemIndex, TypeContext context) {
+        super(field, overriddenType, overriddenName, declaringTypeMembers, fakeContainerItemIndex, context);
     }
 
     @Override
     public FieldScope withOverriddenType(ResolvedType overriddenType) {
         return new FieldScope(this.getMember(), overriddenType, this.getOverriddenName(), this.getDeclaringTypeMembers(),
-                this.isFakeContainerItemScope(), this.getContext());
+                this.getFakeContainerItemIndex(), this.getContext());
     }
 
     @Override
     public FieldScope withOverriddenName(String overriddenName) {
         return new FieldScope(this.getMember(), this.getOverriddenType(), overriddenName, this.getDeclaringTypeMembers(),
-                this.isFakeContainerItemScope(), this.getContext());
+                this.getFakeContainerItemIndex(), this.getContext());
     }
 
     @Override
@@ -138,13 +137,7 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
     @Override
     public <A extends Annotation> A getContainerItemAnnotation(Class<A> annotationClass) {
         AnnotatedType annotatedType = this.getRawMember().getAnnotatedType();
-        if (annotatedType instanceof AnnotatedParameterizedType) {
-            AnnotatedType[] typeArguments = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
-            if (typeArguments.length == 1) {
-                return typeArguments[0].getAnnotation(annotationClass);
-            }
-        }
-        return null;
+        return this.getContext().getTypeParameterAnnotation(annotationClass, annotatedType, this.getFakeContainerItemIndex());
     }
 
     @Override

@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -311,7 +313,17 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
     }
 
     @Override
+    public SchemaGeneratorConfigPart<M> withAdditionalPropertiesResolver(BiFunction<M, SchemaGenerationContext, JsonNode> resolver) {
+        return (SchemaGeneratorConfigPart<M>) super.withAdditionalPropertiesResolver(resolver);
+    }
+
+    @Override
     public SchemaGeneratorConfigPart<M> withPatternPropertiesResolver(ConfigFunction<M, Map<String, Type>> resolver) {
+        return (SchemaGeneratorConfigPart<M>) super.withPatternPropertiesResolver(resolver);
+    }
+
+    @Override
+    public SchemaGeneratorConfigPart<M> withPatternPropertiesResolver(BiFunction<M, SchemaGenerationContext, Map<String, JsonNode>> resolver) {
         return (SchemaGeneratorConfigPart<M>) super.withPatternPropertiesResolver(resolver);
     }
 

@@ -19,15 +19,14 @@ package com.github.victools.jsonschema.generator.impl;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -132,23 +131,14 @@ public class AttributeCollectorTest {
     @ParameterizedTest
     @EnumSource(SchemaVersion.class)
     public void testSetAdditionalProperties_ObjectClass(SchemaVersion schemaVersion) {
-        this.collector.setAdditionalProperties(this.definitionNode, Object.class, this.generateContext(schemaVersion));
-        Assertions.assertTrue(this.definitionNode.isEmpty());
-    }
-
-    @ParameterizedTest
-    @EnumSource(SchemaVersion.class)
-    public void testSetAdditionalProperties_ResolvedObjectClass(SchemaVersion schemaVersion) {
-        SchemaGenerationContext generationContext = this.generateContext(schemaVersion);
-        ResolvedType resolvedObjectClass = generationContext.getTypeContext().resolve(Object.class);
-        this.collector.setAdditionalProperties(this.definitionNode, resolvedObjectClass, generationContext);
+        this.collector.setAdditionalProperties(this.definitionNode, BooleanNode.TRUE, this.generateContext(schemaVersion));
         Assertions.assertTrue(this.definitionNode.isEmpty());
     }
 
     @ParameterizedTest
     @EnumSource(SchemaVersion.class)
     public void testSetAdditionalProperties_VoidClass(SchemaVersion schemaVersion) {
-        this.collector.setAdditionalProperties(this.definitionNode, Void.class, this.generateContext(schemaVersion));
+        this.collector.setAdditionalProperties(this.definitionNode, BooleanNode.FALSE, this.generateContext(schemaVersion));
         Assertions.assertEquals(1, this.definitionNode.size());
         JsonNode additionalPropertiesNode = this.definitionNode.get(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES.forVersion(schemaVersion));
         Assertions.assertNotNull(additionalPropertiesNode);
@@ -158,26 +148,15 @@ public class AttributeCollectorTest {
 
     @ParameterizedTest
     @EnumSource(SchemaVersion.class)
-    public void testSetAdditionalProperties_VoidType(SchemaVersion schemaVersion) {
-        this.collector.setAdditionalProperties(this.definitionNode, Void.TYPE, this.generateContext(schemaVersion));
-        Assertions.assertEquals(1, this.definitionNode.size());
-        JsonNode additionalPropertiesNode = this.definitionNode.get(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES.forVersion(schemaVersion));
-        Assertions.assertNotNull(additionalPropertiesNode);
-        Assertions.assertTrue(additionalPropertiesNode.isBoolean());
-        Assertions.assertFalse(additionalPropertiesNode.asBoolean());
-    }
-
-    @ParameterizedTest
-    @EnumSource(SchemaVersion.class)
-    public void testSetAdditionalProperties_SpecificClass(SchemaVersion schemaVersion) {
+    public void testSetAdditionalProperties_SpecificDefinition(SchemaVersion schemaVersion) {
         SchemaGenerationContextImpl generationContext = this.generateContext(schemaVersion);
-        this.collector.setAdditionalProperties(this.definitionNode, int.class, generationContext);
+        ResolvedType resolvedType = generationContext.getTypeContext().resolve(int.class);
+        ObjectNode definition = generationContext.createDefinitionReference(resolvedType);
+        this.collector.setAdditionalProperties(this.definitionNode, definition, generationContext);
         Assertions.assertEquals(1, this.definitionNode.size());
         JsonNode additionalPropertiesNode = this.definitionNode.get(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES.forVersion(schemaVersion));
         Assertions.assertNotNull(additionalPropertiesNode);
         Assertions.assertTrue(additionalPropertiesNode.isObject());
-        ResolvedType resolvedType = generationContext.getTypeContext().resolve(int.class);
-        Assertions.assertTrue(generationContext.containsDefinition(resolvedType, null));
     }
 
     @ParameterizedTest
@@ -196,43 +175,11 @@ public class AttributeCollectorTest {
 
     @ParameterizedTest
     @EnumSource(SchemaVersion.class)
-    public void testSetPatternProperties_ObjectClass(SchemaVersion schemaVersion) {
-        SchemaGenerationContextImpl generationContext = this.generateContext(schemaVersion);
-        LinkedHashMap<String, Type> patterns = new LinkedHashMap<>();
-        patterns.put("^objectClass.*$", Object.class);
-        this.collector.setPatternProperties(this.definitionNode, patterns, generationContext);
-        Assertions.assertEquals(1, this.definitionNode.size());
-        JsonNode patternPropertiesNode = this.definitionNode.get(SchemaKeyword.TAG_PATTERN_PROPERTIES.forVersion(schemaVersion));
-        Assertions.assertNotNull(patternPropertiesNode);
-        Assertions.assertTrue(patternPropertiesNode.isObject());
-        Assertions.assertEquals(1, patternPropertiesNode.size());
-        Assertions.assertTrue(patternPropertiesNode.get("^objectClass.*$").isObject());
-        Assertions.assertTrue(generationContext.containsDefinition(generationContext.getTypeContext().resolve(Object.class), null));
-    }
-
-    @ParameterizedTest
-    @EnumSource(SchemaVersion.class)
-    public void testSetPatternProperties_ResolvedObjectClass(SchemaVersion schemaVersion) {
-        SchemaGenerationContextImpl generationContext = this.generateContext(schemaVersion);
-        LinkedHashMap<String, Type> patterns = new LinkedHashMap<>();
-        patterns.put("^resolvedObjectClass.*$", generationContext.getTypeContext().resolve(Object.class));
-        this.collector.setPatternProperties(this.definitionNode, patterns, generationContext);
-        Assertions.assertEquals(1, this.definitionNode.size());
-        JsonNode patternPropertiesNode = this.definitionNode.get(SchemaKeyword.TAG_PATTERN_PROPERTIES.forVersion(schemaVersion));
-        Assertions.assertNotNull(patternPropertiesNode);
-        Assertions.assertTrue(patternPropertiesNode.isObject());
-        Assertions.assertEquals(1, patternPropertiesNode.size());
-        Assertions.assertTrue(patternPropertiesNode.get("^resolvedObjectClass.*$").isObject());
-        Assertions.assertTrue(generationContext.containsDefinition(generationContext.getTypeContext().resolve(Object.class), null));
-    }
-
-    @ParameterizedTest
-    @EnumSource(SchemaVersion.class)
     public void testSetPatternProperties_SpecificEntries(SchemaVersion schemaVersion) {
         SchemaGenerationContextImpl generationContext = this.generateContext(schemaVersion);
-        LinkedHashMap<String, Type> patterns = new LinkedHashMap<>();
-        patterns.put("^intClass.*$", int.class);
-        patterns.put("^resolvedStringClass.*$", generationContext.getTypeContext().resolve(String.class));
+        LinkedHashMap<String, JsonNode> patterns = new LinkedHashMap<>();
+        patterns.put("^intClass.*$", generationContext.createDefinitionReference(generationContext.getTypeContext().resolve(int.class)));
+        patterns.put("^stringClass.*$", generationContext.createDefinitionReference(generationContext.getTypeContext().resolve(String.class)));
         this.collector.setPatternProperties(this.definitionNode, patterns, generationContext);
         Assertions.assertEquals(1, this.definitionNode.size());
         JsonNode patternPropertiesNode = this.definitionNode.get(SchemaKeyword.TAG_PATTERN_PROPERTIES.forVersion(schemaVersion));
@@ -240,8 +187,6 @@ public class AttributeCollectorTest {
         Assertions.assertTrue(patternPropertiesNode.isObject());
         Assertions.assertEquals(2, patternPropertiesNode.size());
         Assertions.assertTrue(patternPropertiesNode.get("^intClass.*$").isObject());
-        Assertions.assertTrue(patternPropertiesNode.get("^resolvedStringClass.*$").isObject());
-        Assertions.assertTrue(generationContext.containsDefinition(generationContext.getTypeContext().resolve(int.class), null));
-        Assertions.assertTrue(generationContext.containsDefinition(generationContext.getTypeContext().resolve(String.class), null));
+        Assertions.assertTrue(patternPropertiesNode.get("^stringClass.*$").isObject());
     }
 }

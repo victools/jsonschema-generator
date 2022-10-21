@@ -23,6 +23,9 @@ import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.TypeResolver;
 import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.classmate.members.ResolvedMethod;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
@@ -192,6 +195,27 @@ public class TypeContext {
             itemType = this.getTypeParameterFor(containerType, Iterable.class, 0);
         }
         return itemType;
+    }
+
+    /**
+     * Return the annotation of the given type from the annotated container's item, if such an annotation is present.
+     *
+     * @param <A> type of annotation
+     * @param annotationClass type of annotation
+     * @param annotatedContainerType annotated container type that is considered if it is an {@link AnnotatedParameterizedType}
+     * @param containerItemIndex parameter index of the desired item on the container type
+     * @return annotation instance (or {@code null} if no annotation of the given type is present)
+     */
+    public <A extends Annotation> A getTypeParameterAnnotation(Class<A> annotationClass, AnnotatedType annotatedContainerType,
+            Integer containerItemIndex) {
+        if (annotatedContainerType instanceof AnnotatedParameterizedType) {
+            AnnotatedType[] typeArguments = ((AnnotatedParameterizedType) annotatedContainerType).getAnnotatedActualTypeArguments();
+            int itemIndex = containerItemIndex == null ? 0 : containerItemIndex;
+            if (typeArguments.length > itemIndex) {
+                return typeArguments[itemIndex].getAnnotation(annotationClass);
+            }
+        }
+        return null;
     }
 
     /**

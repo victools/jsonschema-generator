@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.impl.PropertySortUtils;
 import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import java.lang.reflect.Type;
@@ -26,6 +27,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 /**
  * Generic collection of reflection based analysis for populating a JSON Schema targeting a specific type in general.
@@ -214,7 +216,18 @@ public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigP
     }
 
     @Override
+    public SchemaGeneratorGeneralConfigPart withAdditionalPropertiesResolver(BiFunction<TypeScope, SchemaGenerationContext, JsonNode> resolver) {
+        return (SchemaGeneratorGeneralConfigPart) super.withAdditionalPropertiesResolver(resolver);
+    }
+
+    @Override
     public SchemaGeneratorGeneralConfigPart withPatternPropertiesResolver(ConfigFunction<TypeScope, Map<String, Type>> resolver) {
+        return (SchemaGeneratorGeneralConfigPart) super.withPatternPropertiesResolver(resolver);
+    }
+
+    @Override
+    public SchemaGeneratorGeneralConfigPart withPatternPropertiesResolver(
+            BiFunction<TypeScope, SchemaGenerationContext, Map<String, JsonNode>> resolver) {
         return (SchemaGeneratorGeneralConfigPart) super.withPatternPropertiesResolver(resolver);
     }
 

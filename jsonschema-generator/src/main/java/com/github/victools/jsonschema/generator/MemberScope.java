@@ -38,7 +38,7 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
     private final ResolvedType overriddenType;
     private final String overriddenName;
     private final ResolvedTypeWithMembers declaringTypeMembers;
-    private boolean fakeContainerItemScope;
+    private Integer fakeContainerItemIndex;
     private final TypeContext context;
     private final LazyValue<String> schemaPropertyName = new LazyValue<>(this::doGetSchemaPropertyName);
 
@@ -49,27 +49,28 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @param overriddenType alternative type for this field or method's return value
      * @param overriddenName alternative name for this field or method
      * @param declaringTypeMembers collection of the declaring type's (other) fields and methods
-     * @param fakeContainerItemScope whether this field/method scope represents only the container item type of the actual field/method
+     * @param fakeContainerItemIndex index of the container item on the generic field/method scope's declared type (e.g., in case of a List, it is 0)
      * @param context the overall type resolution context
      */
     protected MemberScope(M member, ResolvedType overriddenType, String overriddenName,
-            ResolvedTypeWithMembers declaringTypeMembers, boolean fakeContainerItemScope, TypeContext context) {
+            ResolvedTypeWithMembers declaringTypeMembers, Integer fakeContainerItemIndex, TypeContext context) {
         super(Optional.ofNullable(overriddenType).orElseGet(member::getType), context);
         this.member = member;
         this.overriddenType = overriddenType;
         this.overriddenName = overriddenName;
         this.declaringTypeMembers = declaringTypeMembers;
-        this.fakeContainerItemScope = fakeContainerItemScope;
+        this.fakeContainerItemIndex = fakeContainerItemIndex;
         this.context = context;
     }
 
     /**
-     * Set the {@code fakeContainerItemScope} flag to {@code true}.
+     * Getter for the {@code fakeContainerItemIndex} (may be null).
      *
+     * @return index of the container item on the generic field/method scope's declared type (e.g., in case of a List, it is 0)
      * @see #isFakeContainerItemScope()
      */
-    protected void markAsFakeContainerItemScope() {
-        this.fakeContainerItemScope = true;
+    protected Integer getFakeContainerItemIndex() {
+        return this.fakeContainerItemIndex;
     }
 
     /**
@@ -95,7 +96,23 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
             return this.withOverriddenType(this.getOverriddenType());
         }
         MemberScope<M, T> result = this.withOverriddenType(this.getContainerItemType());
-        result.markAsFakeContainerItemScope();
+        result.fakeContainerItemIndex = 0;
+        return result;
+    }
+
+    /**
+     * Create another instance for this field or method and context, representing its field/method return type's container item type.
+     *
+     * @param referenceType the generic "container type" from which to extract the "container item type"
+     * @param containerItemIndex index of the container item on the generic field/method scope's declared type (e.g., in case of a List, it is 0)
+     * @return new instance with the container item type as override (or an identical copy if this is not a container type)
+     * @see #withOverriddenType(ResolvedType)
+     * @see #getContainerItemType()
+     * @see #isFakeContainerItemScope()
+     */
+    public MemberScope<M, T> asFakeContainerItemScope(Class<?> referenceType, int containerItemIndex) {
+        MemberScope<M, T> result = this.withOverriddenType(this.getTypeParameterFor(referenceType, containerItemIndex));
+        result.fakeContainerItemIndex = containerItemIndex;
         return result;
     }
 
@@ -153,7 +170,7 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @return whether this is not the actual field/method but a representation of its container item type
      */
     public boolean isFakeContainerItemScope() {
-        return this.fakeContainerItemScope;
+        return this.fakeContainerItemIndex != null;
     }
 
     /**
