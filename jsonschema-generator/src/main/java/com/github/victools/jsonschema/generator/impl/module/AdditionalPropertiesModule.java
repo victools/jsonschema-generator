@@ -16,12 +16,19 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.ConfigFunction;
+import com.github.victools.jsonschema.generator.FieldScope;
+import com.github.victools.jsonschema.generator.MemberScope;
+import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
+import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 /**
  * Default module being included if {@code Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT} is enabled.
@@ -34,14 +41,37 @@ public class AdditionalPropertiesModule implements Module {
      * @return module instance
      */
     public static AdditionalPropertiesModule forMapValues() {
-        return new AdditionalPropertiesModule(scope -> {
+        ConfigFunction<TypeScope, Type> generalResolver = scope -> {
             if (scope.getType().isInstanceOf(Map.class)) {
                 // within a Map<Key, Value> allow additionalProperties of the Value type
                 // if no type parameters are defined, this will result in additionalProperties to be omitted (by way of returning Object.class)
                 return scope.getTypeParameterFor(Map.class, 1);
             }
             return null;
-        });
+        };
+        return new AdditionalPropertiesModule(generalResolver,
+                AdditionalPropertiesModule::createDefinitionForMemberMap,
+                AdditionalPropertiesModule::createDefinitionForMemberMap);
+    }
+
+    private static JsonNode createDefinitionForMemberMap(MemberScope<?, ?> member, SchemaGenerationContext context) {
+        if (!member.getType().isInstanceOf(Map.class)) {
+            return null;
+        }
+        // within a Map<Key, Value> allow additionalProperties of the Value type
+        // if no type parameters are defined, this will result in additionalProperties to be omitted (by way of returning Object.class)
+        ResolvedType valueType = member.getTypeParameterFor(Map.class, 1);
+        if (valueType.getErasedType() == Object.class) {
+            return null;
+        }
+        MemberScope<?, ?> mapValueScope = member.asFakeContainerItemScope(Map.class, 1);
+        if (mapValueScope instanceof FieldScope) {
+            return context.createStandardDefinitionReference((FieldScope) mapValueScope, null);
+        }
+        if (mapValueScope instanceof MethodScope) {
+            return context.createStandardDefinitionReference((MethodScope) mapValueScope, null);
+        }
+        throw new IllegalStateException("Unsupported member scope type: " + member.getClass());
     }
 
     /**
@@ -56,20 +86,47 @@ public class AdditionalPropertiesModule implements Module {
         return new AdditionalPropertiesModule(scope -> scope.isContainerType() ? null : Void.class);
     }
 
-    private final ConfigFunction<TypeScope, Type> additionalPropertiesResolver;
+    private final ConfigFunction<TypeScope, Type> generalAdditionalPropertiesResolver;
+    private final BiFunction<FieldScope, SchemaGenerationContext, JsonNode> fieldAdditionalPropertiesResolver;
+    private final BiFunction<MethodScope, SchemaGenerationContext, JsonNode> methodAdditionalPropertiesResolver;
 
     /**
      * Constructor.
      *
-     * @param additionalPropertiesResolver resolver for additionalProperties
+     * @param generalAdditionalPropertiesResolver resolver for additionalProperties of types in general
      */
-    public AdditionalPropertiesModule(ConfigFunction<TypeScope, Type> additionalPropertiesResolver) {
-        this.additionalPropertiesResolver = additionalPropertiesResolver;
+    public AdditionalPropertiesModule(ConfigFunction<TypeScope, Type> generalAdditionalPropertiesResolver) {
+        this(generalAdditionalPropertiesResolver, null, null);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param generalAdditionalPropertiesResolver resolver for additionalProperties of types in general
+     * @param fieldAdditionalPropertiesResolver resolver for additionalPropoerties for fields
+     * @param methodAdditionalPropertiesResolver resolver for additionalPropoerties for methods
+     */
+    public AdditionalPropertiesModule(ConfigFunction<TypeScope, Type> generalAdditionalPropertiesResolver,
+            BiFunction<FieldScope, SchemaGenerationContext, JsonNode> fieldAdditionalPropertiesResolver,
+            BiFunction<MethodScope, SchemaGenerationContext, JsonNode> methodAdditionalPropertiesResolver) {
+        this.generalAdditionalPropertiesResolver = generalAdditionalPropertiesResolver;
+        this.fieldAdditionalPropertiesResolver = fieldAdditionalPropertiesResolver;
+        this.methodAdditionalPropertiesResolver = methodAdditionalPropertiesResolver;
     }
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
-        builder.forTypesInGeneral()
-                .withAdditionalPropertiesResolver(this.additionalPropertiesResolver);
+        if (this.generalAdditionalPropertiesResolver != null) {
+            builder.forTypesInGeneral()
+                    .withAdditionalPropertiesResolver(this.generalAdditionalPropertiesResolver);
+        }
+        if (this.fieldAdditionalPropertiesResolver != null) {
+            builder.forFields()
+                    .withAdditionalPropertiesResolver(this.fieldAdditionalPropertiesResolver);
+        }
+        if (this.methodAdditionalPropertiesResolver != null) {
+            builder.forMethods()
+                    .withAdditionalPropertiesResolver(this.methodAdditionalPropertiesResolver);
+        }
     }
 }

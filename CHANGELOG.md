@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - enable providing full custom schema definition to be included in `additionalProperties` or `patternProperties`
 
 #### Changed
+- consider annotations on `Map` value types when using `Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES`
 - bump `slf4j-api` dependency version from `1.7.35` to `2.0.3`
 - bump `jackson-core` dependency version from `2.13.2` to `2.13.4`
 - bump `jackson-databind` dependency version from `2.13.2.2` to `2.13.4.2`

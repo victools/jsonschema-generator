@@ -19,22 +19,32 @@ package com.github.victools.jsonschema.generator.impl.module;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.github.victools.jsonschema.generator.ConfigFunction;
+import com.github.victools.jsonschema.generator.FieldScope;
+import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TestUtils;
 import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.io.IOException;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
@@ -45,8 +55,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for the {@link AdditionalPropertiesModule} class.
@@ -55,6 +63,8 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
 
     private SchemaGeneratorConfigBuilder builder;
     private SchemaGeneratorGeneralConfigPart generalConfigPart;
+    private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
+    private SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
 
     public AdditionalPropertiesModuleTest() {
         super(TestMapSubType.class);
@@ -64,7 +74,11 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
     public void setUp() {
         this.builder = Mockito.mock(SchemaGeneratorConfigBuilder.class);
         this.generalConfigPart = Mockito.spy(new SchemaGeneratorGeneralConfigPart());
+        this.fieldConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
+        this.methodConfigPart = Mockito.spy(new SchemaGeneratorConfigPart<>());
         Mockito.when(this.builder.forTypesInGeneral()).thenReturn(this.generalConfigPart);
+        Mockito.when(this.builder.forFields()).thenReturn(this.fieldConfigPart);
+        Mockito.when(this.builder.forMethods()).thenReturn(this.methodConfigPart);
         this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
     }
 
@@ -73,10 +87,11 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
         AdditionalPropertiesModule.forMapValues()
                 .applyToConfigBuilder(this.builder);
 
-        Mockito.verify(this.builder).forTypesInGeneral();
-        Mockito.verifyNoMoreInteractions(this.builder);
-        Mockito.verify(this.generalConfigPart).withAdditionalPropertiesResolver(Mockito.any());
-        Mockito.verifyNoMoreInteractions(this.generalConfigPart);
+        Mockito.verify(this.generalConfigPart).withAdditionalPropertiesResolver(Mockito.any(ConfigFunction.class));
+        Mockito.verify(this.generalConfigPart).withAdditionalPropertiesResolver(Mockito.any(BiFunction.class));
+        Mockito.verify(this.fieldConfigPart).withAdditionalPropertiesResolver(Mockito.any(BiFunction.class));
+        Mockito.verify(this.methodConfigPart).withAdditionalPropertiesResolver(Mockito.any(BiFunction.class));
+        Mockito.verifyNoMoreInteractions(this.generalConfigPart, this.fieldConfigPart, this.methodConfigPart);
     }
 
     @Test
@@ -84,10 +99,9 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
         AdditionalPropertiesModule.forbiddenForAllObjectsButContainers()
                 .applyToConfigBuilder(this.builder);
 
-        Mockito.verify(this.builder).forTypesInGeneral();
-        Mockito.verifyNoMoreInteractions(this.builder);
-        Mockito.verify(this.generalConfigPart).withAdditionalPropertiesResolver(Mockito.any());
-        Mockito.verifyNoMoreInteractions(this.generalConfigPart);
+        Mockito.verify(this.generalConfigPart).withAdditionalPropertiesResolver(Mockito.any(ConfigFunction.class));
+        Mockito.verify(this.generalConfigPart).withAdditionalPropertiesResolver(Mockito.any(BiFunction.class));
+        Mockito.verifyNoMoreInteractions(this.generalConfigPart, this.fieldConfigPart, this.methodConfigPart);
     }
 
     static Stream<Arguments> parametersForTestResolveAdditionalProperties() {
@@ -128,25 +142,36 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
     @Test
     public void testAdditionalPropertyWithSubtype() throws JSONException, IOException {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON);
-        configBuilder.with(Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES)
+        configBuilder.with(Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES, Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES)
                 .without(Option.SCHEMA_VERSION_INDICATOR)
                 .forTypesInGeneral()
                 .withSubtypeResolver((declaredType, context) -> declaredType.getErasedType() == B.class
                         ? Collections.singletonList(context.getTypeContext().resolve(BImpl.class))
                         : null);
+        configBuilder.forFields()
+                .withDescriptionResolver(field -> field.isFakeContainerItemScope()
+                        ? Optional.ofNullable(field.getContainerItemAnnotation(ParamInfo.class)).map(ParamInfo::value).orElse(null)
+                        : null);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(A.class);
-        JSONAssert.assertEquals(TestUtils.loadResource(AdditionalPropertiesModuleTest.class, "additional-property-with-subtype.json"),
-                result.toString(), JSONCompareMode.STRICT);
+        TestUtils.assertGeneratedSchema(result, AdditionalPropertiesModuleTest.class, "additional-property-with-subtype.json");
     }
 
     private static class TestMapSubType extends HashMap<Object, String> {
         // no further fields
     }
 
+    @Target(ElementType.TYPE_USE)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Documented
+    private @interface ParamInfo {
+
+        public abstract String value();
+    }
+
     private static class A {
 
-        private Map<String, B> map;
+        private Map<String, @ParamInfo("annotated super value") B> map;
 
         Map<String, B> getMap() {
             return this.map;
