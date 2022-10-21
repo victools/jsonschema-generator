@@ -16,115 +16,121 @@
 
 package com.github.victools.jsonschema.generator;
 
+import java.util.EnumSet;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * JSON Schema properties and their values.
  */
 public enum SchemaKeyword {
-    TAG_SCHEMA("$schema"),
-    TAG_SCHEMA_VALUE(SchemaVersion::getIdentifier),
-    TAG_ID("$id"),
+    TAG_SCHEMA("$schema", Type.TAG),
+    TAG_SCHEMA_VALUE(SchemaVersion::getIdentifier, Type.VALUE),
+    TAG_ID("$id", Type.TAG),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_2019_09}.
      */
-    TAG_ANCHOR("$anchor"),
-    TAG_DEFINITIONS(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7 ? "definitions" : "$defs"),
+    TAG_ANCHOR("$anchor", Type.TAG),
+    TAG_DEFINITIONS(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7 ? "definitions" : "$defs", Type.TAG),
     /**
      * Before {@link SchemaVersion#DRAFT_2019_09} all other properties in the same sub-schema besides this one were ignored.
      */
-    TAG_REF("$ref"),
-    TAG_REF_MAIN("#"),
+    TAG_REF("$ref", Type.TAG),
+    TAG_REF_MAIN("#", Type.VALUE),
     /**
      * Common prefix of all standard {@link #TAG_REF} values.
      *
      * @deprecated is now implicitly created based on {@link SchemaKeyword#TAG_DEFINITIONS} or an explicit alternative definitions path
      */
     @Deprecated
-    TAG_REF_PREFIX(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7 ? "#/definitions/" : "#/$defs/"),
+    TAG_REF_PREFIX(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7 ? "#/definitions/" : "#/$defs/", Type.VALUE),
 
-    TAG_TYPE("type"),
-    TAG_TYPE_NULL("null"),
-    TAG_TYPE_ARRAY("array"),
-    TAG_TYPE_OBJECT("object"),
-    TAG_TYPE_BOOLEAN("boolean"),
-    TAG_TYPE_STRING("string"),
-    TAG_TYPE_INTEGER("integer"),
-    TAG_TYPE_NUMBER("number"),
+    TAG_TYPE("type", Type.TAG),
+    TAG_TYPE_NULL("null", Type.VALUE),
+    TAG_TYPE_ARRAY("array", Type.VALUE),
+    TAG_TYPE_OBJECT("object", Type.VALUE),
+    TAG_TYPE_BOOLEAN("boolean", Type.VALUE),
+    TAG_TYPE_STRING("string", Type.VALUE),
+    TAG_TYPE_INTEGER("integer", Type.VALUE),
+    TAG_TYPE_NUMBER("number", Type.VALUE),
 
-    TAG_PROPERTIES("properties"),
-    TAG_ITEMS("items"),
-    TAG_REQUIRED("required"),
-    TAG_ADDITIONAL_PROPERTIES("additionalProperties"),
-    TAG_PATTERN_PROPERTIES("patternProperties"),
-    TAG_PROPERTIES_MIN("minProperties"),
-    TAG_PROPERTIES_MAX("maxProperties"),
+    TAG_PROPERTIES("properties", Type.TAG),
+    TAG_ITEMS("items", Type.TAG),
+    TAG_REQUIRED("required", Type.TAG),
+    TAG_ADDITIONAL_PROPERTIES("additionalProperties", Type.TAG),
+    TAG_PATTERN_PROPERTIES("patternProperties", Type.TAG),
+    TAG_PROPERTIES_MIN("minProperties", Type.TAG),
+    TAG_PROPERTIES_MAX("maxProperties", Type.TAG),
 
-    TAG_ALLOF("allOf"),
-    TAG_ANYOF("anyOf"),
-    TAG_ONEOF("oneOf"),
-    TAG_NOT("not"),
+    TAG_ALLOF("allOf", Type.TAG),
+    TAG_ANYOF("anyOf", Type.TAG),
+    TAG_ONEOF("oneOf", Type.TAG),
+    TAG_NOT("not", Type.TAG),
 
-    TAG_TITLE("title"),
-    TAG_DESCRIPTION("description"),
-    TAG_CONST("const"),
-    TAG_ENUM("enum"),
-    TAG_DEFAULT("default"),
+    TAG_TITLE("title", Type.TAG),
+    TAG_DESCRIPTION("description", Type.TAG),
+    TAG_CONST("const", Type.TAG),
+    TAG_ENUM("enum", Type.TAG),
+    TAG_DEFAULT("default", Type.TAG),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
      */
-    TAG_READ_ONLY("readOnly"),
+    TAG_READ_ONLY("readOnly", Type.TAG),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
      */
-    TAG_WRITE_ONLY("writeOnly"),
+    TAG_WRITE_ONLY("writeOnly", Type.TAG),
 
-    TAG_LENGTH_MIN("minLength"),
-    TAG_LENGTH_MAX("maxLength"),
-    TAG_FORMAT("format"),
-    TAG_PATTERN("pattern"),
+    TAG_LENGTH_MIN("minLength", Type.TAG),
+    TAG_LENGTH_MAX("maxLength", Type.TAG),
+    TAG_FORMAT("format", Type.TAG),
+    TAG_PATTERN("pattern", Type.TAG),
 
-    TAG_MINIMUM("minimum"),
-    TAG_MINIMUM_EXCLUSIVE("exclusiveMinimum"),
-    TAG_MAXIMUM("maximum"),
-    TAG_MAXIMUM_EXCLUSIVE("exclusiveMaximum"),
-    TAG_MULTIPLE_OF("multipleOf"),
+    TAG_MINIMUM("minimum", Type.TAG),
+    TAG_MINIMUM_EXCLUSIVE("exclusiveMinimum", Type.TAG),
+    TAG_MAXIMUM("maximum", Type.TAG),
+    TAG_MAXIMUM_EXCLUSIVE("exclusiveMaximum", Type.TAG),
+    TAG_MULTIPLE_OF("multipleOf", Type.TAG),
 
-    TAG_ITEMS_MIN("minItems"),
-    TAG_ITEMS_MAX("maxItems"),
-    TAG_ITEMS_UNIQUE("uniqueItems"),
+    TAG_ITEMS_MIN("minItems", Type.TAG),
+    TAG_ITEMS_MAX("maxItems", Type.TAG),
+    TAG_ITEMS_UNIQUE("uniqueItems", Type.TAG),
 
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
      */
-    TAG_IF("if"),
+    TAG_IF("if", Type.TAG),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
      */
-    TAG_THEN("then"),
+    TAG_THEN("then", Type.TAG),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
      */
-    TAG_ELSE("else");
+    TAG_ELSE("else", Type.TAG);
 
     private final Function<SchemaVersion, String> valueProvider;
+    private final SchemaKeyword.Type type;
 
     /**
      * Constructor.
      *
      * @param fixedValue single value applying regardless of schema version
+     * @param keywordType what kind of keyword this represents
      */
-    private SchemaKeyword(String fixedValue) {
-        this.valueProvider = _version -> fixedValue;
+    private SchemaKeyword(String fixedValue, SchemaKeyword.Type keywordType) {
+        this(_version -> fixedValue, keywordType);
     }
 
     /**
      * Constructor.
      *
      * @param valueProvider dynamic value provider that may return different values base on specific JSON Schema versions
+     * @param keywordType what kind of keyword this represents
      */
-    private SchemaKeyword(Function<SchemaVersion, String> valueProvider) {
+    private SchemaKeyword(Function<SchemaVersion, String> valueProvider, SchemaKeyword.Type keywordType) {
         this.valueProvider = valueProvider;
+        this.type = keywordType;
     }
 
     /**
@@ -135,5 +141,14 @@ public enum SchemaKeyword {
      */
     public String forVersion(SchemaVersion version) {
         return this.valueProvider.apply(version);
+    }
+
+    public static Stream<SchemaKeyword> getTagStream() {
+        return EnumSet.allOf(SchemaKeyword.class).stream()
+                .filter(keyword -> keyword.type == SchemaKeyword.Type.TAG);
+    }
+
+    private enum Type {
+        TAG, VALUE;
     }
 }

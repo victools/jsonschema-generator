@@ -26,18 +26,12 @@
             }
         },
         "notEmptyMap": {
-            "allOf": [{
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "integer"
-                    }
-                }, {
-                    "additionalProperties": {
-                        "type": "integer",
-                        "minimum": 13
-                    },
-                    "minProperties": 1
-                }]
+            "type": "object",
+            "additionalProperties": {
+                "type": "integer",
+                "minimum": 13
+            },
+            "minProperties": 1
         },
         "notEmptyPatternText": {
             "type": "string",
@@ -97,19 +91,13 @@
             }
         },
         "sizeRangeMap": {
-            "allOf": [{
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                }, {
-                    "additionalProperties": {
-                        "type": "string",
-                        "minLength": 1
-                    },
-                    "minProperties": 3,
-                    "maxProperties": 25
-                }]
+            "type": "object",
+            "additionalProperties": {
+                "type": "string",
+                "minLength": 1
+            },
+            "minProperties": 3,
+            "maxProperties": 25
         },
         "sizeRangeText": {
             "type": "string",

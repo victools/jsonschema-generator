@@ -12,17 +12,11 @@
     "type": "object",
     "properties": {
         "map": {
-            "allOf": [{
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/$defs/B"
-                    }
-                }, {
-                    "additionalProperties": {
-                        "$ref": "#/$defs/B",
-                        "description": "annotated super value"
-                    }
-                }]
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/$defs/B",
+                "description": "annotated super value"
+            }
         }
     }
 }
