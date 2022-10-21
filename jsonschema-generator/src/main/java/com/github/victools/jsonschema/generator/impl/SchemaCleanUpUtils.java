@@ -484,10 +484,12 @@ public class SchemaCleanUpUtils {
     /**
      * Helper function, that represents a BinaryOperator for use in Collectors.toMap() that assumes that there are no duplicate keys.
      *
-     * @param <T> value type
-     * @return merge function that throws an IllegalStateException when invoked
+     * @param <T> key value type
+     * @param one first key occurrence
+     * @param two second key occurrence
+     * @return nothing, as this always throws an IllegalStateException when invoked
      */
-    private static <T> T throwingMerger(T a, T b) {
-        throw new IllegalStateException("Duplicate key " + a);
+    private static <T> T throwingMerger(T one, T two) {
+        throw new IllegalStateException("Duplicate key " + one);
     }
 }
