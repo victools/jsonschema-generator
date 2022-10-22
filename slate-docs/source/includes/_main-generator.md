@@ -640,6 +640,10 @@ configBuilder.forMethods()
 `withEnumResolver()` is expecting the `"const"`/`"enum"` attribute's value(s) to be returned based on a given `TypeScope`/`FieldScope`/`MethodScope` – the first non-`null` value will be applied, which will be serialised through the `ObjectMapper` instance provided in the `SchemaGeneratorConfigBuilder`'s constructor.
 
 ## `"additionalProperties"` Keyword
+> Option 1: derive plain type from given scope
+
+One version of the `withAdditionalPropertiesResolver()` is expecting the `"additionalProperties"` attribute's value to be returned based on a given `TypeScope`/`FieldScope`/`MethodScope` – the first non-`null` value will be applied.
+
 ```java
 configBuilder.forTypesInGeneral()
     .withAdditionalPropertiesResolver(scope -> Object.class);
@@ -651,13 +655,50 @@ configBuilder.forMethods()
             ? method.getTypeParameterFor(Map.class, 1) : Void.class);
 ```
 
-`withAdditionalPropertiesResolver()` is expecting the `"additionalProperties"` attribute's value to be returned based on a given `TypeScope`/`FieldScope`/`MethodScope` – the first non-`null` value will be applied.
-
+* If `null` is being returned, the next registered `AdditionalPropertiesResolver` will be checked. If all return `null`, the atttribute will be omitted.
 * If `Object.class` is being returned, the `"additionalProperties"` attribute will be omitted.
 * if `Void.class` is being returned, the `"additionalProperties"` will be set to `false`.
 * If any other type is being returned (e.g. other `Class` or a `ResolvedType`) a corresponding schema will be included in `"additionalProperties"`.
 
+> Option 2: specify explicit subschema
+
+Another version of the `withAdditionalPropertiesResolver()` is expecting the `"additionalProperties"` attribute's value to be provided directly as a `JsonNode` (e.g., `ObjectNode`) representing the desired subschema.
+In this case, both the `TypeScope`/`FieldScope`/`MethodScope` and the overall generation context are being provided as input parameters.
+
+```java
+configBuilder.forTypesInGeneral()
+    .withAdditionalPropertiesResolver((scope, context) -> BooleanNode.TRUE);
+configBuilder.forFields()
+    .withAdditionalPropertiesResolver((field, context) -> field.getType().getErasedType() == Object.class
+            ? null : BooleanNode.FALSE);
+configBuilder.forMethods()
+    .withAdditionalPropertiesResolver((method, context) -> {
+        if (!method.getType().isInstanceOf(Map.class)) {
+            return null;
+        }
+        ResolvedType valueType = method.getTypeParameterFor(Map.class, 1);
+        if (valueType == null || valueType.getErasedType() == Object.class) {
+            return null;
+        }
+        return context.createStandardDefinitionReference(method.asFakeContainerItemScope(Map.class, 1), null);
+    });
+```
+
+* If `null` is being returned, the next registered `AdditionalPropertiesResolver` will be checked. If all return `null`, the atttribute will be omitted.
+* If `BooleanNode.TRUE` is being returned, the `"additionalProperties"` attribute will be omitted.
+* if `BooleanNode.FALSE` is being returned, the `"additionalProperties"` will be set to `false`.
+* If any other subschema is being returned, that will be included as `"additionalProperties"` attribute directly.
+
+This usage of the `FieldScope`/`MethodScope` potentially via `asFakeContainerItemScope()` has the advantage of allowing the consideration of annotations on generic parameters, such as the one on `Map<String, @Min(10) Integer>` when that is the declared type of a field/method.
+<aside class="success">
+    The third example shown for the deriving <code>"addtionalProperties"</code> from a <code>Map</code> value is the default behaviour offered via the <code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code>.
+</aside>
+
 ## `"patternProperties"` Keyword
+> Option 1: derive plain types from given scope
+
+One version of the `withPatternPropertiesResolver()` is expecting a `Map` of regular expressions to their corresponding allowed types to be returned based on a given `TypeScope`/`FieldScope`/`MethodScope` – the first non-`null` value will be applied.
+
 ```java
 configBuilder.forTypesInGeneral()
     .withPatternPropertiesResolver(scope -> scope.getType().isInstanceOf(Map.class)
@@ -669,8 +710,16 @@ configBuilder.forMethods()
     .withPatternPropertiesResolver(method -> method.getType().isInstanceOf(StringMap.class)
             ? Collections.singletonMap("^txt_", String.class) : null);
 ```
+Each regular expression will be included as key in the `"patternProperties"` attribute with a schema representing the mapped type as the corresponding value.
 
-`withPatternPropertiesResolver()` is expecting a `Map` of regular expressions to their corresponding allowed types to be returned based on a given `TypeScope`/`FieldScope`/`MethodScope` – the first non-`null` value will be applied; the regular expression will be included as keys in the `"patternProperties"` attribute with a schema representing the mapped type as the corresponding values.
+> Option 2: specify explicit subschema
+
+Another version of the `withPatternPropertiesResolver()` is expecting a `Map` with each value being a `JsonNode` (e.g., `ObjectNode`) representing the respective desired subschema.
+In this case, both the `TypeScope`/`FieldScope`/`MethodScope` and the overall generation context are being provided as input parameters.
+
+> The generation of the subschema could look similar to the example given for the `"additionalProperties"` attribute above.
+
+The usage of the `FieldScope`/`MethodScope` potentially via `asFakeContainerItemScope()` has the advantage of allowing the consideration of annotations on generic parameters, such as the one on `Map<String, @Min(10) Integer>` when that is the declared type of a field/method.
 
 ## `"minLength"` Keyword
 ```java
