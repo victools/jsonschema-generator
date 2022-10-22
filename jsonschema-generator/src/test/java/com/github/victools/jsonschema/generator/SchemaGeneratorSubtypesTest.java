@@ -27,8 +27,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for {@link SchemaGenerator} class.
@@ -61,8 +59,7 @@ public class SchemaGeneratorSubtypesTest {
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(TestClassWithSuperTypeReferences.class);
-        JSONAssert.assertEquals('\n' + result.toString() + '\n', TestUtils.loadResource(SchemaGeneratorSubtypesTest.class,
-                "testclass-withsupertypereferences-" + caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
+        TestUtils.assertGeneratedSchema(result, SchemaGeneratorSubtypesTest.class, "testclass-withsupertypereferences-" + caseTitle + ".json");
     }
 
     private List<ResolvedType> determineTargetTypeOverrides(FieldScope field) {

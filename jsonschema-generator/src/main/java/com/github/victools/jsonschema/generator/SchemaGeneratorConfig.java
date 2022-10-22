@@ -17,11 +17,11 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
@@ -500,49 +500,55 @@ public interface SchemaGeneratorConfig {
      * Determine the "additionalProperties" of an object's field/property.
      *
      * @param field object's field/property to determine "additionalProperties" value for
+     * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
      * @return "additionalProperties" in a JSON Schema (may be {@link Void}) to indicate no additional properties being allowed or may be null)
      */
-    Type resolveAdditionalProperties(FieldScope field);
+    JsonNode resolveAdditionalProperties(FieldScope field, SchemaGenerationContext context);
 
     /**
      * Determine the "additionalProperties" of a method's return value.
      *
      * @param method method for whose return value to determine "additionalProperties" value for
+     * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
      * @return "additionalProperties" in a JSON Schema (may be {@link Void}) to indicate no additional properties being allowed or may be null)
      */
-    Type resolveAdditionalProperties(MethodScope method);
+    JsonNode resolveAdditionalProperties(MethodScope method, SchemaGenerationContext context);
 
     /**
      * Determine the "additionalProperties" of a context-independent type representation.
      *
      * @param scope context-independent type representation to determine "additionalProperties" value for
-     * @return "additionalProperties" in a JSON Schema (may be {@link Void}) to indicate no additional properties being allowed or may be null)
+     * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
+     * @return "additionalProperties" in a JSON Schema (may be null)
      */
-    Type resolveAdditionalPropertiesForType(TypeScope scope);
+    JsonNode resolveAdditionalPropertiesForType(TypeScope scope, SchemaGenerationContext context);
 
     /**
      * Determine the "patternProperties" of an object's field/property.
      *
      * @param field object's field/property to determine "patternProperties" value for
+     * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
      * @return "patternProperties" in a JSON Schema (may be null), the keys representing the patterns and the mapped values their corresponding types
      */
-    Map<String, Type> resolvePatternProperties(FieldScope field);
+    Map<String, JsonNode> resolvePatternProperties(FieldScope field, SchemaGenerationContext context);
 
     /**
      * Determine the "patternProperties" of a method's return value.
      *
      * @param method method for whose return value to determine "patternProperties" value for
+     * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
      * @return "patternProperties" in a JSON Schema (may be null), the keys representing the patterns and the mapped values their corresponding types
      */
-    Map<String, Type> resolvePatternProperties(MethodScope method);
+    Map<String, JsonNode> resolvePatternProperties(MethodScope method, SchemaGenerationContext context);
 
     /**
      * Determine the "patternProperties" of a context-independent type representation.
      *
      * @param scope context-independent type representation to determine "patternProperties" value for
+     * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
      * @return "patternProperties" in a JSON Schema (may be null), the keys representing the patterns and the mapped values their corresponding types
      */
-    Map<String, Type> resolvePatternPropertiesForType(TypeScope scope);
+    Map<String, JsonNode> resolvePatternPropertiesForType(TypeScope scope, SchemaGenerationContext context);
 
     /**
      * Determine the "minLength" of an object's field/property.

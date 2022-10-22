@@ -37,8 +37,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for {@link SchemaGenerator} class.
@@ -157,8 +155,7 @@ public class SchemaGeneratorComplexTypesTest {
                 Assertions.assertEquals(key, new URI(key).toASCIIString());
             }
         }
-        JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                TestUtils.loadResource(this.getClass(), caseTitle + ".json"), result.toString(), JSONCompareMode.STRICT);
+        TestUtils.assertGeneratedSchema(result, this.getClass(), caseTitle + ".json");
     }
 
     @Test

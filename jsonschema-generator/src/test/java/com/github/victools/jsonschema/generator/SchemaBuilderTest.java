@@ -20,8 +20,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for the {@link SchemaBuilder}.
@@ -70,8 +68,7 @@ public class SchemaBuilderTest {
         result.with("components")
                 .set("schemas", instance.collectDefinitions("components/schemas"));
 
-        JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                TestUtils.loadResource(this.getClass(), "openapi.json"), result.toString(), JSONCompareMode.STRICT);
+        TestUtils.assertGeneratedSchema(result, this.getClass(), "openapi.json");
     }
 
     private static class TestClass1 {

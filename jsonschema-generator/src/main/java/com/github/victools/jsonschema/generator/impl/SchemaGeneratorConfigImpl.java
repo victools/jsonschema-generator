@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -38,7 +39,6 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeAttributeOverrideV2;
 import com.github.victools.jsonschema.generator.TypeScope;
 import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
@@ -420,33 +420,33 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
-    public Type resolveAdditionalProperties(FieldScope field) {
-        return this.fieldConfigPart.resolveAdditionalProperties(field);
+    public JsonNode resolveAdditionalProperties(FieldScope field, SchemaGenerationContext context) {
+        return this.fieldConfigPart.resolveAdditionalProperties(field, context);
     }
 
     @Override
-    public Type resolveAdditionalProperties(MethodScope method) {
-        return this.methodConfigPart.resolveAdditionalProperties(method);
+    public JsonNode resolveAdditionalProperties(MethodScope method, SchemaGenerationContext context) {
+        return this.methodConfigPart.resolveAdditionalProperties(method, context);
     }
 
     @Override
-    public Type resolveAdditionalPropertiesForType(TypeScope scope) {
-        return this.typesInGeneralConfigPart.resolveAdditionalProperties(scope);
+    public JsonNode resolveAdditionalPropertiesForType(TypeScope scope, SchemaGenerationContext context) {
+        return this.typesInGeneralConfigPart.resolveAdditionalProperties(scope, context);
     }
 
     @Override
-    public Map<String, Type> resolvePatternProperties(FieldScope field) {
-        return this.fieldConfigPart.resolvePatternProperties(field);
+    public Map<String, JsonNode> resolvePatternProperties(FieldScope field, SchemaGenerationContext context) {
+        return this.fieldConfigPart.resolvePatternProperties(field, context);
     }
 
     @Override
-    public Map<String, Type> resolvePatternProperties(MethodScope method) {
-        return this.methodConfigPart.resolvePatternProperties(method);
+    public Map<String, JsonNode> resolvePatternProperties(MethodScope method, SchemaGenerationContext context) {
+        return this.methodConfigPart.resolvePatternProperties(method, context);
     }
 
     @Override
-    public Map<String, Type> resolvePatternPropertiesForType(TypeScope scope) {
-        return this.typesInGeneralConfigPart.resolvePatternProperties(scope);
+    public Map<String, JsonNode> resolvePatternPropertiesForType(TypeScope scope, SchemaGenerationContext context) {
+        return this.typesInGeneralConfigPart.resolvePatternProperties(scope, context);
     }
 
     @Override

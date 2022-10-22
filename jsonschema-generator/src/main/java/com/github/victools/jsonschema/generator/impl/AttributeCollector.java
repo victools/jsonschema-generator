@@ -16,7 +16,6 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +28,6 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeScope;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -76,8 +74,8 @@ public class AttributeCollector {
         collector.setEnum(node, config.resolveEnum(field), generationContext);
         collector.setReadOnly(node, config.isReadOnly(field), generationContext);
         collector.setWriteOnly(node, config.isWriteOnly(field), generationContext);
-        collector.setAdditionalProperties(node, config.resolveAdditionalProperties(field), generationContext);
-        collector.setPatternProperties(node, config.resolvePatternProperties(field), generationContext);
+        collector.setAdditionalProperties(node, config.resolveAdditionalProperties(field, generationContext), generationContext);
+        collector.setPatternProperties(node, config.resolvePatternProperties(field, generationContext), generationContext);
         collector.setStringMinLength(node, config.resolveStringMinLength(field), generationContext);
         collector.setStringMaxLength(node, config.resolveStringMaxLength(field), generationContext);
         collector.setStringFormat(node, config.resolveStringFormat(field), generationContext);
@@ -112,8 +110,8 @@ public class AttributeCollector {
         collector.setEnum(node, config.resolveEnum(method), generationContext);
         collector.setReadOnly(node, config.isReadOnly(method), generationContext);
         collector.setWriteOnly(node, config.isWriteOnly(method), generationContext);
-        collector.setAdditionalProperties(node, config.resolveAdditionalProperties(method), generationContext);
-        collector.setPatternProperties(node, config.resolvePatternProperties(method), generationContext);
+        collector.setAdditionalProperties(node, config.resolveAdditionalProperties(method, generationContext), generationContext);
+        collector.setPatternProperties(node, config.resolvePatternProperties(method, generationContext), generationContext);
         collector.setStringMinLength(node, config.resolveStringMinLength(method), generationContext);
         collector.setStringMaxLength(node, config.resolveStringMaxLength(method), generationContext);
         collector.setStringFormat(node, config.resolveStringFormat(method), generationContext);
@@ -151,8 +149,8 @@ public class AttributeCollector {
         collector.setDefault(node, config.resolveDefaultForType(scope), generationContext);
         collector.setEnum(node, config.resolveEnumForType(scope), generationContext);
         if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT))) {
-            collector.setAdditionalProperties(node, config.resolveAdditionalPropertiesForType(scope), generationContext);
-            collector.setPatternProperties(node, config.resolvePatternPropertiesForType(scope), generationContext);
+            collector.setAdditionalProperties(node, config.resolveAdditionalPropertiesForType(scope, generationContext), generationContext);
+            collector.setPatternProperties(node, config.resolvePatternPropertiesForType(scope, generationContext), generationContext);
         }
         if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_STRING))) {
             collector.setStringMinLength(node, config.resolveStringMinLengthForType(scope), generationContext);
@@ -496,20 +494,13 @@ public class AttributeCollector {
      * Setter for "{@link SchemaKeyword#TAG_ADDITIONAL_PROPERTIES}" attribute.
      *
      * @param node schema node to set attribute on
-     * @param additionalProperties attribute value to set
+     * @param additionalProperties attribute value to set (sub-schema)
      * @param generationContext generation context, including configuration to apply when looking-up attribute values
      * @return this instance (for chaining)
      */
-    public AttributeCollector setAdditionalProperties(ObjectNode node, Type additionalProperties, SchemaGenerationContext generationContext) {
-        if (additionalProperties == Void.class || additionalProperties == Void.TYPE) {
-            node.put(generationContext.getKeyword(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES), false);
-        } else if (additionalProperties != null) {
-            ResolvedType targetType = generationContext.getTypeContext().resolve(additionalProperties);
-            if (targetType.getErasedType() != Object.class) {
-                ObjectNode additionalPropertiesSchema = generationContext.createDefinitionReference(targetType);
-                node.set(generationContext.getKeyword(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES),
-                        additionalPropertiesSchema);
-            }
+    public AttributeCollector setAdditionalProperties(ObjectNode node, JsonNode additionalProperties, SchemaGenerationContext generationContext) {
+        if (additionalProperties != null && (!additionalProperties.isBoolean() || !additionalProperties.asBoolean())) {
+            node.set(generationContext.getKeyword(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES), additionalProperties);
         }
         return this;
     }
@@ -518,19 +509,15 @@ public class AttributeCollector {
      * Setter for "{@link SchemaKeyword#TAG_PATTERN_PROPERTIES}" attribute.
      *
      * @param node schema node to set attribute on
-     * @param patternProperties resolved attribute value to set
+     * @param patternProperties resolved attribute value to set (sub-schema mapped by respective property name pattern)
      * @param generationContext generation context, including configuration to apply when looking-up attribute values
      * @return this instance (for chaining)
      */
-    public AttributeCollector setPatternProperties(ObjectNode node, Map<String, Type> patternProperties,
+    public AttributeCollector setPatternProperties(ObjectNode node, Map<String, JsonNode> patternProperties,
             SchemaGenerationContext generationContext) {
         if (patternProperties != null && !patternProperties.isEmpty()) {
             ObjectNode patternPropertiesNode = this.objectMapper.createObjectNode();
-            for (Map.Entry<String, Type> entry : patternProperties.entrySet()) {
-                ResolvedType targetType = generationContext.getTypeContext().resolve(entry.getValue());
-                ObjectNode singlePatternSchema = generationContext.createDefinitionReference(targetType);
-                patternPropertiesNode.set(entry.getKey(), singlePatternSchema);
-            }
+            patternPropertiesNode.setAll(patternProperties);
             node.set(generationContext.getKeyword(SchemaKeyword.TAG_PATTERN_PROPERTIES), patternPropertiesNode);
         }
         return this;

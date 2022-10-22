@@ -28,7 +28,8 @@
         "notEmptyMap": {
             "type": "object",
             "additionalProperties": {
-                "type": "integer"
+                "type": "integer",
+                "minimum": 13
             },
             "minProperties": 1
         },
@@ -92,7 +93,8 @@
         "sizeRangeMap": {
             "type": "object",
             "additionalProperties": {
-                "type": "string"
+                "type": "string",
+                "minLength": 1
             },
             "minProperties": 3,
             "maxProperties": 25

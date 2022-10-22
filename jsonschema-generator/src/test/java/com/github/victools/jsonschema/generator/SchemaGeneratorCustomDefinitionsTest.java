@@ -28,8 +28,6 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for {@link SchemaGenerator} class.
@@ -167,9 +165,7 @@ public class SchemaGeneratorCustomDefinitionsTest {
                 });
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(TestDirectCircularClass.class);
-        JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                TestUtils.loadResource(this.getClass(), "multiple-definitions-one-type-" + schemaVersion.name() + ".json"),
-                result.toString(), JSONCompareMode.STRICT);
+        TestUtils.assertGeneratedSchema(result, this.getClass(), "multiple-definitions-one-type-" + schemaVersion.name() + ".json");
     }
 
     @ParameterizedTest
@@ -192,9 +188,7 @@ public class SchemaGeneratorCustomDefinitionsTest {
                 .withCustomDefinitionProvider(customDefinitionProvider);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(TestCircularClass1.class);
-        JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                TestUtils.loadResource(this.getClass(), "circular-custom-definition-" + schemaVersion.name() + ".json"),
-                result.toString(), JSONCompareMode.STRICT);
+        TestUtils.assertGeneratedSchema(result, this.getClass(), "circular-custom-definition-" + schemaVersion.name() + ".json");
     }
 
     @ParameterizedTest
@@ -220,9 +214,7 @@ public class SchemaGeneratorCustomDefinitionsTest {
                 .withCustomDefinitionProvider(customPropertyDefinitionProvider);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
         JsonNode result = generator.generateSchema(TestDirectCircularClass.class);
-        JSONAssert.assertEquals('\n' + result.toString() + '\n',
-                TestUtils.loadResource(this.getClass(), "custom-property-definition-" + schemaVersion.name() + ".json"),
-                result.toString(), JSONCompareMode.STRICT);
+        TestUtils.assertGeneratedSchema(result, this.getClass(), "custom-property-definition-" + schemaVersion.name() + ".json");
     }
 
     private static class TestDirectCircularClass {

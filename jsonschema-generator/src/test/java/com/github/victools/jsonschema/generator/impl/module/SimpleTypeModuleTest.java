@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
+import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
@@ -69,8 +70,8 @@ public class SimpleTypeModuleTest {
         Mockito.verifyNoMoreInteractions(methodConfigPart);
         Mockito.verify(this.builder, Mockito.times(2)).forMethods();
 
-        Mockito.verify(this.typeConfigPart).withAdditionalPropertiesResolver(Mockito.any());
-        Mockito.verify(this.typeConfigPart).withPatternPropertiesResolver(Mockito.any());
+        Mockito.verify(this.typeConfigPart).withAdditionalPropertiesResolver(Mockito.any(ConfigFunction.class));
+        Mockito.verify(this.typeConfigPart).withPatternPropertiesResolver(Mockito.any(ConfigFunction.class));
         Mockito.verify(this.typeConfigPart).withCustomDefinitionProvider(Mockito.any(CustomDefinitionProviderV2.class));
         Mockito.verifyNoMoreInteractions(this.typeConfigPart);
         Mockito.verify(this.builder).forTypesInGeneral();
