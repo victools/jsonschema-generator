@@ -163,9 +163,9 @@ public class JacksonModuleTest {
         Mockito.verify(this.typesInGeneralConfigPart).withSubtypeResolver(Mockito.any());
         Mockito.verify(this.typesInGeneralConfigPart, Mockito.times(2)).withCustomDefinitionProvider(Mockito.any());
         Mockito.verify(this.fieldConfigPart).withTargetTypeOverridesResolver(Mockito.any());
-        Mockito.verify(this.fieldConfigPart).withCustomDefinitionProvider(Mockito.any());
+        Mockito.verify(this.fieldConfigPart, Mockito.times(2)).withCustomDefinitionProvider(Mockito.any());
         Mockito.verify(this.methodConfigPart).withTargetTypeOverridesResolver(Mockito.any());
-        Mockito.verify(this.methodConfigPart).withCustomDefinitionProvider(Mockito.any());
+        Mockito.verify(this.methodConfigPart, Mockito.times(2)).withCustomDefinitionProvider(Mockito.any());
 
         Mockito.verifyNoMoreInteractions(this.configBuilder, this.fieldConfigPart, this.methodConfigPart, this.typesInGeneralConfigPart);
     }
