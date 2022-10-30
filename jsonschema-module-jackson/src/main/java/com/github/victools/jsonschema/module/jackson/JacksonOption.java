@@ -85,5 +85,11 @@ public enum JacksonOption {
      *
      * @since 4.18.0
      */
-    RESPECT_JSONPROPERTY_REQUIRED
+    RESPECT_JSONPROPERTY_REQUIRED,
+    /**
+     * Use this option to consider {@code @JsonIdentityReference(alwaysAsId = true)} annotations on fields/methods or the type itself.
+     *
+     * @since 4.28.0
+     */
+    JSONIDENTITY_REFERENCE_ALWAYS_AS_ID;
 }

@@ -104,6 +104,12 @@ public class JacksonModule implements Module {
         if (this.options.contains(JacksonOption.RESPECT_JSONPROPERTY_ORDER)) {
             generalConfigPart.withPropertySorter(new JsonPropertySorter(true));
         }
+        if (this.options.contains(JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID)) {
+            JsonIdentityReferenceDefinitionProvider identityReferenceDefinitionProvider = new JsonIdentityReferenceDefinitionProvider();
+            generalConfigPart.withCustomDefinitionProvider(identityReferenceDefinitionProvider);
+            fieldConfigPart.withCustomDefinitionProvider(identityReferenceDefinitionProvider::provideCustomPropertySchemaDefinition);
+            methodConfigPart.withCustomDefinitionProvider(identityReferenceDefinitionProvider::provideCustomPropertySchemaDefinition);
+        }
 
         boolean lookUpSubtypes = !this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP);
         boolean includeTypeInfoTransform = !this.options.contains(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM);
