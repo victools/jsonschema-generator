@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - enable look-up of annotations on a member's type parameter (e.g., a `Map`'s value type)
 - enable providing full custom schema definition to be included in `additionalProperties` or `patternProperties`
+- new function `TypeContext.getTypeWithAnnotation()` for finding also super type of interface with certain type annotation
+- new function `TypeContext.getTypeAnnotationConsideringHierarchy()´ for searching type annotations also on super types and interfaces
 
 #### Changed
 - consider annotations on `Map` value types when using `Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES`

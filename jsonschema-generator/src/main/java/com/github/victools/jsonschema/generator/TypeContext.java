@@ -29,6 +29,7 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -216,6 +217,52 @@ public class TypeContext {
             }
         }
         return null;
+    }
+
+    /**
+     * Find the (super) type, including interfaces, that has the designated type annotation.
+     *
+     * @param targetType type to check for the annotation, potentially iterating over its declared interfaces and super types
+     * @param annotationType type of annotation to look for
+     * @return (super) type with the targeted annotation (or {@code null} if the annotation wasn't found on any of its interfaces or super types)
+     *
+     * @since 4.28.0
+     */
+    public ResolvedType getTypeWithAnnotation(ResolvedType targetType, Class<? extends Annotation> annotationType) {
+        ResolvedType targetSuperType = targetType;
+        do {
+            if (targetSuperType.getErasedType().getAnnotation(annotationType) != null) {
+                return targetSuperType;
+            }
+            // the @JsonTypeInfo annotation may also be present on a common interface rather than a super class
+            // assumption: there are never multiple interfaces with such an annotation on a single class
+            Optional<ResolvedType> interfaceWithAnnotation = targetSuperType.getImplementedInterfaces().stream()
+                    .filter(superInterface -> superInterface.getErasedType().getAnnotation(annotationType) != null)
+                    .findFirst();
+            if (interfaceWithAnnotation.isPresent()) {
+                return interfaceWithAnnotation.get();
+            }
+            targetSuperType = targetSuperType.getParentClass();
+        } while (targetSuperType != null);
+        return null;
+    }
+
+    /**
+     * Look-up the given annotation on the targeted type or one of its declared interfaces or super types.
+     *
+     * @param <A> type of annotation to look for
+     * @param targetType type to find annotation on (or on any of its declared interfaces or super types)
+     * @param annotationType type of annotation to look for
+     * @return annotation instance (or {@code null} if not found)
+     *
+     * @since 4.28.0
+     */
+    public <A extends Annotation> A getTypeAnnotationConsideringHierarchy(ResolvedType targetType, Class<A> annotationType) {
+        ResolvedType typeWithAnnotation = this.getTypeWithAnnotation(targetType, annotationType);
+        if (typeWithAnnotation == null) {
+            return null;
+        }
+        return typeWithAnnotation.getErasedType().getAnnotation(annotationType);
     }
 
     /**
