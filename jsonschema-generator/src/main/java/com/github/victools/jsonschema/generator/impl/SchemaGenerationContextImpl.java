@@ -735,7 +735,12 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             ObjectNode collectedAttributes, CustomPropertyDefinitionProvider<M> ignoredDefinitionProvider) {
         final CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(scope, this, ignoredDefinitionProvider);
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
-            targetNode.setAll(customDefinition.getValue());
+            if (customDefinition.getValue().isEmpty()) {
+                targetNode.withArray(this.getKeyword(SchemaKeyword.TAG_ALLOF))
+                        .add(customDefinition.getValue());
+            } else {
+                targetNode.setAll(customDefinition.getValue());
+            }
             if (customDefinition.shouldIncludeAttributes()) {
                 AttributeCollector.mergeMissingAttributes(targetNode, collectedAttributes);
                 Set<String> allowedSchemaTypes = this.collectAllowedSchemaTypes(targetNode);

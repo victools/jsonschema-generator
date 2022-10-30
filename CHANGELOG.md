@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bump `jackson-core` dependency version from `2.13.2` to `2.13.4`
 - bump `jackson-databind` dependency version from `2.13.2.2` to `2.13.4.2`
 
+#### Fixed
+- custom property definition containing only a definition reference/placeholder is being ignored
+
 ### `jsonschema-module-jackson`
 #### Added
 - new `JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID` to respect `@JsonIdentityReference(alwaysAsId=true)` annotations (with `@JsonIdentityInfo`)

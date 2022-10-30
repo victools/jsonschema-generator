@@ -21,13 +21,11 @@ import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerator;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.CustomPropertyDefinition;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
-import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.TypeContext;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -55,23 +53,9 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
      */
     public CustomPropertyDefinition provideCustomPropertySchemaDefinition(MemberScope<?, ?> scope, SchemaGenerationContext context) {
         return this.getIdentityReferenceType(scope)
-                .map(idType -> this.createWrappedDefinitionReference(idType, context))
+                .map(context::createDefinitionReference)
                 .map(CustomPropertyDefinition::new)
                 .orElse(null);
-    }
-
-    /**
-     * Create a schema node containing an "allOf" property that wraps a single schema reference/placeholder to ensure its correct inclusion.
-     *
-     * @param targetType type for which to generate a schema reference/placeholder
-     * @param context generation context enabling the standard schema generation for the identity property's value type
-     * @return wrapper schema with the "allOf" array holding the single reference/placeholder
-     */
-    private ObjectNode createWrappedDefinitionReference(ResolvedType targetType, SchemaGenerationContext context) {
-        ObjectNode wrapperNode = context.getGeneratorConfig().createObjectNode();
-        wrapperNode.withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))
-                .add(context.createDefinitionReference(targetType));
-        return wrapperNode;
     }
 
     /**
@@ -130,7 +114,7 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
         // @JsonIdentityInfo annotation declares generator with specific identity type
         ResolvedType identityTypeFromGenerator = typeContext.getTypeParameterFor(typeContext.resolve(identityInfoAnnotation.generator()),
                 ObjectIdGenerator.class, 0);
-        if (identityTypeFromGenerator.getErasedType() == Object.class) {
+        if (identityTypeFromGenerator == null || identityTypeFromGenerator.getErasedType() == Object.class) {
             // the identity may be derived from a property
             String idPropertyName = identityInfoAnnotation.property();
             ResolvedField[] eligibleFields = typeContext.resolveWithMembers(typeWithIdentityInfoAnnotation).getMemberFields();
@@ -142,6 +126,6 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
                 return identityTypeFromProperty;
             }
         }
-        return Optional.of(identityTypeFromGenerator);
+        return Optional.ofNullable(identityTypeFromGenerator);
     }
 }
