@@ -46,6 +46,7 @@ import java.util.stream.Stream;
 public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionProviderV2 {
 
     private final CustomDefinition.DefinitionType subtypeDefinitionType;
+    private final Optional<JsonIdentityReferenceDefinitionProvider> identityReferenceProvider;
 
     /**
      * Default constructor equivalent to calling {@code new JsonSubTypesResolver(Collections.emptyList())}.
@@ -66,6 +67,35 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         this.subtypeDefinitionType = options.contains(JacksonOption.ALWAYS_REF_SUBTYPES)
                 ? CustomDefinition.DefinitionType.ALWAYS_REF
                 : CustomDefinition.DefinitionType.STANDARD;
+        if (options.contains(JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID)) {
+            this.identityReferenceProvider = Optional.of(new JsonIdentityReferenceDefinitionProvider());
+        } else {
+            this.identityReferenceProvider = Optional.empty();
+        }
+    }
+
+    /**
+     * Check whether to skip the subtype handling for a particular field/method (e.g. when {@code JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID}
+     * applies instead).
+     *
+     * @param member field/method for which a potential subtype should be resolved (or not)
+     * @return whether to skip the subtype resolution for the given field/method
+     */
+    private boolean skipSubtypeResolution(MemberScope<?, ?> member) {
+        return member.getType() == null
+                || this.identityReferenceProvider.flatMap(idRefProvider -> idRefProvider.getIdentityReferenceType(member)).isPresent();
+    }
+
+    /**
+     * Check whether to skip the subtype handling for a particular type (e.g. when {@code JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID} applies
+     * instead).
+     *
+     * @param declaredType type for which a potential subtype should be resolved (or not)
+     * @param context applicable type context, that offers convenience methods, e.g., for the annotation look-up
+     * @return whether to skip the subtype resolution for the given type
+     */
+    private boolean skipSubtypeResolution(ResolvedType declaredType, TypeContext context) {
+        return this.identityReferenceProvider.flatMap(idRefProvider -> idRefProvider.getIdentityReferenceType(declaredType, context)).isPresent();
     }
 
     /*
@@ -73,6 +103,9 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      */
     @Override
     public List<ResolvedType> findSubtypes(ResolvedType declaredType, SchemaGenerationContext context) {
+        if (this.skipSubtypeResolution(declaredType, context.getTypeContext())) {
+            return null;
+        }
         JsonSubTypes subtypesAnnotation = declaredType.getErasedType().getAnnotation(JsonSubTypes.class);
         return this.lookUpSubtypesFromAnnotation(declaredType, subtypesAnnotation, context.getTypeContext());
     }
@@ -84,7 +117,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      * @return list of annotated subtypes (or {@code null} if there is no {@link JsonSubTypes} annotation)
      */
     public List<ResolvedType> findTargetTypeOverrides(MemberScope<?, ?> property) {
-        if (property.getType() == null) {
+        if (this.skipSubtypeResolution(property)) {
             return null;
         }
         JsonSubTypes subtypesAnnotation = property.getAnnotationConsideringFieldAndGetter(JsonSubTypes.class);
@@ -130,13 +163,15 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      */
     @Override
     public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
-        Class<?> typeWithTypeInfo = this.getTypeDeclaringJsonTypeInfoAnnotation(javaType.getErasedType());
-        if (typeWithTypeInfo == null || javaType.getErasedType().getAnnotation(JsonSubTypes.class) != null) {
+        ResolvedType typeWithTypeInfo = context.getTypeContext().getTypeWithAnnotation(javaType, JsonTypeInfo.class);
+        if (typeWithTypeInfo == null || javaType.getErasedType().getAnnotation(JsonSubTypes.class) != null
+                || this.skipSubtypeResolution(javaType, context.getTypeContext())) {
             // no @JsonTypeInfo annotation found or the given javaType is the super type, that should be replaced
             return null;
         }
-        JsonTypeInfo typeInfoAnnotation = typeWithTypeInfo.getAnnotation(JsonTypeInfo.class);
-        JsonSubTypes subTypesAnnotation = typeWithTypeInfo.getAnnotation(JsonSubTypes.class);
+        Class<?> erasedTypeWithTypeInfo = typeWithTypeInfo.getErasedType();
+        JsonTypeInfo typeInfoAnnotation = erasedTypeWithTypeInfo.getAnnotation(JsonTypeInfo.class);
+        JsonSubTypes subTypesAnnotation = erasedTypeWithTypeInfo.getAnnotation(JsonSubTypes.class);
         ObjectNode definition = this.createSubtypeDefinition(javaType, typeInfoAnnotation, subTypesAnnotation, null, context);
         if (definition == null) {
             return null;
@@ -152,7 +187,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      * @return applicable custom per-property override schema definition (may be {@code null})
      */
     public CustomPropertyDefinition provideCustomPropertySchemaDefinition(MemberScope<?, ?> scope, SchemaGenerationContext context) {
-        if (scope.getType() == null || scope.getType().getErasedType().getDeclaredAnnotation(JsonSubTypes.class) != null) {
+        if (this.skipSubtypeResolution(scope) || scope.getType().getErasedType().getDeclaredAnnotation(JsonSubTypes.class) != null) {
             return null;
         }
         JsonTypeInfo typeInfoAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonTypeInfo.class);
@@ -181,25 +216,6 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
             return null;
         }
         return new CustomPropertyDefinition(definition, CustomDefinition.AttributeInclusion.NO);
-    }
-
-    private Class<?> getTypeDeclaringJsonTypeInfoAnnotation(Class<?> erasedTargetType) {
-        Class<?> targetSuperType = erasedTargetType;
-        do {
-            if (targetSuperType.getAnnotation(JsonTypeInfo.class) != null) {
-                return targetSuperType;
-            }
-            // the @JsonTypeInfo annotation may also be present on a common interface rather than a super class
-            // assumption: there are never multiple interfaces with such an annotation on a single class
-            Optional<Class<?>> interfaceWithAnnotation = Stream.of(targetSuperType.getInterfaces())
-                    .filter(superInterface -> superInterface.getAnnotation(JsonTypeInfo.class) != null)
-                    .findFirst();
-            if (interfaceWithAnnotation.isPresent()) {
-                return interfaceWithAnnotation.get();
-            }
-            targetSuperType = targetSuperType.getSuperclass();
-        } while (targetSuperType != null);
-        return null;
     }
 
     /**

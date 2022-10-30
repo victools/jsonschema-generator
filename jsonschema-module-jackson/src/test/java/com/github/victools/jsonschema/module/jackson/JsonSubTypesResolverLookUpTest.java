@@ -17,12 +17,16 @@
 package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeContext;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
@@ -35,7 +39,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  */
 public class JsonSubTypesResolverLookUpTest extends AbstractTypeAwareTest {
 
-    private final JsonSubTypesResolver instance = new JsonSubTypesResolver();
+    private final JsonSubTypesResolver instance = new JsonSubTypesResolver(Collections.singleton(JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID));
 
     public JsonSubTypesResolverLookUpTest() {
         super(TestSuperClassWithNameProperty.class);
@@ -73,6 +77,7 @@ public class JsonSubTypesResolverLookUpTest extends AbstractTypeAwareTest {
     static Stream<Arguments> parametersForTestFindTargetTypeOverridesForField() {
         return Stream.of(
             Arguments.of("supertypeNoAnnotation", null),
+            Arguments.of("supertypeWithIdentityReference", null),
             Arguments.of("supertypeWithAnnotationOnField", Arrays.asList(TestSubClass1.class, TestSubClass2.class)),
             Arguments.of("supertypeWithAnnotationOnGetter", Arrays.asList(TestSubClass2.class, TestSubClass3.class)),
             Arguments.of("supertypeWithAnnotationOnFieldAndGetter", Arrays.asList(TestSubClass1.class, TestSubClass2.class))
@@ -90,6 +95,7 @@ public class JsonSubTypesResolverLookUpTest extends AbstractTypeAwareTest {
     static Stream<Arguments> parametersForTestFindTargetTypeOverridesForMethod() {
         return Stream.of(
             Arguments.of("getSupertypeNoAnnotation", null),
+            Arguments.of("getSupertypeWithIdentityReference", null),
             Arguments.of("getSupertypeWithAnnotationOnField", Arrays.asList(TestSubClass1.class, TestSubClass2.class)),
             Arguments.of("getSupertypeWithAnnotationOnGetter", Arrays.asList(TestSubClass2.class, TestSubClass3.class)),
             Arguments.of("getSupertypeWithAnnotationOnFieldAndGetter", Arrays.asList(TestSubClass2.class, TestSubClass3.class))
@@ -110,9 +116,15 @@ public class JsonSubTypesResolverLookUpTest extends AbstractTypeAwareTest {
         @JsonSubTypes.Type(TestSubClass2.class),
         @JsonSubTypes.Type(TestSubClass3.class)
     })
+    @JsonIdentityInfo(generator = ObjectIdGenerators.UUIDGenerator.class)
     private static class TestSuperClassWithNameProperty {
 
         public TestSuperClassWithNameProperty supertypeNoAnnotation;
+        @JsonSubTypes({
+            @JsonSubTypes.Type(TestSubClass1.class),
+            @JsonSubTypes.Type(TestSubClass2.class)
+        })
+        public TestSuperClassWithNameProperty supertypeWithIdentityReference;
         @JsonSubTypes({
             @JsonSubTypes.Type(TestSubClass1.class),
             @JsonSubTypes.Type(TestSubClass2.class)
@@ -127,6 +139,11 @@ public class JsonSubTypesResolverLookUpTest extends AbstractTypeAwareTest {
 
         public TestSuperClassWithNameProperty getSupertypeNoAnnotation() {
             return this.supertypeNoAnnotation;
+        }
+
+        @JsonIdentityReference(alwaysAsId = true)
+        public TestSuperClassWithNameProperty getSupertypeWithIdentityReference() {
+            return supertypeWithIdentityReference;
         }
 
         public TestSuperClassWithNameProperty getSupertypeWithAnnotationOnField() {
