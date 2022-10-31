@@ -7,7 +7,17 @@
             "title": "custom title",
             "description": "field description"
         },
-        "self": {
+        "selfCustomRefNoAttributes": {
+            "$ref": "#"
+        },
+        "selfCustomRefWithAttributes": {
+            "allOf": [{
+                    "$ref": "#"
+                }],
+            "description": "field description",
+            "title": "type title"
+        },
+        "selfStandardRef": {
             "allOf": [{
                     "$ref": "#"
                 }, {
