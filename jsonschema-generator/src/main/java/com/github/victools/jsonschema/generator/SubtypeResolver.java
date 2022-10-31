@@ -40,7 +40,7 @@ public interface SubtypeResolver {
      *
      * @param declaredType declared type (i.e. without type parameter information)
      * @param context generation context (including a reference to the {@code TypeContext} for deriving a {@link ResolvedType} from a {@link Class})
-     * @return list of subtypes to represent as separate schemas; returning
+     * @return list of subtypes to represent as separate schemas (may return {@code null})
      * @see SchemaGeneratorConfigPart#withTargetTypeOverrideResolver(ConfigFunction)
      */
     List<ResolvedType> findSubtypes(ResolvedType declaredType, SchemaGenerationContext context);

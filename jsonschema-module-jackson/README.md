@@ -19,6 +19,7 @@ Module for the [jsonschema-generator](../jsonschema-generator) – deriving JSON
     * Considering `@JsonTypeInfo.use` with values `Id.CLASS`, `Id.NAME`
 12. Consider `@JsonProperty.access` for marking a field/method as `readOnly` or `writeOnly`
 13. Optionally: ignore all methods but those with a `@JsonProperty` annotation, if the `JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS` was provided (i.e. this is an "opt-in").
+14. Optionally: respect `@JsonIdentityReference(alwaysAsId=true)` annotation if there is a corresponding `@JsonIdentityInfo` annotation on the type and the `JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID` as provided (i.e., this is an "opt-in")
 
 Schema attributes derived from validation annotations on getter methods are also applied to their associated fields.
 

@@ -26,6 +26,17 @@
         "fieldWithOverriddenName": {
             "type": "boolean",
             "writeOnly": true
+        },
+        "referenceByObjectId": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
         }
     },
     "description": "test description"

@@ -153,6 +153,23 @@ public class JacksonModuleTest {
         Mockito.verifyNoMoreInteractions(this.configBuilder, this.fieldConfigPart, this.methodConfigPart, this.typesInGeneralConfigPart);
     }
 
+    @Test
+    public void testApplyToConfigBuilderWithIdentityReferenceOption() {
+        new JacksonModule(JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID)
+                .applyToConfigBuilder(this.configBuilder);
+
+        this.verifyCommonConfigurations(true);
+
+        Mockito.verify(this.typesInGeneralConfigPart).withSubtypeResolver(Mockito.any());
+        Mockito.verify(this.typesInGeneralConfigPart, Mockito.times(2)).withCustomDefinitionProvider(Mockito.any());
+        Mockito.verify(this.fieldConfigPart).withTargetTypeOverridesResolver(Mockito.any());
+        Mockito.verify(this.fieldConfigPart, Mockito.times(2)).withCustomDefinitionProvider(Mockito.any());
+        Mockito.verify(this.methodConfigPart).withTargetTypeOverridesResolver(Mockito.any());
+        Mockito.verify(this.methodConfigPart, Mockito.times(2)).withCustomDefinitionProvider(Mockito.any());
+
+        Mockito.verifyNoMoreInteractions(this.configBuilder, this.fieldConfigPart, this.methodConfigPart, this.typesInGeneralConfigPart);
+    }
+
     private void verifyCommonConfigurations(boolean considerNamingStrategy) {
         Mockito.verify(this.configBuilder).getObjectMapper();
         Mockito.verify(this.configBuilder).forFields();

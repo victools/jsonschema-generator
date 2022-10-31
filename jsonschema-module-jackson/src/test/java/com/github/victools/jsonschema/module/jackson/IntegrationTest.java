@@ -17,9 +17,12 @@
 package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
@@ -48,7 +51,7 @@ public class IntegrationTest {
     @Test
     public void testIntegration() throws Exception {
         JacksonModule module = new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE, JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY,
-                JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS);
+                JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS, JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID);
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_7, OptionPreset.PLAIN_JSON)
                 .with(Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
                 .with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
@@ -85,6 +88,9 @@ public class IntegrationTest {
         @JsonProperty(value = "fieldWithOverriddenName", access = JsonProperty.Access.WRITE_ONLY)
         public boolean originalFieldName;
 
+        @JsonIdentityReference(alwaysAsId = true)
+        public TestTypeWithObjectId referenceByObjectId;
+
         public TestEnum enumValueHandledByStandardOption;
 
         public TestEnumWithJsonValueAnnotation enumValueWithJsonValueAnnotation;
@@ -118,5 +124,15 @@ public class IntegrationTest {
     static enum TestEnumWithJsonPropertyAnnotations {
         @JsonProperty("x_property") X,
         @JsonProperty Y;
+    }
+
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    static class TestTypeWithObjectId {
+        IdType id;
+
+        class IdType {
+            public String version;
+            public long value;
+        }
     }
 }

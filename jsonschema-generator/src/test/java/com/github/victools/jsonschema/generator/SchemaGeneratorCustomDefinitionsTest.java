@@ -144,7 +144,8 @@ public class SchemaGeneratorCustomDefinitionsTest {
             }
         };
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON)
-                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS);
+                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS)
+                .without(Option.NULLABLE_FIELDS_BY_DEFAULT);
         configBuilder.forTypesInGeneral()
                 .withCustomDefinitionProvider(customDefinitionProviderOne)
                 .withCustomDefinitionProvider(customDefinitionProviderTwo)
@@ -203,8 +204,18 @@ public class SchemaGeneratorCustomDefinitionsTest {
                 return new CustomPropertyDefinition(context.createDefinition(field.getType())
                         .put(context.getKeyword(SchemaKeyword.TAG_DESCRIPTION), "custom description"));
             }
-            // the circular reference would result in an endless loop here; need to be careful!
-            return null;
+            // avoid an endless loop by including a reference (almost equivalent and usually better: just return null)
+            switch (field.getName()) {
+            case "selfCustomRefWithAttributes":
+                // blocks all member attributes
+                return new CustomPropertyDefinition(context.createDefinitionReference(field.getType()), CustomDefinition.AttributeInclusion.YES);
+            case "selfCustomRefNoAttributes":
+                // duplicates type attributes that are also in the referenced schema
+                return new CustomPropertyDefinition(context.createDefinitionReference(field.getType()), CustomDefinition.AttributeInclusion.NO);
+            default:
+                // includes member attributes, but leaves type attributes in the referenced schema
+                return null;
+            }
         };
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON);
         configBuilder.forTypesInGeneral()
@@ -213,7 +224,7 @@ public class SchemaGeneratorCustomDefinitionsTest {
                 .withDescriptionResolver(_field -> "field description")
                 .withCustomDefinitionProvider(customPropertyDefinitionProvider);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
-        JsonNode result = generator.generateSchema(TestDirectCircularClass.class);
+        JsonNode result = generator.generateSchema(TestDirectCircularClassMultipleProperties.class);
         TestUtils.assertGeneratedSchema(result, this.getClass(), "custom-property-definition-" + schemaVersion.name() + ".json");
     }
 
@@ -221,6 +232,15 @@ public class SchemaGeneratorCustomDefinitionsTest {
 
         public int number;
         public TestDirectCircularClass self;
+        public String text;
+    }
+
+    private static class TestDirectCircularClassMultipleProperties {
+
+        public int number;
+        public TestDirectCircularClassMultipleProperties selfStandardRef;
+        public TestDirectCircularClassMultipleProperties selfCustomRefWithAttributes;
+        public TestDirectCircularClassMultipleProperties selfCustomRefNoAttributes;
         public String text;
     }
 

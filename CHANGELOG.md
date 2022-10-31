@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - enable look-up of annotations on a member's type parameter (e.g., a `Map`'s value type)
 - enable providing full custom schema definition to be included in `additionalProperties` or `patternProperties`
+- new function `TypeContext.getTypeWithAnnotation()` for finding also super type of interface with certain type annotation
+- new function `TypeContext.getTypeAnnotationConsideringHierarchy()´ for searching type annotations also on super types and interfaces
 
 #### Changed
 - consider annotations on `Map` value types when using `Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES`
@@ -17,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bump `slf4j-api` dependency version from `1.7.35` to `2.0.3`
 - bump `jackson-core` dependency version from `2.13.2` to `2.13.4`
 - bump `jackson-databind` dependency version from `2.13.2.2` to `2.13.4.2`
+
+#### Fixed
+- custom property definition containing only a definition reference/placeholder is being ignored
+
+### `jsonschema-module-jackson`
+#### Added
+- new `JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID` to respect `@JsonIdentityReference(alwaysAsId=true)` annotations (with `@JsonIdentityInfo`)
 
 ### `jsonschema-module-jakarta
 #### Added
