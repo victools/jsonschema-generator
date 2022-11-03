@@ -87,7 +87,7 @@ public class IntegrationTest {
 
     }
 
-    static class TestClass {
+    static class TestClass implements TestInterface {
 
         @Null
         public Object nullObject;
