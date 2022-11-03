@@ -171,9 +171,47 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
         A annotation = super.getAnnotation(annotationClass);
         if (annotation == null) {
-            annotation = this.getRawMember().getAnnotatedReturnType().getAnnotation(annotationClass);
+            annotation = findGetterCandidates(this.getRawMember()).stream().map(m -> {
+                return Optional.ofNullable(m.getAnnotation(annotationClass))
+                        .orElse(m.getAnnotatedReturnType().getAnnotation(annotationClass));
+            }).filter(Objects::nonNull).findFirst().orElse(null);
         }
         return annotation;
+    }
+
+    private Collection<Method> findGetterCandidates(Method m) {
+        List<Method> candidates = new ArrayList<>();
+        addGetterCandidates(candidates, m.getDeclaringClass(), m.getName());
+        return candidates;
+    }
+
+    private void addGetterCandidates(List<Method> candidates, Class<?> declaringClass,
+            String methodName) {
+        Method getterInClass = findGetterInClass(declaringClass, methodName);
+        if (getterInClass != null) {
+            candidates.add(getterInClass);
+        }
+        for (Class<?> i : declaringClass.getInterfaces()) {
+            Method getterInInterface = findGetterInClass(i, methodName);
+            if (getterInInterface != null) {
+                candidates.add(getterInInterface);
+            }
+
+        }
+        Class<?> superClass = declaringClass.getSuperclass();
+        if (!superClass.equals(Object.class)) {
+            addGetterCandidates(candidates, superClass, methodName);
+        }
+    }
+
+    private Method findGetterInClass(Class<?> clazz, String getterName) {
+        for (Method m : clazz.getDeclaredMethods()) {
+            if (m.getParameterCount() == 0 && Modifier.isPublic(m.getModifiers())
+                    && m.getName().equals(getterName)) {
+                return m;
+            }
+        }
+        return null;
     }
 
     @Override
