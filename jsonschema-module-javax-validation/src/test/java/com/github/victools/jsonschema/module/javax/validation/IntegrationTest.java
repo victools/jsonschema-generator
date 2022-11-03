@@ -128,5 +128,17 @@ public class IntegrationTest {
         @DecimalMin(value = "0", inclusive = false)
         @DecimalMax(value = "1", inclusive = false)
         public double exclusiveRangeDouble;
+        
+        private String valueWithInheritedConstraints;
+
+        @Override
+        public String getValueWithInheritedConstraints() {
+            return valueWithInheritedConstraints;
+        }
+    }
+
+    interface TestInterface {
+        @Size(min = 1)
+        String getValueWithInheritedConstraints();
     }
 }
