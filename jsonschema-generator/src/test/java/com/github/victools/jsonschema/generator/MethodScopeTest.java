@@ -110,7 +110,18 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
         }
     }
 
-    private static class TestClass {
+    private static class TestClass {        @Override
+        public String getFieldWithInheritedConstraints() {
+            return "foo";
+        }
+    }
+
+    private interface TestInterface {
+
+        @TestAnnotation
+        String getFieldWithInheritedConstraints();
+
+    }
 
         private int fieldWithPrivateGetter;
         private long fieldWithPublicGetter;
@@ -149,8 +160,19 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
         public int calculateSomething() {
             return 42;
         }
+
+        @Override
+        public String getFieldWithInheritedConstraints() {
+            return "foo";
+        }
     }
 
+    private interface TestInterface {
+
+        @TestAnnotation
+        String getFieldWithInheritedConstraints();
+
+    }
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD, ElementType.METHOD})
     private static @interface TestAnnotation {
