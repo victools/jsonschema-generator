@@ -110,18 +110,7 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
         }
     }
 
-    private static class TestClass {        @Override
-        public String getFieldWithInheritedConstraints() {
-            return "foo";
-        }
-    }
-
-    private interface TestInterface {
-
-        @TestAnnotation
-        String getFieldWithInheritedConstraints();
-
-    }
+    private static class TestClass implements TestInterface {
 
         private int fieldWithPrivateGetter;
         private long fieldWithPublicGetter;
