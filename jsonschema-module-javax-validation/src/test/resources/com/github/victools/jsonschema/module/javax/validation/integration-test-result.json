@@ -82,6 +82,10 @@
             "type": "string",
             "minLength": 5,
             "maxLength": 12
+        },
+        "valueWithInheritedConstraints": {
+            "type": "string",
+            "minLength": 1
         }
     },
     "required": ["notBlankText", "notEmptyList", "notEmptyPatternText", "notNullEmail", "notNullList"]
