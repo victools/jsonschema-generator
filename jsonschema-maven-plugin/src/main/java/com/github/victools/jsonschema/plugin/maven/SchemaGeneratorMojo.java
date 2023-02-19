@@ -35,6 +35,7 @@ import com.github.victools.jsonschema.module.swagger15.SwaggerOption;
 import com.github.victools.jsonschema.module.swagger2.Swagger2Module;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -48,6 +49,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -262,21 +265,51 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             if (considerAnnotations) {
                 classGraph.enableAnnotationInfo();
             }
-            if (this.excludeClassNames != null && this.excludeClassNames.length > 0) {
-                Set<Pattern> exclusions = Stream.of(this.excludeClassNames)
+            Set<Pattern> exclusions;
+            if (this.excludeClassNames == null || this.excludeClassNames.length == 0) {
+                exclusions = Collections.emptySet();
+            } else {
+                exclusions = Stream.of(this.excludeClassNames)
                         .map(excludeEntry -> GlobHandler.createClassOrPackageNameFilter(excludeEntry, false))
                         .collect(Collectors.toSet());
-                classGraph.filterClasspathElements(element -> exclusions.stream()
-                        .noneMatch(pattern -> pattern.matcher(element).matches()));
             }
+            Set<Pattern> inclusions = new HashSet<>();
+            if (considerAnnotations) {
+                inclusions.add(Pattern.compile(".*"));
+            } else {
+                if (this.classNames != null) {
+                    for (String className : this.classNames) {
+                        inclusions.add(GlobHandler.createClassOrPackageNameFilter(className, false));
+                    }
+                }
+                if (this.packageNames != null) {
+                    for (String packageName : this.packageNames) {
+                        inclusions.add(GlobHandler.createClassOrPackageNameFilter(packageName, true));
+                    }
+                }
+            }
+
+            ClassInfoList.ClassInfoFilter filter = element -> {
+                String classPathEntry = element.getName().replaceAll("\\.", "/");
+                if (exclusions.stream().anyMatch(pattern -> pattern.matcher(classPathEntry).matches())) {
+                    this.getLog().debug("  Excluding: " + element.getName());
+                    return false;
+                }
+                if (inclusions.stream().anyMatch(pattern -> pattern.matcher(classPathEntry).matches())) {
+                    this.getLog().debug("  Including: " + element.getName());
+                    return true;
+                }
+                this.getLog().debug("  Ignoring: " + element.getName());
+                return false;
+            };
             Stream<ClassInfo> allTypesStream;
             try (ScanResult scanResult = classGraph.scan()) {
                 if (considerAnnotations) {
                     allTypesStream = this.annotations.stream()
-                            .flatMap(a -> scanResult.getClassesWithAnnotation(a.className).stream())
+                            .flatMap(a -> scanResult.getClassesWithAnnotation(a.className).filter(filter).stream())
                             .distinct();
                 } else {
-                    allTypesStream = scanResult.getAllClasses().stream();
+                    allTypesStream = scanResult.getAllClasses().filter(filter).stream();
                 }
                 this.allTypes = allTypesStream
                         .map(PotentialSchemaClass::new)
