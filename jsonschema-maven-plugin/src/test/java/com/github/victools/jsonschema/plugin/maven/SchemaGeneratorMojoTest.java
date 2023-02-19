@@ -166,9 +166,9 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         Assertions.assertTrue(resultFileA.exists());
         resultFileA.deleteOnExit();
 
+        // explicitly excluded, although it is in the target
         File resultFileB = new File(generationLocation,"TestClassB-schema.json");
-        Assertions.assertTrue(resultFileB.exists());
-        resultFileB.deleteOnExit();
+        Assertions.assertFalse(resultFileB.exists());
 
         File resultFileC = new File(generationLocation,"TestClassC-schema.json");
         Assertions.assertTrue(resultFileC.exists());
@@ -179,11 +179,6 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         Assertions.assertTrue(referenceFileA.exists());
         Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileA, referenceFileA, CHARSET_NAME),
                 "Generated schema for TestClassA is not equal to the expected reference.");
-
-        File referenceFileB = new File(testCaseLocation, "TestClassB-reference.json");
-        Assertions.assertTrue(referenceFileB.exists());
-        Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFileB, referenceFileB, CHARSET_NAME),
-                "Generated schema for TestClassB is not equal to the expected reference.");
 
         File referenceFileC = new File(testCaseLocation, "TestClassC-reference.json");
         Assertions.assertTrue(referenceFileC.exists());
