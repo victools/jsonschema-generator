@@ -47,7 +47,7 @@ configBuilder.without(
           <li><code>Double</code>/<code>double</code>/<code>Float</code>/<code>float</code> are treated as <code>{ "type": "number" }</code> schema</li>
           <li><code>BigInteger</code> as <code>{ "type": "integer" }</code> schema</li>
           <li><code>BigDecimal</code>/<code>Number</code> as <code>{ "type": "number" }</code> schema</li>
-          <li><code>LocalDate</code>/<code>LocalDateTime</code>/<code>LocalTime</code>/<code>ZonedDateTime</code>/<code>OffsetDateTime</code>/<code>OffsetTime</code>/<code>Instant</code>/<code>ZoneId</code>/<code>Date</code>/<code>Calendar</code>/<code>UUID</code> as <code>{ "type": "string" }</code> schema</li>
+          <li><code>LocalDate</code>/<code>LocalDateTime</code>/<code>LocalTime</code>/<code>ZonedDateTime</code>/<code>OffsetDateTime</code>/<code>OffsetTime</code>/<code>Instant</code>/<code>Period</code>/<code>ZoneId</code>/<code>Date</code>/<code>Calendar</code>/<code>UUID</code> as <code>{ "type": "string" }</code> schema</li>
         </ul>
       </td>
       <td>

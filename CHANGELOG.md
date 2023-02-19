@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Changed
+- treat `java.time.Period` as `{ "type": "string" }` when `Option.ADDITIONAL_FIXED_TYPES` is enabled
+
 ### `jsonschema-maven-plugin`
 #### Fixed
 - regression: filtering of considered classes for schema generation stopped working (after migration to `classgraph` in 4.28.0)
