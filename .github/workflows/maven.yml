@@ -15,12 +15,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        java-version: ['11', '17']
+
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 11
+    - name: Set up JDK ${{ matrix.java-version }}
       uses: actions/setup-java@v1
       with:
-        java-version: 11
+        java-version: ${{ matrix.java-version }}
     - name: Build
       run: mvn install -DskipTests=true -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -B -V
       env:
@@ -31,12 +35,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        java-version: ['11', '17']
+
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 11
+    - name: Set up JDK ${{ matrix.java-version }}
       uses: actions/setup-java@v1
       with:
-        java-version: 11
+        java-version: ${{ matrix.java-version }}
     - name: Test
       run: mvn test -B
       env:
