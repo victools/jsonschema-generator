@@ -89,6 +89,7 @@ public class SimpleTypeModule implements Module {
         module.withStringType(java.util.UUID.class, "uuid");
         module.withStringType(java.net.URI.class, "uri");
         module.withStringType(java.time.ZoneId.class);
+        module.withStringType(java.time.Period.class);
         module.withIntegerType(java.math.BigInteger.class);
 
         Stream.of(java.math.BigDecimal.class, Number.class)
