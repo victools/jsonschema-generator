@@ -108,11 +108,15 @@
         <maven.plugin.version.checkstyle>3.2.0</maven.plugin.version.checkstyle>
         <version.checkstyle>9.3</version.checkstyle>
         <maven.plugin.version.compiler>3.10.1</maven.plugin.version.compiler>
+        <maven.plugin.version.enforcer>3.2.1</maven.plugin.version.enforcer>
         <maven.plugin.version.jacoco>0.8.8</maven.plugin.version.jacoco>
         <maven.plugin.version.javadoc>3.4.1</maven.plugin.version.javadoc>
         <maven.plugin.version.release>2.5.3</maven.plugin.version.release>
         <maven.plugin.version.source>3.2.1</maven.plugin.version.source>
         <maven.plugin.version.surefire>3.0.0-M7</maven.plugin.version.surefire>
+        <maven.plugin.version.moditect>1.0.0.RC2</maven.plugin.version.moditect>
+
+        <java.module.name>undefined</java.module.name>
 
         <!-- included dependencies -->
         <version.classmate>1.5.1</version.classmate>
@@ -340,7 +344,60 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>$maven.plugin.version.release{}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.moditect</groupId>
+                    <artifactId>moditect-maven-plugin</artifactId>
+                    <version>${maven.plugin.version.moditect}</version>
+                    <executions>
+                        <execution>
+                            <id>add-module-infos</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>add-module-info</goal>
+                            </goals>
+                            <configuration>
+                                <jvmVersion>9</jvmVersion>
+                                <overwriteExistingFiles>true</overwriteExistingFiles>
+                                <module>
+                                    <moduleInfo>
+                                        <name>${java.module.name}</name>
+                                        <!-- export everything -->
+                                        <exports>*;</exports>
+                                        <!-- declare services consumed by the artifact -->
+                                        <addServiceUses>true</addServiceUses>
+                                    </moduleInfo>
+                                </module>
+                                <jdepsExtraArgs>
+                                    <arg>--multi-release=9</arg>
+                                </jdepsExtraArgs>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven.plugin.version.enforcer}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[11,)</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 </project>
