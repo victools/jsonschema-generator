@@ -14,6 +14,10 @@
     <description>Module for the jsonschema-generator – deriving JSON Schema attributes from jackson annotations</description>
     <url>https://github.com/victools/jsonschema-generator</url>
 
+    <properties>
+        <java.module.name>com.github.victools.jsonschema.module.jackson</java.module.name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.github.victools</groupId>
@@ -45,6 +49,10 @@
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.moditect</groupId>
+                <artifactId>moditect-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

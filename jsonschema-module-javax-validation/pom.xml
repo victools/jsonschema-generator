@@ -13,6 +13,10 @@
     <name>Java JSON Schema Generator Module – javax.validation</name>
     <description>Module for the jsonschema-generator – deriving JSON Schema attributes from javax.validation annotations</description>
 
+    <properties>
+        <java.module.name>com.github.victools.jsonschema.module.javax.validation</java.module.name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.github.victools</groupId>
@@ -39,6 +43,10 @@
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.moditect</groupId>
+                <artifactId>moditect-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
