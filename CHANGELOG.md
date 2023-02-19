@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### `jsonschema-generator`
+#### Added
+- include basic Java module descriptor (also for standard modules and maven plugin)
+
 #### Changed
 - treat `java.time.Period` as `{ "type": "string" }` when `Option.ADDITIONAL_FIXED_TYPES` is enabled
 

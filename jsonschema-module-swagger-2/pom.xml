@@ -13,6 +13,10 @@
     <name>Java JSON Schema Generator Module – swagger (2.x)</name>
     <description>Module for the jsonschema-generator – Swagger (2.x)</description>
 
+    <properties>
+        <java.module.name>com.github.victools.jsonschema.module.swagger.two</java.module.name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.github.victools</groupId>
@@ -39,6 +43,10 @@
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.moditect</groupId>
+                <artifactId>moditect-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
