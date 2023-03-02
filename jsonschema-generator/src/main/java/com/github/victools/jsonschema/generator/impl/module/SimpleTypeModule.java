@@ -86,7 +86,7 @@ public class SimpleTypeModule implements Module {
                 java.time.OffsetDateTime.class, java.time.Instant.class,
                 java.util.Date.class, java.util.Calendar.class)
                 .forEach(javaType -> module.withStringType(javaType, "date-time"));
-        Stream.of(java.time.LocalTime.class,  java.time.OffsetTime.class)
+        Stream.of(java.time.LocalTime.class, java.time.OffsetTime.class)
                 .forEach(javaType -> module.withStringType(javaType, "time"));
         module.withStringType(java.util.UUID.class, "uuid");
         module.withStringType(java.net.URI.class, "uri");
