@@ -82,10 +82,12 @@ public class SimpleTypeModule implements Module {
         SimpleTypeModule module = SimpleTypeModule.forPrimitiveTypes();
 
         module.withStringType(java.time.LocalDate.class, "date");
-        Stream.of(java.time.LocalDateTime.class, java.time.LocalTime.class, java.time.ZonedDateTime.class,
-                java.time.OffsetDateTime.class, java.time.OffsetTime.class, java.time.Instant.class,
+        Stream.of(java.time.LocalDateTime.class, java.time.ZonedDateTime.class,
+                java.time.OffsetDateTime.class, java.time.Instant.class,
                 java.util.Date.class, java.util.Calendar.class)
                 .forEach(javaType -> module.withStringType(javaType, "date-time"));
+        Stream.of(java.time.LocalTime.class, java.time.OffsetTime.class)
+                .forEach(javaType -> module.withStringType(javaType, "time"));
         module.withStringType(java.util.UUID.class, "uuid");
         module.withStringType(java.net.URI.class, "uri");
         module.withStringType(java.time.ZoneId.class);
