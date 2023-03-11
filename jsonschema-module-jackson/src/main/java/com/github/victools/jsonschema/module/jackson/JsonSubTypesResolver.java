@@ -323,11 +323,11 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
             break;
         case WRAPPER_OBJECT:
             definition.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT));
-            ObjectNode propertiesNode = definition.with(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));
+            ObjectNode propertiesNode = definition.putObject(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));
             if (attributesToInclude == null || attributesToInclude.isEmpty()) {
                 propertiesNode.set(typeIdentifier, context.createStandardDefinitionReference(javaType, this));
             } else {
-                propertiesNode.with(typeIdentifier)
+                propertiesNode.putObject(typeIdentifier)
                         .withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))
                         .add(context.createStandardDefinitionReference(javaType, this))
                         .add(attributesToInclude);
@@ -346,8 +346,8 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
                 additionalPart.setAll(attributesToInclude);
             }
             additionalPart.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT))
-                    .with(context.getKeyword(SchemaKeyword.TAG_PROPERTIES))
-                    .with(propertyName)
+                    .putObject(context.getKeyword(SchemaKeyword.TAG_PROPERTIES))
+                    .putObject(propertyName)
                     .put(context.getKeyword(SchemaKeyword.TAG_CONST), typeIdentifier);
             if (!javaType.getErasedType().equals(typeInfoAnnotation.defaultImpl())) {
                 additionalPart.withArray(context.getKeyword(SchemaKeyword.TAG_REQUIRED))

@@ -43,29 +43,29 @@ public class SchemaBuilderTest {
 
         ObjectNode result = this.config.createObjectNode();
         result.put("openapi", "3.0.0");
-        result.with("info")
+        result.putObject("info")
                 .put("title", "Test API")
                 .put("version", "0.1.0");
-        ObjectNode testPath = result.with("paths")
-                .with("/test");
-        ObjectNode testPathPost = testPath.with("post");
-        testPathPost.with("requestBody")
-                .with("content").with("application/json")
+        ObjectNode testPath = result.putObject("paths")
+                .putObject("/test");
+        ObjectNode testPathPost = testPath.putObject("post");
+        testPathPost.putObject("requestBody")
+                .putObject("content").putObject("application/json")
                 .set("schema", instance.createSchemaReference(TestClass1.class));
-        testPathPost.with("responses").with("200")
+        testPathPost.putObject("responses").putObject("200")
                 .put("description", "succesful POST")
-                .with("content").with("application/json")
+                .putObject("content").putObject("application/json")
                 .set("schema", instance.createSchemaReference(TestClass2.class));
-        ObjectNode testPathPut = testPath.with("put");
-        testPathPut.with("requestBody")
-                .with("content").with("application/json")
+        ObjectNode testPathPut = testPath.putObject("put");
+        testPathPut.putObject("requestBody")
+                .putObject("content").putObject("application/json")
                 .set("schema", instance.createSchemaReference(TestClass3.class));
-        testPathPut.with("responses").with("201")
+        testPathPut.putObject("responses").putObject("201")
                 .put("description", "succesful PUT")
-                .with("content").with("application/json")
+                .putObject("content").putObject("application/json")
                 .set("schema", instance.createSchemaReference(TestClass3.class));
 
-        result.with("components")
+        result.putObject("components")
                 .set("schemas", instance.collectDefinitions("components/schemas"));
 
         TestUtils.assertGeneratedSchema(result, this.getClass(), "openapi.json");
