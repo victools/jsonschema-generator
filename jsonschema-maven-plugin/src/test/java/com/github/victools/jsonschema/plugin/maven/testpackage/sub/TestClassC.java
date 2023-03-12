@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.victools.jsonschema.plugin.maven.testpackage.subpackage;
+package com.github.victools.jsonschema.plugin.maven.testpackage.sub;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 

@@ -53,7 +53,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.maven.plugin.AbstractMojo;
@@ -69,8 +69,8 @@ import org.apache.maven.project.MavenProject;
  */
 @Mojo(name = "generate",
         defaultPhase = LifecyclePhase.COMPILE,
-        requiresDependencyResolution = ResolutionScope.COMPILE,
-        requiresDependencyCollection = ResolutionScope.COMPILE,
+        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+        requiresDependencyCollection = ResolutionScope.COMPILE_PLUS_RUNTIME,
         threadSafe = true)
 public class SchemaGeneratorMojo extends AbstractMojo {
 
@@ -209,9 +209,9 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @throws MojoExecutionException In case of problems
      */
     private void generateSchema(String classOrPackageName, boolean targetPackage) throws MojoExecutionException {
-        Pattern filter = GlobHandler.createClassOrPackageNameFilter(classOrPackageName, targetPackage);
+        Predicate<String> filter = GlobHandler.createClassOrPackageNameFilter(classOrPackageName, targetPackage);
         List<PotentialSchemaClass> matchingClasses = this.getAllClassNames().stream()
-                .filter(entry -> filter.matcher(entry.getAbsolutePathToMatch()).matches())
+                .filter(entry -> filter.test(entry.getAbsolutePathToMatch()))
                 .sorted()
                 .collect(Collectors.toList());
         for (PotentialSchemaClass potentialTarget : matchingClasses) {
@@ -265,7 +265,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             if (considerAnnotations) {
                 classGraph.enableAnnotationInfo();
             }
-            Set<Pattern> exclusions;
+            Set<Predicate<String>> exclusions;
             if (this.excludeClassNames == null || this.excludeClassNames.length == 0) {
                 exclusions = Collections.emptySet();
             } else {
@@ -273,9 +273,9 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                         .map(excludeEntry -> GlobHandler.createClassOrPackageNameFilter(excludeEntry, false))
                         .collect(Collectors.toSet());
             }
-            Set<Pattern> inclusions = new HashSet<>();
+            Set<Predicate<String>> inclusions = new HashSet<>();
             if (considerAnnotations) {
-                inclusions.add(Pattern.compile(".*"));
+                inclusions.add(input -> true);
             } else {
                 if (this.classNames != null) {
                     for (String className : this.classNames) {
@@ -291,15 +291,14 @@ public class SchemaGeneratorMojo extends AbstractMojo {
 
             ClassInfoList.ClassInfoFilter filter = element -> {
                 String classPathEntry = element.getName().replaceAll("\\.", "/");
-                if (exclusions.stream().anyMatch(pattern -> pattern.matcher(classPathEntry).matches())) {
+                if (exclusions.stream().anyMatch(exclude -> exclude.test(classPathEntry))) {
                     this.getLog().debug("  Excluding: " + element.getName());
                     return false;
                 }
-                if (inclusions.stream().anyMatch(pattern -> pattern.matcher(classPathEntry).matches())) {
+                if (inclusions.stream().anyMatch(include -> include.test(classPathEntry))) {
                     this.getLog().debug("  Including: " + element.getName());
                     return true;
                 }
-                this.getLog().debug("  Ignoring: " + element.getName());
                 return false;
             };
             Stream<ClassInfo> allTypesStream;
