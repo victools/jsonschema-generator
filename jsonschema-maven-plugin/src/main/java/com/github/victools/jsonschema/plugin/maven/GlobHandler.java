@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -24,13 +25,24 @@ import java.util.regex.Pattern;
 public class GlobHandler {
 
     /**
+     * Generate predicate to check the given input for filtering classes on the classpath.
+     *
+     * @param input either absolute value (with "." as package separator) or glob pattern (with "/" as package separator)
+     * @param forPackage whether the given input identifies a package
+     * @return predicate to filter classes on classpath by
+     */
+    public static Predicate<String> createClassOrPackageNameFilter(String input, boolean forPackage) {
+        return GlobHandler.createClassOrPackageNamePattern(input, forPackage).asMatchPredicate();
+    }
+
+    /**
      * Generate regular expression from the given input for filtering classes on the classpath.
      *
      * @param input either absolute value (with "." as package separator) or glob pattern (with "/" as package separator)
      * @param forPackage whether the given input identifies a package
      * @return regular expression to filter classes on classpath by
      */
-    public static Pattern createClassOrPackageNameFilter(String input, boolean forPackage) {
+    public static Pattern createClassOrPackageNamePattern(String input, boolean forPackage) {
         String inputRegex;
         if (input.chars().anyMatch(c -> c == '/' || c == '*' || c == '?' || c == '+' || c == '[' || c == '{' || c == '\\')) {
             // convert glob pattern into regular expression
