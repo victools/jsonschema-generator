@@ -127,7 +127,7 @@
 
         <!-- included dependencies -->
         <version.classmate>1.5.1</version.classmate>
-        <version.jackson>2.13.4.20221013</version.jackson>
+        <version.jackson>2.14.2</version.jackson>
         <version.slf4j>2.0.3</version.slf4j>
         <!-- test dependencies -->
         <version.jsonassert>1.5.1</version.jsonassert>

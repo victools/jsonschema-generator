@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Changed
 - treat `java.time.Period` as `{ "type": "string" }` when `Option.ADDITIONAL_FIXED_TYPES` is enabled
 - treat `java.time.LocalTime` and `java.time.OffsetTime` as `{ "format": "time" }` when `Option.ADDITIONAL_FIXED_TYPES` is enabled (instead of "date-time")
+- update jackson dependency from version `2.13.4.20221013` to `2.14.2` and replace usage of now deprecated methods
 
 ### `jsonschema-maven-plugin`
 #### Fixed
