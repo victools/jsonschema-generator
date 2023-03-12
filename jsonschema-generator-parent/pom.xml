@@ -118,7 +118,7 @@
         <maven.plugin.version.enforcer>3.2.1</maven.plugin.version.enforcer>
         <maven.plugin.version.jacoco>0.8.8</maven.plugin.version.jacoco>
         <maven.plugin.version.javadoc>3.4.1</maven.plugin.version.javadoc>
-        <maven.plugin.version.moditect>1.0.0.RC2</maven.plugin.version.moditect>
+        <maven.plugin.version.moditect>1.0.0.RC3</maven.plugin.version.moditect>
         <maven.plugin.version.release>2.5.3</maven.plugin.version.release>
         <maven.plugin.version.source>3.2.1</maven.plugin.version.source>
         <maven.plugin.version.surefire>3.0.0-M7</maven.plugin.version.surefire>
