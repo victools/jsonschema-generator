@@ -32,7 +32,7 @@ public class GlobHandler {
      * @return predicate to filter classes on classpath by
      */
     public static Predicate<String> createClassOrPackageNameFilter(String input, boolean forPackage) {
-        return GlobHandler.createClassOrPackageNamePattern(input, forPackage).asMatchPredicate();
+        return (className) -> GlobHandler.createClassOrPackageNamePattern(input, forPackage).matcher(className).matches();
     }
 
     /**
