@@ -28,13 +28,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Generic collection of reflection based analysis for populating a JSON Schema.
  *
  * @param <S> type of the scope/type representation to analyse
  */
-public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
+public class SchemaGeneratorTypeConfigPart<S extends TypeScope> implements StatefulConfig {
 
     /**
      * Helper function for invoking a given function with the provided inputs or returning null, if all functions return null themselves.
@@ -525,5 +526,15 @@ public class SchemaGeneratorTypeConfigPart<S extends TypeScope> {
      */
     public Boolean resolveArrayUniqueItems(S scope) {
         return getFirstDefinedValue(this.arrayUniqueItemsResolvers, scope);
+    }
+
+    @Override
+    public void resetAfterSchemaGenerationFinished() {
+        Stream.of(this.titleResolvers, this.descriptionResolvers, this.defaultResolvers, this.enumResolvers,
+                this.stringMinLengthResolvers, this.stringMaxLengthResolvers, this.stringFormatResolvers,
+                this.stringPatternResolvers, this.numberInclusiveMinimumResolvers, this.numberExclusiveMinimumResolvers,
+                this.numberInclusiveMaximumResolvers, this.numberExclusiveMaximumResolvers, this.numberMultipleOfResolvers,
+                this.arrayMinItemsResolvers, this.arrayMaxItemsResolvers, this.arrayUniqueItemsResolvers
+        ).flatMap(List::stream).forEach(StatefulConfig::resetAfterSchemaGenerationFinished);
     }
 }

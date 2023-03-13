@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 /**
  * Test for the {@link SchemaBuilder}.
@@ -31,9 +32,9 @@ public class SchemaBuilderTest {
 
     @BeforeEach
     public void setUp() {
-        this.config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
+        this.config = Mockito.spy(new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(Option.PLAIN_DEFINITION_KEYS)
-                .build();
+                .build());
         this.typeContext = TypeContextFactory.createDefaultTypeContext();
     }
 
@@ -69,6 +70,7 @@ public class SchemaBuilderTest {
                 .set("schemas", instance.collectDefinitions("components/schemas"));
 
         TestUtils.assertGeneratedSchema(result, this.getClass(), "openapi.json");
+        Mockito.verify(this.config, Mockito.times(4)).resetAfterSchemaGenerationFinished();
     }
 
     private static class TestClass1 {

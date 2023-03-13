@@ -27,7 +27,7 @@ import java.util.List;
  * but allowing the schema validator to ignore any sub-schemas after the first match was found.
  */
 @FunctionalInterface
-public interface SubtypeResolver {
+public interface SubtypeResolver extends StatefulConfig {
 
     /**
      * Look-up the subtypes for a given type, that should be listed independently.

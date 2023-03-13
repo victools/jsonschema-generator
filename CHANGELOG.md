@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `jsonschema-generator`
 #### Added
 - include basic Java module descriptor (also for standard modules and maven plugin)
+- add possibility to reset various types of configuration aspects after a schema was generated, to enable re-using a generator instance even if it is stateful (i.e., behaves differently on subsequent invocations)
 
 #### Changed
 - treat `java.time.Period` as `{ "type": "string" }` when `Option.ADDITIONAL_FIXED_TYPES` is enabled

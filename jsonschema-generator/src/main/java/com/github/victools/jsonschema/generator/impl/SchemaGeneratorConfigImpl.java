@@ -84,6 +84,13 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
         this.methodConfigPart = methodConfigPart;
     }
 
+    @Override
+    public void resetAfterSchemaGenerationFinished() {
+        this.typesInGeneralConfigPart.resetAfterSchemaGenerationFinished();
+        this.fieldConfigPart.resetAfterSchemaGenerationFinished();
+        this.methodConfigPart.resetAfterSchemaGenerationFinished();
+    }
+
     /**
      * Whether a given option is currently enabled (either specifically or by default).
      *

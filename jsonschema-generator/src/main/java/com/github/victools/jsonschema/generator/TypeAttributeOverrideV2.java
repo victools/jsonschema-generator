@@ -21,7 +21,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 /**
  * Entry point for customising the JSON Schema attributes being collected for a type in general, i.e. the part that may be referenced multiple times.
  */
-public interface TypeAttributeOverrideV2 {
+@FunctionalInterface
+public interface TypeAttributeOverrideV2 extends StatefulConfig {
 
     /**
      * Add/remove attributes on the given JSON Schema node – this is specifically intended for attributes relating to the type in general.

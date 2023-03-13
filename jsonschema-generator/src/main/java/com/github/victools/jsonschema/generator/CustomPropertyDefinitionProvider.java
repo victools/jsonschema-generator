@@ -21,7 +21,8 @@ package com.github.victools.jsonschema.generator;
  *
  * @param <M> either field or method for which a custom definition may be provided
  */
-public interface CustomPropertyDefinitionProvider<M extends MemberScope<?, ?>> {
+@FunctionalInterface
+public interface CustomPropertyDefinitionProvider<M extends MemberScope<?, ?>> extends StatefulConfig {
 
     /**
      * Look-up the non-standard JSON schema definition for a given property. If it returns null, the next definition provider is applied.

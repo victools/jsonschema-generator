@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 VicTools.
+ * Copyright 2023 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,15 @@
 package com.github.victools.jsonschema.generator;
 
 /**
- * Functional interface for realising one of various configurations.
- *
- * @param <S> type of scope/type representation the configuration applies to
- * @param <R> type of the configuration result
+ * Type of configuration (or an aspect of it), that may change during a schema generation and7or remember some kind of state.
  */
-@FunctionalInterface
-public interface ConfigFunction<S extends TypeScope, R> extends StatefulConfig {
+public interface StatefulConfig {
 
     /**
-     * Applies this function to the given arguments.
-     *
-     * @param target the targeted type representation the configuration applies to
-     * @return the function result (may be null to indicate no specific configuration applies)
+     * Method being invoked after the generation of a single "main" type's schema has been completed. This enables the same {@code SchemaGenerator}
+     * instance to be re-used for multiple subsequent executions, even if some aspect of the configuration remembers the original "main" type.
      */
-    R apply(S target);
+    default void resetAfterSchemaGenerationFinished() {
+        // nothing to reset by default
+    }
 }

@@ -130,6 +130,7 @@ public class SchemaBuilder {
             this.schemaNodes.add(jsonSchemaResult);
         }
         this.performCleanup();
+        this.config.resetAfterSchemaGenerationFinished();
         return jsonSchemaResult;
     }
 
@@ -148,6 +149,8 @@ public class SchemaBuilder {
         ResolvedType resolvedTargetType = this.typeContext.resolve(targetType, typeParameters);
         ObjectNode node = this.generationContext.createDefinitionReference(resolvedTargetType);
         this.schemaNodes.add(node);
+
+        this.config.resetAfterSchemaGenerationFinished();
         return node;
     }
 

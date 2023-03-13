@@ -23,7 +23,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  *
  * @param <M> type of the reference/context to modify
  */
-public interface InstanceAttributeOverrideV2<M extends MemberScope<?, ?>> {
+@FunctionalInterface
+public interface InstanceAttributeOverrideV2<M extends MemberScope<?, ?>> extends StatefulConfig {
 
     /**
      * Add/remove attributes on the given JSON Schema node – this is specifically intended for attributes relating to a particular instance.

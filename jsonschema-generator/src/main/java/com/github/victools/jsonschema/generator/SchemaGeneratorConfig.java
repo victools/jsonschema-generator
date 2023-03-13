@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * Default implementation of a schema generator's configuration.
  */
-public interface SchemaGeneratorConfig {
+public interface SchemaGeneratorConfig extends StatefulConfig {
 
     /**
      * Getter for the designated JSON Schema version.
