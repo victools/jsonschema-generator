@@ -24,6 +24,8 @@ public interface StatefulConfig {
     /**
      * Method being invoked after the generation of a single "main" type's schema has been completed. This enables the same {@code SchemaGenerator}
      * instance to be re-used for multiple subsequent executions, even if some aspect of the configuration remembers the original "main" type.
+     *
+     * @since 4.29.0
      */
     default void resetAfterSchemaGenerationFinished() {
         // nothing to reset by default

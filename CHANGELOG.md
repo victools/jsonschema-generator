@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.29.0] - 2023-03-13
 ### `jsonschema-generator`
 #### Added
 - include basic Java module descriptor (also for standard modules and maven plugin)
@@ -702,7 +702,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.28.0...HEAD
+[4.29.0]: https://github.com/victools/jsonschema-generator/compare/v4.28.0...v4.29.0
 [4.28.0]: https://github.com/victools/jsonschema-generator/compare/v4.27.0...v4.28.0
 [4.27.0]: https://github.com/victools/jsonschema-generator/compare/v4.26.0...v4.27.0
 [4.26.0]: https://github.com/victools/jsonschema-generator/compare/v4.25.0...v4.26.0
