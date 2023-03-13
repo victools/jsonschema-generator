@@ -36,6 +36,9 @@
         "person": {
             "$ref": "#/$defs/referenceToPerson",
             "writeOnly": true
+        },
+        "test": {
+            "$ref": "./TestClass-schema.json"
         }
     }
 }

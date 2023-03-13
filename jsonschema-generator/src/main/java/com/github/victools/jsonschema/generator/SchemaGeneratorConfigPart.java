@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Generic collection of reflection based analysis for populating a JSON Schema from a certain kind of member.
@@ -385,5 +386,14 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
     @Override
     public SchemaGeneratorConfigPart<M> withArrayUniqueItemsResolver(ConfigFunction<M, Boolean> resolver) {
         return (SchemaGeneratorConfigPart<M>) super.withArrayUniqueItemsResolver(resolver);
+    }
+
+    @Override
+    public void resetAfterSchemaGenerationFinished() {
+        super.resetAfterSchemaGenerationFinished();
+
+        Stream.of(this.customDefinitionProviders, this.instanceAttributeOverrides, this.nullableChecks,
+                this.targetTypeOverridesResolvers, this.propertyNameOverrideResolvers
+        ).flatMap(List::stream).forEach(StatefulConfig::resetAfterSchemaGenerationFinished);
     }
 }

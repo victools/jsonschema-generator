@@ -27,7 +27,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
 /**
  * Generic collection of reflection based analysis for populating a JSON Schema targeting a specific type in general.
@@ -289,5 +291,14 @@ public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigP
     @Override
     public SchemaGeneratorGeneralConfigPart withArrayUniqueItemsResolver(ConfigFunction<TypeScope, Boolean> resolver) {
         return (SchemaGeneratorGeneralConfigPart) super.withArrayUniqueItemsResolver(resolver);
+    }
+
+    @Override
+    public void resetAfterSchemaGenerationFinished() {
+        super.resetAfterSchemaGenerationFinished();
+
+        Optional.ofNullable(this.definitionNamingStrategy).ifPresent(StatefulConfig::resetAfterSchemaGenerationFinished);
+        Stream.of(this.customDefinitionProviders, this.subtypeResolvers, this.typeAttributeOverrides, this.idResolvers, this.anchorResolvers)
+                .flatMap(List::stream).forEach(StatefulConfig::resetAfterSchemaGenerationFinished);
     }
 }

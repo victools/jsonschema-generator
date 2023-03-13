@@ -61,6 +61,7 @@ public class Swagger2Module implements Module {
         configPart.withDescriptionResolver(this.createTypePropertyResolver(Schema::description, description -> !description.isEmpty()));
         configPart.withTitleResolver(this.createTypePropertyResolver(Schema::title, title -> !title.isEmpty()));
 
+        configPart.withCustomDefinitionProvider(new ExternalRefCustomDefinitionProvider());
         configPart.withSubtypeResolver(new Swagger2SubtypeResolver());
         configPart.withDefinitionNamingStrategy(new Swagger2SchemaDefinitionNamingStrategy(configPart.getDefinitionNamingStrategy()));
     }

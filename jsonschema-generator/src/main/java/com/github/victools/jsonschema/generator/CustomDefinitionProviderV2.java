@@ -21,7 +21,8 @@ import com.fasterxml.classmate.ResolvedType;
 /**
  * Provider of non-standard JSON schema definitions.
  */
-public interface CustomDefinitionProviderV2 {
+@FunctionalInterface
+public interface CustomDefinitionProviderV2 extends StatefulConfig {
 
     /**
      * Look-up the non-standard JSON schema definition for a given type. If it returns null, the next definition provider is expected to be applied.

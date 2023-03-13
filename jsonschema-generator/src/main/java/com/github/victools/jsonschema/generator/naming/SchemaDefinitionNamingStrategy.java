@@ -17,13 +17,14 @@
 package com.github.victools.jsonschema.generator.naming;
 
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
+import com.github.victools.jsonschema.generator.StatefulConfig;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import java.util.Map;
 
 /**
  * Naming strategy for the keys in the "definitions"/"$defs" containing shared/reused subschemas.
  */
-public interface SchemaDefinitionNamingStrategy {
+public interface SchemaDefinitionNamingStrategy extends StatefulConfig {
 
     /**
      * Getter for the name/key in the "definitions"/"$defs" to represent the given {@link DefinitionKey}.

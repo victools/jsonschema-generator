@@ -8,11 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `jsonschema-generator`
 #### Added
 - include basic Java module descriptor (also for standard modules and maven plugin)
+- add possibility to reset various types of configuration aspects after a schema was generated, to enable re-using a generator instance even if it is stateful (i.e., behaves differently on subsequent invocations)
 
 #### Changed
 - treat `java.time.Period` as `{ "type": "string" }` when `Option.ADDITIONAL_FIXED_TYPES` is enabled
 - treat `java.time.LocalTime` and `java.time.OffsetTime` as `{ "format": "time" }` when `Option.ADDITIONAL_FIXED_TYPES` is enabled (instead of "date-time")
 - update jackson dependency from version `2.13.4.20221013` to `2.14.2` and replace usage of now deprecated methods
+
+### `jsonschema-module-swagger-2`
+#### Added
+- consider `@Schema(ref = "...")` attribute, when it is annotated on a type (and not just a member) except for the main type being targeted
 
 ### `jsonschema-maven-plugin`
 #### Fixed
