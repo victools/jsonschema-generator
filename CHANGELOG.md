@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - treat `java.time.LocalTime` and `java.time.OffsetTime` as `{ "format": "time" }` when `Option.ADDITIONAL_FIXED_TYPES` is enabled (instead of "date-time")
 - update jackson dependency from version `2.13.4.20221013` to `2.14.2` and replace usage of now deprecated methods
 
+### `jsonschema-module-swagger-2`
+#### Added
+- consider `@Schema(ref = "...")` attribute, when it is annotated on a type (and not just a member) except for the main type being targeted
+
 ### `jsonschema-maven-plugin`
 #### Fixed
 - regression: filtering of considered classes for schema generation stopped working (after migration to `classgraph` in 4.28.0)

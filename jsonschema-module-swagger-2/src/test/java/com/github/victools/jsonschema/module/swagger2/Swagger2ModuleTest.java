@@ -69,6 +69,7 @@ public class Swagger2ModuleTest {
 
         Mockito.verify(this.typesInGeneralConfigPart).withDescriptionResolver(Mockito.any());
         Mockito.verify(this.typesInGeneralConfigPart).withTitleResolver(Mockito.any());
+        Mockito.verify(this.typesInGeneralConfigPart).withCustomDefinitionProvider(Mockito.any(ExternalRefCustomDefinitionProvider.class));
         Mockito.verify(this.typesInGeneralConfigPart).withSubtypeResolver(Mockito.any(Swagger2SubtypeResolver.class));
         Mockito.verify(this.typesInGeneralConfigPart).getDefinitionNamingStrategy();
         Mockito.verify(this.typesInGeneralConfigPart).withDefinitionNamingStrategy(Mockito.any(Swagger2SchemaDefinitionNamingStrategy.class));

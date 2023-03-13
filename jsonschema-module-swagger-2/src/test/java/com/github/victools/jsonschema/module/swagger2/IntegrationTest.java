@@ -37,24 +37,33 @@ import com.github.victools.jsonschema.module.swagger2.IntegrationTest.PersonRefe
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Integration test of this module being used in a real SchemaGenerator instance.
  */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class IntegrationTest {
 
-    @ParameterizedTest
-    @ValueSource(classes = {TestClass.class, Foo.class})
-    public void testIntegration(Class<?> rawTargetType) throws Exception {
+    private SchemaGenerator generator;
+
+    @BeforeAll
+    public void setUp() {
         Swagger2Module module = new Swagger2Module();
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
                 .with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
                 .with(module);
-        SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
-        JsonNode result = generator.generateSchema(rawTargetType);
+        this.generator = new SchemaGenerator(configBuilder.build());
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {TestClass.class, Foo.class})
+    public void testIntegration(Class<?> rawTargetType) throws Exception {
+        JsonNode result = this.generator.generateSchema(rawTargetType);
 
         String rawJsonSchema = result.toString();
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
@@ -75,7 +84,7 @@ public class IntegrationTest {
 
     }
 
-    @Schema(minProperties = 2, maxProperties = 5, requiredProperties = {"fieldWithInclusiveNumericRange"})
+    @Schema(minProperties = 2, maxProperties = 5, requiredProperties = {"fieldWithInclusiveNumericRange"}, ref = "./TestClass-schema.json")
     static class TestClass {
 
         @Schema(hidden = true)
@@ -138,5 +147,7 @@ public class IntegrationTest {
 
         @Schema(oneOf = {Boolean.class, String.class})
         private Object oneOfBooleanOrString;
+
+        private TestClass test;
     }
 }
