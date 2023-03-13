@@ -546,7 +546,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
           <li><code>Double</code>/<code>double</code>/<code>Float</code>/<code>float</code> are treated as <code>{ "type": "number" }</code> schema</li>
           <li><code>BigInteger</code> as <code>{ "type": "integer" }</code> schema</li>
           <li><code>BigDecimal</code>/<code>Number</code> as <code>{ "type": "number" }</code> schema</li>
-          <li><code>LocalDate</code>/<code>LocalDateTime</code>/<code>LocalTime</code>/<code>ZonedDateTime</code>/<code>OffsetDateTime</code>/<code>OffsetTime</code>/<code>Instant</code>/<code>ZoneId</code>/<code>Date</code>/<code>Calendar</code>/<code>UUID</code> as <code>{ "type": "string" }</code> schema</li>
+          <li><code>LocalDate</code>/<code>LocalDateTime</code>/<code>LocalTime</code>/<code>ZonedDateTime</code>/<code>OffsetDateTime</code>/<code>OffsetTime</code>/<code>Instant</code>/<code>Period</code>/<code>ZoneId</code>/<code>Date</code>/<code>Calendar</code>/<code>UUID</code> as <code>{ "type": "string" }</code> schema</li>
         </ul>
       </td>
       <td>
@@ -1900,6 +1900,7 @@ Schema attributes derived from <code>@ApiModelProperty</code> on getter methods 
 <ol>
 <li>From <code>@Schema(description = …)</code> on types in general, derive <code>&quot;description&quot;</code>.</li>
 <li>From <code>@Schema(title = …)</code> on types in general, derive <code>&quot;title&quot;</code>.</li>
+<li>From <code>@Schema(ref = …)</code> on types in general, replace subschema with <code>&quot;$ref&quot;</code> to external/separate schema (except for the main type being targeted).</li>
 <li>From <code>@Schema(subTypes = …)</code> on types in general, derive <code>&quot;anyOf&quot;</code> alternatives.</li>
 <li>From <code>@Schema(anyOf = …)</code> on types in general (as alternative to <code>subTypes</code>), derive <code>&quot;anyOf&quot;</code> alternatives.</li>
 <li>From <code>@Schema(name = …)</code> on types in general, derive the keys/names in <code>&quot;definitions&quot;</code>/<code>&quot;$defs&quot;</code>.</li>
