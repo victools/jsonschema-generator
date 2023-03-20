@@ -227,7 +227,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      * @param context generation context allowing to let the standard generation take over nested parts of the custom definition
      * @param ignoredDefinitionProvider custom definition provider to ignore
      * @return non-standard JSON schema definition (may be null)
-     * @see #getCustomDefinition(ResolvedType, SchemaGenerationContext, CustomDefinitionProviderV3)
+     * @see #getCustomDefinition(ResolvedType, SchemaGenerationContext, CustomDefinitionProviderV2)
      */
     private <M extends MemberScope<?, ?>> CustomPropertyDefinition getCustomDefinition(SchemaGeneratorConfigPart<M> configPart, M scope,
             SchemaGenerationContext context, CustomPropertyDefinitionProvider<? extends M> ignoredDefinitionProvider) {
@@ -409,6 +409,16 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public Object resolveDefaultForType(TypeScope scope) {
         return this.typesInGeneralConfigPart.resolveDefault(scope);
+    }
+
+    @Override
+    public List<String> resolveDependentRequires(FieldScope field) {
+        return this.fieldConfigPart.resolveDependentRequires(field);
+    }
+
+    @Override
+    public List<String> resolveDependentRequires(MethodScope method) {
+        return this.methodConfigPart.resolveDependentRequires(method);
     }
 
     @Override
