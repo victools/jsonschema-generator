@@ -55,8 +55,30 @@ public enum SchemaKeyword {
     TAG_TYPE_NUMBER("number", Type.VALUE),
 
     TAG_PROPERTIES("properties", Type.TAG),
+    /**
+     * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_2019_09}.
+     */
+    TAG_UNEVALUATED_PROPERTIES("unevaluatedProperties", Type.TAG),
     TAG_ITEMS("items", Type.TAG),
+    /**
+     * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_2019_09}.
+     */
+    TAG_PREFIX_ITEMS("prefixItems", Type.TAG),
+    /**
+     * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_2019_09}.
+     */
+    TAG_UNEVALUATED_ITEMS("unevaluatedItems", Type.TAG),
     TAG_REQUIRED("required", Type.TAG),
+    /**
+     * Prior to {@link SchemaVersion#DRAFT_2019_09}, this had the same name as {@link #TAG_DEPENDENT_SCHEMAS}.
+     */
+    TAG_DEPENDENT_REQUIRED(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7
+            ? "dependencies" : "dependentRequired", Type.TAG),
+    /**
+     * Prior to {@link SchemaVersion#DRAFT_2019_09}, this had the same name as {@link #TAG_DEPENDENT_REQUIRED}.
+     */
+    TAG_DEPENDENT_SCHEMAS(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7
+            ? "dependencies" : "dependentSchemas", Type.TAG),
     TAG_ADDITIONAL_PROPERTIES("additionalProperties", Type.TAG),
     TAG_PATTERN_PROPERTIES("patternProperties", Type.TAG),
     TAG_PROPERTIES_MIN("minProperties", Type.TAG),
