@@ -453,19 +453,26 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             List<MemberScope<?, ?>> sortedProperties = targetProperties.values().stream()
                     .sorted(this.generatorConfig::sortProperties)
                     .collect(Collectors.toList());
+            Map<String, List<String>> dependentRequires = new LinkedHashMap<>();
             for (MemberScope<?, ?> property : sortedProperties) {
                 JsonNode subSchema;
+                List<String> dependentRequiredForProperty;
                 if (property instanceof FieldScope) {
                     subSchema = this.populateFieldSchema((FieldScope) property);
+                    dependentRequiredForProperty = this.generatorConfig.resolveDependentRequires((FieldScope) property);
                 } else if (property instanceof MethodScope) {
                     subSchema = this.populateMethodSchema((MethodScope) property);
+                    dependentRequiredForProperty = this.generatorConfig.resolveDependentRequires((MethodScope) property);
                 } else {
                     throw new IllegalStateException("Unsupported member scope of type " + property.getClass());
                 }
-                propertiesNode.set(property.getSchemaPropertyName(), subSchema);
+                String propertyName = property.getSchemaPropertyName();
+                propertiesNode.set(propertyName, subSchema);
+                if (dependentRequiredForProperty != null && !dependentRequiredForProperty.isEmpty()) {
+                    dependentRequires.put(propertyName, dependentRequiredForProperty);
+                }
             }
             definition.set(this.getKeyword(SchemaKeyword.TAG_PROPERTIES), propertiesNode);
-
             if (!requiredProperties.isEmpty()) {
                 ArrayNode requiredNode = this.generatorConfig.createArrayNode();
                 // list required properties in the same order as the property
@@ -474,6 +481,12 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                         .filter(requiredProperties::contains)
                         .forEach(requiredNode::add);
                 definition.set(this.getKeyword(SchemaKeyword.TAG_REQUIRED), requiredNode);
+            }
+            if (!dependentRequires.isEmpty()) {
+                ObjectNode dpendentRequiredNode = this.generatorConfig.createObjectNode();
+                dependentRequires.forEach((leadName, dependentNames) -> dependentNames
+                        .forEach(dpendentRequiredNode.withArray(leadName)::add));
+                definition.set(this.getKeyword(SchemaKeyword.TAG_DEPENDENT_REQUIRED), dpendentRequiredNode);
             }
         }
     }
@@ -728,7 +741,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @param forceInlineDefinition whether to generate an inline definition without registering it in this context
      * @param collectedAttributes separately collected attribute for the field/method in their respective declaring type
      * @param ignoredDefinitionProvider first custom definition provider to ignore
-     * @see #populateField(FieldScope, Map, Set)
+     * @see #populateFieldSchema(FieldScope)
      * @see #collectMethod(MethodScope, Map, Set)
      */
     private <M extends MemberScope<?, ?>> void populateMemberSchema(M scope, ObjectNode targetNode, boolean isNullable, boolean forceInlineDefinition,
