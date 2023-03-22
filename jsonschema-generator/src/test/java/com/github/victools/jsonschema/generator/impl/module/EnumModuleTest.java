@@ -153,7 +153,7 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
 
         JsonNode enumNode = node.get(SchemaKeyword.TAG_ENUM.forVersion(schemaVersion));
         Assertions.assertEquals(JsonNodeType.ARRAY, enumNode.getNodeType());
-        Assertions.assertEquals(3, ((ArrayNode) enumNode).size());
+        Assertions.assertEquals(3, enumNode.size());
         Assertions.assertEquals(JsonNodeType.STRING, enumNode.get(0).getNodeType());
         Assertions.assertEquals(value1, enumNode.get(0).textValue());
         Assertions.assertEquals(JsonNodeType.STRING, enumNode.get(1).getNodeType());
@@ -162,7 +162,7 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         Assertions.assertEquals(value3, enumNode.get(2).textValue());
     }
 
-    private static enum TestEnum {
+    private enum TestEnum {
         VALUE1, VALUE2, VALUE3;
 
         @Override

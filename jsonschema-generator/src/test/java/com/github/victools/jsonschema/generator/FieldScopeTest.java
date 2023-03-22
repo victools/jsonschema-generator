@@ -124,6 +124,6 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD, ElementType.METHOD})
-    private static @interface TestAnnotation {
+    private @interface TestAnnotation {
     }
 }

@@ -51,7 +51,7 @@ public class SchemaGeneratorComplexTypesTest {
                 .withDefaultResolver(scope -> scope.getType().isInstanceOf(Number.class) ? 1 : null)
                 .withDescriptionResolver(scope -> descriptionPrefix + scope.getSimpleTypeDescription())
                 .withEnumResolver(scope -> scope.getType().isInstanceOf(Number.class) ? Arrays.asList(1, 2, 3, 4, 5) : null)
-                .withEnumResolver(scope -> scope.getType().isInstanceOf(String.class) ? Arrays.asList("constant string value") : null)
+                .withEnumResolver(scope -> scope.getType().isInstanceOf(String.class) ? Collections.singletonList("constant string value") : null)
                 .withAdditionalPropertiesResolver(SchemaGeneratorComplexTypesTest::resolveAdditionalProperties)
                 .withPatternPropertiesResolver(SchemaGeneratorComplexTypesTest::resolvePatternProperties)
                 .withNumberExclusiveMaximumResolver(scope -> scope.getType().isInstanceOf(Number.class) ? BigDecimal.TEN.add(BigDecimal.ONE) : null)
@@ -63,7 +63,7 @@ public class SchemaGeneratorComplexTypesTest {
                 .withStringMaxLengthResolver(scope -> scope.getType().isInstanceOf(String.class) ? 256 : null)
                 .withStringMinLengthResolver(scope -> scope.getType().isInstanceOf(String.class) ? 1 : null)
                 .withStringPatternResolver(scope -> scope.getType().isInstanceOf(String.class) ? "^.{1,256}$" : null)
-                .withTitleResolver(scope -> scope.getSimpleTypeDescription());
+                .withTitleResolver(TypeScope::getSimpleTypeDescription);
     }
 
     private static Type resolveAdditionalProperties(TypeScope scope) {
@@ -93,7 +93,7 @@ public class SchemaGeneratorComplexTypesTest {
         configPart
                 .withNullableCheck(member -> !member.getName().startsWith("nested"))
                 .withRequiredCheck(member -> member.getName().startsWith("nested"))
-                .withReadOnlyCheck(member -> member.isFinal())
+                .withReadOnlyCheck(MemberScope::isFinal)
                 .withWriteOnlyCheck(member -> member.getType() != null && TestClass4.class.isAssignableFrom(member.getType().getErasedType()));
     }
 
@@ -149,7 +149,7 @@ public class SchemaGeneratorComplexTypesTest {
         // ensure that the generated definition keys are valid URIs without any characters requiring encoding
         JsonNode definitions = result.get(SchemaKeyword.TAG_DEFINITIONS.forVersion(schemaVersion));
         if (definitions instanceof ObjectNode) {
-            Iterator<String> definitionKeys = ((ObjectNode) definitions).fieldNames();
+            Iterator<String> definitionKeys = definitions.fieldNames();
             while (definitionKeys.hasNext()) {
                 String key = definitionKeys.next();
                 Assertions.assertEquals(key, new URI(key).toASCIIString());
@@ -241,7 +241,7 @@ public class SchemaGeneratorComplexTypesTest {
         public TestClass2<TestClassCircular> class2OfCircular;
     }
 
-    private static enum TestEnum {
+    private enum TestEnum {
         VALUE1, VALUE2, VALUE3;
 
         @Override

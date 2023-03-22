@@ -59,6 +59,8 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
         Mockito.when(config.resolveTitle(Mockito.any(FieldScope.class))).thenReturn("Field Title");
         Mockito.when(config.resolveTitle(Mockito.any(MethodScope.class))).thenReturn("Method Title");
         Mockito.when(config.resolveDescriptionForType(Mockito.any())).thenReturn("Type Description");
+        Mockito.when(config.resolveDependentRequires(Mockito.any(FieldScope.class))).thenReturn(Collections.singletonList("isBooleanField()"));
+        Mockito.when(config.resolveDependentRequires(Mockito.any(MethodScope.class))).thenReturn(Collections.singletonList("booleanField"));
         Mockito.when(config.resolveStringMinLength(Mockito.any(FieldScope.class))).thenReturn(null);
         Mockito.when(config.resolveStringMaxLength(Mockito.any(FieldScope.class))).thenReturn(null);
         Mockito.when(config.resolveArrayMinItems(Mockito.any(FieldScope.class))).thenReturn(null);
@@ -279,6 +281,18 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
         FieldScope targetField = this.getTestClassField("booleanField");
         ObjectNode result = this.contextImpl.createStandardDefinitionReference(targetField, null);
         Assertions.assertEquals("{\"$comment\":\"custom property\"}", result.toString());
+    }
+
+    @Test
+    public void testCreateStandardDefinition() {
+        ResolvedType type = this.contextImpl.getTypeContext().resolve(TestClass.class);
+        ObjectNode result = this.contextImpl.createStandardDefinition(type, null);
+        Assertions.assertEquals("{\"type\":\"object\",\"properties\":{"
+                        + "\"booleanField\":{\"allOf\":[{},{\"title\":\"Field Title\"}]},"
+                        + "\"isBooleanField()\":{\"allOf\":[{},{\"title\":\"Method Title\"}]}},"
+                        + "\"dependentRequired\":{\"booleanField\":[\"isBooleanField()\"],\"isBooleanField()\":[\"booleanField\"]}," +
+                        "\"description\":\"Type Description\"}",
+                result.toString());
     }
 
     private static class TestClass {

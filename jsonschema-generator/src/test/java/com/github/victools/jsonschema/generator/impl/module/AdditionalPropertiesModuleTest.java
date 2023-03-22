@@ -166,7 +166,7 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
     @Documented
     private @interface ParamInfo {
 
-        public abstract String value();
+        String value();
     }
 
     private static class A {

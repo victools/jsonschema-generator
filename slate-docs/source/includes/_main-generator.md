@@ -246,8 +246,8 @@ configBuilder.without(
       <td colspan="2"><code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code></td>
     </tr>
     <tr>
-      <td>Setting the <code>additionalProperties</code> attribute in each <code>Map<K, V></code> to a schema representing the declared value type <code>V</code>.</td>
-      <td>Omitting the <code>additionalProperties</code> attribute in <code>Map<K, V></code> schemas by default (thereby allowing additional properties of any type) unless some configuration specifically says something else.</td>
+      <td>Setting the <code>additionalProperties</code> attribute in each <code>Map&lt;K, V&gt;</code> to a schema representing the declared value type <code>V</code>.</td>
+      <td>Omitting the <code>additionalProperties</code> attribute in <code>Map&lt;K, V&gt;</code> schemas by default (thereby allowing additional properties of any type) unless some configuration specifically says something else.</td>
     </tr>
     <tr>
       <td rowspan="2" style="text-align: right">26</td>
@@ -561,6 +561,24 @@ configBuilder.forMethods()
 ```
 
 `withRequiredCheck()` is expecting the indication to be returned whether a given `FieldScope`/`MethodScope` should be included in the `"required"` attribute – if any check returns `true`, the field/method will be deemed `"required"`.
+
+## `"dependentRequired"` Keyword
+```java
+configBuilder.forFields()
+    .withDependentRequiresResolver(field -> Optional
+        .ofNullable(field.getAnnotationConsideringFieldAndGetter(IfPresentAlsoRequire.class)
+        .map(IfPresentAlsoRequire::value)
+        .map(Arrays::asList)
+        .orElse(null));
+configBuilder.forMethods()
+    .withDependentRequiresResolver(method -> Optional.ofNullable(method.findGetterField())
+        .map(FieldScope::getSchemaPropertyName)
+        .map(Collections::singletonList)
+        .orElse(null));
+```
+
+`withDependentRequiresResolver()` is expecting the names of other properties to be returned, which should be deemed "required", if the property represented by the given field/method is present.
+The results of all registered resolvers are being combined.
 
 ## `"readOnly"` Keyword
 ```java

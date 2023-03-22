@@ -148,7 +148,7 @@ public class JsonIdentityReferenceDefinitionProviderTest extends AbstractTypeAwa
     private static class TestTypeReferencedByObjectId {
         private IdType id;
 
-        private class IdType {
+        private static class IdType {
         }
     }
 
@@ -156,7 +156,7 @@ public class JsonIdentityReferenceDefinitionProviderTest extends AbstractTypeAwa
     private static class TestTypeWithObjectIdRequiringReferenceAnnotation {
         private IdType id;
 
-        private class IdType {
+        private static class IdType {
         }
     }
 }

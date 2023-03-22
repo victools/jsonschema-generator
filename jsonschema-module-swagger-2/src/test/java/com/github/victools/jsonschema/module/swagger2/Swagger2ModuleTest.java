@@ -31,7 +31,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 /**
- * Test for the {@link SwaggerModule} class.
+ * Test for the {@link Swagger2Module} class.
  */
 public class Swagger2ModuleTest {
 

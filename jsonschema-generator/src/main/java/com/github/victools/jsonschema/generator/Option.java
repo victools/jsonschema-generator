@@ -324,7 +324,7 @@ public enum Option {
      * @param disabledModuleProvider type of the module realising this setting/option if it is disabled
      * @param overriddenOptions other options being ignored if this one is enabled
      */
-    private Option(Supplier<Module> enabledModuleProvider, Supplier<Module> disabledModuleProvider, Option... overriddenOptions) {
+    Option(Supplier<Module> enabledModuleProvider, Supplier<Module> disabledModuleProvider, Option... overriddenOptions) {
         this.enabledModuleProvider = enabledModuleProvider;
         this.disabledModuleProvider = disabledModuleProvider;
         if (overriddenOptions == null || overriddenOptions.length == 0) {

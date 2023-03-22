@@ -60,11 +60,18 @@ public class SchemaGeneratorAllOfCleanUpTest {
         // in Drafts 6/7, alongside $ref all other attributes are being ignored and should therefore not be merged
         EnumSet<SchemaVersion> versionsWithSpecialRefHandling = EnumSet.of(SchemaVersion.DRAFT_6, SchemaVersion.DRAFT_7);
         String refInAllOfPart = "{ \"type\": \"object\", \"allOf\": [{ \"$ref\": \"#\" }, { \"title\": \"value\" }] }";
-        versionsWithSpecialRefHandling.stream()
-                .forEach(schemaVersion -> testCases.add(Arguments.of(schemaVersion, refInAllOfPart, refInAllOfPart)));
-        EnumSet.complementOf(versionsWithSpecialRefHandling).stream()
-                .forEach(schemaVersion ->
-        testCases.add(Arguments.of(schemaVersion, refInAllOfPart, "{ \"type\": \"object\", \"$ref\": \"#\", \"title\": \"value\" }")));
+        versionsWithSpecialRefHandling.forEach(schemaVersion -> testCases.add(
+                Arguments.of(schemaVersion, refInAllOfPart, refInAllOfPart)));
+        EnumSet.complementOf(versionsWithSpecialRefHandling).forEach(schemaVersion -> testCases.add(
+                Arguments.of(schemaVersion, refInAllOfPart, "{ \"type\": \"object\", \"$ref\": \"#\", \"title\": \"value\" }")));
+
+        // the keyword for "dependentRequired" changed, but not the handling for it
+        for (SchemaVersion schemaVersion : EnumSet.allOf(SchemaVersion.class)) {
+            String tag = SchemaKeyword.TAG_DEPENDENT_REQUIRED.forVersion(schemaVersion);
+            String drInput = "{ \"" + tag + "\": {\"a\": [\"b\"]}, \"allOf\": [{}, { \"" + tag + "\": { \"a\": [\"c\"], \"b\": [\"a\", \"c\"] } }] }";
+            String drCleanOutput = "{ \"" + tag + "\": { \"a\": [\"b\", \"c\"], \"b\": [\"a\", \"c\"] } }";
+            testCases.add(Arguments.of(schemaVersion, drInput, drCleanOutput));
+        }
         return testCases.stream();
     }
 

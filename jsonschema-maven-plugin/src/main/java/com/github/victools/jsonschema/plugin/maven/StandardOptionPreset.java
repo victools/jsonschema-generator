@@ -29,7 +29,7 @@ public enum StandardOptionPreset {
 
     private final OptionPreset preset;
 
-    private StandardOptionPreset(OptionPreset preset) {
+    StandardOptionPreset(OptionPreset preset) {
         this.preset = preset;
     }
 

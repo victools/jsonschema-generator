@@ -52,6 +52,7 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
     private final List<Predicate<M>> readOnlyChecks = new ArrayList<>();
     private final List<Predicate<M>> writeOnlyChecks = new ArrayList<>();
     private final List<ConfigFunction<M, Boolean>> nullableChecks = new ArrayList<>();
+    private final List<ConfigFunction<M, List<String>>> dependentRequiresResolvers = new ArrayList<>();
 
     /*
      * Customising options for the names of properties in a schema with "type": "object".
@@ -220,6 +221,34 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         return result.isEmpty() ? null : result.stream().anyMatch(value -> value);
+    }
+
+    /**
+     * Setter for resolver, that collects the names of other properties that are required depending on the targeted one.
+     * <br>
+     * Beware that the output of all configured resolvers are combined, i.e., not just considering the first that returns a value.
+     *
+     * @param resolver how to determine which other properties should have a required value if the given one is present.
+     * @return this config part (for chaining)
+     */
+    public SchemaGeneratorConfigPart<M> withDependentRequiresResolver(ConfigFunction<M, List<String>> resolver) {
+        this.dependentRequiresResolvers.add(resolver);
+        return this;
+    }
+
+    /**
+     * Determine the names of other properties that are required to have a value, if the given member is present.
+     *
+     * @param member member to check
+     * @return list of other properties' names (may be empty)
+     */
+    public List<String> resolveDependentRequires(M member) {
+        return this.dependentRequiresResolvers.stream()
+                .map(resolver -> resolver.apply(member))
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     /**
@@ -393,7 +422,7 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
         super.resetAfterSchemaGenerationFinished();
 
         Stream.of(this.customDefinitionProviders, this.instanceAttributeOverrides, this.nullableChecks,
-                this.targetTypeOverridesResolvers, this.propertyNameOverrideResolvers
+                this.dependentRequiresResolvers, this.targetTypeOverridesResolvers, this.propertyNameOverrideResolvers
         ).flatMap(List::stream).forEach(StatefulConfig::resetAfterSchemaGenerationFinished);
     }
 }

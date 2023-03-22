@@ -258,7 +258,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         return Stream.of(subTypesAnnotation.value())
                 .filter(subTypeAnnotation -> erasedTargetType.equals(subTypeAnnotation.value()))
                 .findFirst()
-                .map(subTypeAnnotation -> subTypeAnnotation.name())
+                .map(JsonSubTypes.Type::name)
                 .filter(name -> !name.isEmpty());
     }
 

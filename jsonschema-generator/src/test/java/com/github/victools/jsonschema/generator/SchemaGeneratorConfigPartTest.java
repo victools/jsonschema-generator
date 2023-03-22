@@ -109,6 +109,30 @@ public class SchemaGeneratorConfigPartTest {
     }
 
     @Test
+    public void testDependentRequires() {
+        Assertions.assertEquals(Collections.emptyList(), this.instance.resolveDependentRequires(this.field1));
+
+        ConfigFunction<FieldScope, List<String>> resolver1 = member -> member == this.field1 ? Collections.singletonList("field2") : null;
+        Assertions.assertSame(this.instance, this.instance.withDependentRequiresResolver(resolver1));
+        Assertions.assertEquals(Collections.singletonList("field2"), this.instance.resolveDependentRequires(this.field1));
+        Assertions.assertEquals(Collections.emptyList(), this.instance.resolveDependentRequires(this.field2));
+        Assertions.assertEquals(Collections.emptyList(), this.instance.resolveDependentRequires(this.field3));
+
+        ConfigFunction<FieldScope, List<String>> resolver2 = member -> member == this.field1 ? Collections.singletonList("field3") : null;
+        Assertions.assertSame(this.instance, this.instance.withDependentRequiresResolver(resolver2));
+        Assertions.assertEquals(Arrays.asList("field2", "field3"), this.instance.resolveDependentRequires(this.field1));
+        Assertions.assertEquals(Collections.emptyList(), this.instance.resolveDependentRequires(this.field2));
+        Assertions.assertEquals(Collections.emptyList(), this.instance.resolveDependentRequires(this.field3));
+
+        ConfigFunction<FieldScope, List<String>> resolver3 = member -> member == this.field3
+                ? Collections.emptyList() : Arrays.asList("field3", "field4");
+        Assertions.assertSame(this.instance, this.instance.withDependentRequiresResolver(resolver3));
+        Assertions.assertEquals(Arrays.asList("field2", "field3", "field4"), this.instance.resolveDependentRequires(this.field1));
+        Assertions.assertEquals(Arrays.asList("field3", "field4"), this.instance.resolveDependentRequires(this.field2));
+        Assertions.assertEquals(Collections.emptyList(), this.instance.resolveDependentRequires(this.field3));
+    }
+
+    @Test
     @SuppressWarnings("deprecation")
     public void testTargetTypeOverride() {
         ResolvedType type1 = Mockito.mock(ResolvedType.class);
@@ -177,7 +201,7 @@ public class SchemaGeneratorConfigPartTest {
 
     @Test
     public void testEnum() {
-        this.testFirstDefinedValueConfig(Arrays.asList("val1", "val2"), Arrays.asList("val3"),
+        this.testFirstDefinedValueConfig(Arrays.asList("val1", "val2"), Collections.singletonList("val3"),
                 this.instance::withEnumResolver, this.instance::resolveEnum);
     }
 

@@ -43,7 +43,7 @@ public class Swagger2SubtypeResolver implements SubtypeResolver {
                     .collect(Collectors.toList());
         }
         return Stream.of(annotation.anyOf())
-                .map(erasedType -> typeContext.resolve(erasedType))
+                .map(typeContext::resolve)
                 .collect(Collectors.toList());
     }
 }

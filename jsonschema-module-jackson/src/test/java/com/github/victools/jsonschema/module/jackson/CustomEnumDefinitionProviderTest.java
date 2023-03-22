@@ -31,6 +31,7 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
@@ -63,8 +64,8 @@ public class CustomEnumDefinitionProviderTest {
 
     static Stream<Arguments> parametersForTestProvideCustomSchemaDefinition() {
         return Stream.of(
-            Arguments.of(EnumWithInactiveJsonValueAndJsonProperty.class, true, true, Arrays.asList("entry")),
-            Arguments.of(EnumWithInactiveJsonValueAndJsonProperty.class, false, true, Arrays.asList("entry")),
+            Arguments.of(EnumWithInactiveJsonValueAndJsonProperty.class, true, true, Collections.singletonList("entry")),
+            Arguments.of(EnumWithInactiveJsonValueAndJsonProperty.class, false, true, Collections.singletonList("entry")),
             Arguments.of(EnumWithJsonValueAndJsonProperty.class, true, false, Arrays.asList("json-value-ENTRY1", "json-value-ENTRY2")),
             Arguments.of(EnumWithJsonValueAndJsonProperty.class, true, true, Arrays.asList("json-value-ENTRY1", "json-value-ENTRY2")),
             Arguments.of(EnumWithJsonValueAndJsonProperty.class, false, true, Arrays.asList("entry1", "ENTRY2"))
@@ -186,7 +187,7 @@ public class CustomEnumDefinitionProviderTest {
         }
     }
 
-    private static enum EmptyEnumWithJsonValue {
+    private enum EmptyEnumWithJsonValue {
         ;
 
         @JsonValue
@@ -195,7 +196,7 @@ public class CustomEnumDefinitionProviderTest {
         }
     }
 
-    private static enum EnumWithInvalidJsonValue {
+    private enum EnumWithInvalidJsonValue {
         ENTRY;
 
         @JsonValue
@@ -204,7 +205,7 @@ public class CustomEnumDefinitionProviderTest {
         }
     }
 
-    private static enum EnumWithInactiveJsonValueAndJsonProperty {
+    private enum EnumWithInactiveJsonValueAndJsonProperty {
         @JsonProperty("entry") ENTRY;
 
         @JsonValue(false)
@@ -213,7 +214,7 @@ public class CustomEnumDefinitionProviderTest {
         }
     }
 
-    private static enum EnumWithTwoJsonValuesAndIncompleteJsonProperty {
+    private enum EnumWithTwoJsonValuesAndIncompleteJsonProperty {
         ENTRY1,
         @JsonProperty("only-entry-2") ENTRY2;
 
@@ -228,7 +229,7 @@ public class CustomEnumDefinitionProviderTest {
         }
     }
 
-    private static enum EnumWithJsonValueAndJsonProperty {
+    private enum EnumWithJsonValueAndJsonProperty {
         @JsonProperty("entry1") ENTRY1,
         @JsonProperty ENTRY2;
 

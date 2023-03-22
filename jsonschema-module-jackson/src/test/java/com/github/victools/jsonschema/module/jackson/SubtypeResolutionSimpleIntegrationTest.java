@@ -79,8 +79,7 @@ public class SubtypeResolutionSimpleIntegrationTest {
                 stringBuilder.append(scanner.nextLine()).append('\n');
             }
         }
-        String fileAsString = stringBuilder.toString();
-        return fileAsString;
+        return stringBuilder.toString();
     }
 
     private static class TestClassForSubtypeResolution {

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,7 +63,7 @@ public class SchemaCleanUpUtils {
     public void reduceAllOfNodes(List<ObjectNode> jsonSchemas) {
         String allOfTagName = this.config.getKeyword(SchemaKeyword.TAG_ALLOF);
         Map<String, SchemaKeyword> reverseKeywordMap = SchemaKeyword.getTagStream()
-                .collect(Collectors.toMap(this.config::getKeyword, keyword -> keyword));
+                .collect(Collectors.toMap(this.config::getKeyword, keyword -> keyword, (k1, k2) -> k1));
         this.finaliseSchemaParts(jsonSchemas, nodeToCheck -> this.mergeAllOfPartsIfPossible(nodeToCheck, allOfTagName, reverseKeywordMap));
     }
 
@@ -83,7 +84,6 @@ public class SchemaCleanUpUtils {
      * {@link SchemaKeyword#TAG_ITEMS}.
      *
      * @return names of eligible tags as per the designated JSON Schema version
-     * @see #discardUnnecessaryAllOfWrappers(ObjectNode)
      */
     private Set<String> getTagNamesContainingSchema() {
         SchemaVersion schemaVersion = this.config.getSchemaVersion();
@@ -97,7 +97,6 @@ public class SchemaCleanUpUtils {
      * {@link SchemaKeyword#TAG_ONEOF}.
      *
      * @return names of eligible tags as per the designated JSON Schema version
-     * @see #discardUnnecessaryAllOfWrappers(ObjectNode)
      */
     private Set<String> getTagNamesContainingSchemaArray() {
         SchemaVersion schemaVersion = this.config.getSchemaVersion();
@@ -111,7 +110,6 @@ public class SchemaCleanUpUtils {
      * {@link SchemaKeyword#TAG_PROPERTIES}.
      *
      * @return names of eligible tags as per the designated JSON Schema version
-     * @see #discardUnnecessaryAllOfWrappers(ObjectNode)
      */
     private Set<String> getTagNamesContainingSchemaObject() {
         SchemaVersion schemaVersion = this.config.getSchemaVersion();
@@ -148,11 +146,11 @@ public class SchemaCleanUpUtils {
                 tagsWithSchemas.stream().map(nodeToCheck::get).forEach(addNodeToCheck);
                 tagsWithSchemaArrays.stream()
                         .map(nodeToCheck::get)
-                        .filter(possibleArrayNode -> possibleArrayNode instanceof ArrayNode)
+                        .filter(ArrayNode.class::isInstance)
                         .forEach(arrayNode -> arrayNode.forEach(addNodeToCheck));
                 tagsWithSchemaObjects.stream()
                         .map(nodeToCheck::get)
-                        .filter(possibleObjectNode -> possibleObjectNode instanceof ObjectNode)
+                        .filter(ObjectNode.class::isInstance)
                         .forEach(objectNode -> objectNode.forEach(addNodeToCheck));
             }
         } while (!nextNodesToCheck.isEmpty());
@@ -203,9 +201,14 @@ public class SchemaCleanUpUtils {
         case TAG_REQUIRED:
             return this.mergeArrays(valuesToMerge);
         case TAG_PROPERTIES:
+        case TAG_DEPENDENT_SCHEMAS:
             return this.mergeObjectProperties(valuesToMerge);
+        case TAG_DEPENDENT_REQUIRED:
+            return this.mergeDependentRequiredNode(valuesToMerge);
         case TAG_ITEMS:
+        case TAG_UNEVALUATED_ITEMS:
         case TAG_ADDITIONAL_PROPERTIES:
+        case TAG_UNEVALUATED_PROPERTIES:
             return this.mergeSchemas(null, valuesToMerge, reverseKeywordMap);
         case TAG_TYPE:
             return this.returnOverlapOfStringsOrStringArrays(valuesToMerge);
@@ -250,16 +253,48 @@ public class SchemaCleanUpUtils {
                 Map.Entry<String, JsonNode> singleField = it.next();
                 if (!mergedObjectNode.has(singleField.getKey())) {
                     mergedObjectNode.set(singleField.getKey(), singleField.getValue());
-                } else if (mergedObjectNode.get(singleField.getKey()).equals(singleField.getValue())) {
-                    // preserve equal existing node
-                    continue;
-                } else {
+                } else if (!mergedObjectNode.get(singleField.getKey()).equals(singleField.getValue())) {
                     // cannot consolidate two occurrences of the same property; abort merge (in the future: may want to be smarter here)
                     return null;
                 }
             }
         }
         return () -> mergedObjectNode;
+    }
+
+    private Supplier<JsonNode> mergeDependentRequiredNode(List<JsonNode> dependentRequiredNodesToMerge) {
+        if (!dependentRequiredNodesToMerge.stream().allMatch(JsonNode::isObject)) {
+            // at least one value is not an object as expected, abort merge
+            return null;
+        }
+        Map<String, Set<String>> mergedDependentRequiredNames = new LinkedHashMap<>();
+        for (JsonNode singleDependentRequired : dependentRequiredNodesToMerge) {
+            Iterator<Map.Entry<String, JsonNode>> it = singleDependentRequired.fields();
+            while (it.hasNext()) {
+                Map.Entry<String, JsonNode> singleLeadingField = it.next();
+                if (!singleLeadingField.getValue().isArray()) {
+                    // cannot consolidate when anything but an array of other property names is being provided
+                    return null;
+                } else {
+                    Set<String> propertyNames = mergedDependentRequiredNames.computeIfAbsent(singleLeadingField.getKey(),
+                            (name) -> new LinkedHashSet<>());
+                    Iterator<JsonNode> propertyNameIt = singleLeadingField.getValue().elements();
+                    while (propertyNameIt.hasNext()) {
+                        JsonNode propertyName = propertyNameIt.next();
+                        if (!propertyName.isTextual()) {
+                            // cannot consolidate when array contains anything but plain property names
+                            return null;
+                        }
+                        propertyNames.add(propertyName.asText());
+                    }
+                }
+            }
+        }
+        // merging is possible, now build corresponding object node
+        ObjectNode mergedDependentRequiredNode = this.config.createObjectNode();
+        mergedDependentRequiredNames.forEach((leadName, dependentNames) -> dependentNames
+                .forEach(mergedDependentRequiredNode.withArray(leadName)::add));
+        return () -> mergedDependentRequiredNode;
     }
 
     /**
@@ -276,13 +311,13 @@ public class SchemaCleanUpUtils {
             return null;
         }
         List<ObjectNode> parts = nodes.stream()
-                .filter(part -> part instanceof ObjectNode)
-                .map(part -> (ObjectNode) part)
+                .filter(ObjectNode.class::isInstance)
+                .map(ObjectNode.class::cast)
                 .collect(Collectors.toList());
 
         // collect all defined attributes from the separate parts and check whether there are incompatible differences
         Map<String, List<JsonNode>> fieldsFromAllParts = parts.stream()
-                .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) () -> part.fields()).spliterator(), false))
+                .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) part::fields).spliterator(), false))
                 .collect(Collectors.groupingBy(Map.Entry::getKey, LinkedHashMap::new, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
         if ((this.config.getSchemaVersion() == SchemaVersion.DRAFT_6 || this.config.getSchemaVersion() == SchemaVersion.DRAFT_7)
                 && fieldsFromAllParts.containsKey(this.config.getKeyword(SchemaKeyword.TAG_REF))
@@ -387,14 +422,14 @@ public class SchemaCleanUpUtils {
     }
 
     private Supplier<JsonNode> returnMinimumNumericValue(List<JsonNode> nodes) {
-        if (nodes.stream().allMatch(node -> node.isNumber())) {
+        if (nodes.stream().allMatch(JsonNode::isNumber)) {
             return () -> nodes.stream().reduce((a, b) -> a.asDouble() < b.asDouble() ? a : b).get();
         }
         return null;
     }
 
     private Supplier<JsonNode> returnMaximumNumericValue(List<JsonNode> nodes) {
-        if (nodes.stream().allMatch(node -> node.isNumber())) {
+        if (nodes.stream().allMatch(JsonNode::isNumber)) {
             return () -> nodes.stream().reduce((a, b) -> a.asDouble() < b.asDouble() ? b : a).get();
         }
         return null;

@@ -52,7 +52,6 @@ public class FieldExclusionModuleTest extends AbstractTypeAwareTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testApplyToConfigBuilder() {
         Predicate<FieldScope> ignoreCheck = field -> true;
         FieldExclusionModule module = new FieldExclusionModule(ignoreCheck);

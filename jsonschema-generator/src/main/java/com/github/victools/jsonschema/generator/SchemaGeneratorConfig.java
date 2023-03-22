@@ -473,6 +473,23 @@ public interface SchemaGeneratorConfig extends StatefulConfig {
     Object resolveDefaultForType(TypeScope scope);
 
     /**
+     * Determine the "dependentRequired" list of other properties' names, for which a value is required if the given field is present.
+     *
+     * @param field object's field/property to collect dependent property names for
+     * @return "dependentRequired" list in a JSON Schema associated with the targeted field (may be empty)
+     */
+    List<String> resolveDependentRequires(FieldScope field);
+
+    /**
+     * Determine the "dependentRequired" list of other properties' names, for which a value is required if the given method
+     * (or more likely: the field derived from this method) is present.
+     *
+     * @param method method to collect dependent property names for
+     * @return "dependentRequired" list in a JSON Schema associated with the targeted method (may be empty)
+     */
+    List<String> resolveDependentRequires(MethodScope method);
+
+    /**
      * Determine the "enum"/"const" of an object's field/property.
      *
      * @param field object's field/property to determine "enum"/"const" value for

@@ -470,7 +470,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setReadOnly(ObjectNode node, boolean readOnly, SchemaGenerationContext generationContext) {
         if (readOnly) {
-            node.put(generationContext.getKeyword(SchemaKeyword.TAG_READ_ONLY), readOnly);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_READ_ONLY), true);
         }
         return this;
     }
@@ -485,7 +485,7 @@ public class AttributeCollector {
      */
     public AttributeCollector setWriteOnly(ObjectNode node, boolean writeOnly, SchemaGenerationContext generationContext) {
         if (writeOnly) {
-            node.put(generationContext.getKeyword(SchemaKeyword.TAG_WRITE_ONLY), writeOnly);
+            node.put(generationContext.getKeyword(SchemaKeyword.TAG_WRITE_ONLY), true);
         }
         return this;
     }

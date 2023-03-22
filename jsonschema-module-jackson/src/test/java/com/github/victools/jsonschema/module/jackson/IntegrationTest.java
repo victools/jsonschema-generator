@@ -43,11 +43,6 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
  */
 public class IntegrationTest {
 
-    /**
-     * Test
-     *
-     * @throws Exception
-     */
     @Test
     public void testIntegration() throws Exception {
         JacksonModule module = new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE, JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY,
@@ -74,8 +69,7 @@ public class IntegrationTest {
                 stringBuilder.append(scanner.nextLine()).append('\n');
             }
         }
-        String fileAsString = stringBuilder.toString();
-        return fileAsString;
+        return stringBuilder.toString();
 
     }
 
@@ -108,11 +102,11 @@ public class IntegrationTest {
         }
     }
 
-    static enum TestEnum {
-        A, B, C;
+    enum TestEnum {
+        A, B, C
     }
 
-    static enum TestEnumWithJsonValueAnnotation {
+    enum TestEnumWithJsonValueAnnotation {
         ENTRY1, ENTRY2, ENTRY3;
 
         @JsonValue
@@ -121,16 +115,16 @@ public class IntegrationTest {
         }
     }
 
-    static enum TestEnumWithJsonPropertyAnnotations {
+    enum TestEnumWithJsonPropertyAnnotations {
         @JsonProperty("x_property") X,
-        @JsonProperty Y;
+        @JsonProperty Y
     }
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     static class TestTypeWithObjectId {
         IdType id;
 
-        class IdType {
+        static class IdType {
             public String version;
             public long value;
         }

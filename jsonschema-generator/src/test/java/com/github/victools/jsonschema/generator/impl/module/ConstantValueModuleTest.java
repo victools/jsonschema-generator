@@ -55,7 +55,6 @@ public class ConstantValueModuleTest extends AbstractTypeAwareTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testApplyToConfigBuilder() {
         this.instance.applyToConfigBuilder(this.builder);
 
