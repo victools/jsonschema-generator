@@ -162,7 +162,7 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     @ParameterizedTest
     @MethodSource("parametersForTestIsNullable")
-    public void testIsNullableField(Boolean configResult, boolean optionEnabled, boolean expectedResult) throws Exception {
+    public void testIsNullableField(Boolean configResult, boolean optionEnabled, boolean expectedResult) {
         FieldScope field = this.getTestClassField("field");
         Mockito.when(this.fieldConfigPart.isNullable(field)).thenReturn(configResult);
         if (optionEnabled) {
@@ -174,7 +174,7 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     @ParameterizedTest
     @MethodSource("parametersForTestIsNullable")
-    public void testIsNullableMethod(Boolean configResult, boolean optionEnabled, boolean expectedResult) throws Exception {
+    public void testIsNullableMethod(Boolean configResult, boolean optionEnabled, boolean expectedResult) {
         MethodScope method = this.getTestClassMethod("getField");
         Mockito.when(this.methodConfigPart.isNullable(method)).thenReturn(configResult);
         if (optionEnabled) {
@@ -186,7 +186,7 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void testIsRequiredField(boolean configuredAndExpectedResult) throws Exception {
+    public void testIsRequiredField(boolean configuredAndExpectedResult) {
         FieldScope field = this.getTestClassField("field");
         Mockito.when(this.fieldConfigPart.isRequired(field)).thenReturn(configuredAndExpectedResult);
         boolean result = this.instance.isRequired(field);
@@ -195,11 +195,29 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    public void testIsRequiredMethod(boolean configuredAndExpectedResult) throws Exception {
+    public void testIsRequiredMethod(boolean configuredAndExpectedResult) {
         MethodScope method = this.getTestClassMethod("getField");
         Mockito.when(this.methodConfigPart.isRequired(method)).thenReturn(configuredAndExpectedResult);
         boolean result = this.instance.isRequired(method);
         Assertions.assertEquals(configuredAndExpectedResult, result);
+    }
+
+    @Test
+    public void testResolveDependentRequiresField() {
+        List<String> configuredAndExceptedResult = Collections.singletonList("otherField");
+        FieldScope field = this.getTestClassField("field");
+        Mockito.when(this.fieldConfigPart.resolveDependentRequires(field)).thenReturn(configuredAndExceptedResult);
+        List<String> result = this.instance.resolveDependentRequires(field);
+        Assertions.assertEquals(configuredAndExceptedResult, result);
+    }
+
+    @Test
+    public void testResolveDependentRequiresMethod() {
+        List<String> configuredAndExceptedResult = Collections.singletonList("otherMethod");
+        MethodScope method = this.getTestClassMethod("getField");
+        Mockito.when(this.methodConfigPart.resolveDependentRequires(method)).thenReturn(configuredAndExceptedResult);
+        List<String> result = this.instance.resolveDependentRequires(method);
+        Assertions.assertEquals(configuredAndExceptedResult, result);
     }
 
     @Test
