@@ -146,11 +146,11 @@ public class SchemaCleanUpUtils {
                 tagsWithSchemas.stream().map(nodeToCheck::get).forEach(addNodeToCheck);
                 tagsWithSchemaArrays.stream()
                         .map(nodeToCheck::get)
-                        .filter(possibleArrayNode -> possibleArrayNode instanceof ArrayNode)
+                        .filter(ArrayNode.class::isInstance)
                         .forEach(arrayNode -> arrayNode.forEach(addNodeToCheck));
                 tagsWithSchemaObjects.stream()
                         .map(nodeToCheck::get)
-                        .filter(possibleObjectNode -> possibleObjectNode instanceof ObjectNode)
+                        .filter(ObjectNode.class::isInstance)
                         .forEach(objectNode -> objectNode.forEach(addNodeToCheck));
             }
         } while (!nextNodesToCheck.isEmpty());
@@ -311,13 +311,13 @@ public class SchemaCleanUpUtils {
             return null;
         }
         List<ObjectNode> parts = nodes.stream()
-                .filter(part -> part instanceof ObjectNode)
-                .map(part -> (ObjectNode) part)
+                .filter(ObjectNode.class::isInstance)
+                .map(ObjectNode.class::cast)
                 .collect(Collectors.toList());
 
         // collect all defined attributes from the separate parts and check whether there are incompatible differences
         Map<String, List<JsonNode>> fieldsFromAllParts = parts.stream()
-                .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) () -> part.fields()).spliterator(), false))
+                .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) part::fields).spliterator(), false))
                 .collect(Collectors.groupingBy(Map.Entry::getKey, LinkedHashMap::new, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
         if ((this.config.getSchemaVersion() == SchemaVersion.DRAFT_6 || this.config.getSchemaVersion() == SchemaVersion.DRAFT_7)
                 && fieldsFromAllParts.containsKey(this.config.getKeyword(SchemaKeyword.TAG_REF))
@@ -422,14 +422,14 @@ public class SchemaCleanUpUtils {
     }
 
     private Supplier<JsonNode> returnMinimumNumericValue(List<JsonNode> nodes) {
-        if (nodes.stream().allMatch(node -> node.isNumber())) {
+        if (nodes.stream().allMatch(JsonNode::isNumber)) {
             return () -> nodes.stream().reduce((a, b) -> a.asDouble() < b.asDouble() ? a : b).get();
         }
         return null;
     }
 
     private Supplier<JsonNode> returnMaximumNumericValue(List<JsonNode> nodes) {
-        if (nodes.stream().allMatch(node -> node.isNumber())) {
+        if (nodes.stream().allMatch(JsonNode::isNumber)) {
             return () -> nodes.stream().reduce((a, b) -> a.asDouble() < b.asDouble() ? b : a).get();
         }
         return null;

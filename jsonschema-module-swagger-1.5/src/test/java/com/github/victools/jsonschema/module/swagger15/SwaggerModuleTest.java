@@ -459,15 +459,15 @@ public class SwaggerModuleTest {
         }
 
         @ApiModel
-        private class ExampleWithEmptyApiModel {
+        private static class ExampleWithEmptyApiModel {
         }
 
         @ApiModel(value = "example title")
-        private class ExampleWithApiModelTitle {
+        private static class ExampleWithApiModelTitle {
         }
 
         @ApiModel(description = "type description")
-        private class ExampleWithApiModelDescription {
+        private static class ExampleWithApiModelDescription {
         }
     }
 

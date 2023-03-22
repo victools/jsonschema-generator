@@ -140,7 +140,7 @@ public enum SchemaKeyword {
      * @param fixedValue single value applying regardless of schema version
      * @param keywordType what kind of keyword this represents
      */
-    private SchemaKeyword(String fixedValue, SchemaKeyword.Type keywordType) {
+    SchemaKeyword(String fixedValue, SchemaKeyword.Type keywordType) {
         this(_version -> fixedValue, keywordType);
     }
 
@@ -150,7 +150,7 @@ public enum SchemaKeyword {
      * @param valueProvider dynamic value provider that may return different values base on specific JSON Schema versions
      * @param keywordType what kind of keyword this represents
      */
-    private SchemaKeyword(Function<SchemaVersion, String> valueProvider, SchemaKeyword.Type keywordType) {
+    SchemaKeyword(Function<SchemaVersion, String> valueProvider, SchemaKeyword.Type keywordType) {
         this.valueProvider = valueProvider;
         this.type = keywordType;
     }

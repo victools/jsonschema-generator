@@ -81,7 +81,7 @@ public class AttributeCollectorTest {
     @ParameterizedTest
     @EnumSource(SchemaVersion.class)
     public void testSetEnum_singleConstValue(SchemaVersion schemaVersion) {
-        this.collector.setEnum(this.definitionNode, Arrays.asList("A"), this.generateContext(schemaVersion));
+        this.collector.setEnum(this.definitionNode, Collections.singletonList("A"), this.generateContext(schemaVersion));
         JsonNode constNode = this.definitionNode.get(SchemaKeyword.TAG_CONST.forVersion(schemaVersion));
         Assertions.assertNotNull(constNode);
         Assertions.assertTrue(constNode.isTextual());
@@ -91,7 +91,7 @@ public class AttributeCollectorTest {
     @ParameterizedTest
     @EnumSource(SchemaVersion.class)
     public void testSetEnum_singleEnumValue(SchemaVersion schemaVersion) {
-        this.collector.setEnum(this.definitionNode, Arrays.asList("A"), this.generateContext(schemaVersion, Option.ENUM_KEYWORD_FOR_SINGLE_VALUES));
+        this.collector.setEnum(this.definitionNode, Collections.singletonList("A"), this.generateContext(schemaVersion, Option.ENUM_KEYWORD_FOR_SINGLE_VALUES));
         JsonNode enumNode = this.definitionNode.get(SchemaKeyword.TAG_ENUM.forVersion(schemaVersion));
         Assertions.assertNotNull(enumNode);
         Assertions.assertTrue(enumNode.isArray());

@@ -39,7 +39,6 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
     private final String overriddenName;
     private final ResolvedTypeWithMembers declaringTypeMembers;
     private Integer fakeContainerItemIndex;
-    private final TypeContext context;
     private final LazyValue<String> schemaPropertyName = new LazyValue<>(this::doGetSchemaPropertyName);
 
     /**
@@ -60,7 +59,6 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
         this.overriddenName = overriddenName;
         this.declaringTypeMembers = declaringTypeMembers;
         this.fakeContainerItemIndex = fakeContainerItemIndex;
-        this.context = context;
     }
 
     /**

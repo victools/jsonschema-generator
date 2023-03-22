@@ -246,8 +246,8 @@ configBuilder.without(
       <td colspan="2"><code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code></td>
     </tr>
     <tr>
-      <td>Setting the <code>additionalProperties</code> attribute in each <code>Map<K, V></code> to a schema representing the declared value type <code>V</code>.</td>
-      <td>Omitting the <code>additionalProperties</code> attribute in <code>Map<K, V></code> schemas by default (thereby allowing additional properties of any type) unless some configuration specifically says something else.</td>
+      <td>Setting the <code>additionalProperties</code> attribute in each <code>Map&lt;K, V&gt;</code> to a schema representing the declared value type <code>V</code>.</td>
+      <td>Omitting the <code>additionalProperties</code> attribute in <code>Map&lt;K, V&gt;</code> schemas by default (thereby allowing additional properties of any type) unless some configuration specifically says something else.</td>
     </tr>
     <tr>
       <td rowspan="2" style="text-align: right">26</td>

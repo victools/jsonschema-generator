@@ -79,8 +79,7 @@ public class IntegrationTest {
                 stringBuilder.append(scanner.nextLine()).append('\n');
             }
         }
-        String fileAsString = stringBuilder.toString();
-        return fileAsString;
+        return stringBuilder.toString();
 
     }
 
@@ -105,7 +104,7 @@ public class IntegrationTest {
     }
 
     @Schema(subTypes = {Reference.class, PersonReference.class})
-    static interface IReference {
+    interface IReference {
 
         String getName();
     }

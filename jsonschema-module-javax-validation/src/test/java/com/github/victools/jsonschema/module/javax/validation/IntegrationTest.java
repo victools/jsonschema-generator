@@ -49,11 +49,6 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
  */
 public class IntegrationTest {
 
-    /**
-     * Test
-     *
-     * @throws Exception
-     */
     @Test
     public void testIntegration() throws Exception {
         // active all optional modules
@@ -82,8 +77,7 @@ public class IntegrationTest {
                 stringBuilder.append(scanner.nextLine()).append('\n');
             }
         }
-        String fileAsString = stringBuilder.toString();
-        return fileAsString;
+        return stringBuilder.toString();
 
     }
 

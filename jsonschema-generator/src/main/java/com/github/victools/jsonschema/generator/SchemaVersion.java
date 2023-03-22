@@ -32,7 +32,7 @@ public enum SchemaVersion {
      *
      * @param schemaIdentifier value for the {@code $schema} tag
      */
-    private SchemaVersion(String schemaIdentifier) {
+    SchemaVersion(String schemaIdentifier) {
         this.identifier = schemaIdentifier;
     }
 

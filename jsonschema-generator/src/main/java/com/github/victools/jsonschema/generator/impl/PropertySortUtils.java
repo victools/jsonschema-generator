@@ -36,7 +36,7 @@ public class PropertySortUtils {
      * @see MemberScope#getSchemaPropertyName()
      */
     public static final Comparator<MemberScope<?, ?>> SORT_PROPERTIES_BY_NAME_ALPHABETICALLY
-            = (first, second) -> first.getSchemaPropertyName().compareTo(second.getSchemaPropertyName());
+            = Comparator.comparing(MemberScope::getSchemaPropertyName);
 
     /**
      * {@link Comparator} sorting properties into the following groups and within each group alphabetically by their name.

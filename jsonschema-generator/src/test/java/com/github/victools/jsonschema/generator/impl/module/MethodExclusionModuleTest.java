@@ -52,7 +52,6 @@ public class MethodExclusionModuleTest extends AbstractTypeAwareTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testApplyToConfigBuilder() {
         Predicate<MethodScope> ignoreCheck = method -> true;
         MethodExclusionModule module = new MethodExclusionModule(ignoreCheck);

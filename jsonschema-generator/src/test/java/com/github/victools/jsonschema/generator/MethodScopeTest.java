@@ -29,7 +29,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 /**
- * Test for the {@link MethodSCope} class.
+ * Test for the {@link MethodScope} class.
  */
 public class MethodScopeTest extends AbstractTypeAwareTest {
 
@@ -153,6 +153,6 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD, ElementType.METHOD})
-    private static @interface TestAnnotation {
+    private @interface TestAnnotation {
     }
 }

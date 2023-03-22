@@ -18,6 +18,7 @@ package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.members.ResolvedField;
+import com.fasterxml.classmate.members.ResolvedMember;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerator;
@@ -120,7 +121,7 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
             ResolvedField[] eligibleFields = typeContext.resolveWithMembers(typeWithIdentityInfoAnnotation).getMemberFields();
             Optional<ResolvedType> identityTypeFromProperty = Stream.of(eligibleFields)
                     .filter(field -> field.getName().equals(idPropertyName))
-                    .map(field -> field.getType())
+                    .map(ResolvedMember::getType)
                     .findFirst();
             if (identityTypeFromProperty.isPresent()) {
                 return identityTypeFromProperty;
