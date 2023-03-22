@@ -562,6 +562,24 @@ configBuilder.forMethods()
 
 `withRequiredCheck()` is expecting the indication to be returned whether a given `FieldScope`/`MethodScope` should be included in the `"required"` attribute – if any check returns `true`, the field/method will be deemed `"required"`.
 
+## `"dependentRequired"` Keyword
+```java
+configBuilder.forFields()
+    .withDependentRequiresResolver(field -> Optional
+        .ofNullable(field.getAnnotationConsideringFieldAndGetter(IfPresentAlsoRequire.class)
+        .map(IfPresentAlsoRequire::value)
+        .map(Arrays::asList)
+        .orElse(null));
+configBuilder.forMethods()
+    .withDependentRequiresResolver(method -> Optional.ofNullable(method.findGetterField())
+        .map(FieldScope::getSchemaPropertyName)
+        .map(Collections::singletonList)
+        .orElse(null));
+```
+
+`withDependentRequiresResolver()` is expecting the names of other properties to be returned, which should be deemed "required", if the property represented by the given field/method is present.
+The results of all registered resolvers are being combined.
+
 ## `"readOnly"` Keyword
 ```java
 configBuilder.forFields()
