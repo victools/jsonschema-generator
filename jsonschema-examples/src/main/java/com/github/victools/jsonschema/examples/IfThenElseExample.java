@@ -85,9 +85,9 @@ public class IfThenElseExample implements SchemaGenerationExampleInterface {
             ObjectNode propertyNode = this.withObject(
                     this.withObject(node, context.getKeyword(SchemaKeyword.TAG_PROPERTIES)),
                     propertyAnnotation.name());
-            if (!"".equals(propertyAnnotation.constValue())) {
+            if (!Objects.equals(propertyAnnotation.constValue(), "")) {
                 propertyNode.put(context.getKeyword(SchemaKeyword.TAG_CONST), propertyAnnotation.constValue());
-            } else if (!"".equals(propertyAnnotation.pattern())) {
+            } else if (!Objects.equals(propertyAnnotation.pattern(), "")) {
                 propertyNode.put(context.getKeyword(SchemaKeyword.TAG_PATTERN), propertyAnnotation.pattern());
             }
         }
