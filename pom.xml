@@ -22,6 +22,7 @@
         <module>jsonschema-module-swagger-1.5</module>
         <module>jsonschema-module-swagger-2</module>
         <module>jsonschema-maven-plugin</module>
+        <module>jsonschema-examples</module>
     </modules>
 
     <build>

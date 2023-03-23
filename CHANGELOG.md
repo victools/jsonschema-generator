@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### `jsonschema-examples`
+#### Added
+- new collection of examples (and implicit integration test) holding various examples (e.g., ones created in response to issues/discussions on Github)
 
 ## [4.29.0] - 2023-03-13
 ### `jsonschema-generator`
