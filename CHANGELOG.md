@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Added
+- introduce configuration option for `dependentRequired` keyword
+
+#### Changed
+- enable `allOf` clean-up when any of the following keywords are contained: `dependentRequired`/`dependentSchemas`/`prefixItems`/`unevaluatedItems`/`unevaluatedProperties`
 
 ### `jsonschema-examples`
 #### Added

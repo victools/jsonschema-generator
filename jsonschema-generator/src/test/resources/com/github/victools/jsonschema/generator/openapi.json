@@ -23,7 +23,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "succesful POST",
+                        "description": "successful POST",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -46,7 +46,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "succesful PUT",
+                        "description": "successful PUT",
                         "content": {
                             "application/json": {
                                 "schema": {
