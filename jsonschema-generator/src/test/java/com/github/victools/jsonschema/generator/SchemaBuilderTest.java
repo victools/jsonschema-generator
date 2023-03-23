@@ -54,7 +54,7 @@ public class SchemaBuilderTest {
                 .putObject("content").putObject("application/json")
                 .set("schema", instance.createSchemaReference(TestClass1.class));
         testPathPost.putObject("responses").putObject("200")
-                .put("description", "succesful POST")
+                .put("description", "successful POST")
                 .putObject("content").putObject("application/json")
                 .set("schema", instance.createSchemaReference(TestClass2.class));
         ObjectNode testPathPut = testPath.putObject("put");
@@ -62,7 +62,7 @@ public class SchemaBuilderTest {
                 .putObject("content").putObject("application/json")
                 .set("schema", instance.createSchemaReference(TestClass3.class));
         testPathPut.putObject("responses").putObject("201")
-                .put("description", "succesful PUT")
+                .put("description", "successful PUT")
                 .putObject("content").putObject("application/json")
                 .set("schema", instance.createSchemaReference(TestClass3.class));
 

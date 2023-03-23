@@ -1,0 +1,36 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "country" : {
+      "type" : "string"
+    },
+    "postalCode" : {
+      "type" : "string"
+    }
+  },
+  "if" : {
+    "required" : [ "country" ],
+    "properties" : {
+      "country" : {
+        "const" : "US"
+      }
+    }
+  },
+  "then" : {
+    "required" : [ "postalCode" ],
+    "properties" : {
+      "postalCode" : {
+        "pattern" : "^\\d{5}(?:[-\\s]\\d{4})?$"
+      }
+    }
+  },
+  "else" : {
+    "required" : [ "postalCode" ],
+    "properties" : {
+      "postalCode" : {
+        "pattern" : "^[-\\s\\d]+$"
+      }
+    }
+  }
+}
