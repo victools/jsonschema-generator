@@ -91,7 +91,7 @@ public class ExternalRefAnnotationExample implements SchemaGenerationExampleInte
         }
     }
 
-    class Example {
+    static class Example {
         @Schema(description = "alpha")
         private String alpha;
         @Schema(ref = "./BetaSchema.json")
@@ -102,7 +102,7 @@ public class ExternalRefAnnotationExample implements SchemaGenerationExampleInte
         private List<Omega> omega;
     }
 
-    class Omega {
+    static class Omega {
     }
 
     @Schema(
@@ -110,7 +110,7 @@ public class ExternalRefAnnotationExample implements SchemaGenerationExampleInte
             description = "Theta",
             additionalProperties = Schema.AdditionalPropertiesValue.FALSE,
             ref = "./ThetaSchema.json")
-    class Theta extends Omega {
+    static class Theta extends Omega {
     }
 
     // Implementation omitted for brevity
@@ -119,6 +119,6 @@ public class ExternalRefAnnotationExample implements SchemaGenerationExampleInte
             description = "Tau",
             additionalProperties = Schema.AdditionalPropertiesValue.FALSE,
             ref = "./TauSchema.json")
-    class Tau extends Omega {
+    static class Tau extends Omega {
     }
 }
