@@ -1,0 +1,35 @@
+{
+  "$schema" : "http://json-schema.org/draft-07/schema#",
+  "type" : "object",
+  "properties" : {
+    "alpha" : {
+      "type" : "string",
+      "description" : "alpha"
+    },
+    "beta" : {
+      "$ref" : "./BetaSchema.json"
+    },
+    "omega" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "oneOf" : [ {
+          "$ref" : "./ThetaSchema.json",
+          "title" : "Theta",
+          "description" : "Theta"
+        }, {
+          "$ref" : "./TauSchema.json",
+          "title" : "Tau",
+          "description" : "Tau"
+        } ]
+      }
+    },
+    "sigma" : {
+      "type" : "number",
+      "description" : "sigma"
+    },
+    "$schema" : {
+      "type" : "string"
+    }
+  }
+}

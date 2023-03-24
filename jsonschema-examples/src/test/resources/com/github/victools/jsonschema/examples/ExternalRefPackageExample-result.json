@@ -1,0 +1,16 @@
+{
+  "$schema" : "https://json-schema.org/draft/2020-12/schema",
+  "type" : "object",
+  "properties" : {
+    "bar" : {
+      "$ref" : "http://foo.bar/com.github.victools.jsonschema.examples.ExternalRefPackageExample$Bar.json"
+    },
+    "foo" : {
+      "$ref" : "http://foo.bar/com.github.victools.jsonschema.examples.ExternalRefPackageExample$Foo.json"
+    },
+    "text" : {
+      "type" : "string"
+    }
+  },
+  "$id" : "http://foo.bar/com.github.victools.jsonschema.examples.ExternalRefPackageExample$Example.json"
+}
