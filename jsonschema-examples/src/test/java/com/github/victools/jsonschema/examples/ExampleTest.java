@@ -31,6 +31,8 @@ public class ExampleTest {
 
     @ParameterizedTest
     @ValueSource(classes = {
+            ExternalRefAnnotationExample.class,
+            ExternalRefPackageExample.class,
             IfThenElseExample.class
     })
     public void testExample(Class<? extends SchemaGenerationExampleInterface> exampleType) throws Exception {
