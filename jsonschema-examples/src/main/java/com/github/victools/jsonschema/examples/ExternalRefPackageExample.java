@@ -51,10 +51,12 @@ public class ExternalRefPackageExample implements SchemaGenerationExampleInterfa
 
         private static final String PACKAGE_FOR_EXTERNAL_REFS = "com.github.victools.jsonschema.example";
         private static final String EXTERNAL_REF_PREFIX = "http://foo.bar/";
+        private static final String EXTERNAL_REF_SUFFIX = ".json";
 
         @Override
         public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
-            SchemaRefDefinitionProvider definitionProvider = new SchemaRefDefinitionProvider(PACKAGE_FOR_EXTERNAL_REFS, EXTERNAL_REF_PREFIX);
+            SchemaRefDefinitionProvider definitionProvider = new SchemaRefDefinitionProvider(PACKAGE_FOR_EXTERNAL_REFS,
+                    EXTERNAL_REF_PREFIX, EXTERNAL_REF_SUFFIX);
             builder.forTypesInGeneral()
                     .withCustomDefinitionProvider(definitionProvider)
                     .withIdResolver(scope -> definitionProvider.isMainType(scope.getType())
@@ -65,11 +67,13 @@ public class ExternalRefPackageExample implements SchemaGenerationExampleInterfa
 
             private final String packageForExternalRefs;
             private final String externalRefPrefix;
+            private final String externalRefSuffix;
             private Class<?> mainType;
 
-            SchemaRefDefinitionProvider(String packageForExternalRefs, String externalRefPrefix) {
+            SchemaRefDefinitionProvider(String packageForExternalRefs, String externalRefPrefix, String externalRefSuffix) {
                 this.packageForExternalRefs = packageForExternalRefs;
                 this.externalRefPrefix = externalRefPrefix;
+                this.externalRefSuffix = externalRefSuffix;
             }
 
             @Override
@@ -92,7 +96,7 @@ public class ExternalRefPackageExample implements SchemaGenerationExampleInterfa
             }
 
             String getExternalRef(ResolvedType javaType) {
-                return this.externalRefPrefix + javaType.getErasedType().getName();
+                return this.externalRefPrefix + javaType.getErasedType().getName() + this.externalRefSuffix;
             }
 
             @Override
