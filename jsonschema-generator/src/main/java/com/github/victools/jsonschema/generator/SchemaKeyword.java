@@ -16,34 +16,30 @@
 
 package com.github.victools.jsonschema.generator;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * JSON Schema properties and their values.
  */
 public enum SchemaKeyword {
-    TAG_SCHEMA("$schema", Collections.emptyList(), TagContent.NON_SCHEMA),
-    TAG_SCHEMA_VALUE(SchemaVersion::getIdentifier, Collections.emptyList()),
-    TAG_ID("$id", Collections.emptyList(), TagContent.NON_SCHEMA),
+    TAG_SCHEMA("$schema", EnumSet.of(TagContent.NON_SCHEMA)),
+    TAG_SCHEMA_VALUE(SchemaVersion::getIdentifier, EnumSet.noneOf(TagContent.class), EnumSet.noneOf(SchemaType.class)),
+    TAG_ID("$id", EnumSet.of(TagContent.NON_SCHEMA)),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_2019_09}.
      */
-    TAG_ANCHOR("$anchor", Collections.emptyList(), TagContent.NON_SCHEMA),
+    TAG_ANCHOR("$anchor", EnumSet.of(TagContent.NON_SCHEMA)),
     TAG_DEFINITIONS(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7 ? "definitions" : "$defs",
-            Collections.emptyList(), TagContent.NAMED_SCHEMAS),
+            EnumSet.of(TagContent.NAMED_SCHEMAS), EnumSet.noneOf(SchemaType.class)),
     /**
      * Before {@link SchemaVersion#DRAFT_2019_09} all other properties in the same sub-schema besides this one were ignored.
      */
-    TAG_REF("$ref", Collections.emptyList(), TagContent.NON_SCHEMA),
-    TAG_REF_MAIN("#", Collections.emptyList()),
+    TAG_REF("$ref", EnumSet.of(TagContent.NON_SCHEMA)),
+    TAG_REF_MAIN("#"),
     /**
      * Common prefix of all standard {@link #TAG_REF} values.
      *
@@ -51,121 +47,140 @@ public enum SchemaKeyword {
      */
     @Deprecated
     TAG_REF_PREFIX(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7 ? "#/definitions/" : "#/$defs/",
-            Collections.emptyList()),
+            EnumSet.noneOf(TagContent.class), EnumSet.noneOf(SchemaType.class)),
 
-    TAG_TYPE("type", Collections.emptyList(), TagContent.NON_SCHEMA),
-    TAG_TYPE_NULL(SchemaType.NULL.getSchemaKeywordValue(), Collections.emptyList()),
-    TAG_TYPE_ARRAY(SchemaType.ARRAY.getSchemaKeywordValue(), Collections.emptyList()),
-    TAG_TYPE_OBJECT(SchemaType.OBJECT.getSchemaKeywordValue(), Collections.emptyList()),
-    TAG_TYPE_BOOLEAN(SchemaType.BOOLEAN.getSchemaKeywordValue(), Collections.emptyList()),
-    TAG_TYPE_STRING(SchemaType.STRING.getSchemaKeywordValue(), Collections.emptyList()),
-    TAG_TYPE_INTEGER(SchemaType.INTEGER.getSchemaKeywordValue(), Collections.emptyList()),
-    TAG_TYPE_NUMBER(SchemaType.NUMBER.getSchemaKeywordValue(), Collections.emptyList()),
+    TAG_TYPE("type", EnumSet.of(TagContent.NON_SCHEMA)),
+    TAG_TYPE_NULL(SchemaType.NULL.getSchemaKeywordValue()),
+    TAG_TYPE_ARRAY(SchemaType.ARRAY.getSchemaKeywordValue()),
+    TAG_TYPE_OBJECT(SchemaType.OBJECT.getSchemaKeywordValue()),
+    TAG_TYPE_BOOLEAN(SchemaType.BOOLEAN.getSchemaKeywordValue()),
+    TAG_TYPE_STRING(SchemaType.STRING.getSchemaKeywordValue()),
+    TAG_TYPE_INTEGER(SchemaType.INTEGER.getSchemaKeywordValue()),
+    TAG_TYPE_NUMBER(SchemaType.NUMBER.getSchemaKeywordValue()),
 
-    TAG_PROPERTIES("properties", Collections.singletonList(SchemaType.OBJECT), TagContent.NAMED_SCHEMAS),
+    TAG_PROPERTIES("properties", EnumSet.of(TagContent.NAMED_SCHEMAS), EnumSet.of(SchemaType.OBJECT)),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_2019_09}.
      */
-    TAG_UNEVALUATED_PROPERTIES("unevaluatedProperties", Collections.singletonList(SchemaType.OBJECT), TagContent.SCHEMA),
-    TAG_ITEMS("items", Collections.singletonList(SchemaType.ARRAY), TagContent.SCHEMA, TagContent.ARRAY_OF_SCHEMAS),
+    TAG_UNEVALUATED_PROPERTIES("unevaluatedProperties", EnumSet.of(TagContent.SCHEMA), EnumSet.of(SchemaType.OBJECT)),
+    TAG_ITEMS("items", EnumSet.of(TagContent.SCHEMA, TagContent.ARRAY_OF_SCHEMAS), EnumSet.of(SchemaType.ARRAY)),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_2019_09}.
      */
     TAG_PREFIX_ITEMS(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7 ? "items" : "prefixItems",
-            Collections.singletonList(SchemaType.ARRAY), TagContent.ARRAY_OF_SCHEMAS),
+            EnumSet.of(TagContent.ARRAY_OF_SCHEMAS), EnumSet.of(SchemaType.ARRAY)),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_2019_09}.
      */
-    TAG_UNEVALUATED_ITEMS("unevaluatedItems", Collections.singletonList(SchemaType.ARRAY), TagContent.SCHEMA),
-    TAG_REQUIRED("required", Collections.singletonList(SchemaType.OBJECT), TagContent.NON_SCHEMA),
+    TAG_UNEVALUATED_ITEMS("unevaluatedItems", EnumSet.of(TagContent.SCHEMA), EnumSet.of(SchemaType.ARRAY)),
+    TAG_REQUIRED("required", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.OBJECT)),
     /**
      * Prior to {@link SchemaVersion#DRAFT_2019_09}, this had the same name as {@link #TAG_DEPENDENT_REQUIRED}.
      */
     TAG_DEPENDENT_SCHEMAS(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7
-            ? "dependencies" : "dependentSchemas", Collections.singletonList(SchemaType.OBJECT), TagContent.NAMED_SCHEMAS),
+            ? "dependencies" : "dependentSchemas", EnumSet.of(TagContent.NAMED_SCHEMAS), EnumSet.of(SchemaType.OBJECT)),
     /**
      * Prior to {@link SchemaVersion#DRAFT_2019_09}, this had the same name as {@link #TAG_DEPENDENT_SCHEMAS}.
      */
     TAG_DEPENDENT_REQUIRED(version -> version == SchemaVersion.DRAFT_6 || version == SchemaVersion.DRAFT_7
-            ? "dependencies" : "dependentRequired", Collections.singletonList(SchemaType.OBJECT), TagContent.NON_SCHEMA),
-    TAG_ADDITIONAL_PROPERTIES("additionalProperties", Collections.singletonList(SchemaType.OBJECT), TagContent.SCHEMA),
-    TAG_PATTERN_PROPERTIES("patternProperties", Collections.singletonList(SchemaType.OBJECT), TagContent.NAMED_SCHEMAS),
-    TAG_PROPERTIES_MIN("minProperties", Collections.singletonList(SchemaType.OBJECT), TagContent.NON_SCHEMA),
-    TAG_PROPERTIES_MAX("maxProperties", Collections.singletonList(SchemaType.OBJECT), TagContent.NON_SCHEMA),
+            ? "dependencies" : "dependentRequired", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.OBJECT)),
+    TAG_ADDITIONAL_PROPERTIES("additionalProperties", EnumSet.of(TagContent.SCHEMA), EnumSet.of(SchemaType.OBJECT)),
+    TAG_PATTERN_PROPERTIES("patternProperties", EnumSet.of(TagContent.NAMED_SCHEMAS), EnumSet.of(SchemaType.OBJECT)),
+    TAG_PROPERTIES_MIN("minProperties", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.OBJECT)),
+    TAG_PROPERTIES_MAX("maxProperties", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.OBJECT)),
 
-    TAG_ALLOF("allOf", Collections.emptyList(), TagContent.ARRAY_OF_SCHEMAS),
-    TAG_ANYOF("anyOf", Collections.emptyList(), TagContent.ARRAY_OF_SCHEMAS),
-    TAG_ONEOF("oneOf", Collections.emptyList(), TagContent.ARRAY_OF_SCHEMAS),
-    TAG_NOT("not", Collections.emptyList(), TagContent.SCHEMA),
+    TAG_ALLOF("allOf", EnumSet.of(TagContent.ARRAY_OF_SCHEMAS)),
+    TAG_ANYOF("anyOf", EnumSet.of(TagContent.ARRAY_OF_SCHEMAS)),
+    TAG_ONEOF("oneOf", EnumSet.of(TagContent.ARRAY_OF_SCHEMAS)),
+    TAG_NOT("not", EnumSet.of(TagContent.SCHEMA)),
 
-    TAG_TITLE("title", Collections.emptyList(), TagContent.NON_SCHEMA),
-    TAG_DESCRIPTION("description", Collections.emptyList(), TagContent.NON_SCHEMA),
-    TAG_CONST("const", Collections.emptyList(), TagContent.NON_SCHEMA),
-    TAG_ENUM("enum", Collections.emptyList(), TagContent.NON_SCHEMA),
-    TAG_DEFAULT("default", Collections.emptyList(), TagContent.NON_SCHEMA),
+    TAG_TITLE("title", EnumSet.of(TagContent.NON_SCHEMA)),
+    TAG_DESCRIPTION("description", EnumSet.of(TagContent.NON_SCHEMA)),
+    TAG_CONST("const", EnumSet.of(TagContent.NON_SCHEMA)),
+    TAG_ENUM("enum", EnumSet.of(TagContent.NON_SCHEMA)),
+    TAG_DEFAULT("default", EnumSet.of(TagContent.NON_SCHEMA)),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
      */
-    TAG_READ_ONLY("readOnly", Collections.emptyList(), TagContent.NON_SCHEMA),
+    TAG_READ_ONLY("readOnly", EnumSet.of(TagContent.NON_SCHEMA)),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
      */
-    TAG_WRITE_ONLY("writeOnly", Collections.emptyList(), TagContent.NON_SCHEMA),
+    TAG_WRITE_ONLY("writeOnly", EnumSet.of(TagContent.NON_SCHEMA)),
 
-    TAG_LENGTH_MIN("minLength", Collections.singletonList(SchemaType.STRING), TagContent.NON_SCHEMA),
-    TAG_LENGTH_MAX("maxLength", Collections.singletonList(SchemaType.STRING), TagContent.NON_SCHEMA),
-    TAG_FORMAT("format", Collections.singletonList(SchemaType.STRING), TagContent.NON_SCHEMA),
-    TAG_PATTERN("pattern", Collections.singletonList(SchemaType.STRING), TagContent.NON_SCHEMA),
+    TAG_LENGTH_MIN("minLength", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.STRING)),
+    TAG_LENGTH_MAX("maxLength", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.STRING)),
+    TAG_FORMAT("format", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.STRING)),
+    TAG_PATTERN("pattern", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.STRING)),
 
-    TAG_MINIMUM("minimum", Arrays.asList(SchemaType.INTEGER, SchemaType.NUMBER), TagContent.NON_SCHEMA),
-    TAG_MINIMUM_EXCLUSIVE("exclusiveMinimum", Arrays.asList(SchemaType.INTEGER, SchemaType.NUMBER), TagContent.NON_SCHEMA),
-    TAG_MAXIMUM("maximum", Arrays.asList(SchemaType.INTEGER, SchemaType.NUMBER), TagContent.NON_SCHEMA),
-    TAG_MAXIMUM_EXCLUSIVE("exclusiveMaximum", Arrays.asList(SchemaType.INTEGER, SchemaType.NUMBER), TagContent.NON_SCHEMA),
-    TAG_MULTIPLE_OF("multipleOf", Arrays.asList(SchemaType.INTEGER, SchemaType.NUMBER), TagContent.NON_SCHEMA),
+    TAG_MINIMUM("minimum", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.INTEGER, SchemaType.NUMBER)),
+    TAG_MINIMUM_EXCLUSIVE("exclusiveMinimum", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.INTEGER, SchemaType.NUMBER)),
+    TAG_MAXIMUM("maximum", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.INTEGER, SchemaType.NUMBER)),
+    TAG_MAXIMUM_EXCLUSIVE("exclusiveMaximum", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.INTEGER, SchemaType.NUMBER)),
+    TAG_MULTIPLE_OF("multipleOf", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.INTEGER, SchemaType.NUMBER)),
 
-    TAG_ITEMS_MIN("minItems", Collections.singletonList(SchemaType.ARRAY), TagContent.NON_SCHEMA),
-    TAG_ITEMS_MAX("maxItems", Collections.singletonList(SchemaType.ARRAY), TagContent.NON_SCHEMA),
-    TAG_ITEMS_UNIQUE("uniqueItems", Collections.singletonList(SchemaType.ARRAY), TagContent.NON_SCHEMA),
+    TAG_ITEMS_MIN("minItems", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.ARRAY)),
+    TAG_ITEMS_MAX("maxItems", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.ARRAY)),
+    TAG_ITEMS_UNIQUE("uniqueItems", EnumSet.of(TagContent.NON_SCHEMA), EnumSet.of(SchemaType.ARRAY)),
 
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
      */
-    TAG_IF("if", Collections.emptyList(), TagContent.SCHEMA),
+    TAG_IF("if", EnumSet.of(TagContent.SCHEMA)),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
      */
-    TAG_THEN("then", Collections.emptyList(), TagContent.SCHEMA),
+    TAG_THEN("then", EnumSet.of(TagContent.SCHEMA)),
     /**
      * Beware that this keyword was only introduced in {@link SchemaVersion#DRAFT_7}.
      */
-    TAG_ELSE("else", Collections.emptyList(), TagContent.SCHEMA);
+    TAG_ELSE("else", EnumSet.of(TagContent.SCHEMA));
 
     private final Function<SchemaVersion, String> valueProvider;
-    private final List<SchemaType> impliedTypes;
-    private final List<TagContent> contentTypes;
+    private final EnumSet<TagContent> contentTypes;
+    private final EnumSet<SchemaType> impliedTypes;
 
     /**
      * Constructor.
      *
      * @param fixedValue single value applying regardless of schema version
-     * @param impliedTypes values of the {@link #TAG_TYPE} being implied by the presence of this keyword in a schema
+     */
+    SchemaKeyword(String fixedValue) {
+        this(fixedValue, EnumSet.noneOf(TagContent.class), EnumSet.noneOf(SchemaType.class));
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param fixedValue single value applying regardless of schema version
      * @param contentTypes what kind of values can be expected under this keyword (empty when this keyword represents such a value)
      */
-    SchemaKeyword(String fixedValue, List<SchemaType> impliedTypes, TagContent... contentTypes) {
-        this(_version -> fixedValue, impliedTypes, contentTypes);
+    SchemaKeyword(String fixedValue, EnumSet<TagContent> contentTypes) {
+        this(_version -> fixedValue, contentTypes, EnumSet.noneOf(SchemaType.class));
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param fixedValue single value applying regardless of schema version
+     * @param contentTypes what kind of values can be expected under this keyword (empty when this keyword represents such a value)
+     * @param impliedTypes values of the {@link #TAG_TYPE} being implied by the presence of this keyword in a schema
+     */
+    SchemaKeyword(String fixedValue, EnumSet<TagContent> contentTypes, EnumSet<SchemaType> impliedTypes) {
+        this(_version -> fixedValue, contentTypes, impliedTypes);
     }
 
     /**
      * Constructor.
      *
      * @param valueProvider dynamic value provider that may return different values base on specific JSON Schema versions
-     * @param impliedTypes values of the {@link #TAG_TYPE} being implied by the presence of this keyword in a schema
      * @param contentTypes what kind of values can be expected under this keyword (empty when this keyword represents such a value)
+     * @param impliedTypes values of the {@link #TAG_TYPE} being implied by the presence of this keyword in a schema
      */
-    SchemaKeyword(Function<SchemaVersion, String> valueProvider, List<SchemaType> impliedTypes, TagContent... contentTypes) {
+    SchemaKeyword(Function<SchemaVersion, String> valueProvider, EnumSet<TagContent> contentTypes, EnumSet<SchemaType> impliedTypes) {
         this.valueProvider = valueProvider;
-        this.impliedTypes = Collections.unmodifiableList(impliedTypes);
-        this.contentTypes = Collections.unmodifiableList(Arrays.asList(contentTypes));
+        this.contentTypes = contentTypes;
+        this.impliedTypes = impliedTypes;
     }
 
     /**
@@ -173,7 +188,7 @@ public enum SchemaKeyword {
      *
      * @return implied type values or an empty list if this keyword is not type specific
      */
-    public List<SchemaType> getImpliedTypes() {
+    public EnumSet<SchemaType> getImpliedTypes() {
         return this.impliedTypes;
     }
 
