@@ -113,6 +113,13 @@ public interface SchemaGeneratorConfig extends StatefulConfig {
     boolean shouldCleanupUnnecessaryAllOfElements();
 
     /**
+     * Determine whether sub schemas should get the {@link SchemaKeyword#TAG_TYPE} added implicitly based on other contained tags, if it is missing.
+     *
+     * @return whether to try and imply the {@link SchemaKeyword#TAG_TYPE} from other contained tags in the schema
+     */
+    boolean shouldIncludeStrictTypeInfo();
+
+    /**
      * Determine whether static fields should be included in the generated schema.
      *
      * @return whether to include static fields

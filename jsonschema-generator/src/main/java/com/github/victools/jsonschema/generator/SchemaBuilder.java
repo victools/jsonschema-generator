@@ -187,6 +187,9 @@ public class SchemaBuilder {
             cleanUpUtils.reduceAllOfNodes(this.schemaNodes);
         }
         cleanUpUtils.reduceAnyOfNodes(this.schemaNodes);
+        if (this.config.shouldIncludeStrictTypeInfo()) {
+            cleanUpUtils.setStrictTypeInfo(this.schemaNodes, true);
+        }
     }
 
     /**

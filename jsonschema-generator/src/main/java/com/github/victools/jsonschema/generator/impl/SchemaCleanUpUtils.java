@@ -30,11 +30,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -62,9 +62,8 @@ public class SchemaCleanUpUtils {
      */
     public void reduceAllOfNodes(List<ObjectNode> jsonSchemas) {
         String allOfTagName = this.config.getKeyword(SchemaKeyword.TAG_ALLOF);
-        Map<String, SchemaKeyword> reverseKeywordMap = SchemaKeyword.getTagStream()
-                .collect(Collectors.toMap(this.config::getKeyword, keyword -> keyword, (k1, k2) -> k1));
-        this.finaliseSchemaParts(jsonSchemas, nodeToCheck -> this.mergeAllOfPartsIfPossible(nodeToCheck, allOfTagName, reverseKeywordMap));
+        Map<String, SchemaKeyword> reverseTagMap = SchemaKeyword.getReverseTagMap(this.config.getSchemaVersion(), _tag -> true);
+        this.finaliseSchemaParts(jsonSchemas, nodeToCheck -> this.mergeAllOfPartsIfPossible(nodeToCheck, allOfTagName, reverseTagMap));
     }
 
     /**
@@ -80,42 +79,29 @@ public class SchemaCleanUpUtils {
     }
 
     /**
-     * Collect names of schema tags that may contain sub-schemas, i.e. {@link SchemaKeyword#TAG_ADDITIONAL_PROPERTIES} and
-     * {@link SchemaKeyword#TAG_ITEMS}.
+     * Go through all sub-schemas and look for those without a {@link SchemaKeyword#TAG_TYPE} indication. Then try to derive the appropriate type
+     * indication from the other present tags (e.g., "properties" implies it is an "object").
      *
-     * @return names of eligible tags as per the designated JSON Schema version
+     * @param jsonSchemas sub-schemas to check and extend where required and possible
+     * @param considerNullType whether to always include "null" as possible "type" in addition to the implied values
+     *
+     * @since 4.30.0
      */
-    private Set<String> getTagNamesContainingSchema() {
-        SchemaVersion schemaVersion = this.config.getSchemaVersion();
-        return Stream.of(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES, SchemaKeyword.TAG_ITEMS)
-                .map(keyword -> keyword.forVersion(schemaVersion))
-                .collect(Collectors.toSet());
+    public void setStrictTypeInfo(List<ObjectNode> jsonSchemas, boolean considerNullType) {
+        String typeTagName = this.config.getKeyword(SchemaKeyword.TAG_TYPE);
+        Map<String, SchemaKeyword> reverseTagMap = SchemaKeyword.getReverseTagMap(this.config.getSchemaVersion(),
+                tag -> !tag.getImpliedTypes().isEmpty());
+        this.finaliseSchemaParts(jsonSchemas, nodeToCheck -> this.addTypeInfoWhereMissing(nodeToCheck, typeTagName, considerNullType, reverseTagMap));
     }
 
     /**
-     * Collect names of schema tags that may contain arrays of sub-schemas, i.e. {@link SchemaKeyword#TAG_ALLOF}, {@link SchemaKeyword#TAG_ANYOF} and
-     * {@link SchemaKeyword#TAG_ONEOF}.
+     * Collect names of schema tags that may contain the given type of content.
      *
+     * @param contentType targeted type of content that can be expected under a returned tag
      * @return names of eligible tags as per the designated JSON Schema version
      */
-    private Set<String> getTagNamesContainingSchemaArray() {
-        SchemaVersion schemaVersion = this.config.getSchemaVersion();
-        return Stream.of(SchemaKeyword.TAG_ALLOF, SchemaKeyword.TAG_ANYOF, SchemaKeyword.TAG_ONEOF)
-                .map(keyword -> keyword.forVersion(schemaVersion))
-                .collect(Collectors.toSet());
-    }
-
-    /**
-     * Collect names of schema tags that may contain objects with sub-schemas as values, i.e. {@link SchemaKeyword#TAG_PATTERN_PROPERTIES} and
-     * {@link SchemaKeyword#TAG_PROPERTIES}.
-     *
-     * @return names of eligible tags as per the designated JSON Schema version
-     */
-    private Set<String> getTagNamesContainingSchemaObject() {
-        SchemaVersion schemaVersion = this.config.getSchemaVersion();
-        return Stream.of(SchemaKeyword.TAG_PATTERN_PROPERTIES, SchemaKeyword.TAG_PROPERTIES)
-                .map(keyword -> keyword.forVersion(schemaVersion))
-                .collect(Collectors.toSet());
+    private Set<String> getTagNamesSupporting(SchemaKeyword.TagContent contentType) {
+        return SchemaKeyword.getReverseTagMap(this.config.getSchemaVersion(), tag -> tag.supportsContentType(contentType)).keySet();
     }
 
     /**
@@ -135,9 +121,9 @@ public class SchemaCleanUpUtils {
             }
         };
 
-        Set<String> tagsWithSchemas = this.getTagNamesContainingSchema();
-        Set<String> tagsWithSchemaArrays = this.getTagNamesContainingSchemaArray();
-        Set<String> tagsWithSchemaObjects = this.getTagNamesContainingSchemaObject();
+        Set<String> tagsWithSchemas = this.getTagNamesSupporting(SchemaKeyword.TagContent.SCHEMA);
+        Set<String> tagsWithSchemaArrays = this.getTagNamesSupporting(SchemaKeyword.TagContent.ARRAY_OF_SCHEMAS);
+        Set<String> tagsWithSchemaObjects = this.getTagNamesSupporting(SchemaKeyword.TagContent.NAMED_SCHEMAS);
         do {
             List<ObjectNode> currentNodesToCheck = new ArrayList<>(nextNodesToCheck);
             nextNodesToCheck.clear();
@@ -202,7 +188,13 @@ public class SchemaCleanUpUtils {
             return this.mergeArrays(valuesToMerge);
         case TAG_PROPERTIES:
         case TAG_DEPENDENT_SCHEMAS:
-            return this.mergeObjectProperties(valuesToMerge);
+            if (this.config.getSchemaVersion() == SchemaVersion.DRAFT_6 || this.config.getSchemaVersion() == SchemaVersion.DRAFT_7) {
+                // in Draft 6 and Draft 7, the "dependencies" keyword was covering both "dependentSchemas" and "dependentRequired" scenarios
+                return Optional.ofNullable(this.mergeDependentRequiredNode(valuesToMerge))
+                        .orElseGet(() -> this.mergeObjectProperties(valuesToMerge));
+            } else {
+                return this.mergeObjectProperties(valuesToMerge);
+            }
         case TAG_DEPENDENT_REQUIRED:
             return this.mergeDependentRequiredNode(valuesToMerge);
         case TAG_ITEMS:
@@ -291,10 +283,12 @@ public class SchemaCleanUpUtils {
             }
         }
         // merging is possible, now build corresponding object node
-        ObjectNode mergedDependentRequiredNode = this.config.createObjectNode();
-        mergedDependentRequiredNames.forEach((leadName, dependentNames) -> dependentNames
-                .forEach(mergedDependentRequiredNode.withArray(leadName)::add));
-        return () -> mergedDependentRequiredNode;
+        return () -> {
+            ObjectNode mergedDependentRequiredNode = this.config.createObjectNode();
+            mergedDependentRequiredNames.forEach((leadName, dependentNames) -> dependentNames
+                    .forEach(mergedDependentRequiredNode.withArray(leadName)::add));
+            return mergedDependentRequiredNode;
+        };
     }
 
     /**
@@ -423,14 +417,14 @@ public class SchemaCleanUpUtils {
 
     private Supplier<JsonNode> returnMinimumNumericValue(List<JsonNode> nodes) {
         if (nodes.stream().allMatch(JsonNode::isNumber)) {
-            return () -> nodes.stream().reduce((a, b) -> a.asDouble() < b.asDouble() ? a : b).get();
+            return () -> nodes.stream().reduce((a, b) -> a.asDouble() < b.asDouble() ? a : b).orElse(null);
         }
         return null;
     }
 
     private Supplier<JsonNode> returnMaximumNumericValue(List<JsonNode> nodes) {
         if (nodes.stream().allMatch(JsonNode::isNumber)) {
-            return () -> nodes.stream().reduce((a, b) -> a.asDouble() < b.asDouble() ? b : a).get();
+            return () -> nodes.stream().reduce((a, b) -> a.asDouble() < b.asDouble() ? b : a).orElse(null);
         }
         return null;
     }
@@ -476,6 +470,39 @@ public class SchemaCleanUpUtils {
             for (int nestedEntryIndex = nestedAnyOf.size() - 1; nestedEntryIndex > -1; nestedEntryIndex--) {
                 ((ArrayNode) anyOfTag).insert(index, nestedAnyOf.get(nestedEntryIndex));
             }
+        }
+    }
+
+    /**
+     * Add the {@link SchemaKeyword#TAG_TYPE} where it is missing and it can be implied from other present tags.
+     *
+     * @param schemaNode sub-schema to check and extend, if required and possible
+     * @param typeTagName name of the "type" tag
+     * @param considerNullType whether to always include "null" as possible "type" in addition to the implied values
+     * @param reverseTagMap mapping from tag name in the produced schema to their corresponding {@link SchemaKeyword} value
+     */
+    private void addTypeInfoWhereMissing(ObjectNode schemaNode, String typeTagName, boolean considerNullType,
+            Map<String, SchemaKeyword> reverseTagMap) {
+        if (schemaNode.has(typeTagName)) {
+            // explicit type indication is already present
+            return;
+        }
+        List<String> impliedTypes = reverseTagMap.entrySet().stream()
+                .filter(entry -> schemaNode.has(entry.getKey()))
+                .flatMap(entry -> entry.getValue().getImpliedTypes().stream())
+                .sorted()
+                .map(SchemaKeyword.SchemaType::getSchemaKeywordValue)
+                .collect(Collectors.toList());
+        if (impliedTypes.isEmpty()) {
+            return;
+        }
+        if (considerNullType) {
+            impliedTypes.add(SchemaKeyword.SchemaType.NULL.getSchemaKeywordValue());
+        }
+        if (impliedTypes.size() == 1) {
+            schemaNode.put(typeTagName, impliedTypes.get(0));
+        } else {
+            impliedTypes.forEach(schemaNode.putArray(typeTagName)::add);
         }
     }
 

@@ -306,6 +306,7 @@ configBuilder.without(
       <td>Ensure that the keys for any <code>$defs</code>/<code>definitions</code> match the regular expression <code>^[a-zA-Z0-9\.\-_]+$</code> (as expected by the OpenAPI specification 3.0).</td>
       <td>Ensure that the keys for any <code>$defs</code>/<code>definitions</code> are URI compatible (as expected by the JSON Schema specification).</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">33</td>
       <td colspan="2"><code>Option.ALLOF_CLEANUP_AT_THE_END</code></td>
@@ -313,6 +314,14 @@ configBuilder.without(
     <tr>
       <td>At the very end of the schema generation reduce <code>allOf</code> wrappers where it is possible without overwriting any attributes – this also affects the results from custom definitions.</td>
       <td>Do not attempt to reduce <code>allOf</code> wrappers but preserve them as they were generated regardless of them being necessary or not.</td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="text-align: right">34</td>
+      <td colspan="2"><code>Option.STRICT_TYPE_INFO</code></td>
+    </tr>
+    <tr>
+      <td>As final step in the schema generation process, ensure all sub schemas containing keywords implying a particular "type" (e.g., "properties" implying an "object") have this "type" declared explicitly – this also affects the results from custom definitions.</td>
+      <td>No additional "type" indication will be added for each sub schema, e.g. on the collected attributes where the "allOf" clean-up could not be applied or was disabled.</td>
     </tr>
   </tbody>
 </table>
@@ -323,41 +332,42 @@ Below, you can find the lists of <code>Option</code>s included/excluded in the r
 * "J_O" = <code>JAVA_OBJECT</code>
 * "P_J" = <code>PLAIN_JSON</code>
 
-| # | Standard `Option` | F_D | J_O | P_J |
-| --- | --- | --- | --- | --- |
-|  1 | `SCHEMA_VERSION_INDICATOR` | ⬜️ | ⬜️ | ✅ |
-|  2 | `ADDITIONAL_FIXED_TYPES` | ⬜️ | ⬜️ | ✅ |
-|  3 | `EXTRA_OPEN_API_FORMAT_VALUES` | ⬜️ | ⬜️ | ⬜️ |
-|  4 | `SIMPLIFIED_ENUMS` | ✅ | ✅ | ⬜️ |
-|  5 | `FLATTENED_ENUMS` | ⬜️ | ⬜️ | ✅ |
-|  6 | `FLATTENED_ENUMS_FROM_TOSTRING` | ⬜️ | ⬜️ | ⬜️ |
-|  7 | `SIMPLIFIED_OPTIONALS` | ✅ | ✅ | ⬜️ 
-|  8 | `FLATTENED_OPTIONALS` | ⬜️ | ⬜️ | ✅ |
-|  8 | `FLATTENED_SUPPLIERS` | ⬜️ | ⬜️ | ✅ |
-| 10 | `VALUES_FROM_CONSTANT_FIELDS` | ✅ | ✅ | ✅ |
-| 11 | `PUBLIC_STATIC_FIELDS` | ✅ | ✅ | ⬜️ |
-| 12 | `PUBLIC_NONSTATIC_FIELDS` | ✅ | ✅ | ✅ |
-| 13 | `NONPUBLIC_STATIC_FIELDS` | ✅ | ⬜️ | ⬜️ |
-| 14 | `NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS` | ✅ | ⬜️ | ✅ |
+|  # | Standard `Option`                            | F_D | J_O | P_J |
+| -- | -------------------------------------------- | --- | --- | --- |
+|  1 | `SCHEMA_VERSION_INDICATOR`                   | ⬜️ | ⬜️ | ✅ |
+|  2 | `ADDITIONAL_FIXED_TYPES`                     | ⬜️ | ⬜️ | ✅ |
+|  3 | `EXTRA_OPEN_API_FORMAT_VALUES`               | ⬜️ | ⬜️ | ⬜️ |
+|  4 | `SIMPLIFIED_ENUMS`                           | ✅ | ✅ | ⬜️ |
+|  5 | `FLATTENED_ENUMS`                            | ⬜️ | ⬜️ | ✅ |
+|  6 | `FLATTENED_ENUMS_FROM_TOSTRING`              | ⬜️ | ⬜️ | ⬜️ |
+|  7 | `SIMPLIFIED_OPTIONALS`                       | ✅ | ✅ | ⬜️ |
+|  8 | `FLATTENED_OPTIONALS`                        | ⬜️ | ⬜️ | ✅ |
+|  8 | `FLATTENED_SUPPLIERS`                        | ⬜️ | ⬜️ | ✅ |
+| 10 | `VALUES_FROM_CONSTANT_FIELDS`                | ✅ | ✅ | ✅ |
+| 11 | `PUBLIC_STATIC_FIELDS`                       | ✅ | ✅ | ⬜️ |
+| 12 | `PUBLIC_NONSTATIC_FIELDS`                    | ✅ | ✅ | ✅ |
+| 13 | `NONPUBLIC_STATIC_FIELDS`                    | ✅ | ⬜️ | ⬜️ |
+| 14 | `NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS`    | ✅ | ⬜️ | ✅ |
 | 15 | `NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS` | ✅ | ⬜️ | ✅ |
-| 16 | `TRANSIENT_FIELDS` | ✅ | ⬜️ | ⬜️ |
-| 17 | `STATIC_METHODS` | ✅ | ✅ | ⬜️ |
-| 18 | `VOID_METHODS` | ✅ | ✅ | ⬜️ |
-| 19 | `GETTER_METHODS` | ✅ | ✅ | ⬜️ |
-| 20 | `NONSTATIC_NONVOID_NONGETTER_METHODS` | ✅ | ✅ | ⬜️ |
-| 21 | `NULLABLE_FIELDS_BY_DEFAULT` | ✅ | ⬜️ | ⬜️ |
-| 22 | `NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT` | ✅ | ⬜️ | ⬜️ |
-| 23 | `NULLABLE_ARRAY_ITEMS_ALLOWED` | ⬜️ | ⬜️ | ⬜️ |
-| 24 | `FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS` | ⬜️ | ⬜️ | ⬜️ |
-| 25 | `MAP_VALUES_AS_ADDITIONAL_PROPERTIES` | ⬜️ | ⬜️ | ⬜️ |
-| 26 | `ENUM_KEYWORD_FOR_SINGLE_VALUES` | ⬜️ | ⬜️ | ⬜️ |
+| 16 | `TRANSIENT_FIELDS`                           | ✅ | ⬜️ | ⬜️ |
+| 17 | `STATIC_METHODS`                             | ✅ | ✅ | ⬜️ |
+| 18 | `VOID_METHODS`                               | ✅ | ✅ | ⬜️ |
+| 19 | `GETTER_METHODS`                             | ✅ | ✅ | ⬜️ |
+| 20 | `NONSTATIC_NONVOID_NONGETTER_METHODS`        | ✅ | ✅ | ⬜️ |
+| 21 | `NULLABLE_FIELDS_BY_DEFAULT`                 | ✅ | ⬜️ | ⬜️ |
+| 22 | `NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT`   | ✅ | ⬜️ | ⬜️ |
+| 23 | `NULLABLE_ARRAY_ITEMS_ALLOWED`               | ⬜️ | ⬜️ | ⬜️ |
+| 24 | `FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS`   | ⬜️ | ⬜️ | ⬜️ |
+| 25 | `MAP_VALUES_AS_ADDITIONAL_PROPERTIES`        | ⬜️ | ⬜️ | ⬜️ |
+| 26 | `ENUM_KEYWORD_FOR_SINGLE_VALUES`             | ⬜️ | ⬜️ | ⬜️ |
 | 27 | `FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` | ⬜️ | ⬜️ | ⬜️ |
-| 28 | `DEFINITIONS_FOR_ALL_OBJECTS` | ⬜️ | ⬜️ | ⬜️ |
-| 29 | `DEFINITION_FOR_MAIN_SCHEMA` | ⬜️ | ⬜️ | ⬜️ |
-| 30 | `DEFINITIONS_FOR_MEMBER_SUPERTYPES` | ⬜️ | ⬜️ | ⬜️ |
-| 31 | `INLINE_ALL_SCHEMAS` | ⬜️ | ⬜️ | ⬜️ |
-| 32 | `PLAIN_DEFINITION_KEYS` | ⬜️ | ⬜️ | ⬜️ |
-| 33 | `ALLOF_CLEANUP_AT_THE_END` | ✅ | ✅ | ✅ |
+| 28 | `DEFINITIONS_FOR_ALL_OBJECTS`                | ⬜️ | ⬜️ | ⬜️ |
+| 29 | `DEFINITION_FOR_MAIN_SCHEMA`                 | ⬜️ | ⬜️ | ⬜️ |
+| 30 | `DEFINITIONS_FOR_MEMBER_SUPERTYPES`          | ⬜️ | ⬜️ | ⬜️ |
+| 31 | `INLINE_ALL_SCHEMAS`                         | ⬜️ | ⬜️ | ⬜️ |
+| 32 | `PLAIN_DEFINITION_KEYS`                      | ⬜️ | ⬜️ | ⬜️ |
+| 33 | `ALLOF_CLEANUP_AT_THE_END`                   | ✅ | ✅ | ✅ |
+| 34 | `STRICT_TYPE_INFO`                           | ⬜️ | ⬜️ | ⬜️ |
 
 # Generator – Modules
 Similar to an `OptionPreset` being a short-cut to including various `Option`s, the concept of `Module`s is a convenient way of including multiple [individual configurations](#generator-individual-configurations) or even [advanced configurations](#generator-advanced-configurations) (as per the following sections) at once.

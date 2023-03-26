@@ -33,7 +33,8 @@ public class ExampleTest {
     @ValueSource(classes = {
             ExternalRefAnnotationExample.class,
             ExternalRefPackageExample.class,
-            IfThenElseExample.class
+            IfThenElseExample.class,
+            StrictTypeInfoExample.class
     })
     public void testExample(Class<? extends SchemaGenerationExampleInterface> exampleType) throws Exception {
         SchemaGenerationExampleInterface exampleImplementation = exampleType.getDeclaredConstructor().newInstance();
