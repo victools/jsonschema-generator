@@ -190,8 +190,11 @@ public class SchemaCleanUpUtils {
         case TAG_DEPENDENT_SCHEMAS:
             if (this.config.getSchemaVersion() == SchemaVersion.DRAFT_6 || this.config.getSchemaVersion() == SchemaVersion.DRAFT_7) {
                 // in Draft 6 and Draft 7, the "dependencies" keyword was covering both "dependentSchemas" and "dependentRequired" scenarios
-                return () -> Optional.ofNullable(this.mergeDependentRequiredNode(valuesToMerge).get())
-                        .orElseGet(() -> this.mergeObjectProperties(valuesToMerge).get());
+                return () -> Optional.ofNullable(this.mergeDependentRequiredNode(valuesToMerge))
+                        .map(Supplier::get)
+                        .orElseGet(() -> Optional.ofNullable(this.mergeObjectProperties(valuesToMerge))
+                                .map(Supplier::get)
+                                .orElse(null));
             } else {
                 return this.mergeObjectProperties(valuesToMerge);
             }

@@ -165,7 +165,7 @@ public enum SchemaKeyword {
     SchemaKeyword(Function<SchemaVersion, String> valueProvider, List<SchemaType> impliedTypes, TagContent... contentTypes) {
         this.valueProvider = valueProvider;
         this.impliedTypes = Collections.unmodifiableList(impliedTypes);
-        this.contentTypes = Arrays.asList(contentTypes);
+        this.contentTypes = Collections.unmodifiableList(Arrays.asList(contentTypes));
     }
 
     /**
