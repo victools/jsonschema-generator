@@ -490,6 +490,7 @@ public class SchemaCleanUpUtils {
         List<String> impliedTypes = reverseTagMap.entrySet().stream()
                 .filter(entry -> schemaNode.has(entry.getKey()))
                 .flatMap(entry -> entry.getValue().getImpliedTypes().stream())
+                .distinct()
                 .sorted()
                 .map(SchemaKeyword.SchemaType::getSchemaKeywordValue)
                 .collect(Collectors.toList());

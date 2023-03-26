@@ -201,6 +201,9 @@
                     "multipleOf": 1
                 }
             },
+            "dependencies": {
+                "optionalS": ["listOfOptionalS"]
+            },
             "title": "TestClass4<Integer, String>",
             "description": "looked-up from field: TestClass4<Integer, String>",
             "writeOnly": true,
