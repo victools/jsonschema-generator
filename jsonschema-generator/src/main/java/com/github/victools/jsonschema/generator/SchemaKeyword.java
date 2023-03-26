@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -139,9 +140,12 @@ public enum SchemaKeyword {
      */
     TAG_ELSE("else", Collections.singletonList(TagContent.SCHEMA));
 
+    /*
+     * Store enum members as suppliers, in order to ensure immutability.
+     */
     private final Function<SchemaVersion, String> valueProvider;
-    private final List<TagContent> contentTypes;
-    private final List<SchemaType> impliedTypes;
+    private final Supplier<List<TagContent>> contentTypesProvider;
+    private final Supplier<List<SchemaType>> impliedTypesProvider;
 
     /**
      * Constructor.
@@ -182,27 +186,10 @@ public enum SchemaKeyword {
      */
     SchemaKeyword(Function<SchemaVersion, String> valueProvider, List<TagContent> contentTypes, List<SchemaType> impliedTypes) {
         this.valueProvider = valueProvider;
-        this.contentTypes = Collections.unmodifiableList(contentTypes);
-        this.impliedTypes = Collections.unmodifiableList(impliedTypes);
-    }
-
-    /**
-     * Determine which (if any) specific {@link #TAG_TYPE} values this keyword implies.
-     *
-     * @return implied type values or an empty list if this keyword is not type specific
-     */
-    public List<SchemaType> getImpliedTypes() {
-        return this.impliedTypes;
-    }
-
-    /**
-     * Indicate what the given kind of values can be expected under this keyword (if it represents a tag). Returns always false for values.
-     *
-     * @param contentType type of content/values to be expected under a schema tag
-     * @return whether the given tag content type is supported by this keyword
-     */
-    public boolean supportsContentType(TagContent contentType) {
-        return this.contentTypes.contains(contentType);
+        List<TagContent> unmodifiableTagContents = Collections.unmodifiableList(contentTypes);
+        this.contentTypesProvider = () -> unmodifiableTagContents;
+        List<SchemaType> unmodifiableImpliedTypes = Collections.unmodifiableList(impliedTypes);
+        this.impliedTypesProvider = () -> unmodifiableImpliedTypes;
     }
 
     /**
@@ -216,6 +203,25 @@ public enum SchemaKeyword {
     }
 
     /**
+     * Determine which (if any) specific {@link #TAG_TYPE} values this keyword implies.
+     *
+     * @return implied type values or an empty list if this keyword is not type specific
+     */
+    public List<SchemaType> getImpliedTypes() {
+        return this.impliedTypesProvider.get();
+    }
+
+    /**
+     * Indicate whether the given kind of values can be expected under this keyword (if it represents a tag). Returns always false for values.
+     *
+     * @param contentType type of content/values to be expected under a schema tag
+     * @return whether the given tag content type is supported by this keyword
+     */
+    public boolean supportsContentType(TagContent contentType) {
+        return this.contentTypesProvider.get().contains(contentType);
+    }
+
+    /**
      * Provide a map over all keywords, that represent a schema tag/property, i.e., not a value.
      *
      * @param version schema draft version to look-up keyword for
@@ -224,7 +230,7 @@ public enum SchemaKeyword {
      */
     public static Map<String, SchemaKeyword> getReverseTagMap(SchemaVersion version, Predicate<SchemaKeyword> filter) {
         return Stream.of(SchemaKeyword.values())
-                .filter(keyword -> !keyword.contentTypes.isEmpty() && filter.test(keyword))
+                .filter(keyword -> !keyword.contentTypesProvider.get().isEmpty() && filter.test(keyword))
                 .collect(Collectors.toMap(keyword -> keyword.forVersion(version), keyword -> keyword,
                         // when two keywords are mapped to the same tag name, stick to the first (as per declaration order in this enum)
                         (k1, k2) -> k1));
@@ -257,6 +263,9 @@ public enum SchemaKeyword {
      * Type of content/values to be expected under a schema tag.
      */
     public enum TagContent {
-        SCHEMA, ARRAY_OF_SCHEMAS, NAMED_SCHEMAS, NON_SCHEMA;
+        SCHEMA,
+        ARRAY_OF_SCHEMAS,
+        NAMED_SCHEMAS,
+        NON_SCHEMA
     }
 }
