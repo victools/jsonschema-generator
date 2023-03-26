@@ -30,11 +30,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -62,9 +62,8 @@ public class SchemaCleanUpUtils {
      */
     public void reduceAllOfNodes(List<ObjectNode> jsonSchemas) {
         String allOfTagName = this.config.getKeyword(SchemaKeyword.TAG_ALLOF);
-        Map<String, SchemaKeyword> reverseKeywordMap = SchemaKeyword.getTagStream()
-                .collect(Collectors.toMap(this.config::getKeyword, keyword -> keyword, (k1, k2) -> k1));
-        this.finaliseSchemaParts(jsonSchemas, nodeToCheck -> this.mergeAllOfPartsIfPossible(nodeToCheck, allOfTagName, reverseKeywordMap));
+        Map<String, SchemaKeyword> reverseTagMap = SchemaKeyword.getReverseTagMap(this.config.getSchemaVersion(), _tag -> true);
+        this.finaliseSchemaParts(jsonSchemas, nodeToCheck -> this.mergeAllOfPartsIfPossible(nodeToCheck, allOfTagName, reverseTagMap));
     }
 
     /**
@@ -93,29 +92,13 @@ public class SchemaCleanUpUtils {
     }
 
     /**
-     * Collect names of schema tags that may contain arrays of sub-schemas, i.e. {@link SchemaKeyword#TAG_ALLOF}, {@link SchemaKeyword#TAG_ANYOF} and
-     * {@link SchemaKeyword#TAG_ONEOF}.
+     * Collect names of schema tags that may contain the given type of content.
      *
+     * @param contentType targeted type of content that can be expected under a returned tag
      * @return names of eligible tags as per the designated JSON Schema version
      */
-    private Set<String> getTagNamesContainingSchemaArray() {
-        SchemaVersion schemaVersion = this.config.getSchemaVersion();
-        return Stream.of(SchemaKeyword.TAG_ALLOF, SchemaKeyword.TAG_ANYOF, SchemaKeyword.TAG_ONEOF)
-                .map(keyword -> keyword.forVersion(schemaVersion))
-                .collect(Collectors.toSet());
-    }
-
-    /**
-     * Collect names of schema tags that may contain objects with sub-schemas as values, i.e. {@link SchemaKeyword#TAG_PATTERN_PROPERTIES} and
-     * {@link SchemaKeyword#TAG_PROPERTIES}.
-     *
-     * @return names of eligible tags as per the designated JSON Schema version
-     */
-    private Set<String> getTagNamesContainingSchemaObject() {
-        SchemaVersion schemaVersion = this.config.getSchemaVersion();
-        return Stream.of(SchemaKeyword.TAG_PATTERN_PROPERTIES, SchemaKeyword.TAG_PROPERTIES)
-                .map(keyword -> keyword.forVersion(schemaVersion))
-                .collect(Collectors.toSet());
+    private Set<String> getTagNamesSupporting(SchemaKeyword.TagContent contentType) {
+        return SchemaKeyword.getReverseTagMap(this.config.getSchemaVersion(), tag -> tag.supportsContentType(contentType)).keySet();
     }
 
     /**
@@ -135,9 +118,9 @@ public class SchemaCleanUpUtils {
             }
         };
 
-        Set<String> tagsWithSchemas = this.getTagNamesContainingSchema();
-        Set<String> tagsWithSchemaArrays = this.getTagNamesContainingSchemaArray();
-        Set<String> tagsWithSchemaObjects = this.getTagNamesContainingSchemaObject();
+        Set<String> tagsWithSchemas = this.getTagNamesSupporting(SchemaKeyword.TagContent.SCHEMA);
+        Set<String> tagsWithSchemaArrays = this.getTagNamesSupporting(SchemaKeyword.TagContent.ARRAY_OF_SCHEMAS);
+        Set<String> tagsWithSchemaObjects = this.getTagNamesSupporting(SchemaKeyword.TagContent.NAMED_SCHEMAS);
         do {
             List<ObjectNode> currentNodesToCheck = new ArrayList<>(nextNodesToCheck);
             nextNodesToCheck.clear();
@@ -202,7 +185,13 @@ public class SchemaCleanUpUtils {
             return this.mergeArrays(valuesToMerge);
         case TAG_PROPERTIES:
         case TAG_DEPENDENT_SCHEMAS:
-            return this.mergeObjectProperties(valuesToMerge);
+            if (this.config.getSchemaVersion() == SchemaVersion.DRAFT_6 || this.config.getSchemaVersion() == SchemaVersion.DRAFT_7) {
+                // in Draft 6 and Draft 7, the "dependencies" keyword was covering both "dependentSchemas" and "dependentRequired" scenarios
+                return () -> Optional.ofNullable(this.mergeDependentRequiredNode(valuesToMerge).get())
+                        .orElseGet(() -> this.mergeObjectProperties(valuesToMerge).get());
+            } else {
+                return this.mergeObjectProperties(valuesToMerge);
+            }
         case TAG_DEPENDENT_REQUIRED:
             return this.mergeDependentRequiredNode(valuesToMerge);
         case TAG_ITEMS:
