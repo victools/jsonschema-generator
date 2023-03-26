@@ -1,0 +1,12 @@
+{
+  "$schema" : "https://json-schema.org/draft/2019-09/schema",
+  "type" : "object",
+  "properties" : {
+    "identifier" : {
+      "type" : "string",
+      "minLength" : 1,
+      "maxLength" : 8,
+      "pattern" : "^[a-zA-Z#@$][a-zA-Z#@$0-9]*$"
+    }
+  }
+}

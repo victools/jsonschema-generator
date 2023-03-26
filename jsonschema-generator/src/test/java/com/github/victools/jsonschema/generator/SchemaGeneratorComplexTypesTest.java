@@ -93,6 +93,7 @@ public class SchemaGeneratorComplexTypesTest {
         configPart
                 .withNullableCheck(member -> !member.getName().startsWith("nested"))
                 .withRequiredCheck(member -> member.getName().startsWith("nested"))
+                .withDependentRequiresResolver(member -> "optionalS".equals(member.getName()) ? Collections.singletonList("listOfOptionalS") : null)
                 .withReadOnlyCheck(MemberScope::isFinal)
                 .withWriteOnlyCheck(member -> member.getType() != null && TestClass4.class.isAssignableFrom(member.getType().getErasedType()));
     }
@@ -142,7 +143,7 @@ public class SchemaGeneratorComplexTypesTest {
         final SchemaVersion schemaVersion = SchemaVersion.DRAFT_7;
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, preset);
         configBuilder.with(testModule);
-        configBuilder.with(Option.NULLABLE_ARRAY_ITEMS_ALLOWED);
+        configBuilder.with(Option.NULLABLE_ARRAY_ITEMS_ALLOWED, Option.STRICT_TYPE_INFO);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(targetType);

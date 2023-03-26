@@ -33,6 +33,7 @@ public class ExampleTest {
     @ValueSource(classes = {
             ExternalRefAnnotationExample.class,
             ExternalRefPackageExample.class,
+            GroupedAnnotationExample.class,
             IfThenElseExample.class,
             StrictTypeInfoExample.class
     })
