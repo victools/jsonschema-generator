@@ -79,16 +79,19 @@ public class SchemaCleanUpUtils {
     }
 
     /**
-     * Collect names of schema tags that may contain sub-schemas, i.e. {@link SchemaKeyword#TAG_ADDITIONAL_PROPERTIES} and
-     * {@link SchemaKeyword#TAG_ITEMS}.
+     * Go through all sub-schemas and look for those without a {@link SchemaKeyword#TAG_TYPE} indication. Then try to derive the appropriate type
+     * indication from the other present tags (e.g., "properties" implies it is an "object").
      *
-     * @return names of eligible tags as per the designated JSON Schema version
+     * @param jsonSchemas sub-schemas to check and extend where required and possible
+     * @param considerNullType whether to always include "null" as possible "type" in addition to the implied values
+     *
+     * @since 4.30.0
      */
-    private Set<String> getTagNamesContainingSchema() {
-        SchemaVersion schemaVersion = this.config.getSchemaVersion();
-        return Stream.of(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES, SchemaKeyword.TAG_ITEMS)
-                .map(keyword -> keyword.forVersion(schemaVersion))
-                .collect(Collectors.toSet());
+    public void setStrictTypeInfo(List<ObjectNode> jsonSchemas, boolean considerNullType) {
+        String typeTagName = this.config.getKeyword(SchemaKeyword.TAG_TYPE);
+        Map<String, SchemaKeyword> reverseTagMap = SchemaKeyword.getReverseTagMap(this.config.getSchemaVersion(),
+                tag -> !tag.getImpliedTypes().isEmpty());
+        this.finaliseSchemaParts(jsonSchemas, nodeToCheck -> this.addTypeInfoWhereMissing(nodeToCheck, typeTagName, considerNullType, reverseTagMap));
     }
 
     /**
@@ -465,6 +468,39 @@ public class SchemaCleanUpUtils {
             for (int nestedEntryIndex = nestedAnyOf.size() - 1; nestedEntryIndex > -1; nestedEntryIndex--) {
                 ((ArrayNode) anyOfTag).insert(index, nestedAnyOf.get(nestedEntryIndex));
             }
+        }
+    }
+
+    /**
+     * Add the {@link SchemaKeyword#TAG_TYPE} where it is missing and it can be implied from other present tags.
+     *
+     * @param schemaNode sub-schema to check and extend, if required and possible
+     * @param typeTagName name of the "type" tag
+     * @param considerNullType whether to always include "null" as possible "type" in addition to the implied values
+     * @param reverseTagMap mapping from tag name in the produced schema to their corresponding {@link SchemaKeyword} value
+     */
+    private void addTypeInfoWhereMissing(ObjectNode schemaNode, String typeTagName, boolean considerNullType,
+            Map<String, SchemaKeyword> reverseTagMap) {
+        if (schemaNode.has(typeTagName)) {
+            // explicit type indication is already present
+            return;
+        }
+        List<String> impliedTypes = reverseTagMap.entrySet().stream()
+                .filter(entry -> schemaNode.has(entry.getKey()))
+                .flatMap(entry -> entry.getValue().getImpliedTypes().stream())
+                .sorted()
+                .map(SchemaKeyword.SchemaType::getSchemaKeywordValue)
+                .collect(Collectors.toList());
+        if (impliedTypes.isEmpty()) {
+            return;
+        }
+        if (considerNullType) {
+            impliedTypes.add(SchemaKeyword.SchemaType.NULL.getSchemaKeywordValue());
+        }
+        if (impliedTypes.size() == 1) {
+            schemaNode.put(typeTagName, impliedTypes.get(0));
+        } else {
+            impliedTypes.forEach(schemaNode.putArray(typeTagName)::add);
         }
     }
 

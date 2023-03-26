@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `jsonschema-generator`
 #### Added
 - introduce configuration option for `dependentRequired` keyword
+- introduce new `Option.STRICT_TYPE_INFO` for implying the `type` of sub-schemas based on their contained attributes (note: implied "type" array always contains "null")
 
 #### Changed
 - enable `allOf` clean-up when any of the following keywords are contained: `dependentRequired`/`dependentSchemas`/`prefixItems`/`unevaluatedItems`/`unevaluatedProperties`
+- extend consideration of sub-schemas for `allOf` clean-up to more recognized keywords
 
 ### `jsonschema-examples`
 #### Added

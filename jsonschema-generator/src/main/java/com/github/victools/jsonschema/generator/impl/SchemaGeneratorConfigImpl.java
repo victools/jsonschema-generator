@@ -147,6 +147,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldIncludeStrictTypeInfo() {
+        return this.isOptionEnabled(Option.STRICT_TYPE_INFO);
+    }
+
+    @Override
     public boolean shouldIncludeStaticFields() {
         return this.isOptionEnabled(Option.PUBLIC_STATIC_FIELDS) || this.isOptionEnabled(Option.NONPUBLIC_STATIC_FIELDS);
     }
