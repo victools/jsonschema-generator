@@ -190,11 +190,8 @@ public class SchemaCleanUpUtils {
         case TAG_DEPENDENT_SCHEMAS:
             if (this.config.getSchemaVersion() == SchemaVersion.DRAFT_6 || this.config.getSchemaVersion() == SchemaVersion.DRAFT_7) {
                 // in Draft 6 and Draft 7, the "dependencies" keyword was covering both "dependentSchemas" and "dependentRequired" scenarios
-                return () -> Optional.ofNullable(this.mergeDependentRequiredNode(valuesToMerge))
-                        .map(Supplier::get)
-                        .orElseGet(() -> Optional.ofNullable(this.mergeObjectProperties(valuesToMerge))
-                                .map(Supplier::get)
-                                .orElse(null));
+                return Optional.ofNullable(this.mergeDependentRequiredNode(valuesToMerge))
+                        .orElseGet(() -> this.mergeObjectProperties(valuesToMerge));
             } else {
                 return this.mergeObjectProperties(valuesToMerge);
             }
@@ -286,10 +283,12 @@ public class SchemaCleanUpUtils {
             }
         }
         // merging is possible, now build corresponding object node
-        ObjectNode mergedDependentRequiredNode = this.config.createObjectNode();
-        mergedDependentRequiredNames.forEach((leadName, dependentNames) -> dependentNames
-                .forEach(mergedDependentRequiredNode.withArray(leadName)::add));
-        return () -> mergedDependentRequiredNode;
+        return () -> {
+            ObjectNode mergedDependentRequiredNode = this.config.createObjectNode();
+            mergedDependentRequiredNames.forEach((leadName, dependentNames) -> dependentNames
+                    .forEach(mergedDependentRequiredNode.withArray(leadName)::add));
+            return mergedDependentRequiredNode;
+        };
     }
 
     /**
@@ -418,14 +417,14 @@ public class SchemaCleanUpUtils {
 
     private Supplier<JsonNode> returnMinimumNumericValue(List<JsonNode> nodes) {
         if (nodes.stream().allMatch(JsonNode::isNumber)) {
-            return () -> nodes.stream().reduce((a, b) -> a.asDouble() < b.asDouble() ? a : b).get();
+            return () -> nodes.stream().reduce((a, b) -> a.asDouble() < b.asDouble() ? a : b).orElse(null);
         }
         return null;
     }
 
     private Supplier<JsonNode> returnMaximumNumericValue(List<JsonNode> nodes) {
         if (nodes.stream().allMatch(JsonNode::isNumber)) {
-            return () -> nodes.stream().reduce((a, b) -> a.asDouble() < b.asDouble() ? b : a).get();
+            return () -> nodes.stream().reduce((a, b) -> a.asDouble() < b.asDouble() ? b : a).orElse(null);
         }
         return null;
     }
