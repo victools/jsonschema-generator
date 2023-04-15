@@ -9,7 +9,6 @@
         <relativePath>../jsonschema-generator-parent/pom.xml</relativePath>
     </parent>
     <artifactId>jsonschema-examples</artifactId>
-    <packaging>pom</packaging>
 
     <name>Java JSON Schema Generator - Examples</name>
     <description>Examples show-casing some of the Java JSON Schema Generator's capabilities</description>
@@ -79,9 +78,28 @@
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>default-install</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>

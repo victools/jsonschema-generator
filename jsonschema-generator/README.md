@@ -54,6 +54,8 @@ JsonNode jsonSchema = generator.generateSchema(YourClass.class);
 System.out.println(jsonSchema.toString());
 ```
 
+Additional examples can be found in the [jsonschema-examples](../jsonschema-examples) folder or throughout the various tests classes.
+
 #### Toggling Standard Options (via OptionPresets)
 There are three predefined `OptionPreset` alternatives:
 - `OptionPreset.FULL_DOCUMENTATION` – show-casing the inclusion of all fields (`private`/`package`/`protected`/`public` and `static`/non-`static`) and all `public` methods (`static`/non-`static`)
