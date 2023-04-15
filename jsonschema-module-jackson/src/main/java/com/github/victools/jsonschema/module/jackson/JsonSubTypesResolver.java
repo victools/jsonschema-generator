@@ -45,7 +45,7 @@ import java.util.stream.Stream;
  */
 public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionProviderV2 {
 
-    private final CustomDefinition.DefinitionType subtypeDefinitionType;
+    private final CustomDefinition.DefinitionType wrappingSubtypeDefinitionType;
     private final Optional<JsonIdentityReferenceDefinitionProvider> identityReferenceProvider;
 
     /**
@@ -64,7 +64,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      * @param options module options to derive differing behavior from
      */
     public JsonSubTypesResolver(Collection<JacksonOption> options) {
-        this.subtypeDefinitionType = options.contains(JacksonOption.ALWAYS_REF_SUBTYPES)
+        this.wrappingSubtypeDefinitionType = options.contains(JacksonOption.ALWAYS_REF_SUBTYPES)
                 ? CustomDefinition.DefinitionType.ALWAYS_REF
                 : CustomDefinition.DefinitionType.STANDARD;
         if (options.contains(JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID)) {
@@ -176,7 +176,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         if (definition == null) {
             return null;
         }
-        return new CustomDefinition(definition, this.subtypeDefinitionType, CustomDefinition.AttributeInclusion.NO);
+        return new CustomDefinition(definition, this.wrappingSubtypeDefinitionType, CustomDefinition.AttributeInclusion.NO);
     }
 
     /**
@@ -308,7 +308,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         switch (typeInfoAnnotation.include()) {
         case WRAPPER_ARRAY:
             definition.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY));
-            ArrayNode itemsArray = definition.withArray(context.getKeyword(SchemaKeyword.TAG_ITEMS));
+            ArrayNode itemsArray = definition.withArray(context.getKeyword(SchemaKeyword.TAG_PREFIX_ITEMS));
             itemsArray.addObject()
                     .put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_STRING))
                     .put(context.getKeyword(SchemaKeyword.TAG_CONST), typeIdentifier);

@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - enable `allOf` clean-up when any of the following keywords are contained: `dependentRequired`/`dependentSchemas`/`prefixItems`/`unevaluatedItems`/`unevaluatedProperties`
 - extend consideration of sub-schemas for `allOf` clean-up to more recognized keywords
 
+### `jsonschema-module-jackson`
+#### Fixed
+- use `prefixItems` instead of `items` keyword (from Draft 2019-09 onward) for tuples in `WRAPPING_ARRAY` subtype definitions 
+
 ### `jsonschema-examples`
 #### Added
 - new collection of examples (and implicit integration test) holding various examples (e.g., ones created in response to issues/discussions on Github)

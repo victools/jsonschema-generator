@@ -94,7 +94,7 @@
                     "type": "null"
                 }, {
                     "type": "array",
-                    "items": [{
+                    "prefixItems": [{
                             "type": "string",
                             "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionFromInterfaceIntegrationTest$TestSubClassWithTypeNameAnnotation"
                         }, {
@@ -102,7 +102,7 @@
                         }]
                 }, {
                     "type": "array",
-                    "items": [{
+                    "prefixItems": [{
                             "type": "string",
                             "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionFromInterfaceIntegrationTest$TestSubClass2"
                         }, {
@@ -110,7 +110,7 @@
                         }]
                 }, {
                     "type": "array",
-                    "items": [{
+                    "prefixItems": [{
                             "type": "string",
                             "const": "com.github.victools.jsonschema.module.jackson.SubtypeResolutionFromInterfaceIntegrationTest$TestSubClass3"
                         }, {
