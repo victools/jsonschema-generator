@@ -35,6 +35,7 @@ public class ExampleTest {
             ExternalRefPackageExample.class,
             GroupedAnnotationExample.class,
             IfThenElseExample.class,
+            JacksonSubtypeDefinitionExample.class,
             StrictTypeInfoExample.class
     })
     public void testExample(Class<? extends SchemaGenerationExampleInterface> exampleType) throws Exception {

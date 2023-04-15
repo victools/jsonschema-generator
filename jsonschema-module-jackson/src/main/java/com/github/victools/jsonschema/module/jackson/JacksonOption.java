@@ -73,6 +73,16 @@ public enum JacksonOption {
      */
     ALWAYS_REF_SUBTYPES,
     /**
+     * Use this option to ensure all looked-up subtypes according to {@code @JsonSubTypes} annotations are referenced via the central "$defs". This
+     * applies to the nested schema inside the wrapping object/array or "allOf" based on {@code @JsonTypeInfo} annotations. This can be used to
+     * counter-act the {@link com.github.victools.jsonschema.generator.Option#DEFINITIONS_FOR_ALL_OBJECTS Option.DEFINITIONS_FOR_ALL_OBJECTS}.
+     * Beware: as with every explicit inlining, recursive non-transformed references can result in a stack overflow during schema generation when this
+     * option is enabled (similar to {@link com.github.victools.jsonschema.generator.Option#INLINE_ALL_SCHEMAS Option.INLINE_ALL_SCHEMAS})!
+     *
+     * @since 4.30.0
+     */
+    INLINE_TRANSFORMED_SUBTYPES,
+    /**
      * Use this option to skip the automatic look-up of subtypes according to {@code @JsonSubTypes} annotations.
      */
     SKIP_SUBTYPE_LOOKUP,

@@ -1,5 +1,40 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "BaseType": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/SubType1"
+                }, {
+                    "$ref": "#/definitions/SubType2"
+                }
+            ]
+        },
+        "SubType1": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string"
+                },
+                "@type": {
+                    "const": "subtype1"
+                }
+            },
+            "required": ["@type"]
+        },
+        "SubType2": {
+            "type": "object",
+            "properties": {
+                "recursiveBaseReference": {
+                    "$ref": "#/definitions/BaseType"
+                },
+                "@type": {
+                    "const": "subtype2"
+                }
+            },
+            "required": ["@type"]
+        }
+    },
     "type": "object",
     "properties": {
         "calculated": {
@@ -26,6 +61,9 @@
         "fieldWithOverriddenName": {
             "type": "boolean",
             "writeOnly": true
+        },
+        "interfaceWithDeclaredSubtypes": {
+            "$ref": "#/definitions/BaseType"
         },
         "referenceByObjectId": {
             "type": "object",

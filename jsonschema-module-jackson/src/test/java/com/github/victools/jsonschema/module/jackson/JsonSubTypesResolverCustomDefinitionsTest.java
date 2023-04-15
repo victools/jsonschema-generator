@@ -109,11 +109,11 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
                 "{\"allOf\":[{},{\"type\":\"object\",\"properties\":{\"@type\":{\"const\":\"SUB_CLASS_2\"}},\"required\":[\"@type\"]}]}"),
             Arguments.of("superTypeWithAnnotationOnFieldAndGetter", null, null),
             Arguments.of("superTypeWithAnnotationOnFieldAndGetter", TestSubClass1.class,
-                "{\"type\":\"array\",\"items\":[{\"type\":\"string\",\"const\":"
+                "{\"type\":\"array\",\"prefixItems\":[{\"type\":\"string\",\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass1\"},"
                 + "{\"allOf\":[{},{\"title\":\"property attribute\"}]}]}"),
             Arguments.of("superTypeWithAnnotationOnFieldAndGetter", TestSubClass2.class,
-                "{\"type\":\"array\",\"items\":[{\"type\":\"string\",\"const\":"
+                "{\"type\":\"array\",\"prefixItems\":[{\"type\":\"string\",\"const\":"
                 + "\"com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass2\"},{}]}"),
             Arguments.of("superInterfaceWithAnnotationOnField", null, null),
             Arguments.of("superInterfaceWithAnnotationOnField", TestSubClass3.class,

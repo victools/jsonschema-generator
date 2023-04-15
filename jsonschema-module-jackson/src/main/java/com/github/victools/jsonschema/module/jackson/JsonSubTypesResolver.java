@@ -45,7 +45,8 @@ import java.util.stream.Stream;
  */
 public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionProviderV2 {
 
-    private final CustomDefinition.DefinitionType subtypeDefinitionType;
+    private final CustomDefinition.DefinitionType wrappingSubtypeDefinitionType;
+    private final boolean shouldInlineNestedSubtypes;
     private final Optional<JsonIdentityReferenceDefinitionProvider> identityReferenceProvider;
 
     /**
@@ -64,9 +65,10 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      * @param options module options to derive differing behavior from
      */
     public JsonSubTypesResolver(Collection<JacksonOption> options) {
-        this.subtypeDefinitionType = options.contains(JacksonOption.ALWAYS_REF_SUBTYPES)
+        this.wrappingSubtypeDefinitionType = options.contains(JacksonOption.ALWAYS_REF_SUBTYPES)
                 ? CustomDefinition.DefinitionType.ALWAYS_REF
                 : CustomDefinition.DefinitionType.STANDARD;
+        this.shouldInlineNestedSubtypes = options.contains(JacksonOption.INLINE_TRANSFORMED_SUBTYPES);
         if (options.contains(JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID)) {
             this.identityReferenceProvider = Optional.of(new JsonIdentityReferenceDefinitionProvider());
         } else {
@@ -176,7 +178,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         if (definition == null) {
             return null;
         }
-        return new CustomDefinition(definition, this.subtypeDefinitionType, CustomDefinition.AttributeInclusion.NO);
+        return new CustomDefinition(definition, this.wrappingSubtypeDefinitionType, CustomDefinition.AttributeInclusion.NO);
     }
 
     /**
@@ -308,16 +310,16 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         switch (typeInfoAnnotation.include()) {
         case WRAPPER_ARRAY:
             definition.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY));
-            ArrayNode itemsArray = definition.withArray(context.getKeyword(SchemaKeyword.TAG_ITEMS));
+            ArrayNode itemsArray = definition.withArray(context.getKeyword(SchemaKeyword.TAG_PREFIX_ITEMS));
             itemsArray.addObject()
                     .put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_STRING))
                     .put(context.getKeyword(SchemaKeyword.TAG_CONST), typeIdentifier);
             if (attributesToInclude == null || attributesToInclude.isEmpty()) {
-                itemsArray.add(context.createStandardDefinitionReference(javaType, this));
+                itemsArray.add(this.createNestedSubtypeSchema(javaType, context));
             } else {
                 itemsArray.addObject()
                         .withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))
-                        .add(context.createStandardDefinitionReference(javaType, this))
+                        .add(this.createNestedSubtypeSchema(javaType, context))
                         .add(attributesToInclude);
             }
             break;
@@ -325,11 +327,11 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
             definition.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT));
             ObjectNode propertiesNode = definition.putObject(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));
             if (attributesToInclude == null || attributesToInclude.isEmpty()) {
-                propertiesNode.set(typeIdentifier, context.createStandardDefinitionReference(javaType, this));
+                propertiesNode.set(typeIdentifier, this.createNestedSubtypeSchema(javaType, context));
             } else {
                 propertiesNode.putObject(typeIdentifier)
                         .withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))
-                        .add(context.createStandardDefinitionReference(javaType, this))
+                        .add(this.createNestedSubtypeSchema(javaType, context))
                         .add(attributesToInclude);
             }
             definition.withArray(context.getKeyword(SchemaKeyword.TAG_REQUIRED)).add(typeIdentifier);
@@ -340,7 +342,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
                     .filter(name -> !name.isEmpty())
                     .orElseGet(() -> typeInfoAnnotation.use().getDefaultPropertyName());
             ObjectNode additionalPart = definition.withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))
-                    .add(context.createStandardDefinitionReference(javaType, this))
+                    .add(this.createNestedSubtypeSchema(javaType, context))
                     .addObject();
             if (attributesToInclude != null && !attributesToInclude.isEmpty()) {
                 additionalPart.setAll(attributesToInclude);
@@ -358,5 +360,12 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
             return null;
         }
         return definition;
+    }
+
+    private ObjectNode createNestedSubtypeSchema(ResolvedType javaType, SchemaGenerationContext context) {
+        if (this.shouldInlineNestedSubtypes) {
+            return context.createStandardDefinition(javaType, this);
+        }
+        return context.createStandardDefinitionReference(javaType, this);
     }
 }

@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,6 +35,7 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Scanner;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -46,9 +49,10 @@ public class IntegrationTest {
     @Test
     public void testIntegration() throws Exception {
         JacksonModule module = new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE, JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY,
-                JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS, JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID);
+                JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS, JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID,
+                JacksonOption.ALWAYS_REF_SUBTYPES, JacksonOption.INLINE_TRANSFORMED_SUBTYPES);
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_7, OptionPreset.PLAIN_JSON)
-                .with(Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
+                .with(Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES, Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
                 .with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
                 .with(module)
                 .build();
@@ -91,6 +95,8 @@ public class IntegrationTest {
 
         public TestEnumWithJsonPropertyAnnotations enumValueWithJsonPropertyAnnotations;
 
+        public BaseType interfaceWithDeclaredSubtypes;
+
         public String ignoredUnannotatedMethod() {
             return "nothing";
         }
@@ -128,5 +134,21 @@ public class IntegrationTest {
             public String version;
             public long value;
         }
+    }
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+    @JsonSubTypes({
+            @JsonSubTypes.Type(value = SubType1.class, name = "subtype1"),
+            @JsonSubTypes.Type(value = SubType2.class, name = "subtype2"),
+    })
+    interface BaseType {
+    }
+
+    static class SubType1 implements BaseType {
+        public String text;
+    }
+
+    static class SubType2 implements BaseType {
+        public BaseType recursiveBaseReference;
     }
 }
