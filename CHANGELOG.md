@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - extend consideration of sub-schemas for `allOf` clean-up to more recognized keywords
 
 ### `jsonschema-module-jackson`
+#### Added
+- introduce new `JacksonOption.INLINE_TRANSFORMED_SUBTYPES` in order to avoid definitions with `-1`/`-2` suffixes being generated in case of subtypes involving transformation (e.g., additional property, wrapping array, wrapping object)  
+  To be used with care, as a recursive reference can cause a `StackOverflowError`. In some scenarios, such an error can be avoided by also enabling the `Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES`.
+
 #### Fixed
 - use `prefixItems` instead of `items` keyword (from Draft 2019-09 onward) for tuples in `WRAPPING_ARRAY` subtype definitions 
 

@@ -1,0 +1,46 @@
+{
+    "$schema" : "https://json-schema.org/draft/2020-12/schema",
+    "$ref" : "#/$defs/BaseType",
+    "$defs" : {
+        "BaseType" : {
+            "anyOf" : [ {
+                "$ref" : "#/$defs/SubType1"
+            }, {
+                "$ref" : "#/$defs/SubType2"
+            } ]
+        },
+        "NestedObject" : {
+            "type" : "object",
+            "properties" : {
+                "field" : { }
+            }
+        },
+        "SubType1" : {
+            "type" : "object",
+            "properties" : {
+                "nestedObject" : {
+                    "$ref" : "#/$defs/NestedObject"
+                },
+                "@type" : {
+                    "const" : "subtype1"
+                }
+            },
+            "required" : [ "@type" ]
+        },
+        "SubType2" : {
+            "type" : "object",
+            "properties" : {
+                "conditions" : {
+                    "type" : "array",
+                    "items" : {
+                        "$ref" : "#/$defs/BaseType"
+                    }
+                },
+                "@type" : {
+                    "const" : "subtype2"
+                }
+            },
+            "required" : [ "@type" ]
+        }
+    }
+}
