@@ -62,3 +62,5 @@ JsonNode jsonSchema = generator.generateSchema(YourClass.class);
 
 System.out.println(jsonSchema.toPrettyString());
 ```
+
+Additional examples can be found in the [jsonschema-examples](jsonschema-examples) folder or throughout the various tests classes.
