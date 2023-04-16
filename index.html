@@ -339,6 +339,9 @@
                     <a href="#quot-required-quot-keyword" class="toc-h2 toc-link" data-title=""required" Keyword"><code>"required"</code> Keyword</a>
                   </li>
                   <li>
+                    <a href="#quot-dependentrequired-quot-keyword" class="toc-h2 toc-link" data-title=""dependentRequired" Keyword"><code>"dependentRequired"</code> Keyword</a>
+                  </li>
+                  <li>
                     <a href="#quot-readonly-quot-keyword" class="toc-h2 toc-link" data-title=""readOnly" Keyword"><code>"readOnly"</code> Keyword</a>
                   </li>
                   <li>
@@ -580,7 +583,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td colspan="2"><code>Option.FLATTENED_ENUMS</code></td>
     </tr>
     <tr>
-      <td>Treating enountered enum types as <code>{ "type": "string" }</code> schema with the names of the enum constants being listed as its <code>enum</code> values.</td>
+      <td>Treating encountered enum types as <code>{ "type": "string" }</code> schema with the names of the enum constants being listed as its <code>enum</code> values.</td>
       <td>-</td>
     </tr>
     <tr>
@@ -588,7 +591,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td colspan="2"><code>Option.FLATTENED_ENUMS_FROM_TOSTRING</code></td>
     </tr>
     <tr>
-      <td>Treating enountered enum types as <code>{ "type": "string" }</code> schema with the <code>toString()</code> values of the enum constants being listed as its <code>enum</code> values.</td>
+      <td>Treating encountered enum types as <code>{ "type": "string" }</code> schema with the <code>toString()</code> values of the enum constants being listed as its <code>enum</code> values.</td>
       <td>-</td>
     </tr>
     <tr>
@@ -745,8 +748,8 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td colspan="2"><code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code></td>
     </tr>
     <tr>
-      <td>Setting the <code>additionalProperties</code> attribute in each <code>Map<K, V></code> to a schema representing the declared value type <code>V</code>.</td>
-      <td>Omitting the <code>additionalProperties</code> attribute in <code>Map<K, V></code> schemas by default (thereby allowing additional properties of any type) unless some configuration specifically says something else.</td>
+      <td>Setting the <code>additionalProperties</code> attribute in each <code>Map&lt;K, V&gt;</code> to a schema representing the declared value type <code>V</code>.</td>
+      <td>Omitting the <code>additionalProperties</code> attribute in <code>Map&lt;K, V&gt;</code> schemas by default (thereby allowing additional properties of any type) unless some configuration specifically says something else.</td>
     </tr>
     <tr>
       <td rowspan="2" style="text-align: right">26</td>
@@ -786,7 +789,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td colspan="2"><code>Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES</code></td>
     </tr>
     <tr>
-      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a single definition with any collected member attributes assigned directly. Any subtypes are only being handled as generic types, i.e., outside of the member context. That means, certain relevent annotations may be ignored (e.g. a jackson <code>@JsonTypeInfo</code> override on a single member would not be correctly reflected in the produced schema).</td>
+      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a single definition with any collected member attributes assigned directly. Any subtypes are only being handled as generic types, i.e., outside of the member context. That means, certain relevant annotations may be ignored (e.g. a jackson <code>@JsonTypeInfo</code> override on a single member would not be correctly reflected in the produced schema).</td>
       <td>For a member (field/method), having a declared type for which subtypes are being detected, include a list of definittions: one for each subtype in the given member's context. This allows independently interpreting contextual information (e.g., member annotations) for each subtype.</td>
     </tr>
     <tr>
@@ -805,6 +808,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>Ensure that the keys for any <code>$defs</code>/<code>definitions</code> match the regular expression <code>^[a-zA-Z0-9\.\-_]+$</code> (as expected by the OpenAPI specification 3.0).</td>
       <td>Ensure that the keys for any <code>$defs</code>/<code>definitions</code> are URI compatible (as expected by the JSON Schema specification).</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">33</td>
       <td colspan="2"><code>Option.ALLOF_CLEANUP_AT_THE_END</code></td>
@@ -812,6 +816,14 @@ Various aspects can be toggled on/off by including or excluding respective <code
     <tr>
       <td>At the very end of the schema generation reduce <code>allOf</code> wrappers where it is possible without overwriting any attributes – this also affects the results from custom definitions.</td>
       <td>Do not attempt to reduce <code>allOf</code> wrappers but preserve them as they were generated regardless of them being necessary or not.</td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="text-align: right">34</td>
+      <td colspan="2"><code>Option.STRICT_TYPE_INFO</code></td>
+    </tr>
+    <tr>
+      <td>As final step in the schema generation process, ensure all sub schemas containing keywords implying a particular "type" (e.g., "properties" implying an "object") have this "type" declared explicitly – this also affects the results from custom definitions.</td>
+      <td>No additional "type" indication will be added for each sub schema, e.g. on the collected attributes where the "allOf" clean-up could not be applied or was disabled.</td>
     </tr>
   </tbody>
 </table>
@@ -1064,6 +1076,13 @@ Various aspects can be toggled on/off by including or excluding respective <code
 <td>✅</td>
 <td>✅</td>
 </tr>
+<tr>
+<td>34</td>
+<td><code>STRICT_TYPE_INFO</code></td>
+<td>⬜️</td>
+<td>⬜️</td>
+<td>⬜️</td>
+</tr>
 </tbody></table>
 <h1 id='generator-modules'>Generator – Modules</h1>
 <p>Similar to an <code>OptionPreset</code> being a short-cut to including various <code>Option</code>s, the concept of <code>Module</code>s is a convenient way of including multiple <a href="#generator-individual-configurations">individual configurations</a> or even <a href="#generator-advanced-configurations">advanced configurations</a> (as per the following sections) at once.</p>
@@ -1237,6 +1256,20 @@ Optionally, you can override the logic how to adjust them in case of multiple ty
     <span class="o">.</span><span class="na">withRequiredCheck</span><span class="o">(</span><span class="n">method</span> <span class="o">-&gt;</span> <span class="n">method</span><span class="o">.</span><span class="na">getAnnotationConsideringFieldAndGetter</span><span class="o">(</span><span class="nc">NotNull</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">);</span>
 </code></pre></div>
 <p><code>withRequiredCheck()</code> is expecting the indication to be returned whether a given <code>FieldScope</code>/<code>MethodScope</code> should be included in the <code>&quot;required&quot;</code> attribute – if any check returns <code>true</code>, the field/method will be deemed <code>&quot;required&quot;</code>.</p>
+<h2 id='quot-dependentrequired-quot-keyword'><code>&quot;dependentRequired&quot;</code> Keyword</h2><div class="highlight"><pre class="highlight java tab-java"><code><span class="n">configBuilder</span><span class="o">.</span><span class="na">forFields</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">withDependentRequiresResolver</span><span class="o">(</span><span class="n">field</span> <span class="o">-&gt;</span> <span class="nc">Optional</span>
+        <span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">field</span><span class="o">.</span><span class="na">getAnnotationConsideringFieldAndGetter</span><span class="o">(</span><span class="nc">IfPresentAlsoRequire</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nl">IfPresentAlsoRequire:</span><span class="o">:</span><span class="n">value</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nl">Arrays:</span><span class="o">:</span><span class="n">asList</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">orElse</span><span class="o">(</span><span class="kc">null</span><span class="o">));</span>
+<span class="n">configBuilder</span><span class="o">.</span><span class="na">forMethods</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">withDependentRequiresResolver</span><span class="o">(</span><span class="n">method</span> <span class="o">-&gt;</span> <span class="nc">Optional</span><span class="o">.</span><span class="na">ofNullable</span><span class="o">(</span><span class="n">method</span><span class="o">.</span><span class="na">findGetterField</span><span class="o">())</span>
+        <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nl">FieldScope:</span><span class="o">:</span><span class="n">getSchemaPropertyName</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nl">Collections:</span><span class="o">:</span><span class="n">singletonList</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">orElse</span><span class="o">(</span><span class="kc">null</span><span class="o">));</span>
+</code></pre></div>
+<p><code>withDependentRequiresResolver()</code> is expecting the names of other properties to be returned, which should be deemed &quot;required&quot;, if the property represented by the given field/method is present.
+The results of all registered resolvers are being combined.</p>
 <h2 id='quot-readonly-quot-keyword'><code>&quot;readOnly&quot;</code> Keyword</h2><div class="highlight"><pre class="highlight java tab-java"><code><span class="n">configBuilder</span><span class="o">.</span><span class="na">forFields</span><span class="o">()</span>
     <span class="o">.</span><span class="na">withReadOnlyCheck</span><span class="o">(</span><span class="n">field</span> <span class="o">-&gt;</span> <span class="n">field</span><span class="o">.</span><span class="na">getAnnotationConsideringFieldAndGetter</span><span class="o">(</span><span class="nc">ReadOnly</span><span class="o">.</span><span class="na">class</span><span class="o">)</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">);</span>
 <span class="n">configBuilder</span><span class="o">.</span><span class="na">forMethods</span><span class="o">()</span>
@@ -1306,7 +1339,7 @@ Optionally, you can override the logic how to adjust them in case of multiple ty
             <span class="o">?</span> <span class="n">method</span><span class="o">.</span><span class="na">getTypeParameterFor</span><span class="o">(</span><span class="nc">Map</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="mi">1</span><span class="o">)</span> <span class="o">:</span> <span class="nc">Void</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
 </code></pre></div>
 <ul>
-<li>If <code>null</code> is being returned, the next registered <code>AdditionalPropertiesResolver</code> will be checked. If all return <code>null</code>, the atttribute will be omitted.</li>
+<li>If <code>null</code> is being returned, the next registered <code>AdditionalPropertiesResolver</code> will be checked. If all return <code>null</code>, the attribute will be omitted.</li>
 <li>If <code>Object.class</code> is being returned, the <code>&quot;additionalProperties&quot;</code> attribute will be omitted.</li>
 <li>if <code>Void.class</code> is being returned, the <code>&quot;additionalProperties&quot;</code> will be set to <code>false</code>.</li>
 <li>If any other type is being returned (e.g. other <code>Class</code> or a <code>ResolvedType</code>) a corresponding schema will be included in <code>&quot;additionalProperties&quot;</code>.</li>
@@ -1336,7 +1369,7 @@ In this case, both the <code>TypeScope</code>/<code>FieldScope</code>/<code>Meth
     <span class="o">});</span>
 </code></pre></div>
 <ul>
-<li>If <code>null</code> is being returned, the next registered <code>AdditionalPropertiesResolver</code> will be checked. If all return <code>null</code>, the atttribute will be omitted.</li>
+<li>If <code>null</code> is being returned, the next registered <code>AdditionalPropertiesResolver</code> will be checked. If all return <code>null</code>, the attribute will be omitted.</li>
 <li>If <code>BooleanNode.TRUE</code> is being returned, the <code>&quot;additionalProperties&quot;</code> attribute will be omitted.</li>
 <li>if <code>BooleanNode.FALSE</code> is being returned, the <code>&quot;additionalProperties&quot;</code> will be set to <code>false</code>.</li>
 <li>If any other subschema is being returned, that will be included as <code>&quot;additionalProperties&quot;</code> attribute directly.</li>
@@ -1344,7 +1377,7 @@ In this case, both the <code>TypeScope</code>/<code>FieldScope</code>/<code>Meth
 
 <p>This usage of the <code>FieldScope</code>/<code>MethodScope</code> potentially via <code>asFakeContainerItemScope()</code> has the advantage of allowing the consideration of annotations on generic parameters, such as the one on <code>Map&lt;String, @Min(10) Integer&gt;</code> when that is the declared type of a field/method.
 <aside class="success">
-    The third example shown for the deriving <code>&quot;addtionalProperties&quot;</code> from a <code>Map</code> value is the default behaviour offered via the <code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code>.
+    The third example shown for the deriving <code>&quot;additionalProperties&quot;</code> from a <code>Map</code> value is the default behaviour offered via the <code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code>.
 </aside></p>
 <h2 id='quot-patternproperties-quot-keyword'><code>&quot;patternProperties&quot;</code> Keyword</h2>
 <blockquote>
@@ -1741,7 +1774,7 @@ In order to reflect Java&#39;s polymorphism, you can make use of the following c
 
 <aside class="notice">
     By their very nature, a field/method schema is always going to be defined "in-line" since it cannot be re-used.
-    However, you can still decide whether or not the attributes collected through the various other <a href="#generator-individual-configurations">Individual Configurations</a> shall be added,
+    However, you can still decide whether the attributes collected through the various other <a href="#generator-individual-configurations">Individual Configurations</a> shall be added,
     through the <code>AttributeInclusion</code> parameter in the <code>CustomPropertyDefinition</code>'s constructor.
 </aside>
 <h1 id='jackson-module'>Jackson Module</h1>
@@ -2018,7 +2051,7 @@ The default path is <code>src/main/resources</code></p>
 <span class="nt">&lt;/configuration&gt;</span>
 </code></pre></div>
 <p>The name of the generated schema files can be configured with the <code>&lt;schemaFileName&gt;</code> element.
-This is a substitution pattern that is used for all generated files. It following the <code>MessageFormat</code> syntax,
+This is a substitution pattern that is used for all generated files. It is following the <code>MessageFormat</code> syntax,
 where the following variables can be used:
  - <code>{0}</code> : This is the name of the class
  - <code>{1}</code> : This is the package path of the class</p>
@@ -2092,7 +2125,7 @@ It is not possible to configure options for custom modules.</p>
 <span class="o">}</span>
 </code></pre></div>
 <p>There currently is no dedicated Gradle Plugin as such, but Gradle is flexible enough to allow you to use a java library straight from within the <code>build.gradle</code> file.
-CHeckout https://github.com/victools/jsonschema-gradle-example for the complete example.</p>
+Checkout https://github.com/victools/jsonschema-gradle-example for the complete example.</p>
 <h2 id='what-about-enums'>What about enums?</h2>
 <blockquote>
 <p>If you have a custom serialization logic for converting enum values to strings, you can re-use it in order to generate the correct list of allowed values:</p>
