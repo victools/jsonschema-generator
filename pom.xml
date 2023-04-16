@@ -3,7 +3,7 @@
 
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator-reactor</artifactId>
-    <version>4.30.0-SNAPSHOT</version>
+    <version>4.30.0</version>
     <packaging>pom</packaging>
 
     <name>Java JSON Schema Generator (Reactor)</name>
@@ -12,18 +12,41 @@
 
     <!-- For list of contributors, refer to jsonschema-generator-parent/pom.xml -->
 
-    <modules>
-        <module>jsonschema-generator-bom</module>
-        <module>jsonschema-generator-parent</module>
-        <module>jsonschema-generator</module>
-        <module>jsonschema-module-jackson</module>
-        <module>jsonschema-module-jakarta-validation</module>
-        <module>jsonschema-module-javax-validation</module>
-        <module>jsonschema-module-swagger-1.5</module>
-        <module>jsonschema-module-swagger-2</module>
-        <module>jsonschema-maven-plugin</module>
-        <module>jsonschema-examples</module>
-    </modules>
+    <profiles>
+        <profile>
+            <id>all</id>
+            <modules>
+                <module>jsonschema-generator-bom</module>
+                <module>jsonschema-generator-parent</module>
+                <module>jsonschema-generator</module>
+                <module>jsonschema-module-jackson</module>
+                <module>jsonschema-module-jakarta-validation</module>
+                <module>jsonschema-module-javax-validation</module>
+                <module>jsonschema-module-swagger-1.5</module>
+                <module>jsonschema-module-swagger-2</module>
+                <module>jsonschema-maven-plugin</module>
+                <module>jsonschema-examples</module>
+            </modules>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>release</id>
+            <modules>
+                <module>jsonschema-generator-bom</module>
+                <module>jsonschema-generator-parent</module>
+                <module>jsonschema-generator</module>
+                <module>jsonschema-module-jackson</module>
+                <module>jsonschema-module-jakarta-validation</module>
+                <module>jsonschema-module-javax-validation</module>
+                <module>jsonschema-module-swagger-1.5</module>
+                <module>jsonschema-module-swagger-2</module>
+                <module>jsonschema-maven-plugin</module>
+                <!-- excluding examples module during the release publishing -->
+            </modules>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
