@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - introduce configuration option for `dependentRequired` keyword
 - introduce new `Option.STRICT_TYPE_INFO` for implying the `type` of sub-schemas based on their contained attributes (note: implied "type" array always contains "null")
+- extend convenience methods for annotation lookup, to consider meta annotations (annotations on annotations)
 
 #### Changed
 - enable `allOf` clean-up when any of the following keywords are contained: `dependentRequired`/`dependentSchemas`/`prefixItems`/`unevaluatedItems`/`unevaluatedProperties`
@@ -21,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Fixed
 - use `prefixItems` instead of `items` keyword (from Draft 2019-09 onward) for tuples in `WRAPPING_ARRAY` subtype definitions 
+
+### `jsonschema-module-jakarta-validation`
+#### Added
+- support meta annotations (validation annotations on other annotations marked as `@Constraint`)
+
+### `jsonschema-module-javax-validation`
+#### Added
+- support meta annotations (validation annotations on other annotations marked as `@Constraint`)
 
 ### `jsonschema-examples`
 #### Added
@@ -68,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - new `JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID` to respect `@JsonIdentityReference(alwaysAsId=true)` annotations (with `@JsonIdentityInfo`)
 
-### `jsonschema-module-jakarta`
+### `jsonschema-module-jakarta-validation`
 #### Added
 - set `minProperties`/`maxProperties` for `Map` types with `@NotEmpty` or `@Size` annotation
 

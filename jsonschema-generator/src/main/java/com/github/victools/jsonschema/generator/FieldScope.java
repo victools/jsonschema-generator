@@ -24,6 +24,7 @@ import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -135,27 +136,29 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
     }
 
     @Override
-    public <A extends Annotation> A getContainerItemAnnotation(Class<A> annotationClass) {
+    public <A extends Annotation> A getContainerItemAnnotation(Class<A> annotationClass, Predicate<Annotation> considerOtherAnnotation) {
         AnnotatedType annotatedType = this.getRawMember().getAnnotatedType();
-        return this.getContext().getTypeParameterAnnotation(annotationClass, annotatedType, this.getFakeContainerItemIndex());
+        return this.getContext()
+                .getTypeParameterAnnotation(annotationClass, considerOtherAnnotation, annotatedType, this.getFakeContainerItemIndex());
     }
 
     @Override
-    public <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass) {
-        A annotation = this.getAnnotation(annotationClass);
+    public <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass, Predicate<Annotation> considerOtherAnnotation) {
+        A annotation = this.getAnnotation(annotationClass, considerOtherAnnotation);
         if (annotation == null) {
             MemberScope<?, ?> associatedGetter = this.findGetter();
-            annotation = associatedGetter == null ? null : associatedGetter.getAnnotation(annotationClass);
+            annotation = associatedGetter == null ? null : associatedGetter.getAnnotation(annotationClass, considerOtherAnnotation);
         }
         return annotation;
     }
 
     @Override
-    public <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetter(Class<A> annotationClass) {
-        A annotation = this.getContainerItemAnnotation(annotationClass);
+    public <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetter(Class<A> annotationClass,
+            Predicate<Annotation> considerOtherAnnotation) {
+        A annotation = this.getContainerItemAnnotation(annotationClass, considerOtherAnnotation);
         if (annotation == null) {
             MemberScope<?, ?> associatedGetter = this.findGetter();
-            annotation = associatedGetter == null ? null : associatedGetter.getContainerItemAnnotation(annotationClass);
+            annotation = associatedGetter == null ? null : associatedGetter.getContainerItemAnnotation(annotationClass, considerOtherAnnotation);
         }
         return annotation;
     }

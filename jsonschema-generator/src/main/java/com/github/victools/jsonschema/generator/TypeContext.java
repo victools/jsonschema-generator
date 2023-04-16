@@ -27,15 +27,20 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Context in which types can be resolved (as well as their declared fields and methods).
  */
 public class TypeContext {
+
+    protected static final Predicate<Annotation> IGNORE_ANNOTATIONS_ON_ANNOTATIONS = _a -> false;
 
     private final TypeResolver typeResolver;
     private final MemberResolver memberResolver;
@@ -84,7 +89,7 @@ public class TypeContext {
     }
 
     /**
-     * Resolve actual type (mostly relevant for parameterised types, type variables and such.
+     * Resolve actual type (mostly relevant for parameterised types, type variables and such).
      *
      * @param type java type to resolve
      * @param typeParameters (optional) type parameters to pass on
@@ -155,7 +160,7 @@ public class TypeContext {
      * @param type type to find type parameter for
      * @param erasedSuperType (super) type to find declared type parameter for
      * @param parameterIndex index of the single type parameter's declared type to return
-     * @return declared parameter type; or Object.class if no parameters are defined; or null if the given type or index are invalid
+     * @return declared parameter type; or {@code Object.class} if no parameters are defined; or null if the given type or index are invalid
      * @see ResolvedType#typeParametersFor(Class)
      */
     public ResolvedType getTypeParameterFor(ResolvedType type, Class<?> erasedSuperType, int parameterIndex) {
@@ -177,7 +182,7 @@ public class TypeContext {
      * Determine whether a given type should be treated as {@link SchemaKeyword#TAG_TYPE_ARRAY} in the generated schema.
      *
      * @param type type to check
-     * @return whether the given type is an array or sub type of {@link Collection}
+     * @return whether the given type is an array or subtype of {@link Collection}
      */
     public boolean isContainerType(ResolvedType type) {
         return type.isArray() || type.isInstanceOf(Collection.class);
@@ -199,6 +204,36 @@ public class TypeContext {
     }
 
     /**
+     * Select the instance of the specified annotation type from the given list. Also considering meta annotations (i.e., annotations on annotations)
+     * if a meta annotation is deemed eligible according to the given {@code Predicate}.
+     *
+     * @param <A> type of annotation
+     * @param annotationClass type of annotation
+     * @param annotationList initial list of annotations to search in (potentially containing meta annotations)
+     * @param considerOtherAnnotation check whether some other annotation should also be checked for holding an instance of the target annotation
+     * @return annotation instance (or {@code null} if no annotation of the given type is present)
+     *
+     * @since 4.30.0
+     */
+    public <A extends Annotation> A getAnnotationFromList(Class<A> annotationClass, List<Annotation> annotationList,
+            Predicate<Annotation> considerOtherAnnotation) {
+        List<Annotation> annotations = annotationList;
+        while (!annotations.isEmpty()) {
+            Optional<Annotation> nestedAnnotation = annotations.stream()
+                    .filter(annotationClass::isInstance)
+                    .findFirst();
+            if (nestedAnnotation.isPresent()) {
+                return nestedAnnotation.map(annotationClass::cast).get();
+            }
+            annotations = annotations.stream()
+                    .filter(considerOtherAnnotation)
+                    .flatMap(otherAnnotation -> Stream.of(otherAnnotation.annotationType().getAnnotations()))
+                    .collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    /**
      * Return the annotation of the given type from the annotated container's item, if such an annotation is present.
      *
      * @param <A> type of annotation
@@ -206,17 +241,54 @@ public class TypeContext {
      * @param annotatedContainerType annotated container type that is considered if it is an {@link AnnotatedParameterizedType}
      * @param containerItemIndex parameter index of the desired item on the container type
      * @return annotation instance (or {@code null} if no annotation of the given type is present)
+     *
+     * @deprecated use {@link #getTypeParameterAnnotation(Class, Predicate, AnnotatedType, Integer)} instead
      */
+    @Deprecated
     public <A extends Annotation> A getTypeParameterAnnotation(Class<A> annotationClass, AnnotatedType annotatedContainerType,
             Integer containerItemIndex) {
+        return this.getTypeParameterAnnotation(annotationClass, IGNORE_ANNOTATIONS_ON_ANNOTATIONS, annotatedContainerType, containerItemIndex);
+    }
+
+    /**
+     * Return the annotation of the given type from the annotated container's item, if such an annotation is present.
+     * <br>
+     * Additionally, also consider annotations on annotations, if the given predicate indicates another annotation as eligible for holding the target.
+     *
+     * @param <A> type of annotation
+     * @param annotationClass type of annotation
+     * @param considerOtherAnnotation check whether some other annotation should also be checked for holding an instance of the target annotation
+     * @param annotatedContainerType annotated container type that is considered if it is an {@link AnnotatedParameterizedType}
+     * @param containerItemIndex parameter index of the desired item on the container type
+     * @return annotation instance (or {@code null} if no annotation of the given type is present)
+     *
+     * @since 4.30.0
+     */
+    public <A extends Annotation> A getTypeParameterAnnotation(Class<A> annotationClass, Predicate<Annotation> considerOtherAnnotation,
+                AnnotatedType annotatedContainerType, Integer containerItemIndex) {
+        List<Annotation> annotationList = this.getTypeParameterAnnotations(annotatedContainerType, containerItemIndex)
+                .collect(Collectors.toList());
+        return this.getAnnotationFromList(annotationClass, annotationList, considerOtherAnnotation);
+    }
+
+    /**
+     * Return the annotations from the annotated container's item.
+     *
+     * @param annotatedContainerType annotated container type that is considered if it is an {@link AnnotatedParameterizedType}
+     * @param containerItemIndex parameter index of the desired item on the container type
+     * @return annotation instances (possibly empty if no annotation is present)
+     *
+     * @since 4.30.0
+     */
+    public Stream<Annotation> getTypeParameterAnnotations(AnnotatedType annotatedContainerType, Integer containerItemIndex) {
         if (annotatedContainerType instanceof AnnotatedParameterizedType) {
             AnnotatedType[] typeArguments = ((AnnotatedParameterizedType) annotatedContainerType).getAnnotatedActualTypeArguments();
             int itemIndex = containerItemIndex == null ? 0 : containerItemIndex;
             if (typeArguments.length > itemIndex) {
-                return typeArguments[itemIndex].getAnnotation(annotationClass);
+                return Stream.of(typeArguments[itemIndex].getAnnotations());
             }
         }
-        return null;
+        return Stream.empty();
     }
 
     /**
@@ -229,15 +301,44 @@ public class TypeContext {
      * @since 4.28.0
      */
     public ResolvedType getTypeWithAnnotation(ResolvedType targetType, Class<? extends Annotation> annotationType) {
+        return this.getTypeWithAnnotation(targetType, annotationType, TypeContext.IGNORE_ANNOTATIONS_ON_ANNOTATIONS);
+    }
+
+    /**
+     * Find the (super) type, including interfaces, that has the designated type annotation.
+     * <br>
+     * Additionally, also consider annotations on annotations, if the given predicate indicates another annotation as eligible for holding the target.
+     *
+     * @param targetType type to check for the annotation, potentially iterating over its declared interfaces and super types
+     * @param annotationType type of annotation to look for
+     * @param considerOtherAnnotation check whether some other annotation should also be checked for holding an instance of the target annotation
+     * @return (super) type with the targeted annotation (or {@code null} if the annotation wasn't found on any of its interfaces or super types)
+     *
+     * @since 4.30.0
+     */
+    public ResolvedType getTypeWithAnnotation(ResolvedType targetType, Class<? extends Annotation> annotationType,
+            Predicate<Annotation> considerOtherAnnotation) {
+        return this.getTypeConsideringHierarchyMatching(targetType, type -> this.getAnnotationFromList(annotationType,
+                Arrays.asList(type.getErasedType().getAnnotations()), considerOtherAnnotation) != null);
+    }
+
+    /**
+     * Find the (super) type, including interfaces, that fulfils the given condition/check..
+     *
+     * @param targetType type to check for the annotation, potentially iterating over its declared interfaces and super types
+     * @param check condition to be fulfilled
+     * @return (super) type fulfilling the given condition (or {@code null} if the condition wasn't fulfilled by any of its interfaces or super types)
+     *
+     * @since 4.30.0
+     */
+    public ResolvedType getTypeConsideringHierarchyMatching(ResolvedType targetType, Predicate<ResolvedType> check) {
         ResolvedType targetSuperType = targetType;
         do {
-            if (targetSuperType.getErasedType().getAnnotation(annotationType) != null) {
+            if (check.test(targetSuperType)) {
                 return targetSuperType;
             }
-            // the @JsonTypeInfo annotation may also be present on a common interface rather than a super class
-            // assumption: there are never multiple interfaces with such an annotation on a single class
             Optional<ResolvedType> interfaceWithAnnotation = targetSuperType.getImplementedInterfaces().stream()
-                    .filter(superInterface -> superInterface.getErasedType().getAnnotation(annotationType) != null)
+                    .filter(check)
                     .findFirst();
             if (interfaceWithAnnotation.isPresent()) {
                 return interfaceWithAnnotation.get();

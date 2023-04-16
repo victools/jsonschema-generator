@@ -26,6 +26,7 @@ import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
+import jakarta.validation.Constraint;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
@@ -49,6 +50,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * JSON Schema Generation Module: based on annotations from the {@code jakarta.validation.constraints} package.
@@ -62,6 +64,8 @@ import java.util.function.Function;
  * </ul>
  */
 public class JakartaValidationModule implements Module {
+
+    private static final Predicate<Annotation> CONSTRAINT_CHECK = annotation -> annotation.annotationType().isAnnotationPresent(Constraint.class);
 
     private final Set<JakartaValidationOption> options;
     private Set<Class<?>> validationGroups;
@@ -150,11 +154,11 @@ public class JakartaValidationModule implements Module {
      */
     protected <A extends Annotation> A getAnnotationFromFieldOrGetter(MemberScope<?, ?> member, Class<A> annotationClass,
             Function<A, Class<?>[]> validationGroupsLookup) {
-        A containerItemAnnotation = member.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(annotationClass);
+        A containerItemAnnotation = member.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(annotationClass, CONSTRAINT_CHECK);
         if (this.shouldConsiderAnnotation(containerItemAnnotation, validationGroupsLookup)) {
             return containerItemAnnotation;
         }
-        A annotation = member.getAnnotationConsideringFieldAndGetterIfSupported(annotationClass);
+        A annotation = member.getAnnotationConsideringFieldAndGetterIfSupported(annotationClass, CONSTRAINT_CHECK);
         if (this.shouldConsiderAnnotation(annotation, validationGroupsLookup)) {
             return annotation;
         }
