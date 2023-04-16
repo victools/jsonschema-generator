@@ -24,6 +24,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
+import java.nio.file.DirectoryStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -59,8 +60,6 @@ import javax.validation.constraints.Size;
  * </ul>
  */
 public class JavaxValidationModule implements Module {
-
-    private static final Predicate<Annotation> CONSTRAINT_CHECK = annotation -> annotation.annotationType().isAnnotationPresent(Constraint.class);
 
     private final Set<JavaxValidationOption> options;
     private Set<Class<?>> validationGroups;
@@ -148,15 +147,26 @@ public class JavaxValidationModule implements Module {
      */
     protected <A extends Annotation> A getAnnotationFromFieldOrGetter(MemberScope<?, ?> member, Class<A> annotationClass,
             Function<A, Class<?>[]> validationGroupsLookup) {
-        A containerItemAnnotation = member.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(annotationClass, CONSTRAINT_CHECK);
+        Predicate<Annotation> isConstraintAnnotation = this::isConstraintAnnotation;
+        A containerItemAnnotation = member.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(annotationClass, isConstraintAnnotation);
         if (this.shouldConsiderAnnotation(containerItemAnnotation, validationGroupsLookup)) {
             return containerItemAnnotation;
         }
-        A annotation = member.getAnnotationConsideringFieldAndGetterIfSupported(annotationClass, CONSTRAINT_CHECK);
+        A annotation = member.getAnnotationConsideringFieldAndGetterIfSupported(annotationClass, isConstraintAnnotation);
         if (this.shouldConsiderAnnotation(annotation, validationGroupsLookup)) {
             return annotation;
         }
         return null;
+    }
+
+    /**
+     * Check whether the given annotation is marked as {@link Constraint @Constraint} itself and may therefore hold additional validation annotations.
+     *
+     * @param annotation annotation instance to check
+     * @return whether the given annotation represents a constraint to consider during validation
+     */
+    private boolean isConstraintAnnotation(Annotation annotation) {
+        return annotation.annotationType().isAnnotationPresent(Constraint.class);
     }
 
     /**

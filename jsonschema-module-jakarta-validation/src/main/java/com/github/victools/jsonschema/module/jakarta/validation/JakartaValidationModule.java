@@ -65,8 +65,6 @@ import java.util.function.Predicate;
  */
 public class JakartaValidationModule implements Module {
 
-    private static final Predicate<Annotation> CONSTRAINT_CHECK = annotation -> annotation.annotationType().isAnnotationPresent(Constraint.class);
-
     private final Set<JakartaValidationOption> options;
     private Set<Class<?>> validationGroups;
 
@@ -154,15 +152,26 @@ public class JakartaValidationModule implements Module {
      */
     protected <A extends Annotation> A getAnnotationFromFieldOrGetter(MemberScope<?, ?> member, Class<A> annotationClass,
             Function<A, Class<?>[]> validationGroupsLookup) {
-        A containerItemAnnotation = member.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(annotationClass, CONSTRAINT_CHECK);
+        Predicate<Annotation> isConstraintAnnotation = this::isConstraintAnnotation;
+        A containerItemAnnotation = member.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(annotationClass, isConstraintAnnotation);
         if (this.shouldConsiderAnnotation(containerItemAnnotation, validationGroupsLookup)) {
             return containerItemAnnotation;
         }
-        A annotation = member.getAnnotationConsideringFieldAndGetterIfSupported(annotationClass, CONSTRAINT_CHECK);
+        A annotation = member.getAnnotationConsideringFieldAndGetterIfSupported(annotationClass, isConstraintAnnotation);
         if (this.shouldConsiderAnnotation(annotation, validationGroupsLookup)) {
             return annotation;
         }
         return null;
+    }
+
+    /**
+     * Check whether the given annotation is marked as {@link Constraint @Constraint} itself and may therefore hold additional validation annotations.
+     *
+     * @param annotation annotation instance to check
+     * @return whether the given annotation represents a constraint to consider during validation
+     */
+    private boolean isConstraintAnnotation(Annotation annotation) {
+        return annotation.annotationType().isAnnotationPresent(Constraint.class);
     }
 
     /**
