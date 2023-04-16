@@ -34,7 +34,7 @@ task generate {
 ```
 
 There currently is no dedicated Gradle Plugin as such, but Gradle is flexible enough to allow you to use a java library straight from within the `build.gradle` file.
-CHeckout https://github.com/victools/jsonschema-gradle-example for the complete example.
+Checkout https://github.com/victools/jsonschema-gradle-example for the complete example.
 
 ## What about enums?
 > If you have a custom serialization logic for converting enum values to strings, you can re-use it in order to generate the correct list of allowed values:

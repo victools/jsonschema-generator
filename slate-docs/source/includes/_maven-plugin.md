@@ -42,11 +42,11 @@ By default, the plugin aborts if the glob pattern does not match any class. If t
 ## Basic Configuration Options
 There are some additional parameters available in the plugin `<configuration>`:
 
-| # | Tag | Default | Description |
-| --- | --- | --- | --- |
-|  1 | `<schemaFilePath>` | `src/main/resources` | Directory to generate all schemas in |
-|  2 | `<schemaFileName>` | `{0}-schema.json` | Relative path from the `<schemaFilePath>` including the file name pattern. Two placeholders are supported: `{0}` will be replaced with the respective simple class name (e.g. `TypeA`) `{1}` will be replaced with the respective package path (e.g. `com/myOrg/myApp`) in case you want to preserve the original package structure |
-|  3 | `<schemaVersion>` | `DRAFT_7` | JSON Schema version to apply (`DRAFT_6`, `DRAFT_7`, `DRAFT_2019_09` or `DRAFT_2020_12`) |
+| #   | Tag                | Default              | Description                                                                                                                                                                                                                                                                                                                         |
+|-----|--------------------|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1   | `<schemaFilePath>` | `src/main/resources` | Directory to generate all schemas in                                                                                                                                                                                                                                                                                                |
+| 2   | `<schemaFileName>` | `{0}-schema.json`    | Relative path from the `<schemaFilePath>` including the file name pattern. Two placeholders are supported: `{0}` will be replaced with the respective simple class name (e.g. `TypeA`) `{1}` will be replaced with the respective package path (e.g. `com/myOrg/myApp`) in case you want to preserve the original package structure |
+| 3   | `<schemaVersion>`  | `DRAFT_7`            | JSON Schema version to apply (`DRAFT_6`, `DRAFT_7`, `DRAFT_2019_09` or `DRAFT_2020_12`)                                                                                                                                                                                                                                             |
 
 
 ### Configuring generated file names and locations
@@ -66,7 +66,7 @@ The default path is `src/main/resources`
 </configuration>
 ```
 The name of the generated schema files can be configured with the `<schemaFileName>` element.
-This is a substitution pattern that is used for all generated files. It following the `MessageFormat` syntax,
+This is a substitution pattern that is used for all generated files. It is following the `MessageFormat` syntax,
 where the following variables can be used:
  - `{0}` : This is the name of the class
  - `{1}` : This is the package path of the class

@@ -81,7 +81,7 @@ configBuilder.without(
       <td colspan="2"><code>Option.FLATTENED_ENUMS</code></td>
     </tr>
     <tr>
-      <td>Treating enountered enum types as <code>{ "type": "string" }</code> schema with the names of the enum constants being listed as its <code>enum</code> values.</td>
+      <td>Treating encountered enum types as <code>{ "type": "string" }</code> schema with the names of the enum constants being listed as its <code>enum</code> values.</td>
       <td>-</td>
     </tr>
     <tr>
@@ -89,7 +89,7 @@ configBuilder.without(
       <td colspan="2"><code>Option.FLATTENED_ENUMS_FROM_TOSTRING</code></td>
     </tr>
     <tr>
-      <td>Treating enountered enum types as <code>{ "type": "string" }</code> schema with the <code>toString()</code> values of the enum constants being listed as its <code>enum</code> values.</td>
+      <td>Treating encountered enum types as <code>{ "type": "string" }</code> schema with the <code>toString()</code> values of the enum constants being listed as its <code>enum</code> values.</td>
       <td>-</td>
     </tr>
     <tr>
@@ -287,7 +287,7 @@ configBuilder.without(
       <td colspan="2"><code>Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES</code></td>
     </tr>
     <tr>
-      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a single definition with any collected member attributes assigned directly. Any subtypes are only being handled as generic types, i.e., outside of the member context. That means, certain relevent annotations may be ignored (e.g. a jackson <code>@JsonTypeInfo</code> override on a single member would not be correctly reflected in the produced schema).</td>
+      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a single definition with any collected member attributes assigned directly. Any subtypes are only being handled as generic types, i.e., outside of the member context. That means, certain relevant annotations may be ignored (e.g. a jackson <code>@JsonTypeInfo</code> override on a single member would not be correctly reflected in the produced schema).</td>
       <td>For a member (field/method), having a declared type for which subtypes are being detected, include a list of definittions: one for each subtype in the given member's context. This allows independently interpreting contextual information (e.g., member annotations) for each subtype.</td>
     </tr>
     <tr>
@@ -683,7 +683,7 @@ configBuilder.forMethods()
             ? method.getTypeParameterFor(Map.class, 1) : Void.class);
 ```
 
-* If `null` is being returned, the next registered `AdditionalPropertiesResolver` will be checked. If all return `null`, the atttribute will be omitted.
+* If `null` is being returned, the next registered `AdditionalPropertiesResolver` will be checked. If all return `null`, the attribute will be omitted.
 * If `Object.class` is being returned, the `"additionalProperties"` attribute will be omitted.
 * if `Void.class` is being returned, the `"additionalProperties"` will be set to `false`.
 * If any other type is being returned (e.g. other `Class` or a `ResolvedType`) a corresponding schema will be included in `"additionalProperties"`.
@@ -712,14 +712,14 @@ configBuilder.forMethods()
     });
 ```
 
-* If `null` is being returned, the next registered `AdditionalPropertiesResolver` will be checked. If all return `null`, the atttribute will be omitted.
+* If `null` is being returned, the next registered `AdditionalPropertiesResolver` will be checked. If all return `null`, the attribute will be omitted.
 * If `BooleanNode.TRUE` is being returned, the `"additionalProperties"` attribute will be omitted.
 * if `BooleanNode.FALSE` is being returned, the `"additionalProperties"` will be set to `false`.
 * If any other subschema is being returned, that will be included as `"additionalProperties"` attribute directly.
 
 This usage of the `FieldScope`/`MethodScope` potentially via `asFakeContainerItemScope()` has the advantage of allowing the consideration of annotations on generic parameters, such as the one on `Map<String, @Min(10) Integer>` when that is the declared type of a field/method.
 <aside class="success">
-    The third example shown for the deriving <code>"addtionalProperties"</code> from a <code>Map</code> value is the default behaviour offered via the <code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code>.
+    The third example shown for the deriving <code>"additionalProperties"</code> from a <code>Map</code> value is the default behaviour offered via the <code>Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES</code>.
 </aside>
 
 ## `"patternProperties"` Keyword
@@ -1171,6 +1171,6 @@ When not even the [Custom Type Definitions](#custom-type-definitions) are flexib
 
 <aside class="notice">
     By their very nature, a field/method schema is always going to be defined "in-line" since it cannot be re-used.
-    However, you can still decide whether or not the attributes collected through the various other <a href="#generator-individual-configurations">Individual Configurations</a> shall be added,
+    However, you can still decide whether the attributes collected through the various other <a href="#generator-individual-configurations">Individual Configurations</a> shall be added,
     through the <code>AttributeInclusion</code> parameter in the <code>CustomPropertyDefinition</code>'s constructor.
 </aside>

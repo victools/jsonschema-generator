@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `jsonschema-examples`
 #### Added
-- new collection of examples (and implicit integration test) holding various examples (e.g., ones created in response to issues/discussions on Github)
+- new collection of examples (and implicit integration test) holding various examples (e.g., ones created in response to issues/discussions on GitHub)
 
 ## [4.29.0] - 2023-03-13
 ### `jsonschema-generator`
@@ -180,7 +180,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `jsonschema-module-jackson`
 #### Added
-- Support for sub type resolution on properties with `JsonTypeInfo.Id.NONE` override avoiding the default wrapping/modification
+- Support for subtype resolution on properties with `JsonTypeInfo.Id.NONE` override avoiding the default wrapping/modification
 
 #### Fixed
 - Correctly consider `@JsonIgnoreProperties` targeting fields in super type
@@ -196,11 +196,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `jsonschema-module-jackson`
 #### Fixed
-- Sub type resolution utilising `JsonTypeInfo.Id.NAME` now considers `@JsonSubTypes.value[].name` instead of relying on `@JsonTypeName` being present
+- Subtype resolution utilising `JsonTypeInfo.Id.NAME` now considers `@JsonSubTypes.value[].name` instead of relying on `@JsonTypeName` being present
 
 #### Changed
-- Sub type resolution utilising `JsonTypeInfo.As.PROPERTY`/`JsonTypeInfo.As.EXISTING_PROPERTY` now marks discriminator property as `"required"`
-- Sub type resolution utilising `JsonTypeInfo.As.WRAPPER_OBJECT` now marks discriminator value as `"required"` in wrapper object
+- Subtype resolution utilising `JsonTypeInfo.As.PROPERTY`/`JsonTypeInfo.As.EXISTING_PROPERTY` now marks discriminator property as `"required"`
+- Subtype resolution utilising `JsonTypeInfo.As.WRAPPER_OBJECT` now marks discriminator value as `"required"` in wrapper object
 
 ## [4.22.0] - 2022-01-10
 ### `jsonschema-generator`
@@ -241,7 +241,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `jsonschema-generator`
 #### Added
 - Support for `null` values in collections/containers/arrays
-- New opt-in `Option.NULLABLE_ARRAY_ITEMS_ALLOWED` for enabling the respective "NullableCheck" to be considered for items in a field's array value or a method' array return value
+- New opt-in `Option.NULLABLE_ARRAY_ITEMS_ALLOWED` for enabling the respective "NullableCheck" to be considered for items in a field's array value or a method's array return value
 
 ### `jsonschema-module-swagger-2`
 #### Added
