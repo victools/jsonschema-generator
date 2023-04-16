@@ -31,9 +31,9 @@ public class ExampleTest {
 
     @ParameterizedTest
     @ValueSource(classes = {
+            AnnotationInheritanceExample.class,
             ExternalRefAnnotationExample.class,
             ExternalRefPackageExample.class,
-            GroupedAnnotationExample.class,
             IfThenElseExample.class,
             JacksonSubtypeDefinitionExample.class,
             StrictTypeInfoExample.class
