@@ -23,7 +23,9 @@ import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -168,36 +170,39 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
      * @return annotation instance (or {@code null} if no annotation of the given type is present
      */
     @Override
-    public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-        A annotation = super.getAnnotation(annotationClass);
+    public <A extends Annotation> A getAnnotation(Class<A> annotationClass, Predicate<Annotation> considerOtherAnnotation) {
+        A annotation = super.getAnnotation(annotationClass, considerOtherAnnotation);
         if (annotation == null) {
-            annotation = this.getRawMember().getAnnotatedReturnType().getAnnotation(annotationClass);
+            List<Annotation> annotationList = Arrays.asList(this.getRawMember().getAnnotatedReturnType().getAnnotations());
+            annotation = this.getContext().getAnnotationFromList(annotationClass, annotationList, considerOtherAnnotation);
         }
         return annotation;
     }
 
     @Override
-    public <A extends Annotation> A getContainerItemAnnotation(Class<A> annotationClass) {
+    public <A extends Annotation> A getContainerItemAnnotation(Class<A> annotationClass, Predicate<Annotation> considerOtherAnnotation) {
         AnnotatedType annotatedReturnType = this.getRawMember().getAnnotatedReturnType();
-        return this.getContext().getTypeParameterAnnotation(annotationClass, annotatedReturnType, this.getFakeContainerItemIndex());
+        return this.getContext()
+                .getTypeParameterAnnotation(annotationClass, considerOtherAnnotation, annotatedReturnType, this.getFakeContainerItemIndex());
     }
 
     @Override
-    public <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass) {
-        A annotation = this.getAnnotation(annotationClass);
+    public <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass, Predicate<Annotation> considerOtherAnnotation) {
+        A annotation = this.getAnnotation(annotationClass, considerOtherAnnotation);
         if (annotation == null) {
             MemberScope<?, ?> associatedField = this.findGetterField();
-            annotation = associatedField == null ? null : associatedField.getAnnotation(annotationClass);
+            annotation = associatedField == null ? null : associatedField.getAnnotation(annotationClass, considerOtherAnnotation);
         }
         return annotation;
     }
 
     @Override
-    public <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetter(Class<A> annotationClass) {
-        A annotation = this.getContainerItemAnnotation(annotationClass);
+    public <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetter(Class<A> annotationClass,
+            Predicate<Annotation> considerOtherAnnotation) {
+        A annotation = this.getContainerItemAnnotation(annotationClass, considerOtherAnnotation);
         if (annotation == null) {
             MemberScope<?, ?> associatedField = this.findGetterField();
-            annotation = associatedField == null ? null : associatedField.getContainerItemAnnotation(annotationClass);
+            annotation = associatedField == null ? null : associatedField.getContainerItemAnnotation(annotationClass, considerOtherAnnotation);
         }
         return annotation;
     }

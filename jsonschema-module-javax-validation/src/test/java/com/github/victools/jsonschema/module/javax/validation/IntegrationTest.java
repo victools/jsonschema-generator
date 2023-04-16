@@ -25,10 +25,15 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import javax.validation.Constraint;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Email;
@@ -70,15 +75,13 @@ public class IntegrationTest {
 
     private static String loadResource(String resourcePath) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
-        try (InputStream inputStream = IntegrationTest.class
-                .getResourceAsStream(resourcePath);
+        try (InputStream inputStream = IntegrationTest.class.getResourceAsStream(resourcePath);
                 Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
             while (scanner.hasNext()) {
                 stringBuilder.append(scanner.nextLine()).append('\n');
             }
         }
         return stringBuilder.toString();
-
     }
 
     static class TestClass {
@@ -104,14 +107,14 @@ public class IntegrationTest {
         public Optional<Integer> optionalInclusiveRangeInt1;
         public Optional<@Min(2) @Max(5) Integer> optionalInclusiveRangeInt2;
 
-        @NotNull
-        @Email(regexp = ".+@.+\\..+")
+        @MandatoryEmail
         public String notNullEmail;
         @NotEmpty
         @Pattern(regexp = "\\w+")
         public String notEmptyPatternText;
         @NotBlank
         public String notBlankText;
+        @NotNullMetaAnnotationMissingConstraint
         @Size(min = 5, max = 12)
         public String sizeRangeText;
 
@@ -122,5 +125,21 @@ public class IntegrationTest {
         @DecimalMin(value = "0", inclusive = false)
         @DecimalMax(value = "1", inclusive = false)
         public double exclusiveRangeDouble;
+    }
+
+    @NotNull
+    @Email(regexp = ".+@.+\\..+")
+    @Constraint(validatedBy = {})
+    @Target({ElementType.PARAMETER, ElementType.FIELD})
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface MandatoryEmail {
+        // presence of @Constraint annotation allows this kind of meta annotation for grouping common validation annotations
+    }
+
+    @NotNull
+    @Target({ElementType.PARAMETER, ElementType.FIELD})
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface NotNullMetaAnnotationMissingConstraint {
+        // due to the missing @Constraint annotation, the @NotNull is being ignored
     }
 }

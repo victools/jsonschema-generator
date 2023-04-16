@@ -23,6 +23,7 @@ import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
+import jakarta.validation.Constraint;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
@@ -36,6 +37,10 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -110,14 +115,14 @@ public class IntegrationTest {
         public Optional<Integer> optionalInclusiveRangeInt1;
         public Optional<@Min(2) @Max(5) Integer> optionalInclusiveRangeInt2;
 
-        @NotNull
-        @Email(regexp = ".+@.+\\..+")
+        @MandatoryEmail
         public String notNullEmail;
         @NotEmpty
         @Pattern(regexp = "\\w+")
         public String notEmptyPatternText;
         @NotBlank
         public String notBlankText;
+        @NotNullMetaAnnotationMissingConstraint
         @Size(min = 5, max = 12)
         public String sizeRangeText;
 
@@ -128,5 +133,21 @@ public class IntegrationTest {
         @DecimalMin(value = "0", inclusive = false)
         @DecimalMax(value = "1", inclusive = false)
         public double exclusiveRangeDouble;
+    }
+
+    @NotNull
+    @Email(regexp = ".+@.+\\..+")
+    @Constraint(validatedBy = {})
+    @Target({ElementType.PARAMETER, ElementType.FIELD})
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface MandatoryEmail {
+        // presence of @Constraint annotation allows this kind of meta annotation for grouping common validation annotations
+    }
+
+    @NotNull
+    @Target({ElementType.PARAMETER, ElementType.FIELD})
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface NotNullMetaAnnotationMissingConstraint {
+        // due to the missing @Constraint annotation, the @NotNull is being ignored
     }
 }

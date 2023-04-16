@@ -24,13 +24,15 @@ import com.fasterxml.classmate.members.ResolvedMethod;
 import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * Representation of a single introspected field or method.
  *
  * @param <M> type of member in scope (i.e. {@link ResolvedField} or {@link ResolvedMethod}).
- * @param <T> type of java/reflection member in scope (i.e. {@link java.lang.reflect.Field FIeld} or {@link java.lang.reflect.Method Nethod}
+ * @param <T> type of java/reflection member in scope (i.e. {@link java.lang.reflect.Field Field} or {@link java.lang.reflect.Method Method}
  */
 public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member> extends TypeScope {
 
@@ -271,13 +273,32 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
 
     /**
      * Return the annotation of the given type on the member, if such an annotation is present.
+     * <br>
+     * Using this method is equivalent to invoking {@link #getAnnotation(Class, Predicate)} with the second parameter always returning {@code false}.
      *
      * @param <A> type of annotation to look-up
      * @param annotationClass annotation class to look up instance on member for
      * @return annotation instance (or {@code null} if no annotation of the given type is present
      */
     public <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
-        return this.member.get(annotationClass);
+        return this.getAnnotation(annotationClass, TypeContext.IGNORE_ANNOTATIONS_ON_ANNOTATIONS);
+    }
+
+    /**
+     * Return the annotation of the given type on the member, if such an annotation is present.
+     * <br>
+     * Additionally, also consider annotations on annotations, if the given predicate indicates another annotation as eligible for holding the target.
+     *
+     * @param <A> type of annotation to look-up
+     * @param annotationClass annotation class to look up instance on member for
+     * @param considerOtherAnnotation check whether some other annotation should also be checked for holding an instance of the target annotation
+     * @return annotation instance (or {@code null} if no annotation of the given type is present
+     *
+     * @since 4.30.0
+     */
+    public <A extends Annotation> A getAnnotation(Class<A> annotationClass, Predicate<Annotation> considerOtherAnnotation) {
+        List<Annotation> annotationList = this.member.getAnnotations().asList();
+        return this.getContext().getAnnotationFromList(annotationClass, annotationList, considerOtherAnnotation);
     }
 
     /**
@@ -288,7 +309,24 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @param annotationClass type of annotation
      * @return annotation instance (or {@code null} if no annotation of the given type is present)
      */
-    public abstract <A extends Annotation> A getContainerItemAnnotation(Class<A> annotationClass);
+    public <A extends Annotation> A getContainerItemAnnotation(Class<A> annotationClass) {
+        return this.getContainerItemAnnotation(annotationClass, TypeContext.IGNORE_ANNOTATIONS_ON_ANNOTATIONS);
+    }
+
+    /**
+     * Return the annotation of the given type on the member's container item (i.e. first type parameter if there is one), if such an annotation is
+     * present on either the field or its getter.
+     * <br>
+     * Additionally, also consider annotations on annotations, if the given predicate indicates another annotation as eligible for holding the target.
+     *
+     * @param <A> type of annotation
+     * @param annotationClass type of annotation
+     * @param considerOtherAnnotation check whether some other annotation should also be checked for holding an instance of the target annotation
+     * @return annotation instance (or {@code null} if no annotation of the given type is present)
+     *
+     * @since 4.30.0
+     */
+    public abstract <A extends Annotation> A getContainerItemAnnotation(Class<A> annotationClass, Predicate<Annotation> considerOtherAnnotation);
 
     /**
      * Return the annotation of the given type on the member, if such an annotation is present on either the field or its getter.
@@ -297,7 +335,24 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @param annotationClass type of annotation
      * @return annotation instance (or {@code null} if no annotation of the given type is present)
      */
-    public abstract <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass);
+    public <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass) {
+        return this.getAnnotationConsideringFieldAndGetter(annotationClass, TypeContext.IGNORE_ANNOTATIONS_ON_ANNOTATIONS);
+    }
+
+    /**
+     * Return the annotation of the given type on the member, if such an annotation is present on either the field or its getter.
+     * <br>
+     * Additionally, also consider annotations on annotations, if the given predicate indicates another annotation as eligible for holding the target.
+     *
+     * @param <A> type of annotation
+     * @param annotationClass type of annotation
+     * @param considerOtherAnnotation check whether some other annotation should also be checked for holding an instance of the target annotation
+     * @return annotation instance (or {@code null} if no annotation of the given type is present)
+     *
+     * @since 4.30.0
+     */
+    public abstract <A extends Annotation> A getAnnotationConsideringFieldAndGetter(Class<A> annotationClass,
+            Predicate<Annotation> considerOtherAnnotation);
 
     /**
      * Return the annotation of the given type on the member, if such an annotation is present on either the field or its getter and this is not a
@@ -308,10 +363,28 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @return annotation instance (or {@code null} if no annotation of the given type is present or the look-up is not supported by default)
      */
     public <A extends Annotation> A getAnnotationConsideringFieldAndGetterIfSupported(Class<A> annotationClass) {
+        return this.getAnnotationConsideringFieldAndGetterIfSupported(annotationClass, TypeContext.IGNORE_ANNOTATIONS_ON_ANNOTATIONS);
+    }
+
+    /**
+     * Return the annotation of the given type on the member, if such an annotation is present on either the field or its getter and this is not a
+     * {@link #isFakeContainerItemScope() fake container item scope}.
+     * <br>
+     * Additionally, also consider annotations on annotations, if the given predicate indicates another annotation as eligible for holding the target.
+     *
+     * @param <A> type of annotation
+     * @param annotationClass type of annotation
+     * @param considerOtherAnnotation check whether some other annotation should also be checked for holding an instance of the target annotation
+     * @return annotation instance (or {@code null} if no annotation of the given type is present or the look-up is not supported by default)
+     *
+     * @since 4.30.0
+     */
+    public <A extends Annotation> A getAnnotationConsideringFieldAndGetterIfSupported(Class<A> annotationClass,
+            Predicate<Annotation> considerOtherAnnotation) {
         if (this.isFakeContainerItemScope()) {
             return null;
         }
-        return this.getAnnotationConsideringFieldAndGetter(annotationClass);
+        return this.getAnnotationConsideringFieldAndGetter(annotationClass, considerOtherAnnotation);
     }
 
     /**
@@ -322,7 +395,25 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @param annotationClass type of annotation
      * @return annotation instance (or {@code null} if no annotation of the given type is present)
      */
-    public abstract <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetter(Class<A> annotationClass);
+    public <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetter(Class<A> annotationClass) {
+        return this.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass, TypeContext.IGNORE_ANNOTATIONS_ON_ANNOTATIONS);
+    }
+
+    /**
+     * Return the annotation of the given type on the member's container item (i.e. single type parameter if there is one), if such an annotation is
+     * present on either the field or its getter.
+     * <br>
+     * Additionally, also consider annotations on annotations, if the given predicate indicates another annotation as eligible for holding the target.
+     *
+     * @param <A> type of annotation
+     * @param annotationClass type of annotation
+     * @param considerOtherAnnotation check whether some other annotation should also be checked for holding an instance of the target annotation
+     * @return annotation instance (or {@code null} if no annotation of the given type is present)
+     *
+     * @since 4.30.0
+     */
+    public abstract <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetter(Class<A> annotationClass,
+            Predicate<Annotation> considerOtherAnnotation);
 
     /**
      * Return the annotation of the given type on the member's container item (i.e. single type parameter if there is one), if such an annotation is
@@ -333,13 +424,31 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * @return annotation instance (or {@code null} if no annotation of the given type is present or this look-up is not supported by default )
      */
     public <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetterIfSupported(Class<A> annotationClass) {
+        return this.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(annotationClass, TypeContext.IGNORE_ANNOTATIONS_ON_ANNOTATIONS);
+    }
+
+    /**
+     * Return the annotation of the given type on the member's container item (i.e. single type parameter if there is one), if such an annotation is
+     * present on either the field or its getter and this particular member is either a collection or special generic type (e.g. {@link Optional}).
+     * <br>
+     * Additionally, also consider annotations on annotations, if the given predicate indicates another annotation as eligible for holding the target.
+     *
+     * @param <A> type of annotation
+     * @param annotationClass type of annotation
+     * @param considerOtherAnnotation check whether some other annotation should also be checked for holding an instance of the target annotation
+     * @return annotation instance (or {@code null} if no annotation of the given type is present or this look-up is not supported by default)
+     *
+     * @since 4.30.0
+     */
+    public <A extends Annotation> A getContainerItemAnnotationConsideringFieldAndGetterIfSupported(Class<A> annotationClass,
+            Predicate<Annotation> considerOtherAnnotation) {
         if (this.isFakeContainerItemScope()) {
-            return this.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass);
+            return this.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass, considerOtherAnnotation);
         }
         if (this.getOverriddenType() != null
                 && this.getDeclaredType().getErasedType() == Optional.class
                 && this.getOverriddenType().getErasedType() == this.getDeclaredType().getTypeParameters().get(0).getErasedType()) {
-            return this.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass);
+            return this.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass, considerOtherAnnotation);
         }
         return null;
     }
