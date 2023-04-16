@@ -1,0 +1,10 @@
+{
+    "$schema" : "https://json-schema.org/draft/2019-09/schema",
+    "type" : "object",
+    "properties" : {
+        "title" : {
+            "type" : "string",
+            "minLength" : 1
+        }
+    }
+}
