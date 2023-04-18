@@ -189,7 +189,8 @@ public class JavaxValidationModule implements Module {
         }
         // check that the annotation's validation groups have at least one common entry to the configured groups on this module
         Class<?>[] associatedGroups = validationGroupsLookup.apply(annotation);
-        return associatedGroups.length == 0 || !Collections.disjoint(this.validationGroups, Arrays.asList(associatedGroups));
+        return associatedGroups.length == 0 || Arrays.stream(associatedGroups)
+                .anyMatch(associatedGroup -> this.validationGroups.stream().anyMatch(associatedGroup::isAssignableFrom));
     }
 
     /**
