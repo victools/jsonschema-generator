@@ -16,12 +16,14 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.classmate.AnnotationInclusion;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
+import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
@@ -181,6 +183,15 @@ public interface SchemaGeneratorConfig extends StatefulConfig {
      * @return JSON array node
      */
     ArrayNode createArrayNode();
+
+    /**
+     * Provide the explicit rule overrides of when to include particular annotations (e.g., with or without {@code @Inherited}).
+     *
+     * @return annotation inclusion rules for specific annotation types
+     *
+     * @since 4.31.0
+     */
+    Map<Class<? extends Annotation>, AnnotationInclusion> getAnnotationInclusionOverrides();
 
     /**
      * Implementation of the {@link java.util.Comparator#compare(Object, Object)} interface method to determine the order of fields and methods in an

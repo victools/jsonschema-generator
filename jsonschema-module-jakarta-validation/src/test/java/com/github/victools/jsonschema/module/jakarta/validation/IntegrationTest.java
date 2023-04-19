@@ -91,6 +91,7 @@ public class IntegrationTest {
 
         @Null
         public Object nullObject;
+        public Book inheritedAnnotation;
 
         @NotNull
         public List<@Min(2) @Max(2048) Integer> notNullList;
@@ -133,6 +134,20 @@ public class IntegrationTest {
         @DecimalMin(value = "0", inclusive = false)
         @DecimalMax(value = "1", inclusive = false)
         public double exclusiveRangeDouble;
+    }
+
+    static class Book implements Publication {
+        private String title;
+
+        @Override
+        public String getTitle() {
+            return this.title;
+        }
+    }
+
+    interface Publication {
+        @NotEmpty
+        String getTitle();
     }
 
     @NotNull

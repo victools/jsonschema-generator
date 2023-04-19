@@ -67,7 +67,8 @@ public class AttributeCollectorTest {
                 Stream.of(options).collect(Collectors.toSet()),
                 new SchemaGeneratorGeneralConfigPart(),
                 new SchemaGeneratorConfigPart<>(),
-                new SchemaGeneratorConfigPart<>());
+                new SchemaGeneratorConfigPart<>(),
+                Collections.emptyMap());
         return new SchemaGenerationContextImpl(generatorConfig, TypeContextFactory.createDefaultTypeContext());
     }
 

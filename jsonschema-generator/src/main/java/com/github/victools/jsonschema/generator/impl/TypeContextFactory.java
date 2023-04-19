@@ -92,6 +92,9 @@ public enum TypeContextFactory {
 
     /**
      * Create the a {@link TypeContext} with the given {@link AnnotationConfiguration}.
+     * <br>
+     * Note: when providing an instance of {@link AnnotationConfiguration.StdConfiguration} as first parameter, any configured annotation inclusion
+     * overrides are applied automatically.
      *
      * @param annotationConfig configuration determining which annotations to include during type resolution/introspection
      * @param config configuration to consider

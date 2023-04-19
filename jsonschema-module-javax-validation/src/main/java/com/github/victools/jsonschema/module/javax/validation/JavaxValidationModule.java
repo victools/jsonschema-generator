@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.module.javax.validation;
 
+import com.fasterxml.classmate.AnnotationInclusion;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
@@ -24,13 +25,13 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
-import java.nio.file.DirectoryStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import javax.validation.Constraint;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
@@ -108,6 +109,9 @@ public class JavaxValidationModule implements Module {
         if (this.options.contains(JavaxValidationOption.NOT_NULLABLE_METHOD_IS_REQUIRED)) {
             methodConfigPart.withRequiredCheck(this::isRequired);
         }
+        Stream.of(DecimalMax.class, DecimalMin.class, Email.class, Max.class, Min.class, Negative.class, NegativeOrZero.class,
+                        NotBlank.class, NotEmpty.class, Null.class, NotNull.class, Pattern.class, Positive.class, PositiveOrZero.class, Size.class)
+                .forEach(annotationType -> builder.withAnnotationInclusionOverride(annotationType, AnnotationInclusion.INCLUDE_AND_INHERIT));
     }
 
     /**

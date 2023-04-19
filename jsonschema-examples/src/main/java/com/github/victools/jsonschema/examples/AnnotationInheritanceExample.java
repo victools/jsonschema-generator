@@ -32,8 +32,8 @@ import java.lang.annotation.Inherited;
 
 /**
  * Example created in response to <a href="https://github.com/victools/jsonschema-generator/discussions/333">#333</a>.
- * <br/>
- * Ensuring "type" inclusion on "allOf" parts holding collected attributes, e.g., "additionalProperties".
+ * <br>
+ * Adapted after inheritance is supported out-of-the-box.
  */
 public class AnnotationInheritanceExample implements SchemaGenerationExampleInterface {
 
@@ -42,11 +42,9 @@ public class AnnotationInheritanceExample implements SchemaGenerationExampleInte
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(new JakartaValidationModule());
         SchemaGeneratorConfig config = configBuilder.build();
-        // the default AnnotationInclusion.INCLUDE_AND_INHERIT_IF_INHERITED requires @Inherited on annotations being looked up
-        // using AnnotationInclusion.INCLUDE_AND_INHERIT instead considers all annotations on overridden methods as well
-        SchemaGenerator generator = new SchemaGenerator(config,
-                TypeContextFactory.createTypeContext(AnnotationInclusion.INCLUDE_AND_INHERIT, config));
-        return generator.generateSchema(Book.class);
+        // jakarta (and javax) validation constraints annotations are always inherited (INCLUDE_AND_INHERIT)
+        // there are overrides being applied through the modules (INCLUDE_AND_INHERIT_IF_INHERITED)
+        return new SchemaGenerator(config).generateSchema(Book.class);
     }
 
     static class Book implements Publication {

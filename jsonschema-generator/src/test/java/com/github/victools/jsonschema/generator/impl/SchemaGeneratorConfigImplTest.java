@@ -77,7 +77,7 @@ public class SchemaGeneratorConfigImplTest extends AbstractTypeAwareTest {
         this.enabledOptions = new HashSet<>();
 
         this.instance = new SchemaGeneratorConfigImpl(this.objectMapper, SchemaVersion.DRAFT_2019_09, this.enabledOptions,
-                this.typesInGeneralConfigPart, this.fieldConfigPart, this.methodConfigPart);
+                this.typesInGeneralConfigPart, this.fieldConfigPart, this.methodConfigPart, Collections.emptyMap());
         this.prepareContextForVersion(SchemaVersion.DRAFT_2019_09);
     }
 

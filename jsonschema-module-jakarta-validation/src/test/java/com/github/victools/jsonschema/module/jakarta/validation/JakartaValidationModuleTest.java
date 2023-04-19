@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.module.jakarta.validation;
 
+import com.fasterxml.classmate.AnnotationInclusion;
 import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.InstanceAttributeOverrideV2;
@@ -158,6 +159,9 @@ public class JakartaValidationModuleTest {
         Mockito.verify(this.methodConfigPart).withNumberInclusiveMaximumResolver(Mockito.any());
         Mockito.verify(this.methodConfigPart).withNumberExclusiveMaximumResolver(Mockito.any());
         Mockito.verify(this.methodConfigPart).withInstanceAttributeOverride(Mockito.any(InstanceAttributeOverrideV2.class));
+
+        Mockito.verify(this.configBuilder, Mockito.times(15))
+                .withAnnotationInclusionOverride(Mockito.any(), Mockito.eq(AnnotationInclusion.INCLUDE_AND_INHERIT));
     }
 
     static Stream<Arguments> parametersForTestNullableCheck() {

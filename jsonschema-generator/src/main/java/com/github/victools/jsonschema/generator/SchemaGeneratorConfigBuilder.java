@@ -16,10 +16,12 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.classmate.AnnotationInclusion;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.github.victools.jsonschema.generator.impl.SchemaGeneratorConfigImpl;
+import java.lang.annotation.Annotation;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -57,6 +59,7 @@ public class SchemaGeneratorConfigBuilder {
     private final SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart = new SchemaGeneratorGeneralConfigPart();
     private final SchemaGeneratorConfigPart<FieldScope> fieldConfigPart = new SchemaGeneratorConfigPart<>();
     private final SchemaGeneratorConfigPart<MethodScope> methodConfigPart = new SchemaGeneratorConfigPart<>();
+    private final Map<Class<? extends Annotation>, AnnotationInclusion> annotationInclusionOverrides = new LinkedHashMap<>();
 
     /**
      * Constructor of an empty configuration builder for a {@link SchemaVersion#DRAFT_7 Draft 7} schema. This is equivalent to calling:<br>
@@ -157,7 +160,8 @@ public class SchemaGeneratorConfigBuilder {
                 enabledOptions,
                 this.typesInGeneralConfigPart,
                 this.fieldConfigPart,
-                this.methodConfigPart);
+                this.methodConfigPart,
+                this.annotationInclusionOverrides);
     }
 
     /**
@@ -286,6 +290,20 @@ public class SchemaGeneratorConfigBuilder {
                 this.options.put(additionalSetting, enabled);
             }
         }
+        return this;
+    }
+
+    /**
+     * Register an explicit annotation inclusion rule for a given annotation type.
+     *
+     * @param annotationType type of annotation for which the inclusion behaviour should be overridden
+     * @param override inclusion behaviour to apply for the given annotation type
+     * @return this builder instance (for chaining)
+     *
+     * @since 4.31.0
+     */
+    public SchemaGeneratorConfigBuilder withAnnotationInclusionOverride(Class<? extends Annotation> annotationType, AnnotationInclusion override) {
+        this.annotationInclusionOverrides.put(annotationType, override);
         return this;
     }
 }

@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.module.jakarta.validation;
 
+import com.fasterxml.classmate.AnnotationInclusion;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.FieldScope;
@@ -51,6 +52,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * JSON Schema Generation Module: based on annotations from the {@code jakarta.validation.constraints} package.
@@ -112,6 +114,9 @@ public class JakartaValidationModule implements Module {
         if (this.options.contains(JakartaValidationOption.NOT_NULLABLE_METHOD_IS_REQUIRED)) {
             methodConfigPart.withRequiredCheck(this::isRequired);
         }
+        Stream.of(DecimalMax.class, DecimalMin.class, Email.class, Max.class, Min.class, Negative.class, NegativeOrZero.class,
+                        NotBlank.class, NotEmpty.class, Null.class, NotNull.class, Pattern.class, Positive.class, PositiveOrZero.class, Size.class)
+                .forEach(annotationType -> builder.withAnnotationInclusionOverride(annotationType, AnnotationInclusion.INCLUDE_AND_INHERIT));
     }
 
     /**

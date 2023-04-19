@@ -12,6 +12,16 @@
             "minimum": 7,
             "maximum": 38
         },
+        "inheritedAnnotation": {
+            "type": "object",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            },
+            "required": ["title"]
+        },
         "notBlankText": {
             "type": "string",
             "minLength": 1
