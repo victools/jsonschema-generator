@@ -56,7 +56,7 @@ public class EnumModule implements Module {
 
     /**
      * Factory method: creating an {@link EnumModule} instance that treats all enums as objects but hides all methods declared by the general enum
-     * interface but {@link Enum#name() name()}. Methods and fields (including the enum constants) declared by their sub types are not excluded.
+     * interface but {@link Enum#name() name()}. Methods and fields (including the enum constants) declared by their subtypes are not excluded.
      *
      * @return created module instance
      */
@@ -78,7 +78,7 @@ public class EnumModule implements Module {
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         if (this.enumConstantToString == null) {
-            // ignore all direct enum methods but name() - methods declared by a specific enum sub type are not ignored
+            // ignore all direct enum methods but name() - methods declared by a specific enum subtype are not ignored
             builder.forMethods()
                     .withIgnoreCheck(method -> EnumModule.isEnum(method.getDeclaringType()) && !"name".equals(method.getName()))
                     .withNullableCheck(method -> EnumModule.isEnum(method.getDeclaringType()) ? Boolean.FALSE : null)

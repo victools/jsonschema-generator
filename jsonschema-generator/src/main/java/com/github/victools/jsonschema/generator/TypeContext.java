@@ -51,7 +51,10 @@ public class TypeContext {
      * Constructor.
      *
      * @param annotationConfig annotation configuration to apply when collecting resolved fields and methods
+     *
+     * @deprecated use {@link #TypeContext(AnnotationConfiguration, SchemaGeneratorConfig)} instead
      */
+    @Deprecated
     public TypeContext(AnnotationConfiguration annotationConfig) {
         this(annotationConfig, false);
     }

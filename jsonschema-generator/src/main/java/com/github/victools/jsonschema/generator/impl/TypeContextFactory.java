@@ -24,7 +24,8 @@ import com.github.victools.jsonschema.generator.TypeContext;
 /**
  * Factory class for creating {@link TypeContext} instances.
  */
-public class TypeContextFactory {
+public enum TypeContextFactory {
+    /* using enum type to avoid instantiation */;
 
     /**
      * Create the default {@link TypeContext} with {@link AnnotationInclusion#INCLUDE_AND_INHERIT_IF_INHERITED}.
@@ -32,7 +33,9 @@ public class TypeContextFactory {
      * This is equivalent to calling: {@code TypeContextFactory.createTypeContext(AnnotationInclusion.INCLUDE_AND_INHERIT_IF_INHERITED)}
      *
      * @return created {@link TypeContext} instance
+     * @deprecated use {@link #createDefaultTypeContext(SchemaGeneratorConfig)} instead
      */
+    @Deprecated
     public static TypeContext createDefaultTypeContext() {
         return TypeContextFactory.createTypeContext(AnnotationInclusion.INCLUDE_AND_INHERIT_IF_INHERITED);
     }
@@ -55,7 +58,9 @@ public class TypeContextFactory {
      *
      * @param annotationInclusion indication which annotations to include during type resolution/introspection
      * @return created {@link TypeContext} instance
+     * @deprecated use {@link #createTypeContext(AnnotationInclusion, SchemaGeneratorConfig)} instead
      */
+    @Deprecated
     public static TypeContext createTypeContext(AnnotationInclusion annotationInclusion) {
         return TypeContextFactory.createTypeContext(new AnnotationConfiguration.StdConfiguration(annotationInclusion));
     }
@@ -78,7 +83,9 @@ public class TypeContextFactory {
      *
      * @param annotationConfig configuration determining which annotations to include during type resolution/introspection
      * @return created {@link TypeContext} instance
+     * @deprecated use {@link #createTypeContext(AnnotationConfiguration, SchemaGeneratorConfig)} instead
      */
+    @Deprecated
     public static TypeContext createTypeContext(AnnotationConfiguration annotationConfig) {
         return new TypeContext(annotationConfig);
     }

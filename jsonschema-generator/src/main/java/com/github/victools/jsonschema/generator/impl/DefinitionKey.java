@@ -49,7 +49,7 @@ public class DefinitionKey {
     }
 
     /**
-     * Getter for the a custom definition provider that was the first to be skipped during the generation of the schema definition. Ignoring a custom
+     * Getter for the custom definition provider that was the first to be skipped during the generation of the schema definition. Ignoring a custom
      * definition provider allows for the next custom definition provider to be applied, or if there is none or no custom definition is returned:
      * falling-back on the standard definition for the targeted type.
      *
