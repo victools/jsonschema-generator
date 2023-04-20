@@ -35,6 +35,7 @@ public class ExampleTest {
             ExternalRefAnnotationExample.class,
             ExternalRefPackageExample.class,
             IfThenElseExample.class,
+            JacksonDescriptionAsTitleExample.class,
             JacksonSubtypeDefinitionExample.class,
             StrictTypeInfoExample.class
     })
