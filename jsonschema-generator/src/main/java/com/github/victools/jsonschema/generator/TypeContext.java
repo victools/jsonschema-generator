@@ -51,19 +51,29 @@ public class TypeContext {
      * Constructor.
      *
      * @param annotationConfig annotation configuration to apply when collecting resolved fields and methods
+     *
+     * @deprecated use {@link #TypeContext(AnnotationConfiguration, SchemaGeneratorConfig)} instead
      */
+    @Deprecated
     public TypeContext(AnnotationConfiguration annotationConfig) {
         this(annotationConfig, false);
     }
 
     /**
      * Constructor.
+     * <br>
+     * Note: when providing an instance of {@link AnnotationConfiguration.StdConfiguration} as first parameter, any configured annotation inclusion
+     * overrides are applied automatically.
      *
      * @param annotationConfig annotation configuration to apply when collecting resolved fields and methods
      * @param generatorConfig generator configuration indicating whether argument free methods should be represented as fields
      */
     public TypeContext(AnnotationConfiguration annotationConfig, SchemaGeneratorConfig generatorConfig) {
         this(annotationConfig, generatorConfig.shouldDeriveFieldsFromArgumentFreeMethods());
+        if (annotationConfig instanceof AnnotationConfiguration.StdConfiguration) {
+            generatorConfig.getAnnotationInclusionOverrides()
+                    .forEach(((AnnotationConfiguration.StdConfiguration) annotationConfig)::setInclusion);
+        }
     }
 
     /**

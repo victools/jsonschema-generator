@@ -22,7 +22,8 @@ import java.util.Comparator;
 /**
  * Utility class containing the declaration of the default property sort algorithm and its components.
  */
-public class PropertySortUtils {
+public enum PropertySortUtils {
+    /* using enum type to avoid instantiation */;
 
     /**
      * {@link Comparator} sorting properties: with fields before methods.

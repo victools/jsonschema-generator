@@ -35,7 +35,7 @@ public class SchemaBuilderTest {
         this.config = Mockito.spy(new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(Option.PLAIN_DEFINITION_KEYS)
                 .build());
-        this.typeContext = TypeContextFactory.createDefaultTypeContext();
+        this.typeContext = TypeContextFactory.createDefaultTypeContext(this.config);
     }
 
     @Test

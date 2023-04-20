@@ -103,8 +103,8 @@ public class AdditionalPropertiesModule implements Module {
      * Constructor.
      *
      * @param generalAdditionalPropertiesResolver resolver for additionalProperties of types in general
-     * @param fieldAdditionalPropertiesResolver resolver for additionalPropoerties for fields
-     * @param methodAdditionalPropertiesResolver resolver for additionalPropoerties for methods
+     * @param fieldAdditionalPropertiesResolver resolver for additionalProperties for fields
+     * @param methodAdditionalPropertiesResolver resolver for additionalProperties for methods
      */
     public AdditionalPropertiesModule(ConfigFunction<TypeScope, Type> generalAdditionalPropertiesResolver,
             BiFunction<FieldScope, SchemaGenerationContext, JsonNode> fieldAdditionalPropertiesResolver,

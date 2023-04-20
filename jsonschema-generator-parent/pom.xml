@@ -60,6 +60,7 @@
             <roles>
                 <role>Provided PRs #116 and #118 (part of initial Swagger2Module)</role>
                 <role>Provided implementation for #204 (readOnly/writeOnly in JacksonModule)</role>
+                <role>Provided PR #299 and feedback on final implementation (inheritance of validation constraint annotations)</role>
             </roles>
         </contributor>
         <contributor>

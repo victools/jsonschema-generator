@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.module.javax.validation;
 
+import com.fasterxml.classmate.AnnotationInclusion;
 import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
@@ -155,6 +156,9 @@ public class JavaxValidationModuleTest {
         Mockito.verify(this.methodConfigPart).withNumberExclusiveMinimumResolver(Mockito.any());
         Mockito.verify(this.methodConfigPart).withNumberInclusiveMaximumResolver(Mockito.any());
         Mockito.verify(this.methodConfigPart).withNumberExclusiveMaximumResolver(Mockito.any());
+
+        Mockito.verify(this.configBuilder, Mockito.times(15))
+                .withAnnotationInclusionOverride(Mockito.any(), Mockito.eq(AnnotationInclusion.INCLUDE_AND_INHERIT));
     }
 
     static Stream<Arguments> parametersForTestNullableCheck() {

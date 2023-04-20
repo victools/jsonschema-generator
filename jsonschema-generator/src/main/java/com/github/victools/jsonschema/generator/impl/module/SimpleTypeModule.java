@@ -72,7 +72,7 @@ public class SimpleTypeModule implements Module {
 
     /**
      * Factory method: creating an instance of the {@link SimpleTypeModule} containing mappings for various primitive types and their non-primitive
-     * counter parts (e.g. {@code boolean} and {@code Boolean}) as well as other classes that are normally serialised in a JSON as non-objects, e.g.
+     * counterparts (e.g. {@code boolean} and {@code Boolean}) as well as other classes that are normally serialised in a JSON as non-objects, e.g.
      * <br>{@code BigDecimal}, {@code BigInteger}, {@code UUID}, {@code LocalDate}, {@code LocalDateTime}, and a number of other date-time types.
      *
      * @return created module instance
@@ -241,7 +241,7 @@ public class SimpleTypeModule implements Module {
      * Specifically omit the "additionalProperties" keyword for non-object types.
      *
      * @param scope the scope to check for fixed non-object types
-     * @return either Object.class to cause omission of the "additonalProperties" keyword or null to leave it up to following configurations
+     * @return either {@code Object.class} to cause omission of the "additionalProperties" keyword or null to leave it up to following configurations
      */
     private Type resolveAdditionalProperties(TypeScope scope) {
         if (scope.getType().getTypeParameters().isEmpty()

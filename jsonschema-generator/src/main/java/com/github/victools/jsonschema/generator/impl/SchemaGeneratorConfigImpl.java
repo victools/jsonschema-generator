@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
+import com.fasterxml.classmate.AnnotationInclusion;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +40,7 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeAttributeOverrideV2;
 import com.github.victools.jsonschema.generator.TypeScope;
 import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
+import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,29 +61,29 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     private final SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart;
     private final SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
     private final SchemaGeneratorConfigPart<MethodScope> methodConfigPart;
+    private final Map<Class<? extends Annotation>, AnnotationInclusion> annotationInclusionOverrides;
 
     /**
      * Constructor of a configuration instance.
      *
-     * @param objectMapper supplier for object and array nodes for the JSON structure being generated
-     * @param schemaVersion designated JSON Schema version
-     * @param enabledOptions enabled settings/options (either by default or explicitly set)
+     * @param objectMapper             supplier for object and array nodes for the JSON structure being generated
+     * @param schemaVersion            designated JSON Schema version
+     * @param enabledOptions           enabled settings/options (either by default or explicitly set)
      * @param typesInGeneralConfigPart configuration part for context-independent attribute collection
-     * @param fieldConfigPart configuration part for fields
-     * @param methodConfigPart configuration part for methods
+     * @param fieldConfigPart          configuration part for fields
+     * @param methodConfigPart         configuration part for methods
+     * @param inclusionOverrides       overrides of the rules when to include certain annotations (e.g., with or without {@code @Inherited} annotation
      */
-    public SchemaGeneratorConfigImpl(ObjectMapper objectMapper,
-            SchemaVersion schemaVersion,
-            Set<Option> enabledOptions,
-            SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart,
-            SchemaGeneratorConfigPart<FieldScope> fieldConfigPart,
-            SchemaGeneratorConfigPart<MethodScope> methodConfigPart) {
+    public SchemaGeneratorConfigImpl(ObjectMapper objectMapper, SchemaVersion schemaVersion, Set<Option> enabledOptions,
+            SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart, SchemaGeneratorConfigPart<FieldScope> fieldConfigPart,
+            SchemaGeneratorConfigPart<MethodScope> methodConfigPart, Map<Class<? extends Annotation>, AnnotationInclusion> inclusionOverrides) {
         this.objectMapper = objectMapper;
         this.schemaVersion = schemaVersion;
         this.enabledOptions = enabledOptions;
         this.typesInGeneralConfigPart = typesInGeneralConfigPart;
         this.fieldConfigPart = fieldConfigPart;
         this.methodConfigPart = methodConfigPart;
+        this.annotationInclusionOverrides = inclusionOverrides;
     }
 
     @Override
@@ -194,6 +196,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     @Override
     public ArrayNode createArrayNode() {
         return this.getObjectMapper().createArrayNode();
+    }
+
+    @Override
+    public Map<Class<? extends Annotation>, AnnotationInclusion> getAnnotationInclusionOverrides() {
+        return Collections.unmodifiableMap(this.annotationInclusionOverrides);
     }
 
     @Override
