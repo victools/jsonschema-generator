@@ -386,8 +386,13 @@ public class SchemaCleanUpUtils {
                 // invalid node; abort merge
                 return null;
             }
-            encounteredValues.retainAll(nextValues);
-            if (encounteredValues.isEmpty()) {
+            if (encounteredValues.size() > 1) {
+                encounteredValues.retainAll(nextValues);
+                if (encounteredValues.isEmpty()) {
+                    // invalid merge result: no valid value remained; abort merge
+                    return null;
+                }
+            } else if (!nextValues.contains(encounteredValues.get(0))) {
                 // invalid merge result: no valid value remained; abort merge
                 return null;
             }
