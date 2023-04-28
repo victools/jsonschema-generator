@@ -52,8 +52,23 @@ public class SchemaGeneratorAllOfCleanUpTest {
                                 + "\"allOf\": [{ \"title\":\"same in all three\" }, { \"title\":\"same in all three\" }] }",
                         "{ \"type\": \"object\", \"title\":\"same in all three\" }"),
                     Arguments.of(schemaVersion,
-                        "{ \"type\": \"object\",\"allOf\": [{ \"title\":\"from allOf[0]\" }, { \"description\":\"from allOf[1]\" }] }",
-                        "{ \"type\": \"object\", \"title\":\"from allOf[0]\", \"description\":\"from allOf[1]\" }")
+                        "{ \"type\": \"object\", \"allOf\": [{ \"title\":\"from allOf[0]\" }, { \"description\":\"from allOf[1]\" }] }",
+                        "{ \"type\": \"object\", \"title\":\"from allOf[0]\", \"description\":\"from allOf[1]\" }"),
+                    Arguments.of(schemaVersion,
+                        "{ \"type\": \"object\", \"allOf\": [{ \"type\": [\"object\",\"null\"] }] }",
+                        "{ \"type\": \"object\" }"),
+                    Arguments.of(schemaVersion,
+                        "{ \"type\": [\"object\",\"null\"], \"allOf\": [{ \"type\": \"object\" }] }",
+                        "{ \"type\": \"object\" }"),
+                    Arguments.of(schemaVersion,
+                        "{ \"type\": \"object\", \"allOf\": [{ \"type\": \"null\" }] }",
+                        "{ \"type\": \"object\", \"allOf\": [{ \"type\": \"null\" }] }"),
+                    Arguments.of(schemaVersion,
+                        "{ \"type\": \"object\", \"allOf\": [{ \"type\": [\"string\",\"null\"] }] }",
+                        "{ \"type\": \"object\", \"allOf\": [{ \"type\": [\"string\",\"null\"] }] }"),
+                    Arguments.of(schemaVersion,
+                        "{ \"type\": [\"object\",\"null\"], \"allOf\": [{ \"type\": \"string\" }] }",
+                        "{ \"type\": [\"object\",\"null\"], \"allOf\": [{ \"type\": \"string\" }] }")
                 ))
                 .collect(Collectors.toList());
 
