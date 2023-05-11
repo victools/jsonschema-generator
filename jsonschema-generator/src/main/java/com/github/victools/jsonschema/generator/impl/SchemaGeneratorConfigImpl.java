@@ -155,7 +155,7 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
 
     @Override
     public boolean shouldIncludeStaticFields() {
-        return this.isOptionEnabled(Option.PUBLIC_STATIC_FIELDS) || this.isOptionEnabled(Option.NONPUBLIC_STATIC_FIELDS);
+        return this.isOptionEnabled(Option.PUBLIC_STATIC_FIELDS) || this.isOptionEnabled(Option.NONPUBLIC_STATIC_FIELDS) || this.isOptionEnabled(Option.VALUES_FROM_CONSTANT_FIELDS);
     }
 
     @Override
