@@ -32,11 +32,13 @@ import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.TypeScope;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -60,6 +62,7 @@ public class Swagger2Module implements Module {
     private void applyToConfigBuilder(SchemaGeneratorGeneralConfigPart configPart) {
         configPart.withDescriptionResolver(this.createTypePropertyResolver(Schema::description, description -> !description.isEmpty()));
         configPart.withTitleResolver(this.createTypePropertyResolver(Schema::title, title -> !title.isEmpty()));
+        configPart.withAdditionalPropertiesResolver(this.createTypePropertyResolver(this::mapAdditionalPropertiesEnumValue, Objects::nonNull));
 
         configPart.withCustomDefinitionProvider(new ExternalRefCustomDefinitionProvider());
         configPart.withSubtypeResolver(new Swagger2SubtypeResolver());
@@ -177,6 +180,30 @@ public class Swagger2Module implements Module {
     protected boolean checkNullable(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::nullable, Boolean.TRUE::equals)
                 .isPresent();
+    }
+
+    /**
+     * Derive the allowed type of a schema's additional properties from the given annotation.
+     *
+     * @param annotation annotation to check
+     * @return {@code Object.class} (if true or an external "$ref" is specified), {@code Void.class} (if forbidden) or {@code null} (if undefined)
+     */
+    protected Type mapAdditionalPropertiesEnumValue(Schema annotation) {
+        if (!annotation.ref().isEmpty()) {
+            // prevent invalid combination of "$ref" with "additionalProperties": false
+            return Object.class;
+        }
+        switch (annotation.additionalProperties()) {
+        case TRUE:
+            // allow any additional properties
+            return Object.class;
+        case FALSE:
+            // block any additional properties
+            return Void.class;
+        default:
+            // fall-back on other configuration, e.g., as per Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT
+            return null;
+        }
     }
 
     /**
