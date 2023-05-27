@@ -40,5 +40,6 @@
         "test": {
             "$ref": "./TestClass-schema.json"
         }
-    }
+    },
+    "additionalProperties": false
 }

@@ -16,12 +16,14 @@
 
 package com.github.victools.jsonschema.module.swagger2;
 
+import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.InstanceAttributeOverrideV2;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
+import java.util.function.BiFunction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,6 +71,8 @@ public class Swagger2ModuleTest {
 
         Mockito.verify(this.typesInGeneralConfigPart).withDescriptionResolver(Mockito.any());
         Mockito.verify(this.typesInGeneralConfigPart).withTitleResolver(Mockito.any());
+        Mockito.verify(this.typesInGeneralConfigPart).withAdditionalPropertiesResolver(Mockito.any(ConfigFunction.class));
+        Mockito.verify(this.typesInGeneralConfigPart).withAdditionalPropertiesResolver(Mockito.any(BiFunction.class));
         Mockito.verify(this.typesInGeneralConfigPart).withCustomDefinitionProvider(Mockito.any(ExternalRefCustomDefinitionProvider.class));
         Mockito.verify(this.typesInGeneralConfigPart).withSubtypeResolver(Mockito.any(Swagger2SubtypeResolver.class));
         Mockito.verify(this.typesInGeneralConfigPart).getDefinitionNamingStrategy();

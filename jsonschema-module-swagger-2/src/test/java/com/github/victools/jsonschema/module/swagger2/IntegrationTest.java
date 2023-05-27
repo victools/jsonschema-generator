@@ -133,12 +133,14 @@ public class IntegrationTest {
         }
     }
 
+    @Schema(additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
     static class Foo {
 
         @Schema(implementation = PersonReference.class, accessMode = Schema.AccessMode.WRITE_ONLY)
         private Reference<Person> person;
 
-        @Schema(ref = "http://example.com/bar", accessMode = Schema.AccessMode.READ_ONLY)
+        @Schema(ref = "http://example.com/bar", accessMode = Schema.AccessMode.READ_ONLY,
+                additionalProperties = Schema.AdditionalPropertiesValue.TRUE)
         private Object bar;
 
         @Schema(anyOf = {Double.class, Integer.class})
@@ -147,6 +149,8 @@ public class IntegrationTest {
         @Schema(oneOf = {Boolean.class, String.class})
         private Object oneOfBooleanOrString;
 
+        // on a member, the "additionalProperties" attribute is ignored
+        @Schema(additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
         private TestClass test;
     }
 }
