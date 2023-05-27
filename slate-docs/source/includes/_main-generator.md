@@ -124,7 +124,7 @@ configBuilder.without(
     <tr>
       <td>
         Attempt to load the values of <code>static</code> <code>final</code> fields, serialize them via the <code>ObjectMapper</code> and include them as the respective schema's <code>const</code> value.
-        <aside class="notice">For this option to take effect, those <code>static</code> <code>final</code> fields need to be included via <code>Option.PUBLIC_STATIC_FIELDS</code> and/or <code>Option.NONPUBLIC_STATIC_FIELDS</code>.</aside>
+        <div>For this option to take effect, those <code>static</code> <code>final</code> fields need to be included via <code>Option.PUBLIC_STATIC_FIELDS</code> and/or <code>Option.NONPUBLIC_STATIC_FIELDS</code>.</div>
       </td>
       <td>No <code>const</code> values are populated for <code>static</code> <code>final</code> fields.</td>
     </tr>
