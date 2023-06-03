@@ -37,7 +37,8 @@ public class ExampleTest {
             IfThenElseExample.class,
             JacksonDescriptionAsTitleExample.class,
             JacksonSubtypeDefinitionExample.class,
-            StrictTypeInfoExample.class
+            StrictTypeInfoExample.class,
+            SubtypeLookUpExample.class
     })
     public void testExample(Class<? extends SchemaGenerationExampleInterface> exampleType) throws Exception {
         SchemaGenerationExampleInterface exampleImplementation = exampleType.getDeclaredConstructor().newInstance();
