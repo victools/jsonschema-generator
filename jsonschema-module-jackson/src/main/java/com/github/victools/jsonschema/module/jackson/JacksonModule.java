@@ -196,11 +196,22 @@ public class JacksonModule implements Module {
         if (annotation != null) {
             String nameOverride = annotation.value();
             // check for invalid overrides
-            if (nameOverride != null && !nameOverride.isEmpty() && !nameOverride.equals(member.getDeclaredName())) {
+            if (isValidNameOverride(member, nameOverride)) {
                 return nameOverride;
             }
         }
         return null;
+    }
+
+    /**
+     * Checks whether the potential name override is valid for the specified member
+     *
+     * @param member field/method to override
+     * @param nameOverride the name that will override the original name of the member
+     * @return true if the specified override is valid for the member, false otherwise
+     */
+    protected static boolean isValidNameOverride(MemberScope<?, ?> member, String nameOverride) {
+        return nameOverride != null && !nameOverride.isEmpty() && !nameOverride.equals(member.getDeclaredName());
     }
 
     /**
