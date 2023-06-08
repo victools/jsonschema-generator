@@ -3,11 +3,10 @@ package com.github.victools.jsonschema.module.jackson;
 import com.fasterxml.classmate.members.RawField;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.victools.jsonschema.generator.MemberScope;
-import kotlin.Metadata;
-
 import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.OptionalInt;
+import kotlin.Metadata;
 
 public class KotlinJacksonModule extends JacksonModule {
     /**

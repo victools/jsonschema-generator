@@ -204,7 +204,7 @@ public class JacksonModule implements Module {
     }
 
     /**
-     * Checks whether the potential name override is valid for the specified member
+     * Checks whether the potential name override is valid for the specified member.
      *
      * @param member field/method to override
      * @param nameOverride the name that will override the original name of the member
