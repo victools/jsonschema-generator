@@ -75,6 +75,9 @@
                     "type": "string"
                 }
             }
+        },
+        "unwrappedProperty": {
+            "type": "string"
         }
     },
     "description": "test description"
