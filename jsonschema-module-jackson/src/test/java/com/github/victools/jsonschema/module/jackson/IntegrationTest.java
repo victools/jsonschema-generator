@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -97,6 +98,9 @@ public class IntegrationTest {
 
         public BaseType interfaceWithDeclaredSubtypes;
 
+        @JsonUnwrapped
+        public TypeToBeUnwrapped typeToBeUnwrapped;
+
         public String ignoredUnannotatedMethod() {
             return "nothing";
         }
@@ -150,5 +154,9 @@ public class IntegrationTest {
 
     static class SubType2 implements BaseType {
         public BaseType recursiveBaseReference;
+    }
+
+    static class TypeToBeUnwrapped {
+        public String unwrappedProperty;
     }
 }

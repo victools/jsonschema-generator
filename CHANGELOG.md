@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-module-jackson`
+#### Added
+- elevate nested properties to the parent type where members are annotated with `@JsonUnwrapped`
+
 ### `jsonschema-module-swagger-2`
 #### Added
 - consider `@Schema(additionalProperties = ...)` attribute (only values `TRUE` and `FALSE`), when it is annotated on a type (not on a member)

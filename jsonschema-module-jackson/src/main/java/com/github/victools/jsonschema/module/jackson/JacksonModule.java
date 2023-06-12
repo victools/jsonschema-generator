@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -126,6 +127,8 @@ public class JacksonModule implements Module {
                 methodConfigPart.withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
             }
         }
+
+        generalConfigPart.withCustomDefinitionProvider(new JsonUnwrappedDefinitionProvider());
     }
 
     /**
@@ -268,6 +271,12 @@ public class JacksonModule implements Module {
         if (field.getAnnotationConsideringFieldAndGetterIfSupported(JsonBackReference.class) != null) {
             return true;
         }
+        // @since 4.32.0
+        JsonUnwrapped unwrappedAnnotation = field.getAnnotationConsideringFieldAndGetterIfSupported(JsonUnwrapped.class);
+        if (unwrappedAnnotation != null && unwrappedAnnotation.enabled()) {
+            // unwrapped properties should be ignored here, as they are included in their unwrapped form
+            return true;
+        }
         // instead of re-creating the various ways a property may be included/excluded in jackson: just use its built-in introspection
         HierarchicType topMostHierarchyType = field.getDeclaringTypeMembers().allTypesAndOverrides().get(0);
         BeanDescription beanDescription = this.getBeanDescriptionForClass(topMostHierarchyType.getType());
@@ -293,10 +302,17 @@ public class JacksonModule implements Module {
      */
     protected boolean shouldIgnoreMethod(MethodScope method) {
         FieldScope getterField = method.findGetterField();
-        if (getterField != null && this.shouldIgnoreField(getterField)) {
-            return true;
-        }
-        if (getterField == null && method.getAnnotationConsideringFieldAndGetterIfSupported(JsonBackReference.class) != null) {
+        if (getterField == null) {
+            if (method.getAnnotationConsideringFieldAndGetterIfSupported(JsonBackReference.class) != null) {
+                return true;
+            }
+            // @since 4.32.0
+            JsonUnwrapped unwrappedAnnotation = method.getAnnotationConsideringFieldAndGetterIfSupported(JsonUnwrapped.class);
+            if (unwrappedAnnotation != null && unwrappedAnnotation.enabled()) {
+                // unwrapped properties should be ignored here, as they are included in their unwrapped form
+                return true;
+            }
+        } else if (this.shouldIgnoreField(getterField)) {
             return true;
         }
         return this.options.contains(JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS)
