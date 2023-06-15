@@ -13,8 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - consider `@Schema(additionalProperties = ...)` attribute (only values `TRUE` and `FALSE`), when it is annotated on a type (not on a member)
 
-#### Changed
-- when taking over the value from `@Schema(multipleOf)`, rounding to 10 decimal digits by default (can be configured)
+#### Fixed
+- avoid rounding error when taking over the value from `@Schema(multipleOf)`
 
 ## [4.31.1] - 2023-04-28
 ### `jsonschema-generator`

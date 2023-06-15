@@ -53,19 +53,6 @@ import java.util.stream.Stream;
  */
 public class Swagger2Module implements Module {
 
-    private int scaleMultipleOf = 10;
-
-    /**
-     * Setter for the maximum number of decimal digits to preserve when converting the {@code @Schema(multipleOf)} into a {@link BigDecimal}.
-     *
-     * @param scaleMultipleOf maximum number of decimal digits (trailing zeros will be removed, which may reduce the actual number of decimal digits)
-     *
-     * @since 4.32.0
-     */
-    public void setScaleMultipleOf(int scaleMultipleOf) {
-        this.scaleMultipleOf = scaleMultipleOf;
-    }
-
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
         this.applyToConfigBuilder(builder.forTypesInGeneral());
@@ -317,8 +304,7 @@ public class Swagger2Module implements Module {
      */
     protected BigDecimal resolveMultipleOf(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::multipleOf, multipleOf -> multipleOf != 0)
-                .map(BigDecimal::new)
-                .map(value -> value.setScale(this.scaleMultipleOf, RoundingMode.HALF_UP).stripTrailingZeros())
+                .map(BigDecimal::valueOf)
                 .orElse(null);
     }
 
