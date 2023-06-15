@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - consider `@Schema(additionalProperties = ...)` attribute (only values `TRUE` and `FALSE`), when it is annotated on a type (not on a member)
 
+#### Fixed
+- avoid rounding error when taking over the value from `@Schema(multipleOf)`
+
 ## [4.31.1] - 2023-04-28
 ### `jsonschema-generator`
 #### Fixed

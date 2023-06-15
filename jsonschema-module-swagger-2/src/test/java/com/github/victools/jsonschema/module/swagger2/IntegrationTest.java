@@ -18,6 +18,7 @@ package com.github.victools.jsonschema.module.swagger2;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Scanner;
@@ -96,10 +97,10 @@ public class IntegrationTest {
         @Schema(description = "field description", nullable = true, allowableValues = {"A", "B", "C", "D"}, minLength = 1, maxLength = 1)
         public String fieldWithDescriptionAndAllowableValues;
 
-        @Schema(minimum = "15", maximum = "20")
-        public int fieldWithInclusiveNumericRange;
+        @Schema(minimum = "15", maximum = "20", multipleOf = 0.0123456789)
+        public BigDecimal fieldWithInclusiveNumericRange;
 
-        @Schema(minimum = "14", maximum = "21", exclusiveMinimum = true, exclusiveMaximum = true, required = true)
+        @Schema(minimum = "14", maximum = "21", exclusiveMinimum = true, exclusiveMaximum = true, required = true, multipleOf = 0.1)
         public int fieldWithExclusiveNumericRange;
     }
 

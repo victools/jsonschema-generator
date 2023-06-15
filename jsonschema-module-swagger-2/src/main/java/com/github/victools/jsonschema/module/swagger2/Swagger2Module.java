@@ -303,7 +303,7 @@ public class Swagger2Module implements Module {
      */
     protected BigDecimal resolveMultipleOf(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::multipleOf, multipleOf -> multipleOf != 0)
-                .map(BigDecimal::new)
+                .map(BigDecimal::valueOf)
                 .orElse(null);
     }
 
