@@ -129,24 +129,25 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
             return null;
         }
         String methodName = this.getDeclaredName();
-        String fieldName;
+        List<String> possibleFieldNames;
         if (methodName.startsWith("get") && methodName.length() > 3 && Character.isUpperCase(methodName.charAt(3))) {
             // ensure that the variable starts with a lower-case letter
-            fieldName = methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
+            possibleFieldNames = Arrays.asList(methodName.substring(3, 4).toLowerCase() + methodName.substring(4));
         } else if (methodName.startsWith("is") && methodName.length() > 2 && Character.isUpperCase(methodName.charAt(2))) {
-            // ensure that the variable starts with a lower-case letter
-            fieldName = methodName.substring(2, 3).toLowerCase() + methodName.substring(3);
+            possibleFieldNames = Arrays.asList(
+                    // since 4.32.0: a method "isBool()" is considered a possible getter for a field "isBool" as well as for "bool"
+                    methodName,
+                    // ensure that the variable starts with a lower-case letter
+                    methodName.substring(2, 3).toLowerCase() + methodName.substring(3)
+            );
         } else {
             // method name does not fall into getter conventions
-            fieldName = null;
-        }
-        if (fieldName == null) {
             return null;
         }
         // method name matched getter conventions
         // check whether a matching field exists
         return Stream.of(this.getDeclaringTypeMembers().getMemberFields())
-                .filter(memberField -> memberField.getName().equals(fieldName))
+                .filter(memberField -> possibleFieldNames.contains(memberField.getName()))
                 .findFirst()
                 .map(field -> this.getContext().createFieldScope(field, this.getDeclaringTypeMembers()))
                 .orElse(null);

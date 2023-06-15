@@ -24,6 +24,8 @@ import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -112,14 +114,20 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
      * @return public getter from within the field's declaring class
      */
     private MethodScope doFindGetter() {
-        String capitalisedFieldName = this.getDeclaredName().substring(0, 1).toUpperCase() + this.getDeclaredName().substring(1);
-        String getterName1 = "get" + capitalisedFieldName;
-        String getterName2 = "is" + capitalisedFieldName;
+        String declaredName = this.getDeclaredName();
+        String capitalisedFieldName = declaredName.substring(0, 1).toUpperCase() + declaredName.substring(1);
+        List<String> possibleGetterNames = new ArrayList<>(3);
+        possibleGetterNames.add("get" + capitalisedFieldName);
+        possibleGetterNames.add("is" + capitalisedFieldName);
+        // since 4.32.0
+        if (declaredName.startsWith("is") && declaredName.length() > 2 && Character.isUpperCase(declaredName.charAt(2))) {
+            // for a field like "isBool" also consider "isBool()" as potential getter method
+            possibleGetterNames.add(declaredName);
+        }
         ResolvedMethod[] methods = this.getDeclaringTypeMembers().getMemberMethods();
         return Stream.of(methods)
-                .filter(method -> method.getRawMember().getParameterCount() == 0)
-                .filter(ResolvedMethod::isPublic)
-                .filter(method -> method.getName().equals(getterName1) || method.getName().equals(getterName2))
+                .filter(method -> method.isPublic() && method.getRawMember().getParameterCount() == 0)
+                .filter(method -> possibleGetterNames.contains(method.getName()))
                 .findFirst()
                 .map(method -> this.getContext().createMethodScope(method, this.getDeclaringTypeMembers()))
                 .orElse(null);

@@ -49,7 +49,9 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
             Arguments.of("fieldWithPrivateGetter", null, null),
             Arguments.of("fieldWithPublicGetter", null, "getFieldWithPublicGetter"),
             Arguments.of("fieldWithPublicGetter", "fieldWithoutGetter", "getFieldWithPublicGetter"),
-            Arguments.of("fieldWithPublicBooleanGetter", null, "isFieldWithPublicBooleanGetter")
+            Arguments.of("fieldWithPublicBooleanGetter", null, "isFieldWithPublicBooleanGetter"),
+            Arguments.of("isFieldWithMatchingGetter", null, "isFieldWithMatchingGetter"),
+            Arguments.of("isFieldWithMatchingGetter", "fieldWithPublicGetter", "isFieldWithMatchingGetter")
         );
     }
 
@@ -107,6 +109,7 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
         private int fieldWithPrivateGetter;
         private long fieldWithPublicGetter;
         private boolean fieldWithPublicBooleanGetter;
+        private boolean isFieldWithMatchingGetter;
 
         private int getFieldWithPrivateGetter() {
             return this.fieldWithPrivateGetter;
@@ -119,6 +122,10 @@ public class FieldScopeTest extends AbstractTypeAwareTest {
         @TestAnnotation
         public boolean isFieldWithPublicBooleanGetter() {
             return this.fieldWithPublicBooleanGetter;
+        }
+
+        public boolean isFieldWithMatchingGetter() {
+            return this.isFieldWithMatchingGetter;
         }
     }
 
