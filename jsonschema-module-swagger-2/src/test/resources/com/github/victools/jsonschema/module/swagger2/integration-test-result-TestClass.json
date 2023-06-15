@@ -12,12 +12,14 @@
         "fieldWithExclusiveNumericRange": {
             "type": "integer",
             "exclusiveMinimum": 14,
-            "exclusiveMaximum": 21
+            "exclusiveMaximum": 21,
+            "multipleOf": 0.1
         },
         "fieldWithInclusiveNumericRange": {
-            "type": "integer",
+            "type": "number",
             "minimum": 15,
-            "maximum": 20
+            "maximum": 20,
+            "multipleOf": 0.0123456789
         },
         "fieldWithOverriddenName": {
             "minItems": 1,

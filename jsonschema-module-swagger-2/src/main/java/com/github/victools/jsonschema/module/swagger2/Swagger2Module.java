@@ -34,6 +34,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -51,6 +52,19 @@ import java.util.stream.Stream;
  * @since 4.13.0
  */
 public class Swagger2Module implements Module {
+
+    private int scaleMultipleOf = 10;
+
+    /**
+     * Setter for the maximum number of decimal digits to preserve when converting the {@code @Schema(multipleOf)} into a {@link BigDecimal}.
+     *
+     * @param scaleMultipleOf maximum number of decimal digits (trailing zeros will be removed, which may reduce the actual number of decimal digits)
+     *
+     * @since 4.32.0
+     */
+    public void setScaleMultipleOf(int scaleMultipleOf) {
+        this.scaleMultipleOf = scaleMultipleOf;
+    }
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
@@ -304,6 +318,7 @@ public class Swagger2Module implements Module {
     protected BigDecimal resolveMultipleOf(MemberScope<?, ?> member) {
         return this.getSchemaAnnotationValue(member, Schema::multipleOf, multipleOf -> multipleOf != 0)
                 .map(BigDecimal::new)
+                .map(value -> value.setScale(this.scaleMultipleOf, RoundingMode.HALF_UP).stripTrailingZeros())
                 .orElse(null);
     }
 
