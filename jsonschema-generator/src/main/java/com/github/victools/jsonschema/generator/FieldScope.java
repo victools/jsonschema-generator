@@ -115,13 +115,18 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
      */
     private MethodScope doFindGetter() {
         String declaredName = this.getDeclaredName();
+        List<String> possibleGetterNames = new ArrayList<>(5);
+        // @since 4.32.0 - for a field like "xIndex" also consider "getxIndex()" as getter method (according to JavaBeans specification)
+        if (declaredName.length() > 1 && Character.isUpperCase(declaredName.charAt(1))) {
+            possibleGetterNames.add("get" + declaredName);
+            possibleGetterNames.add("is" + declaredName);
+        }
+        // common naming convention: capitalise first character and leave the rest as-is
         String capitalisedFieldName = declaredName.substring(0, 1).toUpperCase() + declaredName.substring(1);
-        List<String> possibleGetterNames = new ArrayList<>(3);
         possibleGetterNames.add("get" + capitalisedFieldName);
         possibleGetterNames.add("is" + capitalisedFieldName);
-        // since 4.32.0
+        // @since 4.32.0 - for a field like "isBool" also consider "isBool()" as potential getter method
         if (declaredName.startsWith("is") && declaredName.length() > 2 && Character.isUpperCase(declaredName.charAt(2))) {
-            // for a field like "isBool" also consider "isBool()" as potential getter method
             possibleGetterNames.add(declaredName);
         }
         ResolvedMethod[] methods = this.getDeclaringTypeMembers().getMemberMethods();

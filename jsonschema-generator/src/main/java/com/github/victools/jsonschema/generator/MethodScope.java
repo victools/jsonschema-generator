@@ -23,6 +23,7 @@ import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
@@ -129,18 +130,29 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
             return null;
         }
         String methodName = this.getDeclaredName();
-        List<String> possibleFieldNames;
-        if (methodName.startsWith("get") && methodName.length() > 3 && Character.isUpperCase(methodName.charAt(3))) {
-            // ensure that the variable starts with a lower-case letter
-            possibleFieldNames = Arrays.asList(methodName.substring(3, 4).toLowerCase() + methodName.substring(4));
-        } else if (methodName.startsWith("is") && methodName.length() > 2 && Character.isUpperCase(methodName.charAt(2))) {
-            possibleFieldNames = Arrays.asList(
-                    // since 4.32.0: a method "isBool()" is considered a possible getter for a field "isBool" as well as for "bool"
-                    methodName,
-                    // ensure that the variable starts with a lower-case letter
-                    methodName.substring(2, 3).toLowerCase() + methodName.substring(3)
-            );
-        } else {
+        List<String> possibleFieldNames = new ArrayList<>(3);
+        if (methodName.startsWith("get")) {
+            if (methodName.length() > 3 && Character.isUpperCase(methodName.charAt(3))) {
+                // ensure that the variable starts with a lower-case letter
+                possibleFieldNames.add(methodName.substring(3, 4).toLowerCase() + methodName.substring(4));
+            }
+            // @since 4.32.0 - conforming with JavaBeans API specification edge case when second character in field name is in uppercase
+            if (methodName.length() > 4 && Character.isUpperCase(methodName.charAt(4))) {
+                possibleFieldNames.add(methodName.substring(3));
+            }
+        } else if (methodName.startsWith("is")) {
+            if (methodName.length() > 2 && Character.isUpperCase(methodName.charAt(2))) {
+                // ensure that the variable starts with a lower-case letter
+                possibleFieldNames.add(methodName.substring(2, 3).toLowerCase() + methodName.substring(3));
+                // since 4.32.0: a method "isBool()" is considered a possible getter for a field "isBool" as well as for "bool"
+                possibleFieldNames.add(methodName);
+            }
+            // @since 4.32.0 - conforming with JavaBeans API specification edge case when second character in field name is in uppercase
+            if (methodName.length() > 3 && Character.isUpperCase(methodName.charAt(3))) {
+                possibleFieldNames.add(methodName.substring(2));
+            }
+        }
+        if (possibleFieldNames.isEmpty()) {
             // method name does not fall into getter conventions
             return null;
         }

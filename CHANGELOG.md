@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### `jsonschema-generator`
 #### Changed
+- consider JavaBeans API specification in getter naming convention for field names with the second character being uppercase (e.g., a field `xIndex` has the getter `getxIndex()` according to the specification)
 - allow for field names starting with `is` to have getter of the same name (e.g., a field `isBool` may have the getter `isBool()`)
 
 ### `jsonschema-module-jackson`
