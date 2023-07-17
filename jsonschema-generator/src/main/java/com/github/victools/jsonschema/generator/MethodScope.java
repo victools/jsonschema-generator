@@ -23,9 +23,10 @@ import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -130,7 +131,7 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
             return null;
         }
         String methodName = this.getDeclaredName();
-        List<String> possibleFieldNames = new ArrayList<>(3);
+        Set<String> possibleFieldNames = new HashSet<>(3);
         if (methodName.startsWith("get")) {
             if (methodName.length() > 3 && Character.isUpperCase(methodName.charAt(3))) {
                 // ensure that the variable starts with a lower-case letter

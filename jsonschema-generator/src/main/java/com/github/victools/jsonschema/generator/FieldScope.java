@@ -24,8 +24,8 @@ import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -115,7 +115,7 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
      */
     private MethodScope doFindGetter() {
         String declaredName = this.getDeclaredName();
-        List<String> possibleGetterNames = new ArrayList<>(5);
+        Set<String> possibleGetterNames = new HashSet<>(5);
         // @since 4.32.0 - for a field like "xIndex" also consider "getxIndex()" as getter method (according to JavaBeans specification)
         if (declaredName.length() > 1 && Character.isUpperCase(declaredName.charAt(1))) {
             possibleGetterNames.add("get" + declaredName);
