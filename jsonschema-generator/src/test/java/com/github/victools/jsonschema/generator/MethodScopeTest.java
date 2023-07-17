@@ -50,6 +50,12 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
             Arguments.of("getFieldWithPublicGetter", "getFieldWithPrivateGetter", "fieldWithPublicGetter"),
             Arguments.of("isFieldWithPublicBooleanGetter", null, "fieldWithPublicBooleanGetter"),
             Arguments.of("isFieldWithPublicBooleanGetter", "isBehavingSomehow", "fieldWithPublicBooleanGetter"),
+            Arguments.of("isFieldWithMatchingPublicGetter", null, "isFieldWithMatchingPublicGetter"),
+            Arguments.of("isFieldWithMatchingPublicGetter", "isFieldWithPublicBooleanGetter", "isFieldWithMatchingPublicGetter"),
+            Arguments.of("getaFieldWithJavaBeansConformingGetter", null, "aFieldWithJavaBeansConformingGetter"),
+            Arguments.of("getAFieldWithJavaBeansNonConformingGetter", null, "aFieldWithJavaBeansNonConformingGetter"),
+            Arguments.of("isaFieldWithJavaBeansConformingBooleanGetter", null, "aFieldWithJavaBeansConformingBooleanGetter"),
+            Arguments.of("isAFieldWithJavaBeansNonConformingBooleanGetter", null, "aFieldWithJavaBeansNonConformingBooleanGetter"),
             Arguments.of("getCalculatedValue", null, null),
             Arguments.of("isBehavingSomehow", null, null),
             Arguments.of("isBehavingSomehow", "isFieldWithPublicBooleanGetter", null),
@@ -116,6 +122,11 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
         private long fieldWithPublicGetter;
         @TestAnnotation
         private boolean fieldWithPublicBooleanGetter;
+        private boolean isFieldWithMatchingPublicGetter;
+        private int aFieldWithJavaBeansConformingGetter;
+        private long aFieldWithJavaBeansNonConformingGetter;
+        private boolean aFieldWithJavaBeansConformingBooleanGetter;
+        private boolean aFieldWithJavaBeansNonConformingBooleanGetter;
 
         @TestAnnotation
         private int getFieldWithPrivateGetter() {
@@ -128,6 +139,26 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
 
         public boolean isFieldWithPublicBooleanGetter() {
             return this.fieldWithPublicBooleanGetter;
+        }
+
+        public boolean isFieldWithMatchingPublicGetter() {
+            return this.isFieldWithMatchingPublicGetter;
+        }
+
+        public int getaFieldWithJavaBeansConformingGetter() {
+            return this.aFieldWithJavaBeansConformingGetter;
+        }
+
+        public long getAFieldWithJavaBeansNonConformingGetter() {
+            return this.aFieldWithJavaBeansNonConformingGetter;
+        }
+
+        public boolean isaFieldWithJavaBeansConformingBooleanGetter() {
+            return this.aFieldWithJavaBeansConformingBooleanGetter;
+        }
+
+        public boolean isAFieldWithJavaBeansNonConformingBooleanGetter() {
+            return this.aFieldWithJavaBeansNonConformingBooleanGetter;
         }
 
         public double getCalculatedValue() {

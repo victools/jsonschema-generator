@@ -24,6 +24,8 @@ import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -112,14 +114,25 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
      * @return public getter from within the field's declaring class
      */
     private MethodScope doFindGetter() {
-        String capitalisedFieldName = this.getDeclaredName().substring(0, 1).toUpperCase() + this.getDeclaredName().substring(1);
-        String getterName1 = "get" + capitalisedFieldName;
-        String getterName2 = "is" + capitalisedFieldName;
+        String declaredName = this.getDeclaredName();
+        Set<String> possibleGetterNames = new HashSet<>(5);
+        // @since 4.32.0 - for a field like "xIndex" also consider "getxIndex()" as getter method (according to JavaBeans specification)
+        if (declaredName.length() > 1 && Character.isUpperCase(declaredName.charAt(1))) {
+            possibleGetterNames.add("get" + declaredName);
+            possibleGetterNames.add("is" + declaredName);
+        }
+        // common naming convention: capitalise first character and leave the rest as-is
+        String capitalisedFieldName = declaredName.substring(0, 1).toUpperCase() + declaredName.substring(1);
+        possibleGetterNames.add("get" + capitalisedFieldName);
+        possibleGetterNames.add("is" + capitalisedFieldName);
+        // @since 4.32.0 - for a field like "isBool" also consider "isBool()" as potential getter method
+        if (declaredName.startsWith("is") && declaredName.length() > 2 && Character.isUpperCase(declaredName.charAt(2))) {
+            possibleGetterNames.add(declaredName);
+        }
         ResolvedMethod[] methods = this.getDeclaringTypeMembers().getMemberMethods();
         return Stream.of(methods)
-                .filter(method -> method.getRawMember().getParameterCount() == 0)
-                .filter(ResolvedMethod::isPublic)
-                .filter(method -> method.getName().equals(getterName1) || method.getName().equals(getterName2))
+                .filter(method -> method.isPublic() && method.getRawMember().getParameterCount() == 0)
+                .filter(method -> possibleGetterNames.contains(method.getName()))
                 .findFirst()
                 .map(method -> this.getContext().createMethodScope(method, this.getDeclaringTypeMembers()))
                 .orElse(null);

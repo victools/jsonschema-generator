@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Changed
+- consider JavaBeans API specification in getter naming convention for field names with the second character being uppercase (e.g., a field `xIndex` has the getter `getxIndex()` according to the specification)
+- allow for field names starting with `is` to have getter of the same name (e.g., a field `isBool` may have the getter `isBool()`)
+
 ### `jsonschema-module-jackson`
 #### Added
 - elevate nested properties to the parent type where members are annotated with `@JsonUnwrapped`
