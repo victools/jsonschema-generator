@@ -15,8 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - elevate nested properties to the parent type where members are annotated with `@JsonUnwrapped`
 
 ### `jsonschema-module-swagger-2`
+***NOTE: `io.swagger.core.v3:swagger-annotations` minimum version is now `2.2.5`!***
 #### Added
 - consider `@Schema(additionalProperties = ...)` attribute (only values `TRUE` and `FALSE`), when it is annotated on a type (not on a member)
+- consider `@Schema(requiredMode = REQUIRED)` in addition to deprecated `@Schema(required = true)`
 
 #### Fixed
 - avoid rounding error when taking over the value from `@Schema(multipleOf)`

@@ -28,7 +28,7 @@ SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(Sc
 14. From `@Schema(anyOf = …)` on fields/methods, include `"anyOf"` parts.
 15. From `@Schema(oneOf = …)` on fields/methods, include `"oneOf"` parts.
 16. From `@Schema(not = …)` on fields/methods, include the indicated `"not"` subschema.
-17. From `@Schema(required = true)` on fields/methods, mark property as `"required"` in the schema containing the property.
+17. From `@Schema(requiredMode = REQUIRED)` or `@Schema(required = true)` on fields/methods, mark property as `"required"` in the schema containing the property.
 18. From `@Schema(requiredProperties = …)` on fields/methods, derive its `"required"` properties.
 19. From `@Schema(minProperties = …)` on fields/methods, derive its `"minProperties"`.
 20. From `@Schema(maxProperties = …)` on fields/methods, derive its `"maxProperties"`.

@@ -140,7 +140,7 @@
         <version.jakarta.validation>3.0.2</version.jakarta.validation>
         <version.javax.validation>2.0.1.Final</version.javax.validation>
         <version.swagger-1.5>1.6.7</version.swagger-1.5>
-        <version.swagger-2>2.2.3</version.swagger-2>
+        <version.swagger-2>2.2.5</version.swagger-2>
         <!-- maven plugin runtime dependencies -->
         <version.classgraph>4.8.149</version.classgraph>
     </properties>

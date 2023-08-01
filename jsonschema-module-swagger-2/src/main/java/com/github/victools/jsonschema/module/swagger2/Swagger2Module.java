@@ -167,7 +167,9 @@ public class Swagger2Module implements Module {
      * @return whether the field/method is required
      */
     protected boolean checkRequired(MemberScope<?, ?> member) {
-        return this.getSchemaAnnotationValue(member, Schema::required, Boolean.TRUE::equals)
+        return this.getSchemaAnnotationValue(member,
+                        schemaAnnotation -> schemaAnnotation.requiredMode() == Schema.RequiredMode.REQUIRED || schemaAnnotation.required(),
+                        Boolean.TRUE::equals)
                 .isPresent();
     }
 
