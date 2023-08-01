@@ -97,10 +97,11 @@ public class IntegrationTest {
         @Schema(description = "field description", nullable = true, allowableValues = {"A", "B", "C", "D"}, minLength = 1, maxLength = 1)
         public String fieldWithDescriptionAndAllowableValues;
 
-        @Schema(minimum = "15", maximum = "20", multipleOf = 0.0123456789)
+        @Schema(minimum = "15", maximum = "20", multipleOf = 0.0123456789, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         public BigDecimal fieldWithInclusiveNumericRange;
 
-        @Schema(minimum = "14", maximum = "21", exclusiveMinimum = true, exclusiveMaximum = true, required = true, multipleOf = 0.1)
+        @Schema(minimum = "14", maximum = "21", exclusiveMinimum = true, exclusiveMaximum = true, multipleOf = 0.1,
+                requiredMode = Schema.RequiredMode.REQUIRED)
         public int fieldWithExclusiveNumericRange;
     }
 
