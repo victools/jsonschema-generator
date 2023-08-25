@@ -1,0 +1,31 @@
+{
+    "$schema" : "https://json-schema.org/draft/2020-12/schema",
+    "$defs" : {
+        "JobDetails" : {
+            "type" : "object",
+            "properties" : {
+                "trainingCosts" : {
+                    "properties" : {
+                        "wood" : {
+                            "type" : "integer"
+                        },
+                        "food" : {
+                            "type" : "integer"
+                        },
+                        "stone" : {
+                            "type" : "integer"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "properties" : {
+        "blacksmith" : {
+            "$ref" : "#/$defs/JobDetails"
+        },
+        "farmer" : {
+            "$ref" : "#/$defs/JobDetails"
+        }
+    }
+}
