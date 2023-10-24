@@ -51,7 +51,7 @@ public class SchemaGeneratorConfigBuilder {
         return mapper;
     }
 
-    private final ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     private final OptionPreset preset;
     private final SchemaVersion schemaVersion;
 
@@ -304,6 +304,20 @@ public class SchemaGeneratorConfigBuilder {
      */
     public SchemaGeneratorConfigBuilder withAnnotationInclusionOverride(Class<? extends Annotation> annotationType, AnnotationInclusion override) {
         this.annotationInclusionOverrides.put(annotationType, override);
+        return this;
+    }
+
+    /**
+     * Register a custom {@link ObjectMapper} to use for serialization of the schema. This can be used to customize
+     * the serialization behavior of the schema (eg serialize to yaml instead of json).
+     *
+     * @param objectMapper the {@link ObjectMapper} to use for serializing schemas
+     * @return this builder instance (for chaining)
+     *
+     * @since 4.32.0
+     */
+    public SchemaGeneratorConfigBuilder withObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         return this;
     }
 }
