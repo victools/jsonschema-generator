@@ -494,7 +494,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         if (this.classLoader == null) {
             // fix the classpath such that the classloader can get classes from any possible dependency
             // this does not affect filtering, as the classgraph library uses its own classloader and allows for caching
-            List<URL> urls = ClasspathType.WITH_ALL_DEPENDENCIES.getUrls(this.project);
+            List<URL> urls = ClasspathType.WITH_ALL_DEPENDENCIES_AND_TESTS.getUrls(this.project);
             this.classLoader = new URLClassLoader(urls.toArray(new URL[0]),
                 Thread.currentThread().getContextClassLoader());
         }

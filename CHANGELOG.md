@@ -28,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - avoid rounding error when taking over the value from `@Schema(multipleOf)`
 
 ### `jsonschema-naven-plugin`
+### Added
+- support custom configuration `Module` being loaded from test classpath elements 
+
 ### Changed
 - a generated schema is now serialized through the configuration's `ObjectMapper` instance (e.g., granting control over pretty printing or even generating YAML instead of JSON files)
 

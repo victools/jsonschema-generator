@@ -43,7 +43,12 @@ public enum ClasspathType {
     /**
      * Classes from the project, compile time and runtime dependencies.
      */
-    WITH_ALL_DEPENDENCIES;
+    WITH_ALL_DEPENDENCIES,
+    /**
+     * Classes from the project (including tests), compile time, runtime and test dependencies.
+     * Mainly intended for internal use when looking up custom modules.
+     */
+    WITH_ALL_DEPENDENCIES_AND_TESTS;
 
     public Collection<String> getClasspathElements(MavenProject project) {
         Collection<String> classpathElements;
@@ -63,6 +68,13 @@ public enum ClasspathType {
                 classpathElements = new HashSet<>();
                 classpathElements.addAll(project.getRuntimeClasspathElements());
                 classpathElements.addAll(project.getCompileClasspathElements());
+                break;
+            case WITH_ALL_DEPENDENCIES_AND_TESTS:
+                // to remove duplicates
+                classpathElements = new HashSet<>();
+                classpathElements.addAll(project.getRuntimeClasspathElements());
+                classpathElements.addAll(project.getCompileClasspathElements());
+                classpathElements.addAll(project.getTestClasspathElements());
                 break;
             default:
                 throw new IllegalArgumentException("ClasspathType " + this + " not supported");
