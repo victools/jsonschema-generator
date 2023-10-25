@@ -1,5 +1,1 @@
-{
-  "type" : "object",
-  "description" : "Jackson annotation class",
-  "additionalProperties" : false
-}
+{"type":"object","properties":{"anInt":{"type":"integer"},"getAnInt()":{"type":"integer"}},"description":"Jackson annotation class","additionalProperties":false}

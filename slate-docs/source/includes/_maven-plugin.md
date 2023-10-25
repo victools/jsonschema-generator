@@ -34,7 +34,8 @@ The considered `<classpath>` may be further specified as one of four values:
 - `WITH_COMPILE_DEPENDENCIES` : `PROJECT_ONLY` and compile dependencies
 - `WITH_RUNTIME_DEPENDENCIES` : `PROJECT_ONLY` and runtime dependencies (default, if unspecified)
 - `WITH_ALL_DEPENDENCIES` : all of the above
-
+- `WITH_ALL_DEPENDENCIES_AND_TESTS` : all of the above, with the addition of the current project's test files  
+  Note that this requires a different `<phase>` (e.g., `test-compile`) being specified on the `<execution>`.
 ----
 
 By default, the plugin aborts if the glob pattern does not match any class. If this is not desired, the `<failIfNoClassesMatch>` property can be set to `false`.
@@ -122,3 +123,45 @@ Through the `<modules>` tag you can include the standard modules – potentially
 You can also group any kind of configurations into a Module of your own and include it via its full class name.   
 Make sure your custom module is on the classpath (considering the project itself as well as all compile and runtime dependencies) and has a default constructor.    
 It is not possible to configure options for custom modules.
+
+### Altering the format of generated schema files
+
+```java
+public class MavenPluginYamlModule implements Module {
+    @Override
+    public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
+        // Maven plugin should produce YAML files instead of JSON
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        // set additional serialization options
+        mapper.getSerializationConfig()
+                .with(JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS);
+        mapper.setNodeFactory(JsonNodeFactory.withExactBigDecimals(true));
+        builder.withObjectMapper(mapper);
+    }
+}
+```
+
+One possibility within such a custom Module (as mentioned above) is to configure the format of the generated schema files.
+The file contents are being produced by the schema generator's associated `ObjectMapper`.
+That default `ObjectMapper` can be replaced, e.g., to opt-out of the default pretty-printing or changing the file format to YAML.
+The given example requires the inclusion of the extra `com.fasterxml.jackson.dataformat:jackson-dataformat-yaml` dependency.
+
+### Loading custom Module from test classes
+
+```xml
+<executions>
+    <execution>
+        <phase>test-compile</phase>
+        <goals>
+            <goal>generate</goal>
+        </goals>
+    </execution>
+</executions>
+```
+
+When you're using a custom Module (as mentioned above) for additional configuration options, but don't want to include it among your application code,
+you can either package it as separate artifact and include that as dependency of the plugin (not going into further detail here)
+or the custom Module class can be included in your test packages.  
+When you do the latter, the Maven plugin will by default not be able to load that class, since it won't be compiled yet in the Maven phase during which the schema generation is being executed.  
+The Maven `compile` phase is when the schema generation gets triggered by default.
+If you want the test classes (including the custom Module) to be available, a later phase (most likely: `test-compile`) needs to be specified.

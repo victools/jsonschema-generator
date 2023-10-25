@@ -6,9 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### `jsonschema-generator`
+#### Added
+- offer `SchemaGeneratorConfigBuilder.withObjectMapper()`; mainly for use in custom modules in combination with the Maven plugin, where the constructor parameter cannot be used instead
+
 #### Changed
 - consider JavaBeans API specification in getter naming convention for field names with the second character being uppercase (e.g., a field `xIndex` has the getter `getxIndex()` according to the specification)
 - allow for field names starting with `is` to have getter of the same name (e.g., a field `isBool` may have the getter `isBool()`)
+- the default `ObjectMapper` instance now includes the enabled `SerializationFeature.INDENT_OUTPUT`
 
 ### `jsonschema-module-jackson`
 #### Added
@@ -22,6 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Fixed
 - avoid rounding error when taking over the value from `@Schema(multipleOf)`
+
+### `jsonschema-naven-plugin`
+### Added
+- support custom configuration `Module` being loaded from test classpath elements 
+
+### Changed
+- a generated schema is now serialized through the configuration's `ObjectMapper` instance (e.g., granting control over pretty printing or even generating YAML instead of JSON files)
 
 ## [4.31.1] - 2023-04-28
 ### `jsonschema-generator`
