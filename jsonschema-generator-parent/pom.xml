@@ -106,6 +106,13 @@
                 <role>Provided PR #314 (adding explicit Java module descriptors)</role>
             </roles>
         </contributor>
+        <contributor>
+            <name>takanuva15</name>
+            <url>https://github.com/takanuva15</url>
+            <roles>
+                <role>Provided PR #388 (allowing configuration of Maven plugin serialization behavior)</role>
+            </roles>
+        </contributor>
     </contributors>
 
     <properties>

@@ -122,3 +122,25 @@ Through the `<modules>` tag you can include the standard modules – potentially
 You can also group any kind of configurations into a Module of your own and include it via its full class name.   
 Make sure your custom module is on the classpath (considering the project itself as well as all compile and runtime dependencies) and has a default constructor.    
 It is not possible to configure options for custom modules.
+
+### Altering the format of generated schema files
+
+```java
+public class MavenPluginYamlModule implements Module {
+    @Override
+    public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
+        // Maven plugin should produce YAML files instead of JSON
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        // set additional serialization options
+        mapper.getSerializationConfig()
+                .with(JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS);
+        mapper.setNodeFactory(JsonNodeFactory.withExactBigDecimals(true));
+        builder.withObjectMapper(mapper);
+    }
+}
+```
+
+One possibility within such a custom Module (as mentioned above) is to configure the format of the generated schema files.
+The file contents are being produced by the schema generator's associated `ObjectMapper`.
+That default `ObjectMapper` can be replaced, e.g., to opt-out of the default pretty-printing or changing the file format to YAML.
+The given example requires the inclusion of the extra `com.fasterxml.jackson.dataformat:jackson-dataformat-yaml` dependency.
