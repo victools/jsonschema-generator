@@ -25,4 +25,8 @@ public class TestClass {
     public TestClass(int anInt) {
         this.anInt = anInt;
     }
+
+    public int getAnInt() {
+        return this.anInt;
+    }
 }
