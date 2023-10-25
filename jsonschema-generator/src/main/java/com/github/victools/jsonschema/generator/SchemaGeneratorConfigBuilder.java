@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.classmate.AnnotationInclusion;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.github.victools.jsonschema.generator.impl.SchemaGeneratorConfigImpl;
 import java.lang.annotation.Annotation;
@@ -41,7 +42,9 @@ public class SchemaGeneratorConfigBuilder {
      * @return default ObjectMapper instance
      */
     private static ObjectMapper createDefaultObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper()
+                // since version 4.32.0; pretty print by default (can be overridden by supplying explicit mapper)
+                .enable(SerializationFeature.INDENT_OUTPUT);
         mapper.getSerializationConfig()
                 // since version 4.21.0
                 .with(JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS);
@@ -51,7 +54,7 @@ public class SchemaGeneratorConfigBuilder {
         return mapper;
     }
 
-    private final ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     private final OptionPreset preset;
     private final SchemaVersion schemaVersion;
 
@@ -304,6 +307,21 @@ public class SchemaGeneratorConfigBuilder {
      */
     public SchemaGeneratorConfigBuilder withAnnotationInclusionOverride(Class<? extends Annotation> annotationType, AnnotationInclusion override) {
         this.annotationInclusionOverrides.put(annotationType, override);
+        return this;
+    }
+
+    /**
+     * Register a custom {@link ObjectMapper} to create object and array nodes for the JSON structure being
+     * generated. Additionally, it is used to serialize a given schema, e.g., within the standard Maven plugin as
+     * either YAML or JSON.
+     *
+     * @param objectMapper supplier for object and array nodes for the JSON structure being generated
+     * @return this builder instance (for chaining)
+     *
+     * @since 4.32.0
+     */
+    public SchemaGeneratorConfigBuilder withObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         return this;
     }
 }

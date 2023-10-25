@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.generator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,15 @@ public class SchemaGeneratorConfigBuilderTest {
     public void testGetSetting_WithoutOption() {
         Assertions.assertSame(this.builder, this.builder.without(Option.DEFINITIONS_FOR_ALL_OBJECTS));
         Assertions.assertFalse(this.builder.getSetting(Option.DEFINITIONS_FOR_ALL_OBJECTS));
+    }
+
+    @Test
+    public void testWithObjectMapper() {
+        ObjectMapper currMapper = this.builder.getObjectMapper();
+        ObjectMapper newMapper = new ObjectMapper();
+        this.builder.withObjectMapper(newMapper);
+        Assertions.assertSame(newMapper, this.builder.getObjectMapper());
+        Assertions.assertNotEquals(currMapper, this.builder.getObjectMapper());
     }
 
     @Test

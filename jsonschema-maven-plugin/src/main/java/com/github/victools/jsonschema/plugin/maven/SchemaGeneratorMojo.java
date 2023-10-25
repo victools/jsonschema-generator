@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.plugin.maven;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
@@ -626,9 +627,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @throws MojoExecutionException In case of problems when writing the targeted file
      */
     private void writeToFile(JsonNode jsonSchema, File file) throws MojoExecutionException {
+        ObjectMapper mapper = getGenerator().getConfig().getObjectMapper();
         try (FileOutputStream outputStream = new FileOutputStream(file);
                 PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
-            writer.print(jsonSchema.toPrettyString());
+            writer.print(mapper.writeValueAsString(jsonSchema));
         } catch (IOException e) {
             throw new MojoExecutionException("Error: Can not write to file " + file, e);
         }

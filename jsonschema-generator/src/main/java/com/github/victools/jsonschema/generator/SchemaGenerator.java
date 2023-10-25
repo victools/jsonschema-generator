@@ -75,4 +75,13 @@ public class SchemaGenerator {
     public SchemaBuilder buildMultipleSchemaDefinitions() {
         return SchemaBuilder.forMultipleTypes(this.config, this.typeContext);
     }
+
+    /**
+     * Returns the {@link SchemaGeneratorConfig} associated with this {@link SchemaGenerator}.
+     *
+     * @return a {@link SchemaGeneratorConfig} instance
+     */
+    public SchemaGeneratorConfig getConfig() {
+        return this.config;
+    }
 }
