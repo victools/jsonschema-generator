@@ -43,7 +43,7 @@ public class SchemaGeneratorConfigBuilder {
      */
     private static ObjectMapper createDefaultObjectMapper() {
         ObjectMapper mapper = new ObjectMapper()
-                // enables pretty-printing by default (users can override this by supplying their own mapper)
+                // since version 4.32.0; pretty print by default (can be overridden by supplying explicit mapper)
                 .enable(SerializationFeature.INDENT_OUTPUT);
         mapper.getSerializationConfig()
                 // since version 4.21.0
@@ -311,10 +311,11 @@ public class SchemaGeneratorConfigBuilder {
     }
 
     /**
-     * Register a custom {@link ObjectMapper} to use for serialization of the schema. This can be used to customize
-     * the serialization behavior of the schema (eg serialize to yaml instead of json).
+     * Register a custom {@link ObjectMapper} to create object and array nodes for the JSON structure being
+     * generated. Additionally, it is used to serialize a given schema, e.g., within the standard Maven plugin as
+     * either YAML or JSON.
      *
-     * @param objectMapper the {@link ObjectMapper} to use for serializing schemas
+     * @param objectMapper supplier for object and array nodes for the JSON structure being generated
      * @return this builder instance (for chaining)
      *
      * @since 4.32.0

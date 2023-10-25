@@ -249,7 +249,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         JsonNode jsonSchema = getGenerator().generateSchema(schemaClass);
         File file = getSchemaFile(schemaClass);
         this.getLog().info("- Writing schema to file: " + file);
-        this.writeToFile(getGenerator().getConfig().getObjectMapper(), jsonSchema, file);
+        this.writeToFile(jsonSchema, file);
     }
 
     /**
@@ -622,12 +622,12 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     /**
      * Write generated schema to a file.
      *
-     * @param mapper ObjectMapper to use when writing the given schema to the given file
      * @param jsonSchema Generated schema to be written
      * @param file The file to write to
      * @throws MojoExecutionException In case of problems when writing the targeted file
      */
-    private void writeToFile(ObjectMapper mapper, JsonNode jsonSchema, File file) throws MojoExecutionException {
+    private void writeToFile(JsonNode jsonSchema, File file) throws MojoExecutionException {
+        ObjectMapper mapper = getGenerator().getConfig().getObjectMapper();
         try (FileOutputStream outputStream = new FileOutputStream(file);
                 PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             writer.print(mapper.writeValueAsString(jsonSchema));

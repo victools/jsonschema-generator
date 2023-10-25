@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.lang.reflect.Type;
