@@ -78,12 +78,11 @@ public class SchemaGenerator {
     }
 
     /**
-     * Returns the {@link ObjectMapper} instance that is associated with the {@link SchemaGeneratorConfig} that was
-     * used to build this {@link SchemaGenerator}.
+     * Returns the {@link SchemaGeneratorConfig} associated with this {@link SchemaGenerator}.
      *
-     * @return {@link ObjectMapper}  instance
+     * @return a {@link SchemaGeneratorConfig} instance
      */
-    public ObjectMapper getObjectMapper() {
-        return this.config.getObjectMapper();
+    public SchemaGeneratorConfig getConfig() {
+        return this.config;
     }
 }

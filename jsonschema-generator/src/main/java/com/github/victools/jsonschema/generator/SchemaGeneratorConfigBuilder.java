@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.classmate.AnnotationInclusion;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.github.victools.jsonschema.generator.impl.SchemaGeneratorConfigImpl;
 import java.lang.annotation.Annotation;
@@ -41,7 +42,9 @@ public class SchemaGeneratorConfigBuilder {
      * @return default ObjectMapper instance
      */
     private static ObjectMapper createDefaultObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper()
+                // enables pretty-printing by default (users can override this by supplying their own mapper)
+                .enable(SerializationFeature.INDENT_OUTPUT);
         mapper.getSerializationConfig()
                 // since version 4.21.0
                 .with(JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS);
