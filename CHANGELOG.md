@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.32.0] - 2023-10-27
 ### `jsonschema-generator`
 #### Added
 - offer `SchemaGeneratorConfigBuilder.withObjectMapper()`; mainly for use in custom modules in combination with the Maven plugin, where the constructor parameter cannot be used instead
@@ -783,7 +783,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.31.1...HEAD
+[4.32.0]: https://github.com/victools/jsonschema-generator/compare/v4.31.1...v4.32.0
 [4.31.1]: https://github.com/victools/jsonschema-generator/compare/v4.31.0...v4.31.1
 [4.31.0]: https://github.com/victools/jsonschema-generator/compare/v4.30.0...v4.31.0
 [4.30.0]: https://github.com/victools/jsonschema-generator/compare/v4.29.0...v4.30.0
