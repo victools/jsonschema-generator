@@ -3,7 +3,7 @@
 
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator-reactor</artifactId>
-    <version>4.32.0</version>
+    <version>4.32.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Java JSON Schema Generator (Reactor)</name>

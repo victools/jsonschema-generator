@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Changed
 - consider JavaBeans API specification in getter naming convention for field names with the second character being uppercase (e.g., a field `xIndex` has the getter `getxIndex()` according to the specification)
-- allow for field names starting with `is` to have getter of the same name (e.g., a field `isBool` may have the getter `isBool()`)
+- allow for field names starting with `is` to have a getter of the same name (e.g., a field `isBool` may have the getter `isBool()`)
 - the default `ObjectMapper` instance now includes the enabled `SerializationFeature.INDENT_OUTPUT`
 
 ### `jsonschema-module-jackson`
@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Fixed
 - avoid rounding error when taking over the value from `@Schema(multipleOf)`
 
-### `jsonschema-naven-plugin`
+### `jsonschema-maven-plugin`
 ### Added
 - support custom configuration `Module` being loaded from test classpath elements 
 
