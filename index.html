@@ -448,6 +448,9 @@
                     <a href="#target-types-to-generate-schemas-for" class="toc-h2 toc-link" data-title="Target Types to generate Schemas for">Target Types to generate Schemas for</a>
                   </li>
                   <li>
+                    <a href="#note-that-this-requires-a-different-lt-phase-gt-e-g-test-compile-being-specified-on-the-lt-execution-gt" class="toc-h2 toc-link" data-title="  Note that this requires a different &lt;phase&gt; (e.g., test-compile) being specified on the &lt;execution&gt;.">  Note that this requires a different <code>&lt;phase&gt;</code> (e.g., <code>test-compile</code>) being specified on the <code>&lt;execution&gt;</code>.</a>
+                  </li>
+                  <li>
                     <a href="#basic-configuration-options" class="toc-h2 toc-link" data-title="Basic Configuration Options">Basic Configuration Options</a>
                   </li>
                   <li>
@@ -624,7 +627,10 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td colspan="2"><code>Option.VALUES_FROM_CONSTANT_FIELDS</code></td>
     </tr>
     <tr>
-      <td>Attempt to load the values of <code>static</code> <code>final</code> fields, serialize them via the <code>ObjectMapper</code> and include them as the respective schema's <code>const</code> value.</td>
+      <td>
+        Attempt to load the values of <code>static</code> <code>final</code> fields, serialize them via the <code>ObjectMapper</code> and include them as the respective schema's <code>const</code> value.
+        <div>For this option to take effect, those <code>static</code> <code>final</code> fields need to be included via <code>Option.PUBLIC_STATIC_FIELDS</code> and/or <code>Option.NONPUBLIC_STATIC_FIELDS</code>.</div>
+      </td>
       <td>No <code>const</code> values are populated for <code>static</code> <code>final</code> fields.</td>
     </tr>
     <tr>
@@ -1811,6 +1817,7 @@ In order to reflect Java&#39;s polymorphism, you can make use of the following c
 <li>Consider <code>@JsonProperty.access</code> for marking a field/method as <code>readOnly</code> or <code>writeOnly</code></li>
 <li>Optionally: ignore all methods but those with a <code>@JsonProperty</code> annotation, if the <code>JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS</code> was provided (i.e. this is an &quot;opt-in&quot;).</li>
 <li>Optionally: respect <code>@JsonIdentityReference(alwaysAsId=true)</code> annotation if there is a corresponding <code>@JsonIdentityInfo</code> annotation on the type and the <code>JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID</code> as provided (i.e., this is an &quot;opt-in&quot;)</li>
+<li>Elevate nested properties to the parent type where members are annotated with <code>@JsonUnwrapped</code>.</li>
 </ol>
 
 <p>Schema attributes derived from annotations on getter methods are also applied to their associated fields.</p>
@@ -1947,7 +1954,7 @@ Schema attributes derived from <code>@ApiModelProperty</code> on getter methods 
 <li>From <code>@Schema(anyOf = …)</code> on fields/methods, include <code>&quot;anyOf&quot;</code> parts.</li>
 <li>From <code>@Schema(oneOf = …)</code> on fields/methods, include <code>&quot;oneOf&quot;</code> parts.</li>
 <li>From <code>@Schema(not = …)</code> on fields/methods, include the indicated <code>&quot;not&quot;</code> subschema.</li>
-<li>From <code>@Schema(required = true)</code> on fields/methods, mark property as <code>&quot;required&quot;</code> in the schema containing the property.</li>
+<li>From <code>@Schema(requiredMode = REQUIRED)</code> or <code>@Schema(required = true)</code> on fields/methods, mark property as <code>&quot;required&quot;</code> in the schema containing the property.</li>
 <li>From <code>@Schema(requiredProperties = …)</code> on fields/methods, derive its <code>&quot;required&quot;</code> properties.</li>
 <li>From <code>@Schema(minProperties = …)</code> on fields/methods, derive its <code>&quot;minProperties&quot;</code>.</li>
 <li>From <code>@Schema(maxProperties = …)</code> on fields/methods, derive its <code>&quot;maxProperties&quot;</code>.</li>
@@ -2003,10 +2010,9 @@ The considered <code>&lt;classpath&gt;</code> may be further specified as one of
 - <code>PROJECT_ONLY</code> : only source files of the current project
 - <code>WITH_COMPILE_DEPENDENCIES</code> : <code>PROJECT_ONLY</code> and compile dependencies
 - <code>WITH_RUNTIME_DEPENDENCIES</code> : <code>PROJECT_ONLY</code> and runtime dependencies (default, if unspecified)
-- <code>WITH_ALL_DEPENDENCIES</code> : all of the above</p>
-
-<hr>
-
+- <code>WITH_ALL_DEPENDENCIES</code> : all of the above
+- <code>WITH_ALL_DEPENDENCIES_AND_TESTS</code> : all of the above, with the addition of the current project&#39;s test files  </p>
+<h2 id='note-that-this-requires-a-different-lt-phase-gt-e-g-test-compile-being-specified-on-the-lt-execution-gt'>  Note that this requires a different <code>&lt;phase&gt;</code> (e.g., <code>test-compile</code>) being specified on the <code>&lt;execution&gt;</code>.</h2>
 <p>By default, the plugin aborts if the glob pattern does not match any class. If this is not desired, the <code>&lt;failIfNoClassesMatch&gt;</code> property can be set to <code>false</code>.</p>
 <h2 id='basic-configuration-options'>Basic Configuration Options</h2>
 <p>There are some additional parameters available in the plugin <code>&lt;configuration&gt;</code>:</p>
@@ -2093,6 +2099,38 @@ The default <code>&lt;schemaFileName&gt;</code> is <code>{0}-schema.json</code>.
 <p>You can also group any kind of configurations into a Module of your own and include it via its full class name.<br>
 Make sure your custom module is on the classpath (considering the project itself as well as all compile and runtime dependencies) and has a default constructor.<br>
 It is not possible to configure options for custom modules.</p>
+<h3 id='altering-the-format-of-generated-schema-files'>Altering the format of generated schema files</h3><div class="highlight"><pre class="highlight java tab-java"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MavenPluginYamlModule</span> <span class="kd">implements</span> <span class="nc">Module</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">applyToConfigBuilder</span><span class="o">(</span><span class="nc">SchemaGeneratorConfigBuilder</span> <span class="n">builder</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// Maven plugin should produce YAML files instead of JSON</span>
+        <span class="nc">ObjectMapper</span> <span class="n">mapper</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ObjectMapper</span><span class="o">(</span><span class="k">new</span> <span class="nc">YAMLFactory</span><span class="o">());</span>
+        <span class="c1">// set additional serialization options</span>
+        <span class="n">mapper</span><span class="o">.</span><span class="na">getSerializationConfig</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">with</span><span class="o">(</span><span class="nc">JsonWriteFeature</span><span class="o">.</span><span class="na">WRITE_NUMBERS_AS_STRINGS</span><span class="o">);</span>
+        <span class="n">mapper</span><span class="o">.</span><span class="na">setNodeFactory</span><span class="o">(</span><span class="nc">JsonNodeFactory</span><span class="o">.</span><span class="na">withExactBigDecimals</span><span class="o">(</span><span class="kc">true</span><span class="o">));</span>
+        <span class="n">builder</span><span class="o">.</span><span class="na">withObjectMapper</span><span class="o">(</span><span class="n">mapper</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+<p>One possibility within such a custom Module (as mentioned above) is to configure the format of the generated schema files.
+The file contents are being produced by the schema generator&#39;s associated <code>ObjectMapper</code>.
+That default <code>ObjectMapper</code> can be replaced, e.g., to opt-out of the default pretty-printing or changing the file format to YAML.
+The given example requires the inclusion of the extra <code>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</code> dependency.</p>
+<h3 id='loading-custom-module-from-test-classes'>Loading custom Module from test classes</h3><div class="highlight"><pre class="highlight xml tab-xml"><code><span class="nt">&lt;executions&gt;</span>
+    <span class="nt">&lt;execution&gt;</span>
+        <span class="nt">&lt;phase&gt;</span>test-compile<span class="nt">&lt;/phase&gt;</span>
+        <span class="nt">&lt;goals&gt;</span>
+            <span class="nt">&lt;goal&gt;</span>generate<span class="nt">&lt;/goal&gt;</span>
+        <span class="nt">&lt;/goals&gt;</span>
+    <span class="nt">&lt;/execution&gt;</span>
+<span class="nt">&lt;/executions&gt;</span>
+</code></pre></div>
+<p>When you&#39;re using a custom Module (as mentioned above) for additional configuration options, but don&#39;t want to include it among your application code,
+you can either package it as separate artifact and include that as dependency of the plugin (not going into further detail here)
+or the custom Module class can be included in your test packages.<br>
+When you do the latter, the Maven plugin will by default not be able to load that class, since it won&#39;t be compiled yet in the Maven phase during which the schema generation is being executed.<br>
+The Maven <code>compile</code> phase is when the schema generation gets triggered by default.
+If you want the test classes (including the custom Module) to be available, a later phase (most likely: <code>test-compile</code>) needs to be specified.</p>
 <h1 id='faq'>FAQ</h1><h2 id='is-there-a-gradle-plugin'>Is there a Gradle Plugin?</h2><div class="highlight"><pre class="highlight groovy tab-groovy"><code><span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.generator.OptionPreset</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.generator.SchemaGenerator</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder</span><span class="o">;</span>
