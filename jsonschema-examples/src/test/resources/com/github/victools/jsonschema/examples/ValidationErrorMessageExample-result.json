@@ -1,0 +1,34 @@
+{
+    "$schema" : "https://json-schema.org/draft/2020-12/schema",
+    "type" : "object",
+    "properties" : {
+        "results" : {
+            "minItems" : 1,
+            "message" : {
+                "required" : "Mandatory to be present and contain at least one item",
+                "minItems" : "Mandatory to be present and contain at least one item"
+            },
+            "type" : "array",
+            "items" : {
+                "type" : "number",
+                "minimum" : 0,
+                "maximum" : 100,
+                "message" : {
+                    "minimum" : "less than 0% is unfair",
+                    "maximum" : "more than 100% is unrealistic"
+                }
+            }
+        },
+        "title" : {
+            "type" : "string",
+            "minLength" : 5,
+            "maxLength" : 100,
+            "message" : {
+                "required" : "Mandatory to be present and contain not only whitespaces",
+                "maxLength" : "Must be between 5 and 100 characters long",
+                "minLength" : "Must be between 5 and 100 characters long"
+            }
+        }
+    },
+    "required" : [ "results", "title" ]
+}
