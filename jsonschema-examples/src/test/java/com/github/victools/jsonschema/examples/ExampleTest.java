@@ -39,7 +39,8 @@ public class ExampleTest {
             JacksonDescriptionAsTitleExample.class,
             JacksonSubtypeDefinitionExample.class,
             StrictTypeInfoExample.class,
-            SubtypeLookUpExample.class
+            SubtypeLookUpExample.class,
+            ValidationErrorMessageExample.class
     })
     public void testExample(Class<? extends SchemaGenerationExampleInterface> exampleType) throws Exception {
         SchemaGenerationExampleInterface exampleImplementation = exampleType.getDeclaredConstructor().newInstance();
