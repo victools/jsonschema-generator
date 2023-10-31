@@ -229,7 +229,7 @@ configBuilder.without(
     </tr>
     <tr>
       <td rowspan="2" style="text-align: right">23</td>
-      <td colspan="2"><code>Option.NULLABLE_ARRAY ITEMS_ALLOWED</code></td>
+      <td colspan="2"><code>Option.NULLABLE_ARRAY_ITEMS_ALLOWED</code></td>
     </tr>
     <tr>
       <td>The schema <code>type</code> for the items in an array (in case of a field's value or method's return value being a container/array) allows <code>null</code>, if the corresponding configuration explicitly says so. Otherwise, they're still deemed not null-able by default.</td>
