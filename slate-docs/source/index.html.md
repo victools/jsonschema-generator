@@ -6,7 +6,10 @@ toc_footers:
   - <a href='https://github.com/slatedocs/slate'>Documentation Powered by Slate</a>
 
 includes:
-  - main-generator
+  - main-generator-options
+  - main-generator-modules
+  - main-generator-individual
+  - main-generator-advanced
   - jackson-module
   - jakarta-validation-module
   - javax-validation-module
@@ -34,3 +37,7 @@ This documentation aims at always covering the latest released version of the `j
 Please refer to the [CHANGELOG](https://github.com/victools/jsonschema-generator/blob/master/CHANGELOG.md) for a list of the incremental changes.
 
 ***
+
+The [victools:jsonschema-generator](https://github.com/victools/jsonschema-generator/tree/master/jsonschema-generator) aims at allowing the generation of JSON Schema (Draft 6, Draft 7, Draft 2019-09 or Draft 2020-12) to document Java code.
+This is expressly not limited to _JSON_ but also allows for a Java API to be documented (i.e. including methods and the associated return values).
+
