@@ -236,3 +236,23 @@ When not even the [Custom Type Definitions](#custom-type-definitions) are flexib
     However, you can still decide whether the attributes collected through the various other <a href="#generator-individual-configurations">Individual Configurations</a> shall be added,
     through the <code>AttributeInclusion</code> parameter in the <code>CustomPropertyDefinition</code>'s constructor.
 </aside>
+
+## Order of Object Properties
+```java
+// sort by custom @JsonPropertyIndex(3) annotation
+configBuilder.forTypesInGeneral()
+        .withPropertySorter(Comparator.comparing(member -> Optional.ofNullable(member.getAnnotation(JsonPropertyIndex.class))
+                .map(JsonPropertyIndex::value)
+                .orElse(0)));
+```
+```java
+// preserve property order in byte code (determined by compiler)
+configBuilder.forTypesInGeneral()
+        .withPropertySorter((first, second) -> 0);
+```
+
+You may want to control the order in which an object's properties are being listed, e.g., when using the JSON schema as basis for an auto-generated form in some user interface.  
+By default, fields are being included before methods -- with each sublist being sorted alphabetically.
+
+You can define your own `Comparator<MemberScope<?, ?>>`, e.g., considering an annotation specifying the desired order or disable the sorting by always returning zero (`0`).  
+With disabled property sorting, your compiler decides the order of the properties in your generated JSON schema. Depending on the compiler, this may correspond to the declaration order in your source file but is not guaranteed.
