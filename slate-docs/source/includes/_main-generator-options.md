@@ -61,7 +61,7 @@ configBuilder.without(
       <td colspan="2"><code>Option.EXTRA_OPEN_API_FORMAT_VALUES</code></td>
     </tr>
     <tr>
-      <td>Include extra <code>"format"</code> values (e.g. <code>"int32"</code>, <code>"int64"</code>, <code>"date"</code>, <code>"date-time"</code>, <code>"uuid"</code>) for fixed types (primitive/basic types, plus some of the <code>Option.ADDITIONAL_FIXED_TYPES</code> if they are enabled as well).</td>
+      <td>Include extra <code>"format"</code> values (e.g. <code>"int32"</code>, <code>"int64"</code>, <code>"date"</code>, <code>"time"</code>, <code>"date-time"</code>, <code>"duration"</code>, <code>"uuid"</code>, <code>"uri"</code>) for fixed types (primitive/basic types, plus some of the <code>Option.ADDITIONAL_FIXED_TYPES</code> if they are enabled as well). Only works if <code>Option.ADDITIONAL_FIXED_TYPES</code> is set and it overrides <code>Option.STANDARD_FORMATS.</code></td></td>
       <td>no automatic <code>"format"</code> values are being included.</td>
     </tr>
     <tr>
