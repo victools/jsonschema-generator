@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
@@ -28,7 +27,11 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -305,8 +308,8 @@ public class SimpleTypeModule implements Module {
 
         private boolean shouldAddFormatTag(final ResolvedType javaType, final SchemaGenerationContext context) {
             // either OpenAPI extra formats or standard-formats that are registered
-            return context.getGeneratorConfig().shouldIncludeExtraOpenApiFormatValues() ||
-                    (context.getGeneratorConfig().shouldIncludeStandardFormatValues()
+            return context.getGeneratorConfig().shouldIncludeExtraOpenApiFormatValues()
+                    || (context.getGeneratorConfig().shouldIncludeStandardFormatValues()
                             && standardFormats.contains(javaType.getErasedType()));
         }
     }

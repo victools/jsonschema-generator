@@ -289,7 +289,7 @@ public enum Option {
 
     /**
      * For the "format" attribute, JSON Schema defines various built-in supported values.
-     *
+     * <br>
      * Some of those data-types would be handed if either {@link #ADDITIONAL_FIXED_TYPES}
      * or a custom {@link SimpleTypeModule} (i.e., {@link SimpleTypeModule#forPrimitiveTypes()})
      * are added.
