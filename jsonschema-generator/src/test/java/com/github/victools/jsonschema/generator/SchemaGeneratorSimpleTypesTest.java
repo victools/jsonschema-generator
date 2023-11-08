@@ -32,43 +32,43 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class SchemaGeneratorSimpleTypesTest {
 
     static Stream<Arguments> getSimpleTypeCombinations() {
-        // order of arguments: targetType, expectedJsonSchemaType, expectedOpenApiFormat
+        // order of arguments: targetType, expectedJsonSchemaType, expectedOpenApiFormat, standardFormat
         return Stream.of(
-            Arguments.of(Object.class, null, null),
-            Arguments.of(String.class, SchemaKeyword.TAG_TYPE_STRING, null),
-            Arguments.of(Character.class, SchemaKeyword.TAG_TYPE_STRING, null),
-            Arguments.of(char.class, SchemaKeyword.TAG_TYPE_STRING, null),
-            Arguments.of(CharSequence.class, SchemaKeyword.TAG_TYPE_STRING, null),
-            Arguments.of(Byte.class, SchemaKeyword.TAG_TYPE_STRING, null),
-            Arguments.of(byte.class, SchemaKeyword.TAG_TYPE_STRING, null),
-            Arguments.of(Boolean.class, SchemaKeyword.TAG_TYPE_BOOLEAN, null),
-            Arguments.of(boolean.class, SchemaKeyword.TAG_TYPE_BOOLEAN, null),
-            Arguments.of(Integer.class, SchemaKeyword.TAG_TYPE_INTEGER, "int32"),
-            Arguments.of(int.class, SchemaKeyword.TAG_TYPE_INTEGER, "int32"),
-            Arguments.of(Long.class, SchemaKeyword.TAG_TYPE_INTEGER, "int64"),
-            Arguments.of(long.class, SchemaKeyword.TAG_TYPE_INTEGER, "int64"),
-            Arguments.of(Short.class, SchemaKeyword.TAG_TYPE_INTEGER, null),
-            Arguments.of(short.class, SchemaKeyword.TAG_TYPE_INTEGER, null),
-            Arguments.of(Double.class, SchemaKeyword.TAG_TYPE_NUMBER, "double"),
-            Arguments.of(double.class, SchemaKeyword.TAG_TYPE_NUMBER, "double"),
-            Arguments.of(Float.class, SchemaKeyword.TAG_TYPE_NUMBER, "float"),
-            Arguments.of(float.class, SchemaKeyword.TAG_TYPE_NUMBER, "float"),
-            Arguments.of(java.time.LocalDate.class, SchemaKeyword.TAG_TYPE_STRING, "date"),
-            Arguments.of(java.time.LocalDateTime.class, SchemaKeyword.TAG_TYPE_STRING, "date-time"),
-            Arguments.of(java.time.LocalTime.class, SchemaKeyword.TAG_TYPE_STRING, "time"),
-            Arguments.of(java.time.ZonedDateTime.class, SchemaKeyword.TAG_TYPE_STRING, "date-time"),
-            Arguments.of(java.time.OffsetDateTime.class, SchemaKeyword.TAG_TYPE_STRING, "date-time"),
-            Arguments.of(java.time.OffsetTime.class, SchemaKeyword.TAG_TYPE_STRING, "time"),
-            Arguments.of(java.time.Instant.class, SchemaKeyword.TAG_TYPE_STRING, "date-time"),
-            Arguments.of(java.util.Date.class, SchemaKeyword.TAG_TYPE_STRING, "date-time"),
-            Arguments.of(java.util.Calendar.class, SchemaKeyword.TAG_TYPE_STRING, "date-time"),
-            Arguments.of(java.time.Duration.class, SchemaKeyword.TAG_TYPE_STRING, "duration"),
-            Arguments.of(java.time.Period.class, SchemaKeyword.TAG_TYPE_STRING, "duration"),
-            Arguments.of(java.util.UUID.class, SchemaKeyword.TAG_TYPE_STRING, "uuid"),
-            Arguments.of(java.time.ZoneId.class, SchemaKeyword.TAG_TYPE_STRING, null),
-            Arguments.of(java.math.BigInteger.class, SchemaKeyword.TAG_TYPE_INTEGER, null),
-            Arguments.of(java.math.BigDecimal.class, SchemaKeyword.TAG_TYPE_NUMBER, null),
-            Arguments.of(Number.class, SchemaKeyword.TAG_TYPE_NUMBER, null)
+            Arguments.of(Object.class, null, null, null),
+            Arguments.of(String.class, SchemaKeyword.TAG_TYPE_STRING, null, null),
+            Arguments.of(Character.class, SchemaKeyword.TAG_TYPE_STRING, null, null),
+            Arguments.of(char.class, SchemaKeyword.TAG_TYPE_STRING, null, null),
+            Arguments.of(CharSequence.class, SchemaKeyword.TAG_TYPE_STRING, null, null),
+            Arguments.of(Byte.class, SchemaKeyword.TAG_TYPE_STRING, null, null),
+            Arguments.of(byte.class, SchemaKeyword.TAG_TYPE_STRING, null, null),
+            Arguments.of(Boolean.class, SchemaKeyword.TAG_TYPE_BOOLEAN, null, null),
+            Arguments.of(boolean.class, SchemaKeyword.TAG_TYPE_BOOLEAN, null, null),
+            Arguments.of(Integer.class, SchemaKeyword.TAG_TYPE_INTEGER, "int32", null),
+            Arguments.of(int.class, SchemaKeyword.TAG_TYPE_INTEGER, "int32", null),
+            Arguments.of(Long.class, SchemaKeyword.TAG_TYPE_INTEGER, "int64", null),
+            Arguments.of(long.class, SchemaKeyword.TAG_TYPE_INTEGER, "int64", null),
+            Arguments.of(Short.class, SchemaKeyword.TAG_TYPE_INTEGER, null, null),
+            Arguments.of(short.class, SchemaKeyword.TAG_TYPE_INTEGER, null, null),
+            Arguments.of(Double.class, SchemaKeyword.TAG_TYPE_NUMBER, "double", null, null),
+            Arguments.of(double.class, SchemaKeyword.TAG_TYPE_NUMBER, "double", null, null),
+            Arguments.of(Float.class, SchemaKeyword.TAG_TYPE_NUMBER, "float", null, null),
+            Arguments.of(float.class, SchemaKeyword.TAG_TYPE_NUMBER, "float", null, null),
+            Arguments.of(java.time.LocalDate.class, SchemaKeyword.TAG_TYPE_STRING, "date", "date"),
+            Arguments.of(java.time.LocalDateTime.class, SchemaKeyword.TAG_TYPE_STRING, "date-time", "date-time"),
+            Arguments.of(java.time.LocalTime.class, SchemaKeyword.TAG_TYPE_STRING, "time", "time"),
+            Arguments.of(java.time.ZonedDateTime.class, SchemaKeyword.TAG_TYPE_STRING, "date-time", "date-time"),
+            Arguments.of(java.time.OffsetDateTime.class, SchemaKeyword.TAG_TYPE_STRING, "date-time", "date-time"),
+            Arguments.of(java.time.OffsetTime.class, SchemaKeyword.TAG_TYPE_STRING, "time", "time"),
+            Arguments.of(java.time.Instant.class, SchemaKeyword.TAG_TYPE_STRING, "date-time", "date-time"),
+            Arguments.of(java.util.Date.class, SchemaKeyword.TAG_TYPE_STRING, "date-time", "date-time"),
+            Arguments.of(java.util.Calendar.class, SchemaKeyword.TAG_TYPE_STRING, "date-time", "date-time"),
+            Arguments.of(java.time.Duration.class, SchemaKeyword.TAG_TYPE_STRING, "duration", "duration"),
+            Arguments.of(java.time.Period.class, SchemaKeyword.TAG_TYPE_STRING, "duration", "duration"),
+            Arguments.of(java.util.UUID.class, SchemaKeyword.TAG_TYPE_STRING, "uuid", "uuid"),
+            Arguments.of(java.time.ZoneId.class, SchemaKeyword.TAG_TYPE_STRING, null, null),
+            Arguments.of(java.math.BigInteger.class, SchemaKeyword.TAG_TYPE_INTEGER, null, null),
+            Arguments.of(java.math.BigDecimal.class, SchemaKeyword.TAG_TYPE_NUMBER, null, null),
+            Arguments.of(Number.class, SchemaKeyword.TAG_TYPE_NUMBER, null, null)
         );
     }
 
@@ -84,6 +84,13 @@ public class SchemaGeneratorSimpleTypesTest {
         return EnumSet.allOf(SchemaVersion.class).stream()
                 .flatMap(schemaVersion -> typeCombinations.stream()
                         .map(entry -> Arguments.of(entry.get()[0], entry.get()[1], entry.get()[2], schemaVersion)));
+    }
+
+    static Stream<Arguments> parametersForTestGenerateSchema_SimpleTypeWithStandardFormat() {
+        List<Arguments> typeCombinations = getSimpleTypeCombinations().collect(Collectors.toList());
+        return EnumSet.allOf(SchemaVersion.class).stream()
+                .flatMap(schemaVersion -> typeCombinations.stream()
+                        .map(entry -> Arguments.of(entry.get()[0], entry.get()[1], entry.get()[3], schemaVersion)));
     }
 
     @ParameterizedTest
@@ -142,6 +149,29 @@ public class SchemaGeneratorSimpleTypesTest {
             Assertions.assertEquals(1, result.size());
             Assertions.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
                     result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("parametersForTestGenerateSchema_SimpleTypeWithStandardFormat")
+    public void testGenerateSchema_SimpleTypeWithStandardFormat(Class<?> targetType, SchemaKeyword expectedJsonSchemaType, String expectedFormat,
+                                                        SchemaVersion schemaVersion) throws Exception {
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(schemaVersion)
+                .with(Option.ADDITIONAL_FIXED_TYPES, Option.STANDARD_FORMATS)
+                .build();
+        SchemaGenerator generator = new SchemaGenerator(config);
+        JsonNode result = generator.generateSchema(targetType);
+        if (expectedJsonSchemaType == null) {
+            Assertions.assertTrue(result.isEmpty());
+        } else if (expectedFormat == null) {
+            Assertions.assertEquals(1, result.size());
+            Assertions.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
+                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
+        } else {
+            Assertions.assertEquals(2, result.size());
+            Assertions.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
+                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
+            Assertions.assertEquals(expectedFormat, result.get(SchemaKeyword.TAG_FORMAT.forVersion(schemaVersion)).asText());
         }
     }
 }
