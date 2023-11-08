@@ -100,6 +100,13 @@ public interface SchemaGeneratorConfig extends StatefulConfig {
     boolean shouldUsePlainDefinitionKeys();
 
     /**
+     * Determine whether standard {@link SchemaKeyword#TAG_FORMAT} values should be included for "simple types".
+     *
+     * @return whether to include standard {@link SchemaKeyword#TAG_FORMAT} values
+     */
+    boolean shouldIncludeStandardFormatValues();
+
+    /**
      * Determine whether extra {@link SchemaKeyword#TAG_FORMAT} values should be included for "simple types".
      *
      * @return whether to include extra {@link SchemaKeyword#TAG_FORMAT} values

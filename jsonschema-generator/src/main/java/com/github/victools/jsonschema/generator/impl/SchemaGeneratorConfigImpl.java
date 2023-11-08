@@ -138,6 +138,12 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
         return this.isOptionEnabled(Option.PLAIN_DEFINITION_KEYS);
     }
 
+
+    @Override
+    public boolean shouldIncludeStandardFormatValues() {
+        return this.isOptionEnabled(Option.STANDARD_FORMATS);
+    }
+
     @Override
     public boolean shouldIncludeExtraOpenApiFormatValues() {
         return this.isOptionEnabled(Option.EXTRA_OPEN_API_FORMAT_VALUES);
