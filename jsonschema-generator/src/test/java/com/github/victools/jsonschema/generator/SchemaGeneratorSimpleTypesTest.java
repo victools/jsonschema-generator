@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class SchemaGeneratorSimpleTypesTest {
 
     static Stream<Arguments> getSimpleTypeCombinations() {
+        // order of arguments: targetType, expectedJsonSchemaType, expectedOpenApiFormat
         return Stream.of(
             Arguments.of(Object.class, null, null),
             Arguments.of(String.class, SchemaKeyword.TAG_TYPE_STRING, null),
@@ -61,6 +62,8 @@ public class SchemaGeneratorSimpleTypesTest {
             Arguments.of(java.time.Instant.class, SchemaKeyword.TAG_TYPE_STRING, "date-time"),
             Arguments.of(java.util.Date.class, SchemaKeyword.TAG_TYPE_STRING, "date-time"),
             Arguments.of(java.util.Calendar.class, SchemaKeyword.TAG_TYPE_STRING, "date-time"),
+            Arguments.of(java.time.Duration.class, SchemaKeyword.TAG_TYPE_STRING, "duration"),
+            Arguments.of(java.time.Period.class, SchemaKeyword.TAG_TYPE_STRING, "duration"),
             Arguments.of(java.util.UUID.class, SchemaKeyword.TAG_TYPE_STRING, "uuid"),
             Arguments.of(java.time.ZoneId.class, SchemaKeyword.TAG_TYPE_STRING, null),
             Arguments.of(java.math.BigInteger.class, SchemaKeyword.TAG_TYPE_INTEGER, null),
