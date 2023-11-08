@@ -286,6 +286,20 @@ public enum Option {
      * @since 4.11.0
      */
     PLAIN_DEFINITION_KEYS(null, null),
+
+    /**
+     * For the "format" attribute, JSON Schema defines various built-in supported values.
+     *
+     * Some of those data-types would be handed if either {@link #ADDITIONAL_FIXED_TYPES}
+     * or a custom {@link SimpleTypeModule} (i.e., {@link SimpleTypeModule#forPrimitiveTypes()})
+     * are added.
+     * In that case, by enabling this option these standard built-in "format" values would be added.
+     * Note that if {@link #EXTRA_OPEN_API_FORMAT_VALUES} is enabled, it overrides this option as
+     * it include extra "format" attributes.
+     *
+     * @since 4.32.1
+     */
+    STANDARD_FORMATS(null, null),
     /**
      * For the "format" attribute, JSON Schema defines various supported values. The OpenAPI specification assigns a few more of those in order to
      * differentiate between standard data types (e.g. float vs. double) and even some more fixed data types (e.g. LocalDate, LocalDateTime) if
@@ -294,7 +308,7 @@ public enum Option {
      *
      * @since 4.15.0
      */
-    EXTRA_OPEN_API_FORMAT_VALUES(null, null),
+    EXTRA_OPEN_API_FORMAT_VALUES(null, null, Option.STANDARD_FORMATS),
     /**
      * Whether as the last step of the schema generation, unnecessary "allOf" elements (i.e. where there are no conflicts/overlaps between the
      * contained sub-schemas) should be merged into one, in order to make the generated schema more readable. This also applies to manually added
