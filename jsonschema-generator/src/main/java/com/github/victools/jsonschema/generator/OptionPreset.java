@@ -55,6 +55,7 @@ public class OptionPreset {
     public static final OptionPreset PLAIN_JSON = new OptionPreset(
             Option.SCHEMA_VERSION_INDICATOR,
             Option.ADDITIONAL_FIXED_TYPES,
+            Option.STANDARD_FORMATS,
             Option.FLATTENED_ENUMS,
             Option.FLATTENED_OPTIONALS,
             Option.FLATTENED_SUPPLIERS,

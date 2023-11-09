@@ -23,15 +23,16 @@ import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -104,8 +105,8 @@ public class SimpleTypeModule implements Module {
     }
 
     private final Map<Class<?>, SchemaKeyword> fixedJsonSchemaTypes = new HashMap<>();
-    private final List<Class<?>> standardFormats = new ArrayList<>();
-    private final Map<Class<?>, String> extraOpenApiFormatValues = new HashMap<>();
+    private final Set<Class<?>> typesWithStandardFormats = new HashSet<>();
+    private final Map<Class<?>, String> formatValues = new HashMap<>();
 
     /**
      * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute.
@@ -118,7 +119,7 @@ public class SimpleTypeModule implements Module {
     private SimpleTypeModule with(Class<?> javaType, SchemaKeyword jsonSchemaTypeValue, String openApiFormat) {
         this.fixedJsonSchemaTypes.put(javaType, jsonSchemaTypeValue);
         if (openApiFormat != null) {
-            this.extraOpenApiFormatValues.put(javaType, openApiFormat);
+            this.formatValues.put(javaType, openApiFormat);
         }
         return this;
     }
@@ -166,10 +167,16 @@ public class SimpleTypeModule implements Module {
         return this.with(javaType, SchemaKeyword.TAG_TYPE_STRING, openApiFormat);
     }
 
-    private final SimpleTypeModule withStandardStringType(Class<?> javaType, final String format) {
-        // track as a standard format
-        this.standardFormats.add(javaType);
-        return this.withStringType(javaType, format);
+    /**
+     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@link SchemaKeyword#TAG_TYPE_STRING}".
+     *
+     * @param javaType java class to map to a fixed JSON schema definition
+     * @param standardFormat optional {@link SchemaKeyword#TAG_FORMAT} value, to set if one of the respective Options is enabled
+     * @return this module instance (for chaining)
+     */
+    public final SimpleTypeModule withStandardStringType(Class<?> javaType, final String standardFormat) {
+        this.typesWithStandardFormats.add(javaType);
+        return this.withStringType(javaType, standardFormat);
     }
 
     /**
@@ -254,8 +261,7 @@ public class SimpleTypeModule implements Module {
      * @return either {@code Object.class} to cause omission of the "additionalProperties" keyword or null to leave it up to following configurations
      */
     private Type resolveAdditionalProperties(TypeScope scope) {
-        if (scope.getType().getTypeParameters().isEmpty()
-                && SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType())) {
+        if (this.shouldHaveEmptySchema(scope)) {
             // indicate no specific additionalProperties type - thereby causing it to be omitted from the generated schema
             return Object.class;
         }
@@ -269,12 +275,15 @@ public class SimpleTypeModule implements Module {
      * @return either an empty map to cause omission of the "patternProperties" keyword or null to leave it up to following configurations
      */
     private Map<String, Type> resolvePatternProperties(TypeScope scope) {
-        if (scope.getType().getTypeParameters().isEmpty()
-                && SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType())) {
+        if (this.shouldHaveEmptySchema(scope)) {
             // indicate no specific patternProperties - thereby causing it to be omitted from the generated schema
             return Collections.emptyMap();
         }
         return null;
+    }
+
+    private boolean shouldHaveEmptySchema(TypeScope scope) {
+        return SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType());
     }
 
     /**
@@ -296,21 +305,20 @@ public class SimpleTypeModule implements Module {
             if (jsonSchemaTypeValue != SchemaKeyword.TAG_TYPE_NULL) {
                 customSchema.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(jsonSchemaTypeValue));
             }
-            if (shouldAddFormatTag(javaType, context)) {
-                String formatValue = SimpleTypeModule.this.extraOpenApiFormatValues.get(javaType.getErasedType());
+            if (this.shouldAddFormatTag(javaType, context.getGeneratorConfig())) {
+                String formatValue = SimpleTypeModule.this.formatValues.get(javaType.getErasedType());
                 if (formatValue != null) {
                     customSchema.put(context.getKeyword(SchemaKeyword.TAG_FORMAT), formatValue);
                 }
             }
-            // set true as second parameter to indicate simple types to be always in-lined (i.e. not put into definitions)
             return new CustomDefinition(customSchema, CustomDefinition.DefinitionType.INLINE, CustomDefinition.AttributeInclusion.YES);
         }
 
-        private boolean shouldAddFormatTag(final ResolvedType javaType, final SchemaGenerationContext context) {
+        private boolean shouldAddFormatTag(final ResolvedType javaType, final SchemaGeneratorConfig config) {
             // either OpenAPI extra formats or standard-formats that are registered
-            return context.getGeneratorConfig().shouldIncludeExtraOpenApiFormatValues()
-                    || (context.getGeneratorConfig().shouldIncludeStandardFormatValues()
-                            && standardFormats.contains(javaType.getErasedType()));
+            return config.shouldIncludeExtraOpenApiFormatValues()
+                    || (config.shouldIncludeStandardFormatValues()
+                        && SimpleTypeModule.this.typesWithStandardFormats.contains(javaType.getErasedType()));
         }
     }
 }
