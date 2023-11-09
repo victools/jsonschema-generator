@@ -61,7 +61,7 @@ configBuilder.without(
       <td colspan="2"><code>Option.EXTRA_OPEN_API_FORMAT_VALUES</code></td>
     </tr>
     <tr>
-      <td>Include extra <code>"format"</code> values (e.g. <code>"int32"</code>, <code>"int64"</code>, <code>"date"</code>, <code>"date-time"</code>, <code>"uuid"</code>) for fixed types (primitive/basic types, plus some of the <code>Option.ADDITIONAL_FIXED_TYPES</code> if they are enabled as well).</td>
+      <td>Include extra <code>"format"</code> values (e.g. <code>"int32"</code>, <code>"int64"</code>, <code>"date"</code>, <code>"time"</code>, <code>"date-time"</code>, <code>"duration"</code>, <code>"uuid"</code>, <code>"uri"</code>) for fixed types (primitive/basic types, plus some of the <code>Option.ADDITIONAL_FIXED_TYPES</code> if they are enabled as well). Only works if <code>Option.ADDITIONAL_FIXED_TYPES</code> is set and it overrides <code>Option.STANDARD_FORMATS.</code></td></td>
       <td>no automatic <code>"format"</code> values are being included.</td>
     </tr>
     <tr>
@@ -323,6 +323,15 @@ configBuilder.without(
       <td>As final step in the schema generation process, ensure all sub schemas containing keywords implying a particular "type" (e.g., "properties" implying an "object") have this "type" declared explicitly – this also affects the results from custom definitions.</td>
       <td>No additional "type" indication will be added for each sub schema, e.g. on the collected attributes where the "allOf" clean-up could not be applied or was disabled.</td>
     </tr>
+    <tr>
+      <td rowspan="2" style="text-align: right">35</td>
+      <td colspan="2"><code>Option.STANDARD_FORMATS</code></td>
+    </tr>
+    <tr>
+      <td>Same as <code>Option.EXTRA_OPEN_API_FORMAT_VALUES</code> but only for built-in supported <code>"format"</code> values (<code>"date"</code>, <code>"time"</code>, <code>"date-time"</code>, <code>"duration"</code>, <code>"uuid"</code>, <code>"uri"</code>).
+      Only works if <code>Option.ADDITIONAL_FIXED_TYPES</code> is set and it is overriden by <code>Option.EXTRA_OPEN_API_FORMAT_VALUES</code></td>
+      <td>no automatic <code>"format"</code> values are being included.</td>
+    </tr>
   </tbody>
 </table>
 
@@ -368,3 +377,4 @@ Below, you can find the lists of <code>Option</code>s included/excluded in the r
 | 32 | `PLAIN_DEFINITION_KEYS`                      | ⬜️ | ⬜️ | ⬜️ |
 | 33 | `ALLOF_CLEANUP_AT_THE_END`                   | ✅ | ✅ | ✅ |
 | 34 | `STRICT_TYPE_INFO`                           | ⬜️ | ⬜️ | ⬜️ |
+| 35 | `STANDARD_FORMATS`                           | ⬜️ | ⬜️ | ⬜️ |

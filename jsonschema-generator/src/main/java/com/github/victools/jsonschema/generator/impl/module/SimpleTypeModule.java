@@ -27,8 +27,10 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -81,17 +83,18 @@ public class SimpleTypeModule implements Module {
     public static SimpleTypeModule forPrimitiveAndAdditionalTypes() {
         SimpleTypeModule module = SimpleTypeModule.forPrimitiveTypes();
 
-        module.withStringType(java.time.LocalDate.class, "date");
+        module.withStandardStringType(java.time.LocalDate.class, "date");
         Stream.of(java.time.LocalDateTime.class, java.time.ZonedDateTime.class,
                 java.time.OffsetDateTime.class, java.time.Instant.class,
                 java.util.Date.class, java.util.Calendar.class)
-                .forEach(javaType -> module.withStringType(javaType, "date-time"));
+                .forEach(javaType -> module.withStandardStringType(javaType, "date-time"));
         Stream.of(java.time.LocalTime.class, java.time.OffsetTime.class)
-                .forEach(javaType -> module.withStringType(javaType, "time"));
-        module.withStringType(java.util.UUID.class, "uuid");
-        module.withStringType(java.net.URI.class, "uri");
+                .forEach(javaType -> module.withStandardStringType(javaType, "time"));
+        Stream.of(java.time.Duration.class, java.time.Period.class)
+                .forEach(javaType -> module.withStandardStringType(javaType, "duration"));
+        module.withStandardStringType(java.util.UUID.class, "uuid");
+        module.withStandardStringType(java.net.URI.class, "uri");
         module.withStringType(java.time.ZoneId.class);
-        module.withStringType(java.time.Period.class);
         module.withIntegerType(java.math.BigInteger.class);
 
         Stream.of(java.math.BigDecimal.class, Number.class)
@@ -101,6 +104,7 @@ public class SimpleTypeModule implements Module {
     }
 
     private final Map<Class<?>, SchemaKeyword> fixedJsonSchemaTypes = new HashMap<>();
+    private final List<Class<?>> standardFormats = new ArrayList<>();
     private final Map<Class<?>, String> extraOpenApiFormatValues = new HashMap<>();
 
     /**
@@ -160,6 +164,12 @@ public class SimpleTypeModule implements Module {
      */
     public final SimpleTypeModule withStringType(Class<?> javaType, String openApiFormat) {
         return this.with(javaType, SchemaKeyword.TAG_TYPE_STRING, openApiFormat);
+    }
+
+    private final SimpleTypeModule withStandardStringType(Class<?> javaType, final String format) {
+        // track as a standard format
+        this.standardFormats.add(javaType);
+        return this.withStringType(javaType, format);
     }
 
     /**
@@ -286,7 +296,7 @@ public class SimpleTypeModule implements Module {
             if (jsonSchemaTypeValue != SchemaKeyword.TAG_TYPE_NULL) {
                 customSchema.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(jsonSchemaTypeValue));
             }
-            if (context.getGeneratorConfig().shouldIncludeExtraOpenApiFormatValues()) {
+            if (shouldAddFormatTag(javaType, context)) {
                 String formatValue = SimpleTypeModule.this.extraOpenApiFormatValues.get(javaType.getErasedType());
                 if (formatValue != null) {
                     customSchema.put(context.getKeyword(SchemaKeyword.TAG_FORMAT), formatValue);
@@ -294,6 +304,13 @@ public class SimpleTypeModule implements Module {
             }
             // set true as second parameter to indicate simple types to be always in-lined (i.e. not put into definitions)
             return new CustomDefinition(customSchema, CustomDefinition.DefinitionType.INLINE, CustomDefinition.AttributeInclusion.YES);
+        }
+
+        private boolean shouldAddFormatTag(final ResolvedType javaType, final SchemaGenerationContext context) {
+            // either OpenAPI extra formats or standard-formats that are registered
+            return context.getGeneratorConfig().shouldIncludeExtraOpenApiFormatValues()
+                    || (context.getGeneratorConfig().shouldIncludeStandardFormatValues()
+                            && standardFormats.contains(javaType.getErasedType()));
         }
     }
 }
