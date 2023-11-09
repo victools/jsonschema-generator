@@ -49,10 +49,10 @@ public class SchemaGeneratorSimpleTypesTest {
             Arguments.of(long.class, SchemaKeyword.TAG_TYPE_INTEGER, "int64", null),
             Arguments.of(Short.class, SchemaKeyword.TAG_TYPE_INTEGER, null, null),
             Arguments.of(short.class, SchemaKeyword.TAG_TYPE_INTEGER, null, null),
-            Arguments.of(Double.class, SchemaKeyword.TAG_TYPE_NUMBER, "double", null, null),
-            Arguments.of(double.class, SchemaKeyword.TAG_TYPE_NUMBER, "double", null, null),
-            Arguments.of(Float.class, SchemaKeyword.TAG_TYPE_NUMBER, "float", null, null),
-            Arguments.of(float.class, SchemaKeyword.TAG_TYPE_NUMBER, "float", null, null),
+            Arguments.of(Double.class, SchemaKeyword.TAG_TYPE_NUMBER, "double", null),
+            Arguments.of(double.class, SchemaKeyword.TAG_TYPE_NUMBER, "double", null),
+            Arguments.of(Float.class, SchemaKeyword.TAG_TYPE_NUMBER, "float", null),
+            Arguments.of(float.class, SchemaKeyword.TAG_TYPE_NUMBER, "float", null),
             Arguments.of(java.time.LocalDate.class, SchemaKeyword.TAG_TYPE_STRING, "date", "date"),
             Arguments.of(java.time.LocalDateTime.class, SchemaKeyword.TAG_TYPE_STRING, "date-time", "date-time"),
             Arguments.of(java.time.LocalTime.class, SchemaKeyword.TAG_TYPE_STRING, "time", "time"),
@@ -155,7 +155,7 @@ public class SchemaGeneratorSimpleTypesTest {
     @ParameterizedTest
     @MethodSource("parametersForTestGenerateSchema_SimpleTypeWithStandardFormat")
     public void testGenerateSchema_SimpleTypeWithStandardFormat(Class<?> targetType, SchemaKeyword expectedJsonSchemaType, String expectedFormat,
-                                                        SchemaVersion schemaVersion) throws Exception {
+            SchemaVersion schemaVersion) throws Exception {
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(schemaVersion)
                 .with(Option.ADDITIONAL_FIXED_TYPES, Option.STANDARD_FORMATS)
                 .build();

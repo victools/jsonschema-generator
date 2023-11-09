@@ -286,18 +286,14 @@ public enum Option {
      * @since 4.11.0
      */
     PLAIN_DEFINITION_KEYS(null, null),
-
     /**
-     * For the "format" attribute, JSON Schema defines various built-in supported values.
+     * For the "format" attribute, JSON Schema defines various supported values.
      * <br>
-     * Some of those data-types would be handed if either {@link #ADDITIONAL_FIXED_TYPES}
-     * or a custom {@link SimpleTypeModule} (i.e., {@link SimpleTypeModule#forPrimitiveTypes()})
-     * are added.
-     * In that case, by enabling this option these standard built-in "format" values would be added.
-     * Note that if {@link #EXTRA_OPEN_API_FORMAT_VALUES} is enabled, it overrides this option as
-     * it include extra "format" attributes.
+     * Some of those data-types would be included if either {@link #ADDITIONAL_FIXED_TYPES} is enabled or a custom {@link SimpleTypeModule} are added.
+     * By enabling this option, only the standard built-in "format" values would be added, which is a subset of the values considered with the
+     * {@link #EXTRA_OPEN_API_FORMAT_VALUES} being enabled.
      *
-     * @since 4.32.1
+     * @since 4.33.0
      */
     STANDARD_FORMATS(null, null),
     /**
