@@ -299,32 +299,11 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         final CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(targetType, this, ignoredDefinitionProvider);
         if (customDefinition != null && (customDefinition.isMeantToBeInline() || forceInlineDefinition)) {
             includeTypeAttributes = customDefinition.shouldIncludeAttributes();
-            if (targetNode == null) {
-                logger.debug("storing configured custom inline type for {} as definition (since it is the main schema \"#\")", targetType);
-                definition = customDefinition.getValue();
-                this.putDefinition(targetType, definition, ignoredDefinitionProvider);
-                // targetNode will be populated at the end, in buildDefinitionsAndResolveReferences()
-            } else {
-                logger.debug("directly applying configured custom inline type for {}", targetType);
-                targetNode.setAll(customDefinition.getValue());
-                definition = targetNode;
-            }
-            if (isNullable) {
-                this.makeNullable(definition);
-            }
+            definition = applyInlineCustomDefinition(customDefinition, targetType, targetNode, isNullable, ignoredDefinitionProvider);
         } else {
             boolean isContainerType = this.typeContext.isContainerType(targetType);
-            if (forceInlineDefinition || isContainerType && targetNode != null && customDefinition == null) {
-                // always inline array types
-                definition = targetNode;
-            } else {
-                definition = this.generatorConfig.createObjectNode();
-                this.putDefinition(targetType, definition, ignoredDefinitionProvider);
-                if (targetNode != null) {
-                    // targetNode is only null for the main class for which the schema is being generated
-                    this.addReference(targetType, targetNode, ignoredDefinitionProvider, isNullable);
-                }
-            }
+            boolean shouldInlineDefinition = forceInlineDefinition || isContainerType && targetNode != null && customDefinition == null;
+            definition = applyReferenceDefinition(shouldInlineDefinition, targetType, targetNode, isNullable, ignoredDefinitionProvider);
             if (customDefinition != null) {
                 this.markDefinitionAsNeverInlinedIfRequired(customDefinition, targetType, ignoredDefinitionProvider);
                 logger.debug("applying configured custom definition for {}", targetType);
@@ -350,6 +329,42 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         // apply overrides as the very last step
         this.generatorConfig.getTypeAttributeOverrides()
                 .forEach(override -> override.overrideTypeAttributes(definition, scope, this));
+    }
+
+    private ObjectNode applyInlineCustomDefinition(CustomDefinition customDefinition, ResolvedType targetType, ObjectNode targetNode,
+            boolean isNullable, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        final ObjectNode definition;
+        if (targetNode == null) {
+            logger.debug("storing configured custom inline type for {} as definition (since it is the main schema \"#\")", targetType);
+            definition = customDefinition.getValue();
+            this.putDefinition(targetType, definition, ignoredDefinitionProvider);
+            // targetNode will be populated at the end, in buildDefinitionsAndResolveReferences()
+        } else {
+            logger.debug("directly applying configured custom inline type for {}", targetType);
+            targetNode.setAll(customDefinition.getValue());
+            definition = targetNode;
+        }
+        if (isNullable) {
+            this.makeNullable(definition);
+        }
+        return definition;
+    }
+
+    private ObjectNode applyReferenceDefinition(boolean shouldInlineDefinition, ResolvedType targetType, ObjectNode targetNode, boolean isNullable,
+            CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        final ObjectNode definition;
+        if (shouldInlineDefinition) {
+            // always inline array types
+            definition = targetNode;
+        } else {
+            definition = this.generatorConfig.createObjectNode();
+            this.putDefinition(targetType, definition, ignoredDefinitionProvider);
+            if (targetNode != null) {
+                // targetNode is only null for the main class for which the schema is being generated
+                this.addReference(targetType, targetNode, ignoredDefinitionProvider, isNullable);
+            }
+        }
+        return definition;
     }
 
     /**
@@ -404,13 +419,9 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @param isNullable whether the field/method's return value the targetType refers to is allowed to be null in the declaring type
      */
     private void generateArrayDefinition(TypeScope targetScope, ObjectNode definition, boolean isNullable) {
+        definition.put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY));
         if (isNullable) {
-            ArrayNode typeArray = this.generatorConfig.createArrayNode()
-                    .add(this.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY))
-                    .add(this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
-            definition.set(this.getKeyword(SchemaKeyword.TAG_TYPE), typeArray);
-        } else {
-            definition.put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY));
+            this.extendTypeDeclarationToIncludeNull(definition);
         }
         if (targetScope instanceof MemberScope<?, ?> && !((MemberScope<?, ?>) targetScope).isFakeContainerItemScope()) {
             MemberScope<?, ?> fakeArrayItemMember = ((MemberScope<?, ?>) targetScope).asFakeContainerItemScope();
@@ -448,46 +459,51 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
 
         this.collectObjectProperties(targetType, targetProperties, requiredProperties);
 
-        if (!targetProperties.isEmpty()) {
-            ObjectNode propertiesNode = this.generatorConfig.createObjectNode();
-            List<MemberScope<?, ?>> sortedProperties = targetProperties.values().stream()
-                    .sorted(this.generatorConfig::sortProperties)
-                    .collect(Collectors.toList());
-            Map<String, List<String>> dependentRequires = new LinkedHashMap<>();
-            for (MemberScope<?, ?> property : sortedProperties) {
-                JsonNode subSchema;
-                List<String> dependentRequiredForProperty;
-                if (property instanceof FieldScope) {
-                    subSchema = this.populateFieldSchema((FieldScope) property);
-                    dependentRequiredForProperty = this.generatorConfig.resolveDependentRequires((FieldScope) property);
-                } else if (property instanceof MethodScope) {
-                    subSchema = this.populateMethodSchema((MethodScope) property);
-                    dependentRequiredForProperty = this.generatorConfig.resolveDependentRequires((MethodScope) property);
-                } else {
-                    throw new IllegalStateException("Unsupported member scope of type " + property.getClass());
-                }
-                String propertyName = property.getSchemaPropertyName();
-                propertiesNode.set(propertyName, subSchema);
-                if (dependentRequiredForProperty != null && !dependentRequiredForProperty.isEmpty()) {
-                    dependentRequires.put(propertyName, dependentRequiredForProperty);
-                }
-            }
-            definition.set(this.getKeyword(SchemaKeyword.TAG_PROPERTIES), propertiesNode);
-            if (!requiredProperties.isEmpty()) {
-                ArrayNode requiredNode = this.generatorConfig.createArrayNode();
-                // list required properties in the same order as the property
-                sortedProperties.stream()
-                        .map(MemberScope::getSchemaPropertyName)
-                        .filter(requiredProperties::contains)
-                        .forEach(requiredNode::add);
-                definition.set(this.getKeyword(SchemaKeyword.TAG_REQUIRED), requiredNode);
-            }
-            if (!dependentRequires.isEmpty()) {
-                ObjectNode dpendentRequiredNode = this.generatorConfig.createObjectNode();
-                dependentRequires.forEach((leadName, dependentNames) -> dependentNames
-                        .forEach(dpendentRequiredNode.withArray(leadName)::add));
-                definition.set(this.getKeyword(SchemaKeyword.TAG_DEPENDENT_REQUIRED), dpendentRequiredNode);
-            }
+        if (targetProperties.isEmpty()) {
+            return;
+        }
+        ObjectNode propertiesNode = this.generatorConfig.createObjectNode();
+        List<MemberScope<?, ?>> sortedProperties = targetProperties.values().stream()
+                .sorted(this.generatorConfig::sortProperties)
+                .collect(Collectors.toList());
+        Map<String, List<String>> dependentRequires = new LinkedHashMap<>();
+        for (MemberScope<?, ?> property : sortedProperties) {
+            this.addPropertiesEntry(propertiesNode, dependentRequires, property);
+        }
+        definition.set(this.getKeyword(SchemaKeyword.TAG_PROPERTIES), propertiesNode);
+        if (!requiredProperties.isEmpty()) {
+            ArrayNode requiredNode = this.generatorConfig.createArrayNode();
+            // list required properties in the same order as the property
+            sortedProperties.stream()
+                    .map(MemberScope::getSchemaPropertyName)
+                    .filter(requiredProperties::contains)
+                    .forEach(requiredNode::add);
+            definition.set(this.getKeyword(SchemaKeyword.TAG_REQUIRED), requiredNode);
+        }
+        if (!dependentRequires.isEmpty()) {
+            ObjectNode dependentRequiredNode = this.generatorConfig.createObjectNode();
+            dependentRequires.forEach((leadName, dependentNames) -> dependentNames
+                    .forEach(dependentRequiredNode.withArray(leadName)::add));
+            definition.set(this.getKeyword(SchemaKeyword.TAG_DEPENDENT_REQUIRED), dependentRequiredNode);
+        }
+    }
+
+    private void addPropertiesEntry(ObjectNode propertiesNode, Map<String, List<String>> dependentRequires, MemberScope<?, ?> property) {
+        JsonNode subSchema;
+        List<String> dependentRequiredForProperty;
+        if (property instanceof FieldScope) {
+            subSchema = this.populateFieldSchema((FieldScope) property);
+            dependentRequiredForProperty = this.generatorConfig.resolveDependentRequires((FieldScope) property);
+        } else if (property instanceof MethodScope) {
+            subSchema = this.populateMethodSchema((MethodScope) property);
+            dependentRequiredForProperty = this.generatorConfig.resolveDependentRequires((MethodScope) property);
+        } else {
+            throw new IllegalStateException("Unsupported member scope of type " + property.getClass());
+        }
+        String propertyName = property.getSchemaPropertyName();
+        propertiesNode.set(propertyName, subSchema);
+        if (dependentRequiredForProperty != null && !dependentRequiredForProperty.isEmpty()) {
+            dependentRequires.put(propertyName, dependentRequiredForProperty);
         }
     }
 
@@ -748,62 +764,70 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             ObjectNode collectedAttributes, CustomPropertyDefinitionProvider<M> ignoredDefinitionProvider) {
         final CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(scope, this, ignoredDefinitionProvider);
         if (customDefinition != null && customDefinition.isMeantToBeInline()) {
-            if (customDefinition.getValue().isEmpty()) {
-                targetNode.withArray(this.getKeyword(SchemaKeyword.TAG_ALLOF))
-                        .add(customDefinition.getValue());
-            } else {
-                targetNode.setAll(customDefinition.getValue());
-            }
-            if (customDefinition.shouldIncludeAttributes()) {
-                AttributeCollector.mergeMissingAttributes(targetNode, collectedAttributes);
-                Set<String> allowedSchemaTypes = this.collectAllowedSchemaTypes(targetNode);
-                ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this, allowedSchemaTypes);
-                AttributeCollector.mergeMissingAttributes(targetNode, typeAttributes);
-            }
-            if (isNullable) {
-                this.makeNullable(targetNode);
-            }
+            populateMemberSchemaWithInlineCustomDefinition(scope, targetNode, isNullable, collectedAttributes, customDefinition);
         } else {
-            // create an "allOf" wrapper for the attributes related to this particular field and its general type
-            final ObjectNode referenceContainer;
-            if (customDefinition != null && !customDefinition.shouldIncludeAttributes()
-                    || collectedAttributes == null || collectedAttributes.size() == 0) {
-                // no need for the allOf, can use the sub-schema instance directly as reference
-                referenceContainer = targetNode;
-            } else if (customDefinition == null && scope.isContainerType()) {
-                // same as above, but the collected attributes should be applied also for containers/arrays
-                referenceContainer = targetNode;
-                AttributeCollector.mergeMissingAttributes(targetNode, collectedAttributes);
-            } else {
-                // avoid mixing potential "$ref" element with contextual attributes by introducing an "allOf" wrapper
-                // this is only relevant for DRAFT_7 and is being cleaned-up afterwards for newer DRAFT versions
-                referenceContainer = this.generatorConfig.createObjectNode();
-                targetNode.set(this.getKeyword(SchemaKeyword.TAG_ALLOF), this.generatorConfig.createArrayNode()
-                        .add(referenceContainer)
-                        .add(collectedAttributes));
-            }
-            // only add reference for separate definition if it is not a fixed type that should be in-lined
-            try {
-                this.traverseGenericType(scope, referenceContainer, isNullable, forceInlineDefinition, null);
-            } catch (UnsupportedOperationException ex) {
-                logger.warn("Skipping type definition due to error", ex);
-            }
+            populateMemberSchemaWithReference(scope, targetNode, isNullable, forceInlineDefinition, collectedAttributes, customDefinition);
+        }
+    }
+
+    private <M extends MemberScope<?, ?>> void populateMemberSchemaWithInlineCustomDefinition(M scope, ObjectNode targetNode, boolean isNullable,
+            ObjectNode collectedAttributes, CustomDefinition customDefinition) {
+        if (customDefinition.getValue().isEmpty()) {
+            targetNode.withArray(this.getKeyword(SchemaKeyword.TAG_ALLOF))
+                    .add(customDefinition.getValue());
+        } else {
+            targetNode.setAll(customDefinition.getValue());
+        }
+        if (customDefinition.shouldIncludeAttributes()) {
+            AttributeCollector.mergeMissingAttributes(targetNode, collectedAttributes);
+            Set<String> allowedSchemaTypes = this.collectAllowedSchemaTypes(targetNode);
+            ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this, allowedSchemaTypes);
+            AttributeCollector.mergeMissingAttributes(targetNode, typeAttributes);
+        }
+        if (isNullable) {
+            this.makeNullable(targetNode);
+        }
+    }
+
+    private <M extends MemberScope<?, ?>> void populateMemberSchemaWithReference(M scope, ObjectNode targetNode, boolean isNullable,
+            boolean forceInlineDefinition, ObjectNode collectedAttributes, CustomDefinition customDefinition) {
+        // create an "allOf" wrapper for the attributes related to this particular field and its general type
+        final ObjectNode referenceContainer;
+        if (customDefinition != null && !customDefinition.shouldIncludeAttributes()
+                || collectedAttributes == null || collectedAttributes.size() == 0) {
+            // no need for the allOf, can use the sub-schema instance directly as reference
+            referenceContainer = targetNode;
+        } else if (customDefinition == null && scope.isContainerType()) {
+            // same as above, but the collected attributes should be applied also for containers/arrays
+            referenceContainer = targetNode;
+            AttributeCollector.mergeMissingAttributes(targetNode, collectedAttributes);
+        } else {
+            // avoid mixing potential "$ref" element with contextual attributes by introducing an "allOf" wrapper
+            // this is only relevant for DRAFT_6 / DRAFT_7 and is being cleaned-up afterward for newer schema versions
+            referenceContainer = this.generatorConfig.createObjectNode();
+            targetNode.putArray(this.getKeyword(SchemaKeyword.TAG_ALLOF))
+                    .add(referenceContainer)
+                    .add(collectedAttributes);
+        }
+        // only add reference for separate definition if it is not a fixed type that should be in-lined
+        try {
+            this.traverseGenericType(scope, referenceContainer, isNullable, forceInlineDefinition, null);
+        } catch (UnsupportedOperationException ex) {
+            logger.warn("Skipping type definition due to error", ex);
         }
     }
 
     @Override
     public ObjectNode makeNullable(ObjectNode node) {
-        final String nullTypeName = this.getKeyword(SchemaKeyword.TAG_TYPE_NULL);
-        if (node.has(this.getKeyword(SchemaKeyword.TAG_REF))
-                || node.has(this.getKeyword(SchemaKeyword.TAG_ALLOF))
-                || node.has(this.getKeyword(SchemaKeyword.TAG_ANYOF))
-                || node.has(this.getKeyword(SchemaKeyword.TAG_ONEOF))
+        Stream<SchemaKeyword> requiringAnyOfWrapper = Stream.of(
+                SchemaKeyword.TAG_REF, SchemaKeyword.TAG_ALLOF, SchemaKeyword.TAG_ANYOF, SchemaKeyword.TAG_ONEOF,
                 // since version 4.21.0
-                || node.has(this.getKeyword(SchemaKeyword.TAG_CONST))
-                || node.has(this.getKeyword(SchemaKeyword.TAG_ENUM))) {
+                SchemaKeyword.TAG_CONST, SchemaKeyword.TAG_ENUM
+        );
+        if (requiringAnyOfWrapper.map(this::getKeyword).anyMatch(node::has)) {
             // cannot be sure what is specified in those other schema parts, instead simply create an anyOf wrapper
             ObjectNode nullSchema = this.generatorConfig.createObjectNode()
-                    .put(this.getKeyword(SchemaKeyword.TAG_TYPE), nullTypeName);
+                    .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
             ArrayNode anyOf = this.generatorConfig.createArrayNode()
                     // one option in the anyOf should be null
                     .add(nullSchema)
@@ -813,32 +837,35 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             node.removeAll();
             node.set(this.getKeyword(SchemaKeyword.TAG_ANYOF), anyOf);
         } else {
-            // given node is a simple schema, we can simply adjust its "type" attribute
-            JsonNode fixedJsonSchemaType = node.get(this.getKeyword(SchemaKeyword.TAG_TYPE));
-            if (fixedJsonSchemaType instanceof ArrayNode) {
-                // there are already multiple "type" values
-                ArrayNode arrayOfTypes = (ArrayNode) fixedJsonSchemaType;
-                // one of the existing "type" values could be null
-                boolean alreadyContainsNull = false;
-                for (JsonNode arrayEntry : arrayOfTypes) {
-                    alreadyContainsNull = alreadyContainsNull || nullTypeName.equals(arrayEntry.textValue());
-                }
-
-                if (!alreadyContainsNull) {
-                    // null "type" was not mentioned before, to be safe we need to replace the old array and add the null entry
-                    node.replace(this.getKeyword(SchemaKeyword.TAG_TYPE), this.generatorConfig.createArrayNode()
-                            .addAll(arrayOfTypes)
-                            .add(nullTypeName));
-                }
-            } else if (fixedJsonSchemaType instanceof TextNode && !nullTypeName.equals(fixedJsonSchemaType.textValue())) {
-                // add null as second "type" option
-                node.replace(this.getKeyword(SchemaKeyword.TAG_TYPE), this.generatorConfig.createArrayNode()
-                        .add(fixedJsonSchemaType)
-                        .add(nullTypeName));
-            }
-            // if no "type" is specified, null is allowed already
+            // given node is a simple schema, we can adjust its "type" attribute
+            this.extendTypeDeclarationToIncludeNull(node);
         }
         return node;
+    }
+
+    private void extendTypeDeclarationToIncludeNull(ObjectNode node) {
+        JsonNode fixedJsonSchemaType = node.get(this.getKeyword(SchemaKeyword.TAG_TYPE));
+        final String nullTypeName = this.getKeyword(SchemaKeyword.TAG_TYPE_NULL);
+        if (fixedJsonSchemaType instanceof ArrayNode) {
+            // there are already multiple "type" values
+            ArrayNode arrayOfTypes = (ArrayNode) fixedJsonSchemaType;
+            // one of the existing "type" values could be null
+            for (JsonNode arrayEntry : arrayOfTypes) {
+                if (nullTypeName.equals(arrayEntry.textValue())) {
+                    return;
+                }
+            }
+            // null "type" was not mentioned before, to be safe we need to replace the old array and add the null entry
+            node.putArray(this.getKeyword(SchemaKeyword.TAG_TYPE))
+                    .addAll(arrayOfTypes)
+                    .add(nullTypeName);
+        } else if (fixedJsonSchemaType instanceof TextNode && !nullTypeName.equals(fixedJsonSchemaType.textValue())) {
+            // add null as second "type" option
+            node.putArray(this.getKeyword(SchemaKeyword.TAG_TYPE))
+                    .add(fixedJsonSchemaType)
+                    .add(nullTypeName);
+        }
+        // if no "type" is specified, null is allowed already
     }
 
     @Override

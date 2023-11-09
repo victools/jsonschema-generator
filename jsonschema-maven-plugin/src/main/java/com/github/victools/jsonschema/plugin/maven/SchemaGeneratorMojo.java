@@ -54,6 +54,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -258,65 +260,76 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @return A set of classes as found on the classpath, that are not explicitly excluded
      */
     private List<PotentialSchemaClass> getAllClassNames() {
-        if (this.allTypes == null) {
-            ClassGraph classGraph = new ClassGraph()
-                    .overrideClasspath(classpath.getClasspathElements(this.project))
-                    .enableClassInfo();
-            boolean considerAnnotations = this.annotations != null && !this.annotations.isEmpty();
-            if (considerAnnotations) {
-                classGraph.enableAnnotationInfo();
-            }
-            Set<Predicate<String>> exclusions;
-            if (this.excludeClassNames == null || this.excludeClassNames.length == 0) {
-                exclusions = Collections.emptySet();
-            } else {
-                exclusions = Stream.of(this.excludeClassNames)
-                        .map(excludeEntry -> GlobHandler.createClassOrPackageNameFilter(excludeEntry, false))
-                        .collect(Collectors.toSet());
-            }
-            Set<Predicate<String>> inclusions = new HashSet<>();
-            if (considerAnnotations) {
-                inclusions.add(input -> true);
-            } else {
-                if (this.classNames != null) {
-                    for (String className : this.classNames) {
-                        inclusions.add(GlobHandler.createClassOrPackageNameFilter(className, false));
-                    }
-                }
-                if (this.packageNames != null) {
-                    for (String packageName : this.packageNames) {
-                        inclusions.add(GlobHandler.createClassOrPackageNameFilter(packageName, true));
-                    }
-                }
-            }
-
-            ClassInfoList.ClassInfoFilter filter = element -> {
-                String classPathEntry = element.getName().replaceAll("\\.", "/");
-                if (exclusions.stream().anyMatch(exclude -> exclude.test(classPathEntry))) {
-                    this.getLog().debug("  Excluding: " + element.getName());
-                    return false;
-                }
-                if (inclusions.stream().anyMatch(include -> include.test(classPathEntry))) {
-                    this.getLog().debug("  Including: " + element.getName());
-                    return true;
-                }
-                return false;
-            };
+        if (this.allTypes != null) {
+            return this.allTypes;
+        }
+        ClassGraph classGraph = new ClassGraph()
+                .overrideClasspath(classpath.getClasspathElements(this.project))
+                .enableClassInfo();
+        boolean considerAnnotations = this.annotations != null && !this.annotations.isEmpty();
+        if (considerAnnotations) {
+            classGraph.enableAnnotationInfo();
+        }
+        ClassInfoList.ClassInfoFilter filter = createClassInfoFilter(considerAnnotations);
+        try (ScanResult scanResult = classGraph.scan()) {
             Stream<ClassInfo> allTypesStream;
-            try (ScanResult scanResult = classGraph.scan()) {
-                if (considerAnnotations) {
-                    allTypesStream = this.annotations.stream()
-                            .flatMap(a -> scanResult.getClassesWithAnnotation(a.className).filter(filter).stream())
-                            .distinct();
-                } else {
-                    allTypesStream = scanResult.getAllClasses().filter(filter).stream();
-                }
-                this.allTypes = allTypesStream
-                        .map(PotentialSchemaClass::new)
-                        .collect(Collectors.toList());
+            if (considerAnnotations) {
+                allTypesStream = this.annotations.stream()
+                        .flatMap(a -> scanResult.getClassesWithAnnotation(a.className).filter(filter).stream())
+                        .distinct();
+            } else {
+                allTypesStream = scanResult.getAllClasses().filter(filter).stream();
             }
+            this.allTypes = allTypesStream
+                    .map(PotentialSchemaClass::new)
+                    .collect(Collectors.toList());
         }
         return this.allTypes;
+    }
+
+    /**
+     * Based on the plugin configuration, create a filter instance that determines whether a given classpath element should be considered.
+     *
+     * @param considerAnnotations whether the plugin configuration includes looking up types by certain annotations
+     * @return filter instance to apply on a ClassInfoList containing possibly eligible classpath elements
+     */
+    private ClassInfoList.ClassInfoFilter createClassInfoFilter(boolean considerAnnotations) {
+        Set<Predicate<String>> exclusions;
+        if (this.excludeClassNames == null || this.excludeClassNames.length == 0) {
+            exclusions = Collections.emptySet();
+        } else {
+            exclusions = Stream.of(this.excludeClassNames)
+                    .map(excludeEntry -> GlobHandler.createClassOrPackageNameFilter(excludeEntry, false))
+                    .collect(Collectors.toSet());
+        }
+        Set<Predicate<String>> inclusions;
+        if (considerAnnotations) {
+            inclusions = Collections.singleton(input -> true);
+        } else {
+            inclusions = new HashSet<>();
+            if (this.classNames != null) {
+                Stream.of(this.classNames)
+                        .map(className -> GlobHandler.createClassOrPackageNameFilter(className, false))
+                        .forEach(inclusions::add);
+            }
+            if (this.packageNames != null) {
+                Stream.of(this.packageNames)
+                        .map(packageName -> GlobHandler.createClassOrPackageNameFilter(packageName, true))
+                        .forEach(inclusions::add);
+            }
+        }
+        return element -> {
+            String classPathEntry = element.getName().replaceAll("\\.", "/");
+            if (exclusions.stream().anyMatch(exclude -> exclude.test(classPathEntry))) {
+                this.getLog().debug("  Excluding: " + element.getName());
+                return false;
+            }
+            if (inclusions.stream().anyMatch(include -> include.test(classPathEntry))) {
+                this.getLog().debug("  Including: " + element.getName());
+                return true;
+            }
+            return false;
+        };
     }
 
     /**
@@ -445,44 +458,95 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         }
         for (GeneratorModule module : this.modules) {
             if (module.className != null && !module.className.isEmpty()) {
-                try {
-                    this.getLog().debug("- Adding custom Module " + module.className);
-                    Class<? extends Module> moduleClass = (Class<? extends Module>) this.loadClass(module.className);
-                    Module moduleInstance = moduleClass.getConstructor().newInstance();
-                    configBuilder.with(moduleInstance);
-                } catch (ClassCastException | InstantiationException
-                        | IllegalAccessException | NoSuchMethodException
-                        | InvocationTargetException e) {
-                    throw new MojoExecutionException("Error: Can not instantiate custom module " + module.className, e);
-                }
+                this.addCustomModule(module.className, configBuilder);
             } else if (module.name != null) {
-                switch (module.name) {
-                case "Jackson":
-                    this.getLog().debug("- Adding Jackson Module");
-                    addJacksonModule(configBuilder, module);
-                    break;
-                case "JakartaValidation":
-                    this.getLog().debug("- Adding Jakarta Validation Module");
-                    addJakartaValidationModule(configBuilder, module);
-                    break;
-                case "JavaxValidation":
-                    this.getLog().debug("- Adding Javax Validation Module");
-                    addJavaxValidationModule(configBuilder, module);
-                    break;
-                case "Swagger15":
-                    this.getLog().debug("- Adding Swagger 1.5 Module");
-                    addSwagger15Module(configBuilder, module);
-                    break;
-                case "Swagger2":
-                    this.getLog().debug("- Adding Swagger 2.x Module");
-                    addSwagger2Module(configBuilder, module);
-                    break;
-                default:
-                    throw new MojoExecutionException("Error: Module does not have a name in "
-                            + "['Jackson', 'JakartaValidation', 'JavaxValidation', 'Swagger15', 'Swagger2'] or does not have a custom classname.");
+                this.addStandardModule(module, configBuilder);
+            }
+        }
+    }
+
+    /**
+     * Instantiate and apply the custom module with the given class name to the config builder.
+     *
+     * @param moduleClassName Class name of the custom module to add.
+     * @param configBuilder The builder on which the module is added.
+     * @throws MojoExecutionException When failing to instantiate the indicated module class.
+     */
+    private void addCustomModule(String moduleClassName, SchemaGeneratorConfigBuilder configBuilder) throws MojoExecutionException {
+        this.getLog().debug("- Adding custom Module " + moduleClassName);
+        try {
+            Class<? extends Module> moduleClass = (Class<? extends Module>) this.loadClass(moduleClassName);
+            Module moduleInstance = moduleClass.getConstructor().newInstance();
+            configBuilder.with(moduleInstance);
+        } catch (ClassCastException | InstantiationException
+                 | IllegalAccessException | NoSuchMethodException
+                 | InvocationTargetException e) {
+            throw new MojoExecutionException("Error: Can not instantiate custom module " + moduleClassName, e);
+        }
+    }
+
+    /**
+     * Instantiate and apply the standard module with the given name to the config builder.
+     *
+     * @param module Record in the modules section from the pom containing at least a name.
+     * @param configBuilder The builder on which the module is added.
+     * @throws MojoExecutionException When an invalid module name or option is specified.
+     */
+    private void addStandardModule(GeneratorModule module, SchemaGeneratorConfigBuilder configBuilder) throws MojoExecutionException {
+        switch (module.name) {
+        case "Jackson":
+            this.getLog().debug("- Adding Jackson Module");
+            this.addStandardModuleWithOptions(module, configBuilder, JacksonModule::new, JacksonOption[]::new, JacksonOption.class);
+            break;
+        case "JakartaValidation":
+            this.getLog().debug("- Adding Jakarta Validation Module");
+            this.addStandardModuleWithOptions(module, configBuilder, JakartaValidationModule::new, JakartaValidationOption[]::new,
+                    JakartaValidationOption.class);
+            break;
+        case "JavaxValidation":
+            this.getLog().debug("- Adding Javax Validation Module");
+            this.addStandardModuleWithOptions(module, configBuilder, JavaxValidationModule::new, JavaxValidationOption[]::new,
+                    JavaxValidationOption.class);
+            break;
+        case "Swagger15":
+            this.getLog().debug("- Adding Swagger 1.5 Module");
+            this.addStandardModuleWithOptions(module, configBuilder, SwaggerModule::new, SwaggerOption[]::new, SwaggerOption.class);
+            break;
+        case "Swagger2":
+            this.getLog().debug("- Adding Swagger 2.x Module");
+            configBuilder.with(new Swagger2Module());
+            break;
+        default:
+            throw new MojoExecutionException("Error: Module does not have a name in "
+                    + "['Jackson', 'JakartaValidation', 'JavaxValidation', 'Swagger15', 'Swagger2'] or does not have a custom classname.");
+        }
+    }
+
+    /**
+     * Add a standard module to the generator configuration.
+     *
+     * @param <T> type of option enum the standard module expects in its constructor
+     * @param configBuilder builder on which the standard module should be added
+     * @param module record in the modules section from the pom
+     * @param moduleConstructor module constructor expecting an array of options
+     * @param optionArrayConstructor array constructor for the respective option enum type
+     * @param optionType enum type for the module options (e.g., JacksonOption or JakartaValidationOption)
+     * @throws MojoExecutionException in case of problems
+     */
+    private <T extends Enum<T>> void addStandardModuleWithOptions(GeneratorModule module, SchemaGeneratorConfigBuilder configBuilder,
+            Function<T[], Module> moduleConstructor, IntFunction<T[]> optionArrayConstructor, Class<T> optionType) throws MojoExecutionException {
+        Stream.Builder<T> optionStream = Stream.builder();
+        if (module.options != null && module.options.length > 0) {
+            for (String optionName : module.options) {
+                try {
+                    optionStream.add(Enum.valueOf(optionType, optionName));
+                } catch (IllegalArgumentException e) {
+                    throw new MojoExecutionException("Error: Unknown " + module.name + " option " + optionName, e);
                 }
             }
         }
+        T[] options = optionStream.build().toArray(optionArrayConstructor);
+        configBuilder.with(moduleConstructor.apply(options));
     }
 
     /**
@@ -513,109 +577,6 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             return this.getClassLoader().loadClass(className);
         } catch (ClassNotFoundException e) {
             throw new MojoExecutionException("Error loading class " + className, e);
-        }
-    }
-
-    /**
-     * Add the Swagger (1.5) module to the generator config.
-     *
-     * @param configBuilder The builder on which the config is added
-     * @param module The modules section form the pom
-     * @throws MojoExecutionException in case of problems
-     */
-    private void addSwagger15Module(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
-        if (module.options == null || module.options.length == 0) {
-            configBuilder.with(new SwaggerModule());
-        } else {
-            SwaggerOption[] swaggerOptions = new SwaggerOption[module.options.length];
-            for (int i = 0; i < module.options.length; i++) {
-                try {
-                    swaggerOptions[i] = SwaggerOption.valueOf(module.options[i]);
-                } catch (IllegalArgumentException e) {
-                    throw new MojoExecutionException("Error: Unknown Swagger option " + module.options[i], e);
-                }
-            }
-            configBuilder.with(new SwaggerModule(swaggerOptions));
-        }
-    }
-
-    /**
-     * Add the Swagger (2.x) module to the generator config.
-     *
-     * @param configBuilder The builder on which the config is added
-     * @param module The modules section form the pom
-     * @throws MojoExecutionException in case of problems
-     */
-    private void addSwagger2Module(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
-        configBuilder.with(new Swagger2Module());
-    }
-
-    /**
-     * Add the Javax Validation module to the generator config.
-     *
-     * @param configBuilder The builder on which the config is added
-     * @param module The modules section form the pom
-     * @throws MojoExecutionException in case of problems
-     */
-    private void addJavaxValidationModule(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
-        if (module.options == null || module.options.length == 0) {
-            configBuilder.with(new JavaxValidationModule());
-        } else {
-            JavaxValidationOption[] javaxValidationOptions = new JavaxValidationOption[module.options.length];
-            for (int i = 0; i < module.options.length; i++) {
-                try {
-                    javaxValidationOptions[i] = JavaxValidationOption.valueOf(module.options[i]);
-                } catch (IllegalArgumentException e) {
-                    throw new MojoExecutionException("Error: Unknown JavaxValidation option " + module.options[i], e);
-                }
-            }
-            configBuilder.with(new JavaxValidationModule(javaxValidationOptions));
-        }
-    }
-
-    /**
-     * Add the Jakarta Validation module to the generator config.
-     *
-     * @param configBuilder The builder on which the config is added
-     * @param module The modules section form the pom
-     * @throws MojoExecutionException in case of problems
-     */
-    private void addJakartaValidationModule(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
-        if (module.options == null || module.options.length == 0) {
-            configBuilder.with(new JakartaValidationModule());
-        } else {
-            JakartaValidationOption[] jakartaValidationOptions = new JakartaValidationOption[module.options.length];
-            for (int i = 0; i < module.options.length; i++) {
-                try {
-                    jakartaValidationOptions[i] = JakartaValidationOption.valueOf(module.options[i]);
-                } catch (IllegalArgumentException e) {
-                    throw new MojoExecutionException("Error: Unknown JakartaValidation option " + module.options[i], e);
-                }
-            }
-            configBuilder.with(new JakartaValidationModule(jakartaValidationOptions));
-        }
-    }
-
-    /**
-     * Add the Jackson module to the generator config.
-     *
-     * @param configBuilder The builder on which the config is added
-     * @param module The modules section form the pom
-     * @throws MojoExecutionException Exception in case of error
-     */
-    private void addJacksonModule(SchemaGeneratorConfigBuilder configBuilder, GeneratorModule module) throws MojoExecutionException {
-        if (module.options == null || module.options.length == 0) {
-            configBuilder.with(new JacksonModule());
-        } else {
-            JacksonOption[] jacksonOptions = new JacksonOption[module.options.length];
-            for (int i = 0; i < module.options.length; i++) {
-                try {
-                    jacksonOptions[i] = JacksonOption.valueOf(module.options[i]);
-                } catch (IllegalArgumentException e) {
-                    throw new MojoExecutionException("Error: Unknown Jackson option " + module.options[i], e);
-                }
-            }
-            configBuilder.with(new JacksonModule(jacksonOptions));
         }
     }
 
