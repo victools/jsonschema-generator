@@ -43,6 +43,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -496,21 +497,19 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         switch (module.name) {
         case "Jackson":
             this.getLog().debug("- Adding Jackson Module");
-            this.addStandardModuleWithOptions(module, configBuilder, JacksonModule::new, JacksonOption[]::new, JacksonOption.class);
+            this.addStandardModuleWithOptions(module, configBuilder, JacksonModule::new, JacksonOption.class);
             break;
         case "JakartaValidation":
             this.getLog().debug("- Adding Jakarta Validation Module");
-            this.addStandardModuleWithOptions(module, configBuilder, JakartaValidationModule::new, JakartaValidationOption[]::new,
-                    JakartaValidationOption.class);
+            this.addStandardModuleWithOptions(module, configBuilder, JakartaValidationModule::new, JakartaValidationOption.class);
             break;
         case "JavaxValidation":
             this.getLog().debug("- Adding Javax Validation Module");
-            this.addStandardModuleWithOptions(module, configBuilder, JavaxValidationModule::new, JavaxValidationOption[]::new,
-                    JavaxValidationOption.class);
+            this.addStandardModuleWithOptions(module, configBuilder, JavaxValidationModule::new, JavaxValidationOption.class);
             break;
         case "Swagger15":
             this.getLog().debug("- Adding Swagger 1.5 Module");
-            this.addStandardModuleWithOptions(module, configBuilder, SwaggerModule::new, SwaggerOption[]::new, SwaggerOption.class);
+            this.addStandardModuleWithOptions(module, configBuilder, SwaggerModule::new, SwaggerOption.class);
             break;
         case "Swagger2":
             this.getLog().debug("- Adding Swagger 2.x Module");
@@ -529,12 +528,11 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @param configBuilder builder on which the standard module should be added
      * @param module record in the modules section from the pom
      * @param moduleConstructor module constructor expecting an array of options
-     * @param optionArrayConstructor array constructor for the respective option enum type
      * @param optionType enum type for the module options (e.g., JacksonOption or JakartaValidationOption)
      * @throws MojoExecutionException in case of problems
      */
     private <T extends Enum<T>> void addStandardModuleWithOptions(GeneratorModule module, SchemaGeneratorConfigBuilder configBuilder,
-            Function<T[], Module> moduleConstructor, IntFunction<T[]> optionArrayConstructor, Class<T> optionType) throws MojoExecutionException {
+            Function<T[], Module> moduleConstructor, Class<T> optionType) throws MojoExecutionException {
         Stream.Builder<T> optionStream = Stream.builder();
         if (module.options != null && module.options.length > 0) {
             for (String optionName : module.options) {
@@ -545,7 +543,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
                 }
             }
         }
-        T[] options = optionStream.build().toArray(optionArrayConstructor);
+        T[] options = optionStream.build().toArray(count -> (T[]) Array.newInstance(optionType, count));
         configBuilder.with(moduleConstructor.apply(options));
     }
 

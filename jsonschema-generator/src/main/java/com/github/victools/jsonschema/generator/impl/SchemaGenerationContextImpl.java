@@ -794,7 +794,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         // create an "allOf" wrapper for the attributes related to this particular field and its general type
         final ObjectNode referenceContainer;
         if (customDefinition != null && !customDefinition.shouldIncludeAttributes()
-                || collectedAttributes == null || collectedAttributes.size() == 0) {
+                || collectedAttributes == null || collectedAttributes.isEmpty()) {
             // no need for the allOf, can use the sub-schema instance directly as reference
             referenceContainer = targetNode;
         } else if (customDefinition == null && scope.isContainerType()) {
