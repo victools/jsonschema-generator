@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-*-*
+## [Unreleased]
+### `jsonschema-generator`
+#### Added
+- new `Option.STANDARD_FORMATS` includes standard `"format"` values to some types considered by `Option.ADDITIONAL_FIXED_TYPES`
+
+#### Changed
+- include new `Option.STANDARD_FORMATS` in `OptionPreset.PLAIN_JSON` by default
 
 ## [4.32.0] - 2023-10-27
 ### `jsonschema-generator`

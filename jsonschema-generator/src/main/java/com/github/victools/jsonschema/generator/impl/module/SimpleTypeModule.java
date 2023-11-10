@@ -23,13 +23,16 @@ import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -81,17 +84,18 @@ public class SimpleTypeModule implements Module {
     public static SimpleTypeModule forPrimitiveAndAdditionalTypes() {
         SimpleTypeModule module = SimpleTypeModule.forPrimitiveTypes();
 
-        module.withStringType(java.time.LocalDate.class, "date");
+        module.withStandardStringType(java.time.LocalDate.class, "date");
         Stream.of(java.time.LocalDateTime.class, java.time.ZonedDateTime.class,
                 java.time.OffsetDateTime.class, java.time.Instant.class,
                 java.util.Date.class, java.util.Calendar.class)
-                .forEach(javaType -> module.withStringType(javaType, "date-time"));
+                .forEach(javaType -> module.withStandardStringType(javaType, "date-time"));
         Stream.of(java.time.LocalTime.class, java.time.OffsetTime.class)
-                .forEach(javaType -> module.withStringType(javaType, "time"));
-        module.withStringType(java.util.UUID.class, "uuid");
-        module.withStringType(java.net.URI.class, "uri");
+                .forEach(javaType -> module.withStandardStringType(javaType, "time"));
+        Stream.of(java.time.Duration.class, java.time.Period.class)
+                .forEach(javaType -> module.withStandardStringType(javaType, "duration"));
+        module.withStandardStringType(java.util.UUID.class, "uuid");
+        module.withStandardStringType(java.net.URI.class, "uri");
         module.withStringType(java.time.ZoneId.class);
-        module.withStringType(java.time.Period.class);
         module.withIntegerType(java.math.BigInteger.class);
 
         Stream.of(java.math.BigDecimal.class, Number.class)
@@ -101,7 +105,8 @@ public class SimpleTypeModule implements Module {
     }
 
     private final Map<Class<?>, SchemaKeyword> fixedJsonSchemaTypes = new HashMap<>();
-    private final Map<Class<?>, String> extraOpenApiFormatValues = new HashMap<>();
+    private final Set<Class<?>> typesWithStandardFormats = new HashSet<>();
+    private final Map<Class<?>, String> formatValues = new HashMap<>();
 
     /**
      * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute.
@@ -114,7 +119,7 @@ public class SimpleTypeModule implements Module {
     private SimpleTypeModule with(Class<?> javaType, SchemaKeyword jsonSchemaTypeValue, String openApiFormat) {
         this.fixedJsonSchemaTypes.put(javaType, jsonSchemaTypeValue);
         if (openApiFormat != null) {
-            this.extraOpenApiFormatValues.put(javaType, openApiFormat);
+            this.formatValues.put(javaType, openApiFormat);
         }
         return this;
     }
@@ -160,6 +165,18 @@ public class SimpleTypeModule implements Module {
      */
     public final SimpleTypeModule withStringType(Class<?> javaType, String openApiFormat) {
         return this.with(javaType, SchemaKeyword.TAG_TYPE_STRING, openApiFormat);
+    }
+
+    /**
+     * Add the given mapping for a (simple) java class to its JSON schema equivalent "type" attribute: "{@link SchemaKeyword#TAG_TYPE_STRING}".
+     *
+     * @param javaType java class to map to a fixed JSON schema definition
+     * @param standardFormat optional {@link SchemaKeyword#TAG_FORMAT} value, to set if one of the respective Options is enabled
+     * @return this module instance (for chaining)
+     */
+    public final SimpleTypeModule withStandardStringType(Class<?> javaType, final String standardFormat) {
+        this.typesWithStandardFormats.add(javaType);
+        return this.withStringType(javaType, standardFormat);
     }
 
     /**
@@ -244,8 +261,7 @@ public class SimpleTypeModule implements Module {
      * @return either {@code Object.class} to cause omission of the "additionalProperties" keyword or null to leave it up to following configurations
      */
     private Type resolveAdditionalProperties(TypeScope scope) {
-        if (scope.getType().getTypeParameters().isEmpty()
-                && SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType())) {
+        if (this.shouldHaveEmptySchema(scope)) {
             // indicate no specific additionalProperties type - thereby causing it to be omitted from the generated schema
             return Object.class;
         }
@@ -259,12 +275,15 @@ public class SimpleTypeModule implements Module {
      * @return either an empty map to cause omission of the "patternProperties" keyword or null to leave it up to following configurations
      */
     private Map<String, Type> resolvePatternProperties(TypeScope scope) {
-        if (scope.getType().getTypeParameters().isEmpty()
-                && SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType())) {
+        if (this.shouldHaveEmptySchema(scope)) {
             // indicate no specific patternProperties - thereby causing it to be omitted from the generated schema
             return Collections.emptyMap();
         }
         return null;
+    }
+
+    private boolean shouldHaveEmptySchema(TypeScope scope) {
+        return SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType());
     }
 
     /**
@@ -286,14 +305,20 @@ public class SimpleTypeModule implements Module {
             if (jsonSchemaTypeValue != SchemaKeyword.TAG_TYPE_NULL) {
                 customSchema.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(jsonSchemaTypeValue));
             }
-            if (context.getGeneratorConfig().shouldIncludeExtraOpenApiFormatValues()) {
-                String formatValue = SimpleTypeModule.this.extraOpenApiFormatValues.get(javaType.getErasedType());
+            if (this.shouldAddFormatTag(javaType, context.getGeneratorConfig())) {
+                String formatValue = SimpleTypeModule.this.formatValues.get(javaType.getErasedType());
                 if (formatValue != null) {
                     customSchema.put(context.getKeyword(SchemaKeyword.TAG_FORMAT), formatValue);
                 }
             }
-            // set true as second parameter to indicate simple types to be always in-lined (i.e. not put into definitions)
             return new CustomDefinition(customSchema, CustomDefinition.DefinitionType.INLINE, CustomDefinition.AttributeInclusion.YES);
+        }
+
+        private boolean shouldAddFormatTag(final ResolvedType javaType, final SchemaGeneratorConfig config) {
+            // either OpenAPI extra formats or standard-formats that are registered
+            return config.shouldIncludeExtraOpenApiFormatValues()
+                    || (config.shouldIncludeStandardFormatValues()
+                        && SimpleTypeModule.this.typesWithStandardFormats.contains(javaType.getErasedType()));
         }
     }
 }
