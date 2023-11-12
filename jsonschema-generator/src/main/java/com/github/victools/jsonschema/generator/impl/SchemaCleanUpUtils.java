@@ -24,7 +24,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -32,9 +32,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -43,6 +45,7 @@ import java.util.stream.StreamSupport;
 public class SchemaCleanUpUtils {
 
     private final SchemaGeneratorConfig config;
+    private final Map<SchemaKeyword, BiFunction<List<JsonNode>, Map<String, SchemaKeyword>, Supplier<? extends JsonNode>>> allOfMergeFunctions;
 
     /**
      * Constructor.
@@ -51,6 +54,52 @@ public class SchemaCleanUpUtils {
      */
     public SchemaCleanUpUtils(SchemaGeneratorConfig config) {
         this.config = config;
+        this.allOfMergeFunctions = this.prepareAllOfMergeFunctions();
+    }
+
+    private Map<SchemaKeyword, BiFunction<List<JsonNode>, Map<String, SchemaKeyword>, Supplier<? extends JsonNode>>> prepareAllOfMergeFunctions() {
+        Map<SchemaKeyword, BiFunction<List<JsonNode>, Map<String, SchemaKeyword>, Supplier<? extends JsonNode>>> result = new HashMap<>();
+
+        BiFunction<List<JsonNode>, Map<String, SchemaKeyword>, Supplier<? extends JsonNode>> mergeArrays =
+                (valuesToMerge, _ignored) -> this.mergeArrays(valuesToMerge);
+        Stream.of(SchemaKeyword.TAG_ALLOF, SchemaKeyword.TAG_REQUIRED)
+                .forEach(keyword -> result.put(keyword, mergeArrays));
+
+        result.put(SchemaKeyword.TAG_PROPERTIES,
+                (valuesToMerge, _ignored) -> this.mergeObjectProperties(valuesToMerge));
+        result.put(SchemaKeyword.TAG_DEPENDENT_REQUIRED,
+                (valuesToMerge, _ignored) -> this.mergeDependentRequiredNode(valuesToMerge));
+        result.put(SchemaKeyword.TAG_DEPENDENT_SCHEMAS,
+                (valuesToMerge, _ignored) -> {
+                    if (this.config.getSchemaVersion() == SchemaVersion.DRAFT_6 || this.config.getSchemaVersion() == SchemaVersion.DRAFT_7) {
+                        // in Draft 6 and Draft 7, the "dependencies" keyword was covering both "dependentSchemas" and "dependentRequired" scenarios
+                        return Optional.ofNullable(this.mergeDependentRequiredNode(valuesToMerge))
+                                .orElseGet(() -> this.mergeObjectProperties(valuesToMerge));
+                    } else {
+                        return this.mergeObjectProperties(valuesToMerge);
+                    }
+                });
+
+        BiFunction<List<JsonNode>, Map<String, SchemaKeyword>, Supplier<? extends JsonNode>> schemaMerge =
+                (valuesToMerge, reverseKeywordMap) -> this.mergeSchemas(null, valuesToMerge, reverseKeywordMap);
+        Stream.of(SchemaKeyword.TAG_ITEMS, SchemaKeyword.TAG_UNEVALUATED_ITEMS, SchemaKeyword.TAG_ADDITIONAL_PROPERTIES,
+                SchemaKeyword.TAG_UNEVALUATED_PROPERTIES)
+                .forEach(keyword -> result.put(keyword, schemaMerge));
+        result.put(SchemaKeyword.TAG_TYPE,
+                (valuesToMerge, _ignored) -> this.returnOverlapOfStringsOrStringArrays(valuesToMerge));
+
+        BiFunction<List<JsonNode>, Map<String, SchemaKeyword>, Supplier<? extends JsonNode>> minimumNumeric =
+                (valuesToMerge, _ignored) -> this.returnMinimumNumericValue(valuesToMerge);
+        Stream.of(SchemaKeyword.TAG_ITEMS_MAX, SchemaKeyword.TAG_PROPERTIES_MAX, SchemaKeyword.TAG_MAXIMUM, SchemaKeyword.TAG_MAXIMUM_EXCLUSIVE,
+                SchemaKeyword.TAG_LENGTH_MAX)
+                .forEach(keyword -> result.put(keyword, minimumNumeric));
+
+        BiFunction<List<JsonNode>, Map<String, SchemaKeyword>, Supplier<? extends JsonNode>> maximumNumeric =
+                (valuesToMerge, _ignored) -> this.returnMaximumNumericValue(valuesToMerge);
+        Stream.of(SchemaKeyword.TAG_ITEMS_MIN, SchemaKeyword.TAG_PROPERTIES_MIN, SchemaKeyword.TAG_MINIMUM, SchemaKeyword.TAG_MINIMUM_EXCLUSIVE,
+                        SchemaKeyword.TAG_LENGTH_MIN)
+                .forEach(keyword -> result.put(keyword, maximumNumeric));
+        return result;
     }
 
     /**
@@ -182,43 +231,12 @@ public class SchemaCleanUpUtils {
             // no conflicts, no further checks
             return () -> valuesToMerge.get(0);
         }
-        switch (keyword) {
-        case TAG_ALLOF:
-        case TAG_REQUIRED:
-            return this.mergeArrays(valuesToMerge);
-        case TAG_PROPERTIES:
-        case TAG_DEPENDENT_SCHEMAS:
-            if (this.config.getSchemaVersion() == SchemaVersion.DRAFT_6 || this.config.getSchemaVersion() == SchemaVersion.DRAFT_7) {
-                // in Draft 6 and Draft 7, the "dependencies" keyword was covering both "dependentSchemas" and "dependentRequired" scenarios
-                return Optional.ofNullable(this.mergeDependentRequiredNode(valuesToMerge))
-                        .orElseGet(() -> this.mergeObjectProperties(valuesToMerge));
-            } else {
-                return this.mergeObjectProperties(valuesToMerge);
-            }
-        case TAG_DEPENDENT_REQUIRED:
-            return this.mergeDependentRequiredNode(valuesToMerge);
-        case TAG_ITEMS:
-        case TAG_UNEVALUATED_ITEMS:
-        case TAG_ADDITIONAL_PROPERTIES:
-        case TAG_UNEVALUATED_PROPERTIES:
-            return this.mergeSchemas(null, valuesToMerge, reverseKeywordMap);
-        case TAG_TYPE:
-            return this.returnOverlapOfStringsOrStringArrays(valuesToMerge);
-        case TAG_ITEMS_MAX:
-        case TAG_PROPERTIES_MAX:
-        case TAG_MAXIMUM:
-        case TAG_MAXIMUM_EXCLUSIVE:
-        case TAG_LENGTH_MAX:
-            return this.returnMinimumNumericValue(valuesToMerge);
-        case TAG_ITEMS_MIN:
-        case TAG_PROPERTIES_MIN:
-        case TAG_MINIMUM:
-        case TAG_MINIMUM_EXCLUSIVE:
-        case TAG_LENGTH_MIN:
-            return this.returnMaximumNumericValue(valuesToMerge);
-        default:
+        BiFunction<List<JsonNode>, Map<String, SchemaKeyword>, Supplier<? extends JsonNode>> specificMergeFunction =
+                this.allOfMergeFunctions.get(keyword);
+        if (specificMergeFunction == null) {
             return this.returnOneIfAllEqual(valuesToMerge);
         }
+        return specificMergeFunction.apply(valuesToMerge, reverseKeywordMap);
     }
 
     private Supplier<JsonNode> mergeArrays(List<JsonNode> arrayNodesToMerge) {
@@ -255,31 +273,11 @@ public class SchemaCleanUpUtils {
     }
 
     private Supplier<JsonNode> mergeDependentRequiredNode(List<JsonNode> dependentRequiredNodesToMerge) {
-        if (!dependentRequiredNodesToMerge.stream().allMatch(JsonNode::isObject)) {
-            // at least one value is not an object as expected, abort merge
-            return null;
-        }
         Map<String, Set<String>> mergedDependentRequiredNames = new LinkedHashMap<>();
-        for (JsonNode singleDependentRequired : dependentRequiredNodesToMerge) {
-            Iterator<Map.Entry<String, JsonNode>> it = singleDependentRequired.fields();
-            while (it.hasNext()) {
-                Map.Entry<String, JsonNode> singleLeadingField = it.next();
-                if (!singleLeadingField.getValue().isArray()) {
-                    // cannot consolidate when anything but an array of other property names is being provided
-                    return null;
-                } else {
-                    Set<String> propertyNames = mergedDependentRequiredNames.computeIfAbsent(singleLeadingField.getKey(),
-                            (name) -> new LinkedHashSet<>());
-                    Iterator<JsonNode> propertyNameIt = singleLeadingField.getValue().elements();
-                    while (propertyNameIt.hasNext()) {
-                        JsonNode propertyName = propertyNameIt.next();
-                        if (!propertyName.isTextual()) {
-                            // cannot consolidate when array contains anything but plain property names
-                            return null;
-                        }
-                        propertyNames.add(propertyName.asText());
-                    }
-                }
+        for (JsonNode singleNode : dependentRequiredNodesToMerge) {
+            if (!collectDependentRequiredNamesIfMergeAllowed(singleNode, mergedDependentRequiredNames)) {
+                // some dependentRequired node does not comply with expected structure, abort merge
+                return null;
             }
         }
         // merging is possible, now build corresponding object node
@@ -289,6 +287,52 @@ public class SchemaCleanUpUtils {
                     .forEach(mergedDependentRequiredNode.withArray(leadName)::add));
             return mergedDependentRequiredNode;
         };
+    }
+
+    /**
+     * Iterate over the given object node's properties, expecting an array of property names on each, which should be added to the provided map.
+     *
+     * @param objectNode single value of a {@link SchemaKeyword#TAG_DEPENDENT_REQUIRED} attribute
+     * @param mergedDependentRequiredNames collected required property names per leading property name, that should be extended here
+     * @return whether the given {@code objectNode} is eligible to be merged and its contents were successfully added to the given collection
+     */
+    private boolean collectDependentRequiredNamesIfMergeAllowed(JsonNode objectNode, Map<String, Set<String>> mergedDependentRequiredNames) {
+        if (!objectNode.isObject()) {
+            // dependentRequired node is not an object as expected, abort merge
+            return false;
+        }
+        Iterator<Map.Entry<String, JsonNode>> it = objectNode.fields();
+        while (it.hasNext()) {
+            Map.Entry<String, JsonNode> dependentRequiredFieldsOfSingleLead = it.next();
+            Set<String> propertyNames = this.collectTextItemsFromArrayNode(dependentRequiredFieldsOfSingleLead.getValue());
+            if (propertyNames == null) {
+                // cannot consolidate when anything but an array of other plain property names is being provided
+                return false;
+            }
+            mergedDependentRequiredNames.computeIfAbsent(dependentRequiredFieldsOfSingleLead.getKey(), leadName -> new LinkedHashSet<>())
+                    .addAll(propertyNames);
+        }
+        return true;
+    }
+
+    /**
+     * Unpack the given array of texts.
+     *
+     * @param arrayNode the node to unpack
+     * @return all contained text items; or {@code null} if given node is not an array or any item is not a text
+     */
+    private Set<String> collectTextItemsFromArrayNode(JsonNode arrayNode) {
+        if (!arrayNode.isArray()) {
+            return null;
+        }
+        Set<String> textItems = new LinkedHashSet<>();
+        for (JsonNode item : arrayNode) {
+            if (!item.isTextual()) {
+                return null;
+            }
+            textItems.add(item.asText());
+        }
+        return textItems;
     }
 
     /**
@@ -313,16 +357,13 @@ public class SchemaCleanUpUtils {
         Map<String, List<JsonNode>> fieldsFromAllParts = parts.stream()
                 .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) part::fields).spliterator(), false))
                 .collect(Collectors.groupingBy(Map.Entry::getKey, LinkedHashMap::new, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
-        if ((this.config.getSchemaVersion() == SchemaVersion.DRAFT_6 || this.config.getSchemaVersion() == SchemaVersion.DRAFT_7)
-                && fieldsFromAllParts.containsKey(this.config.getKeyword(SchemaKeyword.TAG_REF))
-                && (mainNodeIncludingAllOf == null ? (parts.size() > 1) : (mainNodeIncludingAllOf.size() > 1 || parts.size() > 2))) {
-            // in Draft 7, any other attributes besides the $ref keyword were ignored
+        if (this.shouldSkipMergingAllOf(mainNodeIncludingAllOf, parts, fieldsFromAllParts)) {
             return null;
         }
         Map<String, List<JsonNode>> unsupportedTagValues = fieldsFromAllParts.entrySet().stream()
                 .filter(entry -> !reverseKeywordMap.containsKey(entry.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, SchemaCleanUpUtils::throwingMerger, LinkedHashMap::new));
-        if (unsupportedTagValues.entrySet().stream().anyMatch(entry -> entry.getValue().size() > 1)) {
+        if (unsupportedTagValues.values().stream().anyMatch(occurrences -> occurrences.size() > 1)) {
             // unsupported tag with more than one occurrence: be conservative and don't merge
             return null;
         }
@@ -343,6 +384,32 @@ public class SchemaCleanUpUtils {
         };
     }
 
+    /**
+     * Check whether the merging of the given node and it's allOf entries should be skipped due to a {@link SchemaKeyword#TAG_REF} being present.
+     * Drafts 6 and 7 would ignore any other attributes besides the {@link SchemaKeyword#TAG_REF}.
+     *
+     * @param mainNode the main node containing an {@link SchemaKeyword#TAG_ALLOF} array (maybe {@code null})
+     * @param parts entries of the {@link SchemaKeyword#TAG_ALLOF} array to consider
+     * @param fieldsFromAllParts flatten collection of all attributes in the given parts
+     * @return whether to block merging of the given {@link SchemaKeyword#TAG_ALLOF} candidate
+     */
+    private boolean shouldSkipMergingAllOf(ObjectNode mainNode, List<ObjectNode> parts, Map<String, List<JsonNode>> fieldsFromAllParts) {
+        if (this.config.getSchemaVersion() != SchemaVersion.DRAFT_6 && this.config.getSchemaVersion() != SchemaVersion.DRAFT_7) {
+            // later schema versions support mixing a reference with other attributes
+            return false;
+        }
+        if (!fieldsFromAllParts.containsKey(this.config.getKeyword(SchemaKeyword.TAG_REF))) {
+            // we are only concerned about references here; if none is present, merging should not be blocked
+            return false;
+        }
+        if (mainNode == null) {
+            // if there are multiple parts that could be conflicting, block merging
+            return parts.size() > 1;
+        }
+        // if main node contains more than just the allOf or there are multiple parts that may be conflicting, block merging
+        return mainNode.size() > 1 || parts.size() > 2;
+    }
+
     private Map<SchemaKeyword, Supplier<? extends JsonNode>> collectSupportedTagValueSuppliers(Map<String, List<JsonNode>> fieldsFromAllParts,
             Map<String, SchemaKeyword> reverseKeywordMap, ObjectNode mainNodeIncludingAllOf) {
         Map<SchemaKeyword, List<JsonNode>> supportedTagValues = fieldsFromAllParts.entrySet().stream()
@@ -358,12 +425,12 @@ public class SchemaCleanUpUtils {
             SchemaKeyword keyword = fieldEntries.getKey();
             List<JsonNode> valuesToMerge = fieldEntries.getValue();
             if (keyword == SchemaKeyword.TAG_ALLOF && mainNodeIncludingAllOf != null) {
-                // we can ignore the "allOf" tag in the target node (the one we are trying to remove here)
-                valuesToMerge = valuesToMerge.subList(1, valuesToMerge.size());
-                if (valuesToMerge.isEmpty()) {
+                if (valuesToMerge.size() == 1) {
                     // no other "allOf" part left to merge
                     continue;
                 }
+                // we can ignore the "allOf" tag in the target node (the one we are trying to remove here)
+                valuesToMerge = valuesToMerge.subList(1, valuesToMerge.size());
             }
             Supplier<? extends JsonNode> mergeResultSupplier = this.getAllOfMergeFunctionFor(keyword, valuesToMerge, reverseKeywordMap);
             if (mergeResultSupplier == null) {
@@ -386,13 +453,8 @@ public class SchemaCleanUpUtils {
                 // invalid node; abort merge
                 return null;
             }
-            if (encounteredValues.size() > 1) {
-                encounteredValues.retainAll(nextValues);
-                if (encounteredValues.isEmpty()) {
-                    // invalid merge result: no valid value remained; abort merge
-                    return null;
-                }
-            } else if (!nextValues.contains(encounteredValues.get(0))) {
+            encounteredValues.retainAll(nextValues);
+            if (encounteredValues.isEmpty()) {
                 // invalid merge result: no valid value remained; abort merge
                 return null;
             }
@@ -400,24 +462,27 @@ public class SchemaCleanUpUtils {
         if (encounteredValues.size() == 1) {
             return () -> new TextNode(encounteredValues.get(0));
         }
-        return () -> this.config.createArrayNode()
-                .addAll(encounteredValues.stream().map(TextNode::new).collect(Collectors.toList()));
+        return () -> {
+            ArrayNode arrayNode = this.config.createArrayNode();
+            encounteredValues.stream().map(TextNode::new).forEach(arrayNode::add);
+            return arrayNode;
+        };
     }
 
     private List<String> getStringValuesFromStringOrStringArray(JsonNode node) {
+        List<String> result = new ArrayList<>();
         if (node.isArray()) {
-            List<String> result = new ArrayList<>();
             node.forEach(arrayItem -> result.add(arrayItem.asText(null)));
             if (result.contains(null)) {
                 return null;
             }
-            return result;
+        } else if (node.isTextual()) {
+            result.add(node.asText());
+        } else {
+            // neither array nor text node; abort merge
+            return null;
         }
-        if (node.isTextual()) {
-            return Collections.singletonList(node.asText());
-        }
-        // neither array nor text node; abort merge
-        return null;
+        return result;
     }
 
     private Supplier<JsonNode> returnMinimumNumericValue(List<JsonNode> nodes) {

@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,30 +149,35 @@ public class AttributeCollector {
         collector.setDescription(node, config.resolveDescriptionForType(scope), generationContext);
         collector.setDefault(node, config.resolveDefaultForType(scope), generationContext);
         collector.setEnum(node, config.resolveEnumForType(scope), generationContext);
-        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT))) {
+        if (isListEmptyOrContainingAtLeastOne(allowedSchemaTypes, config, SchemaKeyword.TAG_TYPE_OBJECT)) {
             collector.setAdditionalProperties(node, config.resolveAdditionalPropertiesForType(scope, generationContext), generationContext);
             collector.setPatternProperties(node, config.resolvePatternPropertiesForType(scope, generationContext), generationContext);
         }
-        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_STRING))) {
+        if (isListEmptyOrContainingAtLeastOne(allowedSchemaTypes, config, SchemaKeyword.TAG_TYPE_STRING)) {
             collector.setStringMinLength(node, config.resolveStringMinLengthForType(scope), generationContext);
             collector.setStringMaxLength(node, config.resolveStringMaxLengthForType(scope), generationContext);
             collector.setStringFormat(node, config.resolveStringFormatForType(scope), generationContext);
             collector.setStringPattern(node, config.resolveStringPatternForType(scope), generationContext);
         }
-        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_INTEGER))
-                || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_NUMBER))) {
+        if (isListEmptyOrContainingAtLeastOne(allowedSchemaTypes, config, SchemaKeyword.TAG_TYPE_INTEGER, SchemaKeyword.TAG_TYPE_NUMBER)) {
             collector.setNumberInclusiveMinimum(node, config.resolveNumberInclusiveMinimumForType(scope), generationContext);
             collector.setNumberExclusiveMinimum(node, config.resolveNumberExclusiveMinimumForType(scope), generationContext);
             collector.setNumberInclusiveMaximum(node, config.resolveNumberInclusiveMaximumForType(scope), generationContext);
             collector.setNumberExclusiveMaximum(node, config.resolveNumberExclusiveMaximumForType(scope), generationContext);
             collector.setNumberMultipleOf(node, config.resolveNumberMultipleOfForType(scope), generationContext);
         }
-        if (allowedSchemaTypes.isEmpty() || allowedSchemaTypes.contains(config.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY))) {
+        if (isListEmptyOrContainingAtLeastOne(allowedSchemaTypes, config, SchemaKeyword.TAG_TYPE_ARRAY)) {
             collector.setArrayMinItems(node, config.resolveArrayMinItemsForType(scope), generationContext);
             collector.setArrayMaxItems(node, config.resolveArrayMaxItemsForType(scope), generationContext);
             collector.setArrayUniqueItems(node, config.resolveArrayUniqueItemsForType(scope), generationContext);
         }
         return node;
+    }
+
+    private static boolean isListEmptyOrContainingAtLeastOne(Set<String> values, SchemaGeneratorConfig config, SchemaKeyword... keywords) {
+        return values.isEmpty() || Stream.of(keywords)
+                .map(config::getKeyword)
+                .anyMatch(values::contains);
     }
 
     /**
@@ -297,25 +303,7 @@ public class AttributeCollector {
     public AttributeCollector setDefault(ObjectNode node, Object defaultValue) {
         if (defaultValue != null) {
             final String defaultTag = SchemaKeyword.TAG_DEFAULT.forVersion(SchemaVersion.DRAFT_7);
-            // need to specifically add simple/primitive values by type
-            if (defaultValue instanceof String) {
-                node.put(defaultTag, (String) defaultValue);
-            } else if (defaultValue instanceof BigDecimal) {
-                node.put(defaultTag, (BigDecimal) defaultValue);
-            } else if (defaultValue instanceof BigInteger) {
-                node.put(defaultTag, (BigInteger) defaultValue);
-            } else if (defaultValue instanceof Boolean) {
-                node.put(defaultTag, (Boolean) defaultValue);
-            } else if (defaultValue instanceof Double) {
-                node.put(defaultTag, (Double) defaultValue);
-            } else if (defaultValue instanceof Float) {
-                node.put(defaultTag, (Float) defaultValue);
-            } else if (defaultValue instanceof Integer) {
-                node.put(defaultTag, (Integer) defaultValue);
-            } else {
-                // everything else is simply forwarded as-is to the JSON Schema, it's up to the configurator to ensure the value's correctness
-                node.putPOJO(defaultTag, defaultValue);
-            }
+            this.addRawPropertyValue(node, defaultTag, defaultValue);
         }
         return this;
     }
@@ -331,25 +319,7 @@ public class AttributeCollector {
     public AttributeCollector setDefault(ObjectNode node, Object defaultValue, SchemaGenerationContext generationContext) {
         if (defaultValue != null) {
             final String defaultTag = generationContext.getKeyword(SchemaKeyword.TAG_DEFAULT);
-            // need to specifically add simple/primitive values by type
-            if (defaultValue instanceof String) {
-                node.put(defaultTag, (String) defaultValue);
-            } else if (defaultValue instanceof BigDecimal) {
-                node.put(defaultTag, (BigDecimal) defaultValue);
-            } else if (defaultValue instanceof BigInteger) {
-                node.put(defaultTag, (BigInteger) defaultValue);
-            } else if (defaultValue instanceof Boolean) {
-                node.put(defaultTag, (Boolean) defaultValue);
-            } else if (defaultValue instanceof Double) {
-                node.put(defaultTag, (Double) defaultValue);
-            } else if (defaultValue instanceof Float) {
-                node.put(defaultTag, (Float) defaultValue);
-            } else if (defaultValue instanceof Integer) {
-                node.put(defaultTag, (Integer) defaultValue);
-            } else {
-                // everything else is simply forwarded as-is to the JSON Schema, it's up to the configurator to ensure the value's correctness
-                node.putPOJO(defaultTag, defaultValue);
-            }
+            this.addRawPropertyValue(node, defaultTag, defaultValue);
         }
         return this;
     }
@@ -371,21 +341,10 @@ public class AttributeCollector {
                     .filter(this::canBeConvertedToString)
                     .collect(Collectors.toList());
             if (values.size() == 1) {
-                Object singleValue = values.get(0);
-                if (singleValue instanceof String) {
-                    node.put(SchemaKeyword.TAG_CONST.forVersion(schemaVersion), (String) singleValue);
-                } else {
-                    node.putPOJO(SchemaKeyword.TAG_CONST.forVersion(schemaVersion), singleValue);
-                }
+                this.addRawPropertyValue(node, SchemaKeyword.TAG_CONST.forVersion(schemaVersion), values.get(0));
             } else if (!values.isEmpty()) {
                 ArrayNode array = node.arrayNode();
-                for (Object singleValue : values) {
-                    if (singleValue instanceof String) {
-                        array.add((String) singleValue);
-                    } else {
-                        array.addPOJO(singleValue);
-                    }
-                }
+                values.forEach(singleValue -> this.addRawArrayItem(array, singleValue));
                 node.set(SchemaKeyword.TAG_ENUM.forVersion(schemaVersion), array);
             }
         }
@@ -401,31 +360,67 @@ public class AttributeCollector {
      * @return this instance (for chaining)
      */
     public AttributeCollector setEnum(ObjectNode node, Collection<?> enumValues, SchemaGenerationContext generationContext) {
-        if (enumValues != null) {
-            List<Object> values = enumValues.stream()
-                    .filter(this::isSupportedEnumValue)
-                    .filter(this::canBeConvertedToString)
-                    .collect(Collectors.toList());
-            if (values.size() == 1 && generationContext.getGeneratorConfig().shouldRepresentSingleAllowedValueAsConst()) {
-                Object singleValue = values.get(0);
-                if (singleValue instanceof String) {
-                    node.put(generationContext.getKeyword(SchemaKeyword.TAG_CONST), (String) singleValue);
-                } else {
-                    node.putPOJO(generationContext.getKeyword(SchemaKeyword.TAG_CONST), singleValue);
-                }
-            } else if (!values.isEmpty()) {
-                ArrayNode array = node.arrayNode();
-                for (Object singleValue : values) {
-                    if (singleValue instanceof String) {
-                        array.add((String) singleValue);
-                    } else {
-                        array.addPOJO(singleValue);
-                    }
-                }
-                node.set(generationContext.getKeyword(SchemaKeyword.TAG_ENUM), array);
-            }
+        if (enumValues == null) {
+            return this;
+        }
+        List<Object> values = enumValues.stream()
+                .filter(this::isSupportedEnumValue)
+                .filter(this::canBeConvertedToString)
+                .collect(Collectors.toList());
+        if (values.size() == 1 && generationContext.getGeneratorConfig().shouldRepresentSingleAllowedValueAsConst()) {
+            this.addRawPropertyValue(node, generationContext.getKeyword(SchemaKeyword.TAG_CONST), values.get(0));
+        } else if (!values.isEmpty()) {
+            ArrayNode array = node.arrayNode();
+            values.forEach(singleValue -> this.addRawArrayItem(array, singleValue));
+            node.set(generationContext.getKeyword(SchemaKeyword.TAG_ENUM), array);
         }
         return this;
+    }
+
+    private void addRawPropertyValue(ObjectNode node, String propertyName, Object value) {
+        // need to specifically add simple/primitive values by type
+        if (value instanceof String) {
+            // explicit inclusion as string results in wrapping quote symbols
+            node.put(propertyName, (String) value);
+        } else if (value instanceof BigDecimal) {
+            node.put(propertyName, (BigDecimal) value);
+        } else if (value instanceof BigInteger) {
+            node.put(propertyName, (BigInteger) value);
+        } else if (value instanceof Boolean) {
+            node.put(propertyName, (Boolean) value);
+        } else if (value instanceof Double) {
+            node.put(propertyName, (Double) value);
+        } else if (value instanceof Float) {
+            node.put(propertyName, (Float) value);
+        } else if (value instanceof Integer) {
+            node.put(propertyName, (Integer) value);
+        } else {
+            // everything else is simply forwarded as-is to the JSON Schema, it's up to the configurator to ensure the value's correctness
+            node.putPOJO(propertyName, value);
+        }
+    }
+
+    private void addRawArrayItem(ArrayNode node, Object value) {
+        // need to specifically add simple/primitive values by type
+        if (value instanceof String) {
+            // explicit inclusion as string results in wrapping quote symbols
+            node.add((String) value);
+        } else if (value instanceof BigDecimal) {
+            node.add((BigDecimal) value);
+        } else if (value instanceof BigInteger) {
+            node.add((BigInteger) value);
+        } else if (value instanceof Boolean) {
+            node.add((Boolean) value);
+        } else if (value instanceof Double) {
+            node.add((Double) value);
+        } else if (value instanceof Float) {
+            node.add((Float) value);
+        } else if (value instanceof Integer) {
+            node.add((Integer) value);
+        } else {
+            // everything else is simply forwarded as-is to the JSON Schema, it's up to the configurator to ensure the value's correctness
+            node.addPOJO(value);
+        }
     }
 
     /**
@@ -499,10 +494,16 @@ public class AttributeCollector {
      * @return this instance (for chaining)
      */
     public AttributeCollector setAdditionalProperties(ObjectNode node, JsonNode additionalProperties, SchemaGenerationContext generationContext) {
-        if (additionalProperties != null && (!additionalProperties.isBoolean() || !additionalProperties.asBoolean())) {
+        if (!this.isNullOrTrue(additionalProperties)) {
             node.set(generationContext.getKeyword(SchemaKeyword.TAG_ADDITIONAL_PROPERTIES), additionalProperties);
         }
         return this;
+    }
+
+    private boolean isNullOrTrue(JsonNode nodeToCheck) {
+        return nodeToCheck == null
+               || nodeToCheck.isNull()
+               || nodeToCheck.isBoolean() && nodeToCheck.asBoolean();
     }
 
     /**
