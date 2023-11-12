@@ -240,6 +240,19 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         }
     }
 
+    /**
+     * Generate the JSON schema for the given className.
+     *
+     * @param schemaClass The class for which the schema is to be generated
+     * @throws MojoExecutionException In case of problems
+     */
+    private void generateSchema(Class<?> schemaClass) throws MojoExecutionException {
+        JsonNode jsonSchema = getGenerator().generateSchema(schemaClass);
+        File file = getSchemaFile(schemaClass);
+        this.getLog().info("- Writing schema to file: " + file);
+        this.writeToFile(jsonSchema, file);
+    }
+
     private void logForNoClassesMatchingFilter(String classOrPackageName) throws MojoExecutionException {
         StringBuilder message = new StringBuilder("No matching class found for \"")
                 .append(classOrPackageName)
@@ -252,19 +265,6 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             throw new MojoExecutionException(message.toString());
         }
         this.getLog().warn(message.toString());
-    }
-
-    /**
-     * Generate the JSON schema for the given className.
-     *
-     * @param schemaClass The class for which the schema is to be generated
-     * @throws MojoExecutionException In case of problems
-     */
-    private void generateSchema(Class<?> schemaClass) throws MojoExecutionException {
-        JsonNode jsonSchema = getGenerator().generateSchema(schemaClass);
-        File file = getSchemaFile(schemaClass);
-        this.getLog().info("- Writing schema to file: " + file);
-        this.writeToFile(jsonSchema, file);
     }
 
     /**
