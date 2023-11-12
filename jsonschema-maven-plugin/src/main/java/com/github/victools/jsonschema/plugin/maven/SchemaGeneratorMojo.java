@@ -51,6 +51,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -182,27 +183,33 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         // trigger initialization of the generator instance
         this.getGenerator();
 
-        if (this.classNames != null) {
-            for (String className : this.classNames) {
-                this.getLog().info("Generating JSON Schema for <className>" + className + "</className>");
-                this.generateSchema(className, false);
-            }
+        for (String className : nullSafe(this.classNames)) {
+            this.getLog().info("Generating JSON Schema for <className>" + className + "</className>");
+            this.generateSchema(className, false);
         }
-
-        if (this.packageNames != null) {
-            for (String packageName : this.packageNames) {
-                this.getLog().info("Generating JSON Schema for <packageName>" + packageName + "</packageName>");
-                this.generateSchema(packageName, true);
-            }
+        for (String packageName : nullSafe(this.packageNames)) {
+            this.getLog().info("Generating JSON Schema for <packageName>" + packageName + "</packageName>");
+            this.generateSchema(packageName, true);
         }
-
-        boolean classAndPackageEmpty = (this.classNames == null || this.classNames.length == 0)
-                && (this.packageNames == null || this.packageNames.length == 0);
-
-        if (classAndPackageEmpty && this.annotations != null && !this.annotations.isEmpty()) {
+        if (isNullOrEmpty(this.classNames) && isNullOrEmpty(this.packageNames) && !isNullOrEmpty(this.annotations)) {
             this.getLog().info("Generating JSON Schema for all annotated classes");
             this.generateSchema("**/*", false);
         }
+    }
+
+    private static boolean isNullOrEmpty(Object[] array) {
+        return array == null || array.length == 0;
+    }
+
+    private static boolean isNullOrEmpty(List<?> list) {
+        return list == null || list.isEmpty();
+    }
+
+    private static <T> List<T> nullSafe(T[] array) {
+        if (isNullOrEmpty(array)) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(array);
     }
 
     /**
@@ -229,17 +236,22 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             }
         }
         if (matchingClasses.isEmpty()) {
-            StringBuilder message = new StringBuilder("No matching class found for \"")
-                    .append(classOrPackageName)
-                    .append("\" on classpath");
-            if (this.excludeClassNames != null && this.excludeClassNames.length > 0) {
-                message.append(" that wasn't excluded");
-            }
-            if (this.failIfNoClassesMatch) {
-                throw new MojoExecutionException(message.toString());
-            }
-            this.getLog().warn(message.toString());
+            this.logForNoClassesMatchingFilter(classOrPackageName);
         }
+    }
+
+    private void logForNoClassesMatchingFilter(String classOrPackageName) throws MojoExecutionException {
+        StringBuilder message = new StringBuilder("No matching class found for \"")
+                .append(classOrPackageName)
+                .append("\" on classpath");
+        if (!isNullOrEmpty(this.excludeClassNames)) {
+            message.append(" that wasn't excluded");
+        }
+        if (this.failIfNoClassesMatch) {
+            message.append(".\nYou can change this error to a warning by setting: <failIfNoClassesMatch>false</failIfNoClassesMatch>");
+            throw new MojoExecutionException(message.toString());
+        }
+        this.getLog().warn(message.toString());
     }
 
     /**
@@ -295,29 +307,20 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @return filter instance to apply on a ClassInfoList containing possibly eligible classpath elements
      */
     private ClassInfoList.ClassInfoFilter createClassInfoFilter(boolean considerAnnotations) {
-        Set<Predicate<String>> exclusions;
-        if (this.excludeClassNames == null || this.excludeClassNames.length == 0) {
-            exclusions = Collections.emptySet();
-        } else {
-            exclusions = Stream.of(this.excludeClassNames)
-                    .map(excludeEntry -> GlobHandler.createClassOrPackageNameFilter(excludeEntry, false))
-                    .collect(Collectors.toSet());
-        }
+        Set<Predicate<String>> exclusions = nullSafe(this.excludeClassNames).stream()
+                .map(excludeEntry -> GlobHandler.createClassOrPackageNameFilter(excludeEntry, false))
+                .collect(Collectors.toSet());
         Set<Predicate<String>> inclusions;
         if (considerAnnotations) {
             inclusions = Collections.singleton(input -> true);
         } else {
             inclusions = new HashSet<>();
-            if (this.classNames != null) {
-                Stream.of(this.classNames)
-                        .map(className -> GlobHandler.createClassOrPackageNameFilter(className, false))
-                        .forEach(inclusions::add);
-            }
-            if (this.packageNames != null) {
-                Stream.of(this.packageNames)
-                        .map(packageName -> GlobHandler.createClassOrPackageNameFilter(packageName, true))
-                        .forEach(inclusions::add);
-            }
+            nullSafe(this.classNames).stream()
+                    .map(className -> GlobHandler.createClassOrPackageNameFilter(className, false))
+                    .forEach(inclusions::add);
+            nullSafe(this.packageNames).stream()
+                    .map(packageName -> GlobHandler.createClassOrPackageNameFilter(packageName, true))
+                    .forEach(inclusions::add);
         }
         return element -> {
             String classPathEntry = element.getName().replaceAll("\\.", "/");
@@ -428,21 +431,11 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @param configBuilder The configbuilder on which the options are set
      */
     private void setOptions(SchemaGeneratorConfigBuilder configBuilder) {
-        if (this.options == null) {
-            return;
-        }
-        // Enable all the configured options
-        if (this.options.enabled != null) {
-            for (Option option : this.options.enabled) {
-                configBuilder.with(option);
-            }
-        }
-
-        // Disable all the configured options
-        if (this.options.disabled != null) {
-            for (Option option : this.options.disabled) {
-                configBuilder.without(option);
-            }
+        if (this.options != null) {
+            // Enable all the configured options
+            nullSafe(this.options.enabled).forEach(configBuilder::with);
+            // Disable all the configured options
+            nullSafe(this.options.disabled).forEach(configBuilder::without);
         }
     }
 
@@ -454,10 +447,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     @SuppressWarnings("unchecked")
     private void setModules(SchemaGeneratorConfigBuilder configBuilder) throws MojoExecutionException {
-        if (this.modules == null) {
-            return;
-        }
-        for (GeneratorModule module : this.modules) {
+        for (GeneratorModule module : nullSafe(this.modules)) {
             if (module.className != null && !module.className.isEmpty()) {
                 this.addCustomModule(module.className, configBuilder);
             } else if (module.name != null) {
