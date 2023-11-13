@@ -535,34 +535,20 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         if (this.generatorConfig.shouldIncludeStaticFields() || this.generatorConfig.shouldIncludeStaticMethods()) {
             // static fields and methods are being collected only for the targeted type itself, i.e. need to iterate over super types specifically
             for (HierarchicType singleHierarchy : targetTypeWithMembers.allTypesAndOverrides()) {
-                collectStaticMembers(targetType, targetTypeWithMembers, singleHierarchy, targetProperties, requiredProperties);
+                collectStaticMembers(singleHierarchy, targetProperties, requiredProperties);
             }
         }
     }
 
-    private void collectStaticMembers(ResolvedType targetType, ResolvedTypeWithMembers targetTypeWithMembers, HierarchicType singleHierarchy,
+    private void collectStaticMembers(HierarchicType singleHierarchy,
             Map<String, MemberScope<?, ?>> targetProperties, Set<String> requiredProperties) {
         ResolvedType hierarchyType = singleHierarchy.getType();
         logger.debug("collecting static fields and methods from {}", hierarchyType);
-        boolean includeStaticFields = this.generatorConfig.shouldIncludeStaticFields();
-        boolean includeStaticMethods = this.generatorConfig.shouldIncludeStaticMethods();
-        boolean anyRelevantMembersPresent = (includeStaticFields && !hierarchyType.getStaticFields().isEmpty())
-                || (includeStaticMethods && !hierarchyType.getStaticMethods().isEmpty());
-        if (!anyRelevantMembersPresent) {
-            // no static members to look-up for this (super) type
-            return;
-        }
-        final ResolvedTypeWithMembers hierarchyTypeMembers;
-        if (hierarchyType == targetType) {
-            // avoid looking up the main type again
-            hierarchyTypeMembers = targetTypeWithMembers;
-        } else {
-            hierarchyTypeMembers = this.typeContext.resolveWithMembers(hierarchyType);
-        }
-        if (includeStaticFields) {
+        ResolvedTypeWithMembers hierarchyTypeMembers = this.typeContext.resolveWithMembers(hierarchyType);
+        if (this.generatorConfig.shouldIncludeStaticFields()) {
             this.collectFields(hierarchyTypeMembers, ResolvedTypeWithMembers::getStaticFields, targetProperties, requiredProperties);
         }
-        if (includeStaticMethods) {
+        if (this.generatorConfig.shouldIncludeStaticMethods()) {
             this.collectMethods(hierarchyTypeMembers, ResolvedTypeWithMembers::getStaticMethods, targetProperties, requiredProperties);
         }
     }
