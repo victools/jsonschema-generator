@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.WeakHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,6 +45,7 @@ public class TypeContext {
 
     private final TypeResolver typeResolver;
     private final MemberResolver memberResolver;
+    private final WeakHashMap<ResolvedType, ResolvedTypeWithMembers> typesWithMembersCache;
     private final AnnotationConfiguration annotationConfig;
     private final boolean derivingFieldsFromArgumentFreeMethods;
 
@@ -87,6 +89,7 @@ public class TypeContext {
         this.memberResolver = new MemberResolver(this.typeResolver);
         this.annotationConfig = annotationConfig;
         this.derivingFieldsFromArgumentFreeMethods = derivingFieldsFromArgumentFreeMethods;
+        this.typesWithMembersCache = new WeakHashMap<>();
     }
 
     /**
@@ -129,6 +132,16 @@ public class TypeContext {
      * @return collection of (resolved) fields and methods
      */
     public final ResolvedTypeWithMembers resolveWithMembers(ResolvedType resolvedType) {
+        return this.typesWithMembersCache.computeIfAbsent(resolvedType, this::resolveWithMembersForCache);
+    }
+
+    /**
+     * Collect a given type's declared fields and methods for the inclusion in the internal cache.
+     *
+     * @param resolvedType type for which to collect declared fields and methods
+     * @return collection of (resolved) fields and methods
+     */
+    private ResolvedTypeWithMembers resolveWithMembersForCache(ResolvedType resolvedType) {
         return this.memberResolver.resolve(resolvedType, this.annotationConfig, null);
     }
 
