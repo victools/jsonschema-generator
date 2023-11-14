@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -23,6 +24,12 @@ import java.util.regex.Pattern;
  * Conversion logic from globs to regular expressions.
  */
 public class GlobHandler {
+
+    public static final char ESCAPE_CHAR = '\\';
+    public static final char ASTERISK_CHAR = '*';
+    public static final char QUESTION_MARK_CHAR = '?';
+    public static final char EXCLAMATION_SIGN_CHAR = '!';
+    public static final char COMMA_CHAR = ',';
 
     /**
      * Generate predicate to check the given input for filtering classes on the classpath.
@@ -43,19 +50,21 @@ public class GlobHandler {
      * @return regular expression to filter classes on classpath by
      */
     public static Pattern createClassOrPackageNamePattern(String input, boolean forPackage) {
-        String inputRegex;
-        if (input.chars().anyMatch(c -> c == '/' || c == '*' || c == '?' || c == '+' || c == '[' || c == '{' || c == '\\')) {
-            // convert glob pattern into regular expression
-            inputRegex = GlobHandler.convertGlobToRegex(input);
-        } else {
-            // backward compatible support for absolute paths with "." as separator
-            inputRegex = input.replace('.', '/');
-        }
+        String inputRegex = convertInputToRegex(input);
         if (forPackage) {
             // cater for any classname and any subpackages in between
             inputRegex += inputRegex.charAt(inputRegex.length() - 1) == '/' ? ".+" : "/.+";
         }
         return Pattern.compile(inputRegex);
+    }
+
+    private static String convertInputToRegex(String input) {
+        if (input.chars().anyMatch(c -> c == '/' || c == '*' || c == '?' || c == '+' || c == '[' || c == '{' || c == ESCAPE_CHAR)) {
+            // convert glob pattern into regular expression
+            return GlobHandler.convertGlobToRegex(input);
+        }
+        // backward compatible support for absolute paths with "." as separator
+        return input.replace('.', '/');
     }
 
     /**
@@ -71,57 +80,29 @@ public class GlobHandler {
      */
     private static String convertGlobToRegex(String pattern) {
         StringBuilder sb = new StringBuilder(pattern.length());
-        int inGroup = 0;
-        int inClass = 0;
-        int firstIndexInClass = -1;
+        AtomicInteger inGroup = new AtomicInteger(0);
+        AtomicInteger inClass = new AtomicInteger(0);
+        AtomicInteger firstIndexInClass = new AtomicInteger(-1);
         char[] arr = pattern.toCharArray();
-        for (int i = 0; i < arr.length; i++) {
-            char ch = arr[i];
+        for (AtomicInteger index = new AtomicInteger(0); index.get() < arr.length; index.incrementAndGet()) {
+            char ch = arr[index.get()];
             switch (ch) {
-            case '\\':
-                if (++i >= arr.length) {
-                    sb.append('\\');
-                } else {
-                    char next = arr[i];
-                    switch (next) {
-                    case ',':
-                        // escape not needed
-                        break;
-                    case 'Q':
-                    case 'E':
-                        // extra escape needed
-                        sb.append("\\\\");
-                        break;
-                    default:
-                        sb.append('\\');
-                    }
-                    sb.append(next);
-                }
+            case ESCAPE_CHAR:
+                handleEscapeChar(sb, arr, index.incrementAndGet());
                 break;
-            case '*':
-                if (inClass != 0) {
-                    sb.append('*');
-                } else if ((i + 1) < arr.length && arr[i + 1] == '*') {
-                    i++;
-                    sb.append(".*");
-                } else {
-                    sb.append("[^/]*");
-                }
+            case ASTERISK_CHAR:
+                handleAsteriskChar(sb, inClass, arr, index);
                 break;
-            case '?':
-                if (inClass == 0) {
-                    sb.append("[^/]");
-                } else {
-                    sb.append('?');
-                }
+            case QUESTION_MARK_CHAR:
+                handleQuestionMarkChar(sb, inClass);
                 break;
             case '[':
-                inClass++;
-                firstIndexInClass = i + 1;
+                inClass.incrementAndGet();
+                firstIndexInClass.set(index.get() + 1);
                 sb.append('[');
                 break;
             case ']':
-                inClass--;
+                inClass.decrementAndGet();
                 sb.append(']');
                 break;
             case '.':
@@ -133,37 +114,85 @@ public class GlobHandler {
             case '$':
             case '@':
             case '%':
-                if (inClass == 0 || (firstIndexInClass == i && ch == '^')) {
-                    sb.append('\\');
+                if (inClass.get() == 0 || (firstIndexInClass.get() == index.get() && ch == '^')) {
+                    sb.append(ESCAPE_CHAR);
                 }
                 sb.append(ch);
                 break;
-            case '!':
-                if (firstIndexInClass == i) {
-                    sb.append('^');
-                } else {
-                    sb.append('!');
-                }
+            case EXCLAMATION_SIGN_CHAR:
+                handleExclamationSignChar(sb, firstIndexInClass, index);
                 break;
             case '{':
-                inGroup++;
+                inGroup.incrementAndGet();
                 sb.append('(');
                 break;
             case '}':
-                inGroup--;
+                inGroup.decrementAndGet();
                 sb.append(')');
                 break;
-            case ',':
-                if (inGroup > 0) {
-                    sb.append('|');
-                } else {
-                    sb.append(',');
-                }
+            case COMMA_CHAR:
+                handleCommaChar(sb, inGroup);
                 break;
             default:
                 sb.append(ch);
             }
         }
         return sb.toString();
+    }
+
+    private static void handleEscapeChar(StringBuilder sb, char[] arr, int nextCharIndex) {
+        if (nextCharIndex >= arr.length) {
+            sb.append(ESCAPE_CHAR);
+        } else {
+            char next = arr[nextCharIndex];
+            switch (next) {
+            case COMMA_CHAR:
+                // escape not needed
+                break;
+            case 'Q':
+            case 'E':
+                // extra escape needed
+                sb.append(ESCAPE_CHAR).append(ESCAPE_CHAR);
+                break;
+            default:
+                sb.append(ESCAPE_CHAR);
+            }
+            sb.append(next);
+        }
+    }
+
+    private static void handleAsteriskChar(StringBuilder sb, AtomicInteger inClass, char[] arr, AtomicInteger index) {
+        if (inClass.get() != 0) {
+            sb.append(ASTERISK_CHAR);
+        } else if ((index.get() + 1) < arr.length && arr[index.get() + 1] == ASTERISK_CHAR) {
+            index.incrementAndGet();
+            sb.append(".*");
+        } else {
+            sb.append("[^/]*");
+        }
+    }
+
+    private static void handleQuestionMarkChar(StringBuilder sb, AtomicInteger inClass) {
+        if (inClass.get() == 0) {
+            sb.append("[^/]");
+        } else {
+            sb.append(QUESTION_MARK_CHAR);
+        }
+    }
+
+    private static void handleExclamationSignChar(StringBuilder sb, AtomicInteger firstIndexInClass, AtomicInteger index) {
+        if (firstIndexInClass.get() == index.get()) {
+            sb.append('^');
+        } else {
+            sb.append(EXCLAMATION_SIGN_CHAR);
+        }
+    }
+
+    private static void handleCommaChar(StringBuilder sb, AtomicInteger inGroup) {
+        if (inGroup.get() > 0) {
+            sb.append('|');
+        } else {
+            sb.append(COMMA_CHAR);
+        }
     }
 }

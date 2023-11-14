@@ -32,6 +32,7 @@ import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SubtypeResolver;
 import com.github.victools.jsonschema.generator.TypeContext;
+import com.github.victools.jsonschema.generator.TypeScope;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import java.util.Collection;
 import java.util.Collections;
@@ -174,7 +175,8 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         Class<?> erasedTypeWithTypeInfo = typeWithTypeInfo.getErasedType();
         JsonTypeInfo typeInfoAnnotation = erasedTypeWithTypeInfo.getAnnotation(JsonTypeInfo.class);
         JsonSubTypes subTypesAnnotation = erasedTypeWithTypeInfo.getAnnotation(JsonSubTypes.class);
-        ObjectNode definition = this.createSubtypeDefinition(javaType, typeInfoAnnotation, subTypesAnnotation, null, context);
+        TypeScope scope = context.getTypeContext().createTypeScope(javaType);
+        ObjectNode definition = this.createSubtypeDefinition(scope, typeInfoAnnotation, subTypesAnnotation, context);
         if (definition == null) {
             return null;
         }
@@ -204,16 +206,8 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
                     .add(context.createStandardDefinitionReference(scope.getType(), this));
             return new CustomPropertyDefinition(definition, CustomDefinition.AttributeInclusion.YES);
         }
-        ObjectNode attributes;
-        if (scope instanceof FieldScope) {
-            attributes = AttributeCollector.collectFieldAttributes((FieldScope) scope, context);
-        } else if (scope instanceof MethodScope) {
-            attributes = AttributeCollector.collectMethodAttributes((MethodScope) scope, context);
-        } else {
-            attributes = null;
-        }
         JsonSubTypes subTypesAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonSubTypes.class);
-        ObjectNode definition = this.createSubtypeDefinition(scope.getType(), typeInfoAnnotation, subTypesAnnotation, attributes, context);
+        ObjectNode definition = this.createSubtypeDefinition(scope, typeInfoAnnotation, subTypesAnnotation, context);
         if (definition == null) {
             return null;
         }
@@ -293,68 +287,32 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
     /**
      * Create the custom schema definition for the given subtype, considering the {@link JsonTypeInfo#include()} setting.
      *
-     * @param javaType targeted subtype
+     * @param scope targeted subtype
      * @param typeInfoAnnotation annotation for looking up the type identifier and determining the kind of inclusion/serialization
      * @param subTypesAnnotation annotation specifying the mapping from super to subtypes (potentially including the discriminator values)
-     * @param attributesToInclude optional: additional attributes to include on the actual/contained schema definition
      * @param context generation context
      * @return created custom definition (or {@code null} if no supported subtype resolution scenario could be detected
      */
-    private ObjectNode createSubtypeDefinition(ResolvedType javaType, JsonTypeInfo typeInfoAnnotation, JsonSubTypes subTypesAnnotation,
-            ObjectNode attributesToInclude, SchemaGenerationContext context) {
+    private ObjectNode createSubtypeDefinition(TypeScope scope, JsonTypeInfo typeInfoAnnotation, JsonSubTypes subTypesAnnotation,
+            SchemaGenerationContext context) {
+        ResolvedType javaType = scope.getType();
         final String typeIdentifier = this.getTypeIdentifier(javaType, typeInfoAnnotation, subTypesAnnotation);
         if (typeIdentifier == null) {
             return null;
         }
+        ObjectNode attributesToInclude = this.getAttributesToInclude(scope, context);
         final ObjectNode definition = context.getGeneratorConfig().createObjectNode();
+        SubtypeDefinitionDetails subtypeDetails = new SubtypeDefinitionDetails(javaType, attributesToInclude, context, typeIdentifier, definition);
         switch (typeInfoAnnotation.include()) {
         case WRAPPER_ARRAY:
-            definition.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY));
-            ArrayNode itemsArray = definition.withArray(context.getKeyword(SchemaKeyword.TAG_PREFIX_ITEMS));
-            itemsArray.addObject()
-                    .put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_STRING))
-                    .put(context.getKeyword(SchemaKeyword.TAG_CONST), typeIdentifier);
-            if (attributesToInclude == null || attributesToInclude.isEmpty()) {
-                itemsArray.add(this.createNestedSubtypeSchema(javaType, context));
-            } else {
-                itemsArray.addObject()
-                        .withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))
-                        .add(this.createNestedSubtypeSchema(javaType, context))
-                        .add(attributesToInclude);
-            }
+            createSubtypeDefinitionForWrapperArrayTypeInfo(subtypeDetails);
             break;
         case WRAPPER_OBJECT:
-            definition.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT));
-            ObjectNode propertiesNode = definition.putObject(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));
-            if (attributesToInclude == null || attributesToInclude.isEmpty()) {
-                propertiesNode.set(typeIdentifier, this.createNestedSubtypeSchema(javaType, context));
-            } else {
-                propertiesNode.putObject(typeIdentifier)
-                        .withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))
-                        .add(this.createNestedSubtypeSchema(javaType, context))
-                        .add(attributesToInclude);
-            }
-            definition.withArray(context.getKeyword(SchemaKeyword.TAG_REQUIRED)).add(typeIdentifier);
+            this.createSubtypeDefinitionForWrapperObjectTypeInfo(subtypeDetails);
             break;
         case PROPERTY:
         case EXISTING_PROPERTY:
-            final String propertyName = Optional.ofNullable(typeInfoAnnotation.property())
-                    .filter(name -> !name.isEmpty())
-                    .orElseGet(() -> typeInfoAnnotation.use().getDefaultPropertyName());
-            ObjectNode additionalPart = definition.withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF))
-                    .add(this.createNestedSubtypeSchema(javaType, context))
-                    .addObject();
-            if (attributesToInclude != null && !attributesToInclude.isEmpty()) {
-                additionalPart.setAll(attributesToInclude);
-            }
-            additionalPart.put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT))
-                    .putObject(context.getKeyword(SchemaKeyword.TAG_PROPERTIES))
-                    .putObject(propertyName)
-                    .put(context.getKeyword(SchemaKeyword.TAG_CONST), typeIdentifier);
-            if (!javaType.getErasedType().equals(typeInfoAnnotation.defaultImpl())) {
-                additionalPart.withArray(context.getKeyword(SchemaKeyword.TAG_REQUIRED))
-                        .add(propertyName);
-            }
+            this.createSubtypeDefinitionForPropertyTypeInfo(subtypeDetails, typeInfoAnnotation);
             break;
         default:
             return null;
@@ -362,10 +320,115 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         return definition;
     }
 
+    private void createSubtypeDefinitionForWrapperArrayTypeInfo(SubtypeDefinitionDetails details) {
+        details.getDefinition().put(details.getKeyword(SchemaKeyword.TAG_TYPE), details.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY));
+        ArrayNode itemsArray = details.getDefinition().withArray(details.getKeyword(SchemaKeyword.TAG_PREFIX_ITEMS));
+        itemsArray.addObject()
+                .put(details.getKeyword(SchemaKeyword.TAG_TYPE), details.getKeyword(SchemaKeyword.TAG_TYPE_STRING))
+                .put(details.getKeyword(SchemaKeyword.TAG_CONST), details.getTypeIdentifier());
+        if (details.getAttributesToInclude() == null || details.getAttributesToInclude().isEmpty()) {
+            itemsArray.add(this.createNestedSubtypeSchema(details.getJavaType(), details.getContext()));
+        } else {
+            itemsArray.addObject()
+                    .withArray(details.getKeyword(SchemaKeyword.TAG_ALLOF))
+                    .add(this.createNestedSubtypeSchema(details.getJavaType(), details.getContext()))
+                    .add(details.getAttributesToInclude());
+        }
+    }
+
+    private void createSubtypeDefinitionForWrapperObjectTypeInfo(SubtypeDefinitionDetails details) {
+        details.getDefinition().put(details.getKeyword(SchemaKeyword.TAG_TYPE), details.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT));
+        ObjectNode propertiesNode = details.getDefinition()
+                .putObject(details.getKeyword(SchemaKeyword.TAG_PROPERTIES));
+        ObjectNode nestedSubtypeSchema = this.createNestedSubtypeSchema(details.getJavaType(), details.getContext());
+        if (details.getAttributesToInclude() == null || details.getAttributesToInclude().isEmpty()) {
+            propertiesNode.set(details.getTypeIdentifier(), nestedSubtypeSchema);
+        } else {
+            propertiesNode.putObject(details.getTypeIdentifier())
+                    .withArray(details.getKeyword(SchemaKeyword.TAG_ALLOF))
+                    .add(nestedSubtypeSchema)
+                    .add(details.getAttributesToInclude());
+        }
+        details.getDefinition().withArray(details.getKeyword(SchemaKeyword.TAG_REQUIRED)).add(details.getTypeIdentifier());
+    }
+
+    private void createSubtypeDefinitionForPropertyTypeInfo(SubtypeDefinitionDetails details, JsonTypeInfo typeInfoAnnotation) {
+        final String propertyName = Optional.ofNullable(typeInfoAnnotation.property())
+                .filter(name -> !name.isEmpty())
+                .orElseGet(() -> typeInfoAnnotation.use().getDefaultPropertyName());
+        ObjectNode additionalPart = details.getDefinition().withArray(details.getKeyword(SchemaKeyword.TAG_ALLOF))
+                .add(this.createNestedSubtypeSchema(details.getJavaType(), details.getContext()))
+                .addObject();
+        if (details.getAttributesToInclude() != null && !details.getAttributesToInclude().isEmpty()) {
+            additionalPart.setAll(details.getAttributesToInclude());
+        }
+        additionalPart.put(details.getKeyword(SchemaKeyword.TAG_TYPE), details.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT))
+                .putObject(details.getKeyword(SchemaKeyword.TAG_PROPERTIES))
+                .putObject(propertyName)
+                .put(details.getKeyword(SchemaKeyword.TAG_CONST), details.getTypeIdentifier());
+        if (!details.getJavaType().getErasedType().equals(typeInfoAnnotation.defaultImpl())) {
+            additionalPart.withArray(details.getKeyword(SchemaKeyword.TAG_REQUIRED))
+                    .add(propertyName);
+        }
+    }
+
     private ObjectNode createNestedSubtypeSchema(ResolvedType javaType, SchemaGenerationContext context) {
         if (this.shouldInlineNestedSubtypes) {
             return context.createStandardDefinition(javaType, this);
         }
         return context.createStandardDefinitionReference(javaType, this);
+    }
+
+    private ObjectNode getAttributesToInclude(TypeScope scope, SchemaGenerationContext context) {
+        ObjectNode attributesToInclude;
+        if (scope instanceof FieldScope) {
+            attributesToInclude = AttributeCollector.collectFieldAttributes((FieldScope) scope, context);
+        } else if (scope instanceof MethodScope) {
+            attributesToInclude = AttributeCollector.collectMethodAttributes((MethodScope) scope, context);
+        } else {
+            attributesToInclude = null;
+        }
+        return attributesToInclude;
+    }
+
+    private static class SubtypeDefinitionDetails {
+        private final ResolvedType javaType;
+        private final ObjectNode attributesToInclude;
+        private final SchemaGenerationContext context;
+        private final String typeIdentifier;
+        private final ObjectNode definition;
+
+        SubtypeDefinitionDetails(ResolvedType javaType, ObjectNode attributesToInclude, SchemaGenerationContext context,
+                String typeIdentifier, ObjectNode definition) {
+            this.javaType = javaType;
+            this.attributesToInclude = attributesToInclude;
+            this.context = context;
+            this.typeIdentifier = typeIdentifier;
+            this.definition = definition;
+        }
+
+        ResolvedType getJavaType() {
+            return this.javaType;
+        }
+
+        ObjectNode getAttributesToInclude() {
+            return this.attributesToInclude;
+        }
+
+        SchemaGenerationContext getContext() {
+            return this.context;
+        }
+
+        String getTypeIdentifier() {
+            return this.typeIdentifier;
+        }
+
+        ObjectNode getDefinition() {
+            return this.definition;
+        }
+
+        String getKeyword(SchemaKeyword keyword) {
+            return this.context.getKeyword(keyword);
+        }
     }
 }

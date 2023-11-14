@@ -625,7 +625,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             typeOverrides = this.generatorConfig.resolveSubtypes(field.getType(), this);
         }
         List<FieldScope> fieldOptions;
-        if (typeOverrides == null || typeOverrides.isEmpty()) {
+        if (Util.isNullOrEmpty(typeOverrides)) {
             fieldOptions = Collections.singletonList(field);
         } else {
             fieldOptions = typeOverrides.stream()
@@ -706,7 +706,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             typeOverrides = this.generatorConfig.resolveSubtypes(method.getType(), this);
         }
         List<MethodScope> methodOptions;
-        if (typeOverrides == null || typeOverrides.isEmpty()) {
+        if (Util.isNullOrEmpty(typeOverrides)) {
             methodOptions = Collections.singletonList(method);
         } else {
             methodOptions = typeOverrides.stream()

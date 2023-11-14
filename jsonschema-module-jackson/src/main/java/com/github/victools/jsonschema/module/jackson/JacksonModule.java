@@ -112,23 +112,29 @@ public class JacksonModule implements Module {
             methodConfigPart.withCustomDefinitionProvider(identityReferenceDefinitionProvider::provideCustomPropertySchemaDefinition);
         }
 
-        boolean lookUpSubtypes = !this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP);
-        boolean includeTypeInfoTransform = !this.options.contains(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM);
-        if (lookUpSubtypes || includeTypeInfoTransform) {
-            JsonSubTypesResolver subtypeResolver = new JsonSubTypesResolver(this.options);
-            if (lookUpSubtypes) {
-                generalConfigPart.withSubtypeResolver(subtypeResolver);
-                fieldConfigPart.withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides);
-                methodConfigPart.withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides);
-            }
-            if (includeTypeInfoTransform) {
-                generalConfigPart.withCustomDefinitionProvider(subtypeResolver);
-                fieldConfigPart.withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
-                methodConfigPart.withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
-            }
-        }
+        applySubtypeResolverToConfigBuilder(generalConfigPart, fieldConfigPart, methodConfigPart);
 
         generalConfigPart.withCustomDefinitionProvider(new JsonUnwrappedDefinitionProvider());
+    }
+
+    private void applySubtypeResolverToConfigBuilder(SchemaGeneratorGeneralConfigPart generalConfigPart,
+            SchemaGeneratorConfigPart<FieldScope> fieldConfigPart, SchemaGeneratorConfigPart<MethodScope> methodConfigPart) {
+        boolean skipLookUpSubtypes = this.options.contains(JacksonOption.SKIP_SUBTYPE_LOOKUP);
+        boolean skipTypeInfoTransform = this.options.contains(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM);
+        if (skipLookUpSubtypes && skipTypeInfoTransform) {
+            return;
+        }
+        JsonSubTypesResolver subtypeResolver = new JsonSubTypesResolver(this.options);
+        if (!skipLookUpSubtypes) {
+            generalConfigPart.withSubtypeResolver(subtypeResolver);
+            fieldConfigPart.withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides);
+            methodConfigPart.withTargetTypeOverridesResolver(subtypeResolver::findTargetTypeOverrides);
+        }
+        if (!skipTypeInfoTransform) {
+            generalConfigPart.withCustomDefinitionProvider(subtypeResolver);
+            fieldConfigPart.withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
+            methodConfigPart.withCustomDefinitionProvider(subtypeResolver::provideCustomPropertySchemaDefinition);
+        }
     }
 
     /**

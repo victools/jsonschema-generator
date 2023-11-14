@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -511,20 +512,18 @@ public class JakartaValidationModule implements Module {
             // in its current version, this instance attribute override is only considering Map types
             return;
         }
-        Integer mapMinEntries = this.resolveMapMinEntries(member);
-        if (mapMinEntries != null) {
-            String minPropertiesAttribute = context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MIN);
-            JsonNode existingValue = memberAttributes.get(minPropertiesAttribute);
-            if (existingValue == null || (existingValue.isNumber() && existingValue.asInt() < mapMinEntries)) {
-                memberAttributes.put(minPropertiesAttribute, mapMinEntries);
-            }
-        }
-        Integer mapMaxEntries = this.resolveMapMaxEntries(member);
-        if (mapMaxEntries != null) {
-            String maxPropertiesAttribute = context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MAX);
-            JsonNode existingValue = memberAttributes.get(maxPropertiesAttribute);
-            if (existingValue == null || (existingValue.isNumber() && existingValue.asInt() > mapMaxEntries)) {
-                memberAttributes.put(maxPropertiesAttribute, mapMaxEntries);
+        this.overrideMapPropertyCountAttribute(memberAttributes, context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MIN),
+                this.resolveMapMinEntries(member), (newValue, existingValue) -> newValue > existingValue);
+        this.overrideMapPropertyCountAttribute(memberAttributes, context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MAX),
+                this.resolveMapMaxEntries(member), (newValue, existingValue) -> newValue < existingValue);
+    }
+
+    private void overrideMapPropertyCountAttribute(ObjectNode memberAttributes, String attribute, Integer newValue,
+            BiPredicate<Integer, Integer> isOneStricterThanOther) {
+        if (newValue != null) {
+            JsonNode existingValue = memberAttributes.get(attribute);
+            if (existingValue == null || (existingValue.isNumber() && isOneStricterThanOther.test(newValue, existingValue.asInt()))) {
+                memberAttributes.put(attribute, newValue);
             }
         }
     }

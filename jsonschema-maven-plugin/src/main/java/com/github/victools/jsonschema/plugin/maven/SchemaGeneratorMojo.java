@@ -19,12 +19,12 @@ package com.github.victools.jsonschema.plugin.maven;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.Module;
-import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.generator.impl.Util;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationModule;
@@ -51,13 +51,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -183,33 +181,18 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         // trigger initialization of the generator instance
         this.getGenerator();
 
-        for (String className : nullSafe(this.classNames)) {
+        for (String className : Util.nullSafe(this.classNames)) {
             this.getLog().info("Generating JSON Schema for <className>" + className + "</className>");
             this.generateSchema(className, false);
         }
-        for (String packageName : nullSafe(this.packageNames)) {
+        for (String packageName : Util.nullSafe(this.packageNames)) {
             this.getLog().info("Generating JSON Schema for <packageName>" + packageName + "</packageName>");
             this.generateSchema(packageName, true);
         }
-        if (isNullOrEmpty(this.classNames) && isNullOrEmpty(this.packageNames) && !isNullOrEmpty(this.annotations)) {
+        if (Util.isNullOrEmpty(this.classNames) && Util.isNullOrEmpty(this.packageNames) && !Util.isNullOrEmpty(this.annotations)) {
             this.getLog().info("Generating JSON Schema for all annotated classes");
             this.generateSchema("**/*", false);
         }
-    }
-
-    private static boolean isNullOrEmpty(Object[] array) {
-        return array == null || array.length == 0;
-    }
-
-    private static boolean isNullOrEmpty(List<?> list) {
-        return list == null || list.isEmpty();
-    }
-
-    private static <T> List<T> nullSafe(T[] array) {
-        if (isNullOrEmpty(array)) {
-            return Collections.emptyList();
-        }
-        return Arrays.asList(array);
     }
 
     /**
@@ -257,7 +240,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         StringBuilder message = new StringBuilder("No matching class found for \"")
                 .append(classOrPackageName)
                 .append("\" on classpath");
-        if (!isNullOrEmpty(this.excludeClassNames)) {
+        if (!Util.isNullOrEmpty(this.excludeClassNames)) {
             message.append(" that wasn't excluded");
         }
         if (this.failIfNoClassesMatch) {
@@ -307,7 +290,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @return filter instance to apply on a ClassInfoList containing possibly eligible classpath elements
      */
     private ClassInfoList.ClassInfoFilter createClassInfoFilter(boolean considerAnnotations) {
-        Set<Predicate<String>> exclusions = nullSafe(this.excludeClassNames).stream()
+        Set<Predicate<String>> exclusions = Util.nullSafe(this.excludeClassNames).stream()
                 .map(excludeEntry -> GlobHandler.createClassOrPackageNameFilter(excludeEntry, false))
                 .collect(Collectors.toSet());
         Set<Predicate<String>> inclusions;
@@ -315,10 +298,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             inclusions = Collections.singleton(input -> true);
         } else {
             inclusions = new HashSet<>();
-            nullSafe(this.classNames).stream()
+            Util.nullSafe(this.classNames).stream()
                     .map(className -> GlobHandler.createClassOrPackageNameFilter(className, false))
                     .forEach(inclusions::add);
-            nullSafe(this.packageNames).stream()
+            Util.nullSafe(this.packageNames).stream()
                     .map(packageName -> GlobHandler.createClassOrPackageNameFilter(packageName, true))
                     .forEach(inclusions::add);
         }
@@ -433,9 +416,9 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private void setOptions(SchemaGeneratorConfigBuilder configBuilder) {
         if (this.options != null) {
             // Enable all the configured options
-            nullSafe(this.options.enabled).forEach(configBuilder::with);
+            Util.nullSafe(this.options.enabled).forEach(configBuilder::with);
             // Disable all the configured options
-            nullSafe(this.options.disabled).forEach(configBuilder::without);
+            Util.nullSafe(this.options.disabled).forEach(configBuilder::without);
         }
     }
 
@@ -447,10 +430,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     @SuppressWarnings("unchecked")
     private void setModules(SchemaGeneratorConfigBuilder configBuilder) throws MojoExecutionException {
-        for (GeneratorModule module : nullSafe(this.modules)) {
-            if (module.className != null && !module.className.isEmpty()) {
+        for (GeneratorModule module : Util.nullSafe(this.modules)) {
+            if (!Util.isNullOrEmpty(module.className)) {
                 this.addCustomModule(module.className, configBuilder);
-            } else if (module.name != null) {
+            } else if (!Util.isNullOrEmpty(module.name)) {
                 this.addStandardModule(module, configBuilder);
             }
         }
@@ -524,13 +507,11 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private <T extends Enum<T>> void addStandardModuleWithOptions(GeneratorModule module, SchemaGeneratorConfigBuilder configBuilder,
             Function<T[], Module> moduleConstructor, Class<T> optionType) throws MojoExecutionException {
         Stream.Builder<T> optionStream = Stream.builder();
-        if (module.options != null && module.options.length > 0) {
-            for (String optionName : module.options) {
-                try {
-                    optionStream.add(Enum.valueOf(optionType, optionName));
-                } catch (IllegalArgumentException e) {
-                    throw new MojoExecutionException("Error: Unknown " + module.name + " option " + optionName, e);
-                }
+        for (String optionName : Util.nullSafe(module.options)) {
+            try {
+                optionStream.add(Enum.valueOf(optionType, optionName));
+            } catch (IllegalArgumentException e) {
+                throw new MojoExecutionException("Error: Unknown " + module.name + " option " + optionName, e);
             }
         }
         T[] options = optionStream.build().toArray(count -> (T[]) Array.newInstance(optionType, count));
