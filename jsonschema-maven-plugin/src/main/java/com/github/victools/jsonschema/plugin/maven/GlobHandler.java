@@ -124,7 +124,12 @@ public class GlobHandler {
                 handleCommaChar(sb, inGroup);
                 break;
             default:
-                handleOtherChar(sb, ch, inClass, firstIndexInClass, index);
+                boolean shouldBeEscaped = INPUT_CHARS_REQUIRING_ESCAPE.contains(ch)
+                        && (inClass.get() == 0 || (ch == '^' && firstIndexInClass.get() == index.get()));
+                if (shouldBeEscaped) {
+                    sb.append(ESCAPE_CHAR);
+                }
+                sb.append(ch);
             }
         }
         return sb.toString();
@@ -205,14 +210,5 @@ public class GlobHandler {
         } else {
             sb.append(COMMA_CHAR);
         }
-    }
-
-    private static void handleOtherChar(StringBuilder sb, char ch, AtomicInteger inClass, AtomicInteger firstIndexInClass, AtomicInteger index) {
-        boolean shouldBeEscaped = INPUT_CHARS_REQUIRING_ESCAPE.contains(ch)
-                && (inClass.get() == 0 || (ch == '^' && firstIndexInClass.get() == index.get()));
-        if (shouldBeEscaped) {
-            sb.append(ESCAPE_CHAR);
-        }
-        sb.append(ch);
     }
 }
