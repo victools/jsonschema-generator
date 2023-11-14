@@ -18,11 +18,9 @@ package com.github.victools.jsonschema.plugin.maven;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Conversion logic from globs to regular expressions.
@@ -37,6 +35,9 @@ public class GlobHandler {
 
     private static final List<Character> GLOB_IDENTIFIERS = Arrays.asList(
             ESCAPE_CHAR, ASTERISK_CHAR, QUESTION_MARK_CHAR, '/', '+', '[', '{'
+    );
+    private static final List<Character> INPUT_CHARS_REQUIRING_ESCAPE = Arrays.asList(
+            '.', '(', ')', '+', '|', '^', '$', '@', '%'
     );
 
     /**
@@ -105,44 +106,25 @@ public class GlobHandler {
                 handleQuestionMarkChar(sb, inClass);
                 break;
             case '[':
-                inClass.incrementAndGet();
-                firstIndexInClass.set(index.get() + 1);
-                sb.append('[');
+                handleOpeningBracketChar(sb, inClass, firstIndexInClass, index);
                 break;
             case ']':
-                inClass.decrementAndGet();
-                sb.append(']');
-                break;
-            case '.':
-            case '(':
-            case ')':
-            case '+':
-            case '|':
-            case '^':
-            case '$':
-            case '@':
-            case '%':
-                if (inClass.get() == 0 || (firstIndexInClass.get() == index.get() && ch == '^')) {
-                    sb.append(ESCAPE_CHAR);
-                }
-                sb.append(ch);
+                handleClosingBracketChar(sb, inClass);
                 break;
             case EXCLAMATION_SIGN_CHAR:
                 handleExclamationSignChar(sb, firstIndexInClass, index);
                 break;
             case '{':
-                inGroup.incrementAndGet();
-                sb.append('(');
+                handleOpeningBraceChar(sb, inGroup);
                 break;
             case '}':
-                inGroup.decrementAndGet();
-                sb.append(')');
+                handleClosingBraceChar(sb, inGroup);
                 break;
             case COMMA_CHAR:
                 handleCommaChar(sb, inGroup);
                 break;
             default:
-                sb.append(ch);
+                handleOtherChar(sb, ch, inClass, firstIndexInClass, index);
             }
         }
         return sb.toString();
@@ -196,11 +178,41 @@ public class GlobHandler {
         }
     }
 
+    private static void handleOpeningBracketChar(StringBuilder sb, AtomicInteger inClass, AtomicInteger firstIndexInClass, AtomicInteger index) {
+        inClass.incrementAndGet();
+        firstIndexInClass.set(index.get() + 1);
+        sb.append('[');
+    }
+
+    private static void handleClosingBracketChar(StringBuilder sb, AtomicInteger inClass) {
+        inClass.decrementAndGet();
+        sb.append(']');
+    }
+
+    private static void handleOpeningBraceChar(StringBuilder sb, AtomicInteger inGroup) {
+        inGroup.incrementAndGet();
+        sb.append('(');
+    }
+
+    private static void handleClosingBraceChar(StringBuilder sb, AtomicInteger inGroup) {
+        inGroup.decrementAndGet();
+        sb.append(')');
+    }
+
     private static void handleCommaChar(StringBuilder sb, AtomicInteger inGroup) {
         if (inGroup.get() > 0) {
             sb.append('|');
         } else {
             sb.append(COMMA_CHAR);
         }
+    }
+
+    private static void handleOtherChar(StringBuilder sb, char ch, AtomicInteger inClass, AtomicInteger firstIndexInClass, AtomicInteger index) {
+        boolean shouldBeEscaped = INPUT_CHARS_REQUIRING_ESCAPE.contains(ch)
+                && (inClass.get() == 0 || (ch == '^' && firstIndexInClass.get() == index.get()));
+        if (shouldBeEscaped) {
+            sb.append(ESCAPE_CHAR);
+        }
+        sb.append(ch);
     }
 }
