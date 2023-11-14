@@ -16,20 +16,28 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Conversion logic from globs to regular expressions.
  */
 public class GlobHandler {
 
-    public static final char ESCAPE_CHAR = '\\';
-    public static final char ASTERISK_CHAR = '*';
-    public static final char QUESTION_MARK_CHAR = '?';
-    public static final char EXCLAMATION_SIGN_CHAR = '!';
-    public static final char COMMA_CHAR = ',';
+    private static final char ESCAPE_CHAR = '\\';
+    private static final char ASTERISK_CHAR = '*';
+    private static final char QUESTION_MARK_CHAR = '?';
+    private static final char EXCLAMATION_SIGN_CHAR = '!';
+    private static final char COMMA_CHAR = ',';
+
+    private static final List<Character> GLOB_IDENTIFIERS = Arrays.asList(
+            ESCAPE_CHAR, ASTERISK_CHAR, QUESTION_MARK_CHAR, '/', '+', '[', '{'
+    );
 
     /**
      * Generate predicate to check the given input for filtering classes on the classpath.
@@ -59,7 +67,7 @@ public class GlobHandler {
     }
 
     private static String convertInputToRegex(String input) {
-        if (input.chars().anyMatch(c -> c == '/' || c == '*' || c == '?' || c == '+' || c == '[' || c == '{' || c == ESCAPE_CHAR)) {
+        if (input.chars().anyMatch(GLOB_IDENTIFIERS::contains)) {
             // convert glob pattern into regular expression
             return GlobHandler.convertGlobToRegex(input);
         }
