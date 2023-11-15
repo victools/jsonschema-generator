@@ -37,6 +37,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.TypeScope;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -173,6 +174,10 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      */
     public SchemaGenerationContextImpl addReference(ResolvedType javaType, ObjectNode referencingNode,
             CustomDefinitionProviderV2 ignoredDefinitionProvider, boolean isNullable) {
+        if (referencingNode == null) {
+            // referencingNode should only be null for the main class for which the schema is being generated
+            return this;
+        }
         Map<DefinitionKey, List<ObjectNode>> targetMap = isNullable ? this.nullableReferences : this.references;
         DefinitionKey key = new DefinitionKey(javaType, ignoredDefinitionProvider);
         List<ObjectNode> valueList = targetMap.computeIfAbsent(key, k -> new ArrayList<>());
@@ -294,31 +299,22 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             // nothing more to be done
             return;
         }
-        final ObjectNode definition;
-        final boolean includeTypeAttributes;
+        final Map.Entry<ObjectNode, Boolean> definitionAndTypeAttributeInclusionFlag;
         final CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(targetType, this, ignoredDefinitionProvider);
-        if (customDefinition != null && (customDefinition.isMeantToBeInline() || forceInlineDefinition)) {
-            includeTypeAttributes = customDefinition.shouldIncludeAttributes();
-            definition = applyInlineCustomDefinition(customDefinition, targetType, targetNode, isNullable, ignoredDefinitionProvider);
+        if (customDefinition == null) {
+            // always inline array types
+            boolean shouldInlineDefinition = forceInlineDefinition || this.typeContext.isContainerType(targetType) && targetNode != null;
+            definitionAndTypeAttributeInclusionFlag = applyStandardDefinition(shouldInlineDefinition, scope, targetNode, isNullable,
+                    ignoredDefinitionProvider);
+        } else if (customDefinition.isMeantToBeInline() || forceInlineDefinition) {
+            definitionAndTypeAttributeInclusionFlag = applyInlineCustomDefinition(customDefinition, targetType, targetNode, isNullable,
+                    ignoredDefinitionProvider);
         } else {
-            boolean isContainerType = this.typeContext.isContainerType(targetType);
-            boolean shouldInlineDefinition = forceInlineDefinition || isContainerType && targetNode != null && customDefinition == null;
-            definition = applyReferenceDefinition(shouldInlineDefinition, targetType, targetNode, isNullable, ignoredDefinitionProvider);
-            if (customDefinition != null) {
-                this.markDefinitionAsNeverInlinedIfRequired(customDefinition, targetType, ignoredDefinitionProvider);
-                logger.debug("applying configured custom definition for {}", targetType);
-                definition.setAll(customDefinition.getValue());
-                includeTypeAttributes = customDefinition.shouldIncludeAttributes();
-            } else if (isContainerType) {
-                logger.debug("generating array definition for {}", targetType);
-                this.generateArrayDefinition(scope, definition, isNullable);
-                includeTypeAttributes = true;
-            } else {
-                logger.debug("generating definition for {}", targetType);
-                includeTypeAttributes = !this.addSubtypeReferencesInDefinition(targetType, definition);
-            }
+            definitionAndTypeAttributeInclusionFlag = applyReferencedCustomDefinition(customDefinition, targetType, targetNode, isNullable,
+                    ignoredDefinitionProvider);
         }
-        if (includeTypeAttributes) {
+        final ObjectNode definition = definitionAndTypeAttributeInclusionFlag.getKey();
+        if (definitionAndTypeAttributeInclusionFlag.getValue()) {
             Set<String> allowedSchemaTypes = this.collectAllowedSchemaTypes(definition);
             ObjectNode typeAttributes = AttributeCollector.collectTypeAttributes(scope, this, allowedSchemaTypes);
             // ensure no existing attributes in the 'definition' are replaced, by way of first overriding any conflicts the other way around
@@ -331,8 +327,8 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 .forEach(override -> override.overrideTypeAttributes(definition, scope, this));
     }
 
-    private ObjectNode applyInlineCustomDefinition(CustomDefinition customDefinition, ResolvedType targetType, ObjectNode targetNode,
-            boolean isNullable, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+    private Map.Entry<ObjectNode, Boolean> applyInlineCustomDefinition(CustomDefinition customDefinition, ResolvedType targetType,
+            ObjectNode targetNode, boolean isNullable, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
         final ObjectNode definition;
         if (targetNode == null) {
             logger.debug("storing configured custom inline type for {} as definition (since it is the main schema \"#\")", targetType);
@@ -347,24 +343,41 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         if (isNullable) {
             this.makeNullable(definition);
         }
-        return definition;
+        return new AbstractMap.SimpleEntry<>(definition, customDefinition.shouldIncludeAttributes());
     }
 
-    private ObjectNode applyReferenceDefinition(boolean shouldInlineDefinition, ResolvedType targetType, ObjectNode targetNode, boolean isNullable,
-            CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+    private Map.Entry<ObjectNode, Boolean> applyReferencedCustomDefinition(CustomDefinition customDefinition, ResolvedType targetType,
+            ObjectNode targetNode, boolean isNullable, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        ObjectNode definition = this.generatorConfig.createObjectNode();
+        this.putDefinition(targetType, definition, ignoredDefinitionProvider);
+        this.addReference(targetType, targetNode, ignoredDefinitionProvider, isNullable);
+        this.markDefinitionAsNeverInlinedIfRequired(customDefinition, targetType, ignoredDefinitionProvider);
+        logger.debug("applying configured custom definition for {}", targetType);
+        definition.setAll(customDefinition.getValue());
+        return new AbstractMap.SimpleEntry<>(definition, customDefinition.shouldIncludeAttributes());
+    }
+
+    private Map.Entry<ObjectNode, Boolean> applyStandardDefinition(boolean shouldInlineDefinition, TypeScope scope, ObjectNode targetNode,
+            boolean isNullable, CustomDefinitionProviderV2 ignoredDefinitionProvider) {
+        ResolvedType targetType = scope.getType();
         final ObjectNode definition;
         if (shouldInlineDefinition) {
-            // always inline array types
             definition = targetNode;
         } else {
             definition = this.generatorConfig.createObjectNode();
             this.putDefinition(targetType, definition, ignoredDefinitionProvider);
-            if (targetNode != null) {
-                // targetNode is only null for the main class for which the schema is being generated
-                this.addReference(targetType, targetNode, ignoredDefinitionProvider, isNullable);
-            }
+            this.addReference(targetType, targetNode, ignoredDefinitionProvider, isNullable);
         }
-        return definition;
+        final boolean includeTypeAttributes;
+        if (this.typeContext.isContainerType(targetType)) {
+            logger.debug("generating array definition for {}", targetType);
+            this.generateArrayDefinition(scope, definition, isNullable);
+            includeTypeAttributes = true;
+        } else {
+            logger.debug("generating definition for {}", targetType);
+            includeTypeAttributes = !this.addSubtypeReferencesInDefinition(targetType, definition);
+        }
+        return new AbstractMap.SimpleEntry<>(definition, includeTypeAttributes);
     }
 
     /**
@@ -423,22 +436,20 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         if (isNullable) {
             this.extendTypeDeclarationToIncludeNull(definition);
         }
-        if (targetScope instanceof MemberScope<?, ?> && !((MemberScope<?, ?>) targetScope).isFakeContainerItemScope()) {
-            MemberScope<?, ?> fakeArrayItemMember = ((MemberScope<?, ?>) targetScope).asFakeContainerItemScope();
-            JsonNode fakeItemDefinition;
-            if (targetScope instanceof FieldScope) {
-                fakeItemDefinition = this.populateFieldSchema((FieldScope) fakeArrayItemMember);
-            } else if (targetScope instanceof MethodScope) {
-                fakeItemDefinition = this.populateMethodSchema((MethodScope) fakeArrayItemMember);
-            } else {
-                throw new IllegalStateException("Unsupported member type: " + targetScope.getClass().getName());
-            }
-            definition.set(this.getKeyword(SchemaKeyword.TAG_ITEMS), fakeItemDefinition);
+        definition.set(this.getKeyword(SchemaKeyword.TAG_ITEMS), this.populateItemMemberSchema(targetScope));
+    }
+
+    private JsonNode populateItemMemberSchema(TypeScope targetScope) {
+        JsonNode arrayItemDefinition;
+        if (targetScope instanceof FieldScope && !((FieldScope) targetScope).isFakeContainerItemScope()) {
+            arrayItemDefinition = this.populateFieldSchema(((FieldScope) targetScope).asFakeContainerItemScope());
+        } else if (targetScope instanceof MethodScope && !((MethodScope) targetScope).isFakeContainerItemScope()) {
+            arrayItemDefinition = this.populateMethodSchema(((MethodScope) targetScope).asFakeContainerItemScope());
         } else {
-            ObjectNode arrayItemTypeRef = this.generatorConfig.createObjectNode();
-            definition.set(this.getKeyword(SchemaKeyword.TAG_ITEMS), arrayItemTypeRef);
-            this.traverseGenericType(targetScope.getContainerItemType(), arrayItemTypeRef, false);
+            arrayItemDefinition = this.generatorConfig.createObjectNode();
+            this.traverseGenericType(targetScope.getContainerItemType(), (ObjectNode) arrayItemDefinition, false);
         }
+        return arrayItemDefinition;
     }
 
     /**
@@ -521,32 +532,24 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         this.collectFields(targetTypeWithMembers, ResolvedTypeWithMembers::getMemberFields, targetProperties, requiredProperties);
         this.collectMethods(targetTypeWithMembers, ResolvedTypeWithMembers::getMemberMethods, targetProperties, requiredProperties);
 
-        final boolean includeStaticFields = this.generatorConfig.shouldIncludeStaticFields();
-        final boolean includeStaticMethods = this.generatorConfig.shouldIncludeStaticMethods();
-        if (includeStaticFields || includeStaticMethods) {
+        if (this.generatorConfig.shouldIncludeStaticFields() || this.generatorConfig.shouldIncludeStaticMethods()) {
             // static fields and methods are being collected only for the targeted type itself, i.e. need to iterate over super types specifically
             for (HierarchicType singleHierarchy : targetTypeWithMembers.allTypesAndOverrides()) {
-                ResolvedType hierachyType = singleHierarchy.getType();
-                logger.debug("collecting static fields and methods from {}", hierachyType);
-                if ((!includeStaticFields || hierachyType.getStaticFields().isEmpty())
-                        && (!includeStaticMethods || hierachyType.getStaticMethods().isEmpty())) {
-                    // no static members to look-up for this (super) type
-                    continue;
-                }
-                final ResolvedTypeWithMembers hierarchyTypeMembers;
-                if (hierachyType == targetType) {
-                    // avoid looking up the main type again
-                    hierarchyTypeMembers = targetTypeWithMembers;
-                } else {
-                    hierarchyTypeMembers = this.typeContext.resolveWithMembers(hierachyType);
-                }
-                if (includeStaticFields) {
-                    this.collectFields(hierarchyTypeMembers, ResolvedTypeWithMembers::getStaticFields, targetProperties, requiredProperties);
-                }
-                if (includeStaticMethods) {
-                    this.collectMethods(hierarchyTypeMembers, ResolvedTypeWithMembers::getStaticMethods, targetProperties, requiredProperties);
-                }
+                collectStaticMembers(singleHierarchy, targetProperties, requiredProperties);
             }
+        }
+    }
+
+    private void collectStaticMembers(HierarchicType singleHierarchy,
+            Map<String, MemberScope<?, ?>> targetProperties, Set<String> requiredProperties) {
+        ResolvedType hierarchyType = singleHierarchy.getType();
+        logger.debug("collecting static fields and methods from {}", hierarchyType);
+        ResolvedTypeWithMembers hierarchyTypeMembers = this.typeContext.resolveWithMembers(hierarchyType);
+        if (this.generatorConfig.shouldIncludeStaticFields()) {
+            this.collectFields(hierarchyTypeMembers, ResolvedTypeWithMembers::getStaticFields, targetProperties, requiredProperties);
+        }
+        if (this.generatorConfig.shouldIncludeStaticMethods()) {
+            this.collectMethods(hierarchyTypeMembers, ResolvedTypeWithMembers::getStaticMethods, targetProperties, requiredProperties);
         }
     }
 
@@ -622,7 +625,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             typeOverrides = this.generatorConfig.resolveSubtypes(field.getType(), this);
         }
         List<FieldScope> fieldOptions;
-        if (typeOverrides == null || typeOverrides.isEmpty()) {
+        if (Util.isNullOrEmpty(typeOverrides)) {
             fieldOptions = Collections.singletonList(field);
         } else {
             fieldOptions = typeOverrides.stream()
@@ -703,7 +706,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             typeOverrides = this.generatorConfig.resolveSubtypes(method.getType(), this);
         }
         List<MethodScope> methodOptions;
-        if (typeOverrides == null || typeOverrides.isEmpty()) {
+        if (Util.isNullOrEmpty(typeOverrides)) {
             methodOptions = Collections.singletonList(method);
         } else {
             methodOptions = typeOverrides.stream()
@@ -793,8 +796,9 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             boolean forceInlineDefinition, ObjectNode collectedAttributes, CustomDefinition customDefinition) {
         // create an "allOf" wrapper for the attributes related to this particular field and its general type
         final ObjectNode referenceContainer;
-        if (customDefinition != null && !customDefinition.shouldIncludeAttributes()
-                || collectedAttributes == null || collectedAttributes.isEmpty()) {
+        boolean ignoreCollectedAttributes = customDefinition != null && !customDefinition.shouldIncludeAttributes()
+                || collectedAttributes == null || collectedAttributes.isEmpty();
+        if (ignoreCollectedAttributes) {
             // no need for the allOf, can use the sub-schema instance directly as reference
             referenceContainer = targetNode;
         } else if (customDefinition == null && scope.isContainerType()) {

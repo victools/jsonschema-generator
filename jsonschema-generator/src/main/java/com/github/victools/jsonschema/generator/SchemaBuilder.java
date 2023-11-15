@@ -34,6 +34,7 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -212,7 +213,6 @@ public class SchemaBuilder {
                 createDefinitionsForAll, inlineAllSchemas);
         Map<DefinitionKey, String> baseReferenceKeys = this.getReferenceKeys(mainSchemaKey, shouldProduceDefinition, generationContext);
         considerOnlyDirectReferences.set(true);
-        final boolean createDefinitionForMainSchema = this.config.shouldCreateDefinitionForMainSchema();
         for (Map.Entry<DefinitionKey, String> entry : baseReferenceKeys.entrySet()) {
             String definitionName = entry.getValue();
             DefinitionKey definitionKey = entry.getKey();
@@ -227,13 +227,11 @@ public class SchemaBuilder {
                 referenceKey = null;
             } else {
                 // the same sub-schema is referenced in multiple places
-                if (createDefinitionForMainSchema || !definitionKey.equals(mainSchemaKey)) {
-                    // add it to the definitions (unless it is the main schema that is not explicitly moved there via an Option)
-                    definitionsNode.set(definitionName, generationContext.getDefinition(definitionKey));
-                    referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN) + '/' + designatedDefinitionPath + '/' + definitionName;
-                } else {
-                    referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN);
-                }
+                Supplier<String> addDefinitionAndReturnReferenceKey = () -> {
+                    definitionsNode.set(definitionName, this.generationContext.getDefinition(definitionKey));
+                    return this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN) + '/' + designatedDefinitionPath + '/' + definitionName;
+                };
+                referenceKey = getReferenceKey(mainSchemaKey, definitionKey, addDefinitionAndReturnReferenceKey);
                 references.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey));
             }
             if (!nullableReferences.isEmpty()) {
@@ -258,6 +256,18 @@ public class SchemaBuilder {
         }
         definitionsNode.forEach(node -> this.schemaNodes.add((ObjectNode) node));
         return definitionsNode;
+    }
+
+    private String getReferenceKey(DefinitionKey mainSchemaKey, DefinitionKey definitionKey, Supplier<String> addDefinitionAndReturnReferenceKey) {
+        final String referenceKey;
+        if (definitionKey.equals(mainSchemaKey) && !this.config.shouldCreateDefinitionForMainSchema()) {
+            // no need to add the main schema into the definitions, unless explicitly configured to do so
+            referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN);
+        } else {
+            // add it to the definitions
+            referenceKey = addDefinitionAndReturnReferenceKey.get();
+        }
+        return referenceKey;
     }
 
     /**

@@ -50,8 +50,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToIntBiFunction;
 import java.util.stream.Stream;
 
 /**
@@ -511,21 +513,23 @@ public class JakartaValidationModule implements Module {
             // in its current version, this instance attribute override is only considering Map types
             return;
         }
-        Integer mapMinEntries = this.resolveMapMinEntries(member);
-        if (mapMinEntries != null) {
-            String minPropertiesAttribute = context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MIN);
-            JsonNode existingValue = memberAttributes.get(minPropertiesAttribute);
-            if (existingValue == null || (existingValue.isNumber() && existingValue.asInt() < mapMinEntries)) {
-                memberAttributes.put(minPropertiesAttribute, mapMinEntries);
-            }
+        this.overrideMapPropertyCountAttribute(memberAttributes, context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MIN),
+                this.resolveMapMinEntries(member), Math::min);
+        this.overrideMapPropertyCountAttribute(memberAttributes, context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MAX),
+                this.resolveMapMaxEntries(member), Math::max);
+    }
+
+    private void overrideMapPropertyCountAttribute(ObjectNode memberAttributes, String attribute, Integer newValue,
+            ToIntBiFunction<Integer, Integer> getStricterValue) {
+        if (newValue == null) {
+            return;
         }
-        Integer mapMaxEntries = this.resolveMapMaxEntries(member);
-        if (mapMaxEntries != null) {
-            String maxPropertiesAttribute = context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MAX);
-            JsonNode existingValue = memberAttributes.get(maxPropertiesAttribute);
-            if (existingValue == null || (existingValue.isNumber() && existingValue.asInt() > mapMaxEntries)) {
-                memberAttributes.put(maxPropertiesAttribute, mapMaxEntries);
-            }
+        JsonNode existingValue = memberAttributes.get(attribute);
+        boolean shouldSetNewValue = existingValue == null
+                || !existingValue.isNumber()
+                || newValue == getStricterValue.applyAsInt(newValue, existingValue.asInt());
+        if (shouldSetNewValue) {
+            memberAttributes.put(attribute, newValue);
         }
     }
 }

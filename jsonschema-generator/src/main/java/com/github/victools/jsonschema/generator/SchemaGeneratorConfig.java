@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.impl.Util;
 import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
@@ -361,7 +362,7 @@ public interface SchemaGeneratorConfig extends StatefulConfig {
     @Deprecated
     default ResolvedType resolveTargetTypeOverride(FieldScope field) {
         List<ResolvedType> result = this.resolveTargetTypeOverrides(field);
-        return result == null || result.isEmpty() ? null : result.get(0);
+        return Util.isNullOrEmpty(result) ? null : result.get(0);
     }
 
     /**
@@ -374,7 +375,7 @@ public interface SchemaGeneratorConfig extends StatefulConfig {
     @Deprecated
     default ResolvedType resolveTargetTypeOverride(MethodScope method) {
         List<ResolvedType> result = this.resolveTargetTypeOverrides(method);
-        return result == null || result.isEmpty() ? null : result.get(0);
+        return Util.isNullOrEmpty(result) ? null : result.get(0);
     }
 
     /**
