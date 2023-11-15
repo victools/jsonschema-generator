@@ -150,6 +150,17 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
                 .orElse(null);
     }
 
+    private static void getPossibleFieldNamesStartingWithGet(String methodName, Set<String> possibleFieldNames) {
+        if (methodName.length() > 3 && Character.isUpperCase(methodName.charAt(3))) {
+            // ensure that the variable starts with a lower-case letter
+            possibleFieldNames.add(methodName.substring(3, 4).toLowerCase() + methodName.substring(4));
+        }
+        // @since 4.32.0 - conforming with JavaBeans API specification edge case when second character in field name is in uppercase
+        if (methodName.length() > 4 && Character.isUpperCase(methodName.charAt(4))) {
+            possibleFieldNames.add(methodName.substring(3));
+        }
+    }
+
     private static void getPossibleFieldNamesStartingWithIs(String methodName, Set<String> possibleFieldNames) {
         if (methodName.length() > 2 && Character.isUpperCase(methodName.charAt(2))) {
             // ensure that the variable starts with a lower-case letter
@@ -160,17 +171,6 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
         // @since 4.32.0 - conforming with JavaBeans API specification edge case when second character in field name is in uppercase
         if (methodName.length() > 3 && Character.isUpperCase(methodName.charAt(3))) {
             possibleFieldNames.add(methodName.substring(2));
-        }
-    }
-
-    private static void getPossibleFieldNamesStartingWithGet(String methodName, Set<String> possibleFieldNames) {
-        if (methodName.length() > 3 && Character.isUpperCase(methodName.charAt(3))) {
-            // ensure that the variable starts with a lower-case letter
-            possibleFieldNames.add(methodName.substring(3, 4).toLowerCase() + methodName.substring(4));
-        }
-        // @since 4.32.0 - conforming with JavaBeans API specification edge case when second character in field name is in uppercase
-        if (methodName.length() > 4 && Character.isUpperCase(methodName.charAt(4))) {
-            possibleFieldNames.add(methodName.substring(3));
         }
     }
 
