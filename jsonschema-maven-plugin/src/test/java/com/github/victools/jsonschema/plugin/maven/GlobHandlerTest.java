@@ -31,7 +31,7 @@ public class GlobHandlerTest {
 
     static Stream<Arguments> parametersForTestBasicPattern() {
         return Stream.of(
-            Arguments.of("single star becomes all-but-shlash star", "gl*b", "gl[^/]*b"),
+            Arguments.of("single star becomes all-but-slash star", "gl*b", "gl[^/]*b"),
             Arguments.of("double star becomes dot star", "gl**b", "gl.*b"),
             Arguments.of("escaped star is unchanged", "gl\\*b", "gl\\*b"),
             Arguments.of("question mark becomes all-but-shlash", "gl?b", "gl[^/]b"),

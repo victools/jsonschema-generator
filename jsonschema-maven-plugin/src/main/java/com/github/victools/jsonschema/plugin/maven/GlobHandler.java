@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 /**
  * Conversion logic from globs to regular expressions.
@@ -33,12 +34,12 @@ public class GlobHandler {
     private static final char EXCLAMATION_SIGN_CHAR = '!';
     private static final char COMMA_CHAR = ',';
 
-    private static final List<Character> GLOB_IDENTIFIERS = Arrays.asList(
+    private static final int[] GLOB_IDENTIFIERS = {
             ESCAPE_CHAR, ASTERISK_CHAR, QUESTION_MARK_CHAR, '/', '+', '[', '{'
-    );
-    private static final List<Character> INPUT_CHARS_REQUIRING_ESCAPE = Arrays.asList(
+    };
+    private static final int[] INPUT_CHARS_REQUIRING_ESCAPE = {
             '.', '(', ')', '+', '|', '^', '$', '@', '%'
-    );
+    };
 
     /**
      * Generate predicate to check the given input for filtering classes on the classpath.
@@ -68,7 +69,7 @@ public class GlobHandler {
     }
 
     private static String convertInputToRegex(String input) {
-        if (input.chars().anyMatch(GLOB_IDENTIFIERS::contains)) {
+        if (IntStream.of(GLOB_IDENTIFIERS).anyMatch(identifier -> input.chars().anyMatch(inputChar -> inputChar == identifier))) {
             // convert glob pattern into regular expression
             return GlobHandler.convertGlobToRegex(input);
         }
@@ -124,7 +125,7 @@ public class GlobHandler {
                 handleCommaChar(sb, inGroup);
                 break;
             default:
-                boolean shouldBeEscaped = INPUT_CHARS_REQUIRING_ESCAPE.contains(ch)
+                boolean shouldBeEscaped = IntStream.of(INPUT_CHARS_REQUIRING_ESCAPE).anyMatch(specialChar -> specialChar == ch)
                         && (inClass.get() == 0 || (ch == '^' && firstIndexInClass.get() == index.get()));
                 if (shouldBeEscaped) {
                     sb.append(ESCAPE_CHAR);
