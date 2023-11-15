@@ -53,6 +53,7 @@ import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToIntBiFunction;
 import java.util.stream.Stream;
 
 /**
@@ -513,18 +514,22 @@ public class JakartaValidationModule implements Module {
             return;
         }
         this.overrideMapPropertyCountAttribute(memberAttributes, context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MIN),
-                this.resolveMapMinEntries(member), (newValue, existingValue) -> newValue > existingValue);
+                this.resolveMapMinEntries(member), Math::min);
         this.overrideMapPropertyCountAttribute(memberAttributes, context.getKeyword(SchemaKeyword.TAG_PROPERTIES_MAX),
-                this.resolveMapMaxEntries(member), (newValue, existingValue) -> newValue < existingValue);
+                this.resolveMapMaxEntries(member), Math::max);
     }
 
     private void overrideMapPropertyCountAttribute(ObjectNode memberAttributes, String attribute, Integer newValue,
-            BiPredicate<Integer, Integer> isOneStricterThanOther) {
-        if (newValue != null) {
-            JsonNode existingValue = memberAttributes.get(attribute);
-            if (existingValue == null || (existingValue.isNumber() && isOneStricterThanOther.test(newValue, existingValue.asInt()))) {
-                memberAttributes.put(attribute, newValue);
-            }
+            ToIntBiFunction<Integer, Integer> getStricterValue) {
+        if (newValue == null) {
+            return;
+        }
+        JsonNode existingValue = memberAttributes.get(attribute);
+        boolean shouldSetNewValue = existingValue == null
+                || !existingValue.isNumber()
+                || newValue == getStricterValue.applyAsInt(newValue, existingValue.asInt());
+        if (shouldSetNewValue) {
+            memberAttributes.put(attribute, newValue);
         }
     }
 }
