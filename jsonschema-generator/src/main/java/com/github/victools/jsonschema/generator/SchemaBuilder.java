@@ -205,17 +205,14 @@ public class SchemaBuilder {
     private ObjectNode buildDefinitionsAndResolveReferences(String designatedDefinitionPath, DefinitionKey mainSchemaKey,
             SchemaGenerationContextImpl generationContext) {
         final ObjectNode definitionsNode = this.config.createObjectNode();
-        final boolean createDefinitionsForAll = this.config.shouldCreateDefinitionsForAllObjects();
-        final boolean inlineAllSchemas = this.config.shouldInlineAllSchemas();
 
         final AtomicBoolean considerOnlyDirectReferences = new AtomicBoolean(false);
-        Predicate<DefinitionKey> shouldProduceDefinition = this.getShouldProduceDefinitionCheck(mainSchemaKey, considerOnlyDirectReferences,
-                createDefinitionsForAll, inlineAllSchemas);
+        Predicate<DefinitionKey> shouldProduceDefinition = this.getShouldProduceDefinitionCheck(mainSchemaKey, considerOnlyDirectReferences);
         Map<DefinitionKey, String> baseReferenceKeys = this.getReferenceKeys(mainSchemaKey, shouldProduceDefinition, generationContext);
         considerOnlyDirectReferences.set(true);
-        for (Map.Entry<DefinitionKey, String> entry : baseReferenceKeys.entrySet()) {
-            String definitionName = entry.getValue();
-            DefinitionKey definitionKey = entry.getKey();
+        for (Map.Entry<DefinitionKey, String> baseReferenceKey : baseReferenceKeys.entrySet()) {
+            String definitionName = baseReferenceKey.getValue();
+            DefinitionKey definitionKey = baseReferenceKey.getKey();
             List<ObjectNode> references = generationContext.getReferences(definitionKey);
             List<ObjectNode> nullableReferences = generationContext.getNullableReferences(definitionKey);
             final String referenceKey;
@@ -242,8 +239,7 @@ public class SchemaBuilder {
                     definition = this.config.createObjectNode().put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey);
                 }
                 generationContext.makeNullable(definition);
-                if (generationContext.shouldNeverInlineDefinition(definitionKey)
-                        || (!inlineAllSchemas && (createDefinitionsForAll || nullableReferences.size() > 1))) {
+                if (this.shouldCreateNullableDefinition(generationContext, definitionKey, nullableReferences)) {
                     String nullableDefinitionName = this.definitionNamingStrategy
                             .adjustNullableName(definitionKey, definitionName, generationContext);
                     definitionsNode.set(nullableDefinitionName, definition);
@@ -256,6 +252,20 @@ public class SchemaBuilder {
         }
         definitionsNode.forEach(node -> this.schemaNodes.add((ObjectNode) node));
         return definitionsNode;
+    }
+
+    private boolean shouldCreateNullableDefinition(SchemaGenerationContextImpl generationContext, DefinitionKey definitionKey,
+            List<ObjectNode> nullableReferences) {
+        if (this.config.shouldInlineNullableSchemas()) {
+            return false;
+        }
+        if (generationContext.shouldNeverInlineDefinition(definitionKey)) {
+            return true;
+        }
+        if (this.config.shouldInlineAllSchemas()) {
+            return false;
+        }
+        return this.config.shouldCreateDefinitionsForAllObjects() || nullableReferences.size() > 1;
     }
 
     private String getReferenceKey(DefinitionKey mainSchemaKey, DefinitionKey definitionKey, Supplier<String> addDefinitionAndReturnReferenceKey) {
@@ -275,12 +285,11 @@ public class SchemaBuilder {
      *
      * @param mainSchemaKey main type to consider
      * @param considerOnlyDirectReferences whether to ignore nullable references when determing about definition vs. inlining
-     * @param createDefinitionsForAll whether to produce definitions for all schemas by default (unless explicitly stated otherwise)
-     * @param inlineAllSchemas whether to inline all schemas by default (unless explicitly stated otherwise)
      * @return reusable predicate
      */
-    private Predicate<DefinitionKey> getShouldProduceDefinitionCheck(DefinitionKey mainSchemaKey, AtomicBoolean considerOnlyDirectReferences,
-            boolean createDefinitionsForAll, boolean inlineAllSchemas) {
+    private Predicate<DefinitionKey> getShouldProduceDefinitionCheck(DefinitionKey mainSchemaKey, AtomicBoolean considerOnlyDirectReferences) {
+        final boolean createDefinitionsForAll = this.config.shouldCreateDefinitionsForAllObjects();
+        final boolean inlineAllSchemas = this.config.shouldInlineAllSchemas();
         return definitionKey -> {
             if (generationContext.shouldNeverInlineDefinition(definitionKey)) {
                 // e.g. custom definition explicitly marked to always produce a definition

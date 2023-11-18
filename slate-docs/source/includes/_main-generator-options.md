@@ -310,6 +310,14 @@ configBuilder.without(
     <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">33</td>
+      <td colspan="2"><code>Option.INLINE_NULLABLE_SCHEMAS</code></td>
+    </tr>
+    <tr>
+      <td>Do not include <code>$defs</code>/<code>definitions</code> for a nullable version of a type, but rather define it "inline". The non-nullable type may still be referenced.</td>
+      <td>Depending on whether <code>DEFINITIONS_FOR_ALL_OBJECTS</code> is included or excluded.</td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="text-align: right">34</td>
       <td colspan="2"><code>Option.PLAIN_DEFINITION_KEYS</code></td>
     </tr>
     <tr>
@@ -317,7 +325,7 @@ configBuilder.without(
       <td>Ensure that the keys for any <code>$defs</code>/<code>definitions</code> are URI compatible (as expected by the JSON Schema specification).</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">34</td>
+      <td rowspan="2" style="text-align: right">35</td>
       <td colspan="2"><code>Option.ALLOF_CLEANUP_AT_THE_END</code></td>
     </tr>
     <tr>
@@ -325,7 +333,7 @@ configBuilder.without(
       <td>Do not attempt to reduce <code>allOf</code> wrappers but preserve them as they were generated regardless of them being necessary or not.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">35</td>
+      <td rowspan="2" style="text-align: right">36</td>
       <td colspan="2"><code>Option.STRICT_TYPE_INFO</code></td>
     </tr>
     <tr>
@@ -375,6 +383,7 @@ Below, you can find the lists of <code>Option</code>s included/excluded in the r
 | 30 | `DEFINITION_FOR_MAIN_SCHEMA`                 | ⬜️ | ⬜️ | ⬜️ |
 | 31 | `DEFINITIONS_FOR_MEMBER_SUPERTYPES`          | ⬜️ | ⬜️ | ⬜️ |
 | 32 | `INLINE_ALL_SCHEMAS`                         | ⬜️ | ⬜️ | ⬜️ |
-| 33 | `PLAIN_DEFINITION_KEYS`                      | ⬜️ | ⬜️ | ⬜️ |
-| 34 | `ALLOF_CLEANUP_AT_THE_END`                   | ✅ | ✅ | ✅ |
-| 35 | `STRICT_TYPE_INFO`                           | ⬜️ | ⬜️ | ⬜️ |
+| 33 | `INLINE_NULLABLE_SCHEMAS`                    | ⬜️ | ⬜️ | ⬜️ |
+| 34 | `PLAIN_DEFINITION_KEYS`                      | ⬜️ | ⬜️ | ⬜️ |
+| 35 | `ALLOF_CLEANUP_AT_THE_END`                   | ✅ | ✅ | ✅ |
+| 36 | `STRICT_TYPE_INFO`                           | ⬜️ | ⬜️ | ⬜️ |

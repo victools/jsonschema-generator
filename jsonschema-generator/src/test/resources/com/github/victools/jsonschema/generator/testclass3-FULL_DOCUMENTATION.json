@@ -23,13 +23,6 @@
                 }
             }
         },
-        "Optional_Integer_-nullable": {
-            "anyOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/Optional_Integer_"
-                }]
-        },
         "RoundingMode": {
             "type": "object",
             "properties": {
@@ -50,31 +43,28 @@
                     "enum": ["UP", "DOWN", "CEILING", "FLOOR", "HALF_UP", "HALF_DOWN", "HALF_EVEN", "UNNECESSARY"]
                 },
                 "valueOf(String)": {
-                    "$ref": "#/definitions/RoundingMode-nullable"
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/RoundingMode"
+                        }
+                    ]
                 },
                 "valueOf(int)": {
-                    "$ref": "#/definitions/RoundingMode-nullable"
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/RoundingMode"
+                        }
+                    ]
                 },
                 "values()": {
                     "type": ["array", "null"],
                     "items": {
                         "$ref": "#/definitions/RoundingMode"
                     }
-                }
-            }
-        },
-        "RoundingMode-nullable": {
-            "anyOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/RoundingMode"
-                }]
-        },
-        "Supplier_Integer_-nullable": {
-            "type": ["object", "null"],
-            "properties": {
-                "get()": {
-                    "type": ["integer", "null"]
                 }
             }
         },
@@ -120,13 +110,6 @@
                 }
             }
         },
-        "TestClass2_Long_-nullable": {
-            "anyOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/TestClass2_Long_"
-                }]
-        },
         "TestClass2_String_": {
             "type": "object",
             "properties": {
@@ -141,97 +124,106 @@
                 }
             }
         },
-        "TestClass2_String_-nullable": {
-            "anyOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/TestClass2_String_"
-                }]
-        },
-        "TestClass2_TestClass1..._-nullable": {
-            "type": ["object", "null"],
-            "properties": {
-                "genericArray": {
-                    "type": ["array", "null"],
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/TestClass1"
-                        }
-                    }
-                },
-                "genericValue": {
-                    "type": ["array", "null"],
-                    "items": {
-                        "$ref": "#/definitions/TestClass1"
-                    }
-                }
-            }
-        },
-        "TestClass2_TestClass2_String__-nullable": {
-            "type": ["object", "null"],
-            "properties": {
-                "genericArray": {
-                    "type": ["array", "null"],
-                    "items": {
-                        "$ref": "#/definitions/TestClass2_String_"
-                    }
-                },
-                "genericValue": {
-                    "$ref": "#/definitions/TestClass2_String_-nullable"
-                }
-            }
-        },
         "TestClass3": {
             "type": "object",
             "properties": {
                 "class4": {
-                    "$ref": "#/definitions/TestClass4_Integer.String_-nullable"
+                    "type": ["object", "null"],
+                    "properties": {
+                        "DEFAULT_ROUNDING_MODE": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/RoundingMode"
+                                }, {
+                                    "const": "HALF_UP"
+                                }
+                            ]
+                        },
+                        "class2OfClass2OfT": {
+                            "type": ["object", "null"],
+                            "properties": {
+                                "genericArray": {
+                                    "type": ["array", "null"],
+                                    "items": {
+                                        "$ref": "#/definitions/TestClass2_String_"
+                                    }
+                                },
+                                "genericValue": {
+                                    "anyOf": [
+                                        {
+                                            "type": "null"
+                                        }, {
+                                            "$ref": "#/definitions/TestClass2_String_"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "listOfOptionalS": {
+                            "type": ["array", "null"],
+                            "items": {
+                                "$ref": "#/definitions/Optional_Integer_"
+                            }
+                        },
+                        "optionalS": {
+                            "anyOf": [
+                                {
+                                    "type": "null"
+                                }, {
+                                    "$ref": "#/definitions/Optional_Integer_"
+                                }
+                            ]
+                        },
+                        "setOfStringSupplier": {
+                            "type": ["array", "null"],
+                            "items": {
+                                "$ref": "#/definitions/LazyStringSupplier"
+                            }
+                        },
+                        "supplierS": {
+                            "type": ["object", "null"],
+                            "properties": {
+                                "get()": {
+                                    "type": ["integer", "null"]
+                                }
+                            }
+                        }
+                    }
                 },
                 "nestedClass1Array": {
-                    "$ref": "#/definitions/TestClass2_TestClass1..._-nullable"
+                    "type": ["object", "null"],
+                    "properties": {
+                        "genericArray": {
+                            "type": ["array", "null"],
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/TestClass1"
+                                }
+                            }
+                        },
+                        "genericValue": {
+                            "type": ["array", "null"],
+                            "items": {
+                                "$ref": "#/definitions/TestClass1"
+                            }
+                        }
+                    }
                 },
                 "nestedLong": {
-                    "$ref": "#/definitions/TestClass2_Long_-nullable"
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/TestClass2_Long_"
+                        }
+                    ]
                 },
                 "nestedLongList": {
                     "type": ["array", "null"],
                     "items": {
                         "$ref": "#/definitions/TestClass2_Long_"
                     }
-                }
-            }
-        },
-        "TestClass4_Integer.String_-nullable": {
-            "type": ["object", "null"],
-            "properties": {
-                "DEFAULT_ROUNDING_MODE": {
-                    "allOf": [{
-                            "$ref": "#/definitions/RoundingMode"
-                        }, {
-                            "const": "HALF_UP"
-                        }]
-                },
-                "class2OfClass2OfT": {
-                    "$ref": "#/definitions/TestClass2_TestClass2_String__-nullable"
-                },
-                "listOfOptionalS": {
-                    "type": ["array", "null"],
-                    "items": {
-                        "$ref": "#/definitions/Optional_Integer_"
-                    }
-                },
-                "optionalS": {
-                    "$ref": "#/definitions/Optional_Integer_-nullable"
-                },
-                "setOfStringSupplier": {
-                    "type": ["array", "null"],
-                    "items": {
-                        "$ref": "#/definitions/LazyStringSupplier"
-                    }
-                },
-                "supplierS": {
-                    "$ref": "#/definitions/Supplier_Integer_-nullable"
                 }
             }
         }

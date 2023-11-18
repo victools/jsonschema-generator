@@ -21,7 +21,13 @@
                     "type": ["string", "null"]
                 },
                 "valueOf(String)": {
-                    "$ref": "#/definitions/TestEnum-nullable"
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/TestEnum"
+                        }
+                    ]
                 },
                 "values()": {
                     "type": ["array", "null"],
@@ -30,13 +36,6 @@
                     }
                 }
             }
-        },
-        "TestEnum-nullable": {
-            "anyOf": [{
-                    "type": "null"
-                }, {
-                    "$ref": "#/definitions/TestEnum"
-                }]
         }
     }
 }

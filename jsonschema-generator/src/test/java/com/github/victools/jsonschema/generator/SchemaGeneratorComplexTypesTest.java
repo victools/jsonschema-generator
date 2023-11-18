@@ -110,7 +110,7 @@ public class SchemaGeneratorComplexTypesTest {
             return null;
         });
         Module alternativeDefinitionModule = configBuilder -> configBuilder.with(Option.DEFINITION_FOR_MAIN_SCHEMA,
-                Option.PLAIN_DEFINITION_KEYS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS);
+                Option.PLAIN_DEFINITION_KEYS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS, Option.INLINE_NULLABLE_SCHEMAS);
         Module typeInGeneralModule = configBuilder -> populateTypeConfigPart(
                 configBuilder.with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT).forTypesInGeneral()
                         .withIdResolver(scope -> scope.getType().getTypeName().contains("$Test") ? "id-" + scope.getSimpleTypeDescription() : null)
