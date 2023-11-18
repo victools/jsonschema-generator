@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `jsonschema-generator`
 #### Added
 - new `Option.STANDARD_FORMATS` includes standard `"format"` values to some types considered by `Option.ADDITIONAL_FIXED_TYPES`
+- new `Option.INLINE_NULLABLE_SCHEMAS` avoids `"<type>-nullable"` entries in the `"definitions"`/`"$defs"`
 
 #### Changed
 - include new `Option.STANDARD_FORMATS` in `OptionPreset.PLAIN_JSON` by default

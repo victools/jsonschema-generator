@@ -86,6 +86,14 @@ public interface SchemaGeneratorConfig extends StatefulConfig {
     boolean shouldInlineAllSchemas();
 
     /**
+     * Determine whether nullable sub-schemas should be included in-line, even if they occur multiple times, and not in the schema's
+     * "definitions"/"$defs".
+     *
+     * @return whether to include nullable sub-schemas in-line
+     */
+    boolean shouldInlineNullableSchemas();
+
+    /**
      * Determine whether the {@link SchemaKeyword#TAG_SCHEMA} attribute with {@link SchemaKeyword#TAG_SCHEMA_VALUE} should be added.
      *
      * @return whether to add the schema version attribute

@@ -134,6 +134,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldInlineNullableSchemas() {
+        return this.isOptionEnabled(Option.INLINE_NULLABLE_SCHEMAS);
+    }
+
+    @Override
     public boolean shouldUsePlainDefinitionKeys() {
         return this.isOptionEnabled(Option.PLAIN_DEFINITION_KEYS);
     }

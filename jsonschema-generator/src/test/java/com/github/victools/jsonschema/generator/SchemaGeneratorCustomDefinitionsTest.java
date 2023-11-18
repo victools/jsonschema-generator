@@ -185,6 +185,7 @@ public class SchemaGeneratorCustomDefinitionsTest {
                             .set(accessProperty, context.createDefinitionReference(generic))));
         };
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion);
+        configBuilder.with(Option.INLINE_NULLABLE_SCHEMAS);
         configBuilder.forTypesInGeneral()
                 .withCustomDefinitionProvider(customDefinitionProvider);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());

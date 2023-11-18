@@ -269,6 +269,14 @@ public enum Option {
      */
     DEFINITIONS_FOR_MEMBER_SUPERTYPES(null, null),
     /**
+     * Whether the "nullable" variants of a sub-schema should be defined in-line, i.e., avoiding a second "MyType-nullable" entry in the
+     * "definitions"/"$defs". This takes precedence over {@link #DEFINITIONS_FOR_ALL_OBJECTS} in this specific case. The non-nullable sub-schema is
+     * unaffected by this setting.
+     *
+     * @since 4.33.0
+     */
+    INLINE_NULLABLE_SCHEMAS(null, null),
+    /**
      * Whether all sub-schemas should be defined in-line, i.e. including no "definitions"/"$defs". This takes precedence over
      * {@link #DEFINITIONS_FOR_ALL_OBJECTS} and {@link #DEFINITION_FOR_MAIN_SCHEMA}.
      * <p>
@@ -277,7 +285,8 @@ public enum Option {
      *
      * @since 4.10.0
      */
-    INLINE_ALL_SCHEMAS(InlineSchemaModule::new, null, Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.DEFINITION_FOR_MAIN_SCHEMA),
+    INLINE_ALL_SCHEMAS(InlineSchemaModule::new, null,
+            Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.DEFINITION_FOR_MAIN_SCHEMA, Option.INLINE_NULLABLE_SCHEMAS),
     /**
      * Generally, keys in the collected "definitions"/"$defs" are ensured to be URI compatible but may include parentheses and commas for listing type
      * parameters. By enabling this option, these parentheses and commas will be removed to conform with a reduced set of characters, e.g. as expected
