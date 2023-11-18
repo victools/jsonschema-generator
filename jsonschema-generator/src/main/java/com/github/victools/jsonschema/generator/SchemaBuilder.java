@@ -30,11 +30,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -88,10 +88,8 @@ public class SchemaBuilder {
         this.generationContext = new SchemaGenerationContextImpl(this.config, this.typeContext);
         this.schemaNodes = new ArrayList<>();
 
-        SchemaDefinitionNamingStrategy baseNamingStrategy = config.getDefinitionNamingStrategy();
-        if (baseNamingStrategy == null) {
-            baseNamingStrategy = new DefaultSchemaDefinitionNamingStrategy();
-        }
+        SchemaDefinitionNamingStrategy baseNamingStrategy = Optional.ofNullable(config.getDefinitionNamingStrategy())
+                .orElseGet(DefaultSchemaDefinitionNamingStrategy::new);
         SchemaCleanUpUtils cleanupUtils = new SchemaCleanUpUtils(config);
         Function<String, String> definitionCleanUpTask = config.shouldUsePlainDefinitionKeys()
                 ? cleanupUtils::ensureDefinitionKeyIsPlain
@@ -121,8 +119,8 @@ public class SchemaBuilder {
             this.generationContext.addReference(mainType, jsonSchemaResult, null, false);
         }
         String definitionsTagName = this.config.getKeyword(SchemaKeyword.TAG_DEFINITIONS);
-        ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(definitionsTagName, mainKey, this.generationContext);
-        if (definitionsNode.size() > 0) {
+        ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(definitionsTagName, mainKey);
+        if (!definitionsNode.isEmpty()) {
             jsonSchemaResult.set(definitionsTagName, definitionsNode);
         }
         if (!createDefinitionForMainSchema) {
@@ -169,7 +167,7 @@ public class SchemaBuilder {
      * @see #createSchemaReference(Type, Type...)
      */
     public ObjectNode collectDefinitions(String designatedDefinitionPath) {
-        ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(designatedDefinitionPath, null, this.generationContext);
+        ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(designatedDefinitionPath, null);
         this.performCleanup();
         return definitionsNode;
     }
@@ -199,59 +197,74 @@ public class SchemaBuilder {
      *
      * @param designatedDefinitionPath designated path to the returned definitions node (to be incorporated in {@link SchemaKeyword#TAG_REF} values)
      * @param mainSchemaKey definition key identifying the main type for which createSchemaReference() was invoked
-     * @param generationContext context containing all definitions of (sub) schemas and the list of references to them
      * @return node representing the main schema's "definitions" (may be empty)
      */
-    private ObjectNode buildDefinitionsAndResolveReferences(String designatedDefinitionPath, DefinitionKey mainSchemaKey,
-            SchemaGenerationContextImpl generationContext) {
+    private ObjectNode buildDefinitionsAndResolveReferences(String designatedDefinitionPath, DefinitionKey mainSchemaKey) {
+        final String referenceKeyPrefix = this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN) + '/' + designatedDefinitionPath + '/';
         final ObjectNode definitionsNode = this.config.createObjectNode();
 
         final AtomicBoolean considerOnlyDirectReferences = new AtomicBoolean(false);
         Predicate<DefinitionKey> shouldProduceDefinition = this.getShouldProduceDefinitionCheck(mainSchemaKey, considerOnlyDirectReferences);
-        Map<DefinitionKey, String> baseReferenceKeys = this.getReferenceKeys(mainSchemaKey, shouldProduceDefinition, generationContext);
+        DefinitionCollectionDetails definitionCollectionDetails = new DefinitionCollectionDetails(mainSchemaKey, referenceKeyPrefix,
+                shouldProduceDefinition, definitionsNode);
+
+        Map<DefinitionKey, String> baseReferenceKeys = this.getReferenceKeys(mainSchemaKey, shouldProduceDefinition);
         considerOnlyDirectReferences.set(true);
+
         for (Map.Entry<DefinitionKey, String> baseReferenceKey : baseReferenceKeys.entrySet()) {
-            String definitionName = baseReferenceKey.getValue();
             DefinitionKey definitionKey = baseReferenceKey.getKey();
-            List<ObjectNode> references = generationContext.getReferences(definitionKey);
-            List<ObjectNode> nullableReferences = generationContext.getNullableReferences(definitionKey);
-            final String referenceKey;
-            boolean referenceInline = !shouldProduceDefinition.test(definitionKey);
-            if (referenceInline) {
-                // it is a simple type, just in-line the sub-schema everywhere
-                ObjectNode definition = generationContext.getDefinition(definitionKey);
-                references.forEach(node -> AttributeCollector.mergeMissingAttributes(node, definition));
-                referenceKey = null;
-            } else {
-                // the same sub-schema is referenced in multiple places
-                Supplier<String> addDefinitionAndReturnReferenceKey = () -> {
-                    definitionsNode.set(definitionName, this.generationContext.getDefinition(definitionKey));
-                    return this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN) + '/' + designatedDefinitionPath + '/' + definitionName;
-                };
-                referenceKey = getReferenceKey(mainSchemaKey, definitionKey, addDefinitionAndReturnReferenceKey);
-                references.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey));
-            }
+            List<ObjectNode> references = this.generationContext.getReferences(definitionKey);
+            List<ObjectNode> nullableReferences = this.generationContext.getNullableReferences(definitionKey);
+            final String referenceKey = this.updateReferences(references, definitionCollectionDetails, baseReferenceKey);
             if (!nullableReferences.isEmpty()) {
-                ObjectNode definition;
-                if (referenceInline) {
-                    definition = generationContext.getDefinition(definitionKey);
-                } else {
-                    definition = this.config.createObjectNode().put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey);
-                }
-                generationContext.makeNullable(definition);
-                if (this.shouldCreateNullableDefinition(generationContext, definitionKey, nullableReferences)) {
-                    String nullableDefinitionName = this.definitionNamingStrategy
-                            .adjustNullableName(definitionKey, definitionName, generationContext);
-                    definitionsNode.set(nullableDefinitionName, definition);
-                    nullableReferences.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF),
-                            this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN) + '/' + designatedDefinitionPath + '/' + nullableDefinitionName));
-                } else {
-                    nullableReferences.forEach(node -> AttributeCollector.mergeMissingAttributes(node, definition));
-                }
+                updateNullableReferences(nullableReferences, definitionCollectionDetails, referenceKey, baseReferenceKey);
             }
         }
         definitionsNode.forEach(node -> this.schemaNodes.add((ObjectNode) node));
         return definitionsNode;
+    }
+
+    private String updateReferences(List<ObjectNode> references, DefinitionCollectionDetails definitionCollectionDetails,
+            Map.Entry<DefinitionKey, String> baseReferenceKey) {
+        if (definitionCollectionDetails.shouldProduceDefinition(baseReferenceKey.getKey())) {
+            final String referenceKey;
+            if (definitionCollectionDetails.isMainSchemaKey(baseReferenceKey.getKey()) && !this.config.shouldCreateDefinitionForMainSchema()) {
+                // no need to add the main schema into the definitions, unless explicitly configured to do so
+                referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN);
+            } else {
+                // add it to the definitions
+                definitionCollectionDetails.getDefinitionsNode()
+                        .set(baseReferenceKey.getValue(), this.generationContext.getDefinition(baseReferenceKey.getKey()));
+                referenceKey = definitionCollectionDetails.getReferenceKey(baseReferenceKey.getValue());
+            }
+            references.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF), referenceKey));
+            return referenceKey;
+        }
+        // in-line the sub-schema everywhere (assuming there is no complex hierarchy inside (especially no circular reference)
+        ObjectNode definition = this.generationContext.getDefinition(baseReferenceKey.getKey());
+        references.forEach(node -> AttributeCollector.mergeMissingAttributes(node, definition));
+        return null;
+    }
+
+    private void updateNullableReferences(List<ObjectNode> nullableReferences, DefinitionCollectionDetails definitionCollectionDetails,
+            String nonNullableReferenceKey, Map.Entry<DefinitionKey, String> baseReferenceKey) {
+        DefinitionKey definitionKey = baseReferenceKey.getKey();
+        ObjectNode definition;
+        if (nonNullableReferenceKey == null) {
+            definition = this.generationContext.getDefinition(definitionKey);
+        } else {
+            definition = this.config.createObjectNode().put(this.config.getKeyword(SchemaKeyword.TAG_REF), nonNullableReferenceKey);
+        }
+        this.generationContext.makeNullable(definition);
+        if (this.shouldCreateNullableDefinition(this.generationContext, definitionKey, nullableReferences)) {
+            String nullableDefinitionName = this.definitionNamingStrategy
+                    .adjustNullableName(definitionKey, baseReferenceKey.getValue(), this.generationContext);
+            definitionCollectionDetails.getDefinitionsNode().set(nullableDefinitionName, definition);
+            nullableReferences.forEach(node -> node.put(this.config.getKeyword(SchemaKeyword.TAG_REF),
+                    definitionCollectionDetails.getReferenceKey(nullableDefinitionName)));
+        } else {
+            nullableReferences.forEach(node -> AttributeCollector.mergeMissingAttributes(node, definition));
+        }
     }
 
     private boolean shouldCreateNullableDefinition(SchemaGenerationContextImpl generationContext, DefinitionKey definitionKey,
@@ -268,30 +281,18 @@ public class SchemaBuilder {
         return this.config.shouldCreateDefinitionsForAllObjects() || nullableReferences.size() > 1;
     }
 
-    private String getReferenceKey(DefinitionKey mainSchemaKey, DefinitionKey definitionKey, Supplier<String> addDefinitionAndReturnReferenceKey) {
-        final String referenceKey;
-        if (definitionKey.equals(mainSchemaKey) && !this.config.shouldCreateDefinitionForMainSchema()) {
-            // no need to add the main schema into the definitions, unless explicitly configured to do so
-            referenceKey = this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN);
-        } else {
-            // add it to the definitions
-            referenceKey = addDefinitionAndReturnReferenceKey.get();
-        }
-        return referenceKey;
-    }
-
     /**
      * Produce reusable predicate for checking whether a given type should produce an entry in the {@link SchemaKeyword#TAG_DEFINITIONS} or not.
      *
      * @param mainSchemaKey main type to consider
-     * @param considerOnlyDirectReferences whether to ignore nullable references when determing about definition vs. inlining
+     * @param considerOnlyDirectReferences whether to ignore nullable references when determining about definition vs. inlining
      * @return reusable predicate
      */
     private Predicate<DefinitionKey> getShouldProduceDefinitionCheck(DefinitionKey mainSchemaKey, AtomicBoolean considerOnlyDirectReferences) {
         final boolean createDefinitionsForAll = this.config.shouldCreateDefinitionsForAllObjects();
         final boolean inlineAllSchemas = this.config.shouldInlineAllSchemas();
         return definitionKey -> {
-            if (generationContext.shouldNeverInlineDefinition(definitionKey)) {
+            if (this.generationContext.shouldNeverInlineDefinition(definitionKey)) {
                 // e.g. custom definition explicitly marked to always produce a definition
                 return true;
             }
@@ -302,15 +303,13 @@ public class SchemaBuilder {
             if (definitionKey.equals(mainSchemaKey)) {
                 return true;
             }
-            List<ObjectNode> references = generationContext.getReferences(definitionKey);
+            List<ObjectNode> references = this.generationContext.getReferences(definitionKey);
             if (considerOnlyDirectReferences.get() && references.isEmpty()) {
                 return false;
             }
-            if (createDefinitionsForAll || references.size() > 1) {
-                return true;
-            }
-            List<ObjectNode> nullableReferences = generationContext.getNullableReferences(definitionKey);
-            return (references.size() + nullableReferences.size()) > 1;
+            return createDefinitionsForAll
+                    || references.size() > 1
+                    || (references.size() + this.generationContext.getNullableReferences(definitionKey).size()) > 1;
         };
     }
 
@@ -319,35 +318,16 @@ public class SchemaBuilder {
      *
      * @param mainSchemaKey special definition key for the main schema
      * @param shouldProduceDefinition filter to indicate whether a given key should be considered when determining definition names
-     * @param generationContext generation context in which all traversed types and their definitions have been collected
      * @return encountered types with their corresponding reference keys
      */
-    private Map<DefinitionKey, String> getReferenceKeys(DefinitionKey mainSchemaKey, Predicate<DefinitionKey> shouldProduceDefinition,
-            SchemaGenerationContextImpl generationContext) {
-        boolean createDefinitionForMainSchema = this.config.shouldCreateDefinitionForMainSchema();
-        Function<DefinitionKey, String> definitionNamesForKey = key -> this.definitionNamingStrategy.getDefinitionNameForKey(key, generationContext);
-        Map<String, List<DefinitionKey>> aliases = generationContext.getDefinedTypes().stream()
-                .collect(Collectors.groupingBy(definitionNamesForKey, TreeMap::new, Collectors.toList()));
+    private Map<DefinitionKey, String> getReferenceKeys(DefinitionKey mainSchemaKey, Predicate<DefinitionKey> shouldProduceDefinition) {
+        Function<DefinitionKey, String> definitionNameForKey = key -> this.definitionNamingStrategy.getDefinitionNameForKey(key,
+                this.generationContext);
+        Map<String, List<DefinitionKey>> aliases = this.generationContext.getDefinedTypes().stream()
+                .collect(Collectors.groupingBy(definitionNameForKey, TreeMap::new, Collectors.toList()));
         Map<DefinitionKey, String> referenceKeys = new LinkedHashMap<>();
         for (Map.Entry<String, List<DefinitionKey>> group : aliases.entrySet()) {
-            group.getValue().forEach(key -> referenceKeys.put(key, ""));
-            List<DefinitionKey> definitionKeys = group.getValue().stream()
-                    .filter(shouldProduceDefinition)
-                    .collect(Collectors.toList());
-            if (definitionKeys.size() == 1
-                    || (definitionKeys.size() == 2 && !createDefinitionForMainSchema && definitionKeys.contains(mainSchemaKey))) {
-                definitionKeys.forEach(key -> referenceKeys.put(key, group.getKey()));
-            } else {
-                Map<DefinitionKey, String> referenceKeyGroup = definitionKeys.stream()
-                        .collect(Collectors.toMap(key -> key, _key -> group.getKey(), (val1, _val2) -> val1, LinkedHashMap::new));
-                this.definitionNamingStrategy.adjustDuplicateNames(referenceKeyGroup, generationContext);
-                if (definitionKeys.size() != referenceKeyGroup.size()) {
-                    throw new IllegalStateException(SchemaDefinitionNamingStrategy.class.getSimpleName()
-                            + " of type " + this.definitionNamingStrategy.getClass().getSimpleName()
-                            + " altered list of subschemas with duplicate names.");
-                }
-                referenceKeys.putAll(referenceKeyGroup);
-            }
+            this.collectReferenceKeysFromGroup(referenceKeys, group, mainSchemaKey, shouldProduceDefinition);
         }
         String remainingDuplicateKeys = referenceKeys.values().stream()
                 .filter(value -> !value.isEmpty())
@@ -362,5 +342,75 @@ public class SchemaBuilder {
                     + " produced duplicate keys: " + remainingDuplicateKeys);
         }
         return referenceKeys;
+    }
+
+    private void collectReferenceKeysFromGroup(Map<DefinitionKey, String> referenceKeys, Map.Entry<String, List<DefinitionKey>> group,
+            DefinitionKey mainSchemaKey, Predicate<DefinitionKey> shouldProduceDefinition) {
+        String baseDefinitionName = group.getKey();
+        List<DefinitionKey> definitionKeys = group.getValue().stream()
+                .peek(key -> referenceKeys.put(key, ""))
+                .filter(shouldProduceDefinition)
+                .collect(Collectors.toList());
+        if (this.areDefinitionKeysDistinct(mainSchemaKey, definitionKeys)) {
+            definitionKeys.forEach(key -> referenceKeys.put(key, baseDefinitionName));
+        } else {
+            Map<DefinitionKey, String> referenceKeyGroup = definitionKeys.stream()
+                    .collect(Collectors.toMap(key -> key, _key -> baseDefinitionName, (val1, _val2) -> val1, LinkedHashMap::new));
+            this.definitionNamingStrategy.adjustDuplicateNames(referenceKeyGroup, this.generationContext);
+            if (definitionKeys.size() != referenceKeyGroup.size()) {
+                throw new IllegalStateException(SchemaDefinitionNamingStrategy.class.getSimpleName()
+                        + " of type " + this.definitionNamingStrategy.getClass().getSimpleName()
+                        + " altered list of subschemas with duplicate names.");
+            }
+            referenceKeys.putAll(referenceKeyGroup);
+        }
+    }
+
+    /**
+     * Check whether the given key can be included with its standard name. Otherwise, dedicated names need to be assigned for each definition key.
+     *
+     * @param mainSchemaKey the main schema's key to ignore in the list if it's being in-lined (unless otherwise configured)
+     * @param definitionKeys list of keys that have the same standard name in the "definitions"/"$defs"
+     * @return whether the given key can be included with its standard name
+     */
+    private boolean areDefinitionKeysDistinct(DefinitionKey mainSchemaKey, List<DefinitionKey> definitionKeys) {
+        return definitionKeys.size() == 1
+               || (definitionKeys.size() == 2
+                   && !this.config.shouldCreateDefinitionForMainSchema()
+                   && definitionKeys.contains(mainSchemaKey));
+    }
+
+    /**
+     * Helper type to group common method parameters in order to reduce overall parameter count and complexity in this class.
+     */
+    private static class DefinitionCollectionDetails {
+        private final DefinitionKey mainSchemaKey;
+        private final String referenceKeyPrefix;
+        private final Predicate<DefinitionKey> shouldProduceDefinition;
+        private final ObjectNode definitionsNode;
+
+        DefinitionCollectionDetails(DefinitionKey mainSchemaKey, String referenceKeyPrefix,
+                Predicate<DefinitionKey> shouldProduceDefinition, ObjectNode definitionsNode) {
+            this.mainSchemaKey = mainSchemaKey;
+            this.referenceKeyPrefix = referenceKeyPrefix;
+            this.shouldProduceDefinition = shouldProduceDefinition;
+            this.definitionsNode = definitionsNode;
+        }
+
+        boolean isMainSchemaKey(DefinitionKey key) {
+            return key.equals(this.mainSchemaKey);
+        }
+
+        String getReferenceKey(String definitionName) {
+            return this.referenceKeyPrefix + definitionName;
+        }
+
+        boolean shouldProduceDefinition(DefinitionKey key) {
+            return this.shouldProduceDefinition.test(key);
+        }
+
+        ObjectNode getDefinitionsNode() {
+            return this.definitionsNode;
+        }
     }
 }
