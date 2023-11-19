@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.WeakHashMap;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -188,10 +189,15 @@ public class TypeContext {
      */
     public ResolvedType getTypeParameterFor(ResolvedType type, Class<?> erasedSuperType, int parameterIndex) {
         List<ResolvedType> typeParameters = type.typeParametersFor(erasedSuperType);
-        if (typeParameters == null
-                || (!typeParameters.isEmpty() && typeParameters.size() <= parameterIndex)
-                || (typeParameters.isEmpty() && erasedSuperType.getTypeParameters().length <= parameterIndex)) {
-            // given type is not a super type of the type in scope or given index is out of bounds
+        if (typeParameters == null) {
+            // given type is not a super type of the type in scope
+            return null;
+        }
+        if (!typeParameters.isEmpty() && typeParameters.size() <= parameterIndex) {
+            // given index is out of bounds for the specific type
+        }
+        if (typeParameters.isEmpty() && erasedSuperType.getTypeParameters().length <= parameterIndex) {
+            // given index is out of bounds for the designated super type
             return null;
         }
         if (typeParameters.isEmpty()) {
@@ -440,5 +446,28 @@ public class TypeContext {
      */
     public String getMethodPropertyArgumentTypeDescription(ResolvedType type) {
         return this.getSimpleTypeDescription(type);
+    }
+
+    /**
+     * Helper function to write generic code that targets either a {@link FieldScope} or {@link MethodScope}.
+     *
+     * @param <R> type of expected return value
+     * @param member field or method being targeted
+     * @param fieldAction action to perform in case the given member is a {@link FieldScope}
+     * @param methodAction action to perform in case the given member is a {@link MethodScope}
+     * @return value returned by the performed action
+     * @throws IllegalStateException if given member is neither a {@link FieldScope} or {@link MethodScope}
+     */
+    public <R> R performActionOnMember(MemberScope<?, ?> member, Function<FieldScope, R> fieldAction,
+            Function<MethodScope, R> methodAction) {
+        R result;
+        if (member instanceof FieldScope) {
+            result = fieldAction.apply((FieldScope) member);
+        } else if (member instanceof MethodScope) {
+            result = methodAction.apply((MethodScope) member);
+        } else {
+            throw new IllegalStateException("Unsupported member scope of type: " + member.getClass());
+        }
+        return result;
     }
 }

@@ -445,9 +445,11 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
         if (this.isFakeContainerItemScope()) {
             return this.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass, considerOtherAnnotation);
         }
-        if (this.getOverriddenType() != null
-                && this.getDeclaredType().getErasedType() == Optional.class
-                && this.getOverriddenType().getErasedType() == this.getDeclaredType().getTypeParameters().get(0).getErasedType()) {
+        // in addition to an explicitly marked "faked container item scope", also support a type wrapped in an Optional
+        if (this.getOverriddenType() == null || this.getDeclaredType().getErasedType() != Optional.class) {
+            return null;
+        }
+        if (this.getOverriddenType().getErasedType() == this.getDeclaredType().getTypeParameters().get(0).getErasedType()) {
             return this.getContainerItemAnnotationConsideringFieldAndGetter(annotationClass, considerOtherAnnotation);
         }
         return null;

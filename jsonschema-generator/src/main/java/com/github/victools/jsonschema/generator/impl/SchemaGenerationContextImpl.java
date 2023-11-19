@@ -17,10 +17,6 @@
 package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
-import com.fasterxml.classmate.members.HierarchicType;
-import com.fasterxml.classmate.members.ResolvedField;
-import com.fasterxml.classmate.members.ResolvedMethod;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
@@ -439,15 +435,14 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     }
 
     private JsonNode populateItemMemberSchema(TypeScope targetScope) {
-        JsonNode arrayItemDefinition;
         if (targetScope instanceof FieldScope && !((FieldScope) targetScope).isFakeContainerItemScope()) {
-            arrayItemDefinition = this.populateFieldSchema(((FieldScope) targetScope).asFakeContainerItemScope());
-        } else if (targetScope instanceof MethodScope && !((MethodScope) targetScope).isFakeContainerItemScope()) {
-            arrayItemDefinition = this.populateMethodSchema(((MethodScope) targetScope).asFakeContainerItemScope());
-        } else {
-            arrayItemDefinition = this.generatorConfig.createObjectNode();
-            this.traverseGenericType(targetScope.getContainerItemType(), (ObjectNode) arrayItemDefinition, false);
+            return this.populateFieldSchema(((FieldScope) targetScope).asFakeContainerItemScope());
         }
+        if (targetScope instanceof MethodScope && !((MethodScope) targetScope).isFakeContainerItemScope()) {
+            return this.populateMethodSchema(((MethodScope) targetScope).asFakeContainerItemScope());
+        }
+        ObjectNode arrayItemDefinition = this.generatorConfig.createObjectNode();
+        this.traverseGenericType(targetScope.getContainerItemType(), arrayItemDefinition, false);
         return arrayItemDefinition;
     }
 
@@ -460,156 +455,47 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     private void generateObjectDefinition(ResolvedType targetType, ObjectNode definition) {
         definition.put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT));
 
-        /*
-         * Collecting fields and methods according to their order in the Java Byte Code.
-         * Depending on the compiler implementation, that order may or may not match the declaration order in the source code.
-         */
-        final Map<String, MemberScope<?, ?>> targetProperties = new LinkedHashMap<>();
-        final Set<String> requiredProperties = new HashSet<>();
+        MemberCollectionContextImpl memberCollectionContext = new MemberCollectionContextImpl(targetType, this.generatorConfig, this.typeContext);
+        memberCollectionContext.collectProperties();
 
-        this.collectObjectProperties(targetType, targetProperties, requiredProperties);
-
-        if (targetProperties.isEmpty()) {
-            return;
+        List<MemberScope<?, ?>> sortedProperties = memberCollectionContext.getSortedProperties();
+        if (!sortedProperties.isEmpty()) {
+            this.addPropertiesToDefinition(definition, sortedProperties, memberCollectionContext.getRequiredPropertyNames());
         }
-        ObjectNode propertiesNode = this.generatorConfig.createObjectNode();
-        List<MemberScope<?, ?>> sortedProperties = targetProperties.values().stream()
-                .sorted(this.generatorConfig::sortProperties)
-                .collect(Collectors.toList());
+    }
+
+    private void addPropertiesToDefinition(ObjectNode definition, List<MemberScope<?, ?>> sortedProperties, Set<String> requiredPropertyNames) {
+        ObjectNode propertiesNode = definition.putObject(this.getKeyword(SchemaKeyword.TAG_PROPERTIES));
         Map<String, List<String>> dependentRequires = new LinkedHashMap<>();
         for (MemberScope<?, ?> property : sortedProperties) {
             this.addPropertiesEntry(propertiesNode, dependentRequires, property);
         }
-        definition.set(this.getKeyword(SchemaKeyword.TAG_PROPERTIES), propertiesNode);
-        if (!requiredProperties.isEmpty()) {
-            ArrayNode requiredNode = this.generatorConfig.createArrayNode();
+        if (!requiredPropertyNames.isEmpty()) {
+            ArrayNode requiredNode = definition.putArray(this.getKeyword(SchemaKeyword.TAG_REQUIRED));
             // list required properties in the same order as the property
             sortedProperties.stream()
                     .map(MemberScope::getSchemaPropertyName)
-                    .filter(requiredProperties::contains)
+                    .filter(requiredPropertyNames::contains)
                     .forEach(requiredNode::add);
-            definition.set(this.getKeyword(SchemaKeyword.TAG_REQUIRED), requiredNode);
         }
         if (!dependentRequires.isEmpty()) {
-            ObjectNode dependentRequiredNode = this.generatorConfig.createObjectNode();
+            ObjectNode dependentRequiredNode = definition.putObject(this.getKeyword(SchemaKeyword.TAG_DEPENDENT_REQUIRED));
             dependentRequires.forEach((leadName, dependentNames) -> dependentNames
                     .forEach(dependentRequiredNode.withArray(leadName)::add));
-            definition.set(this.getKeyword(SchemaKeyword.TAG_DEPENDENT_REQUIRED), dependentRequiredNode);
         }
     }
 
     private void addPropertiesEntry(ObjectNode propertiesNode, Map<String, List<String>> dependentRequires, MemberScope<?, ?> property) {
-        JsonNode subSchema;
-        List<String> dependentRequiredForProperty;
-        if (property instanceof FieldScope) {
-            subSchema = this.populateFieldSchema((FieldScope) property);
-            dependentRequiredForProperty = this.generatorConfig.resolveDependentRequires((FieldScope) property);
-        } else if (property instanceof MethodScope) {
-            subSchema = this.populateMethodSchema((MethodScope) property);
-            dependentRequiredForProperty = this.generatorConfig.resolveDependentRequires((MethodScope) property);
-        } else {
-            throw new IllegalStateException("Unsupported member scope of type " + property.getClass());
-        }
         String propertyName = property.getSchemaPropertyName();
+
+        JsonNode subSchema = this.typeContext.performActionOnMember(property, this::populateFieldSchema, this::populateMethodSchema);
         propertiesNode.set(propertyName, subSchema);
-        if (dependentRequiredForProperty != null && !dependentRequiredForProperty.isEmpty()) {
+
+        List<String> dependentRequiredForProperty = this.typeContext.performActionOnMember(property,
+                this.generatorConfig::resolveDependentRequires, this.generatorConfig::resolveDependentRequires);
+        if (!Util.isNullOrEmpty(dependentRequiredForProperty)) {
             dependentRequires.put(propertyName, dependentRequiredForProperty);
         }
-    }
-
-    /**
-     * Recursively collect all properties of the given object type and add them to the respective maps.
-     *
-     * @param targetType the type for which to collect fields and methods
-     * @param targetProperties map of named fields and methods
-     * @param requiredProperties set of properties value required
-     */
-    private void collectObjectProperties(ResolvedType targetType, Map<String, MemberScope<?, ?>> targetProperties, Set<String> requiredProperties) {
-        logger.debug("collecting non-static fields and methods from {}", targetType);
-        final ResolvedTypeWithMembers targetTypeWithMembers = this.typeContext.resolveWithMembers(targetType);
-        // member fields and methods are being collected from the targeted type as well as its super types
-        this.collectFields(targetTypeWithMembers, ResolvedTypeWithMembers::getMemberFields, targetProperties, requiredProperties);
-        this.collectMethods(targetTypeWithMembers, ResolvedTypeWithMembers::getMemberMethods, targetProperties, requiredProperties);
-
-        if (this.generatorConfig.shouldIncludeStaticFields() || this.generatorConfig.shouldIncludeStaticMethods()) {
-            // static fields and methods are being collected only for the targeted type itself, i.e. need to iterate over super types specifically
-            for (HierarchicType singleHierarchy : targetTypeWithMembers.allTypesAndOverrides()) {
-                collectStaticMembers(singleHierarchy, targetProperties, requiredProperties);
-            }
-        }
-    }
-
-    private void collectStaticMembers(HierarchicType singleHierarchy,
-            Map<String, MemberScope<?, ?>> targetProperties, Set<String> requiredProperties) {
-        ResolvedType hierarchyType = singleHierarchy.getType();
-        logger.debug("collecting static fields and methods from {}", hierarchyType);
-        ResolvedTypeWithMembers hierarchyTypeMembers = this.typeContext.resolveWithMembers(hierarchyType);
-        if (this.generatorConfig.shouldIncludeStaticFields()) {
-            this.collectFields(hierarchyTypeMembers, ResolvedTypeWithMembers::getStaticFields, targetProperties, requiredProperties);
-        }
-        if (this.generatorConfig.shouldIncludeStaticMethods()) {
-            this.collectMethods(hierarchyTypeMembers, ResolvedTypeWithMembers::getStaticMethods, targetProperties, requiredProperties);
-        }
-    }
-
-    /**
-     * Preparation Step: add the designated fields to the specified {@link Map}.
-     *
-     * @param declaringTypeMembers the type declaring the fields to populate
-     * @param fieldLookup retrieval function for getter targeted fields from {@code declaringTypeMembers}
-     * @param collectedProperties collected fields and methods for which sub schemas should be added
-     * @param requiredProperties set of properties value required
-     */
-    private void collectFields(ResolvedTypeWithMembers declaringTypeMembers, Function<ResolvedTypeWithMembers, ResolvedField[]> fieldLookup,
-            Map<String, MemberScope<?, ?>> collectedProperties, Set<String> requiredProperties) {
-        Stream.of(fieldLookup.apply(declaringTypeMembers))
-                .map(declaredField -> this.typeContext.createFieldScope(declaredField, declaringTypeMembers))
-                .filter(fieldScope -> !this.generatorConfig.shouldIgnore(fieldScope))
-                .forEach(fieldScope -> this.collectField(fieldScope, collectedProperties, requiredProperties));
-    }
-
-    /**
-     * Preparation Step: add the designated methods to the specified {@link Map}.
-     *
-     * @param declaringTypeMembers the type declaring the methods to populate
-     * @param methodLookup retrieval function for getter targeted methods from {@code declaringTypeMembers}
-     * @param collectedProperties collected fields and methods for which sub schemas should be added
-     * @param requiredProperties set of properties value required
-     */
-    private void collectMethods(ResolvedTypeWithMembers declaringTypeMembers, Function<ResolvedTypeWithMembers, ResolvedMethod[]> methodLookup,
-            Map<String, MemberScope<?, ?>> collectedProperties, Set<String> requiredProperties) {
-        Stream.of(methodLookup.apply(declaringTypeMembers))
-                .map(declaredMethod -> this.typeContext.createMethodScope(declaredMethod, declaringTypeMembers))
-                .filter(methodScope -> !this.generatorConfig.shouldIgnore(methodScope))
-                .forEach(methodScope -> this.collectMethod(methodScope, collectedProperties, requiredProperties));
-    }
-
-    /**
-     * Preparation Step: add the given field to the specified {@link Map}.
-     *
-     * @param field declared field that should be added
-     * @param collectedProperties collection of fields/methods to be added as properties
-     * @param requiredProperties set of required properties
-     */
-    private void collectField(FieldScope field, Map<String, MemberScope<?, ?>> collectedProperties, Set<String> requiredProperties) {
-        final FieldScope fieldWithNameOverride;
-        final String propertyName;
-        if (field.isFakeContainerItemScope()) {
-            fieldWithNameOverride = field;
-            propertyName = field.getSchemaPropertyName();
-        } else {
-            String propertyNameOverride = this.generatorConfig.resolvePropertyNameOverride(field);
-            fieldWithNameOverride = propertyNameOverride == null ? field : field.withOverriddenName(propertyNameOverride);
-            propertyName = fieldWithNameOverride.getSchemaPropertyName();
-            if (this.generatorConfig.isRequired(field)) {
-                requiredProperties.add(propertyName);
-            }
-            if (collectedProperties.containsKey(propertyName)) {
-                logger.debug("ignoring overridden {}.{}", fieldWithNameOverride.getDeclaringType(), fieldWithNameOverride.getDeclaredName());
-                return;
-            }
-        }
-        collectedProperties.put(propertyName, fieldWithNameOverride);
     }
 
     /**
@@ -618,7 +504,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @param field field/property to populate the schema node for
      * @return schema node representing the given field/property
      */
-    private ObjectNode populateFieldSchema(FieldScope field) {
+    private JsonNode populateFieldSchema(FieldScope field) {
         List<ResolvedType> typeOverrides = this.generatorConfig.resolveTargetTypeOverrides(field);
         if (typeOverrides == null && this.generatorConfig.shouldTransparentlyResolveSubtypesOfMembers()) {
             typeOverrides = this.generatorConfig.resolveSubtypes(field.getType(), this);
@@ -638,15 +524,20 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         if (fieldOptions.size() == 1) {
             return this.createFieldSchema(new MemberDetails<>(fieldOptions.get(0), isNullable, false, null));
         }
+        return this.createMemberSchemaWithMultipleOptions(fieldOptions, isNullable, this::createFieldSchema);
+    }
+
+    private <M extends MemberScope<?, ?>> JsonNode createMemberSchemaWithMultipleOptions(List<M> memberOptions, boolean isNullable,
+            Function<MemberDetails<M>, JsonNode> createMemberSchema) {
         ObjectNode subSchema = this.generatorConfig.createObjectNode();
         ArrayNode anyOfArray = subSchema.withArray(this.getKeyword(SchemaKeyword.TAG_ANYOF));
         if (isNullable) {
             anyOfArray.addObject()
                     .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
         }
-        fieldOptions.stream()
+        memberOptions.stream()
                 .map(option -> new MemberDetails<>(option, false, false, null))
-                .map(this::createFieldSchema)
+                .map(createMemberSchema)
                 .forEach(anyOfArray::add);
         return subSchema;
     }
@@ -662,34 +553,6 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         ObjectNode fieldAttributes = AttributeCollector.collectFieldAttributes(fieldDetails.getScope(), this);
         this.populateMemberSchema(subSchema, fieldDetails, fieldAttributes);
         return subSchema;
-    }
-
-    /**
-     * Preparation Step: add the given method to the specified {@link Map}.
-     *
-     * @param method declared method that should be added to the specified node
-     * @param collectedProperties collection of fields/methods to be added as properties
-     * @param requiredProperties set of properties value required
-     */
-    private void collectMethod(MethodScope method, Map<String, MemberScope<?, ?>> collectedProperties, Set<String> requiredProperties) {
-        final MethodScope methodWithNameOverride;
-        final String propertyName;
-        if (method.isFakeContainerItemScope()) {
-            methodWithNameOverride = method;
-            propertyName = method.getSchemaPropertyName();
-        } else {
-            String propertyNameOverride = this.generatorConfig.resolvePropertyNameOverride(method);
-            methodWithNameOverride = propertyNameOverride == null ? method : method.withOverriddenName(propertyNameOverride);
-            propertyName = methodWithNameOverride.getSchemaPropertyName();
-            if (this.generatorConfig.isRequired(method)) {
-                requiredProperties.add(propertyName);
-            }
-            if (collectedProperties.containsKey(propertyName)) {
-                logger.debug("ignoring overridden {}.{}", methodWithNameOverride.getDeclaringType(), methodWithNameOverride.getDeclaredName());
-                return;
-            }
-        }
-        collectedProperties.put(propertyName, methodWithNameOverride);
     }
 
     /**
@@ -718,18 +581,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         if (methodOptions.size() == 1) {
             return this.createMethodSchema(new MemberDetails<>(methodOptions.get(0), isNullable, false, null));
         }
-        ObjectNode subSchema = this.generatorConfig.createObjectNode();
-        ArrayNode anyOfArray = subSchema.withArray(this.getKeyword(SchemaKeyword.TAG_ANYOF));
-        if (isNullable) {
-            anyOfArray.add(this.generatorConfig.createObjectNode()
-                    .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL)));
-        }
-        methodOptions
-                .stream()
-                .map(option -> new MemberDetails<>(option, false, false, null))
-                .map(this::createMethodSchema)
-                .forEach(anyOfArray::add);
-        return subSchema;
+        return this.createMemberSchemaWithMultipleOptions(methodOptions, isNullable, this::createMethodSchema);
     }
 
     /**
@@ -756,7 +608,6 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @param memberDetails details for field/method to populate schema for
      * @param collectedMemberAttributes separately collected attribute for the field/method in their respective declaring type
      * @see #populateFieldSchema(FieldScope)
-     * @see #collectMethod(MethodScope, Map, Set)
      */
     private <M extends MemberScope<?, ?>> void populateMemberSchema(ObjectNode targetNode, MemberDetails<M> memberDetails,
             ObjectNode collectedMemberAttributes) {
