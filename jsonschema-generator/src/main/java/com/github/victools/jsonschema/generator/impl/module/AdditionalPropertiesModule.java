@@ -64,14 +64,9 @@ public class AdditionalPropertiesModule implements Module {
         if (valueType == null || valueType.getErasedType() == Object.class) {
             return null;
         }
-        MemberScope<?, ?> mapValueScope = member.asFakeContainerItemScope(Map.class, 1);
-        if (mapValueScope instanceof FieldScope) {
-            return context.createStandardDefinitionReference((FieldScope) mapValueScope, null);
-        }
-        if (mapValueScope instanceof MethodScope) {
-            return context.createStandardDefinitionReference((MethodScope) mapValueScope, null);
-        }
-        throw new IllegalStateException("Unsupported member scope type: " + member.getClass());
+        return member.getContext().performActionOnMember(member.asFakeContainerItemScope(Map.class, 1),
+                field -> context.createStandardDefinitionReference(field, null),
+                method -> context.createStandardDefinitionReference(method, null));
     }
 
     /**

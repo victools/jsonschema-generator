@@ -35,21 +35,25 @@ public class ConstantValueModule implements Module {
      * @return collection containing single constant value; returning null if field has no constant value
      */
     private static List<?> extractConstantFieldValue(FieldScope field) {
-        if (field.isStatic() && field.isFinal() && !field.getRawMember().isEnumConstant() && !field.isFakeContainerItemScope()) {
-            Field rawField = field.getRawMember();
-            try {
-                return Collections.singletonList(rawField.get(null));
-            } catch (IllegalAccessException ex) {
-                // let's try to make it accessible then
-            }
-            try {
-                rawField.setAccessible(true);
-                return Collections.singletonList(rawField.get(null));
-            } catch (SecurityException | IllegalAccessException ex) {
-                // if the field cannot be accessed, we just can't extract any constant value
-            }
+        if (!field.isStatic() || !field.isFinal()) {
+            return null;
         }
-        return null;
+        if (field.isFakeContainerItemScope() || field.getRawMember().isEnumConstant()) {
+            return null;
+        }
+        Field rawField = field.getRawMember();
+        try {
+            return Collections.singletonList(rawField.get(null));
+        } catch (IllegalAccessException ex) {
+            // let's try to make it accessible then
+        }
+        try {
+            rawField.setAccessible(true);
+            return Collections.singletonList(rawField.get(null));
+        } catch (SecurityException | IllegalAccessException ex) {
+            // if the field cannot be accessed, we just can't extract any constant value
+            return null;
+        }
     }
 
     /**

@@ -126,7 +126,8 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
         possibleGetterNames.add("get" + capitalisedFieldName);
         possibleGetterNames.add("is" + capitalisedFieldName);
         // @since 4.32.0 - for a field like "isBool" also consider "isBool()" as potential getter method
-        if (declaredName.startsWith("is") && declaredName.length() > 2 && Character.isUpperCase(declaredName.charAt(2))) {
+        boolean fieldNameStartsWithIs = declaredName.startsWith("is") && declaredName.length() > 2 && Character.isUpperCase(declaredName.charAt(2));
+        if (fieldNameStartsWithIs) {
             possibleGetterNames.add(declaredName);
         }
         ResolvedMethod[] methods = this.getDeclaringTypeMembers().getMemberMethods();
