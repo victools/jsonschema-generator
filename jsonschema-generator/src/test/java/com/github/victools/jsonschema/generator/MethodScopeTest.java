@@ -27,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 
 /**
  * Test for the {@link MethodScope} class.
@@ -116,6 +117,25 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
         }
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "getCalculatedValue, false, getCalculatedValue()",
+        "isBehavingSomehow, false, isBehavingSomehow()",
+        "getxIndex, false, getxIndex()",
+        "isURL, false, isURL()",
+        "getCalculatedValue, true, calculatedValue",
+        "isBehavingSomehow, true, behavingSomehow",
+        "getxIndex, true, xIndex",
+        "isURL, true, URL",
+    })
+    public void testGetSchemaPropertyName(String methodName, boolean deriveFieldNameFromArgumentFreeMethod, String expectedPropertyName) {
+        MethodScope method = this.getTestClassMethod(methodName);
+        Mockito.when(this.getContext().getTypeContext().isDerivingFieldsFromArgumentFreeMethods())
+                .thenReturn(deriveFieldNameFromArgumentFreeMethod);
+
+        Assertions.assertEquals(expectedPropertyName, method.getSchemaPropertyName());
+    }
+
     private static class TestClass {
 
         private int fieldWithPrivateGetter;
@@ -174,6 +194,14 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
         }
 
         public boolean is() {
+            return false;
+        }
+
+        public int getxIndex() {
+            return 1;
+        }
+
+        public boolean isURL() {
             return false;
         }
 

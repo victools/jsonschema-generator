@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Changed
 - include new `Option.STANDARD_FORMATS` in `OptionPreset.PLAIN_JSON` by default
 
+#### Fixed
+- when using `Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS` on a method where the second character of the derived field name is in uppercase, don't capitalise the first character
+
 ## [4.32.0] - 2023-10-27
 ### `jsonschema-generator`
 #### Added

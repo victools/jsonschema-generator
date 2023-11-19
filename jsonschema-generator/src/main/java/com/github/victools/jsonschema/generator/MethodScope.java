@@ -24,8 +24,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -240,21 +240,36 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
      */
     @Override
     protected String doGetSchemaPropertyName() {
-        String result = this.getName();
+        String result;
         if (!this.getContext().isDerivingFieldsFromArgumentFreeMethods() || this.getArgumentCount() > 0) {
-            result += this.getArgumentTypes().stream()
+            result = this.getName() + this.getArgumentTypes().stream()
                     .map(this.getContext()::getMethodPropertyArgumentTypeDescription)
                     .collect(Collectors.joining(", ", "(", ")"));
         } else if (this.getOverriddenName() == null) {
-            // remove the "get"/"is" prefix from non-overridden method names
-            if (result.startsWith("get") && result.length() > 3) {
-                result = Character.toLowerCase(result.charAt(3)) + result.substring(4);
-            } else if (result.startsWith("is") && result.length() > 2) {
-                result = Character.toLowerCase(result.charAt(2)) + result.substring(3);
-            } else {
-                result += "()";
-            }
+            result = this.deriveFieldName();
+        } else {
+            result = this.getName();
         }
         return result;
+    }
+
+    private String deriveFieldName() {
+        String methodName = this.getDeclaredName();
+        // remove the "get"/"is" prefix from non-overridden method names
+        Optional<String> possibleFieldName = Stream.of("get", "is")
+                .filter(methodName::startsWith)
+                .map(prefix -> methodName.substring(prefix.length()))
+                .filter(name -> !name.isEmpty())
+                .findFirst();
+        if (!possibleFieldName.isPresent()) {
+            return methodName + "()";
+        }
+        String methodNameWithoutPrefix = possibleFieldName.get();
+        if (Character.isUpperCase(methodNameWithoutPrefix.charAt(1))) {
+            // since 4.33.0 according to the Java Beans specification, if the second character is uppercase the first should remain as-is
+            // e.g., getxIndex() corresponds to "xIndex" and isURL() to "URL"
+            return methodNameWithoutPrefix;
+        }
+        return Character.toLowerCase(methodNameWithoutPrefix.charAt(0)) + methodNameWithoutPrefix.substring(1);
     }
 }
