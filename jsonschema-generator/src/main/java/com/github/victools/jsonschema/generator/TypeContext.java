@@ -152,9 +152,24 @@ public class TypeContext {
      * @param field targeted field
      * @param declaringTypeMembers collection of the declaring type's (other) fields and methods
      * @return created {@link FieldScope} instance
+     * @deprecated use {@link #createFieldScope(ResolvedField, MemberScope.DeclarationDetails)} instead
      */
+    @Deprecated
     public FieldScope createFieldScope(ResolvedField field, ResolvedTypeWithMembers declaringTypeMembers) {
-        return new FieldScope(field, declaringTypeMembers, this);
+        return this.createFieldScope(field, new MemberScope.DeclarationDetails(field.getDeclaringType(), declaringTypeMembers));
+    }
+
+    /**
+     * Construct a {@link FieldScope} instance for the given field.
+     *
+     * @param field targeted field
+     * @param declarationDetails context of declaration
+     * @return created {@link FieldScope} instance
+     *
+     * @since 4.33.0
+     */
+    public FieldScope createFieldScope(ResolvedField field, MemberScope.DeclarationDetails declarationDetails) {
+        return new FieldScope(field, declarationDetails, null, this);
     }
 
     /**
@@ -163,9 +178,24 @@ public class TypeContext {
      * @param method targeted method
      * @param declaringTypeMembers collection of the declaring type's fields and (other) methods
      * @return created {@link MethodScope} instance
+     * @deprecated use {@link #createMethodScope(ResolvedMethod, MemberScope.DeclarationDetails)} instead
      */
+    @Deprecated
     public MethodScope createMethodScope(ResolvedMethod method, ResolvedTypeWithMembers declaringTypeMembers) {
-        return new MethodScope(method, declaringTypeMembers, this);
+        return this.createMethodScope(method, new MemberScope.DeclarationDetails(method.getDeclaringType(), declaringTypeMembers));
+    }
+
+    /**
+     * Construct a {@link MethodScope} instance for the given method.
+     *
+     * @param method targeted method
+     * @param declarationDetails context of declaration
+     * @return created {@link MethodScope} instance
+     *
+     * @since 4.33.0
+     */
+    public MethodScope createMethodScope(ResolvedMethod method, MemberScope.DeclarationDetails declarationDetails) {
+        return new MethodScope(method, declarationDetails, null, this);
     }
 
     /**
