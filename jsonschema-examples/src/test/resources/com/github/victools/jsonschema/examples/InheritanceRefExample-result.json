@@ -1,0 +1,56 @@
+{
+    "$schema" : "https://json-schema.org/draft/2020-12/schema",
+    "$defs" : {
+        "Book" : {
+            "type" : "object",
+            "properties" : {
+                "pageCount" : {
+                    "type" : "integer"
+                }
+            },
+            "$ref" : "#/$defs/PrintPublication"
+        },
+        "Poster" : {
+            "type" : "object",
+            "properties" : {
+                "forMovie" : {
+                    "type" : "boolean"
+                }
+            },
+            "$ref" : "#/$defs/PrintPublication"
+        },
+        "PrintPublication" : {
+            "type" : "object",
+            "properties" : {
+                "author" : {
+                    "type" : "string"
+                },
+                "publisher" : {
+                    "type" : "string"
+                }
+            },
+            "$ref" : "#/$defs/Publication"
+        },
+        "Publication" : {
+            "type" : "object",
+            "properties" : {
+                "published" : {
+                    "type" : "string",
+                    "format" : "date"
+                },
+                "title" : {
+                    "type" : "string"
+                }
+            }
+        }
+    },
+    "type" : "object",
+    "properties" : {
+        "favoriteBook" : {
+            "$ref" : "#/$defs/Book"
+        },
+        "favoritePoster" : {
+            "$ref" : "#/$defs/Poster"
+        }
+    }
+}
