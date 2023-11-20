@@ -91,9 +91,10 @@ class MemberCollectionContextImpl {
     public void collectProperties() {
         logger.debug("collecting non-static fields and methods from {}", this.schemaTargetType);
         ResolvedTypeWithMembers typeToCollectMembersFrom = this.typeContext.resolveWithMembers(this.schemaTargetType);
+        MemberScope.DeclarationDetails declarationDetails = new MemberScope.DeclarationDetails(this.schemaTargetType, typeToCollectMembersFrom);
         // member fields and methods are being collected from the targeted type as well as its super types
-        this.collectFields(typeToCollectMembersFrom.getMemberFields(), typeToCollectMembersFrom);
-        this.collectMethods(typeToCollectMembersFrom.getMemberMethods(), typeToCollectMembersFrom);
+        this.collectFields(typeToCollectMembersFrom.getMemberFields(), declarationDetails);
+        this.collectMethods(typeToCollectMembersFrom.getMemberMethods(), declarationDetails);
 
         if (this.generatorConfig.shouldIncludeStaticFields() || this.generatorConfig.shouldIncludeStaticMethods()) {
             // static fields and methods are being collected only for the targeted type itself, i.e. need to iterate over super types specifically
@@ -108,23 +109,24 @@ class MemberCollectionContextImpl {
         logger.debug("collecting static fields and methods from {}", hierarchyType);
         // static members need to be looked up from the declaring type directly as they are not inherited as such
         ResolvedTypeWithMembers hierarchyTypeWithMembers = this.typeContext.resolveWithMembers(hierarchyType);
+        MemberScope.DeclarationDetails declarationDetails = new MemberScope.DeclarationDetails(this.schemaTargetType, hierarchyTypeWithMembers);
         if (this.generatorConfig.shouldIncludeStaticFields()) {
-            this.collectFields(hierarchyTypeWithMembers.getStaticFields(), hierarchyTypeWithMembers);
+            this.collectFields(hierarchyTypeWithMembers.getStaticFields(), declarationDetails);
         }
         if (this.generatorConfig.shouldIncludeStaticMethods()) {
-            this.collectMethods(hierarchyTypeWithMembers.getStaticMethods(), hierarchyTypeWithMembers);
+            this.collectMethods(hierarchyTypeWithMembers.getStaticMethods(), declarationDetails);
         }
     }
 
     /**
      * Preparation Step: collect the designated fields.
      *
-     * @param fields targeted fields from {@code typeToCollectMembersFrom}
-     * @param typeToCollectMembersFrom specific container of given fields (possibly a supertype or interface of the targeted type)
+     * @param fields targeted fields
+     * @param declarationDetails common declaration context for all given fields
      */
-    private void collectFields(ResolvedField[] fields, ResolvedTypeWithMembers typeToCollectMembersFrom) {
+    private void collectFields(ResolvedField[] fields, MemberScope.DeclarationDetails declarationDetails) {
         Stream.of(fields)
-                .map(declaredField -> this.typeContext.createFieldScope(declaredField, typeToCollectMembersFrom))
+                .map(declaredField -> this.typeContext.createFieldScope(declaredField, declarationDetails))
                 .filter(fieldScope -> !this.generatorConfig.shouldIgnore(fieldScope))
                 .forEach(this::collect);
     }
@@ -132,12 +134,12 @@ class MemberCollectionContextImpl {
     /**
      * Preparation Step: collect the designated methods.
      *
-     * @param methods targeted methods from {@code typeToCollectMembersFrom}
-     * @param typeToCollectMembersFrom specific container of given fields (possibly a supertype or interface of the targeted type)
+     * @param methods targeted methods
+     * @param declarationDetails common declaration context for all given methods
      */
-    private void collectMethods(ResolvedMethod[] methods, ResolvedTypeWithMembers typeToCollectMembersFrom) {
+    private void collectMethods(ResolvedMethod[] methods, MemberScope.DeclarationDetails declarationDetails) {
         Stream.of(methods)
-                .map(declaredMethod -> this.typeContext.createMethodScope(declaredMethod, typeToCollectMembersFrom))
+                .map(declaredMethod -> this.typeContext.createMethodScope(declaredMethod, declarationDetails))
                 .filter(methodScope -> !this.generatorConfig.shouldIgnore(methodScope))
                 .forEach(this::collect);
     }

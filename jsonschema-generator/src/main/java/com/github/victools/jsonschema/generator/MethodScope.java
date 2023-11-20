@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedMethod;
 import com.github.victools.jsonschema.generator.impl.LazyValue;
 import java.lang.annotation.Annotation;
@@ -43,38 +42,24 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
      * Constructor.
      *
      * @param method targeted method
-     * @param declaringTypeMembers collection of the declaring type's fields and (other) methods
+     * @param declarationDetails basic details regarding the declaration context
+     * @param overrideDetails augmenting details (e.g., overridden type, name, or container item index)
      * @param context the overall type resolution context
      */
-    protected MethodScope(ResolvedMethod method, ResolvedTypeWithMembers declaringTypeMembers, TypeContext context) {
-        this(method, null, null, declaringTypeMembers, null, context);
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param method targeted method
-     * @param overriddenType alternative type for this method's return value
-     * @param overriddenName alternative name for this method
-     * @param declaringTypeMembers collection of the declaring type's fields and (other) methods
-     * @param fakeContainerItemIndex index of the container item on the generic field/method scope's declared type (e.g., in case of a List, it is 0)
-     * @param context the overall type resolution context
-     */
-    protected MethodScope(ResolvedMethod method, ResolvedType overriddenType, String overriddenName,
-            ResolvedTypeWithMembers declaringTypeMembers, Integer fakeContainerItemIndex, TypeContext context) {
-        super(method, overriddenType, overriddenName, declaringTypeMembers, fakeContainerItemIndex, context);
+    protected MethodScope(ResolvedMethod method, DeclarationDetails declarationDetails, OverrideDetails overrideDetails, TypeContext context) {
+        super(method, declarationDetails, overrideDetails, context);
     }
 
     @Override
     public MethodScope withOverriddenType(ResolvedType overriddenType) {
-        return new MethodScope(this.getMember(), overriddenType, this.getOverriddenName(), this.getDeclaringTypeMembers(),
-                this.getFakeContainerItemIndex(), this.getContext());
+        OverrideDetails overrideDetails = new OverrideDetails(overriddenType, this.getOverriddenName(), this.getFakeContainerItemIndex());
+        return new MethodScope(this.getMember(), this.getDeclarationDetails(), overrideDetails, this.getContext());
     }
 
     @Override
     public MethodScope withOverriddenName(String overriddenName) {
-        return new MethodScope(this.getMember(), this.getOverriddenType(), overriddenName, this.getDeclaringTypeMembers(),
-                this.getFakeContainerItemIndex(), this.getContext());
+        OverrideDetails overrideDetails = new OverrideDetails(this.getOverriddenType(), overriddenName, this.getFakeContainerItemIndex());
+        return new MethodScope(this.getMember(), this.getDeclarationDetails(), overrideDetails, this.getContext());
     }
 
     @Override
@@ -147,7 +132,7 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
         return Stream.of(this.getDeclaringTypeMembers().getMemberFields())
                 .filter(memberField -> possibleFieldNames.contains(memberField.getName()))
                 .findFirst()
-                .map(field -> this.getContext().createFieldScope(field, this.getDeclaringTypeMembers()))
+                .map(field -> this.getContext().createFieldScope(field, this.getDeclarationDetails()))
                 .orElse(null);
     }
 

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Changed
 - include new `Option.STANDARD_FORMATS` in `OptionPreset.PLAIN_JSON` by default
+- extended parameters for creation of `FieldScope`/`MethodScope` through the `TypeContext` to include type for which a schema is being generated
 
 #### Fixed
 - when using `Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS` on a method where the second character of the derived field name is in uppercase, don't capitalise the first character

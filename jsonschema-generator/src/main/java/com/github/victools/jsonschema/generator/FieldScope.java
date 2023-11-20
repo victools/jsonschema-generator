@@ -40,38 +40,24 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
      * Constructor.
      *
      * @param field targeted field
-     * @param declaringTypeMembers collection of the declaring type's (other) fields and methods
+     * @param declarationDetails basic details regarding the declaration context
+     * @param overrideDetails augmenting details (e.g., overridden type, name, or container item index)
      * @param context the overall type resolution context
      */
-    protected FieldScope(ResolvedField field, ResolvedTypeWithMembers declaringTypeMembers, TypeContext context) {
-        this(field, null, null, declaringTypeMembers, null, context);
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param field targeted field
-     * @param overriddenType alternative type for this field
-     * @param overriddenName alternative name for this field
-     * @param declaringTypeMembers collection of the declaring type's (other) fields and methods
-     * @param fakeContainerItemIndex index of the container item on the generic field/method scope's declared type (e.g., in case of a List, it is 0)
-     * @param context the overall type resolution context
-     */
-    protected FieldScope(ResolvedField field, ResolvedType overriddenType, String overriddenName,
-            ResolvedTypeWithMembers declaringTypeMembers, Integer fakeContainerItemIndex, TypeContext context) {
-        super(field, overriddenType, overriddenName, declaringTypeMembers, fakeContainerItemIndex, context);
+    protected FieldScope(ResolvedField field, DeclarationDetails declarationDetails, OverrideDetails overrideDetails, TypeContext context) {
+        super(field, declarationDetails, overrideDetails, context);
     }
 
     @Override
     public FieldScope withOverriddenType(ResolvedType overriddenType) {
-        return new FieldScope(this.getMember(), overriddenType, this.getOverriddenName(), this.getDeclaringTypeMembers(),
-                this.getFakeContainerItemIndex(), this.getContext());
+        OverrideDetails overrideDetails = new OverrideDetails(overriddenType, this.getOverriddenName(), this.getFakeContainerItemIndex());
+        return new FieldScope(this.getMember(), this.getDeclarationDetails(), overrideDetails, this.getContext());
     }
 
     @Override
     public FieldScope withOverriddenName(String overriddenName) {
-        return new FieldScope(this.getMember(), this.getOverriddenType(), overriddenName, this.getDeclaringTypeMembers(),
-                this.getFakeContainerItemIndex(), this.getContext());
+        OverrideDetails overrideDetails = new OverrideDetails(this.getOverriddenType(), overriddenName, this.getFakeContainerItemIndex());
+        return new FieldScope(this.getMember(), this.getDeclarationDetails(), overrideDetails, this.getContext());
     }
 
     @Override
@@ -135,7 +121,7 @@ public class FieldScope extends MemberScope<ResolvedField, Field> {
                 .filter(method -> method.isPublic() && method.getRawMember().getParameterCount() == 0)
                 .filter(method -> possibleGetterNames.contains(method.getName()))
                 .findFirst()
-                .map(method -> this.getContext().createMethodScope(method, this.getDeclaringTypeMembers()))
+                .map(method -> this.getContext().createMethodScope(method, this.getDeclarationDetails()))
                 .orElse(null);
     }
 

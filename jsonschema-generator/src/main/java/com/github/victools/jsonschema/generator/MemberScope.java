@@ -37,9 +37,9 @@ import java.util.function.Predicate;
 public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member> extends TypeScope {
 
     private final M member;
+    private final DeclarationDetails declarationDetails;
     private final ResolvedType overriddenType;
     private final String overriddenName;
-    private final ResolvedTypeWithMembers declaringTypeMembers;
     private Integer fakeContainerItemIndex;
     private final LazyValue<String> schemaPropertyName = new LazyValue<>(this::doGetSchemaPropertyName);
 
@@ -47,20 +47,17 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
      * Constructor.
      *
      * @param member targeted field or method
-     * @param overriddenType alternative type for this field or method's return value
-     * @param overriddenName alternative name for this field or method
-     * @param declaringTypeMembers collection of the declaring type's (other) fields and methods
-     * @param fakeContainerItemIndex index of the container item on the generic field/method scope's declared type (e.g., in case of a List, it is 0)
+     * @param declarationDetails basic details regarding the declaration context
+     * @param overrideDetails augmenting details (e.g., overridden type, name, or container item index)
      * @param context the overall type resolution context
      */
-    protected MemberScope(M member, ResolvedType overriddenType, String overriddenName,
-            ResolvedTypeWithMembers declaringTypeMembers, Integer fakeContainerItemIndex, TypeContext context) {
-        super(Optional.ofNullable(overriddenType).orElseGet(member::getType), context);
+    protected MemberScope(M member, DeclarationDetails declarationDetails, OverrideDetails overrideDetails, TypeContext context) {
+        super(Optional.ofNullable(OverrideDetails.getOverriddenType(overrideDetails)).orElseGet(member::getType), context);
         this.member = member;
-        this.overriddenType = overriddenType;
-        this.overriddenName = overriddenName;
-        this.declaringTypeMembers = declaringTypeMembers;
-        this.fakeContainerItemIndex = fakeContainerItemIndex;
+        this.declarationDetails = declarationDetails;
+        this.overriddenType = OverrideDetails.getOverriddenType(overrideDetails);
+        this.overriddenName = OverrideDetails.getOverriddenName(overrideDetails);
+        this.fakeContainerItemIndex = OverrideDetails.getFakeContainerItemIndex(overrideDetails);
     }
 
     /**
@@ -136,12 +133,21 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
     }
 
     /**
+     * Getter for additional declaration context information.
+     *
+     * @return wrapper for the schema target type and declaring type's field and methods
+     */
+    public DeclarationDetails getDeclarationDetails() {
+        return this.declarationDetails;
+    }
+
+    /**
      * Getter for the collection of the member's declaring type's (other) fields and methods.
      *
      * @return declaring type's fields and methods
      */
     public ResolvedTypeWithMembers getDeclaringTypeMembers() {
-        return this.declaringTypeMembers;
+        return this.declarationDetails.getDeclaringTypeMembers();
     }
 
     /**
@@ -474,5 +480,65 @@ public abstract class MemberScope<M extends ResolvedMember<T>, T extends Member>
     @Override
     public String toString() {
         return this.getSimpleTypeDescription() + " " + this.getSchemaPropertyName();
+    }
+
+    public static class DeclarationDetails {
+        private final ResolvedType schemaTargetType;
+        private final ResolvedTypeWithMembers declaringTypeMembers;
+
+        public DeclarationDetails(ResolvedType schemaTargetType, ResolvedTypeWithMembers declaringTypeMembers) {
+            this.schemaTargetType = schemaTargetType;
+            this.declaringTypeMembers = declaringTypeMembers;
+        }
+
+        /**
+         * Getter for the specific type for which a schema is being generated, that includes this field/method. This can differ from the wrapped
+         * member's declaring type, if that declaring type is an implemented interface or super type of the targeted one.
+         *
+         * @return target type for which a schema is being generated including this field/method
+         */
+        public ResolvedType getSchemaTargetType() {
+            return this.schemaTargetType;
+        }
+
+        /**
+         * Getter for the collection of the member's declaring type's (other) fields and methods.
+         *
+         * @return declaring type's fields and methods
+         */
+        public ResolvedTypeWithMembers getDeclaringTypeMembers() {
+            return this.declaringTypeMembers;
+        }
+    }
+
+    static class OverrideDetails {
+        private final ResolvedType overriddenType;
+        private final String overriddenName;
+        private final Integer fakeContainerItemIndex;
+
+        /**
+         * Constructor.
+         *
+         * @param overriddenType alternative type for this field or method's return value
+         * @param overriddenName alternative name for this field or method
+         * @param fakeContainerItemIndex index of the container item on the generic field/method's declared type (e.g., in case of a List, it is 0)
+         */
+        OverrideDetails(ResolvedType overriddenType, String overriddenName, Integer fakeContainerItemIndex) {
+            this.overriddenType = overriddenType;
+            this.overriddenName = overriddenName;
+            this.fakeContainerItemIndex = fakeContainerItemIndex;
+        }
+
+        private static ResolvedType getOverriddenType(OverrideDetails details) {
+            return details == null ? null : details.overriddenType;
+        }
+
+        private static String getOverriddenName(OverrideDetails details) {
+            return details == null ? null : details.overriddenName;
+        }
+
+        private static Integer getFakeContainerItemIndex(OverrideDetails details) {
+            return details == null ? null : details.fakeContainerItemIndex;
+        }
     }
 }
