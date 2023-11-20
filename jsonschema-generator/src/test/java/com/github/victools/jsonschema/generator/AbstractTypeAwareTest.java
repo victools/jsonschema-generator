@@ -33,7 +33,7 @@ public class AbstractTypeAwareTest {
 
     private final Class<?> testClass;
     private SchemaGenerationContext context;
-    private ResolvedTypeWithMembers testClassMembers;
+    private MemberScope.DeclarationDetails declarationDetails;
 
     protected AbstractTypeAwareTest(Class<?> testClass) {
         this.testClass = testClass;
@@ -47,7 +47,7 @@ public class AbstractTypeAwareTest {
     protected void prepareContextForVersion(SchemaVersion schemaVersion) {
         TypeContext typeContext = Mockito.spy(TypeContextFactory.createDefaultTypeContext());
         ResolvedType resolvedTestClass = typeContext.resolve(this.testClass);
-        this.testClassMembers = typeContext.resolveWithMembers(resolvedTestClass);
+        this.declarationDetails = new MemberScope.DeclarationDetails(resolvedTestClass, typeContext.resolveWithMembers(resolvedTestClass));
         this.context = Mockito.mock(SchemaGenerationContext.class, Mockito.RETURNS_DEEP_STUBS);
         Mockito.when(this.context.getTypeContext()).thenReturn(typeContext);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -66,26 +66,26 @@ public class AbstractTypeAwareTest {
     }
 
     protected FieldScope getTestClassField(String fieldName) {
-        ResolvedField resolvedField = Stream.of(this.testClassMembers.getMemberFields())
+        ResolvedField resolvedField = Stream.of(this.declarationDetails.getDeclaringTypeMembers().getMemberFields())
                 .filter(field -> fieldName.equals(field.getName()))
                 .findAny()
                 .orElseGet(
-                        () -> Stream.of(this.testClassMembers.getStaticFields())
+                        () -> Stream.of(this.declarationDetails.getDeclaringTypeMembers().getStaticFields())
                                 .filter(field -> fieldName.equals(field.getName()))
                                 .findAny()
                                 .get());
-        return this.context.getTypeContext().createFieldScope(resolvedField, this.testClassMembers);
+        return this.context.getTypeContext().createFieldScope(resolvedField, this.declarationDetails);
     }
 
     protected MethodScope getTestClassMethod(String methodName) {
-        ResolvedMethod resolvedMethod = Stream.of(this.testClassMembers.getMemberMethods())
+        ResolvedMethod resolvedMethod = Stream.of(this.declarationDetails.getDeclaringTypeMembers().getMemberMethods())
                 .filter(method -> methodName.equals(method.getName()))
                 .findAny()
                 .orElseGet(
-                        () -> Stream.of(this.testClassMembers.getStaticMethods())
+                        () -> Stream.of(this.declarationDetails.getDeclaringTypeMembers().getStaticMethods())
                                 .filter(method -> methodName.equals(method.getName()))
                                 .findAny()
                                 .get());
-        return this.context.getTypeContext().createMethodScope(resolvedMethod, this.testClassMembers);
+        return this.context.getTypeContext().createMethodScope(resolvedMethod, this.declarationDetails);
     }
 }
