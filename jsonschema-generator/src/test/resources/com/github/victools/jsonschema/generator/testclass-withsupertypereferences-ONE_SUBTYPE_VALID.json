@@ -45,19 +45,29 @@
             },
             "title": "TestSubClass1<String>"
         },
+        "TestSuperClass(Boolean)": {
+            "$ref": "#/definitions/TestSubClass1(Boolean)"
+        },
         "TestSuperClass(Boolean)-nullable": {
-            "anyOf": [{
+            "anyOf": [
+                {
                     "type": "null"
                 }, {
-                    "$ref": "#/definitions/TestSubClass1(Boolean)"
-                }]
+                    "$ref": "#/definitions/TestSuperClass(Boolean)"
+                }
+            ]
+        },
+        "TestSuperClass(String)": {
+            "$ref": "#/definitions/TestSubClass1(String)"
         },
         "TestSuperClass(String)-nullable": {
-            "anyOf": [{
+            "anyOf": [
+                {
                     "type": "null"
                 }, {
-                    "$ref": "#/definitions/TestSubClass1(String)"
-                }]
+                    "$ref": "#/definitions/TestSuperClass(String)"
+                }
+            ]
         }
     },
     "type": "object",
@@ -66,7 +76,8 @@
             "$ref": "#/definitions/TestSuperClass(Boolean)-nullable"
         },
         "numberOrStringObjectField": {
-            "anyOf": [{
+            "anyOf": [
+                {
                     "type": "null"
                 }, {
                     "type": "number",
@@ -74,7 +85,8 @@
                 }, {
                     "type": "string",
                     "title": "String"
-                }]
+                }
+            ]
         },
         "stringSupertypeField": {
             "$ref": "#/definitions/TestSuperClass(String)-nullable"

@@ -68,6 +68,14 @@
                 }
             }
         },
+        "Supplier_Integer_": {
+            "type": "object",
+            "properties": {
+                "get()": {
+                    "type": ["integer", "null"]
+                }
+            }
+        },
         "TestClass1": {
             "type": "object",
             "properties": {
@@ -124,91 +132,66 @@
                 }
             }
         },
+        "TestClass2_TestClass1..._": {
+            "type": "object",
+            "properties": {
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/TestClass1"
+                        }
+                    }
+                },
+                "genericValue": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/TestClass1"
+                    }
+                }
+            }
+        },
+        "TestClass2_TestClass2_String__": {
+            "type": "object",
+            "properties": {
+                "genericArray": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/TestClass2_String_"
+                    }
+                },
+                "genericValue": {
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/TestClass2_String_"
+                        }
+                    ]
+                }
+            }
+        },
         "TestClass3": {
             "type": "object",
             "properties": {
                 "class4": {
-                    "type": ["object", "null"],
-                    "properties": {
-                        "DEFAULT_ROUNDING_MODE": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/RoundingMode"
-                                }, {
-                                    "const": "HALF_UP"
-                                }
-                            ]
-                        },
-                        "class2OfClass2OfT": {
-                            "type": ["object", "null"],
-                            "properties": {
-                                "genericArray": {
-                                    "type": ["array", "null"],
-                                    "items": {
-                                        "$ref": "#/definitions/TestClass2_String_"
-                                    }
-                                },
-                                "genericValue": {
-                                    "anyOf": [
-                                        {
-                                            "type": "null"
-                                        }, {
-                                            "$ref": "#/definitions/TestClass2_String_"
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        "listOfOptionalS": {
-                            "type": ["array", "null"],
-                            "items": {
-                                "$ref": "#/definitions/Optional_Integer_"
-                            }
-                        },
-                        "optionalS": {
-                            "anyOf": [
-                                {
-                                    "type": "null"
-                                }, {
-                                    "$ref": "#/definitions/Optional_Integer_"
-                                }
-                            ]
-                        },
-                        "setOfStringSupplier": {
-                            "type": ["array", "null"],
-                            "items": {
-                                "$ref": "#/definitions/LazyStringSupplier"
-                            }
-                        },
-                        "supplierS": {
-                            "type": ["object", "null"],
-                            "properties": {
-                                "get()": {
-                                    "type": ["integer", "null"]
-                                }
-                            }
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/TestClass4_Integer.String_"
                         }
-                    }
+                    ]
                 },
                 "nestedClass1Array": {
-                    "type": ["object", "null"],
-                    "properties": {
-                        "genericArray": {
-                            "type": ["array", "null"],
-                            "items": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/TestClass1"
-                                }
-                            }
-                        },
-                        "genericValue": {
-                            "type": ["array", "null"],
-                            "items": {
-                                "$ref": "#/definitions/TestClass1"
-                            }
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/TestClass2_TestClass1..._"
                         }
-                    }
+                    ]
                 },
                 "nestedLong": {
                     "anyOf": [
@@ -224,6 +207,59 @@
                     "items": {
                         "$ref": "#/definitions/TestClass2_Long_"
                     }
+                }
+            }
+        },
+        "TestClass4_Integer.String_": {
+            "type": "object",
+            "properties": {
+                "DEFAULT_ROUNDING_MODE": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/RoundingMode"
+                        }, {
+                            "const": "HALF_UP"
+                        }
+                    ]
+                },
+                "class2OfClass2OfT": {
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/TestClass2_TestClass2_String__"
+                        }
+                    ]
+                },
+                "listOfOptionalS": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/Optional_Integer_"
+                    }
+                },
+                "optionalS": {
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/Optional_Integer_"
+                        }
+                    ]
+                },
+                "setOfStringSupplier": {
+                    "type": ["array", "null"],
+                    "items": {
+                        "$ref": "#/definitions/LazyStringSupplier"
+                    }
+                },
+                "supplierS": {
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/Supplier_Integer_"
+                        }
+                    ]
                 }
             }
         }

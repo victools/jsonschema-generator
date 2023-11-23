@@ -300,15 +300,14 @@ public class SchemaBuilder {
                 // global setting: always inline schemas by default
                 return false;
             }
-            if (definitionKey.equals(mainSchemaKey)) {
+            if (createDefinitionsForAll || definitionKey.equals(mainSchemaKey)) {
                 return true;
             }
             List<ObjectNode> references = this.generationContext.getReferences(definitionKey);
             if (considerOnlyDirectReferences.get() && references.isEmpty()) {
                 return false;
             }
-            return createDefinitionsForAll
-                    || references.size() > 1
+            return references.size() > 1
                     || (references.size() + this.generationContext.getNullableReferences(definitionKey).size()) > 1;
         };
     }

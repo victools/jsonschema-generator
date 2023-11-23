@@ -1,15 +1,32 @@
 {
     "definitions": {
+        "List(TestCircularClass1)": {
+            "type": "object",
+            "properties": {
+                "get(0)": {
+                    "$ref": "#"
+                }
+            }
+        },
+        "List(TestCircularClass2)": {
+            "type": "object",
+            "properties": {
+                "get(0)": {
+                    "$ref": "#/definitions/TestCircularClass2"
+                }
+            }
+        },
         "TestCircularClass2": {
             "type": "object",
             "properties": {
                 "list1": {
-                    "type": ["object", "null"],
-                    "properties": {
-                        "get(0)": {
-                            "$ref": "#"
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "$ref": "#/definitions/List(TestCircularClass1)"
                         }
-                    }
+                    ]
                 }
             }
         }
@@ -17,12 +34,13 @@
     "type": "object",
     "properties": {
         "list2": {
-            "type": ["object", "null"],
-            "properties": {
-                "get(0)": {
-                    "$ref": "#/definitions/TestCircularClass2"
+            "anyOf": [
+                {
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/List(TestCircularClass2)"
                 }
-            }
+            ]
         }
     }
 }
