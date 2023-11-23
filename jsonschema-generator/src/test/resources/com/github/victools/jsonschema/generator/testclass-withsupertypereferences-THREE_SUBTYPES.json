@@ -87,25 +87,43 @@
             },
             "title": "TestSubClass3"
         },
-        "TestSuperClass(Boolean)-nullable": {
-            "anyOf": [{
-                    "type": "null"
-                }, {
+        "TestSuperClass(Boolean)": {
+            "anyOf": [
+                {
                     "$ref": "#/definitions/TestSubClass1(Boolean)"
                 }, {
                     "$ref": "#/definitions/TestSubClass2(Boolean)"
-                }]
+                }
+            ]
         },
-        "TestSuperClass(String)-nullable": {
-            "anyOf": [{
+        "TestSuperClass(Boolean)-nullable": {
+            "anyOf": [
+                {
                     "type": "null"
                 }, {
+                    "$ref": "#/definitions/TestSuperClass(Boolean)"
+                }
+            ]
+        },
+        "TestSuperClass(String)": {
+            "anyOf": [
+                {
                     "$ref": "#/definitions/TestSubClass1(String)"
                 }, {
                     "$ref": "#/definitions/TestSubClass2(String)"
                 }, {
                     "$ref": "#/definitions/TestSubClass3"
-                }]
+                }
+            ]
+        },
+        "TestSuperClass(String)-nullable": {
+            "anyOf": [
+                {
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestSuperClass(String)"
+                }
+            ]
         }
     },
     "type": "object",
@@ -114,7 +132,8 @@
             "$ref": "#/definitions/TestSuperClass(Boolean)-nullable"
         },
         "numberOrStringObjectField": {
-            "anyOf": [{
+            "anyOf": [
+                {
                     "type": "null"
                 }, {
                     "type": "number",
@@ -122,7 +141,8 @@
                 }, {
                     "type": "string",
                     "title": "String"
-                }]
+                }
+            ]
         },
         "stringSupertypeField": {
             "$ref": "#/definitions/TestSuperClass(String)-nullable"

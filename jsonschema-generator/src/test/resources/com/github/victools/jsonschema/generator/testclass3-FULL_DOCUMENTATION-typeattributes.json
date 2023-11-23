@@ -62,11 +62,13 @@
             "additionalProperties": false
         },
         "Optional(Integer)-nullable": {
-            "anyOf": [{
+            "anyOf": [
+                {
                     "type": "null"
                 }, {
                     "$ref": "#/definitions/Optional(Integer)"
-                }]
+                }
+            ]
         },
         "RoundingMode": {
             "type": "object",
@@ -136,14 +138,16 @@
             "additionalProperties": false
         },
         "RoundingMode-nullable": {
-            "anyOf": [{
+            "anyOf": [
+                {
                     "type": "null"
                 }, {
                     "$ref": "#/definitions/RoundingMode"
-                }]
+                }
+            ]
         },
-        "Supplier(Integer)-nullable": {
-            "type": ["object", "null"],
+        "Supplier(Integer)": {
+            "type": "object",
             "properties": {
                 "get()": {
                     "type": ["integer", "null"],
@@ -163,6 +167,15 @@
             "title": "Supplier<Integer>",
             "description": "for type in general: Supplier<Integer>",
             "additionalProperties": false
+        },
+        "Supplier(Integer)-nullable": {
+            "anyOf": [
+                {
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/Supplier(Integer)"
+                }
+            ]
         },
         "TestClass1": {
             "type": "object",
@@ -347,11 +360,13 @@
             }
         },
         "TestClass2(Long)-nullable": {
-            "anyOf": [{
+            "anyOf": [
+                {
                     "type": "null"
                 }, {
                     "$ref": "#/definitions/TestClass2(Long)"
-                }]
+                }
+            ]
         },
         "TestClass2(String)": {
             "type": "object",
@@ -418,14 +433,16 @@
             }
         },
         "TestClass2(String)-nullable": {
-            "anyOf": [{
+            "anyOf": [
+                {
                     "type": "null"
                 }, {
                     "$ref": "#/definitions/TestClass2(String)"
-                }]
+                }
+            ]
         },
-        "TestClass2(TestClass1*)-nullable": {
-            "type": ["object", "null"],
+        "TestClass2(TestClass1*)": {
+            "type": "object",
             "properties": {
                 "genericValue": {
                     "type": ["array", "null"],
@@ -493,8 +510,17 @@
                 }
             }
         },
-        "TestClass2(TestClass2(String))-nullable": {
-            "type": ["object", "null"],
+        "TestClass2(TestClass1*)-nullable": {
+            "anyOf": [
+                {
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestClass2(TestClass1*)"
+                }
+            ]
+        },
+        "TestClass2(TestClass2(String))": {
+            "type": "object",
             "properties": {
                 "genericValue": {
                     "$ref": "#/definitions/TestClass2(String)-nullable"
@@ -526,8 +552,17 @@
                 }
             }
         },
-        "TestClass4(Integer,String)-nullable": {
-            "type": ["object", "null"],
+        "TestClass2(TestClass2(String))-nullable": {
+            "anyOf": [
+                {
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestClass2(TestClass2(String))"
+                }
+            ]
+        },
+        "TestClass4(Integer,String)": {
+            "type": "object",
             "properties": {
                 "class2OfClass2OfT": {
                     "$ref": "#/definitions/TestClass2(TestClass2(String))-nullable"
@@ -564,11 +599,13 @@
                     "$ref": "#/definitions/TestClass2(TestClass2(String))-nullable"
                 },
                 "DEFAULT_ROUNDING_MODE": {
-                    "allOf": [{
+                    "allOf": [
+                        {
                             "$ref": "#/definitions/RoundingMode"
                         }, {
                             "const": "HALF_UP"
-                        }]
+                        }
+                    ]
                 }
             },
             "$id": "id-TestClass4<Integer, String>",
@@ -586,6 +623,15 @@
                 "format": "date",
                 "pattern": "^.{1,256}$"
             }
+        },
+        "TestClass4(Integer,String)-nullable": {
+            "anyOf": [
+                {
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestClass4(Integer,String)"
+                }
+            ]
         }
     },
     "type": "object",
@@ -611,9 +657,6 @@
         "class4": {
             "$ref": "#/definitions/TestClass4(Integer,String)-nullable"
         },
-        "getClass4()": {
-            "$ref": "#/definitions/TestClass4(Integer,String)-nullable"
-        },
         "getNestedLong()": {
             "$ref": "#/definitions/TestClass2(Long)-nullable"
         },
@@ -631,6 +674,9 @@
             "minItems": 2,
             "maxItems": 100,
             "uniqueItems": false
+        },
+        "getClass4()": {
+            "$ref": "#/definitions/TestClass4(Integer,String)-nullable"
         }
     },
     "$id": "id-TestClass3",

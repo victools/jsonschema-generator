@@ -304,7 +304,10 @@ public class SchemaBuilder {
                 return true;
             }
             List<ObjectNode> references = this.generationContext.getReferences(definitionKey);
-            if (considerOnlyDirectReferences.get() && references.isEmpty()) {
+            boolean skipDirectReferenceDefinition = considerOnlyDirectReferences.get()
+                    && !createDefinitionsForAll
+                    && references.isEmpty();
+            if (skipDirectReferenceDefinition) {
                 return false;
             }
             return createDefinitionsForAll
