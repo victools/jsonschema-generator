@@ -73,10 +73,12 @@ public class JsonPropertySorter implements Comparator<MemberScope<?, ?>> {
         HierarchicType topMostHierarchyType = property.getDeclaringTypeMembers().allTypesAndOverrides().get(0);
         List<String> sortedProperties = this.propertyOrderPerDeclaringType
                 .computeIfAbsent(topMostHierarchyType.getErasedType(), this::getAnnotatedPropertyOrder);
-        String fieldName;
+        String fieldName = null;
         if (property instanceof MethodScope) {
             fieldName = Optional.ofNullable(((MethodScope) property).findGetterField()).map(MemberScope::getSchemaPropertyName).orElse(null);
-        } else {
+        }
+        // also in case that the MethodScope fails, the filename might be provided by the property.getSchemaPropertyName()
+        if (fieldName == null) {
             fieldName = property.getSchemaPropertyName();
         }
         int propertyIndex = sortedProperties.indexOf(fieldName);
