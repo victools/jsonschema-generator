@@ -38,71 +38,70 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 public class JsonPropertySorterIntegrationTest {
 
-	@ParameterizedTest
-	@CsvSource({
-			"TestObject, one two three",
-			"TestContainer, one two three"
-	})
-	public void testJsonPropertyOrderWithChildAnnotations(String targetTypeName, String expectedFieldOrder) throws Exception {
-		JacksonModule module = new JacksonModule(JacksonOption.RESPECT_JSONPROPERTY_ORDER,
-				JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS);
-		SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
-				.with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
-				.with(module)
-				.build();
-		Class<?> targetType = Stream.of(JsonPropertySorterIntegrationTest.class.getDeclaredClasses())
-				.filter(testType -> testType.getSimpleName().equals(targetTypeName))
-				.findFirst()
-				.orElseThrow(IllegalArgumentException::new);
-		SchemaGenerator generator = new SchemaGenerator(config);
-		JsonNode result = generator.generateSchema(targetType);
+    @ParameterizedTest
+    @CsvSource({
+            "TestObject, one two three",
+            "TestContainer, one two three"
+    })
+    public void testJsonPropertyOrderWithChildAnnotations(String targetTypeName, String expectedFieldOrder) throws Exception {
+        JacksonModule module = new JacksonModule(JacksonOption.RESPECT_JSONPROPERTY_ORDER,
+                JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS);
+        SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
+                .with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
+                .with(module)
+                .build();
+        Class<?> targetType = Stream.of(JsonPropertySorterIntegrationTest.class.getDeclaredClasses())
+                .filter(testType -> testType.getSimpleName().equals(targetTypeName))
+                .findFirst()
+                .orElseThrow(IllegalArgumentException::new);
+        SchemaGenerator generator = new SchemaGenerator(config);
+        JsonNode result = generator.generateSchema(targetType);
+    
+        ObjectNode properties = (ObjectNode) result.get(config.getKeyword(SchemaKeyword.TAG_PROPERTIES));
+        List<String> resultPropertyNames = new ArrayList<>();
+        properties.fieldNames().forEachRemaining(resultPropertyNames::add);
+        Assertions.assertEquals(Arrays.asList(expectedFieldOrder.split(" ")), resultPropertyNames);
+    }
 
-		ObjectNode properties = (ObjectNode) result.get(config.getKeyword(SchemaKeyword.TAG_PROPERTIES));
-		List<String> resultPropertyNames = new ArrayList<>();
-		properties.fieldNames().forEachRemaining(resultPropertyNames::add);
-		Assertions.assertEquals(Arrays.asList(expectedFieldOrder.split(" ")), resultPropertyNames);
-	}
+    @JsonPropertyOrder({"one", "two", "three"})
+    public static class TestContainer {
 
-	@JsonPropertyOrder({ "one", "two", "three" })
-	public static class TestContainer {
+        @JsonProperty("three")
+        private Integer thirdInteger;
+        @JsonProperty("one")
+        private String firstString;
 
-		@JsonProperty("three")
-		private Integer thirdInteger;
-		@JsonProperty("one")
-		private String firstString;
+        @JsonProperty("two")
+        public boolean getSecondValue() {
+            return true;
+        }
+    }
 
-		@JsonProperty("two")
-		public boolean getSecondValue() {
-			return true;
-		}
+    @JsonPropertyOrder({"one", "two", "three"})
+    public static class TestObject {
 
-	}
+        private TestContainer container;
+        private String secondString;
 
-	@JsonPropertyOrder({ "one", "two" , "three"})
-	public static class TestObject {
+        @JsonIgnore
+        public TestContainer getContainer() {
+            return this.container;
+        }
 
-		private TestContainer container;
-		private String secondString;
+        @JsonProperty("three")
+        public Integer getInteger() {
+            return this.container.thirdInteger;
+        }
 
-		@JsonIgnore
-		public TestContainer getContainer() {
-			return this.container;
-		}
+        @JsonProperty("two")
+        public String getSecondString() {
+            return this.secondString;
+        }
 
-		@JsonProperty("three")
-		public Integer getInteger() {
-			return this.container.thirdInteger;
-		}
-
-		@JsonProperty("two")
-		public String getSecondString() {
-			return this.secondString;
-		}
-
-		@JsonProperty("one")
-		public String getString() {
-			return this.container.firstString;
-		}
-	}
+        @JsonProperty("one")
+        public String getString() {
+            return this.container.firstString;
+        }
+    }
 
 }
