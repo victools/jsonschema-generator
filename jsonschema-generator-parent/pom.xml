@@ -118,6 +118,7 @@
             <url>https://github.com/magicDGS</url>
             <roles>
                 <role>Provided PR #300 (introducing support for standard "format" values via Option)</role>
+                <role>Provided PR #423 (fixing Jackson property order handling)</role>
             </roles>
         </contributor>
     </contributors>
