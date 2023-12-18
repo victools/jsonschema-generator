@@ -345,7 +345,7 @@ public class SchemaCleanUpUtils {
      * @return supplier of the successfully merged schemas (into a new node) or {@code null} if merging the given nodes is not easily possible
      */
     private Supplier<ObjectNode> mergeSchemas(ObjectNode mainNodeIncludingAllOf, List<JsonNode> nodes, Map<String, SchemaKeyword> reverseKeywordMap) {
-        if (nodes.stream().anyMatch(part -> !(part instanceof ObjectNode) && !(part.isBoolean() && part.asBoolean()))) {
+        if (nodes.stream().anyMatch(part -> part.isBoolean() && !part.asBoolean())) {
             return null;
         }
         List<ObjectNode> parts = nodes.stream()
@@ -354,9 +354,7 @@ public class SchemaCleanUpUtils {
                 .collect(Collectors.toList());
 
         // collect all defined attributes from the separate parts and check whether there are incompatible differences
-        Map<String, List<JsonNode>> fieldsFromAllParts = parts.stream()
-                .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) part::fields).spliterator(), false))
-                .collect(Collectors.groupingBy(Map.Entry::getKey, LinkedHashMap::new, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
+        Map<String, List<JsonNode>> fieldsFromAllParts = this.getFieldsFromAllParts(parts);
         if (this.shouldSkipMergingAllOf(mainNodeIncludingAllOf, parts, fieldsFromAllParts)) {
             return null;
         }
@@ -385,12 +383,24 @@ public class SchemaCleanUpUtils {
     }
 
     /**
+     * Collect all defined attributes from the separate parts.
+     *
+     * @param parts entries of the {@link SchemaKeyword#TAG_ALLOF} array to consider
+     * @return flattened collection of all attributes in the given parts
+     */
+    private Map<String, List<JsonNode>> getFieldsFromAllParts(List<ObjectNode> parts) {
+        return parts.stream()
+                .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) part::fields).spliterator(), false))
+                .collect(Collectors.groupingBy(Map.Entry::getKey, LinkedHashMap::new, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
+    }
+
+    /**
      * Check whether the merging of the given node and it's allOf entries should be skipped due to a {@link SchemaKeyword#TAG_REF} being present.
      * Drafts 6 and 7 would ignore any other attributes besides the {@link SchemaKeyword#TAG_REF}.
      *
      * @param mainNode the main node containing an {@link SchemaKeyword#TAG_ALLOF} array (maybe {@code null})
      * @param parts entries of the {@link SchemaKeyword#TAG_ALLOF} array to consider
-     * @param fieldsFromAllParts flatten collection of all attributes in the given parts
+     * @param fieldsFromAllParts flattened collection of all attributes in the given parts
      * @return whether to block merging of the given {@link SchemaKeyword#TAG_ALLOF} candidate
      */
     private boolean shouldSkipMergingAllOf(ObjectNode mainNode, List<ObjectNode> parts, Map<String, List<JsonNode>> fieldsFromAllParts) {

@@ -75,7 +75,6 @@ public class IntegrationTest {
             }
         }
         return stringBuilder.toString();
-
     }
 
     @JsonClassDescription("test description")
