@@ -32,7 +32,7 @@ public class JsonPropertyOrderIntegrationTest {
 		// then
 		final String actualSchemaAsString = OBJECT_MAPPER.writerWithDefaultPrettyPrinter()
 				.writeValueAsString(result);
-		final String expectedSchemaAsString = loadTestJson("jsonpropertyorder-nested-method-integration-test-result.json");
+		final String expectedSchemaAsString = loadTestJson("jsonpropertyorder-method-with-child-annotations-integration-test-result.json");
 		Assertions.assertEquals(expectedSchemaAsString, actualSchemaAsString);
 	}
 
