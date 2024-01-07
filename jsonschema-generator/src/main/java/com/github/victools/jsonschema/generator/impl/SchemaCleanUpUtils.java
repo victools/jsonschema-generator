@@ -128,6 +128,30 @@ public class SchemaCleanUpUtils {
     }
 
     /**
+     * Discard attributes on member schemas, that also reference an entry in the common definitions, which contains those exact same attributes.
+     *
+     * @param jsonSchemas generated schemas that may contain redundant attributes in nested object member schemas
+     * @param definitionsNode object node containing common schema definitions
+     * @param referenceKeyPrefix designated prefix to the entries in the returned definitions node (i.e., on {@link SchemaKeyword#TAG_REF} values)
+     */
+    public void reduceRedundantMemberAttributes(List<ObjectNode> jsonSchemas, ObjectNode definitionsNode, String referenceKeyPrefix) {
+        final Map<String, Map<String, JsonNode>> definitions = new HashMap<>();
+        for (Iterator<Map.Entry<String, JsonNode>> defIt = definitionsNode.fields(); defIt.hasNext(); ) {
+            Map.Entry<String, JsonNode> definition = defIt.next();
+            Map<String, JsonNode> attributes = new HashMap<>();
+            for (Iterator<Map.Entry<String, JsonNode>> attIt = definition.getValue().fields(); attIt.hasNext(); ) {
+                Map.Entry<String, JsonNode> attriibute = attIt.next();
+                attributes.put(attriibute.getKey(), attriibute.getValue());
+            }
+            definitions.put(referenceKeyPrefix + definition.getKey(), attributes);
+        }
+        final String propertiesKeyword = this.config.getKeyword(SchemaKeyword.TAG_PROPERTIES);
+        final String refKeyWord = this.config.getKeyword(SchemaKeyword.TAG_REF);
+        this.finaliseSchemaParts(jsonSchemas,
+                nodeToCheck -> this.reduceRedundantMemberAttributesIfPossible(nodeToCheck, propertiesKeyword, refKeyWord, definitions));
+    }
+
+    /**
      * Go through all sub-schemas and look for those without a {@link SchemaKeyword#TAG_TYPE} indication. Then try to derive the appropriate type
      * indication from the other present tags (e.g., "properties" implies it is an "object").
      *
@@ -549,6 +573,45 @@ public class SchemaCleanUpUtils {
             ((ArrayNode) anyOfTag).remove(index);
             for (int nestedEntryIndex = nestedAnyOf.size() - 1; nestedEntryIndex > -1; nestedEntryIndex--) {
                 ((ArrayNode) anyOfTag).insert(index, nestedAnyOf.get(nestedEntryIndex));
+            }
+        }
+    }
+
+    /**
+     * Discard attributes on member schemas, that also reference an entry in the common definitions, which contains those exact same attributes.
+     *
+     * @param schemaNode single schema to check for properties, which in turn contain redundant attributes to be removed
+     * @param propertiesKeyword keyword under which to find an object schema's properties
+     * @param refKeyword keyword containing the reference to a common schema definition
+     * @param definitions object node containing common schema definitions
+     */
+    private void reduceRedundantMemberAttributesIfPossible(ObjectNode schemaNode,
+            String propertiesKeyword, String refKeyword, Map<String, Map<String, JsonNode>> definitions) {
+        JsonNode propertiesNode = schemaNode.get(propertiesKeyword);
+        if (propertiesNode == null || !propertiesNode.isObject()) {
+            return;
+        }
+        for (Iterator<JsonNode> it = propertiesNode.elements(); it.hasNext(); ) {
+            JsonNode memberSchema = it.next();
+            JsonNode reference = memberSchema.get(refKeyword);
+            if (reference != null && memberSchema instanceof ObjectNode && definitions.containsKey(reference.asText())) {
+                this.reduceRedundantAttributesIfPossible((ObjectNode) memberSchema, definitions.get(reference.asText()));
+            }
+        }
+    }
+
+    /**
+     * Discard attributes on the given member schema, if those same attributes are already contained in the common definition being referenced.
+     *
+     * @param memberSchema single schema to discard redundant attributes from
+     * @param referencedDefinition attribute names and values in the common definition, which don't need to be repeated
+     */
+    private void reduceRedundantAttributesIfPossible(ObjectNode memberSchema, Map<String, JsonNode> referencedDefinition) {
+        for (Iterator<Map.Entry<String, JsonNode>> it = memberSchema.fields(); it.hasNext(); ) {
+            Map.Entry<String, JsonNode> memberAttribute = it.next();
+            if (memberAttribute.getValue().equals(referencedDefinition.get(memberAttribute.getKey()))) {
+                // remove member attribute, that also exists on the referenced definition
+                it.remove();
             }
         }
     }
