@@ -23,9 +23,11 @@ import com.fasterxml.classmate.members.ResolvedMethod;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.util.stream.Stream;
+import org.mockito.Mockito;
 
 /**
  * Helper class for constructing {@link FieldScope} and {@link MethodScope} instances in tests.
@@ -36,7 +38,7 @@ public class TestType {
     private final MemberScope.DeclarationDetails declarationDetails;
 
     public TestType(Class<?> testClass) {
-        this.context = TypeContextFactory.createDefaultTypeContext();
+        this.context = TypeContextFactory.createDefaultTypeContext(Mockito.mock(SchemaGeneratorConfig.class));
         ResolvedType resolvedTestClass = this.context.resolve(testClass);
         this.declarationDetails = new MemberScope.DeclarationDetails(resolvedTestClass, this.context.resolveWithMembers(resolvedTestClass));
     }

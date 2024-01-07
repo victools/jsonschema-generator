@@ -53,7 +53,7 @@ public class AbstractTypeAwareTest {
      * @param schemaVersion designated JSON Schema version
      */
     protected void prepareContextForVersion(SchemaVersion schemaVersion) {
-        TypeContext typeContext = TypeContextFactory.createDefaultTypeContext();
+        TypeContext typeContext = TypeContextFactory.createDefaultTypeContext(Mockito.mock(SchemaGeneratorConfig.class));
         ResolvedType resolvedTestClass = typeContext.resolve(this.testClass);
         this.declarationDetails = new MemberScope.DeclarationDetails(resolvedTestClass, typeContext.resolveWithMembers(resolvedTestClass));
         this.context = Mockito.mock(SchemaGenerationContext.class, Mockito.RETURNS_DEEP_STUBS);
