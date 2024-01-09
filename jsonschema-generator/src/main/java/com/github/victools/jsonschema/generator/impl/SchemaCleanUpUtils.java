@@ -595,7 +595,11 @@ public class SchemaCleanUpUtils {
         for (Iterator<JsonNode> it = propertiesNode.elements(); it.hasNext(); ) {
             JsonNode memberSchema = it.next();
             JsonNode reference = memberSchema.get(refKeyword);
-            if (reference != null && memberSchema instanceof ObjectNode && definitions.containsKey(reference.asText())) {
+            if (reference == null || !(memberSchema instanceof ObjectNode)) {
+                // only considering a property/member schema containing a direct reference to a common definition
+                continue;
+            }
+            if (definitions.containsKey(reference.asText())) {
                 this.reduceRedundantAttributesIfPossible((ObjectNode) memberSchema, definitions.get(reference.asText()));
             }
         }
