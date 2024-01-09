@@ -195,7 +195,9 @@ public class SchemaBuilder {
             cleanUpUtils.reduceAllOfNodes(this.schemaNodes);
         }
         cleanUpUtils.reduceAnyOfNodes(this.schemaNodes);
-        cleanUpUtils.reduceRedundantMemberAttributes(this.schemaNodes, definitionsNode, referenceKeyPrefix);
+        if (this.config.shouldDiscardDuplicateMemberAttributes()) {
+            cleanUpUtils.reduceRedundantMemberAttributes(this.schemaNodes, definitionsNode, referenceKeyPrefix);
+        }
         if (this.config.shouldIncludeStrictTypeInfo()) {
             cleanUpUtils.setStrictTypeInfo(this.schemaNodes, true);
         }

@@ -25,6 +25,7 @@ import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -607,9 +608,22 @@ public class SchemaCleanUpUtils {
      * @param referencedDefinition attribute names and values in the common definition, which don't need to be repeated
      */
     private void reduceRedundantAttributesIfPossible(ObjectNode memberSchema, Map<String, JsonNode> referencedDefinition) {
+        Set<String> skippedKeywords = new HashSet<>();
+        String ifKeyword = this.config.getKeyword(SchemaKeyword.TAG_IF);
+        String thenKeyword = this.config.getKeyword(SchemaKeyword.TAG_THEN);
+        String elseKeyword = this.config.getKeyword(SchemaKeyword.TAG_ELSE);
+        boolean shouldSkipConditionals = !Util.nullSafeEquals(memberSchema.get(ifKeyword), referencedDefinition.get(ifKeyword))
+                || !Util.nullSafeEquals(memberSchema.get(thenKeyword), referencedDefinition.get(thenKeyword))
+                || !Util.nullSafeEquals(memberSchema.get(elseKeyword), referencedDefinition.get(elseKeyword));
+        if (shouldSkipConditionals) {
+            skippedKeywords.add(ifKeyword);
+            skippedKeywords.add(thenKeyword);
+            skippedKeywords.add(elseKeyword);
+        }
         for (Iterator<Map.Entry<String, JsonNode>> it = memberSchema.fields(); it.hasNext(); ) {
             Map.Entry<String, JsonNode> memberAttribute = it.next();
-            if (memberAttribute.getValue().equals(referencedDefinition.get(memberAttribute.getKey()))) {
+            String keyword = memberAttribute.getKey();
+            if (!skippedKeywords.contains(keyword) && memberAttribute.getValue().equals(referencedDefinition.get(keyword))) {
                 // remove member attribute, that also exists on the referenced definition
                 it.remove();
             }

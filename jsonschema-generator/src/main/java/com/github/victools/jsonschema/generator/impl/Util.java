@@ -92,4 +92,22 @@ public final class Util {
         }
         return list;
     }
+
+    /**
+     * Ensure the two given values are either both {@code null} or equal to each other.
+     *
+     * @param one first value to check
+     * @param other second value to check
+     * @return whether the two given values are equal
+     */
+    public static boolean nullSafeEquals(Object one, Object other) {
+        if (one == null) {
+            return other == null;
+        }
+        if (other == null) {
+            return false;
+        }
+        return one.hashCode() == other.hashCode()
+               && one.equals(other);
+    }
 }

@@ -5,7 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-*-*
+### `jsonschema-generator`
+#### Added
+- new `Option.DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END` discard duplicate elements from member sub-schemas
+
+#### Changed
+- new `Option.DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END` by default included in standard `OptionPreset`s
 
 ## [4.33.1] - 2023-12-19
 ### `jsonschema-module-jackson`
