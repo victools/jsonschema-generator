@@ -119,7 +119,8 @@ public class SchemaBuilder {
             this.generationContext.addReference(mainType, jsonSchemaResult, null, false);
         }
         String definitionsTagName = this.config.getKeyword(SchemaKeyword.TAG_DEFINITIONS);
-        ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(definitionsTagName, mainKey);
+        String referenceKeyPrefix = this.getReferenceKeyPrefix(definitionsTagName);
+        ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(referenceKeyPrefix, mainKey);
         if (!definitionsNode.isEmpty()) {
             jsonSchemaResult.set(definitionsTagName, definitionsNode);
         }
@@ -128,7 +129,7 @@ public class SchemaBuilder {
             jsonSchemaResult.setAll(mainSchemaNode);
             this.schemaNodes.add(jsonSchemaResult);
         }
-        this.performCleanup();
+        this.performCleanup(definitionsNode, referenceKeyPrefix);
         this.config.resetAfterSchemaGenerationFinished();
         return jsonSchemaResult;
     }
@@ -167,25 +168,36 @@ public class SchemaBuilder {
      * @see #createSchemaReference(Type, Type...)
      */
     public ObjectNode collectDefinitions(String designatedDefinitionPath) {
-        ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(designatedDefinitionPath, null);
-        this.performCleanup();
+        String referenceKeyPrefix = this.getReferenceKeyPrefix(designatedDefinitionPath);
+        ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(referenceKeyPrefix, null);
+        this.performCleanup(definitionsNode, referenceKeyPrefix);
         return definitionsNode;
+    }
+
+    private String getReferenceKeyPrefix(String designatedDefinitionPath) {
+        return this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN) + '/' + designatedDefinitionPath + '/';
     }
 
     /**
      * Reduce unnecessary structures in the generated schema definitions. Assumption being that this method is being invoked as the very last action
      * of the schema generation.
      *
+     * @param definitionsNode object node containing common schema definitions
+     * @param referenceKeyPrefix designated prefix to the entries in the returned definitions node (i.e., on {@link SchemaKeyword#TAG_REF} values)
+     *
      * @see SchemaGeneratorConfig#shouldCleanupUnnecessaryAllOfElements()
      * @see SchemaCleanUpUtils#reduceAllOfNodes(List)
      * @see SchemaCleanUpUtils#reduceAnyOfNodes(List)
      */
-    private void performCleanup() {
+    private void performCleanup(ObjectNode definitionsNode, String referenceKeyPrefix) {
         SchemaCleanUpUtils cleanUpUtils = new SchemaCleanUpUtils(this.config);
         if (this.config.shouldCleanupUnnecessaryAllOfElements()) {
             cleanUpUtils.reduceAllOfNodes(this.schemaNodes);
         }
         cleanUpUtils.reduceAnyOfNodes(this.schemaNodes);
+        if (this.config.shouldDiscardDuplicateMemberAttributes()) {
+            cleanUpUtils.reduceRedundantMemberAttributes(this.schemaNodes, definitionsNode, referenceKeyPrefix);
+        }
         if (this.config.shouldIncludeStrictTypeInfo()) {
             cleanUpUtils.setStrictTypeInfo(this.schemaNodes, true);
         }
@@ -195,12 +207,11 @@ public class SchemaBuilder {
      * Finalisation Step: collect the entries for the generated schema's "definitions" and ensure that all references are either pointing to the
      * appropriate definition or contain the respective (sub) schema directly inline.
      *
-     * @param designatedDefinitionPath designated path to the returned definitions node (to be incorporated in {@link SchemaKeyword#TAG_REF} values)
+     * @param referenceKeyPrefix designated prefix to the entries in the returned definitions node (i.e., on {@link SchemaKeyword#TAG_REF} values)
      * @param mainSchemaKey definition key identifying the main type for which createSchemaReference() was invoked
      * @return node representing the main schema's "definitions" (may be empty)
      */
-    private ObjectNode buildDefinitionsAndResolveReferences(String designatedDefinitionPath, DefinitionKey mainSchemaKey) {
-        final String referenceKeyPrefix = this.config.getKeyword(SchemaKeyword.TAG_REF_MAIN) + '/' + designatedDefinitionPath + '/';
+    private ObjectNode buildDefinitionsAndResolveReferences(String referenceKeyPrefix, DefinitionKey mainSchemaKey) {
         final ObjectNode definitionsNode = this.config.createObjectNode();
 
         final AtomicBoolean considerOnlyDirectReferences = new AtomicBoolean(false);

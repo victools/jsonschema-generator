@@ -131,6 +131,16 @@ public interface SchemaGeneratorConfig extends StatefulConfig {
     boolean shouldCleanupUnnecessaryAllOfElements();
 
     /**
+     * Determine whether duplicate elements should be removed from member/property sub-schemas if equal elements are contained in the referenced
+     * common definition.
+     *
+     * @return whether to discard duplicate elements from property schemas during the last schema generation step
+     *
+     * @since 4.34.0
+     */
+    boolean shouldDiscardDuplicateMemberAttributes();
+
+    /**
      * Determine whether sub schemas should get the {@link SchemaKeyword#TAG_TYPE} added implicitly based on other contained tags, if it is missing.
      *
      * @return whether to try and imply the {@link SchemaKeyword#TAG_TYPE} from other contained tags in the schema

@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeContext;
@@ -47,7 +48,7 @@ import org.mockito.Mockito;
  */
 public class CustomEnumDefinitionProviderTest {
 
-    private final TypeContext typeContext = TypeContextFactory.createDefaultTypeContext();
+    private final TypeContext typeContext = TypeContextFactory.createDefaultTypeContext(Mockito.mock(SchemaGeneratorConfig.class));
     private SchemaGenerationContext generationContext;
 
     @BeforeEach

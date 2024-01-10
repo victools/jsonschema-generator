@@ -323,6 +323,13 @@ public enum Option {
      */
     ALLOF_CLEANUP_AT_THE_END(null, null),
     /**
+     * Whether at the end of the schema generation, all member sub-schemas referencing a common definition should be checked for any duplicated
+     * attributes, which should be removed from the inline member sub-schemas in favor of the equivalent in the single common definition.
+     *
+     * @since 4.34.0
+     */
+    DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END(null, null),
+    /**
      * Whether at the end of the schema generation, all sub-schemas without an explicit "type" indication should be augmented by the implied "type"
      * based on the other tags in the respective schema.
      *

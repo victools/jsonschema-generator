@@ -159,6 +159,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldDiscardDuplicateMemberAttributes() {
+        return this.isOptionEnabled(Option.DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END);
+    }
+
+    @Override
     public boolean shouldIncludeStrictTypeInfo() {
         return this.isOptionEnabled(Option.STRICT_TYPE_INFO);
     }

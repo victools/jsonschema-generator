@@ -20,6 +20,7 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.TypeContext;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import com.github.victools.jsonschema.generator.impl.SchemaCleanUpUtils;
@@ -40,7 +41,7 @@ import org.mockito.Mockito;
  */
 public class SchemaDefinitionNamingStrategyTest {
 
-    private static TypeContext typeContext = TypeContextFactory.createDefaultTypeContext();
+    private static TypeContext typeContext = TypeContextFactory.createDefaultTypeContext(Mockito.mock(SchemaGeneratorConfig.class));
     private DefinitionKey key;
     private SchemaGenerationContext generationContext;
 

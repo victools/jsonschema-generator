@@ -37,6 +37,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 
 /**
  * Test for the {@link AttributeCollector} class.
@@ -69,7 +70,8 @@ public class AttributeCollectorTest {
                 new SchemaGeneratorConfigPart<>(),
                 new SchemaGeneratorConfigPart<>(),
                 Collections.emptyMap());
-        return new SchemaGenerationContextImpl(generatorConfig, TypeContextFactory.createDefaultTypeContext());
+        return new SchemaGenerationContextImpl(generatorConfig,
+                TypeContextFactory.createDefaultTypeContext(Mockito.mock(SchemaGeneratorConfig.class)));
     }
 
     @ParameterizedTest

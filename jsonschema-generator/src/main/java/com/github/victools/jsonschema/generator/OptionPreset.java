@@ -46,7 +46,8 @@ public class OptionPreset {
             Option.DEFINITIONS_FOR_ALL_OBJECTS,
             Option.NULLABLE_FIELDS_BY_DEFAULT,
             Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT,
-            Option.ALLOF_CLEANUP_AT_THE_END
+            Option.ALLOF_CLEANUP_AT_THE_END,
+            Option.DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END
     );
 
     /**
@@ -63,7 +64,8 @@ public class OptionPreset {
             Option.PUBLIC_NONSTATIC_FIELDS,
             Option.NONPUBLIC_NONSTATIC_FIELDS_WITH_GETTERS,
             Option.NONPUBLIC_NONSTATIC_FIELDS_WITHOUT_GETTERS,
-            Option.ALLOF_CLEANUP_AT_THE_END
+            Option.ALLOF_CLEANUP_AT_THE_END,
+            Option.DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END
     );
 
     /**
@@ -79,7 +81,8 @@ public class OptionPreset {
             Option.NONSTATIC_NONVOID_NONGETTER_METHODS,
             Option.SIMPLIFIED_ENUMS,
             Option.SIMPLIFIED_OPTIONALS,
-            Option.ALLOF_CLEANUP_AT_THE_END
+            Option.ALLOF_CLEANUP_AT_THE_END,
+            Option.DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END
     );
 
     private final Set<Option> defaultEnabledOptions;
