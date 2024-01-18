@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Changed
 - new `Option.DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END` by default included in standard `OptionPreset`s
 
+#### Fixed
+- avoid exception when trying to collect supported enum values from raw `Enum` type (i.e., missing type parameter)
+
 ## [4.33.1] - 2023-12-19
 ### `jsonschema-module-jackson`
 #### Fixed
