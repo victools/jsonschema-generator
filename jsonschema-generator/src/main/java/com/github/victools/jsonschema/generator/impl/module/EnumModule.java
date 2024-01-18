@@ -103,7 +103,10 @@ public class EnumModule implements Module {
     private static List<String> extractEnumValues(MethodScope method) {
         ResolvedType declaringType = method.getDeclaringType();
         if (EnumModule.isEnum(declaringType)) {
-            return EnumModule.extractEnumValues(declaringType.getTypeParameters().get(0), Enum::name);
+            ResolvedType enumType = declaringType.getTypeParameters().stream().findFirst().orElse(null);
+            if (enumType != null) {
+                return EnumModule.extractEnumValues(enumType, Enum::name);
+            }
         }
         return null;
     }
