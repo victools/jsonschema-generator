@@ -100,6 +100,8 @@ public class IntegrationTest {
         @JsonUnwrapped
         public TypeToBeUnwrapped typeToBeUnwrapped;
 
+        public TypeWithInheritedFieldToBeUnwrapped typeWithInheritedFieldToBeUnwrapped;
+
         public String ignoredUnannotatedMethod() {
             return "nothing";
         }
@@ -157,5 +159,14 @@ public class IntegrationTest {
 
     static class TypeToBeUnwrapped {
         public String unwrappedProperty;
+    }
+
+    static class TypeWithInheritedFieldToBeUnwrapped extends TypeWithFieldToBeUnwrapped {
+
+    }
+
+    static class TypeWithFieldToBeUnwrapped {
+        @JsonUnwrapped
+        public TypeToBeUnwrapped typeToBeUnwrapped;
     }
 }

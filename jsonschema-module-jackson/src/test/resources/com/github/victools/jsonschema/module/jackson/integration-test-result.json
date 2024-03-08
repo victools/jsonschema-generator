@@ -76,6 +76,14 @@
                 }
             }
         },
+        "typeWithInheritedFieldToBeUnwrapped": {
+            "type": "object",
+            "properties": {
+                "unwrappedProperty": {
+                    "type": "string"
+                }
+            }
+        },
         "unwrappedProperty": {
             "type": "string"
         }
