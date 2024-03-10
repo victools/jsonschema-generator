@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Changed
 - new `Option.DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END` by default included in standard `OptionPreset`s
 
+### `jsonschema-module-jackson`
+#### Fixed
+- `@JsonUnwrapped` annotation on inherited properties resulted in those properties being ignored instead of being unwrapped
+
 ## [4.33.1] - 2023-12-19
 ### `jsonschema-module-jackson`
 #### Fixed
