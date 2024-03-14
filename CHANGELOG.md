@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.34.0] - 2024-03-14
 ### `jsonschema-generator`
 #### Added
 - new `Option.DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END` discard duplicate elements from member sub-schemas
@@ -813,7 +813,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.33.1...HEAD
+[4.34.0]: https://github.com/victools/jsonschema-generator/compare/v4.33.1...v4.34.0
 [4.33.1]: https://github.com/victools/jsonschema-generator/compare/v4.33.0...v4.33.1
 [4.33.0]: https://github.com/victools/jsonschema-generator/compare/v4.32.0...v4.33.0
 [4.32.0]: https://github.com/victools/jsonschema-generator/compare/v4.31.1...v4.32.0
