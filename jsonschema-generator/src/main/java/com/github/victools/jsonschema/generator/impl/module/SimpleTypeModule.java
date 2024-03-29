@@ -283,13 +283,14 @@ public class SimpleTypeModule implements Module {
     }
 
     private boolean shouldHaveEmptySchema(TypeScope scope) {
-        return SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType());
+        return scope.getType() == null
+               || SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType());
     }
 
     /**
      * Implementation of the {@link CustomDefinitionProviderV2} interface for applying fixed schema definitions for simple java types.
      */
-    private class SimpleTypeDefinitionProvider implements CustomDefinitionProviderV2 {
+    private final class SimpleTypeDefinitionProvider implements CustomDefinitionProviderV2 {
 
         @Override
         public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {

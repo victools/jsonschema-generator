@@ -26,8 +26,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for {@link SchemaGenerator} class.
@@ -229,6 +232,25 @@ public class SchemaGeneratorCustomDefinitionsTest {
         TestUtils.assertGeneratedSchema(result, this.getClass(), "custom-property-definition-" + schemaVersion.name() + ".json");
     }
 
+    @Test
+    public void testGenerateSchema_CustomPropertyDefinitionForVoidMethod() throws Exception {
+        CustomPropertyDefinitionProvider<MethodScope> customPropertyDefinitionProvider = (method, context) -> {
+            if (method.isVoid()) {
+                return new CustomPropertyDefinition(context.getGeneratorConfig().createObjectNode()
+                        .put(context.getKeyword(SchemaKeyword.TAG_DESCRIPTION), "this method is void"));
+            }
+            return null;
+        };
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.JAVA_OBJECT);
+        configBuilder.with(Option.VOID_METHODS);
+        configBuilder.forMethods()
+                .withCustomDefinitionProvider(customPropertyDefinitionProvider);
+        SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
+        JsonNode result = generator.generateSchema(TestClassWithVoidMethod.class);
+        JSONAssert.assertEquals("{\"type\":\"object\",\"properties\":{\"updateSomething()\":{\"description\":\"this method is void\"}}}",
+                result.toString(), JSONCompareMode.STRICT);
+    }
+
     private static class TestDirectCircularClass {
 
         public int number;
@@ -255,5 +277,11 @@ public class SchemaGeneratorCustomDefinitionsTest {
 
         public List<TestCircularClass1> list1;
 
+    }
+
+    private static class TestClassWithVoidMethod {
+        public void updateSomething() {
+            // perform an action
+        }
     }
 }

@@ -592,7 +592,12 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      */
     private JsonNode createMethodSchema(MemberDetails<MethodScope> methodDetails) {
         if (methodDetails.getScope().isVoid()) {
-            return BooleanNode.FALSE;
+            // since 4.35.0: support custom definitions for void methods
+            CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(methodDetails.getScope(), this,
+                    methodDetails.getIgnoredDefinitionProvider());
+            if (customDefinition == null) {
+                return BooleanNode.FALSE;
+            }
         }
         ObjectNode subSchema = this.generatorConfig.createObjectNode();
         ObjectNode methodAttributes = AttributeCollector.collectMethodAttributes(methodDetails.getScope(), this);

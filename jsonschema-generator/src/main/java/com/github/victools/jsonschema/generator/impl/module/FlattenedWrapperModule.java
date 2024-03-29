@@ -50,7 +50,7 @@ public class FlattenedWrapperModule<W> implements Module {
      * @return whether the given type is deemed to be of the targeted wrapper type in the context of this module
      */
     protected boolean isWrapperType(ResolvedType type) {
-        return this.wrapperType.isAssignableFrom(type.getErasedType());
+        return type != null && this.wrapperType.isAssignableFrom(type.getErasedType());
     }
 
     /**
