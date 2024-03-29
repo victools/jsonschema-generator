@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### `jsonschema-generator`
+#### Added
+- check for custom definitions for `void` methods (this may result in exceptions inside custom configuration if a `null` return type is not considered)
+
+#### Changed
+- if present, apply custom definition for `void` methods
 
 ## [4.34.0] - 2024-03-14
 ### `jsonschema-generator`
