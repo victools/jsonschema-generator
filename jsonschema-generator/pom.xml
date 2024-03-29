@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.github.victools</groupId>
         <artifactId>jsonschema-generator-parent</artifactId>
-        <version>4.35.0-SNAPSHOT</version>
+        <version>4.35.0</version>
         <relativePath>../jsonschema-generator-parent/pom.xml</relativePath>
     </parent>
     <artifactId>jsonschema-generator</artifactId>

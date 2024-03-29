@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.github.victools</groupId>
         <artifactId>jsonschema-generator-bom</artifactId>
-        <version>4.35.0-SNAPSHOT</version>
+        <version>4.35.0</version>
         <relativePath>../jsonschema-generator-bom/pom.xml</relativePath>
     </parent>
     <artifactId>jsonschema-generator-parent</artifactId>
@@ -132,19 +132,19 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <file.encoding>UTF-8</file.encoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- maven plugins -->
-        <maven.plugin.version.checkstyle>3.2.0</maven.plugin.version.checkstyle>
-        <version.checkstyle>9.3</version.checkstyle>
+        <maven.plugin.version.checkstyle>3.3.1</maven.plugin.version.checkstyle>
+        <version.checkstyle>10.14.1</version.checkstyle>
         <maven.plugin.version.compiler>3.10.1</maven.plugin.version.compiler>
         <maven.plugin.version.enforcer>3.2.1</maven.plugin.version.enforcer>
-        <maven.plugin.version.jacoco>0.8.8</maven.plugin.version.jacoco>
-        <maven.plugin.version.javadoc>3.4.1</maven.plugin.version.javadoc>
+        <maven.plugin.version.javadoc>3.6.3</maven.plugin.version.javadoc>
         <maven.plugin.version.moditect>1.0.0.RC3</maven.plugin.version.moditect>
         <maven.plugin.version.release>2.5.3</maven.plugin.version.release>
         <maven.plugin.version.source>3.2.1</maven.plugin.version.source>
-        <maven.plugin.version.surefire>3.0.0-M7</maven.plugin.version.surefire>
+        <maven.plugin.version.surefire>3.2.5</maven.plugin.version.surefire>
 
         <java.module.name>undefined</java.module.name>
 
@@ -315,32 +315,6 @@
                     </dependencies>
                 </plugin>
                 <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${maven.plugin.version.jacoco}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>prepare-agent</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>report</id>
-                            <phase>test</phase>
-                            <goals>
-                                <goal>report</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <dependencies>
-                        <dependency>
-                            <groupId>commons-collections</groupId>
-                            <artifactId>commons-collections</artifactId>
-                            <version>3.2.2</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
                     <version>${maven.plugin.version.source}</version>
@@ -371,7 +345,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>$maven.plugin.version.release{}</version>
+                    <version>${maven.plugin.version.release}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.moditect</groupId>
