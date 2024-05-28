@@ -115,6 +115,7 @@ public class JacksonModule implements Module {
         applySubtypeResolverToConfigBuilder(generalConfigPart, fieldConfigPart, methodConfigPart);
 
         generalConfigPart.withCustomDefinitionProvider(new JsonUnwrappedDefinitionProvider());
+        generalConfigPart.withCustomDefinitionProvider(new JsonValueDefinitionProvider());
     }
 
     private void applySubtypeResolverToConfigBuilder(SchemaGeneratorGeneralConfigPart generalConfigPart,

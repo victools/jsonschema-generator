@@ -54,6 +54,9 @@
             "type": "string",
             "enum": ["entry1", "entry2", "entry3"]
         },
+        "typeWithJsonValue":{
+            "type":"string"
+        },
         "fieldWithDescription": {
             "type": "string",
             "description": "field description"

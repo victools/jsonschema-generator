@@ -95,6 +95,8 @@ public class IntegrationTest {
 
         public TestEnumWithJsonPropertyAnnotations enumValueWithJsonPropertyAnnotations;
 
+        public TestTypeWithJsonValue typeWithJsonValue;
+
         public BaseType interfaceWithDeclaredSubtypes;
 
         @JsonUnwrapped
@@ -129,6 +131,15 @@ public class IntegrationTest {
     enum TestEnumWithJsonPropertyAnnotations {
         @JsonProperty("x_property") X,
         @JsonProperty Y
+    }
+
+    static class TestTypeWithJsonValue {
+        String value;
+
+        @JsonValue
+        String getJsonValue() {
+            return value;
+        }
     }
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
