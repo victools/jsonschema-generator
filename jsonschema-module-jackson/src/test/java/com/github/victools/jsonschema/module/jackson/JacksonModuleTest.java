@@ -185,7 +185,7 @@ public class JacksonModuleTest {
         Mockito.verify(this.methodConfigPart).withWriteOnlyCheck(Mockito.any());
 
         Mockito.verify(this.typesInGeneralConfigPart).withDescriptionResolver(Mockito.any());
-        Mockito.verify(this.typesInGeneralConfigPart, Mockito.times(1 + additionalCustomTypeDefinitions))
+        Mockito.verify(this.typesInGeneralConfigPart, Mockito.times(2 + additionalCustomTypeDefinitions))
                 .withCustomDefinitionProvider(Mockito.any());
     }
 
