@@ -1,0 +1,17 @@
+{
+    "$schema" : "https://json-schema.org/draft/2020-12/schema",
+    "type" : "object",
+    "properties" : {
+        "byteArray" : {
+            "type" : "string",
+            "minLength" : 1,
+            "maxLength" : 10485760,
+            "contentEncoding" : "base64"
+        },
+        "someText" : {
+            "type" : "string",
+            "minLength" : 1,
+            "maxLength" : 100
+        }
+    }
+}
