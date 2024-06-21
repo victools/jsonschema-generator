@@ -41,6 +41,7 @@ public class ExampleTest {
             JacksonSubtypeDefinitionExample.class,
             StrictTypeInfoExample.class,
             SubtypeLookUpExample.class,
+            TargetTypeOverrideExample.class,
             ValidationErrorMessageExample.class
     })
     public void testExample(Class<? extends SchemaGenerationExampleInterface> exampleType) throws Exception {
