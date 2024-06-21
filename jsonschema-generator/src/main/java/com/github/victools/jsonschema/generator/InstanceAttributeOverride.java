@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public interface InstanceAttributeOverride<M extends MemberScope<?, ?>> extends InstanceAttributeOverrideV2<M> {
 
     /**
-     * Add/remove attributes on the given JSON Schema node – this is specifically intended for attributes relating to a particular instance.
+     * Add/remove attributes on the given JSON Schema node - this is specifically intended for attributes relating to a particular instance.
      * <br>
      * E.g. {@link SchemaKeyword#TAG_DESCRIPTION}, {@link SchemaKeyword#TAG_MINIMUM}, {@link SchemaKeyword#TAG_MAXIMUM_EXCLUSIVE}
      *

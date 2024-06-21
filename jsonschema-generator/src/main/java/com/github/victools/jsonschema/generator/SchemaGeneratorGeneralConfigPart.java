@@ -87,7 +87,7 @@ public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigP
     }
 
     /**
-     * Adding a custom schema provider – if it returns null for a given type, the next definition provider will be applied.
+     * Adding a custom schema provider - if it returns null for a given type, the next definition provider will be applied.
      * <br>
      * If all custom schema providers return null (or there is none), then the standard behaviour applies.
      *
@@ -109,7 +109,7 @@ public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigP
     }
 
     /**
-     * Adding a subtype resolver – if it returns null for a given type, the next subtype resolver will be applied.
+     * Adding a subtype resolver - if it returns null for a given type, the next subtype resolver will be applied.
      * <br>
      * If all subtype resolvers return null, there is none or a resolver returns an empty list, then the standard behaviour applies.
      *
@@ -131,9 +131,9 @@ public class SchemaGeneratorGeneralConfigPart extends SchemaGeneratorTypeConfigP
     }
 
     /**
-     * Adding an override for type attributes – all of the registered overrides will be applied in the order of having been added.
+     * Adding an override for type attributes - all the registered overrides will be applied in the order of having been added.
      *
-     * @param override adding/removing attributes on a JSON Schema node – specifically intended for attributes relating to the type in general.
+     * @param override adding/removing attributes on a JSON Schema node - specifically intended for attributes relating to the type in general.
      * @return this builder instance (for chaining)
      */
     public SchemaGeneratorGeneralConfigPart withTypeAttributeOverride(TypeAttributeOverrideV2 override) {

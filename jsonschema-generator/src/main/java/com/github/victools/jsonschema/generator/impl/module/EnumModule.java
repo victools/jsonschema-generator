@@ -69,7 +69,7 @@ public class EnumModule implements Module {
     /**
      * Constructor remembering whether to treat enums as plain strings or as objects.
      *
-     * @param enumConstantToString how to derive a plain string representation from an enum constant value, may be null to treat them as objects
+     * @param enumConstantToString how to derive a plain string representation from an enum constant value, may be null to treat them as objects
      */
     public EnumModule(Function<Enum<?>, String> enumConstantToString) {
         this.enumConstantToString = enumConstantToString;
@@ -112,7 +112,7 @@ public class EnumModule implements Module {
      * Look-up the given enum type's constant values.
      *
      * @param enumType targeted enum type
-     * @param enumConstantToString how to derive a plain string representation from an enum constant value
+     * @param enumConstantToString how to derive a plain string representation from an enum constant value
      * @return collection containing constant enum values
      */
     private static List<String> extractEnumValues(ResolvedType enumType, Function<Enum<?>, String> enumConstantToString) {

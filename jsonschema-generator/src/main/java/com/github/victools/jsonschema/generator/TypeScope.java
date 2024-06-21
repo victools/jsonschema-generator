@@ -95,7 +95,7 @@ public class TypeScope {
     }
 
     /**
-     * Constructing a string that represents this member's type (including possible type parameters and their actual types) – excluding package names.
+     * Constructing a string that represents this member's type (including possible type parameters and their actual types) - excluding package names.
      * <br>
      * This is equivalent to calling: {@code scope.getContext().getSimpleTypeDescription(scope.getType())}
      *
@@ -109,7 +109,7 @@ public class TypeScope {
     }
 
     /**
-     * Constructing a string that represents this member's type (including possible type parameters and their actual types) – including package names.
+     * Constructing a string that represents this member's type (including possible type parameters and their actual types) - including package names.
      * <br>
      * This is equivalent to calling: {@code scope.getContext().getFullTypeDescription(scope.getType())}
      *

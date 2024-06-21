@@ -55,7 +55,7 @@ public enum Option {
      */
     SIMPLIFIED_ENUMS(EnumModule::asObjects, null),
     /**
-     * Whether enums should be treated as plain {@link SchemaKeyword#TAG_TYPE_STRING} values – derived from their respective constant name.
+     * Whether enums should be treated as plain {@link SchemaKeyword#TAG_TYPE_STRING} values - derived from their respective constant name.
      * <br>
      * This only takes effect if {@link Option#FLATTENED_ENUMS_FROM_TOSTRING} is disabled but takes priority over {@link Option#SIMPLIFIED_ENUMS}.
      *
@@ -64,7 +64,7 @@ public enum Option {
      */
     FLATTENED_ENUMS(EnumModule::asStringsFromName, null, Option.SIMPLIFIED_ENUMS),
     /**
-     * Whether enums should be treated as plain {@link SchemaKeyword#TAG_TYPE_STRING} values – derived from their respective {@code toString()}.
+     * Whether enums should be treated as plain {@link SchemaKeyword#TAG_TYPE_STRING} values - derived from their respective {@code toString()}.
      * <br>
      * This takes priority over both {@link Option#FLATTENED_ENUMS} and {@link Option#SIMPLIFIED_ENUMS}.
      *
@@ -241,11 +241,11 @@ public enum Option {
     /**
      * Whether all referenced objects should be listed in the schema's "definitions"/"$defs".
      * <br>
-     * Without this option, only those subschemas will be "$ref"-erenced if they occur more than once – in-lining everything else.
+     * Without this option, only those subschemas will be "$ref"-erenced if they occur more than once - in-lining everything else.
      */
     DEFINITIONS_FOR_ALL_OBJECTS(null, null),
     /**
-     * Whether the schema for the target/main type should be included in the "definitions"/"$defs" – thereby avoiding an potential {@code "$ref": "#"}
+     * Whether the schema for the target/main type should be included in the "definitions"/"$defs" - thereby avoiding an potential {@code "$ref": "#"}
      * and assigning a name to it like for all other defined subschemas.
      * <br>
      * Otherwise, "$ref"-erences to the main/target schema will use the empty fragment ("#") and it will not be listed in the "definitions"/"$defs".
@@ -259,7 +259,7 @@ public enum Option {
     DEFINITION_FOR_MAIN_SCHEMA(null, null),
     /**
      * Whether a member (field/method), having a declared type for which subtypes are being detected, should be included as standalone definition with
-     * any collected member attributes assigned directly – and the subtypes only being handled as generic types – or each of its subtypes should be
+     * any collected member attributes assigned directly - and the subtypes only being handled as generic types - or each of its subtypes should be
      * treated as alternative sub-schema for this member (field/method) including any attributes derived from that member.
      * <br>
      * Warning: this should only be enabled if there are no relevant annotations (e.g. like jackson {@code @JsonTypeInfo}) on individual properties,

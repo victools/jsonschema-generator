@@ -61,7 +61,7 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
     private final List<ConfigFunction<M, String>> propertyNameOverrideResolvers = new ArrayList<>();
 
     /**
-     * Adding a custom schema provider – if it returns null for a given type, the next definition provider will be applied.
+     * Adding a custom schema provider - if it returns null for a given type, the next definition provider will be applied.
      * <br>
      * If all custom property schema providers return null (or there is none), then the general type custom schema providers apply.
      *
@@ -126,7 +126,7 @@ public class SchemaGeneratorConfigPart<M extends MemberScope<?, ?>> extends Sche
     }
 
     /**
-     * Determine whether a given member should be included – ignoring member if any inclusion check returns false.
+     * Determine whether a given member should be included - ignoring member if any inclusion check returns false.
      *
      * @param member member to check
      * @return whether the member should be ignored (defaults to false)

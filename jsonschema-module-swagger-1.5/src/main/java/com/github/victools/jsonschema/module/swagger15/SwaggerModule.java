@@ -33,7 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * JSON Schema Generator Module – Swagger (1.5).
+ * JSON Schema Generator Module - Swagger (1.5).
  */
 public class SwaggerModule implements Module {
 
@@ -76,7 +76,7 @@ public class SwaggerModule implements Module {
     }
 
     /**
-     * Apply configurations that are part of this module to the given configuration part – expectation being that fields and methods get the same.
+     * Apply configurations that are part of this module to the given configuration part - expectation being that fields and methods get the same.
      *
      * @param configPart configuration instance to add configurations too
      */

@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public interface TypeAttributeOverride extends TypeAttributeOverrideV2 {
 
     /**
-     * Add/remove attributes on the given JSON Schema node – this is specifically intended for attributes relating to the type in general.
+     * Add/remove attributes on the given JSON Schema node - this is specifically intended for attributes relating to the type in general.
      * <br>
      * E.g. {@link SchemaKeyword#TAG_FORMAT}, {@link SchemaKeyword#TAG_PATTERN}, {@link SchemaKeyword#TAG_REQUIRED}
      *

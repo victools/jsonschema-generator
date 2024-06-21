@@ -232,7 +232,7 @@ public class SimpleTypeModule implements Module {
     }
 
     /**
-     * Determine whether a given type is nullable – returning false if the type refers to a primitive type.
+     * Determine whether a given type is nullable - returning false if the type refers to a primitive type.
      *
      * @param fieldOrMethod reference to the method/field (which is being ignored here)
      * @return false if type is a primitive, otherwise null

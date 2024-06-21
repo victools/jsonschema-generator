@@ -46,7 +46,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
- * JSON Schema Generator Module – Swagger (2.x).
+ * JSON Schema Generator Module - Swagger (2.x).
  *
  * @since 4.13.0
  */

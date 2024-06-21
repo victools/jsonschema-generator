@@ -69,7 +69,7 @@ public interface SchemaGeneratorConfig extends StatefulConfig {
 
     /**
      * Determine whether a member (field/method), having a declared type for which subtypes are being detected, should be merely a collection of its
-     * subtype schemas – each being treated like the member had declared the subtype directly – or whether it should be included as standalone
+     * subtype schemas - each being treated like the member had declared the subtype directly - or whether it should be included as standalone
      * definition with any collected member attributes assigned directly and the subtypes only being handled as generic types.
      *
      * @return whether to produce sub-schema for each subtype of a member's declared type, like the member had declared that subtype instead
