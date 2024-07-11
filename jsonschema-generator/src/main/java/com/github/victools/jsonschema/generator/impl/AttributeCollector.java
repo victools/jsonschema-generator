@@ -435,6 +435,7 @@ public class AttributeCollector {
         }
         Class<?> targetType = target.getClass();
         return targetType.isPrimitive()
+                || Boolean.class.isAssignableFrom(targetType)
                 || Number.class.isAssignableFrom(targetType)
                 || CharSequence.class.isAssignableFrom(targetType)
                 || Enum.class.isAssignableFrom(targetType);

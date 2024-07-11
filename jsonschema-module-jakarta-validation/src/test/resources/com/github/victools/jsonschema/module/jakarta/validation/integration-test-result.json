@@ -2,10 +2,17 @@
     "$schema": "https://json-schema.org/draft/2019-09/schema",
     "type": "object",
     "properties": {
+        "allEnumResolvedObject": {
+            "enum": [true, false]
+        },
         "exclusiveRangeDouble": {
             "type": "number",
             "exclusiveMinimum": 0,
             "exclusiveMaximum": 1
+        },
+        "falseBoolean": {
+            "type": "boolean",
+            "const": false
         },
         "inclusiveRangeInt": {
             "type": "integer",
@@ -113,6 +120,10 @@
             "type": "string",
             "minLength": 5,
             "maxLength": 12
+        },
+        "trueBoolean": {
+            "type": "boolean",
+            "const": true
         }
     },
     "required": ["notBlankText", "notEmptyList", "notEmptyMap", "notEmptyPatternText", "notNullEmail", "notNullList"]

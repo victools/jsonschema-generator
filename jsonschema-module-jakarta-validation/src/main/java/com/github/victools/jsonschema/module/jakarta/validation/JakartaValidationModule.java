@@ -28,6 +28,8 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import jakarta.validation.Constraint;
+import jakarta.validation.constraints.AssertFalse;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
@@ -45,12 +47,13 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntBiFunction;
@@ -116,8 +119,9 @@ public class JakartaValidationModule implements Module {
         if (this.options.contains(JakartaValidationOption.NOT_NULLABLE_METHOD_IS_REQUIRED)) {
             methodConfigPart.withRequiredCheck(this::isRequired);
         }
-        Stream.of(DecimalMax.class, DecimalMin.class, Email.class, Max.class, Min.class, Negative.class, NegativeOrZero.class,
-                        NotBlank.class, NotEmpty.class, Null.class, NotNull.class, Pattern.class, Positive.class, PositiveOrZero.class, Size.class)
+        Stream.of(AssertFalse.class, AssertTrue.class, DecimalMax.class, DecimalMin.class, Email.class, Max.class, Min.class,
+                        Negative.class, NegativeOrZero.class, NotBlank.class, NotEmpty.class, Null.class, NotNull.class,
+                        Pattern.class, Positive.class, PositiveOrZero.class, Size.class)
                 .forEach(annotationType -> builder.withAnnotationInclusionOverride(annotationType, AnnotationInclusion.INCLUDE_AND_INHERIT));
     }
 
@@ -137,6 +141,7 @@ public class JakartaValidationModule implements Module {
         configPart.withNumberExclusiveMinimumResolver(this::resolveNumberExclusiveMinimum);
         configPart.withNumberInclusiveMaximumResolver(this::resolveNumberInclusiveMaximum);
         configPart.withNumberExclusiveMaximumResolver(this::resolveNumberExclusiveMaximum);
+        configPart.withEnumResolver(this::resolveEnum);
         configPart.withInstanceAttributeOverride(this::overrideInstanceAttributes);
 
         if (this.options.contains(JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS)) {
@@ -497,6 +502,27 @@ public class JakartaValidationModule implements Module {
             return BigDecimal.ZERO;
         }
         return null;
+    }
+
+    /**
+     * Look-up the finite list of possible values.
+     * @param member field/method to determine allowed values for
+     * @return applicable "const"/"enum" values or null
+     * @see AssertTrue
+     * @see AssertFalse
+     */
+    protected List<Object> resolveEnum(MemberScope<?, ?> member) {
+        List<Object> values = new ArrayList<>();
+
+        if (this.getAnnotationFromFieldOrGetter(member, AssertTrue.class, AssertTrue::groups) != null) {
+            values.add(true);
+        }
+
+        if (this.getAnnotationFromFieldOrGetter(member, AssertFalse.class, AssertFalse::groups) != null) {
+            values.add(false);
+        }
+
+        return values.isEmpty() ? null : values;
     }
 
     /**
