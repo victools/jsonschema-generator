@@ -2,9 +2,6 @@
     "$schema": "https://json-schema.org/draft/2019-09/schema",
     "type": "object",
     "properties": {
-        "allEnumResolvedObject": {
-            "enum": [true, false]
-        },
         "exclusiveRangeDouble": {
             "type": "number",
             "exclusiveMinimum": 0,

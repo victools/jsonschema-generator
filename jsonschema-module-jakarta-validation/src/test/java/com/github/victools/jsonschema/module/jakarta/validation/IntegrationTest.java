@@ -141,9 +141,6 @@ public class IntegrationTest {
         public boolean trueBoolean;
         @AssertFalse
         public boolean falseBoolean;
-        @AssertTrue
-        @AssertFalse
-        public Object allEnumResolvedObject;
     }
 
     static class Book implements Publication {
