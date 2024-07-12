@@ -512,17 +512,15 @@ public class JakartaValidationModule implements Module {
      * @see AssertFalse
      */
     protected List<Object> resolveEnum(MemberScope<?, ?> member) {
-        List<Object> values = new ArrayList<>();
-
+        List<Object> values;
         if (this.getAnnotationFromFieldOrGetter(member, AssertTrue.class, AssertTrue::groups) != null) {
-            values.add(true);
+            values = Collections.singletonList(true);
+        } else if (this.getAnnotationFromFieldOrGetter(member, AssertFalse.class, AssertFalse::groups) != null) {
+            values = Collections.singletonList(false);
+        } else {
+            values = null;
         }
-
-        if (this.getAnnotationFromFieldOrGetter(member, AssertFalse.class, AssertFalse::groups) != null) {
-            values.add(false);
-        }
-
-        return values.isEmpty() ? null : values;
+        return values;
     }
 
     /**
