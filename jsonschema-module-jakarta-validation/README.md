@@ -13,6 +13,7 @@ Module for the [jsonschema-generator](../jsonschema-generator) – deriving JSON
 7. Populate "pattern" for strings. Based on `@Pattern`/`@Email`, when corresponding `JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS` is being provided in constructor.
 8. Populate "minimum"/"exclusiveMinimum" for numbers. Based on `@Min`/`@DecimalMin`/`@Positive`/`@PositiveOrZero`.
 9. Populate "maximum"/"exclusiveMaximum" for numbers. Based on `@Max`/`@DecimalMax`/`@Negative`/`@NegativeOrZero`.
+10. Populate "enum"/"const" for booleans. Based on `@AssertTrue`/`@AssertFalse`.
 
 Schema attributes derived from validation annotations on fields are also applied to their respective getter methods.  
 Schema attributes derived from validation annotations on getter methods are also applied to their associated fields.

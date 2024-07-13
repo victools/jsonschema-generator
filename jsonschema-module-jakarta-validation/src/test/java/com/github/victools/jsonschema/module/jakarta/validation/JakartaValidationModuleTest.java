@@ -23,6 +23,8 @@ import com.github.victools.jsonschema.generator.InstanceAttributeOverrideV2;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
+import jakarta.validation.constraints.AssertFalse;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
@@ -40,6 +42,8 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -146,6 +150,7 @@ public class JakartaValidationModuleTest {
         Mockito.verify(this.fieldConfigPart).withNumberExclusiveMinimumResolver(Mockito.any());
         Mockito.verify(this.fieldConfigPart).withNumberInclusiveMaximumResolver(Mockito.any());
         Mockito.verify(this.fieldConfigPart).withNumberExclusiveMaximumResolver(Mockito.any());
+        Mockito.verify(this.fieldConfigPart).withEnumResolver(Mockito.any());
         Mockito.verify(this.fieldConfigPart).withInstanceAttributeOverride(Mockito.any(InstanceAttributeOverrideV2.class));
 
         Mockito.verify(this.methodConfigPart).withNullableCheck(Mockito.any());
@@ -158,9 +163,10 @@ public class JakartaValidationModuleTest {
         Mockito.verify(this.methodConfigPart).withNumberExclusiveMinimumResolver(Mockito.any());
         Mockito.verify(this.methodConfigPart).withNumberInclusiveMaximumResolver(Mockito.any());
         Mockito.verify(this.methodConfigPart).withNumberExclusiveMaximumResolver(Mockito.any());
+        Mockito.verify(this.methodConfigPart).withEnumResolver(Mockito.any());
         Mockito.verify(this.methodConfigPart).withInstanceAttributeOverride(Mockito.any(InstanceAttributeOverrideV2.class));
 
-        Mockito.verify(this.configBuilder, Mockito.times(15))
+        Mockito.verify(this.configBuilder, Mockito.times(17))
                 .withAnnotationInclusionOverride(Mockito.any(), Mockito.eq(AnnotationInclusion.INCLUDE_AND_INHERIT));
     }
 
@@ -533,6 +539,58 @@ public class JakartaValidationModuleTest {
         Assertions.assertEquals(expectedMaxExclusive, maxExclusive);
     }
 
+    static Stream<Arguments> parametersForTestEnumResolvers() {
+        return Stream.of(
+                Arguments.of("unannotatedBoolean", new Object[]{}),
+                Arguments.of("trueBoolean", new Object[]{true}),
+                Arguments.of("trueOnGetterBoolean", new Object[]{true}),
+                Arguments.of("falseBoolean", new Object[]{false}),
+                Arguments.of("falseOnGetterBoolean", new Object[]{false}),
+                // it's deemed invalid to have both @AssertTrue and @AssertFalse simultaneously
+                Arguments.of("trueAndFalseBoolean", new Object[]{true}),
+                Arguments.of("trueAndFalseOnGetterBoolean", new Object[]{true})
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("parametersForTestEnumResolvers")
+    public void testEnumResolversNoValidationGroup(String fieldName, Object[] expectedValues) {
+        new JakartaValidationModule().applyToConfigBuilder(this.configBuilder);
+
+        this.testEnumResolvers(fieldName, expectedValues);
+    }
+
+    @ParameterizedTest
+    @MethodSource("parametersForTestEnumResolvers")
+    public void testEnumResolversMatchingValidationGroup(String fieldName, Object[] expectedValues) {
+        new JakartaValidationModule()
+                .forValidationGroups(Test.class)
+                .applyToConfigBuilder(this.configBuilder);
+
+        this.testEnumResolvers(fieldName, expectedValues);
+    }
+
+    @ParameterizedTest
+    @MethodSource("parametersForTestEnumResolvers")
+    public void testEnumResolversDifferentValidationGroup(String fieldName, Object[] ignoredExpectedValues) {
+        new JakartaValidationModule()
+                .forValidationGroups(Object.class)
+                .applyToConfigBuilder(this.configBuilder);
+
+        // none of the annotated values are actually expected to be returned
+        this.testEnumResolvers(fieldName);
+    }
+
+    private void testEnumResolvers(String fieldName, Object... values) {
+        TestType testType = new TestType(TestClassForEnums.class);
+        FieldScope field = testType.getMemberField(fieldName);
+
+        ArgumentCaptor<ConfigFunction<FieldScope, Collection<?>>> enumCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
+        Mockito.verify(this.fieldConfigPart).withEnumResolver(enumCaptor.capture());
+        Collection<?> enumValues = enumCaptor.getValue().apply(field);
+        Assertions.assertEquals(values.length > 0 ? Arrays.asList(values) : null, enumValues);
+    }
+
     static Stream<Arguments> parametersForTestValidationGroupSetting() {
         return Stream.of(
             Arguments.of("skippedConfiguringGroups", "fieldWithoutValidationGroup", Boolean.TRUE, null),
@@ -815,6 +873,36 @@ public class JakartaValidationModuleTest {
         @NegativeOrZero(groups = Test.class)
         public Long getNegativeOrZeroOnGetterLong() {
             return negativeOrZeroOnGetterLong;
+        }
+    }
+
+    private static class TestClassForEnums {
+        boolean unannotatedBoolean;
+        @AssertTrue(groups = Test.class)
+        boolean trueBoolean;
+        boolean trueOnGetterBoolean;
+        @AssertFalse(groups = Test.class)
+        boolean falseBoolean;
+        boolean falseOnGetterBoolean;
+        @AssertTrue(groups = Test.class)
+        @AssertFalse(groups = Test.class)
+        boolean trueAndFalseBoolean;
+        boolean trueAndFalseOnGetterBoolean;
+
+        @AssertTrue(groups = Test.class)
+        public boolean isTrueOnGetterBoolean() {
+            return trueOnGetterBoolean;
+        }
+
+        @AssertFalse(groups = Test.class)
+        public boolean isFalseOnGetterBoolean() {
+            return falseOnGetterBoolean;
+        }
+
+        @AssertTrue(groups = Test.class)
+        @AssertFalse(groups = Test.class)
+        public boolean isTrueAndFalseOnGetterBoolean() {
+            return trueAndFalseOnGetterBoolean;
         }
     }
 
