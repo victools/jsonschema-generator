@@ -506,8 +506,11 @@ public class JakartaValidationModule implements Module {
 
     /**
      * Look-up the finite list of possible values.
+     *
      * @param member field/method to determine allowed values for
      * @return applicable "const"/"enum" values or null
+     *
+     * @since 4.36.0
      * @see AssertTrue
      * @see AssertFalse
      */

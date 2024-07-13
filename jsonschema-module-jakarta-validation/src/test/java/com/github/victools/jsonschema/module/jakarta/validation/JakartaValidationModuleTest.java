@@ -546,6 +546,7 @@ public class JakartaValidationModuleTest {
                 Arguments.of("trueOnGetterBoolean", new Object[]{true}),
                 Arguments.of("falseBoolean", new Object[]{false}),
                 Arguments.of("falseOnGetterBoolean", new Object[]{false}),
+                // it's deemed invalid to have both @AssertTrue and @AssertFalse simultaneously
                 Arguments.of("trueAndFalseBoolean", new Object[]{true}),
                 Arguments.of("trueAndFalseOnGetterBoolean", new Object[]{true})
         );
