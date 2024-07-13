@@ -24,6 +24,8 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import jakarta.validation.Constraint;
+import jakarta.validation.constraints.AssertFalse;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
@@ -134,6 +136,11 @@ public class IntegrationTest {
         @DecimalMin(value = "0", inclusive = false)
         @DecimalMax(value = "1", inclusive = false)
         public double exclusiveRangeDouble;
+
+        @AssertTrue
+        public boolean trueBoolean;
+        @AssertFalse
+        public boolean falseBoolean;
     }
 
     static class Book implements Publication {
