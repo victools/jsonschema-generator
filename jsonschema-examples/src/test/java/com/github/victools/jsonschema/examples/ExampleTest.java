@@ -39,6 +39,7 @@ public class ExampleTest {
             InheritanceRefExample.class,
             JacksonDescriptionAsTitleExample.class,
             JacksonSubtypeDefinitionExample.class,
+            SingleArrayItemExample.class,
             StrictTypeInfoExample.class,
             SubtypeLookUpExample.class,
             TargetTypeOverrideExample.class,
