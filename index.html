@@ -775,23 +775,31 @@ Various aspects can be toggled on/off by including or excluding respective <code
     </tr>
     <tr>
       <td rowspan="2" style="text-align: right">27</td>
+      <td colspan="2"><code>Option.ACCEPT_SINGLE_VALUE_AS_ARRAY</code></td>
+    </tr>
+    <tr>
+      <td>Including an <code>anyOf</code> for every field/method declaring a container type. The <code>anyOf</code> then allows for either the array as declared or just a single item type instead.</td>
+      <td>A container type will be represented by an array with the declared item type.</td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="text-align: right">28</td>
       <td colspan="2"><code>Option.ENUM_KEYWORD_FOR_SINGLE_VALUES</code></td>
     </tr>
     <tr>
       <td>Using the <code>enum</code> keyword for allowed values, even if there is only one.</td>
       <td>In case of a single allowed value, use the <code>const</code> keyword instead of <code>enum</code>.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">28</td>
+      <td rowspan="2" style="text-align: right">29</td>
       <td colspan="2"><code>Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</code></td>
     </tr>
     <tr>
       <td>Setting the <code>additionalProperties</code> attribute in all object schemas to <code>false</code> by default unless some configuration specifically says something else.</td>
       <td>Omitting the <code>additionalProperties</code> attribute in all object schemas by default (thereby allowing any additional properties) unless some configuration specifically says something else.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">29</td>
+      <td rowspan="2" style="text-align: right">30</td>
       <td colspan="2"><code>Option.DEFINITIONS_FOR_ALL_OBJECTS</code></td>
     </tr>
     <tr>
@@ -799,7 +807,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>Only include those entries in the <code>$defs</code>/<code>definitions</code> for object types that are referenced more than once and which are not explicitly declared as "inline" via a custom definition.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">30</td>
+      <td rowspan="2" style="text-align: right">31</td>
       <td colspan="2"><code>Option.DEFINITION_FOR_MAIN_SCHEMA</code></td>
     </tr>
     <tr>
@@ -807,24 +815,24 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>Define the main/target type "inline".</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">31</td>
+      <td rowspan="2" style="text-align: right">32</td>
       <td colspan="2"><code>Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES</code></td>
     </tr>
     <tr>
       <td>For a member (field/method), having a declared type for which subtypes are being detected, include a single definition with any collected member attributes assigned directly. Any subtypes are only being handled as generic types, i.e., outside of the member context. That means, certain relevant annotations may be ignored (e.g. a jackson <code>@JsonTypeInfo</code> override on a single member would not be correctly reflected in the produced schema).</td>
       <td>For a member (field/method), having a declared type for which subtypes are being detected, include a list of definittions: one for each subtype in the given member's context. This allows independently interpreting contextual information (e.g., member annotations) for each subtype.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">32</td>
+      <td rowspan="2" style="text-align: right">33</td>
       <td colspan="2"><code>Option.INLINE_ALL_SCHEMAS</code></td>
     </tr>
     <tr>
       <td>Do not include any <code>$defs</code>/<code>definitions</code> but rather define all sub-schemas "inline" – however, this results in an exception being thrown if the given type contains any kind of circular reference.</td>
       <td>Depending on whether <code>DEFINITIONS_FOR_ALL_OBJECTS</code> is included or excluded.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">33</td>
+      <td rowspan="2" style="text-align: right">34</td>
       <td colspan="2"><code>Option.INLINE_NULLABLE_SCHEMAS</code></td>
     </tr>
     <tr>
@@ -832,7 +840,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>Depending on whether <code>DEFINITIONS_FOR_ALL_OBJECTS</code> is included or excluded.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">34</td>
+      <td rowspan="2" style="text-align: right">35</td>
       <td colspan="2"><code>Option.PLAIN_DEFINITION_KEYS</code></td>
     </tr>
     <tr>
@@ -840,15 +848,16 @@ Various aspects can be toggled on/off by including or excluding respective <code
       <td>Ensure that the keys for any <code>$defs</code>/<code>definitions</code> are URI compatible (as expected by the JSON Schema specification).</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">35</td>
+      <td rowspan="2" style="text-align: right">36</td>
       <td colspan="2"><code>Option.ALLOF_CLEANUP_AT_THE_END</code></td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td>At the very end of the schema generation reduce <code>allOf</code> wrappers where it is possible without overwriting any attributes – this also affects the results from custom definitions.</td>
       <td>Do not attempt to reduce <code>allOf</code> wrappers but preserve them as they were generated regardless of them being necessary or not.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">36</td>
+      <td rowspan="2" style="text-align: right">37</td>
       <td colspan="2"><code>Option.STRICT_TYPE_INFO</code></td>
     </tr>
     <tr>
@@ -1059,69 +1068,76 @@ Various aspects can be toggled on/off by including or excluding respective <code
 </tr>
 <tr>
 <td>27</td>
-<td><code>ENUM_KEYWORD_FOR_SINGLE_VALUES</code></td>
+<td><code>ACCEPT_SINGLE_VALUE_AS_ARRAY</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
 <td>28</td>
-<td><code>FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</code></td>
+<td><code>ENUM_KEYWORD_FOR_SINGLE_VALUES</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
 <td>29</td>
-<td><code>DEFINITIONS_FOR_ALL_OBJECTS</code></td>
+<td><code>FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
 <td>30</td>
-<td><code>DEFINITION_FOR_MAIN_SCHEMA</code></td>
+<td><code>DEFINITIONS_FOR_ALL_OBJECTS</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
 <td>31</td>
-<td><code>DEFINITIONS_FOR_MEMBER_SUPERTYPES</code></td>
+<td><code>DEFINITION_FOR_MAIN_SCHEMA</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
 <td>32</td>
-<td><code>INLINE_ALL_SCHEMAS</code></td>
+<td><code>DEFINITIONS_FOR_MEMBER_SUPERTYPES</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
 <td>33</td>
-<td><code>INLINE_NULLABLE_SCHEMAS</code></td>
+<td><code>INLINE_ALL_SCHEMAS</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
 <td>34</td>
-<td><code>PLAIN_DEFINITION_KEYS</code></td>
+<td><code>INLINE_NULLABLE_SCHEMAS</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
 <td>⬜️</td>
 </tr>
 <tr>
 <td>35</td>
+<td><code>PLAIN_DEFINITION_KEYS</code></td>
+<td>⬜️</td>
+<td>⬜️</td>
+<td>⬜️</td>
+</tr>
+<tr>
+<td>36</td>
 <td><code>ALLOF_CLEANUP_AT_THE_END</code></td>
 <td>✅</td>
 <td>✅</td>
 <td>✅</td>
 </tr>
 <tr>
-<td>36</td>
+<td>37</td>
 <td><code>STRICT_TYPE_INFO</code></td>
 <td>⬜️</td>
 <td>⬜️</td>
@@ -1902,6 +1918,7 @@ With disabled property sorting, your compiler decides the order of the propertie
 <li>Populate &quot;pattern&quot; for strings. Based on <code>@Pattern</code>/<code>@Email</code>, if <code>JakartaValidationOption.INCLUDE_PATTERN_EXPRESSIONS</code> is being provided (i.e. this is an &quot;opt-in&quot;).</li>
 <li>Populate &quot;minimum&quot;/&quot;exclusiveMinimum&quot; for numbers. Based on <code>@Min</code>/<code>@DecimalMin</code>/<code>@Positive</code>/<code>@PositiveOrZero</code>.</li>
 <li>Populate &quot;maximum&quot;/&quot;exclusiveMaximum&quot; for numbers. Based on <code>@Max</code>/<code>@DecimalMax</code>/<code>@Negative</code>/<code>@NegativeOrZero</code>.</li>
+<li>Populate &quot;enum&quot;/&quot;const&quot; for booleans. Based on <code>@AssertTrue</code>/<code>@AssertFalse</code>.</li>
 </ol>
 
 <p>Schema attributes derived from validation annotations on fields are also applied to their respective getter methods.<br>
