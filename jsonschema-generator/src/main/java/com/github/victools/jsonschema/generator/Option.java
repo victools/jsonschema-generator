@@ -26,6 +26,7 @@ import com.github.victools.jsonschema.generator.impl.module.InlineSchemaModule;
 import com.github.victools.jsonschema.generator.impl.module.MethodExclusionModule;
 import com.github.victools.jsonschema.generator.impl.module.SimpleTypeModule;
 import com.github.victools.jsonschema.generator.impl.module.SimplifiedOptionalModule;
+import com.github.victools.jsonschema.generator.impl.module.SingleValueAsArrayModule;
 import java.util.Collections;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -222,6 +223,14 @@ public enum Option {
      * @since 4.11.0
      */
     MAP_VALUES_AS_ADDITIONAL_PROPERTIES(AdditionalPropertiesModule::forMapValues, null),
+    /**
+     * Whether each property with a container/{@link java.util.Collection Collection} type should also allow for a single collection item to be
+     * provided instead of an array. This corresponds to the Jackson
+     * {@link com.fasterxml.jackson.databind.DeserializationFeature#ACCEPT_SINGLE_VALUE_AS_ARRAY ACCEPT_SINGLE_VALUE_AS_ARRAY} feature.
+     *
+     * @since 4.36.0
+     */
+    ACCEPT_SINGLE_VALUE_AS_ARRAY(SingleValueAsArrayModule::new, null),
     /**
      * Whether allowed values should always be included in an {@link SchemaKeyword#TAG_ENUM "enum"} keyword. If there is exactly one allowed value, it
      * will otherwise be represented by a {@link SchemaKeyword#TAG_CONST "const"} keyword instead.
