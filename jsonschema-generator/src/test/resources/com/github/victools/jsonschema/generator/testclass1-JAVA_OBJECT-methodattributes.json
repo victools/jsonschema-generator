@@ -6,10 +6,16 @@
             "const": 5
         },
         "genericArray": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
+            "anyOf": [
+                {
+                    "type": "string"
+                }, {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
         },
         "genericValue": {
             "type": ["string", "null"],

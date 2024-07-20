@@ -117,7 +117,8 @@ public class SchemaGeneratorComplexTypesTest {
                         .withAnchorResolver(scope -> scope.isContainerType() ? null : "#anchor")
                         .withPropertySorter((_prop1, _prop2) -> 0),
                 "for type in general: ");
-        Module methodModule = configBuilder -> populateConfigPart(configBuilder.with(Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
+        Module methodModule = configBuilder -> populateConfigPart(configBuilder.with(Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS,
+                Option.ACCEPT_SINGLE_VALUE_AS_ARRAY)
                 .forMethods(), "looked-up from method: ");
         Module fieldModule = configBuilder -> populateConfigPart(configBuilder.with(Option.INLINE_ALL_SCHEMAS).forFields(), "looked-up from field: ");
         Module enumToStringModule = configBuilder -> configBuilder.with(Option.FLATTENED_ENUMS_FROM_TOSTRING);

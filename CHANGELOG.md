@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### `jsonschema-generator`
+#### Added
+- new `Option.ACCEPT_SINGLE_VALUE_AS_ARRAY` to support Jackson `DeserializationFeature` of the same name, i.e., when an array type is declared, an instance of a single item should also be accepted by the schema
+
 #### Changed
 - consider `Boolean` values as valid in `const`/`enum` (i.e., no longer ignore them)
 

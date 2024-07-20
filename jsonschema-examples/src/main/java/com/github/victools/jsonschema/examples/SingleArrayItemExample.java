@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.examples;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.MemberScope;
+import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
@@ -42,22 +43,13 @@ public class SingleArrayItemExample implements SchemaGenerationExampleInterface 
     @Override
     public ObjectNode generateSchema() {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON);
-        configBuilder.forFields()
-                .withTargetTypeOverridesResolver(this::acceptSingleValueAsArray);
+        configBuilder.with(Option.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         SchemaGeneratorConfig config = configBuilder.build();
         SchemaGenerator generator = new SchemaGenerator(config);
         return generator.generateSchema(Example.class);
     }
 
-    private List<ResolvedType> acceptSingleValueAsArray(MemberScope<?, ?> scope) {
-        if (scope.isContainerType() && !scope.isFakeContainerItemScope()) {
-            return Arrays.asList(scope.getContainerItemType(), scope.getType());
-        }
-        return null;
-    }
-
     static class Example {
-        @NotNull
         public List<ArrayItem> someArray;
     }
 

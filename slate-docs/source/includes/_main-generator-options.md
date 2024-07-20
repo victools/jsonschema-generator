@@ -260,23 +260,31 @@ configBuilder.without(
     </tr>
     <tr>
       <td rowspan="2" style="text-align: right">27</td>
+      <td colspan="2"><code>Option.ACCEPT_SINGLE_VALUE_AS_ARRAY</code></td>
+    </tr>
+    <tr>
+      <td>Including an <code>anyOf</code> for every field/method declaring a container type. The <code>anyOf</code> then allows for either the array as declared or just a single item type instead.</td>
+      <td>A container type will be represented by an array with the declared item type.</td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="text-align: right">28</td>
       <td colspan="2"><code>Option.ENUM_KEYWORD_FOR_SINGLE_VALUES</code></td>
     </tr>
     <tr>
       <td>Using the <code>enum</code> keyword for allowed values, even if there is only one.</td>
       <td>In case of a single allowed value, use the <code>const</code> keyword instead of <code>enum</code>.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">28</td>
+      <td rowspan="2" style="text-align: right">29</td>
       <td colspan="2"><code>Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT</code></td>
     </tr>
     <tr>
       <td>Setting the <code>additionalProperties</code> attribute in all object schemas to <code>false</code> by default unless some configuration specifically says something else.</td>
       <td>Omitting the <code>additionalProperties</code> attribute in all object schemas by default (thereby allowing any additional properties) unless some configuration specifically says something else.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">29</td>
+      <td rowspan="2" style="text-align: right">30</td>
       <td colspan="2"><code>Option.DEFINITIONS_FOR_ALL_OBJECTS</code></td>
     </tr>
     <tr>
@@ -284,7 +292,7 @@ configBuilder.without(
       <td>Only include those entries in the <code>$defs</code>/<code>definitions</code> for object types that are referenced more than once and which are not explicitly declared as "inline" via a custom definition.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">30</td>
+      <td rowspan="2" style="text-align: right">31</td>
       <td colspan="2"><code>Option.DEFINITION_FOR_MAIN_SCHEMA</code></td>
     </tr>
     <tr>
@@ -292,24 +300,24 @@ configBuilder.without(
       <td>Define the main/target type "inline".</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">31</td>
+      <td rowspan="2" style="text-align: right">32</td>
       <td colspan="2"><code>Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES</code></td>
     </tr>
     <tr>
       <td>For a member (field/method), having a declared type for which subtypes are being detected, include a single definition with any collected member attributes assigned directly. Any subtypes are only being handled as generic types, i.e., outside of the member context. That means, certain relevant annotations may be ignored (e.g. a jackson <code>@JsonTypeInfo</code> override on a single member would not be correctly reflected in the produced schema).</td>
       <td>For a member (field/method), having a declared type for which subtypes are being detected, include a list of definittions: one for each subtype in the given member's context. This allows independently interpreting contextual information (e.g., member annotations) for each subtype.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">32</td>
+      <td rowspan="2" style="text-align: right">33</td>
       <td colspan="2"><code>Option.INLINE_ALL_SCHEMAS</code></td>
     </tr>
     <tr>
       <td>Do not include any <code>$defs</code>/<code>definitions</code> but rather define all sub-schemas "inline" – however, this results in an exception being thrown if the given type contains any kind of circular reference.</td>
       <td>Depending on whether <code>DEFINITIONS_FOR_ALL_OBJECTS</code> is included or excluded.</td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
-      <td rowspan="2" style="text-align: right">33</td>
+      <td rowspan="2" style="text-align: right">34</td>
       <td colspan="2"><code>Option.INLINE_NULLABLE_SCHEMAS</code></td>
     </tr>
     <tr>
@@ -317,7 +325,7 @@ configBuilder.without(
       <td>Depending on whether <code>DEFINITIONS_FOR_ALL_OBJECTS</code> is included or excluded.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">34</td>
+      <td rowspan="2" style="text-align: right">35</td>
       <td colspan="2"><code>Option.PLAIN_DEFINITION_KEYS</code></td>
     </tr>
     <tr>
@@ -325,15 +333,16 @@ configBuilder.without(
       <td>Ensure that the keys for any <code>$defs</code>/<code>definitions</code> are URI compatible (as expected by the JSON Schema specification).</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">35</td>
+      <td rowspan="2" style="text-align: right">36</td>
       <td colspan="2"><code>Option.ALLOF_CLEANUP_AT_THE_END</code></td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td>At the very end of the schema generation reduce <code>allOf</code> wrappers where it is possible without overwriting any attributes – this also affects the results from custom definitions.</td>
       <td>Do not attempt to reduce <code>allOf</code> wrappers but preserve them as they were generated regardless of them being necessary or not.</td>
     </tr>
     <tr>
-      <td rowspan="2" style="text-align: right">36</td>
+      <td rowspan="2" style="text-align: right">37</td>
       <td colspan="2"><code>Option.STRICT_TYPE_INFO</code></td>
     </tr>
     <tr>
@@ -350,7 +359,7 @@ Below, you can find the lists of <code>Option</code>s included/excluded in the r
 * "P_J" = <code>PLAIN_JSON</code>
 
 | #  | Standard `Option`                            | F_D | J_O | P_J |
-|----| -------------------------------------------- | -- | --- | --- |
+|----|----------------------------------------------| -- | --- | --- |
 | 1  | `SCHEMA_VERSION_INDICATOR`                   | ⬜️ | ⬜️ | ✅ |
 | 2  | `ADDITIONAL_FIXED_TYPES`                     | ⬜️ | ⬜️ | ✅ |
 | 3  | `STANDARD_FORMATS`                           | ⬜ | ⬜️ | ✅ |
@@ -377,13 +386,14 @@ Below, you can find the lists of <code>Option</code>s included/excluded in the r
 | 24 | `NULLABLE_ARRAY_ITEMS_ALLOWED`               | ⬜️ | ⬜️ | ⬜️ |
 | 25 | `FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS`   | ⬜️ | ⬜️ | ⬜️ |
 | 26 | `MAP_VALUES_AS_ADDITIONAL_PROPERTIES`        | ⬜️ | ⬜️ | ⬜️ |
-| 27 | `ENUM_KEYWORD_FOR_SINGLE_VALUES`             | ⬜️ | ⬜️ | ⬜️ |
-| 28 | `FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` | ⬜️ | ⬜️ | ⬜️ |
-| 29 | `DEFINITIONS_FOR_ALL_OBJECTS`                | ⬜️ | ⬜️ | ⬜️ |
-| 30 | `DEFINITION_FOR_MAIN_SCHEMA`                 | ⬜️ | ⬜️ | ⬜️ |
-| 31 | `DEFINITIONS_FOR_MEMBER_SUPERTYPES`          | ⬜️ | ⬜️ | ⬜️ |
-| 32 | `INLINE_ALL_SCHEMAS`                         | ⬜️ | ⬜️ | ⬜️ |
-| 33 | `INLINE_NULLABLE_SCHEMAS`                    | ⬜️ | ⬜️ | ⬜️ |
-| 34 | `PLAIN_DEFINITION_KEYS`                      | ⬜️ | ⬜️ | ⬜️ |
-| 35 | `ALLOF_CLEANUP_AT_THE_END`                   | ✅ | ✅ | ✅ |
-| 36 | `STRICT_TYPE_INFO`                           | ⬜️ | ⬜️ | ⬜️ |
+| 27 | `ACCEPT_SINGLE_VALUE_AS_ARRAY`               | ⬜️ | ⬜️ | ⬜️ |
+| 28 | `ENUM_KEYWORD_FOR_SINGLE_VALUES`             | ⬜️ | ⬜️ | ⬜️ |
+| 29 | `FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT` | ⬜️ | ⬜️ | ⬜️ |
+| 30 | `DEFINITIONS_FOR_ALL_OBJECTS`                | ⬜️ | ⬜️ | ⬜️ |
+| 31 | `DEFINITION_FOR_MAIN_SCHEMA`                 | ⬜️ | ⬜️ | ⬜️ |
+| 32 | `DEFINITIONS_FOR_MEMBER_SUPERTYPES`          | ⬜️ | ⬜️ | ⬜️ |
+| 33 | `INLINE_ALL_SCHEMAS`                         | ⬜️ | ⬜️ | ⬜️ |
+| 34 | `INLINE_NULLABLE_SCHEMAS`                    | ⬜️ | ⬜️ | ⬜️ |
+| 35 | `PLAIN_DEFINITION_KEYS`                      | ⬜️ | ⬜️ | ⬜️ |
+| 36 | `ALLOF_CLEANUP_AT_THE_END`                   | ✅ | ✅ | ✅ |
+| 37 | `STRICT_TYPE_INFO`                           | ⬜️ | ⬜️ | ⬜️ |
