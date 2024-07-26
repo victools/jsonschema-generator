@@ -166,6 +166,7 @@
         <version.swagger-2>2.2.5</version.swagger-2>
         <!-- maven plugin runtime dependencies -->
         <version.classgraph>4.8.149</version.classgraph>
+        <version.gson>2.11.0</version.gson>
     </properties>
 
     <dependencyManagement>
@@ -211,6 +212,11 @@
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
                 <version>${version.classgraph}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${version.gson}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
