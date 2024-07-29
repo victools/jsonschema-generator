@@ -1,0 +1,24 @@
+{
+    "$schema" : "https://json-schema.org/draft/2020-12/schema",
+    "type" : "object",
+    "properties" : {
+        "bar" : {
+            "type" : "array",
+            "items" : {
+                "type" : "string"
+            }
+        },
+        "baz" : {
+            "type" : "number"
+        },
+        "foo" : {
+            "type" : "string"
+        },
+        "foobar" : {
+            "type" : "integer"
+        }
+    },
+    "dependentRequired" : {
+        "foo" : [ "foobar", "bar" ]
+    }
+}
