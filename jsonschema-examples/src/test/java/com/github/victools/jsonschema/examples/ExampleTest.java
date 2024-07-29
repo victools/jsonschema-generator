@@ -32,6 +32,7 @@ public class ExampleTest {
     @ParameterizedTest
     @ValueSource(classes = {
             AnnotationInheritanceExample.class,
+            DependentRequiredExample.class,
             EnumMapExample.class,
             ExternalRefAnnotationExample.class,
             ExternalRefPackageExample.class,
