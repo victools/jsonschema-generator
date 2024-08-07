@@ -60,13 +60,13 @@ public class ValidationErrorMessageExample implements SchemaGenerationExampleInt
 
     private <M extends MemberScope<?, ?>> void includeMessageAttribute(ObjectNode collectedMemberAttributes, M member,
                 SchemaGenerationContext context) {
-        Map<SchemaKeyword, String> validationMessages = new HashMap<>();
-        NotNull notNullAnnotation = this.getAnnotation(member, NotNull.class);
-        NotEmpty notEmptyAnnotation = this.getAnnotation(member, NotEmpty.class);
-        NotBlank notBlankAnnotation = this.getAnnotation(member, NotBlank.class);
-        Size sizeAnnotation = this.getAnnotation(member, Size.class);
-        Min minAnnotation = this.getAnnotation(member, Min.class);
-        Max maxAnnotation = this.getAnnotation(member, Max.class);
+        final Map<SchemaKeyword, String> validationMessages = new HashMap<>();
+        final NotNull notNullAnnotation = this.getAnnotation(member, NotNull.class);
+        final NotEmpty notEmptyAnnotation = this.getAnnotation(member, NotEmpty.class);
+        final NotBlank notBlankAnnotation = this.getAnnotation(member, NotBlank.class);
+        final Size sizeAnnotation = this.getAnnotation(member, Size.class);
+        final Min minAnnotation = this.getAnnotation(member, Min.class);
+        final Max maxAnnotation = this.getAnnotation(member, Max.class);
 
         if (!member.isFakeContainerItemScope()) {
             if (notNullAnnotation != null) {

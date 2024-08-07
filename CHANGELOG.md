@@ -6,14 +6,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### `jsonschema-generator`
+#### Fixed
+- avoid exception when trying to collect supported enum values from raw `Enum` type (i.e., missing type parameter)
+
+## [4.36.0] - 2024-07-20
+### `jsonschema-generator`
+#### Added
+- new `Option.ACCEPT_SINGLE_VALUE_AS_ARRAY` to support Jackson `DeserializationFeature` of the same name, i.e., when an array type is declared, an instance of a single item should also be accepted by the schema
+
+#### Changed
+- consider `Boolean` values as valid in `const`/`enum` (i.e., no longer ignore them)
+
+### `jsonschema-module-jakarta-validation`
+#### Added
+- populate `const`/`enum` based on `@AssertTrue`/`@AssertFalse`
+
+## [4.35.0] - 2024-03-29
+### `jsonschema-generator`
+#### Added
+- check for custom definitions for `void` methods (this may result in exceptions inside custom configuration if a `null` return type is not considered)
+
+#### Changed
+- if present, apply custom definition for `void` methods
+
+## [4.34.0] - 2024-03-14
+### `jsonschema-generator`
 #### Added
 - new `Option.DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END` discard duplicate elements from member sub-schemas
 
 #### Changed
 - new `Option.DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END` by default included in standard `OptionPreset`s
 
+### `jsonschema-module-jackson`
 #### Fixed
-- avoid exception when trying to collect supported enum values from raw `Enum` type (i.e., missing type parameter)
+- `@JsonUnwrapped` annotation on inherited properties resulted in those properties being ignored instead of being unwrapped
 
 ## [4.33.1] - 2023-12-19
 ### `jsonschema-module-jackson`
@@ -812,7 +838,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.33.1...HEAD
+[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.35.0...HEAD
+[4.36.0]: https://github.com/victools/jsonschema-generator/compare/v4.35.0...v4.36.0
+[4.35.0]: https://github.com/victools/jsonschema-generator/compare/v4.34.0...v4.35.0
+[4.34.0]: https://github.com/victools/jsonschema-generator/compare/v4.33.1...v4.34.0
 [4.33.1]: https://github.com/victools/jsonschema-generator/compare/v4.33.0...v4.33.1
 [4.33.0]: https://github.com/victools/jsonschema-generator/compare/v4.32.0...v4.33.0
 [4.32.0]: https://github.com/victools/jsonschema-generator/compare/v4.31.1...v4.32.0

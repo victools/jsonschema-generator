@@ -403,7 +403,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * Collect the specified value(s) from the given definition's {@link SchemaKeyword#TAG_TYPE} attribute.
      *
      * @param definition type definition to extract specified {@link SchemaKeyword#TAG_TYPE} values from
-     * @return extracted {@link SchemaKeyword#TAG_TYPE} – values (may be empty)
+     * @return extracted {@link SchemaKeyword#TAG_TYPE} - values (may be empty)
      */
     private Set<String> collectAllowedSchemaTypes(ObjectNode definition) {
         JsonNode declaredTypes = definition.get(this.getKeyword(SchemaKeyword.TAG_TYPE));
@@ -592,7 +592,12 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      */
     private JsonNode createMethodSchema(MemberDetails<MethodScope> methodDetails) {
         if (methodDetails.getScope().isVoid()) {
-            return BooleanNode.FALSE;
+            // since 4.35.0: support custom definitions for void methods
+            CustomDefinition customDefinition = this.generatorConfig.getCustomDefinition(methodDetails.getScope(), this,
+                    methodDetails.getIgnoredDefinitionProvider());
+            if (customDefinition == null) {
+                return BooleanNode.FALSE;
+            }
         }
         ObjectNode subSchema = this.generatorConfig.createObjectNode();
         ObjectNode methodAttributes = AttributeCollector.collectMethodAttributes(methodDetails.getScope(), this);

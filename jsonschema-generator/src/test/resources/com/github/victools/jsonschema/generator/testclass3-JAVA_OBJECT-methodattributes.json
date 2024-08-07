@@ -1,5 +1,20 @@
 {
     "definitions": {
+        "LazyStringSupplier": {
+            "type": "object",
+            "properties": {
+                "get()": {
+                    "type": ["string", "null"],
+                    "title": "String",
+                    "description": "looked-up from method: String",
+                    "const": "constant string value",
+                    "minLength": 1,
+                    "maxLength": 256,
+                    "format": "date",
+                    "pattern": "^.{1,256}$"
+                }
+            }
+        },
         "Optional(Integer)": {
             "type": "object",
             "properties": {
@@ -74,22 +89,37 @@
                     ]
                 },
                 "values()": {
-                    "title": "RoundingMode[]",
-                    "description": "looked-up from method: RoundingMode[]",
-                    "minItems": 2,
-                    "maxItems": 100,
-                    "uniqueItems": false,
-                    "type": ["array", "null"],
-                    "items": {
-                        "allOf": [
-                            {
-                                "$ref": "#/definitions/RoundingMode-nullable"
-                            }, {
-                                "title": "RoundingMode",
-                                "description": "looked-up from method: RoundingMode"
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/RoundingMode"
+                                }, {
+                                    "title": "RoundingMode",
+                                    "description": "looked-up from method: RoundingMode"
+                                }
+                            ]
+                        }, {
+                            "title": "RoundingMode[]",
+                            "description": "looked-up from method: RoundingMode[]",
+                            "minItems": 2,
+                            "maxItems": 100,
+                            "uniqueItems": false,
+                            "type": "array",
+                            "items": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/definitions/RoundingMode-nullable"
+                                    }, {
+                                        "title": "RoundingMode",
+                                        "description": "looked-up from method: RoundingMode"
+                                    }
+                                ]
                             }
-                        ]
-                    }
+                        }
+                    ]
                 }
             }
         },
@@ -110,10 +140,16 @@
                     "const": 5
                 },
                 "genericArray": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        }, {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 },
                 "genericValue": {
                     "type": ["string", "null"],
@@ -138,14 +174,20 @@
                 "calculateSomething(Number, Number)": false
             }
         },
-        "TestClass2(Long)-nullable": {
-            "type": ["object", "null"],
+        "TestClass2(Long)": {
+            "type": "object",
             "properties": {
                 "genericArray": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        }, {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    ]
                 },
                 "genericValue": {
                     "type": ["integer", "null"],
@@ -161,14 +203,29 @@
                 }
             }
         },
+        "TestClass2(Long)-nullable": {
+            "anyOf": [
+                {
+                    "type": "null"
+                }, {
+                    "$ref": "#/definitions/TestClass2(Long)"
+                }
+            ]
+        },
         "TestClass2(String)": {
             "type": "object",
             "properties": {
                 "genericArray": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        }, {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 },
                 "genericValue": {
                     "type": ["string", "null"],
@@ -201,10 +258,16 @@
                     "type": ["object", "null"],
                     "properties": {
                         "genericArray": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/TestClass2(String)"
-                            }
+                            "anyOf": [
+                                {
+                                    "$ref": "#/definitions/TestClass2(String)"
+                                }, {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/TestClass2(String)"
+                                    }
+                                }
+                            ]
                         },
                         "genericValue": {
                             "anyOf": [
@@ -235,31 +298,31 @@
                     }
                 },
                 "listOfOptionalS": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Optional(Integer)"
-                    }
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/Optional(Integer)"
+                        }, {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Optional(Integer)"
+                            }
+                        }
+                    ]
                 },
                 "optionalS": {
                     "$ref": "#/definitions/Optional(Integer)"
                 },
                 "setOfStringSupplier": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "get()": {
-                                "type": ["string", "null"],
-                                "title": "String",
-                                "description": "looked-up from method: String",
-                                "const": "constant string value",
-                                "minLength": 1,
-                                "maxLength": 256,
-                                "format": "date",
-                                "pattern": "^.{1,256}$"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/LazyStringSupplier"
+                        }, {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/LazyStringSupplier"
                             }
                         }
-                    }
+                    ]
                 },
                 "supplierS": {
                     "type": "object",
@@ -290,39 +353,70 @@
             "type": ["object", "null"],
             "properties": {
                 "genericArray": {
-                    "type": "array",
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/TestClass1"
-                        }
-                    }
-                },
-                "genericValue": {
-                    "title": "TestClass1[]",
-                    "description": "looked-up from method: TestClass1[]",
-                    "minItems": 2,
-                    "maxItems": 100,
-                    "uniqueItems": false,
-                    "type": ["array", "null"],
-                    "items": {
-                        "anyOf": [
-                            {
-                                "type": "null"
-                            }, {
+                    "anyOf": [
+                        {
+                            "type": "array",
+                            "items": {
                                 "$ref": "#/definitions/TestClass1"
                             }
-                        ],
-                        "title": "TestClass1",
-                        "description": "looked-up from method: TestClass1",
-                        "additionalProperties": false,
-                        "patternProperties": {
-                            "^generic.+$": {
-                                "type": "string"
+                        }, {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/TestClass1"
+                                }
                             }
-                        },
-                        "type": ["object", "null"]
-                    }
+                        }
+                    ]
+                },
+                "genericValue": {
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        }, {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/TestClass1"
+                                }, {
+                                    "title": "TestClass1",
+                                    "description": "looked-up from method: TestClass1",
+                                    "additionalProperties": false,
+                                    "patternProperties": {
+                                        "^generic.+$": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": ["object", "null"]
+                                }
+                            ]
+                        }, {
+                            "title": "TestClass1[]",
+                            "description": "looked-up from method: TestClass1[]",
+                            "minItems": 2,
+                            "maxItems": 100,
+                            "uniqueItems": false,
+                            "type": "array",
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "type": "null"
+                                    }, {
+                                        "$ref": "#/definitions/TestClass1"
+                                    }
+                                ],
+                                "title": "TestClass1",
+                                "description": "looked-up from method: TestClass1",
+                                "additionalProperties": false,
+                                "patternProperties": {
+                                    "^generic.+$": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": ["object", "null"]
+                            }
+                        }
+                    ]
                 }
             },
             "title": "TestClass2<TestClass1[]>",
@@ -355,29 +449,51 @@
             ]
         },
         "nestedLongList": {
-            "title": "List<TestClass2<Long>>",
-            "description": "looked-up from method: List<TestClass2<Long>>",
-            "minItems": 2,
-            "maxItems": 100,
-            "uniqueItems": false,
-            "type": ["array", "null"],
-            "items": {
-                "allOf": [
-                    {
-                        "$ref": "#/definitions/TestClass2(Long)-nullable"
-                    }, {
-                        "title": "TestClass2<Long>",
-                        "description": "looked-up from method: TestClass2<Long>",
-                        "additionalProperties": false,
-                        "patternProperties": {
-                            "^generic.+$": {
-                                "type": "integer"
+            "anyOf": [
+                {
+                    "type": "null"
+                }, {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/TestClass2(Long)"
+                        }, {
+                            "title": "TestClass2<Long>",
+                            "description": "looked-up from method: TestClass2<Long>",
+                            "additionalProperties": false,
+                            "patternProperties": {
+                                "^generic.+$": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": ["object", "null"]
+                        }
+                    ]
+                }, {
+                    "title": "List<TestClass2<Long>>",
+                    "description": "looked-up from method: List<TestClass2<Long>>",
+                    "minItems": 2,
+                    "maxItems": 100,
+                    "uniqueItems": false,
+                    "type": "array",
+                    "items": {
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/TestClass2(Long)-nullable"
+                            }, {
+                                "title": "TestClass2<Long>",
+                                "description": "looked-up from method: TestClass2<Long>",
+                                "additionalProperties": false,
+                                "patternProperties": {
+                                    "^generic.+$": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": ["object", "null"]
                             }
-                        },
-                        "type": ["object", "null"]
+                        ]
                     }
-                ]
-            }
+                }
+            ]
         }
     }
 }

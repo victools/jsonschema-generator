@@ -59,7 +59,7 @@ public class ExternalRefAnnotationExample implements SchemaGenerationExampleInte
         return generator.generateSchema(Example.class);
     }
 
-    private static class SchemaRefDefinitionProvider implements CustomDefinitionProviderV2 {
+    private static final class SchemaRefDefinitionProvider implements CustomDefinitionProviderV2 {
 
         private Class<?> mainType;
 

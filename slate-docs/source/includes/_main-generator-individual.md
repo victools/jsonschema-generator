@@ -194,7 +194,7 @@ configBuilder.forMethods()
 ```java
 configBuilder.forFields()
     .withDependentRequiresResolver(field -> Optional
-        .ofNullable(field.getAnnotationConsideringFieldAndGetter(IfPresentAlsoRequire.class)
+        .ofNullable(field.getAnnotationConsideringFieldAndGetter(IfPresentAlsoRequire.class))
         .map(IfPresentAlsoRequire::value)
         .map(Arrays::asList)
         .orElse(null));

@@ -18,7 +18,6 @@ package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
-import com.fasterxml.classmate.members.RawMember;
 import com.fasterxml.classmate.members.ResolvedMember;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,6 +29,7 @@ import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -43,17 +43,18 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
 
     @Override
     public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
-        if (javaType.getMemberFields().stream().noneMatch(this::hasJsonUnwrappedAnnotation)
-                && javaType.getMemberMethods().stream().noneMatch(this::hasJsonUnwrappedAnnotation)) {
+        ResolvedTypeWithMembers typeWithMembers = context.getTypeContext().resolveWithMembers(javaType);
+
+        if (Arrays.stream(typeWithMembers.getMemberFields()).noneMatch(this::hasJsonUnwrappedAnnotation)
+                && Arrays.stream(typeWithMembers.getMemberMethods()).noneMatch(this::hasJsonUnwrappedAnnotation)) {
             // no need for custom handling here, if no relevant annotation is present
             return null;
         }
         // include the target type itself (assuming the annotated members are being ignored then)
         ObjectNode definition = context.createStandardDefinition(javaType, this);
         ArrayNode allOf = definition.withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF));
-        // include each annotated member's type considering the optional prefix and/or suffix
-        ResolvedTypeWithMembers typeWithMembers = context.getTypeContext().resolveWithMembers(javaType);
 
+        // include each annotated member's type considering the optional prefix and/or suffix
         Stream.concat(Stream.of(typeWithMembers.getMemberFields()), Stream.of(typeWithMembers.getMemberMethods()))
                 .filter(member -> Optional.ofNullable(member.getAnnotations().get(JsonUnwrapped.class))
                         .filter(JsonUnwrapped::enabled).isPresent())
@@ -69,7 +70,7 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      * @param member field/method to check
      * @return whether the given member has an {@code enabled} {@link JsonUnwrapped @JsonUnwrapped} annotation
      */
-    private boolean hasJsonUnwrappedAnnotation(RawMember member) {
+    private boolean hasJsonUnwrappedAnnotation(ResolvedMember<?> member) {
         for (Annotation annotation : member.getAnnotations()) {
             if (annotation instanceof JsonUnwrapped && ((JsonUnwrapped) annotation).enabled()) {
                 return true;

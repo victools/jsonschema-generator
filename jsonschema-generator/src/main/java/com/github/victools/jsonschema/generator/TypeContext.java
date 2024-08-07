@@ -428,7 +428,7 @@ public class TypeContext {
     /**
      * Constructing a string that represents the given type (including possible type parameters and their actual types).
      * <br>
-     * This calls {@link Class#getSimpleName()} for a single erased type – i.e. excluding package names.
+     * This calls {@link Class#getSimpleName()} for a single erased type - i.e. excluding package names.
      *
      * @param type the type to represent
      * @return resulting string

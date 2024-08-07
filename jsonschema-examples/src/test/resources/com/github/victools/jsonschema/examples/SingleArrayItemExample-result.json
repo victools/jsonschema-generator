@@ -1,0 +1,28 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$defs": {
+        "ArrayItem": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "type": "object",
+    "properties": {
+        "someArray": {
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/ArrayItem"
+                }, {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/ArrayItem"
+                    }
+                }
+            ]
+        }
+    }
+}

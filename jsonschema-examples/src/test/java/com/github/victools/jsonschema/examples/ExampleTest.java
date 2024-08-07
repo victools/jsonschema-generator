@@ -32,6 +32,7 @@ public class ExampleTest {
     @ParameterizedTest
     @ValueSource(classes = {
             AnnotationInheritanceExample.class,
+            DependentRequiredExample.class,
             EnumMapExample.class,
             ExternalRefAnnotationExample.class,
             ExternalRefPackageExample.class,
@@ -39,8 +40,10 @@ public class ExampleTest {
             InheritanceRefExample.class,
             JacksonDescriptionAsTitleExample.class,
             JacksonSubtypeDefinitionExample.class,
+            SingleArrayItemExample.class,
             StrictTypeInfoExample.class,
             SubtypeLookUpExample.class,
+            TargetTypeOverrideExample.class,
             ValidationErrorMessageExample.class
     })
     public void testExample(Class<? extends SchemaGenerationExampleInterface> exampleType) throws Exception {

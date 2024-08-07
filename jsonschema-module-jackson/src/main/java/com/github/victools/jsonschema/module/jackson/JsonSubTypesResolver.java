@@ -146,7 +146,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
 
     /**
      * Safe way of resolving an erased subtype from its supertype. If the subtype introduces generic parameters not present on the supertype, the
-     * subtype will be resolved without any type parameters – for simplicity's sake not even the ones declared alongside the supertype then.
+     * subtype will be resolved without any type parameters - for simplicity's sake not even the ones declared alongside the supertype then.
      *
      * @param declaredType supertype encountered while generating a schema
      * @param annotatedSubtype single subtype declared via {@link JsonSubTypes} on the super class
