@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.github.victools</groupId>
         <artifactId>jsonschema-generator-parent</artifactId>
-        <version>4.36.0</version>
+        <version>4.36.1-SNAPSHOT</version>
         <relativePath>../jsonschema-generator-parent/pom.xml</relativePath>
     </parent>
     <artifactId>jsonschema-module-swagger-1.5</artifactId>
