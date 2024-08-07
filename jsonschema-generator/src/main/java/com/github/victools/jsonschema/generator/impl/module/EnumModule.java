@@ -148,14 +148,10 @@ public class EnumModule implements Module {
         @Override
         public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
             if (javaType.isInstanceOf(Enum.class)) {
-                List<String> enumValues = EnumModule.extractEnumValues(javaType, this.enumConstantToString);
-                if (Util.isNullOrEmpty(enumValues)) {
-                    return null;
-                }
                 ObjectNode customNode = context.getGeneratorConfig().createObjectNode()
                         .put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_STRING));
                 new AttributeCollector(context.getGeneratorConfig().getObjectMapper())
-                        .setEnum(customNode, enumValues, context);
+                        .setEnum(customNode, EnumModule.extractEnumValues(javaType, this.enumConstantToString), context);
                 return new CustomDefinition(customNode);
             }
             return null;

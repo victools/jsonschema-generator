@@ -80,7 +80,7 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
      */
     private void initConfigBuilder(SchemaVersion schemaVersion) {
         this.prepareContextForVersion(schemaVersion);
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON);
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, new OptionPreset());
         this.typeConfigPart = Mockito.spy(configBuilder.forTypesInGeneral());
         this.fieldConfigPart = Mockito.spy(configBuilder.forFields());
         this.methodConfigPart = Mockito.spy(configBuilder.forMethods());
@@ -169,17 +169,27 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
     }
 
     @Test
-    public void testRawEnumType() throws JSONException {
+    public void testRawEnumType_asString() throws JSONException {
         this.initConfigBuilder(SchemaVersion.DRAFT_2020_12);
-        // test all three modules at once, as they are all expected to be unable to detect values for the raw enum type
+        this.builder.with(Option.PUBLIC_NONSTATIC_FIELDS, Option.NONSTATIC_NONVOID_NONGETTER_METHODS);
         instanceAsStringsFromName.applyToConfigBuilder(this.builder);
-        instanceAsStringsFromToString.applyToConfigBuilder(this.builder);
+
+        JsonNode enumSchema = new SchemaGenerator(this.builder.build()).generateSchema(TestType.class)
+                .get(SchemaKeyword.TAG_PROPERTIES.forVersion(SchemaVersion.DRAFT_2020_12))
+                .get("rawEnum");
+        JSONAssert.assertEquals("{\"type\":\"string\"}", enumSchema.toString(), JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void testRawEnumType_asObject() throws JSONException {
+        this.initConfigBuilder(SchemaVersion.DRAFT_2020_12);
+        this.builder.with(Option.PUBLIC_NONSTATIC_FIELDS, Option.NONSTATIC_NONVOID_NONGETTER_METHODS);
         instanceAsObjects.applyToConfigBuilder(this.builder);
 
         JsonNode enumSchema = new SchemaGenerator(this.builder.build()).generateSchema(TestType.class)
                 .get(SchemaKeyword.TAG_PROPERTIES.forVersion(SchemaVersion.DRAFT_2020_12))
                 .get("rawEnum");
-        JSONAssert.assertEquals("{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"ordinal\":{\"type\":\"integer\"}}}",
+        JSONAssert.assertEquals("{\"type\":\"object\",\"properties\":{\"compareTo(Enum<Object>)\":{\"type\":\"integer\"},\"name()\":{\"type\":\"string\"}}}",
                 enumSchema.toString(), JSONCompareMode.STRICT);
     }
 
