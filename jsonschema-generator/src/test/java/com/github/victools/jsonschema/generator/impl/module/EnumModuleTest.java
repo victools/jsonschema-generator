@@ -26,21 +26,27 @@ import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
+import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
+import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.stream.Stream;
+import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Test for the {@link EnumModule} class.
@@ -74,7 +80,7 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
      */
     private void initConfigBuilder(SchemaVersion schemaVersion) {
         this.prepareContextForVersion(schemaVersion);
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, new OptionPreset());
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON);
         this.typeConfigPart = Mockito.spy(configBuilder.forTypesInGeneral());
         this.fieldConfigPart = Mockito.spy(configBuilder.forFields());
         this.methodConfigPart = Mockito.spy(configBuilder.forMethods());
@@ -162,6 +168,21 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         Assertions.assertEquals(value3, enumNode.get(2).textValue());
     }
 
+    @Test
+    public void testRawEnumType() throws JSONException {
+        this.initConfigBuilder(SchemaVersion.DRAFT_2020_12);
+        // test all three modules at once, as they are all expected to be unable to detect values for the raw enum type
+        instanceAsStringsFromName.applyToConfigBuilder(this.builder);
+        instanceAsStringsFromToString.applyToConfigBuilder(this.builder);
+        instanceAsObjects.applyToConfigBuilder(this.builder);
+
+        JsonNode enumSchema = new SchemaGenerator(this.builder.build()).generateSchema(TestType.class)
+                .get(SchemaKeyword.TAG_PROPERTIES.forVersion(SchemaVersion.DRAFT_2020_12))
+                .get("rawEnum");
+        JSONAssert.assertEquals("{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"ordinal\":{\"type\":\"integer\"}}}",
+                enumSchema.toString(), JSONCompareMode.STRICT);
+    }
+
     private enum TestEnum {
         VALUE1, VALUE2, VALUE3;
 
@@ -169,5 +190,9 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
         public String toString() {
             return this.name().toLowerCase() + "_toString";
         }
+    }
+
+    private static class TestType {
+        public Enum rawEnum;
     }
 }

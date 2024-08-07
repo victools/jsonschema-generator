@@ -26,6 +26,7 @@ import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
+import com.github.victools.jsonschema.generator.impl.Util;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -120,7 +121,7 @@ public class EnumModule implements Module {
      */
     private static List<String> extractEnumValues(ResolvedType enumType, Function<Enum<?>, String> enumConstantToString) {
         Class<?> erasedType = enumType.getErasedType();
-        if (erasedType.getEnumConstants() == null) {
+        if (Util.isNullOrEmpty(erasedType.getEnumConstants())) {
             return null;
         }
         return Stream.of(erasedType.getEnumConstants())
@@ -147,10 +148,14 @@ public class EnumModule implements Module {
         @Override
         public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
             if (javaType.isInstanceOf(Enum.class)) {
+                List<String> enumValues = EnumModule.extractEnumValues(javaType, this.enumConstantToString);
+                if (Util.isNullOrEmpty(enumValues)) {
+                    return null;
+                }
                 ObjectNode customNode = context.getGeneratorConfig().createObjectNode()
                         .put(context.getKeyword(SchemaKeyword.TAG_TYPE), context.getKeyword(SchemaKeyword.TAG_TYPE_STRING));
                 new AttributeCollector(context.getGeneratorConfig().getObjectMapper())
-                        .setEnum(customNode, EnumModule.extractEnumValues(javaType, this.enumConstantToString), context);
+                        .setEnum(customNode, enumValues, context);
                 return new CustomDefinition(customNode);
             }
             return null;
