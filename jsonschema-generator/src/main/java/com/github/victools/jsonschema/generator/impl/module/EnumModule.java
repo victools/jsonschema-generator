@@ -26,6 +26,7 @@ import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
+import com.github.victools.jsonschema.generator.impl.Util;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -103,7 +104,10 @@ public class EnumModule implements Module {
     private static List<String> extractEnumValues(MethodScope method) {
         ResolvedType declaringType = method.getDeclaringType();
         if (EnumModule.isEnum(declaringType)) {
-            return EnumModule.extractEnumValues(declaringType.getTypeParameters().get(0), Enum::name);
+            ResolvedType enumType = declaringType.getTypeParameters().stream().findFirst().orElse(null);
+            if (enumType != null) {
+                return EnumModule.extractEnumValues(enumType, Enum::name);
+            }
         }
         return null;
     }
@@ -117,7 +121,7 @@ public class EnumModule implements Module {
      */
     private static List<String> extractEnumValues(ResolvedType enumType, Function<Enum<?>, String> enumConstantToString) {
         Class<?> erasedType = enumType.getErasedType();
-        if (erasedType.getEnumConstants() == null) {
+        if (Util.isNullOrEmpty(erasedType.getEnumConstants())) {
             return null;
         }
         return Stream.of(erasedType.getEnumConstants())
