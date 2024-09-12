@@ -43,6 +43,10 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
 
     @Override
     public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
+        if (javaType == null) {
+            // since 4.37.0: not for void methods
+            return null;
+        }
         ResolvedTypeWithMembers typeWithMembers = context.getTypeContext().resolveWithMembers(javaType);
 
         if (Arrays.stream(typeWithMembers.getMemberFields()).noneMatch(this::hasJsonUnwrappedAnnotation)

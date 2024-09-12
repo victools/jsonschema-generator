@@ -59,6 +59,10 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
 
     @Override
     public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
+        if (javaType == null) {
+            // since 4.37.0: not for void methods
+            return null;
+        }
         Object[] enumConstants = javaType.getErasedType().getEnumConstants();
         if (enumConstants == null || enumConstants.length == 0) {
             return null;

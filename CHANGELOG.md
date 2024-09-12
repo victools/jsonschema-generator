@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `jsonschema-generator`
 #### Fixed
 - avoid exception when trying to collect supported enum values from raw `Enum` type (i.e., missing type parameter)
+- avoid exception when trying to find type with annotation when given type is `null`
+
+### `jsonschema-module-jackson`
+#### Fixed
+- avoid exception in subtype resolution, when targeting void method
 
 ## [4.36.0] - 2024-07-20
 ### `jsonschema-generator`

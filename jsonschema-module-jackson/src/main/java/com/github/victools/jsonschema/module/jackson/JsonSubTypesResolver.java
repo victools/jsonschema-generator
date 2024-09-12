@@ -166,6 +166,10 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      */
     @Override
     public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
+        if (javaType == null) {
+            // since 4.37.0: not for void methods
+            return null;
+        }
         ResolvedType typeWithTypeInfo = context.getTypeContext().getTypeWithAnnotation(javaType, JsonTypeInfo.class);
         if (typeWithTypeInfo == null || javaType.getErasedType().getAnnotation(JsonSubTypes.class) != null
                 || this.skipSubtypeResolution(javaType, context.getTypeContext())) {
