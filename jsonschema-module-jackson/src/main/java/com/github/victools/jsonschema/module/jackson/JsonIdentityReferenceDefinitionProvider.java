@@ -39,6 +39,10 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
 
     @Override
     public CustomDefinition provideCustomSchemaDefinition(ResolvedType javaType, SchemaGenerationContext context) {
+        if (javaType == null) {
+            // since 4.37.0: not for void methods
+            return null;
+        }
         return this.getIdentityReferenceType(javaType, context.getTypeContext())
                 .map(context::createDefinitionReference)
                 .map(CustomDefinition::new)

@@ -392,7 +392,7 @@ public class TypeContext {
      */
     public ResolvedType getTypeConsideringHierarchyMatching(ResolvedType targetType, Predicate<ResolvedType> check) {
         ResolvedType targetSuperType = targetType;
-        do {
+        while (targetSuperType != null) {
             if (check.test(targetSuperType)) {
                 return targetSuperType;
             }
@@ -403,7 +403,7 @@ public class TypeContext {
                 return interfaceWithAnnotation.get();
             }
             targetSuperType = targetSuperType.getParentClass();
-        } while (targetSuperType != null);
+        }
         return null;
     }
 
