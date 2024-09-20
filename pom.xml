@@ -9,6 +9,9 @@
     <name>Java JSON Schema Generator (Reactor)</name>
     <description>Java JSON Schema Generator + Modules – creating a JSON Schema from your Java classes</description>
     <url>https://github.com/victools/jsonschema-generator</url>
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+  </properties>
 
     <!-- For list of contributors, refer to jsonschema-generator-parent/pom.xml -->
 
@@ -57,6 +60,23 @@
                 <configuration>
                     <skip>true</skip>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openrewrite.maven</groupId>
+                <artifactId>rewrite-maven-plugin</artifactId>
+                <version>5.40.2</version>
+                <configuration>
+                    <activeRecipes>
+                        <recipe>org.openrewrite.java.migrate.UpgradeToJava17</recipe>
+                    </activeRecipes>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.openrewrite.recipe</groupId>
+                        <artifactId>rewrite-migrate-java</artifactId>
+                        <version>2.21.0</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
