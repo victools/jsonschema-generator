@@ -20,9 +20,9 @@
     </prerequisites>
 
     <properties>
-        <maven.core.version>3.8.1</maven.core.version>
+        <maven.core.version>3.9.6</maven.core.version>
         <maven.testing.version>3.3.0</maven.testing.version>
-        <maven.tools.version>3.6.0</maven.tools.version>
+        <maven.tools.version>3.11.0</maven.tools.version>
     </properties>
 
     <dependencies>
