@@ -158,13 +158,14 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
     /**
      * Unit test to test the generation of schemas for multiple classes
      */
-    @Test
-    public void testPackageName() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = { "WithoutAbstracts", "WithoutInterfaces" })
+    public void testPackageName(String scenario) throws Exception {
         File testCaseLocation = new File("src/test/resources/reference-test-cases");
-        File generationLocation = new File("target/generated-test-sources/PackageName");
+        File generationLocation = new File("target/generated-test-sources/PackageName" + scenario);
 
         // Execute the pom
-        executePom(new File("src/test/resources/reference-test-cases/PackageName-pom.xml"));
+        executePom(new File("src/test/resources/reference-test-cases/PackageName" + scenario + "-pom.xml"));
 
         // Validate that the schema files are created.
         File resultFileA = new File(generationLocation,"TestClassA-schema.json");
@@ -178,6 +179,11 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         File resultFileC = new File(generationLocation,"TestClassC-schema.json");
         Assertions.assertTrue(resultFileC.exists());
         resultFileC.deleteOnExit();
+
+        File resultFileAbstract = new File(generationLocation,"AbstractTestClass-schema.json");
+        Assertions.assertNotEquals("WithoutAbstracts".equals(scenario), resultFileAbstract.exists());
+        File resultFileInterface = new File(generationLocation,"TestInterface-schema.json");
+        Assertions.assertNotEquals("WithoutInterfaces".equals(scenario), resultFileInterface.exists());
 
         // Validate that they are the same as the reference
         File referenceFileA = new File(testCaseLocation, "TestClassA-reference.json");

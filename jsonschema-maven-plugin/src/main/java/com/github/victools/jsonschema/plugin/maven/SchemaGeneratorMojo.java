@@ -45,6 +45,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -100,6 +101,22 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     @Parameter(property = "annotations")
     private List<AnnotationParameter> annotations = new ArrayList<>();
+
+    /**
+     * Flag indicating whether abstract classes should be ignored, even if they are matching the classname and/or package pattern.
+     *
+     * @since 4.37.0
+     */
+    @Parameter(property = "skipAbstractTypes", defaultValue = "false")
+    private boolean skipAbstractTypes;
+
+    /**
+     * Flag indicating whether interfaces should be ignored, even if they are matching the classname and/or package pattern.
+     *
+     * @since 4.37.0
+     */
+    @Parameter(property = "skipInterfaces", defaultValue = "false")
+    private boolean skipInterfaces;
 
     /**
      * The classpath to look for classes to generate schema files.
@@ -212,14 +229,31 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             if (potentialTarget.isAlreadyGenerated()) {
                 this.getLog().info("- Skipping already generated " + potentialTarget.getFullClassName());
             } else {
-                // Load the class for which the schema will be generated
-                Class<?> schemaClass = this.loadClass(potentialTarget.getFullClassName());
-                this.generateSchema(schemaClass);
+                this.generateSchema(potentialTarget);
                 potentialTarget.setAlreadyGenerated();
             }
         }
         if (matchingClasses.isEmpty()) {
             this.logForNoClassesMatchingFilter(classOrPackageName);
+        }
+    }
+
+    /**
+     * Generate the JSON schema for the indicated type matching a class name or package pattern. Considering further config flags potentially skipping
+     * the schema file generation.
+     *
+     * @param potentialTarget class to produce JSON schema file for
+     * @throws MojoExecutionException In case of problems
+     */
+    private void generateSchema(PotentialSchemaClass potentialTarget) throws MojoExecutionException {
+        // Load the class for which the schema will be generated
+        Class<?> schemaClass = this.loadClass(potentialTarget.getFullClassName());
+        if (this.skipInterfaces && schemaClass.isInterface()) {
+            this.getLog().info("- Skipping interface " + potentialTarget.getFullClassName());
+        } else if (this.skipAbstractTypes && this.isAbstractClass(schemaClass)) {
+            this.getLog().info("- Skipping abstract type " + potentialTarget.getFullClassName());
+        } else {
+            this.generateSchema(schemaClass);
         }
     }
 
@@ -564,5 +598,15 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         } catch (IOException e) {
             throw new MojoExecutionException("Error: Can not write to file " + file, e);
         }
+    }
+
+    /**
+     * Check whether a given class is deemed abstract but not an interface.
+     *
+     * @param targetClass type to check
+     * @return whether the indicated type represents an abstract non-interface class
+     */
+    private boolean isAbstractClass(Class<?> targetClass) {
+        return Modifier.isAbstract(targetClass.getModifiers()) && !targetClass.isInterface();
     }
 }
