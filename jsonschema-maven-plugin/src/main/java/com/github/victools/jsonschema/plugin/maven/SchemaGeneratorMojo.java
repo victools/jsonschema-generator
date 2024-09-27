@@ -250,7 +250,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         Class<?> schemaClass = this.loadClass(potentialTarget.getFullClassName());
         if (this.skipInterfaces && schemaClass.isInterface()) {
             this.getLog().info("- Skipping interface " + potentialTarget.getFullClassName());
-        } else if (this.skipAbstractTypes && Modifier.isAbstract(schemaClass.getModifiers()) && !schemaClass.isInterface()) {
+        } else if (this.skipAbstractTypes && this.isAbstractClass(schemaClass)) {
             this.getLog().info("- Skipping abstract type " + potentialTarget.getFullClassName());
         } else {
             this.generateSchema(schemaClass);
@@ -598,5 +598,15 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         } catch (IOException e) {
             throw new MojoExecutionException("Error: Can not write to file " + file, e);
         }
+    }
+
+    /**
+     * Check whether a given class is deemed abstract but not an interface.
+     *
+     * @param targetClass type to check
+     * @return whether the indicated type represents an abstract non-interface class
+     */
+    private boolean isAbstractClass(Class<?> targetClass) {
+        return Modifier.isAbstract(targetClass.getModifiers()) && !targetClass.isInterface();
     }
 }
