@@ -21,6 +21,8 @@ There are a number of basic configuration options as well as the possibility to 
         <annotations>
             <annotation>com.myOrg.MySchemaAnnotation</annotation>
         </annotations>
+        <skipAbstractTypes>true</skipAbstractTypes>
+        <skipInterfaces>true</skipInterfaces>
         <classpath>PROJECT_ONLY</classpath>
         <failIfNoClassesMatch>false</failIfNoClassesMatch>
     </configuration>
@@ -82,6 +84,15 @@ For example, the given configuration will create a `MyClass.schema` file.
 ```
 To store the generated schema files in the same directory structure as the originating classes, the following can be used `<schemaFileName>{1}/{0}-schema.json</schemaFileName>`.   
 The default `<schemaFileName>` is `{0}-schema.json`.
+
+Additionally, you can omit the generation for abstract classes and/or interfaces by setting the respective `<skipAbstractTypes>` or `<skipInterfaces>` flags to `true` (by default, they are `false`).
+```xml
+<configuration>
+    <packageNames>com/myOrg/myApp/package/**</packageNames>
+    <skipAbstractTypes>true</skipAbstractTypes>
+    <skipInterfaces>true</skipInterfaces>
+</configuration>
+```
 
 ### Selecting Options
 

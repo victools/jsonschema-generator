@@ -6,8 +6,9 @@
                 <artifactId>jsonschema-maven-plugin</artifactId>
                 <configuration>
                     <packageNames>com.github.victools.jsonschema.plugin.maven.testpackage</packageNames>
-                    <schemaFilePath>target/generated-test-sources/PackageName</schemaFilePath>
+                    <schemaFilePath>target/generated-test-sources/PackageNameWithoutInterfaces</schemaFilePath>
                     <excludeClassNames>com.github.victools.jsonschema.plugin.maven.testpackage.TestClassB</excludeClassNames>
+                    <skipInterfaces>true</skipInterfaces>
                 </configuration>
             </plugin>
         </plugins>

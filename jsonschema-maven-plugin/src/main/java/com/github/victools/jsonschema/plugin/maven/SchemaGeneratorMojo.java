@@ -45,6 +45,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -100,6 +101,22 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     @Parameter(property = "annotations")
     private List<AnnotationParameter> annotations = new ArrayList<>();
+
+    /**
+     * Flag indicating whether abstract classes should be ignored, even if they are matching the classname and/or package pattern.
+     *
+     * @since 4.37.0
+     */
+    @Parameter(property = "skipAbstractTypes", defaultValue = "false")
+    private boolean skipAbstractTypes;
+
+    /**
+     * Flag indicating whether interfaces should be ignored, even if they are matching the classname and/or package pattern.
+     *
+     * @since 4.37.0
+     */
+    @Parameter(property = "skipInterfaces", defaultValue = "false")
+    private boolean skipInterfaces;
 
     /**
      * The classpath to look for classes to generate schema files.
@@ -214,7 +231,13 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             } else {
                 // Load the class for which the schema will be generated
                 Class<?> schemaClass = this.loadClass(potentialTarget.getFullClassName());
-                this.generateSchema(schemaClass);
+                if (this.skipInterfaces && schemaClass.isInterface()) {
+                    this.getLog().info("- Skipping interface " + potentialTarget.getFullClassName());
+                } else if (this.skipAbstractTypes && !schemaClass.isInterface() && Modifier.isAbstract(schemaClass.getModifiers())) {
+                    this.getLog().info("- Skipping abstract type " + potentialTarget.getFullClassName());
+                } else {
+                    this.generateSchema(schemaClass);
+                }
                 potentialTarget.setAlreadyGenerated();
             }
         }
