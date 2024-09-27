@@ -229,20 +229,31 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             if (potentialTarget.isAlreadyGenerated()) {
                 this.getLog().info("- Skipping already generated " + potentialTarget.getFullClassName());
             } else {
-                // Load the class for which the schema will be generated
-                Class<?> schemaClass = this.loadClass(potentialTarget.getFullClassName());
-                if (this.skipInterfaces && schemaClass.isInterface()) {
-                    this.getLog().info("- Skipping interface " + potentialTarget.getFullClassName());
-                } else if (this.skipAbstractTypes && !schemaClass.isInterface() && Modifier.isAbstract(schemaClass.getModifiers())) {
-                    this.getLog().info("- Skipping abstract type " + potentialTarget.getFullClassName());
-                } else {
-                    this.generateSchema(schemaClass);
-                }
+                this.generateSchema(potentialTarget);
                 potentialTarget.setAlreadyGenerated();
             }
         }
         if (matchingClasses.isEmpty()) {
             this.logForNoClassesMatchingFilter(classOrPackageName);
+        }
+    }
+
+    /**
+     * Generate the JSON schema for the indicated type matching a class name or package pattern. Considering further config flags potentially skipping
+     * the schema file generation.
+     *
+     * @param potentialTarget class to produce JSON schema file for
+     * @throws MojoExecutionException In case of problems
+     */
+    private void generateSchema(PotentialSchemaClass potentialTarget) throws MojoExecutionException {
+        // Load the class for which the schema will be generated
+        Class<?> schemaClass = this.loadClass(potentialTarget.getFullClassName());
+        if (this.skipInterfaces && schemaClass.isInterface()) {
+            this.getLog().info("- Skipping interface " + potentialTarget.getFullClassName());
+        } else if (this.skipAbstractTypes && Modifier.isAbstract(schemaClass.getModifiers()) && !schemaClass.isInterface()) {
+            this.getLog().info("- Skipping abstract type " + potentialTarget.getFullClassName());
+        } else {
+            this.generateSchema(schemaClass);
         }
     }
 
