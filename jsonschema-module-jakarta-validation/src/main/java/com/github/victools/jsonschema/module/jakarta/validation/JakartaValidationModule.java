@@ -119,6 +119,11 @@ public class JakartaValidationModule implements Module {
         if (this.options.contains(JakartaValidationOption.NOT_NULLABLE_METHOD_IS_REQUIRED)) {
             methodConfigPart.withRequiredCheck(this::isRequired);
         }
+
+        if (this.options.contains(JakartaValidationOption.SKIP_WHERE_VALID_ANNOTATION_IS_MISSING)) {
+            fieldConfigPart.withCustomDefinitionProvider()
+        }
+
         Stream.of(AssertFalse.class, AssertTrue.class, DecimalMax.class, DecimalMin.class, Email.class, Max.class, Min.class,
                         Negative.class, NegativeOrZero.class, NotBlank.class, NotEmpty.class, Null.class, NotNull.class,
                         Pattern.class, Positive.class, PositiveOrZero.class, Size.class)

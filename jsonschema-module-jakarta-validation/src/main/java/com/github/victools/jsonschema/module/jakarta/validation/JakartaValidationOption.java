@@ -37,6 +37,12 @@ public enum JakartaValidationOption {
     /**
      * Use this option to include a string's "pattern" according to {@code @Pattern(regexp = "...")} or {@code @Email(regexp = "...")}.
      */
-    INCLUDE_PATTERN_EXPRESSIONS;
+    INCLUDE_PATTERN_EXPRESSIONS,
+    /**
+     * Use this option to exclude information from validation annotation, if the main {@code @Valid} annotation on a property is not present.
+     *
+     * @since 4.37.0
+     */
+    SKIP_WHERE_VALID_ANNOTATION_IS_MISSING;
 
 }
