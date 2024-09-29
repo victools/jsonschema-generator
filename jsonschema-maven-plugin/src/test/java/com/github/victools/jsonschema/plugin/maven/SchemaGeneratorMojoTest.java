@@ -77,10 +77,10 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         Assertions.assertTrue(FileUtils.contentEqualsIgnoreEOL(resultFile, referenceFile, CHARSET_NAME),
                 "Generated schema for " + testCaseName + " is not equal to the expected reference.\n"
                         + "Generated:\n"
-                        + FileUtils.readFileToString(resultFile)
+                        + FileUtils.readFileToString(resultFile, CHARSET_NAME)
                         + "\n----------\n"
                         + "Expected:\n"
-                        + FileUtils.readFileToString(referenceFile));
+                        + FileUtils.readFileToString(referenceFile, CHARSET_NAME));
     }
 
     /**
