@@ -19,6 +19,7 @@
                 <module>jsonschema-generator-bom</module>
                 <module>jsonschema-generator-parent</module>
                 <module>jsonschema-generator</module>
+                <module>jsonschema-module-gson</module>
                 <module>jsonschema-module-jackson</module>
                 <module>jsonschema-module-jakarta-validation</module>
                 <module>jsonschema-module-javax-validation</module>
