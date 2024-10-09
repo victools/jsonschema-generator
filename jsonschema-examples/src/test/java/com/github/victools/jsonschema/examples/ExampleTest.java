@@ -58,7 +58,7 @@ public class ExampleTest {
     private static String loadResource(String resourcePath) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         try (InputStream inputStream = Objects.requireNonNull(ExampleTest.class.getResourceAsStream(resourcePath));
-             Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
+             Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8)) {
             while (scanner.hasNext()) {
                 stringBuilder.append(scanner.nextLine()).append('\n');
             }

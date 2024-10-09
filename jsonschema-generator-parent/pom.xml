@@ -134,10 +134,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <file.encoding>UTF-8</file.encoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <!-- maven plugins -->
-        <maven.plugin.version.checkstyle>3.3.1</maven.plugin.version.checkstyle>
+        <maven.plugin.version.checkstyle>3.5.0</maven.plugin.version.checkstyle>
         <version.checkstyle>10.14.1</version.checkstyle>
         <maven.plugin.version.compiler>3.10.1</maven.plugin.version.compiler>
         <maven.plugin.version.enforcer>3.2.1</maven.plugin.version.enforcer>
@@ -277,9 +277,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.plugin.version.compiler}</version>
                     <configuration>
-                        <source>${maven.compiler.source}</source>
-                        <target>${maven.compiler.target}</target>
                         <showDeprecation>true</showDeprecation>
+            <release>17</release>
                     </configuration>
                 </plugin>
                 <plugin>

@@ -435,11 +435,11 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     }
 
     private JsonNode populateItemMemberSchema(TypeScope targetScope) {
-        if (targetScope instanceof FieldScope && !((FieldScope) targetScope).isFakeContainerItemScope()) {
-            return this.populateFieldSchema(((FieldScope) targetScope).asFakeContainerItemScope());
+        if (targetScope instanceof FieldScope scope && !scope.isFakeContainerItemScope()) {
+            return this.populateFieldSchema(scope.asFakeContainerItemScope());
         }
-        if (targetScope instanceof MethodScope && !((MethodScope) targetScope).isFakeContainerItemScope()) {
-            return this.populateMethodSchema(((MethodScope) targetScope).asFakeContainerItemScope());
+        if (targetScope instanceof MethodScope scope && !scope.isFakeContainerItemScope()) {
+            return this.populateMethodSchema(scope.asFakeContainerItemScope());
         }
         ObjectNode arrayItemDefinition = this.generatorConfig.createObjectNode();
         this.traverseGenericType(targetScope.getContainerItemType(), arrayItemDefinition, false);
@@ -704,9 +704,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     private void extendTypeDeclarationToIncludeNull(ObjectNode node) {
         JsonNode fixedJsonSchemaType = node.get(this.getKeyword(SchemaKeyword.TAG_TYPE));
         final String nullTypeName = this.getKeyword(SchemaKeyword.TAG_TYPE_NULL);
-        if (fixedJsonSchemaType instanceof ArrayNode) {
-            // there are already multiple "type" values
-            ArrayNode arrayOfTypes = (ArrayNode) fixedJsonSchemaType;
+        if (fixedJsonSchemaType instanceof ArrayNode arrayOfTypes) {
             // one of the existing "type" values could be null
             for (JsonNode arrayEntry : arrayOfTypes) {
                 if (nullTypeName.equals(arrayEntry.textValue())) {

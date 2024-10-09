@@ -76,7 +76,7 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      */
     private boolean hasJsonUnwrappedAnnotation(ResolvedMember<?> member) {
         for (Annotation annotation : member.getAnnotations()) {
-            if (annotation instanceof JsonUnwrapped && ((JsonUnwrapped) annotation).enabled()) {
+            if (annotation instanceof JsonUnwrapped unwrapped && unwrapped.enabled()) {
                 return true;
             }
         }
@@ -109,12 +109,12 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      */
     private void applyPrefixAndSuffixToPropertyNames(JsonNode definition, String prefix, String suffix, SchemaGenerationContext context) {
         JsonNode properties = definition.get(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));
-        if (properties instanceof ObjectNode && !properties.isEmpty()) {
+        if (properties instanceof ObjectNode node && !properties.isEmpty()) {
             List<String> fieldNames = new ArrayList<>();
             properties.fieldNames().forEachRemaining(fieldNames::add);
             for (String fieldName : fieldNames) {
-                JsonNode propertySchema = ((ObjectNode) properties).remove(fieldName);
-                ((ObjectNode) properties).set(prefix + fieldName + suffix, propertySchema);
+                JsonNode propertySchema = node.remove(fieldName);
+                node.set(prefix + fieldName + suffix, propertySchema);
             }
         }
         JsonNode allOf = definition.get(context.getKeyword(SchemaKeyword.TAG_ALLOF));
