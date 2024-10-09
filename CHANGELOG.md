@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Fixed
 - avoid exception in subtype resolution, when targeting void method
 
+### `jsonschema-maven-plugin`
+### Added
+- support `<skipAbstractTypes>` flag to exclude abstract types (not interfaces)
+- support `<skipInterfaces>` flag to exclude interface types
+
 ## [4.36.0] - 2024-07-20
 ### `jsonschema-generator`
 #### Added

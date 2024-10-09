@@ -61,6 +61,16 @@ The content of each of these elements can be either:
 </configuration>
 ```
 
+Additionally, you can omit the generation for abstract classes and/or interfaces by setting the respective `<skipAbstractTypes>` or `<skipInterfaces>`
+flags to `true` (by default, they are `false`).
+```xml
+<configuration>
+    <packageNames>com/myOrg/myApp/package/**</packageNames>
+    <skipAbstractTypes>true</skipAbstractTypes>
+    <skipInterfaces>true</skipInterfaces>
+</configuration>
+```
+
 #### Based on Annotations (`<annotations>`)
 
 Alternatively classes can be selected based on annotations using the `<annotations>` element. Then
