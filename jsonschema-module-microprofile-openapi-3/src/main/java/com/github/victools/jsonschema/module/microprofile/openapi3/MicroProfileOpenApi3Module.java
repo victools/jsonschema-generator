@@ -474,7 +474,6 @@ public class MicroProfileOpenApi3Module implements Module {
                     .forEach(allOfArray::add);
         }
         if (annotation.anyOf().length > 0) {
-            // since 4.26.0
             ArrayNode allOfArray = memberAttributes.withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF));
             ArrayNode anyOfArray = allOfArray.addObject().withArray(context.getKeyword(SchemaKeyword.TAG_ANYOF));
             Stream.of(annotation.anyOf())
@@ -483,7 +482,6 @@ public class MicroProfileOpenApi3Module implements Module {
                     .forEach(anyOfArray::add);
         }
         if (annotation.oneOf().length > 0) {
-            // since 4.26.0
             ArrayNode allOfArray = memberAttributes.withArray(context.getKeyword(SchemaKeyword.TAG_ALLOF));
             ArrayNode oneOfArray = allOfArray.addObject().withArray(context.getKeyword(SchemaKeyword.TAG_ONEOF));
             Stream.of(annotation.oneOf())
