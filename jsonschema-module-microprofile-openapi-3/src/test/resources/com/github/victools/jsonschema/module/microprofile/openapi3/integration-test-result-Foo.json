@@ -1,0 +1,46 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "$defs": {
+        "referenceToPerson": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "the person's name"
+                }
+            },
+            "title": "reference title",
+            "description": "the foo's person",
+            "additionalProperties": false
+        }
+    },
+    "type": "object",
+    "properties": {
+        "anyOfDoubleOrInt": {
+            "anyOf": [{
+                    "type": "number"
+                }, {
+                    "type": "integer"
+                }]
+        },
+        "bar": {
+            "$ref": "http://example.com/bar",
+            "readOnly": true
+        },
+        "oneOfBooleanOrString": {
+            "oneOf": [{
+                    "type": "boolean"
+                }, {
+                    "type": "string"
+                }]
+        },
+        "person": {
+            "$ref": "#/$defs/referenceToPerson",
+            "writeOnly": true
+        },
+        "test": {
+            "$ref": "./TestClass-schema.json"
+        }
+    },
+    "additionalProperties": false
+}
