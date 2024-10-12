@@ -80,7 +80,13 @@ SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(Sc
 #### Complete Example
 
 ```java
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.victools.jsonschema.generator.OptionPreset;
+import com.github.victools.jsonschema.generator.SchemaGenerator;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.module.microprofile.openapi3.MicroProfileOpenApi3Module;
 ```
 ```java
 MicroProfileOpenApi3Module module = new MicroProfileOpenApi3Module();
