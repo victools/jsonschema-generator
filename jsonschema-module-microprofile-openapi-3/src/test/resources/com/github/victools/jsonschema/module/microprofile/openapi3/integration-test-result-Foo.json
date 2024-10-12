@@ -10,8 +10,7 @@
                 }
             },
             "title": "reference title",
-            "description": "the foo's person",
-            "additionalProperties": false
+            "description": "the foo's person"
         }
     },
     "type": "object",

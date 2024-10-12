@@ -207,7 +207,8 @@ public class MicroProfileOpenApi3Module implements Module {
             // block any additional properties
             return Void.class;
         } else {
-            return annotation.additionalProperties();
+            // fall-back on other configuration, e.g., as per Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT
+            return null;
         }
     }
 
