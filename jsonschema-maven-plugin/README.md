@@ -191,9 +191,9 @@ There are six standard modules that can be used:
 - `Jackson`
 - `JakartaValidation`
 - `JavaxValidation`
+- `MicroProfileOpenApi3`
 - `Swagger15` 
 - `Swagger2`
-- `MicroProfileOpenApi3`
 
 ### Defining options for a module
 ```xml
