@@ -374,9 +374,6 @@ public class MicroProfileOpenApi3Module implements Module {
      * @return the {@code @ArraySchema(minItems)} value, otherwise {@code null}
      */
     protected Integer resolveArrayMinItems(MemberScope<?, ?> member) {
-        if (member.isFakeContainerItemScope()) {
-            return null;
-        }
         return this.getArraySchemaTypeAnnotation(member)
                 .map(Schema::minItems)
                 .filter(minItems -> minItems != Integer.MAX_VALUE)
@@ -390,9 +387,6 @@ public class MicroProfileOpenApi3Module implements Module {
      * @return the {@code @ArraySchema(maxItems)} value, otherwise {@code null}
      */
     protected Integer resolveArrayMaxItems(MemberScope<?, ?> member) {
-        if (member.isFakeContainerItemScope()) {
-            return null;
-        }
         return this.getArraySchemaTypeAnnotation(member)
                 .map(Schema::maxItems)
                 .filter(maxItems -> maxItems != Integer.MIN_VALUE)
@@ -406,9 +400,6 @@ public class MicroProfileOpenApi3Module implements Module {
      * @return whether {@code @ArraySchema(uniqueItems = true)} is present
      */
     protected Boolean resolveArrayUniqueItems(MemberScope<?, ?> member) {
-        if (member.isFakeContainerItemScope()) {
-            return null;
-        }
         return this.getArraySchemaTypeAnnotation(member)
                 .map(Schema::uniqueItems)
                 .filter(uniqueItemsFlag -> uniqueItemsFlag)
