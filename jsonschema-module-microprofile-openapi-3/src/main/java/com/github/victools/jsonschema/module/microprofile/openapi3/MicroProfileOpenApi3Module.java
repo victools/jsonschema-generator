@@ -547,7 +547,7 @@ public class MicroProfileOpenApi3Module implements Module {
      */
     private Optional<Schema> getArraySchemaTypeAnnotation(MemberScope<?, ?> member) {
         return Optional.ofNullable(member.getAnnotationConsideringFieldAndGetter(Schema.class))
-                .filter(schema -> SchemaType.ARRAY.equals(schema.type()));
+                .filter(schema -> isArrayType(member, schema));
     }
 
 }
