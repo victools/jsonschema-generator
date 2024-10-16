@@ -68,8 +68,9 @@ It is recommended to use identical versions for both dependencies to ensure comp
 #### Passing into SchemaGeneratorConfigBuilder.with(Module)
 
 ```java
-
-
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.module.microprofile.openapi3.MicroProfileOpenApi3Module;
 ```
 ```java
 MicroProfileOpenApi3Module module = new MicroProfileOpenApi3Module();
