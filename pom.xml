@@ -22,6 +22,7 @@
                 <module>jsonschema-module-jackson</module>
                 <module>jsonschema-module-jakarta-validation</module>
                 <module>jsonschema-module-javax-validation</module>
+                <module>jsonschema-module-microprofile-openapi-3</module>
                 <module>jsonschema-module-swagger-1.5</module>
                 <module>jsonschema-module-swagger-2</module>
                 <module>jsonschema-maven-plugin</module>
@@ -40,6 +41,7 @@
                 <module>jsonschema-module-jackson</module>
                 <module>jsonschema-module-jakarta-validation</module>
                 <module>jsonschema-module-javax-validation</module>
+                <module>jsonschema-module-microprofile-openapi-3</module>
                 <module>jsonschema-module-swagger-1.5</module>
                 <module>jsonschema-module-swagger-2</module>
                 <module>jsonschema-maven-plugin</module>
