@@ -28,7 +28,6 @@ import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -73,7 +72,7 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
             serializedJsonValues = this.getSerializedValuesFromJsonValue(javaType, enumConstants, context);
         }
         if (serializedJsonValues == null && this.checkForJsonPropertyAnnotations) {
-            serializedJsonValues = this.getSerializedValuesFromJsonProperty(javaType, enumConstants, context);
+            serializedJsonValues = this.getSerializedValuesFromJsonProperty(javaType, enumConstants);
         }
         if (serializedJsonValues == null) {
             return null;
@@ -137,21 +136,18 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
      * @param enumConstants non-empty array of enum constants
      * @return annotated {@link JsonProperty#value()} for each enum constant (or {@code null} if the criteria are not met)
      */
-    protected List<String> getSerializedValuesFromJsonProperty(ResolvedType javaType, Object[] enumConstants, SchemaGenerationContext schemaGenerationContext) {
+    protected List<String> getSerializedValuesFromJsonProperty(ResolvedType javaType, Object[] enumConstants) {
         try {
             List<String> serializedJsonValues = new ArrayList<>(enumConstants.length);
             for (Object enumConstant : enumConstants) {
                 String enumValueName = ((Enum<?>) enumConstant).name();
-                JsonProperty annotation = schemaGenerationContext.getTypeContext().getAnnotationFromList(
-                        JsonProperty.class,
-                        Arrays.asList(javaType.getErasedType().getDeclaredField(enumValueName).getAnnotations()),
-                        JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
-                );
-                if (annotation == null) {
+                Optional<JsonProperty> annotation = JacksonHelper.resolveAnnotation(javaType.getErasedType().getDeclaredField(enumValueName), JsonProperty.class);
+                if (!annotation.isPresent()) {
                     // enum constant without @JsonProperty annotation
                     return null;
                 }
-                serializedJsonValues.add(JsonProperty.USE_DEFAULT_NAME.equals(annotation.value()) ? enumValueName : annotation.value());
+                final String value = annotation.get().value();
+                serializedJsonValues.add(JsonProperty.USE_DEFAULT_NAME.equals(value) ? enumValueName : value);
             }
             return serializedJsonValues;
         } catch (NoSuchFieldException | SecurityException ex) {

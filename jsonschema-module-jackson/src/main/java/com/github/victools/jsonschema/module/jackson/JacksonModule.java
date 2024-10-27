@@ -40,6 +40,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -182,11 +183,8 @@ public class JacksonModule implements Module {
      */
     protected String resolveDescriptionForType(TypeScope scope) {
         Class<?> rawType = scope.getType().getErasedType();
-        JsonClassDescription classAnnotation = scope.getContext().getAnnotationFromList(JsonClassDescription.class, Arrays.asList(rawType.getAnnotations()), JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER);
-        if (classAnnotation != null) {
-            return classAnnotation.value();
-        }
-        return null;
+        Optional<JsonClassDescription> classAnnotation = JacksonHelper.resolveAnnotation(rawType, JsonClassDescription.class);
+        return classAnnotation.map(JsonClassDescription::value).orElse(null);
     }
 
     /**

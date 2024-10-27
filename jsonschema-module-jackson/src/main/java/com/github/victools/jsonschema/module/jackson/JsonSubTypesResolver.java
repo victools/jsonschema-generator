@@ -112,12 +112,8 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         if (this.skipSubtypeResolution(declaredType, context.getTypeContext())) {
             return null;
         }
-        JsonSubTypes subtypesAnnotation = context.getTypeContext().getAnnotationFromList(
-                JsonSubTypes.class,
-                Arrays.asList(declaredType.getErasedType().getAnnotations()),
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
-        );
-        return this.lookUpSubtypesFromAnnotation(declaredType, subtypesAnnotation, context.getTypeContext());
+        Optional<JsonSubTypes> subtypesAnnotation = JacksonHelper.resolveAnnotation(declaredType.getErasedType(), JsonSubTypes.class);
+        return this.lookUpSubtypesFromAnnotation(declaredType, subtypesAnnotation.orElse(null), context.getTypeContext());
     }
 
     /**
@@ -179,7 +175,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         }
         final TypeContext typeContext = context.getTypeContext();
         ResolvedType typeWithTypeInfo = typeContext.getTypeWithAnnotation(javaType, JsonTypeInfo.class, JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER);
-        if (typeWithTypeInfo == null || typeContext.getAnnotationFromList(JsonSubTypes.class, Arrays.asList(javaType.getErasedType().getAnnotations()), JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER) != null
+        if (typeWithTypeInfo == null || JacksonHelper.resolveAnnotation(javaType.getErasedType(), JsonSubTypes.class).isPresent()
                 || this.skipSubtypeResolution(javaType, typeContext)) {
             // no @JsonTypeInfo annotation found or the given javaType is the super type, that should be replaced
             return null;

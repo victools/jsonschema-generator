@@ -75,12 +75,8 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
      * @return designated type of the applicable identity reference (may be empty)
      */
     public Optional<ResolvedType> getIdentityReferenceType(ResolvedType javaType, TypeContext typeContext) {
-        JsonIdentityReference referenceAnnotation = typeContext.getAnnotationFromList(
-                JsonIdentityReference.class,
-                Arrays.asList(javaType.getErasedType().getAnnotations()),
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
-        );
-        return this.getIdentityReferenceType(referenceAnnotation, javaType, typeContext);
+        Optional<JsonIdentityReference> referenceAnnotation = JacksonHelper.resolveAnnotation(javaType.getErasedType(), JsonIdentityReference.class);
+        return this.getIdentityReferenceType(referenceAnnotation.orElse(null), javaType, typeContext);
     }
 
     /**

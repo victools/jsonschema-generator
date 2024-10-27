@@ -3,6 +3,7 @@ package com.github.victools.jsonschema.module.jackson;
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +37,7 @@ final class JacksonHelper {
      * @return an empty entry if not found
      * @param <A> the generic type of the annotation
      */
-    static <A extends Annotation> Optional<A> resolveAnnotation(Class<?> declaringType, Class<A> annotationClass) {
+    static <A extends Annotation> Optional<A> resolveAnnotation(AnnotatedElement declaringType, Class<A> annotationClass) {
         final A annotation = declaringType.getAnnotation(annotationClass);
         if (annotation != null) {
             return Optional.of(annotation);
