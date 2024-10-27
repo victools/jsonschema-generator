@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.module.jackson;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedMember;
+import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -30,6 +31,9 @@ import com.github.victools.jsonschema.generator.SchemaKeyword;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -60,9 +64,9 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
 
         // include each annotated member's type considering the optional prefix and/or suffix
         Stream.concat(Stream.of(typeWithMembers.getMemberFields()), Stream.of(typeWithMembers.getMemberMethods()))
-                .filter(member -> Optional.ofNullable(member.getAnnotations().get(JsonUnwrapped.class))
-                        .filter(JsonUnwrapped::enabled).isPresent())
                 .map(member -> this.createUnwrappedMemberSchema(member, context))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .forEachOrdered(allOf::add);
 
         return new CustomDefinition(definition);
@@ -75,14 +79,37 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      * @return whether the given member has an {@code enabled} {@link JsonUnwrapped @JsonUnwrapped} annotation
      */
     private boolean hasJsonUnwrappedAnnotation(ResolvedMember<?> member) {
-        for (Annotation annotation : member.getAnnotations()) {
-            if (annotation instanceof JsonUnwrapped && ((JsonUnwrapped) annotation).enabled()) {
-                return true;
-            }
-        }
-        return false;
+        return lookupEnabledJsonUnwrappedAnnotation(member.getAnnotations()).isPresent();
     }
 
+    /**
+     * Returns the first enabled occurrence of the {@link JsonUnwrapped} annotation found in the specified annotations parameter,
+     * unwrapping "JacksonAnnotationsInside" combo annotations.
+     * 
+     * @param annotations annotations to crawl through
+     * @return a present value if, and only if, an enabled instance was found.
+     */
+    private Optional<JsonUnwrapped> lookupEnabledJsonUnwrappedAnnotation(Iterable<Annotation> annotations) {
+        Deque<Iterator<Annotation>> iterators = new LinkedList<>();
+        iterators.add(annotations.iterator());
+        while (!iterators.isEmpty()) {
+            Iterator<Annotation> iterator = iterators.peek();
+            if (!iterator.hasNext()) {
+                iterators.remove();
+                continue;
+            }
+            Annotation annotation = iterator.next();
+            if (annotation instanceof JsonUnwrapped && ((JsonUnwrapped) annotation).enabled()) {
+                return Optional.of((JsonUnwrapped) annotation);
+            }
+            final Class<? extends Annotation> annotationClass = annotation.annotationType();
+            if (annotationClass.isAnnotationPresent(JacksonAnnotationsInside.class)) {
+                iterators.addFirst(Arrays.asList(annotationClass.getAnnotations()).iterator());
+            }
+        }
+        return Optional.empty();
+    }
+    
     /**
      * Create a schema representing an unwrapped member's type. Contained properties may get a certain prefix and/or suffix applied to their names.
      *
@@ -90,13 +117,15 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      * @param context generation context
      * @return created schema
      */
-    private ObjectNode createUnwrappedMemberSchema(ResolvedMember<?> member, SchemaGenerationContext context) {
-        ObjectNode definition = context.createStandardDefinition(member.getType(), null);
-        JsonUnwrapped annotation = member.getAnnotations().get(JsonUnwrapped.class);
-        if (!annotation.prefix().isEmpty() || !annotation.suffix().isEmpty()) {
-            this.applyPrefixAndSuffixToPropertyNames(definition, annotation.prefix(), annotation.suffix(), context);
-        }
-        return definition;
+    private Optional<ObjectNode> createUnwrappedMemberSchema(ResolvedMember<?> member, SchemaGenerationContext context) {
+        final Optional<JsonUnwrapped> optAnnotation = lookupEnabledJsonUnwrappedAnnotation(member.getAnnotations());
+        return optAnnotation.map(annotation -> {
+            ObjectNode definition = context.createStandardDefinition(member.getType(), null);
+            if (!annotation.prefix().isEmpty() || !annotation.suffix().isEmpty()) {
+                this.applyPrefixAndSuffixToPropertyNames(definition, annotation.prefix(), annotation.suffix(), context);
+            }
+            return definition;
+        });
     }
 
     /**

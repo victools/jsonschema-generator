@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.impl.PropertySortUtils;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -98,9 +99,13 @@ public class JsonPropertySorter implements Comparator<MemberScope<?, ?>> {
      * @return whether properties that are not specifically mentioned in a {@link JsonPropertyOrder} annotation should be sorted alphabetically
      */
     protected boolean shouldSortPropertiesAlphabetically(Class<?> declaringType) {
-        return Optional.ofNullable(declaringType.getAnnotation(JsonPropertyOrder.class))
+        return resolveJsonPropertyOrder(declaringType)
                 .map(JsonPropertyOrder::alphabetic)
                 .orElse(this.sortAlphabeticallyIfNotAnnotated);
+    }
+    
+    private Optional<JsonPropertyOrder> resolveJsonPropertyOrder(Class<?> declaringType) {
+        return JacksonHelper.resolveAnnotation(declaringType, JsonPropertyOrder.class);
     }
 
     /**
@@ -110,7 +115,7 @@ public class JsonPropertySorter implements Comparator<MemberScope<?, ?>> {
      * @return {@link JsonPropertyOrder#value()} or empty list
      */
     private List<String> getAnnotatedPropertyOrder(Class<?> declaringType) {
-        return Optional.ofNullable(declaringType.getAnnotation(JsonPropertyOrder.class))
+        return resolveJsonPropertyOrder(declaringType)
                 .map(JsonPropertyOrder::value)
                 .filter(valueArray -> valueArray.length != 0)
                 .map(Arrays::asList)

@@ -28,6 +28,8 @@ import com.github.victools.jsonschema.generator.CustomPropertyDefinition;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.TypeContext;
+
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -73,7 +75,11 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
      * @return designated type of the applicable identity reference (may be empty)
      */
     public Optional<ResolvedType> getIdentityReferenceType(ResolvedType javaType, TypeContext typeContext) {
-        JsonIdentityReference referenceAnnotation = javaType.getErasedType().getAnnotation(JsonIdentityReference.class);
+        JsonIdentityReference referenceAnnotation = typeContext.getAnnotationFromList(
+                JsonIdentityReference.class,
+                Arrays.asList(javaType.getErasedType().getAnnotations()),
+                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+        );
         return this.getIdentityReferenceType(referenceAnnotation, javaType, typeContext);
     }
 
@@ -86,13 +92,13 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
      * @return designated type of the applicable identity reference (may be empty)
      */
     public Optional<ResolvedType> getIdentityReferenceType(MemberScope<?, ?> scope) {
-        JsonIdentityReference referenceAnnotation = scope.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(JsonIdentityReference.class);
+        JsonIdentityReference referenceAnnotation = scope.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(JsonIdentityReference.class, JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER);
         if (referenceAnnotation == null) {
-            referenceAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonIdentityReference.class);
+            referenceAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonIdentityReference.class, JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER);
         }
         return this.getIdentityReferenceType(referenceAnnotation, scope.getType(), scope.getContext());
     }
-
+    
     /**
      * If applicable, determine the type of the identity reference that should replace the given actual type, if the
      * {@code @JsonIdentityReference(alwaysAsId = true)} annotation is present as well as a corresponding {@code @JsonIdentityInfo} annotation on the
@@ -110,12 +116,12 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
             return Optional.empty();
         }
         // additionally, the type itself must have a @JsonIdentityInfo annotation
-        ResolvedType typeWithIdentityInfoAnnotation = typeContext.getTypeWithAnnotation(javaType, JsonIdentityInfo.class);
+        ResolvedType typeWithIdentityInfoAnnotation = typeContext.getTypeWithAnnotation(javaType, JsonIdentityInfo.class, JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER);
         if (typeWithIdentityInfoAnnotation == null) {
             // otherwise, the @JsonIdentityReference annotation is simply ignored
             return Optional.empty();
         }
-        JsonIdentityInfo identityInfoAnnotation = typeWithIdentityInfoAnnotation.getErasedType().getAnnotation(JsonIdentityInfo.class);
+        JsonIdentityInfo identityInfoAnnotation = typeContext.getAnnotationFromList(JsonIdentityInfo.class, Arrays.asList(typeWithIdentityInfoAnnotation.getErasedType().getAnnotations()), JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER);
         // @JsonIdentityInfo annotation declares generator with specific identity type
         ResolvedType identityTypeFromGenerator = typeContext.getTypeParameterFor(typeContext.resolve(identityInfoAnnotation.generator()),
                 ObjectIdGenerator.class, 0);

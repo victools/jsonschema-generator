@@ -28,6 +28,7 @@ import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,7 +42,6 @@ import java.util.stream.Stream;
  * definition (e.g. from one of the standard generator {@code Option}s).
  */
 public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 {
-
     private final boolean checkForJsonValueAnnotatedMethod;
     private final boolean checkForJsonPropertyAnnotations;
 
@@ -72,7 +72,7 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
             serializedJsonValues = this.getSerializedValuesFromJsonValue(javaType, enumConstants, context);
         }
         if (serializedJsonValues == null && this.checkForJsonPropertyAnnotations) {
-            serializedJsonValues = this.getSerializedValuesFromJsonProperty(javaType, enumConstants);
+            serializedJsonValues = this.getSerializedValuesFromJsonProperty(javaType, enumConstants, context);
         }
         if (serializedJsonValues == null) {
             return null;
@@ -121,7 +121,7 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
         ResolvedMethod[] memberMethods = context.getTypeContext().resolveWithMembers(javaType).getMemberMethods();
         Set<ResolvedMethod> jsonValueAnnotatedMethods = Stream.of(memberMethods)
                 .filter(method -> method.getArgumentCount() == 0)
-                .filter(method -> Optional.ofNullable(method.getAnnotations().get(JsonValue.class)).map(JsonValue::value).orElse(false))
+                .filter(method -> Optional.ofNullable(context.getTypeContext().getAnnotationFromList(JsonValue.class, method.getAnnotations().asList(), JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER)).map(JsonValue::value).orElse(false))
                 .collect(Collectors.toSet());
         if (jsonValueAnnotatedMethods.size() == 1) {
             return jsonValueAnnotatedMethods.iterator().next();
@@ -136,14 +136,16 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
      * @param enumConstants non-empty array of enum constants
      * @return annotated {@link JsonProperty#value()} for each enum constant (or {@code null} if the criteria are not met)
      */
-    protected List<String> getSerializedValuesFromJsonProperty(ResolvedType javaType, Object[] enumConstants) {
+    protected List<String> getSerializedValuesFromJsonProperty(ResolvedType javaType, Object[] enumConstants, SchemaGenerationContext schemaGenerationContext) {
         try {
             List<String> serializedJsonValues = new ArrayList<>(enumConstants.length);
             for (Object enumConstant : enumConstants) {
                 String enumValueName = ((Enum<?>) enumConstant).name();
-                JsonProperty annotation = javaType.getErasedType()
-                        .getDeclaredField(enumValueName)
-                        .getAnnotation(JsonProperty.class);
+                JsonProperty annotation = schemaGenerationContext.getTypeContext().getAnnotationFromList(
+                        JsonProperty.class,
+                        Arrays.asList(javaType.getErasedType().getDeclaredField(enumValueName).getAnnotations()),
+                        JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                );
                 if (annotation == null) {
                     // enum constant without @JsonProperty annotation
                     return null;
