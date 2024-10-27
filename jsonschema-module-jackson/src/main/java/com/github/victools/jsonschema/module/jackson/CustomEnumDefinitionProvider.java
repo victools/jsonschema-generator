@@ -42,6 +42,7 @@ import java.util.stream.Stream;
  * definition (e.g. from one of the standard generator {@code Option}s).
  */
 public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 {
+
     private final boolean checkForJsonValueAnnotatedMethod;
     private final boolean checkForJsonPropertyAnnotations;
 
