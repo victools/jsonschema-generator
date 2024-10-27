@@ -200,7 +200,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      * @return applicable custom per-property override schema definition (may be {@code null})
      */
     public CustomPropertyDefinition provideCustomPropertySchemaDefinition(MemberScope<?, ?> scope, SchemaGenerationContext context) {
-        if (this.skipSubtypeResolution(scope) || context.getTypeContext().getAnnotationFromList(JsonSubTypes.class, Arrays.asList(scope.getType().getErasedType().getAnnotations()), JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER) != null) {
+        if (this.skipSubtypeResolution(scope) || JacksonHelper.resolveAnnotation(scope.getType().getErasedType(), JsonSubTypes.class).isPresent()) {
             return null;
         }
         JsonTypeInfo typeInfoAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonTypeInfo.class, JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER);
@@ -274,13 +274,9 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      * @return simple class name, with declaring class's unqualified name as prefix for member classes
      */
     private static Optional<String> getNameFromTypeNameAnnotation(Class<?> erasedTargetType) {
-        return lookupJsonTypeName(erasedTargetType)
+        return JacksonHelper.resolveAnnotation(erasedTargetType, JsonTypeName.class)
                 .map(JsonTypeName::value)
                 .filter(name -> !name.isEmpty());
-    }
-    
-    private static Optional<JsonTypeName> lookupJsonTypeName(Class<?> erasedTargetType) {
-        return JacksonHelper.resolveAnnotation(erasedTargetType, JsonTypeName.class);
     }
 
     /**

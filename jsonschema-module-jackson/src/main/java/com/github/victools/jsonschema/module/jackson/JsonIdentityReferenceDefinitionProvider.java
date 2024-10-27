@@ -94,7 +94,7 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
         }
         return this.getIdentityReferenceType(referenceAnnotation, scope.getType(), scope.getContext());
     }
-    
+
     /**
      * If applicable, determine the type of the identity reference that should replace the given actual type, if the
      * {@code @JsonIdentityReference(alwaysAsId = true)} annotation is present as well as a corresponding {@code @JsonIdentityInfo} annotation on the

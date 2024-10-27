@@ -121,7 +121,7 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
         ResolvedMethod[] memberMethods = context.getTypeContext().resolveWithMembers(javaType).getMemberMethods();
         Set<ResolvedMethod> jsonValueAnnotatedMethods = Stream.of(memberMethods)
                 .filter(method -> method.getArgumentCount() == 0)
-                .filter(method -> Optional.ofNullable(context.getTypeContext().getAnnotationFromList(JsonValue.class, method.getAnnotations().asList(), JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER)).map(JsonValue::value).orElse(false))
+                .filter(method -> JacksonHelper.resolveAnnotation(method.getRawMember(), JsonValue.class).map(JsonValue::value).orElse(false))
                 .collect(Collectors.toSet());
         if (jsonValueAnnotatedMethods.size() == 1) {
             return jsonValueAnnotatedMethods.iterator().next();
@@ -146,8 +146,8 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
                     // enum constant without @JsonProperty annotation
                     return null;
                 }
-                final String value = annotation.get().value();
-                serializedJsonValues.add(JsonProperty.USE_DEFAULT_NAME.equals(value) ? enumValueName : value);
+                final String annotationValue = annotation.get().value();
+                serializedJsonValues.add(JsonProperty.USE_DEFAULT_NAME.equals(annotationValue) ? enumValueName : annotationValue);
             }
             return serializedJsonValues;
         } catch (NoSuchFieldException | SecurityException ex) {

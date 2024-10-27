@@ -1,5 +1,6 @@
 package com.github.victools.jsonschema.module.jackson;
 
+import com.fasterxml.classmate.members.ResolvedMember;
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 
 import java.lang.annotation.Annotation;
@@ -10,6 +11,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 final class JacksonHelper {
 
@@ -30,7 +32,27 @@ final class JacksonHelper {
     }
 
     /**
+     * Resolves the specified annotation on the given resolved member and resolve indirect jackson annotations.
+     *
+     * <p>It uses the same algorithm as {@link com.github.victools.jsonschema.generator.TypeContext#getAnnotationFromList(Class, List, Predicate)}.</p>
+     *
+     * @param member where to look for the specified annotation
+     * @param annotationClass the class of the annotation to look for
+     * @return an empty entry if not found
+     * @param <A> the generic type of the annotation
+     */
+    static <A extends Annotation> Optional<A> resolveAnnotation(ResolvedMember<?> member, Class<A> annotationClass) {
+        final A annotation = member.getAnnotations().get(annotationClass);
+        if (annotation != null) {
+            return Optional.of(annotation);
+        }
+        return resolveNestedAnnotations(StreamSupport.stream(member.getAnnotations().spliterator(), false), annotationClass);
+    }
+
+    /**
      * Resolves the specified annotation on the given type and resolve indirect jackson annotations.
+     * 
+     * <p>It uses the same algorithm as {@link com.github.victools.jsonschema.generator.TypeContext#getAnnotationFromList(Class, List, Predicate)}.</p>
      * 
      * @param declaringType where to look for the specified annotation
      * @param annotationClass the class of the annotation to look for
@@ -42,7 +64,11 @@ final class JacksonHelper {
         if (annotation != null) {
             return Optional.of(annotation);
         }
-        List<Annotation> annotations = extractNestedAnnotations(Arrays.stream(declaringType.getAnnotations()));
+        return resolveNestedAnnotations(Arrays.stream(declaringType.getAnnotations()), annotationClass);
+    }
+    
+    private static <A extends Annotation> Optional<A> resolveNestedAnnotations(Stream<Annotation> initialAnnotations, Class<A> annotationClass) {
+        List<Annotation> annotations = extractNestedAnnotations(initialAnnotations);
         while (!annotations.isEmpty()) {
             final Optional<Annotation> directAnnotation = annotations.stream().filter(annotationClass::isInstance).findFirst();
             if (directAnnotation.isPresent()) {

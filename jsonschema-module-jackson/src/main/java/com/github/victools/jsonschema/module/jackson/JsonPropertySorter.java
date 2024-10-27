@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.impl.PropertySortUtils;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;

@@ -79,7 +79,7 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      * @return whether the given member has an {@code enabled} {@link JsonUnwrapped @JsonUnwrapped} annotation
      */
     private boolean hasJsonUnwrappedAnnotation(ResolvedMember<?> member) {
-        return lookupEnabledJsonUnwrappedAnnotation(member.getAnnotations()).isPresent();
+        return JacksonHelper.resolveAnnotation(member, JsonUnwrapped.class).filter(JsonUnwrapped::enabled).isPresent();
     }
 
     /**
