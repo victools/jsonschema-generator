@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 VicTools.
+ * Copyright 2024 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

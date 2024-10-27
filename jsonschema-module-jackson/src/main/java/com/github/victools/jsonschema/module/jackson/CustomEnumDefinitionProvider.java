@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 VicTools.
+ * Copyright 2024 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,10 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
             List<String> serializedJsonValues = new ArrayList<>(enumConstants.length);
             for (Object enumConstant : enumConstants) {
                 String enumValueName = ((Enum<?>) enumConstant).name();
-                Optional<JsonProperty> annotation = JacksonHelper.resolveAnnotation(javaType.getErasedType().getDeclaredField(enumValueName), JsonProperty.class);
+                Optional<JsonProperty> annotation = JacksonHelper.resolveAnnotation(
+                        javaType.getErasedType().getDeclaredField(enumValueName),
+                        JsonProperty.class
+                );
                 if (!annotation.isPresent()) {
                     // enum constant without @JsonProperty annotation
                     return null;
