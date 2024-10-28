@@ -98,8 +98,7 @@ GEM
     rb-inotify (0.10.1)
       ffi (~> 1.0)
     redcarpet (3.6.0)
-    rexml (3.3.6)
-      strscan
+    rexml (3.3.9)
     rouge (3.30.0)
     sass (3.7.4)
       sass-listen (~> 4.0.0)
@@ -112,7 +111,6 @@ GEM
     sprockets (3.7.2)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
-    strscan (3.1.0)
     temple (0.10.0)
     thor (1.2.1)
     tilt (2.0.11)
