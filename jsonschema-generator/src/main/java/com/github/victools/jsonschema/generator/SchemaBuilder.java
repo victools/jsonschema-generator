@@ -157,6 +157,7 @@ public class SchemaBuilder {
     /**
      * Completing the schema generation (after {@link #createSchemaReference(Type, Type...)} was invoked for all relevant types) by creating an
      * {@link ObjectNode} containing common schema definitions.
+     *
      * <p>
      * The given definition path (e.g. {@code "definitions"}, {@code "$defs"}, {@code "components/schemas"}) will be used in generated {@code "$ref"}
      * values (e.g. {@code "#/definitions/YourType"}, {@code "#/$defs/YourType"}, {@code "#/components/schemas/YourType"}).

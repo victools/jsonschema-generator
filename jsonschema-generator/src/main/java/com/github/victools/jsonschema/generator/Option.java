@@ -258,6 +258,7 @@ public enum Option {
      * and assigning a name to it like for all other defined subschemas.
      * <br>
      * Otherwise, "$ref"-erences to the main/target schema will use the empty fragment ("#") and it will not be listed in the "definitions"/"$defs".
+     *
      * <p>
      * Beware: this only results in a valid schema from {@link SchemaVersion#DRAFT_2019_09} onward. Before that, everything besides "$ref" would be
      * ignored.
@@ -288,6 +289,7 @@ public enum Option {
     /**
      * Whether all sub-schemas should be defined in-line, i.e. including no "definitions"/"$defs". This takes precedence over
      * {@link #DEFINITIONS_FOR_ALL_OBJECTS} and {@link #DEFINITION_FOR_MAIN_SCHEMA}.
+     *
      * <p>
      * Beware: This will result in an exception being thrown if a single circular reference is being encountered!
      * </p>
