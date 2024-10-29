@@ -658,13 +658,14 @@ public class SchemaCleanUpUtils {
         if (impliedTypes.isEmpty()) {
             return;
         }
-        if (considerNullType) {
-            impliedTypes.add(SchemaKeyword.SchemaType.NULL.getSchemaKeywordValue());
-        }
         if (impliedTypes.size() == 1) {
             schemaNode.put(typeTagName, impliedTypes.get(0));
         } else {
             impliedTypes.forEach(schemaNode.putArray(typeTagName)::add);
+        }
+        if (considerNullType) {
+            // since version 4.37.0
+            SchemaGenerationContextImpl.makeNullable(schemaNode, this.config);
         }
     }
 
