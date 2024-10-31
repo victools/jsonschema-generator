@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### `jsonschema-generator`
+#### Changed
+- apply property name overrides before triggering the ignore check (i.e., provide both the declared and overridden property names if there is one)
+- update various (runtime/test/build-time) dependencies
+
 #### Fixed
 - avoid exception when trying to collect supported enum values from raw `Enum` type (i.e., missing type parameter)
 - avoid exception when trying to find type with annotation when given type is `null`
@@ -13,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `jsonschema-module-jackson`
 #### Fixed
 - avoid exception in subtype resolution, when targeting void method
+- check for ignored properties excluded fields when a property name override makes it conflict with a non-conventional getter method
 
 ### `jsonschema-maven-plugin`
 ### Added
