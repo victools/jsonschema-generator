@@ -80,6 +80,7 @@ public class GlobHandler {
     /**
      * Converts a standard POSIX Shell globbing pattern into a regular expression pattern. The result can be used with the standard
      * {@link java.util.regex} API to recognize strings which match the glob pattern.
+     *
      * <p>
      * See also, the POSIX Shell language: http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_13_01
      * </p>

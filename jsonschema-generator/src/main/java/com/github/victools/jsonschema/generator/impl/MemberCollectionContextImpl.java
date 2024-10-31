@@ -127,6 +127,7 @@ class MemberCollectionContextImpl {
     private void collectFields(ResolvedField[] fields, MemberScope.DeclarationDetails declarationDetails) {
         Stream.of(fields)
                 .map(declaredField -> this.typeContext.createFieldScope(declaredField, declarationDetails))
+                .map(this::getMemberWithNameOverride)
                 .filter(fieldScope -> !this.generatorConfig.shouldIgnore(fieldScope))
                 .forEach(this::collect);
     }
@@ -140,6 +141,7 @@ class MemberCollectionContextImpl {
     private void collectMethods(ResolvedMethod[] methods, MemberScope.DeclarationDetails declarationDetails) {
         Stream.of(methods)
                 .map(declaredMethod -> this.typeContext.createMethodScope(declaredMethod, declarationDetails))
+                .map(this::getMemberWithNameOverride)
                 .filter(methodScope -> !this.generatorConfig.shouldIgnore(methodScope))
                 .forEach(this::collect);
     }
@@ -150,27 +152,26 @@ class MemberCollectionContextImpl {
      * @param member field/method to add
      */
     public void collect(MemberScope<?, ?> member) {
+        String propertyName = member.getSchemaPropertyName();
         if (member.isFakeContainerItemScope()) {
-            this.collectedProperties.put(member.getSchemaPropertyName(), member);
+            this.collectedProperties.put(propertyName, member);
             return;
         }
-        MemberScope<?, ?> memberWithNameOverride = this.getMemberWithNameOverride(member);
-        this.registerIfRequired(memberWithNameOverride);
-        String propertyName = memberWithNameOverride.getSchemaPropertyName();
+        this.registerIfRequired(member);
         if (this.collectedProperties.containsKey(propertyName)) {
-            logger.debug("ignoring overridden {}.{}", memberWithNameOverride.getDeclaringType(), memberWithNameOverride.getDeclaredName());
+            logger.debug("ignoring overridden {}.{}", member.getDeclaringType(), member.getDeclaredName());
         } else {
-            this.collectedProperties.put(propertyName, memberWithNameOverride);
+            this.collectedProperties.put(propertyName, member);
         }
     }
 
-    private MemberScope<?, ?> getMemberWithNameOverride(MemberScope<?, ?> member) {
+    private <M extends MemberScope<?, ?>> M getMemberWithNameOverride(M member) {
         String propertyNameOverride = member.getContext().performActionOnMember(member,
                 this.generatorConfig::resolvePropertyNameOverride, this.generatorConfig::resolvePropertyNameOverride);
         if (propertyNameOverride == null) {
             return member;
         }
-        return member.withOverriddenName(propertyNameOverride);
+        return (M) member.withOverriddenName(propertyNameOverride);
     }
 
     private void registerIfRequired(MemberScope<?, ?> member) {
