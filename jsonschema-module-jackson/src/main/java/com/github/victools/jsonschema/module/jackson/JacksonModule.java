@@ -289,13 +289,16 @@ public class JacksonModule implements Module {
         // some kinds of field ignorals are only available via an annotation introspector
         Set<String> ignoredProperties = this.objectMapper.getSerializationConfig().getAnnotationIntrospector()
                 .findPropertyIgnoralByName(null, beanDescription.getClassInfo()).getIgnored();
-        String fieldName = field.getName();
-        if (ignoredProperties.contains(fieldName)) {
+        String declaredName = field.getDeclaredName();
+        if (ignoredProperties.contains(declaredName)) {
             return true;
         }
+        // @since 4.37.0 also consider overridden property name as it may match the getter method
+        String fieldName = field.getName();
         // other kinds of field ignorals are handled implicitly, i.e. are only available by way of being absent
         return beanDescription.findProperties().stream()
-                .noneMatch(propertyDefinition -> fieldName.equals(propertyDefinition.getInternalName()));
+                .noneMatch(propertyDefinition -> declaredName.equals(propertyDefinition.getInternalName())
+                        || fieldName.equals(propertyDefinition.getInternalName()));
     }
 
     /**
