@@ -121,7 +121,7 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
         ResolvedMethod[] memberMethods = context.getTypeContext().resolveWithMembers(javaType).getMemberMethods();
         Set<ResolvedMethod> jsonValueAnnotatedMethods = Stream.of(memberMethods)
                 .filter(method -> method.getArgumentCount() == 0)
-                .filter(method -> JacksonHelper.resolveAnnotation(method.getRawMember(), JsonValue.class).map(JsonValue::value).orElse(false))
+                .filter(method -> AnnotationHelper.resolveAnnotation(method.getRawMember(), JsonValue.class).map(JsonValue::value).orElse(false))
                 .collect(Collectors.toSet());
         if (jsonValueAnnotatedMethods.size() == 1) {
             return jsonValueAnnotatedMethods.iterator().next();
@@ -141,7 +141,7 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
             List<String> serializedJsonValues = new ArrayList<>(enumConstants.length);
             for (Object enumConstant : enumConstants) {
                 String enumValueName = ((Enum<?>) enumConstant).name();
-                Optional<JsonProperty> annotation = JacksonHelper.resolveAnnotation(
+                Optional<JsonProperty> annotation = AnnotationHelper.resolveAnnotation(
                         javaType.getErasedType().getDeclaredField(enumValueName),
                         JsonProperty.class
                 );

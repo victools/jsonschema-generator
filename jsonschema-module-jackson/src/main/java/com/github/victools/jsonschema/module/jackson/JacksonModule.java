@@ -183,7 +183,7 @@ public class JacksonModule implements Module {
      */
     protected String resolveDescriptionForType(TypeScope scope) {
         Class<?> rawType = scope.getType().getErasedType();
-        Optional<JsonClassDescription> classAnnotation = JacksonHelper.resolveAnnotation(rawType, JsonClassDescription.class);
+        Optional<JsonClassDescription> classAnnotation = AnnotationHelper.resolveAnnotation(rawType, JsonClassDescription.class);
         return classAnnotation.map(JsonClassDescription::value).orElse(null);
     }
 
@@ -200,7 +200,7 @@ public class JacksonModule implements Module {
     protected String getPropertyNameOverrideBasedOnJsonPropertyAnnotation(MemberScope<?, ?> member) {
         JsonProperty annotation = member.getAnnotationConsideringFieldAndGetter(
                 JsonProperty.class,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         if (annotation != null) {
             String nameOverride = annotation.value();
@@ -237,7 +237,7 @@ public class JacksonModule implements Module {
      * @return annotated naming strategy instance (or {@code null})
      */
     private PropertyNamingStrategy getAnnotatedNamingStrategy(Class<?> declaringType) {
-        return JacksonHelper.resolveAnnotation(declaringType, JsonNaming.class)
+        return AnnotationHelper.resolveAnnotation(declaringType, JsonNaming.class)
                 .map(JsonNaming::value)
                 .map(strategyType -> {
                     try {
@@ -276,13 +276,13 @@ public class JacksonModule implements Module {
     protected boolean shouldIgnoreField(FieldScope field) {
         if (field.getAnnotationConsideringFieldAndGetterIfSupported(
                 JsonBackReference.class,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER) != null) {
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER) != null) {
             return true;
         }
         // @since 4.32.0
         JsonUnwrapped unwrappedAnnotation = field.getAnnotationConsideringFieldAndGetterIfSupported(
                 JsonUnwrapped.class,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         if (unwrappedAnnotation != null && unwrappedAnnotation.enabled()) {
             // unwrapped properties should be ignored here, as they are included in their unwrapped form
@@ -316,13 +316,13 @@ public class JacksonModule implements Module {
         if (getterField == null) {
             if (method.getAnnotationConsideringFieldAndGetterIfSupported(
                     JsonBackReference.class,
-                    JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER) != null) {
+                    AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER) != null) {
                 return true;
             }
             // @since 4.32.0
             JsonUnwrapped unwrappedAnnotation = method.getAnnotationConsideringFieldAndGetterIfSupported(
                     JsonUnwrapped.class,
-                    JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                    AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
             );
             if (unwrappedAnnotation != null && unwrappedAnnotation.enabled()) {
                 // unwrapped properties should be ignored here, as they are included in their unwrapped form
@@ -334,7 +334,7 @@ public class JacksonModule implements Module {
         return this.options.contains(JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS)
                 && method.getAnnotationConsideringFieldAndGetter(
                         JsonProperty.class,
-                        JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER) == null;
+                        AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER) == null;
     }
 
     /**
@@ -346,7 +346,7 @@ public class JacksonModule implements Module {
     protected boolean getRequiredCheckBasedOnJsonPropertyAnnotation(MemberScope<?, ?> member) {
         JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetterIfSupported(
                 JsonProperty.class,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         return jsonProperty != null && jsonProperty.required();
     }
@@ -360,7 +360,7 @@ public class JacksonModule implements Module {
     protected boolean getReadOnlyCheck(MemberScope<?, ?> member) {
         JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetter(
                 JsonProperty.class,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         return jsonProperty != null && jsonProperty.access() == JsonProperty.Access.READ_ONLY;
     }
@@ -374,7 +374,7 @@ public class JacksonModule implements Module {
     protected boolean getWriteOnlyCheck(MemberScope<?, ?> member) {
         JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetter(
                 JsonProperty.class,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         return jsonProperty != null && jsonProperty.access() == JsonProperty.Access.WRITE_ONLY;
     }

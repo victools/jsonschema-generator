@@ -111,7 +111,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         if (this.skipSubtypeResolution(declaredType, context.getTypeContext())) {
             return null;
         }
-        Optional<JsonSubTypes> subtypesAnnotation = JacksonHelper.resolveAnnotation(declaredType.getErasedType(), JsonSubTypes.class);
+        Optional<JsonSubTypes> subtypesAnnotation = AnnotationHelper.resolveAnnotation(declaredType.getErasedType(), JsonSubTypes.class);
         return this.lookUpSubtypesFromAnnotation(declaredType, subtypesAnnotation.orElse(null), context.getTypeContext());
     }
 
@@ -127,7 +127,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         }
         JsonSubTypes subtypesAnnotation = property.getAnnotationConsideringFieldAndGetter(
                 JsonSubTypes.class,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         return this.lookUpSubtypesFromAnnotation(property.getType(), subtypesAnnotation, property.getContext());
     }
@@ -179,9 +179,9 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         ResolvedType typeWithTypeInfo = typeContext.getTypeWithAnnotation(
                 javaType,
                 JsonTypeInfo.class,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
-        if (typeWithTypeInfo == null || JacksonHelper.resolveAnnotation(javaType.getErasedType(), JsonSubTypes.class).isPresent()
+        if (typeWithTypeInfo == null || AnnotationHelper.resolveAnnotation(javaType.getErasedType(), JsonSubTypes.class).isPresent()
                 || this.skipSubtypeResolution(javaType, typeContext)) {
             // no @JsonTypeInfo annotation found or the given javaType is the super type, that should be replaced
             return null;
@@ -191,12 +191,12 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         JsonTypeInfo typeInfoAnnotation = typeContext.getAnnotationFromList(
                 JsonTypeInfo.class,
                 annotationsList,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         JsonSubTypes subTypesAnnotation = typeContext.getAnnotationFromList(
                 JsonSubTypes.class,
                 annotationsList,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         TypeScope scope = typeContext.createTypeScope(javaType);
         ObjectNode definition = this.createSubtypeDefinition(scope, typeInfoAnnotation, subTypesAnnotation, context);
@@ -214,12 +214,13 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      * @return applicable custom per-property override schema definition (may be {@code null})
      */
     public CustomPropertyDefinition provideCustomPropertySchemaDefinition(MemberScope<?, ?> scope, SchemaGenerationContext context) {
-        if (this.skipSubtypeResolution(scope) || JacksonHelper.resolveAnnotation(scope.getType().getErasedType(), JsonSubTypes.class).isPresent()) {
+        if (this.skipSubtypeResolution(scope)
+                || AnnotationHelper.resolveAnnotation(scope.getType().getErasedType(), JsonSubTypes.class).isPresent()) {
             return null;
         }
         JsonTypeInfo typeInfoAnnotation = scope.getAnnotationConsideringFieldAndGetter(
                 JsonTypeInfo.class,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         if (typeInfoAnnotation == null) {
             // the normal per-type behaviour is not being overridden, i.e., no need for an inline custom property schema
@@ -234,7 +235,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         }
         JsonSubTypes subTypesAnnotation = scope.getAnnotationConsideringFieldAndGetter(
                 JsonSubTypes.class,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         ObjectNode definition = this.createSubtypeDefinition(scope, typeInfoAnnotation, subTypesAnnotation, context);
         if (definition == null) {
@@ -294,7 +295,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      * @return simple class name, with declaring class's unqualified name as prefix for member classes
      */
     private static Optional<String> getNameFromTypeNameAnnotation(Class<?> erasedTargetType) {
-        return JacksonHelper.resolveAnnotation(erasedTargetType, JsonTypeName.class)
+        return AnnotationHelper.resolveAnnotation(erasedTargetType, JsonTypeName.class)
                 .map(JsonTypeName::value)
                 .filter(name -> !name.isEmpty());
     }

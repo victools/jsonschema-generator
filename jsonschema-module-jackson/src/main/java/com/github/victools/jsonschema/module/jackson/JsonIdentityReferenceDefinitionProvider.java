@@ -74,7 +74,10 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
      * @return designated type of the applicable identity reference (may be empty)
      */
     public Optional<ResolvedType> getIdentityReferenceType(ResolvedType javaType, TypeContext typeContext) {
-        Optional<JsonIdentityReference> referenceAnnotation = JacksonHelper.resolveAnnotation(javaType.getErasedType(), JsonIdentityReference.class);
+        Optional<JsonIdentityReference> referenceAnnotation = AnnotationHelper.resolveAnnotation(
+                javaType.getErasedType(),
+                JsonIdentityReference.class
+        );
         return this.getIdentityReferenceType(referenceAnnotation.orElse(null), javaType, typeContext);
     }
 
@@ -89,12 +92,12 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
     public Optional<ResolvedType> getIdentityReferenceType(MemberScope<?, ?> scope) {
         JsonIdentityReference referenceAnnotation = scope.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(
                 JsonIdentityReference.class,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         if (referenceAnnotation == null) {
             referenceAnnotation = scope.getAnnotationConsideringFieldAndGetter(
                     JsonIdentityReference.class,
-                    JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                    AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
             );
         }
         return this.getIdentityReferenceType(referenceAnnotation, scope.getType(), scope.getContext());
@@ -120,7 +123,7 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
         ResolvedType typeWithIdentityInfoAnnotation = typeContext.getTypeWithAnnotation(
                 javaType,
                 JsonIdentityInfo.class,
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         if (typeWithIdentityInfoAnnotation == null) {
             // otherwise, the @JsonIdentityReference annotation is simply ignored
@@ -129,7 +132,7 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
         JsonIdentityInfo identityInfoAnnotation = typeContext.getAnnotationFromList(
                 JsonIdentityInfo.class,
                 Arrays.asList(typeWithIdentityInfoAnnotation.getErasedType().getAnnotations()),
-                JacksonHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
         );
         // @JsonIdentityInfo annotation declares generator with specific identity type
         ResolvedType identityTypeFromGenerator = typeContext.getTypeParameterFor(typeContext.resolve(identityInfoAnnotation.generator()),

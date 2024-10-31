@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-final class JacksonHelper {
+final class AnnotationHelper {
 
     static final Predicate<Annotation> JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER = new JacksonAnnotationsInsideAnnotatedFilter();
 
@@ -43,7 +43,7 @@ final class JacksonHelper {
         }
     }
 
-    private JacksonHelper() {
+    private AnnotationHelper() {
         super();
     }
 

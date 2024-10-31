@@ -12,11 +12,11 @@ import java.lang.annotation.Target;
 import java.util.Optional;
 
 /**
- * Unit test class dedicated to the validation of {@link JacksonHelper}.
+ * Unit test class dedicated to the validation of {@link AnnotationHelper}.
  *
  * @author Antoine Malliarakis
  */
-class JacksonHelperTest {
+class AnnotationHelperTest {
     
     @JsonTypeName
     private static class DirectlyAnnotatedClass {
@@ -81,40 +81,40 @@ class JacksonHelperTest {
 
     @Test
     void resolveAnnotation_returnsAnEmptyInstanceIfNotAnnotated() {
-        final Optional<JsonTypeName> result = JacksonHelper.resolveAnnotation(NonAnnotatedClass.class, JsonTypeName.class);
+        final Optional<JsonTypeName> result = AnnotationHelper.resolveAnnotation(NonAnnotatedClass.class, JsonTypeName.class);
         Assertions.assertFalse(result.isPresent());
     }
 
     @Test
     void resolveAnnotation_returnsAnEmptyInstanceIfNotAnnotatedEvenIfThereAreComboAnnotations() {
-        final Optional<JsonTypeName> result = JacksonHelper.resolveAnnotation(AnnotatedClassWithUselessAnnotations.class, JsonTypeName.class);
+        final Optional<JsonTypeName> result = AnnotationHelper.resolveAnnotation(AnnotatedClassWithUselessAnnotations.class, JsonTypeName.class);
         Assertions.assertFalse(result.isPresent());
     }
 
     @Test
     void resolveAnnotation_supportsDirectAnnotations() {
-        final Optional<JsonTypeName> result = JacksonHelper.resolveAnnotation(DirectlyAnnotatedClass.class, JsonTypeName.class);
+        final Optional<JsonTypeName> result = AnnotationHelper.resolveAnnotation(DirectlyAnnotatedClass.class, JsonTypeName.class);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(result.get().value(), "");
     }
     
     @Test
     void resolveAnnotation_directAnnotationTakesPrecedence() {
-        final Optional<JsonTypeName> result = JacksonHelper.resolveAnnotation(BothDirectAndIndirectlyAnnotatedClass.class, JsonTypeName.class);
+        final Optional<JsonTypeName> result = AnnotationHelper.resolveAnnotation(BothDirectAndIndirectlyAnnotatedClass.class, JsonTypeName.class);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals("direct value", result.get().value());
     }
     
     @Test
     void resolveAnnotation_returnsFirstValueFound() {
-        final Optional<JsonTypeName> result = JacksonHelper.resolveAnnotation(IndirectlyAnnotatedClass.class, JsonTypeName.class);
+        final Optional<JsonTypeName> result = AnnotationHelper.resolveAnnotation(IndirectlyAnnotatedClass.class, JsonTypeName.class);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals("first combo annotation value", result.get().value());
     }
     
     @Test
     void resolveAnnotation_usesABreadthFirstlookup() {
-        final Optional<JsonTypeName> result = JacksonHelper.resolveAnnotation(BreadthFirstAnnotatedClass.class, JsonTypeName.class);
+        final Optional<JsonTypeName> result = AnnotationHelper.resolveAnnotation(BreadthFirstAnnotatedClass.class, JsonTypeName.class);
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals("first combo annotation value", result.get().value());
     }
