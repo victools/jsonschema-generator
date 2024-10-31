@@ -30,18 +30,8 @@ import java.util.stream.StreamSupport;
 
 final class AnnotationHelper {
 
-    static final Predicate<Annotation> JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER = new JacksonAnnotationsInsideAnnotatedFilter();
-
-    private static final class JacksonAnnotationsInsideAnnotatedFilter implements Predicate<Annotation> {
-        JacksonAnnotationsInsideAnnotatedFilter() {
-            super();
-        }
-
-        @Override
-        public boolean test(Annotation annotation) {
-            return annotation.annotationType().isAnnotationPresent(JacksonAnnotationsInside.class);
-        }
-    }
+    static final Predicate<Annotation> JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER = (annotation) ->
+            annotation.annotationType().isAnnotationPresent(JacksonAnnotationsInside.class);
 
     private AnnotationHelper() {
         super();
