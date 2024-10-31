@@ -13,8 +13,6 @@ import java.util.Optional;
 
 /**
  * Unit test class dedicated to the validation of {@link AnnotationHelper}.
- *
- * @author Antoine Malliarakis
  */
 class AnnotationHelperTest {
     
