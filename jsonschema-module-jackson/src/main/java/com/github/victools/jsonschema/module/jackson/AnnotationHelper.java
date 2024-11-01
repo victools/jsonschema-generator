@@ -36,10 +36,6 @@ final class AnnotationHelper {
     /**
      * Resolves the specified annotation on the given resolved member and resolve indirect jackson annotations.
      *
-     * <p>It uses the same algorithm as
-     * {@link com.github.victools.jsonschema.generator.TypeContext#getAnnotationFromList(Class, List, Predicate)}
-     * .</p>
-     *
      * @param <A> the generic type of the annotation
      * @param member where to look for the specified annotation
      * @param annotationClass the class of the annotation to look for
@@ -55,10 +51,6 @@ final class AnnotationHelper {
 
     /**
      * Resolves the specified annotation on the given type and resolve indirect jackson annotations.
-     * 
-     * <p>It uses the same algorithm as
-     * {@link com.github.victools.jsonschema.generator.TypeContext#getAnnotationFromList(Class, List, Predicate)}
-     * .</p>
      *
      * @param <A> the generic type of the annotation
      * @param declaringType where to look for the specified annotation
