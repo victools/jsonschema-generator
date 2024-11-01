@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 VicTools.
+ * Copyright 2020-2024 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
         ResolvedMethod[] memberMethods = context.getTypeContext().resolveWithMembers(javaType).getMemberMethods();
         Set<ResolvedMethod> jsonValueAnnotatedMethods = Stream.of(memberMethods)
                 .filter(method -> method.getArgumentCount() == 0)
-                .filter(method -> Optional.ofNullable(method.getAnnotations().get(JsonValue.class)).map(JsonValue::value).orElse(false))
+                .filter(method -> AnnotationHelper.resolveAnnotation(method, JsonValue.class).map(JsonValue::value).orElse(false))
                 .collect(Collectors.toSet());
         if (jsonValueAnnotatedMethods.size() == 1) {
             return jsonValueAnnotatedMethods.iterator().next();
@@ -141,14 +141,16 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
             List<String> serializedJsonValues = new ArrayList<>(enumConstants.length);
             for (Object enumConstant : enumConstants) {
                 String enumValueName = ((Enum<?>) enumConstant).name();
-                JsonProperty annotation = javaType.getErasedType()
-                        .getDeclaredField(enumValueName)
-                        .getAnnotation(JsonProperty.class);
-                if (annotation == null) {
+                Optional<JsonProperty> annotation = AnnotationHelper.resolveAnnotation(
+                        javaType.getErasedType().getDeclaredField(enumValueName),
+                        JsonProperty.class
+                );
+                if (!annotation.isPresent()) {
                     // enum constant without @JsonProperty annotation
                     return null;
                 }
-                serializedJsonValues.add(JsonProperty.USE_DEFAULT_NAME.equals(annotation.value()) ? enumValueName : annotation.value());
+                final String annotationValue = annotation.get().value();
+                serializedJsonValues.add(JsonProperty.USE_DEFAULT_NAME.equals(annotationValue) ? enumValueName : annotationValue);
             }
             return serializedJsonValues;
         } catch (NoSuchFieldException | SecurityException ex) {

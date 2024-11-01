@@ -276,20 +276,7 @@ public class TypeContext {
      */
     public <A extends Annotation> A getAnnotationFromList(Class<A> annotationClass, List<Annotation> annotationList,
             Predicate<Annotation> considerOtherAnnotation) {
-        List<Annotation> annotations = annotationList;
-        while (!annotations.isEmpty()) {
-            Optional<Annotation> nestedAnnotation = annotations.stream()
-                    .filter(annotationClass::isInstance)
-                    .findFirst();
-            if (nestedAnnotation.isPresent()) {
-                return nestedAnnotation.map(annotationClass::cast).get();
-            }
-            annotations = annotations.stream()
-                    .filter(considerOtherAnnotation)
-                    .flatMap(otherAnnotation -> Stream.of(otherAnnotation.annotationType().getAnnotations()))
-                    .collect(Collectors.toList());
-        }
-        return null;
+        return AnnotationHelper.resolveAnnotation(annotationList, annotationClass, considerOtherAnnotation).orElse(null);
     }
 
     /**

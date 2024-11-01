@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 VicTools.
+ * Copyright 2020-2024 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public class JsonPropertySorter implements Comparator<MemberScope<?, ?>> {
      * @return whether properties that are not specifically mentioned in a {@link JsonPropertyOrder} annotation should be sorted alphabetically
      */
     protected boolean shouldSortPropertiesAlphabetically(Class<?> declaringType) {
-        return Optional.ofNullable(declaringType.getAnnotation(JsonPropertyOrder.class))
+        return AnnotationHelper.resolveAnnotation(declaringType, JsonPropertyOrder.class)
                 .map(JsonPropertyOrder::alphabetic)
                 .orElse(this.sortAlphabeticallyIfNotAnnotated);
     }
@@ -110,7 +110,7 @@ public class JsonPropertySorter implements Comparator<MemberScope<?, ?>> {
      * @return {@link JsonPropertyOrder#value()} or empty list
      */
     private List<String> getAnnotatedPropertyOrder(Class<?> declaringType) {
-        return Optional.ofNullable(declaringType.getAnnotation(JsonPropertyOrder.class))
+        return AnnotationHelper.resolveAnnotation(declaringType, JsonPropertyOrder.class)
                 .map(JsonPropertyOrder::value)
                 .filter(valueArray -> valueArray.length != 0)
                 .map(Arrays::asList)

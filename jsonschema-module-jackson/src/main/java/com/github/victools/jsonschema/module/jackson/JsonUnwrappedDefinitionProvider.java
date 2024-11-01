@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 VicTools.
+ * Copyright 2023-2024 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,9 +59,9 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
 
         // include each annotated member's type considering the optional prefix and/or suffix
         Stream.concat(Stream.of(typeWithMembers.getMemberFields()), Stream.of(typeWithMembers.getMemberMethods()))
-                .filter(member -> Optional.ofNullable(member.getAnnotations().get(JsonUnwrapped.class))
-                        .filter(JsonUnwrapped::enabled).isPresent())
                 .map(member -> this.createUnwrappedMemberSchema(member, context))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .forEachOrdered(allOf::add);
 
         return new CustomDefinition(definition);
@@ -75,12 +74,7 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      * @return whether the given member has an {@code enabled} {@link JsonUnwrapped @JsonUnwrapped} annotation
      */
     private boolean hasJsonUnwrappedAnnotation(ResolvedMember<?> member) {
-        for (Annotation annotation : member.getAnnotations()) {
-            if (annotation instanceof JsonUnwrapped && ((JsonUnwrapped) annotation).enabled()) {
-                return true;
-            }
-        }
-        return false;
+        return AnnotationHelper.resolveAnnotation(member, JsonUnwrapped.class).filter(JsonUnwrapped::enabled).isPresent();
     }
 
     /**
@@ -90,13 +84,15 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      * @param context generation context
      * @return created schema
      */
-    private ObjectNode createUnwrappedMemberSchema(ResolvedMember<?> member, SchemaGenerationContext context) {
-        ObjectNode definition = context.createStandardDefinition(member.getType(), null);
-        JsonUnwrapped annotation = member.getAnnotations().get(JsonUnwrapped.class);
-        if (!annotation.prefix().isEmpty() || !annotation.suffix().isEmpty()) {
-            this.applyPrefixAndSuffixToPropertyNames(definition, annotation.prefix(), annotation.suffix(), context);
-        }
-        return definition;
+    private Optional<ObjectNode> createUnwrappedMemberSchema(ResolvedMember<?> member, SchemaGenerationContext context) {
+        final Optional<JsonUnwrapped> optAnnotation = AnnotationHelper.resolveAnnotation(member, JsonUnwrapped.class).filter(JsonUnwrapped::enabled);
+        return optAnnotation.map(annotation -> {
+            ObjectNode definition = context.createStandardDefinition(member.getType(), null);
+            if (!annotation.prefix().isEmpty() || !annotation.suffix().isEmpty()) {
+                this.applyPrefixAndSuffixToPropertyNames(definition, annotation.prefix(), annotation.suffix(), context);
+            }
+            return definition;
+        });
     }
 
     /**
