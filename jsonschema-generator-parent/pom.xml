@@ -129,6 +129,13 @@
                 <role>Provided PR #456 (introducing support for Jakarta @AssertTrue/@AssertFalse)</role>
             </roles>
         </contributor>
+        <contributor>
+            <name>Antoine Malliarakis</name>
+            <url>https://github.com/smaarn</url>
+            <roles>
+                <role>Provided PR #487 (support @JacksonAnnotationsInside annotations)</role>
+            </roles>
+        </contributor>
     </contributors>
 
     <properties>

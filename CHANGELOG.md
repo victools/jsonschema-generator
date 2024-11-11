@@ -18,12 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - avoid exception when trying to find type with annotation when given type is `null`
 
 ### `jsonschema-module-jackson`
+#### Added
+- support `@JacksonAnnotationsInside` annotated combo annotations
+
 #### Fixed
 - avoid exception in subtype resolution, when targeting void method
 - check for ignored properties excluded fields when a property name override makes it conflict with a non-conventional getter method
 
 ### `jsonschema-maven-plugin`
-### Added
+#### Added
 - support `<skipAbstractTypes>` flag to exclude abstract types (not interfaces)
 - support `<skipInterfaces>` flag to exclude interface types
 
