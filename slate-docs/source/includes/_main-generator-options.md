@@ -336,11 +336,11 @@ configBuilder.without(
       <td rowspan="2" style="text-align: right">36</td>
       <td colspan="2"><code>Option.ALLOF_CLEANUP_AT_THE_END</code></td>
     </tr>
-    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td>At the very end of the schema generation reduce <code>allOf</code> wrappers where it is possible without overwriting any attributes – this also affects the results from custom definitions.</td>
       <td>Do not attempt to reduce <code>allOf</code> wrappers but preserve them as they were generated regardless of them being necessary or not.</td>
     </tr>
+    <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
       <td rowspan="2" style="text-align: right">37</td>
       <td colspan="2"><code>Option.STRICT_TYPE_INFO</code></td>
@@ -348,6 +348,14 @@ configBuilder.without(
     <tr>
       <td>As final step in the schema generation process, ensure all sub schemas containing keywords implying a particular "type" (e.g., "properties" implying an "object") have this "type" declared explicitly – this also affects the results from custom definitions.</td>
       <td>No additional "type" indication will be added for each sub schema, e.g. on the collected attributes where the "allOf" clean-up could not be applied or was disabled.</td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="text-align: right">38</td>
+      <td colspan="2"><code>Option.NULLABLE_ALWAYS_AS_ANYOF</code></td>
+    </tr>
+    <tr>
+      <td>A "type": "null" will not be combined with other "type" values in an array. Instead, a separate "anyOf" with a subschema only containing the "type": "null" will be included.</td>
+      <td>For brevity's sake, a "type": "null" may be combined with other "type" values, e.g. as "type": ["null", "object"].</td>
     </tr>
   </tbody>
 </table>
@@ -397,3 +405,4 @@ Below, you can find the lists of <code>Option</code>s included/excluded in the r
 | 35 | `PLAIN_DEFINITION_KEYS`                      | ⬜️ | ⬜️ | ⬜️ |
 | 36 | `ALLOF_CLEANUP_AT_THE_END`                   | ✅ | ✅ | ✅ |
 | 37 | `STRICT_TYPE_INFO`                           | ⬜️ | ⬜️ | ⬜️ |
+| 38 | `NULLABLE_ALWAYS_AS_ANYOF`                   | ⬜️ | ⬜️ | ⬜️ |

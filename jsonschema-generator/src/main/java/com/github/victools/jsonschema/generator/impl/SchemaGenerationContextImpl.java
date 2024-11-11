@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +92,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @return definition key identifying the given entry point
      */
     public DefinitionKey parseType(ResolvedType type) {
-        this.traverseGenericType(type, null, false);
+        this.traverseGenericType(type, null);
         return new DefinitionKey(type, null);
     }
 
@@ -272,11 +273,10 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      *
      * @param targetType (possibly generic) type to add
      * @param targetNode node in the JSON schema that should represent the targetType
-     * @param isNullable whether the field/method's return value is allowed to be null in the declaringType in this particular scenario
      */
-    protected void traverseGenericType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable) {
+    protected void traverseGenericType(ResolvedType targetType, ObjectNode targetNode) {
         TypeScope scope = this.typeContext.createTypeScope(targetType);
-        GenericTypeDetails typeDetails = new GenericTypeDetails(scope, isNullable, false, null);
+        GenericTypeDetails typeDetails = new GenericTypeDetails(scope, false, false, null);
         this.traverseGenericType(targetNode, typeDetails);
     }
 
@@ -428,10 +428,10 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      */
     private void generateArrayDefinition(GenericTypeDetails typeDetails, ObjectNode definition) {
         definition.put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY));
-        if (typeDetails.isNullable()) {
-            this.extendTypeDeclarationToIncludeNull(definition);
-        }
         definition.set(this.getKeyword(SchemaKeyword.TAG_ITEMS), this.populateItemMemberSchema(typeDetails.getScope()));
+        if (typeDetails.isNullable()) {
+            this.makeNullable(definition);
+        }
     }
 
     private JsonNode populateItemMemberSchema(TypeScope targetScope) {
@@ -442,7 +442,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             return this.populateMethodSchema(((MethodScope) targetScope).asFakeContainerItemScope());
         }
         ObjectNode arrayItemDefinition = this.generatorConfig.createObjectNode();
-        this.traverseGenericType(targetScope.getContainerItemType(), arrayItemDefinition, false);
+        this.traverseGenericType(targetScope.getContainerItemType(), arrayItemDefinition);
         return arrayItemDefinition;
     }
 
@@ -676,34 +676,40 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     }
 
     @Override
+    public String getKeyword(SchemaKeyword keyword) {
+        return this.generatorConfig.getKeyword(keyword);
+    }
+
+    @Override
     public ObjectNode makeNullable(ObjectNode node) {
+        return SchemaGenerationContextImpl.makeNullable(node, this.generatorConfig);
+    }
+
+    static ObjectNode makeNullable(ObjectNode node, SchemaGeneratorConfig config) {
+        if (SchemaGenerationContextImpl.canExtendTypeDeclarationToIncludeNull(node, config)) {
+            // given node is a simple schema, we can adjust its "type" attribute
+            SchemaGenerationContextImpl.extendTypeDeclarationToIncludeNull(node, config);
+        } else {
+            SchemaGenerationContextImpl.addAnyOfNullSchema(node, config);
+        }
+        return node;
+    }
+
+    private static boolean canExtendTypeDeclarationToIncludeNull(ObjectNode node, SchemaGeneratorConfig config) {
+        if (config.shouldAlwaysWrapNullSchemaInAnyOf()) {
+            return false;
+        }
         Stream<SchemaKeyword> requiringAnyOfWrapper = Stream.of(
                 SchemaKeyword.TAG_REF, SchemaKeyword.TAG_ALLOF, SchemaKeyword.TAG_ANYOF, SchemaKeyword.TAG_ONEOF,
                 // since version 4.21.0
                 SchemaKeyword.TAG_CONST, SchemaKeyword.TAG_ENUM
         );
-        if (requiringAnyOfWrapper.map(this::getKeyword).anyMatch(node::has)) {
-            // cannot be sure what is specified in those other schema parts, instead simply create an anyOf wrapper
-            ObjectNode nullSchema = this.generatorConfig.createObjectNode()
-                    .put(this.getKeyword(SchemaKeyword.TAG_TYPE), this.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
-            ArrayNode anyOf = this.generatorConfig.createArrayNode()
-                    // one option in the anyOf should be null
-                    .add(nullSchema)
-                    // the other option is the given (assumed to be) not-nullable node
-                    .add(this.generatorConfig.createObjectNode().setAll(node));
-            // replace all existing (and already copied properties with the anyOf wrapper
-            node.removeAll();
-            node.set(this.getKeyword(SchemaKeyword.TAG_ANYOF), anyOf);
-        } else {
-            // given node is a simple schema, we can adjust its "type" attribute
-            this.extendTypeDeclarationToIncludeNull(node);
-        }
-        return node;
+        return requiringAnyOfWrapper.map(config::getKeyword).noneMatch(node::has);
     }
 
-    private void extendTypeDeclarationToIncludeNull(ObjectNode node) {
-        JsonNode fixedJsonSchemaType = node.get(this.getKeyword(SchemaKeyword.TAG_TYPE));
-        final String nullTypeName = this.getKeyword(SchemaKeyword.TAG_TYPE_NULL);
+    private static void extendTypeDeclarationToIncludeNull(ObjectNode node, SchemaGeneratorConfig config) {
+        JsonNode fixedJsonSchemaType = node.get(config.getKeyword(SchemaKeyword.TAG_TYPE));
+        final String nullTypeName = config.getKeyword(SchemaKeyword.TAG_TYPE_NULL);
         if (fixedJsonSchemaType instanceof ArrayNode) {
             // there are already multiple "type" values
             ArrayNode arrayOfTypes = (ArrayNode) fixedJsonSchemaType;
@@ -714,21 +720,44 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                 }
             }
             // null "type" was not mentioned before, to be safe we need to replace the old array and add the null entry
-            node.putArray(this.getKeyword(SchemaKeyword.TAG_TYPE))
+            node.putArray(config.getKeyword(SchemaKeyword.TAG_TYPE))
                     .addAll(arrayOfTypes)
                     .add(nullTypeName);
         } else if (fixedJsonSchemaType instanceof TextNode && !nullTypeName.equals(fixedJsonSchemaType.textValue())) {
             // add null as second "type" option
-            node.putArray(this.getKeyword(SchemaKeyword.TAG_TYPE))
+            node.putArray(config.getKeyword(SchemaKeyword.TAG_TYPE))
                     .add(fixedJsonSchemaType)
                     .add(nullTypeName);
         }
         // if no "type" is specified, null is allowed already
     }
 
-    @Override
-    public String getKeyword(SchemaKeyword keyword) {
-        return this.generatorConfig.getKeyword(keyword);
+    private static void addAnyOfNullSchema(ObjectNode node, SchemaGeneratorConfig config) {
+        // cannot be sure what is specified in those other schema parts, instead simply create an anyOf wrapper
+        ObjectNode nullSchema = config.createObjectNode()
+                .put(config.getKeyword(SchemaKeyword.TAG_TYPE), config.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
+        String anyOfTagName = config.getKeyword(SchemaKeyword.TAG_ANYOF);
+        // reduce likelihood of nested duplicate null schema
+        JsonNode existingAnyOf = node.get(anyOfTagName);
+        if (existingAnyOf instanceof ArrayNode) {
+            Iterator<JsonNode> anyOfIterator = existingAnyOf.iterator();
+            while (anyOfIterator.hasNext()) {
+                if (nullSchema.equals(anyOfIterator.next())) {
+                    // the existing anyOf array contains a duplicate null schema, remove it
+                    anyOfIterator.remove();
+                    // unlikely that there are multiple
+                    break;
+                }
+            }
+        }
+        ArrayNode newAnyOf = config.createArrayNode()
+                // one option in the anyOf should be null
+                .add(nullSchema)
+                // the other option is the given (assumed to be) not-nullable node
+                .add(config.createObjectNode().setAll(node));
+        // replace all existing (and already copied properties with the anyOf wrapper
+        node.removeAll();
+        node.set(anyOfTagName, newAnyOf);
     }
 
     private static class GenericTypeDetails {

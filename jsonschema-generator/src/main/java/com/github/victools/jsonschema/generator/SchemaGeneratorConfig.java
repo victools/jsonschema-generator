@@ -94,6 +94,17 @@ public interface SchemaGeneratorConfig extends StatefulConfig {
     boolean shouldInlineNullableSchemas();
 
     /**
+     * Determine whether a {@code {"type":"null"}} schema should always be grouped as {@link SchemaKeyword#TAG_ANYOF "anyOf"} with the not-null
+     * schema. Otherwise, it is deemed acceptable to include the {@code "null"} option in the main schema's {@link SchemaKeyword#TAG_TYPE "type"}
+     * value, e.g. as {@code {"type":["null","string]}} resulting in a simpler/smaller schema overall.
+     *
+     * @return whether to avoid adding {@code "null"} as additional option in the {@link SchemaKeyword#TAG_TYPE "type"} attribute's value array
+     *
+     * @since 4.37.0
+     */
+    boolean shouldAlwaysWrapNullSchemaInAnyOf();
+
+    /**
      * Determine whether the {@link SchemaKeyword#TAG_SCHEMA} attribute with {@link SchemaKeyword#TAG_SCHEMA_VALUE} should be added.
      *
      * @return whether to add the schema version attribute

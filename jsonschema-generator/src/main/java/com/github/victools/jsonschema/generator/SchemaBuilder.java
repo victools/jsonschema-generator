@@ -201,6 +201,8 @@ public class SchemaBuilder {
         }
         if (this.config.shouldIncludeStrictTypeInfo()) {
             cleanUpUtils.setStrictTypeInfo(this.schemaNodes, true);
+            // since version 4.37.0 as extraneous "anyOf" wrappers may have been introduced to support type "null"
+            cleanUpUtils.reduceAnyOfNodes(this.schemaNodes);
         }
     }
 

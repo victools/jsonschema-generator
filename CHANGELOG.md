@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### `jsonschema-generator`
+#### Added
+- new `Option.NULLABLE_ALWAYS_AS_ANYOF` that avoids the `"null"` type being included with other type values, e.g. `"type": ["object", "null"]`
+
 #### Changed
 - apply property name overrides before triggering the ignore check (i.e., provide both the declared and overridden property names if there is one)
 - update various (runtime/test/build-time) dependencies
