@@ -274,24 +274,18 @@
                                 {
                                     "type": "null"
                                 }, {
-                                    "anyOf": [
-                                        {
-                                            "type": "null"
-                                        }, {
-                                            "$ref": "#/definitions/TestClass2(String)"
-                                        }
-                                    ],
-                                    "title": "TestClass2<String>",
-                                    "description": "looked-up from method: TestClass2<String>",
-                                    "additionalProperties": false,
-                                    "patternProperties": {
-                                        "^generic.+$": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/definitions/TestClass2(String)"
                                 }
-                            ]
+                            ],
+                            "title": "TestClass2<String>",
+                            "description": "looked-up from method: TestClass2<String>",
+                            "additionalProperties": false,
+                            "patternProperties": {
+                                "^generic.+$": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": ["object", "null"]
                         }
                     },
                     "title": "TestClass2<TestClass2<String>>",
@@ -408,24 +402,18 @@
                                     {
                                         "type": "null"
                                     }, {
-                                        "anyOf": [
-                                            {
-                                                "type": "null"
-                                            }, {
-                                                "$ref": "#/definitions/TestClass1"
-                                            }
-                                        ],
-                                        "title": "TestClass1",
-                                        "description": "looked-up from method: TestClass1",
-                                        "additionalProperties": false,
-                                        "patternProperties": {
-                                            "^generic.+$": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "type": "object"
+                                        "$ref": "#/definitions/TestClass1"
                                     }
-                                ]
+                                ],
+                                "title": "TestClass1",
+                                "description": "looked-up from method: TestClass1",
+                                "additionalProperties": false,
+                                "patternProperties": {
+                                    "^generic.+$": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": ["object", "null"]
                             }
                         }
                     ]

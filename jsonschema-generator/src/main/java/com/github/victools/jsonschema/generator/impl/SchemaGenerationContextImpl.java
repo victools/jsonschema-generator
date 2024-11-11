@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +92,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      * @return definition key identifying the given entry point
      */
     public DefinitionKey parseType(ResolvedType type) {
-        this.traverseGenericType(type, null, false);
+        this.traverseGenericType(type, null);
         return new DefinitionKey(type, null);
     }
 
@@ -272,11 +273,10 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
      *
      * @param targetType (possibly generic) type to add
      * @param targetNode node in the JSON schema that should represent the targetType
-     * @param isNullable whether the field/method's return value is allowed to be null in the declaringType in this particular scenario
      */
-    protected void traverseGenericType(ResolvedType targetType, ObjectNode targetNode, boolean isNullable) {
+    protected void traverseGenericType(ResolvedType targetType, ObjectNode targetNode) {
         TypeScope scope = this.typeContext.createTypeScope(targetType);
-        GenericTypeDetails typeDetails = new GenericTypeDetails(scope, isNullable, false, null);
+        GenericTypeDetails typeDetails = new GenericTypeDetails(scope, false, false, null);
         this.traverseGenericType(targetNode, typeDetails);
     }
 
@@ -442,7 +442,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             return this.populateMethodSchema(((MethodScope) targetScope).asFakeContainerItemScope());
         }
         ObjectNode arrayItemDefinition = this.generatorConfig.createObjectNode();
-        this.traverseGenericType(targetScope.getContainerItemType(), arrayItemDefinition, false);
+        this.traverseGenericType(targetScope.getContainerItemType(), arrayItemDefinition);
         return arrayItemDefinition;
     }
 
@@ -693,14 +693,28 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             // cannot be sure what is specified in those other schema parts, instead simply create an anyOf wrapper
             ObjectNode nullSchema = config.createObjectNode()
                     .put(config.getKeyword(SchemaKeyword.TAG_TYPE), config.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
-            ArrayNode anyOf = config.createArrayNode()
+            String anyOfTagName = config.getKeyword(SchemaKeyword.TAG_ANYOF);
+            // reduce likelihood of nested duplicate null schema
+            JsonNode existingAnyOf = node.get(anyOfTagName);
+            if (existingAnyOf instanceof ArrayNode) {
+                Iterator<JsonNode> anyOfIterator = existingAnyOf.iterator();
+                while (anyOfIterator.hasNext()) {
+                    if (nullSchema.equals(anyOfIterator.next())) {
+                        // the existing anyOf array contains a duplicate null schema, remove it
+                        anyOfIterator.remove();
+                        // unlikely that there are multiple
+                        break;
+                    }
+                }
+            }
+            ArrayNode newAnyOf = config.createArrayNode()
                     // one option in the anyOf should be null
                     .add(nullSchema)
                     // the other option is the given (assumed to be) not-nullable node
                     .add(config.createObjectNode().setAll(node));
             // replace all existing (and already copied properties with the anyOf wrapper
             node.removeAll();
-            node.set(config.getKeyword(SchemaKeyword.TAG_ANYOF), anyOf);
+            node.set(anyOfTagName, newAnyOf);
         }
         return node;
     }
