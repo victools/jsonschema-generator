@@ -17,12 +17,15 @@
 package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeContext;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -127,10 +130,15 @@ public class JsonIdentityReferenceDefinitionProviderTest extends AbstractTypeAwa
     private static class TestTypeReferencedAsInteger {
     }
 
-    @JsonIdentityInfo(generator = ObjectIdGenerators.StringIdGenerator.class)
-    @JsonIdentityReference(alwaysAsId = true)
+    @StringIdentity
     private static class TestTypeReferencedAsString {
     }
+
+    @JsonIdentityInfo(generator = ObjectIdGenerators.StringIdGenerator.class)
+    @JsonIdentityReference(alwaysAsId = true)
+    @JacksonAnnotationsInside
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface StringIdentity {}
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.UUIDGenerator.class)
     @JsonIdentityReference(alwaysAsId = true)
