@@ -6,16 +6,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### `jsonschema-generator`
+#### Added
+- new `Option.NULLABLE_ALWAYS_AS_ANYOF` that avoids the `"null"` type being included with other type values, e.g. `"type": ["object", "null"]`
+
+#### Changed
+- apply property name overrides before triggering the ignore check (i.e., provide both the declared and overridden property names if there is one)
+- update various (runtime/test/build-time) dependencies
+
 #### Fixed
 - avoid exception when trying to collect supported enum values from raw `Enum` type (i.e., missing type parameter)
 - avoid exception when trying to find type with annotation when given type is `null`
 
 ### `jsonschema-module-jackson`
+#### Added
+- support `@JacksonAnnotationsInside` annotated combo annotations
+
 #### Fixed
 - avoid exception in subtype resolution, when targeting void method
+- check for ignored properties excluded fields when a property name override makes it conflict with a non-conventional getter method
 
 ### `jsonschema-maven-plugin`
-### Added
+#### Added
 - support `<skipAbstractTypes>` flag to exclude abstract types (not interfaces)
 - support `<skipInterfaces>` flag to exclude interface types
 

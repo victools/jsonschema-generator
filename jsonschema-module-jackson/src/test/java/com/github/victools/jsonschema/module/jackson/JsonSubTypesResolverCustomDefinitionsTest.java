@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.classmate.ResolvedType;
+import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -25,6 +26,8 @@ import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaVersion;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -188,7 +191,7 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
         public TestSuperClassWithNameProperty superTypeWithAnnotationOnGetter;
         @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
         public TestSuperClassWithNameProperty superTypeWithAnnotationOnFieldAndGetter;
-        @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "fullClass", include = JsonTypeInfo.As.PROPERTY)
+        @FullClassProperty
         public TestSuperInterface superInterfaceWithAnnotationOnField;
 
         public TestSuperClassWithNameProperty getSuperTypeNoAnnotation() {
@@ -209,6 +212,11 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
             return this.superTypeWithAnnotationOnFieldAndGetter;
         }
     }
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "fullClass", include = JsonTypeInfo.As.PROPERTY)
+    @JacksonAnnotationsInside
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface FullClassProperty {}
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
     @JsonSubTypes({

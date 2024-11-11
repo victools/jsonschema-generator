@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.module.jackson;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.Option;
@@ -44,7 +45,8 @@ public class IgnorePropertyTest {
     static Stream<Arguments> parametersForTestJsonIgnoreProperties() {
         return Stream.of(
             Arguments.of(SubType.class, "[includedChildField, includedParentField1, includedParentField2]"),
-            Arguments.of(SuperType.class, "[ignoredParentField2, includedParentField1]")
+            Arguments.of(SuperType.class, "[ignoredParentField2, includedParentField1]"),
+            Arguments.of(TypeWithUnderscoreField.class, "[import]")
         );
     }
 
@@ -83,5 +85,18 @@ public class IgnorePropertyTest {
         public String ignoredParentField2;
         @JsonBackReference
         public String ignoredParentField3;
+    }
+
+    private static class TypeWithUnderscoreField {
+        @JsonProperty("import")
+        private int _import;
+
+        public int getImport() {
+            return this._import;
+        }
+
+        public String getIgnoredValue() {
+            return "method being ignored, because there is no matching field";
+        }
     }
 }
