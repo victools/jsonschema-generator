@@ -1,3 +1,19 @@
+/*
+ * Copyright 2024 VicTools.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.github.victools.jsonschema.generator;
 
 import org.junit.jupiter.api.Assertions;
@@ -18,7 +34,37 @@ import java.util.stream.Stream;
 /**
  * Unit test class dedicated to the validation of {@link AnnotationHelper}.
  */
-class AnnotationHelperTest {
+public class AnnotationHelperTest {
+
+    static Stream<Arguments> annotationLookupScenarios() {
+        return Stream.of(
+                Arguments.of(NonAnnotatedClass.class, Optional.empty()),
+                Arguments.of(AnnotatedClassWithUselessAnnotations.class, Optional.empty()),
+                Arguments.of(DirectlyAnnotatedClass.class, Optional.of("")),
+                Arguments.of(BothDirectAndIndirectlyAnnotatedClass.class, Optional.of("direct value")),
+                Arguments.of(IndirectlyAnnotatedClass.class, Optional.of("first combo annotation value")),
+                Arguments.of(BreadthFirstAnnotatedClass.class, Optional.of("first combo annotation value"))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("annotationLookupScenarios")
+    void resolveAnnotation_AnnotatedElement_respects_annotationLookupScenarios(Class<?> annotatedClass, Optional<String> expectedAnnotationValue) {
+        Optional<String> value = AnnotationHelper.resolveAnnotation(annotatedClass, TargetAnnotation.class, metaAnnotationPredicate()).map(TargetAnnotation::value);
+        Assertions.assertEquals(expectedAnnotationValue, value);
+    }
+
+    @ParameterizedTest
+    @MethodSource("annotationLookupScenarios")
+    void resolveAnnotation_List_respects_annotationLookupScenarios(Class<?> annotatedClass, Optional<String> expectedAnnotationValue) {
+        Optional<String> value = AnnotationHelper.resolveAnnotation(Arrays.asList(annotatedClass.getAnnotations()), TargetAnnotation.class, metaAnnotationPredicate()).map(TargetAnnotation::value);
+        Assertions.assertEquals(expectedAnnotationValue, value);
+    }
+
+    private static Predicate<Annotation> metaAnnotationPredicate() {
+        return (annotation) -> annotation.annotationType().isAnnotationPresent(MetaAnnotation.class);
+    }
+
     @Target({ElementType.ANNOTATION_TYPE, ElementType.TYPE})
     @Retention(RetentionPolicy.RUNTIME)
     public @interface TargetAnnotation {
@@ -89,34 +135,5 @@ class AnnotationHelperTest {
     @ThirdComboAnnotation
     @FirstComboAnnotation
     private static class BreadthFirstAnnotatedClass {}
-    
-    static Stream<Arguments> annotationLookupScenarios() {
-        return Stream.of(
-                Arguments.of(NonAnnotatedClass.class, Optional.empty()),
-                Arguments.of(AnnotatedClassWithUselessAnnotations.class, Optional.empty()),
-                Arguments.of(DirectlyAnnotatedClass.class, Optional.of("")),
-                Arguments.of(BothDirectAndIndirectlyAnnotatedClass.class, Optional.of("direct value")),
-                Arguments.of(IndirectlyAnnotatedClass.class, Optional.of("first combo annotation value")),
-                Arguments.of(BreadthFirstAnnotatedClass.class, Optional.of("first combo annotation value"))
-        );
-    }
-    
-    @ParameterizedTest
-    @MethodSource("annotationLookupScenarios")
-    void resolveAnnotation_AnnotatedElement_respects_annotationLookupScenarios(Class<?> annotatedClass, Optional<String> expectedAnnotationValue) {
-        Optional<String> value = AnnotationHelper.resolveAnnotation(annotatedClass, TargetAnnotation.class, metaAnnotationPredicate()).map(TargetAnnotation::value);
-        Assertions.assertEquals(expectedAnnotationValue, value);
-    }
-
-    @ParameterizedTest
-    @MethodSource("annotationLookupScenarios")
-    void resolveAnnotation_List_respects_annotationLookupScenarios(Class<?> annotatedClass, Optional<String> expectedAnnotationValue) {
-        Optional<String> value = AnnotationHelper.resolveAnnotation(Arrays.asList(annotatedClass.getAnnotations()), TargetAnnotation.class, metaAnnotationPredicate()).map(TargetAnnotation::value);
-        Assertions.assertEquals(expectedAnnotationValue, value);
-    }
-
-    private static Predicate<Annotation> metaAnnotationPredicate() {
-        return (annotation) -> annotation.annotationType().isAnnotationPresent(MetaAnnotation.class);
-    }
     
 }

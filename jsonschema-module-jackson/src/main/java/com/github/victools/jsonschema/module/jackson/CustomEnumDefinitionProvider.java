@@ -21,6 +21,7 @@ import com.fasterxml.classmate.members.ResolvedMethod;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.AnnotationHelper;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
@@ -121,7 +122,9 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
         ResolvedMethod[] memberMethods = context.getTypeContext().resolveWithMembers(javaType).getMemberMethods();
         Set<ResolvedMethod> jsonValueAnnotatedMethods = Stream.of(memberMethods)
                 .filter(method -> method.getArgumentCount() == 0)
-                .filter(method -> AnnotationHelper.resolveAnnotation(method, JsonValue.class).map(JsonValue::value).orElse(false))
+                .filter(method -> AnnotationHelper.resolveAnnotation(method, JsonValue.class, JacksonModule.NESTED_ANNOTATION_CHECK)
+                        .map(JsonValue::value)
+                        .orElse(false))
                 .collect(Collectors.toSet());
         if (jsonValueAnnotatedMethods.size() == 1) {
             return jsonValueAnnotatedMethods.iterator().next();
@@ -141,10 +144,8 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
             List<String> serializedJsonValues = new ArrayList<>(enumConstants.length);
             for (Object enumConstant : enumConstants) {
                 String enumValueName = ((Enum<?>) enumConstant).name();
-                Optional<JsonProperty> annotation = AnnotationHelper.resolveAnnotation(
-                        javaType.getErasedType().getDeclaredField(enumValueName),
-                        JsonProperty.class
-                );
+                Optional<JsonProperty> annotation = AnnotationHelper.resolveAnnotation(javaType.getErasedType().getDeclaredField(enumValueName),
+                        JsonProperty.class, JacksonModule.NESTED_ANNOTATION_CHECK);
                 if (!annotation.isPresent()) {
                     // enum constant without @JsonProperty annotation
                     return null;

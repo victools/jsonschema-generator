@@ -44,19 +44,17 @@ public final class AnnotationHelper {
      * @param <A> the generic type of the annotation
      * @param member where to look for the specified annotation
      * @param annotationClass the class of the annotation to look for
-     * @param metaAnnotationPredicate the predicate indicating nested annotations
+     * @param metaAnnotationCheck the predicate indicating nested annotations
      * @return an empty entry if not found
      */
-    public static <A extends Annotation> Optional<A> resolveAnnotation(
-            ResolvedMember<?> member,
-            Class<A> annotationClass,
-            Predicate<Annotation> metaAnnotationPredicate
-    ) {
+    public static <A extends Annotation> Optional<A> resolveAnnotation(ResolvedMember<?> member, Class<A> annotationClass,
+                                                                       Predicate<Annotation> metaAnnotationCheck) {
         final A annotation = member.getAnnotations().get(annotationClass);
-        if (annotation != null) {
-            return Optional.of(annotation);
+        if (annotation == null) {
+            return AnnotationHelper.resolveNestedAnnotations(StreamSupport.stream(member.getAnnotations().spliterator(), false),
+                    annotationClass, metaAnnotationCheck);
         }
-        return resolveNestedAnnotations(StreamSupport.stream(member.getAnnotations().spliterator(), false), annotationClass, metaAnnotationPredicate);
+        return Optional.of(annotation);
     }
 
     /**
@@ -68,19 +66,18 @@ public final class AnnotationHelper {
      * @param <A> the generic type of the annotation
      * @param annotationList a list of annotations to look into
      * @param annotationClass the class of the annotation to look for
-     * @param metaAnnotationPredicate the predicate indicating nested annotations
+     * @param metaAnnotationCheck the predicate indicating nested annotations
      * @return an empty entry if not found
      */
-    public static <A extends Annotation> Optional<A> resolveAnnotation(
-            List<Annotation> annotationList,
-            Class<A> annotationClass,
-            Predicate<Annotation> metaAnnotationPredicate
-    ) {
-        final Optional<Annotation> annotation = annotationList.stream().filter(annotationClass::isInstance).findFirst();
+    public static <A extends Annotation> Optional<A> resolveAnnotation(List<Annotation> annotationList, Class<A> annotationClass,
+                                                                       Predicate<Annotation> metaAnnotationCheck) {
+        final Optional<Annotation> annotation = annotationList.stream()
+                .filter(annotationClass::isInstance)
+                .findFirst();
         if (annotation.isPresent()) {
             return annotation.map(annotationClass::cast);
         }
-        return resolveNestedAnnotations(annotationList.stream(), annotationClass, metaAnnotationPredicate);
+        return AnnotationHelper.resolveNestedAnnotations(annotationList.stream(), annotationClass, metaAnnotationCheck);
     }
 
     /**
@@ -92,42 +89,36 @@ public final class AnnotationHelper {
      * @param <A> the generic type of the annotation
      * @param annotatedElement where to look for the specified annotation
      * @param annotationClass the class of the annotation to look for
-     * @param metaAnnotationPredicate the predicate indicating meta annotations
+     * @param metaAnnotationCheck the predicate indicating meta annotations
      * @return an empty entry if not found
      */
-    public static <A extends Annotation> Optional<A> resolveAnnotation(
-            AnnotatedElement annotatedElement,
-            Class<A> annotationClass,
-            Predicate<Annotation> metaAnnotationPredicate
-    ) {
+    public static <A extends Annotation> Optional<A> resolveAnnotation(AnnotatedElement annotatedElement, Class<A> annotationClass,
+                                                                       Predicate<Annotation> metaAnnotationCheck) {
         final A annotation = annotatedElement.getAnnotation(annotationClass);
-        if (annotation != null) {
-            return Optional.of(annotation);
+        if (annotation == null) {
+            return AnnotationHelper.resolveNestedAnnotations(Arrays.stream(annotatedElement.getAnnotations()),
+                    annotationClass, metaAnnotationCheck);
         }
-        return resolveNestedAnnotations(Arrays.stream(annotatedElement.getAnnotations()), annotationClass, metaAnnotationPredicate);
+        return Optional.of(annotation);
     }
 
-    private static <A extends Annotation> Optional<A> resolveNestedAnnotations(
-            Stream<Annotation> initialAnnotations,
-            Class<A> annotationClass,
-            Predicate<Annotation> metaAnnotationPredicate
-    ) {
-        List<Annotation> annotations = extractAnnotationsFromMetaAnnotations(initialAnnotations, metaAnnotationPredicate);
+    private static <A extends Annotation> Optional<A> resolveNestedAnnotations(Stream<Annotation> initialAnnotations, Class<A> annotationClass,
+                                                                               Predicate<Annotation> metaAnnotationCheck) {
+        List<Annotation> annotations = AnnotationHelper.extractAnnotationsFromMetaAnnotations(initialAnnotations, metaAnnotationCheck);
         while (!annotations.isEmpty()) {
-            final Optional<Annotation> directAnnotation = annotations.stream().filter(annotationClass::isInstance).findFirst();
+            final Optional<Annotation> directAnnotation = annotations.stream()
+                    .filter(annotationClass::isInstance)
+                    .findFirst();
             if (directAnnotation.isPresent()) {
                 return directAnnotation.map(annotationClass::cast);
             }
-            annotations = extractAnnotationsFromMetaAnnotations(annotations.stream(), metaAnnotationPredicate);
+            annotations = AnnotationHelper.extractAnnotationsFromMetaAnnotations(annotations.stream(), metaAnnotationCheck);
         }
         return Optional.empty();
     }
 
-    private static List<Annotation> extractAnnotationsFromMetaAnnotations(
-            Stream<Annotation> annotations,
-            Predicate<Annotation> metaAnnotationPredicate
-    ) {
-        return annotations.filter(metaAnnotationPredicate)
+    private static List<Annotation> extractAnnotationsFromMetaAnnotations(Stream<Annotation> annotations, Predicate<Annotation> metaAnnotationCheck) {
+        return annotations.filter(metaAnnotationCheck)
                 .flatMap(a -> Arrays.stream(a.annotationType().getAnnotations()))
                 .collect(Collectors.toList());
     }

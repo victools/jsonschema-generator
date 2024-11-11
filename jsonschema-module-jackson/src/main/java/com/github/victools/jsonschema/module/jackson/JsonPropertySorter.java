@@ -18,6 +18,7 @@ package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.classmate.members.HierarchicType;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.github.victools.jsonschema.generator.AnnotationHelper;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.impl.PropertySortUtils;
@@ -98,7 +99,7 @@ public class JsonPropertySorter implements Comparator<MemberScope<?, ?>> {
      * @return whether properties that are not specifically mentioned in a {@link JsonPropertyOrder} annotation should be sorted alphabetically
      */
     protected boolean shouldSortPropertiesAlphabetically(Class<?> declaringType) {
-        return AnnotationHelper.resolveAnnotation(declaringType, JsonPropertyOrder.class)
+        return AnnotationHelper.resolveAnnotation(declaringType, JsonPropertyOrder.class, JacksonModule.NESTED_ANNOTATION_CHECK)
                 .map(JsonPropertyOrder::alphabetic)
                 .orElse(this.sortAlphabeticallyIfNotAnnotated);
     }
@@ -110,7 +111,7 @@ public class JsonPropertySorter implements Comparator<MemberScope<?, ?>> {
      * @return {@link JsonPropertyOrder#value()} or empty list
      */
     private List<String> getAnnotatedPropertyOrder(Class<?> declaringType) {
-        return AnnotationHelper.resolveAnnotation(declaringType, JsonPropertyOrder.class)
+        return AnnotationHelper.resolveAnnotation(declaringType, JsonPropertyOrder.class, JacksonModule.NESTED_ANNOTATION_CHECK)
                 .map(JsonPropertyOrder::value)
                 .filter(valueArray -> valueArray.length != 0)
                 .map(Arrays::asList)

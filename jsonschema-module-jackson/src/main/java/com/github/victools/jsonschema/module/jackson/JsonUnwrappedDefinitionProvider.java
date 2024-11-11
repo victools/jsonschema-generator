@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.AnnotationHelper;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
@@ -74,7 +75,9 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      * @return whether the given member has an {@code enabled} {@link JsonUnwrapped @JsonUnwrapped} annotation
      */
     private boolean hasJsonUnwrappedAnnotation(ResolvedMember<?> member) {
-        return AnnotationHelper.resolveAnnotation(member, JsonUnwrapped.class).filter(JsonUnwrapped::enabled).isPresent();
+        return AnnotationHelper.resolveAnnotation(member, JsonUnwrapped.class, JacksonModule.NESTED_ANNOTATION_CHECK)
+                .filter(JsonUnwrapped::enabled)
+                .isPresent();
     }
 
     /**
@@ -85,14 +88,15 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      * @return created schema
      */
     private Optional<ObjectNode> createUnwrappedMemberSchema(ResolvedMember<?> member, SchemaGenerationContext context) {
-        final Optional<JsonUnwrapped> optAnnotation = AnnotationHelper.resolveAnnotation(member, JsonUnwrapped.class).filter(JsonUnwrapped::enabled);
-        return optAnnotation.map(annotation -> {
-            ObjectNode definition = context.createStandardDefinition(member.getType(), null);
-            if (!annotation.prefix().isEmpty() || !annotation.suffix().isEmpty()) {
-                this.applyPrefixAndSuffixToPropertyNames(definition, annotation.prefix(), annotation.suffix(), context);
-            }
-            return definition;
-        });
+        return AnnotationHelper.resolveAnnotation(member, JsonUnwrapped.class, JacksonModule.NESTED_ANNOTATION_CHECK)
+                .filter(JsonUnwrapped::enabled)
+                .map(annotation -> {
+                    ObjectNode definition = context.createStandardDefinition(member.getType(), null);
+                    if (!annotation.prefix().isEmpty() || !annotation.suffix().isEmpty()) {
+                        this.applyPrefixAndSuffixToPropertyNames(definition, annotation.prefix(), annotation.suffix(), context);
+                    }
+                    return definition;
+                });
     }
 
     /**
