@@ -24,6 +24,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -644,17 +645,7 @@ public class SchemaCleanUpUtils {
      */
     private void addTypeInfoWhereMissing(ObjectNode schemaNode, String typeTagName, boolean considerNullType,
             Map<String, SchemaKeyword> reverseTagMap) {
-        if (schemaNode.has(typeTagName)) {
-            // explicit type indication is already present
-            return;
-        }
-        List<String> impliedTypes = reverseTagMap.entrySet().stream()
-                .filter(entry -> schemaNode.has(entry.getKey()))
-                .flatMap(entry -> entry.getValue().getImpliedTypes().stream())
-                .distinct()
-                .sorted()
-                .map(SchemaKeyword.SchemaType::getSchemaKeywordValue)
-                .collect(Collectors.toList());
+        List<String> impliedTypes = this.collectImpliedTypes(schemaNode, typeTagName, reverseTagMap);
         if (impliedTypes.isEmpty()) {
             return;
         }
@@ -670,6 +661,20 @@ public class SchemaCleanUpUtils {
             // since version 4.37.0
             SchemaGenerationContextImpl.makeNullable(schemaNode, this.config);
         }
+    }
+
+    private List<String> collectImpliedTypes(ObjectNode schemaNode, String typeTagName, Map<String, SchemaKeyword> reverseTagMap) {
+        if (schemaNode.has(typeTagName)) {
+            // explicit type indication is already present
+            return Collections.emptyList();
+        }
+        return reverseTagMap.entrySet().stream()
+                .filter(entry -> schemaNode.has(entry.getKey()))
+                .flatMap(entry -> entry.getValue().getImpliedTypes().stream())
+                .distinct()
+                .sorted()
+                .map(SchemaKeyword.SchemaType::getSchemaKeywordValue)
+                .collect(Collectors.toList());
     }
 
     /**

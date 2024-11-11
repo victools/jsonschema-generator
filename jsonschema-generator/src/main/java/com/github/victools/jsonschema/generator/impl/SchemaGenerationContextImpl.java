@@ -690,31 +690,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             // given node is a simple schema, we can adjust its "type" attribute
             SchemaGenerationContextImpl.extendTypeDeclarationToIncludeNull(node, config);
         } else {
-            // cannot be sure what is specified in those other schema parts, instead simply create an anyOf wrapper
-            ObjectNode nullSchema = config.createObjectNode()
-                    .put(config.getKeyword(SchemaKeyword.TAG_TYPE), config.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
-            String anyOfTagName = config.getKeyword(SchemaKeyword.TAG_ANYOF);
-            // reduce likelihood of nested duplicate null schema
-            JsonNode existingAnyOf = node.get(anyOfTagName);
-            if (existingAnyOf instanceof ArrayNode) {
-                Iterator<JsonNode> anyOfIterator = existingAnyOf.iterator();
-                while (anyOfIterator.hasNext()) {
-                    if (nullSchema.equals(anyOfIterator.next())) {
-                        // the existing anyOf array contains a duplicate null schema, remove it
-                        anyOfIterator.remove();
-                        // unlikely that there are multiple
-                        break;
-                    }
-                }
-            }
-            ArrayNode newAnyOf = config.createArrayNode()
-                    // one option in the anyOf should be null
-                    .add(nullSchema)
-                    // the other option is the given (assumed to be) not-nullable node
-                    .add(config.createObjectNode().setAll(node));
-            // replace all existing (and already copied properties with the anyOf wrapper
-            node.removeAll();
-            node.set(anyOfTagName, newAnyOf);
+            SchemaGenerationContextImpl.addAnyOfNullSchema(node, config);
         }
         return node;
     }
@@ -754,6 +730,34 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
                     .add(nullTypeName);
         }
         // if no "type" is specified, null is allowed already
+    }
+
+    private static void addAnyOfNullSchema(ObjectNode node, SchemaGeneratorConfig config) {
+        // cannot be sure what is specified in those other schema parts, instead simply create an anyOf wrapper
+        ObjectNode nullSchema = config.createObjectNode()
+                .put(config.getKeyword(SchemaKeyword.TAG_TYPE), config.getKeyword(SchemaKeyword.TAG_TYPE_NULL));
+        String anyOfTagName = config.getKeyword(SchemaKeyword.TAG_ANYOF);
+        // reduce likelihood of nested duplicate null schema
+        JsonNode existingAnyOf = node.get(anyOfTagName);
+        if (existingAnyOf instanceof ArrayNode) {
+            Iterator<JsonNode> anyOfIterator = existingAnyOf.iterator();
+            while (anyOfIterator.hasNext()) {
+                if (nullSchema.equals(anyOfIterator.next())) {
+                    // the existing anyOf array contains a duplicate null schema, remove it
+                    anyOfIterator.remove();
+                    // unlikely that there are multiple
+                    break;
+                }
+            }
+        }
+        ArrayNode newAnyOf = config.createArrayNode()
+                // one option in the anyOf should be null
+                .add(nullSchema)
+                // the other option is the given (assumed to be) not-nullable node
+                .add(config.createObjectNode().setAll(node));
+        // replace all existing (and already copied properties with the anyOf wrapper
+        node.removeAll();
+        node.set(anyOfTagName, newAnyOf);
     }
 
     private static class GenericTypeDetails {
