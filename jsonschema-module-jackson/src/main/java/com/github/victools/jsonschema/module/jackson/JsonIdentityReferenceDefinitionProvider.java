@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 VicTools.
+ * Copyright 2022-2024 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.github.victools.jsonschema.generator.CustomPropertyDefinition;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.TypeContext;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -73,8 +74,11 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
      * @return designated type of the applicable identity reference (may be empty)
      */
     public Optional<ResolvedType> getIdentityReferenceType(ResolvedType javaType, TypeContext typeContext) {
-        JsonIdentityReference referenceAnnotation = javaType.getErasedType().getAnnotation(JsonIdentityReference.class);
-        return this.getIdentityReferenceType(referenceAnnotation, javaType, typeContext);
+        Optional<JsonIdentityReference> referenceAnnotation = AnnotationHelper.resolveAnnotation(
+                javaType.getErasedType(),
+                JsonIdentityReference.class
+        );
+        return this.getIdentityReferenceType(referenceAnnotation.orElse(null), javaType, typeContext);
     }
 
     /**
@@ -86,9 +90,15 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
      * @return designated type of the applicable identity reference (may be empty)
      */
     public Optional<ResolvedType> getIdentityReferenceType(MemberScope<?, ?> scope) {
-        JsonIdentityReference referenceAnnotation = scope.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(JsonIdentityReference.class);
+        JsonIdentityReference referenceAnnotation = scope.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(
+                JsonIdentityReference.class,
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+        );
         if (referenceAnnotation == null) {
-            referenceAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonIdentityReference.class);
+            referenceAnnotation = scope.getAnnotationConsideringFieldAndGetter(
+                    JsonIdentityReference.class,
+                    AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+            );
         }
         return this.getIdentityReferenceType(referenceAnnotation, scope.getType(), scope.getContext());
     }
@@ -110,12 +120,20 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
             return Optional.empty();
         }
         // additionally, the type itself must have a @JsonIdentityInfo annotation
-        ResolvedType typeWithIdentityInfoAnnotation = typeContext.getTypeWithAnnotation(javaType, JsonIdentityInfo.class);
+        ResolvedType typeWithIdentityInfoAnnotation = typeContext.getTypeWithAnnotation(
+                javaType,
+                JsonIdentityInfo.class,
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+        );
         if (typeWithIdentityInfoAnnotation == null) {
             // otherwise, the @JsonIdentityReference annotation is simply ignored
             return Optional.empty();
         }
-        JsonIdentityInfo identityInfoAnnotation = typeWithIdentityInfoAnnotation.getErasedType().getAnnotation(JsonIdentityInfo.class);
+        JsonIdentityInfo identityInfoAnnotation = typeContext.getAnnotationFromList(
+                JsonIdentityInfo.class,
+                Arrays.asList(typeWithIdentityInfoAnnotation.getErasedType().getAnnotations()),
+                AnnotationHelper.JACKSON_ANNOTATIONS_INSIDE_ANNOTATED_FILTER
+        );
         // @JsonIdentityInfo annotation declares generator with specific identity type
         ResolvedType identityTypeFromGenerator = typeContext.getTypeParameterFor(typeContext.resolve(identityInfoAnnotation.generator()),
                 ObjectIdGenerator.class, 0);
