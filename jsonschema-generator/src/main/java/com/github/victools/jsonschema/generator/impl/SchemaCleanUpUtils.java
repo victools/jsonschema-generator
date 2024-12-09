@@ -271,8 +271,11 @@ public class SchemaCleanUpUtils {
             return null;
         }
         return () -> {
+            Set<JsonNode> arrayItems = new LinkedHashSet<>();
+            arrayNodesToMerge.forEach(node -> node.forEach(arrayItems::add));
+
             ArrayNode mergedArrayNode = this.config.createArrayNode();
-            arrayNodesToMerge.forEach(node -> node.forEach(mergedArrayNode::add));
+            arrayItems.forEach(mergedArrayNode::add);
             return mergedArrayNode;
         };
     }
