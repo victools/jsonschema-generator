@@ -25,9 +25,11 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 import org.json.JSONArray;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -115,5 +117,21 @@ public class SchemaCleanUpUtilsTest {
 
         String schemaAsString = schema.toString();
         JSONAssert.assertEquals('\n' + schemaAsString +'\n', expectedOutput, schemaAsString, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void testAllOfCleanup() throws Exception {
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(
+                SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON);
+        SchemaCleanUpUtils utilsInstance = new SchemaCleanUpUtils(configBuilder.build());
+
+        JsonNode schema = configBuilder.getObjectMapper().readTree(
+                "{\"allOf\":[{\"type\":\"object\",\"properties\":{\"foo\":{\"type\":\"string\"}},\"required\":[\"foo\"]},{\"type\":\"object\",\"properties\":{\"foo\":{\"type\":\"string\"}},\"required\":[\"foo\"]}]}");
+        utilsInstance.reduceAllOfNodes(List.of((ObjectNode) schema));
+
+        String schemaAsString = schema.toString();
+        JSONAssert.assertEquals('\n' + schemaAsString + '\n',
+                "{\"type\":\"object\",\"properties\":{\"foo\":{\"type\":\"string\"}},\"required\":[\"foo\"]}",
+                schemaAsString, JSONCompareMode.STRICT);
     }
 }
