@@ -16,25 +16,17 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.util.Collections;
 import java.util.stream.Stream;
-import org.json.JSONArray;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -115,5 +107,35 @@ public class SchemaCleanUpUtilsTest {
 
         String schemaAsString = schema.toString();
         JSONAssert.assertEquals('\n' + schemaAsString +'\n', expectedOutput, schemaAsString, JSONCompareMode.STRICT);
+    }
+
+    Stream<Arguments> parametersForTestReduceAllOfNodes() {
+        return Stream.of(
+                Arguments.of(
+                        "{\"allOf\":[{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}}}," +
+                                "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"},\"b\":{\"type\":\"string\"}}}]}",
+                        "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"},\"b\":{\"type\":\"string\"}}}"),
+                Arguments.of(
+                        "{\"allOf\":[{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"required\":[\"a\"]}," +
+                                "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"required\":[\"a\"]}]}",
+                        "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"required\":[\"a\"]}"),
+                Arguments.of(
+                        "{\"allOf\":[{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"required\":[\"a\"]}," +
+                                "{\"type\":\"object\",\"properties\":{\"b\":{\"type\":\"string\"}},\"required\":[\"a\",\"b\"]}]}",
+                        "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"},\"b\":{\"type\":\"string\"}},\"required\":[\"a\",\"b\"]}")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("parametersForTestReduceAllOfNodes")
+    public void testReduceAllOfNodes(String schemaInput, String expectedOutput) throws Exception {
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON);
+        SchemaCleanUpUtils utilsInstance = new SchemaCleanUpUtils(configBuilder.build());
+
+        JsonNode schema = configBuilder.getObjectMapper().readTree(schemaInput);
+        utilsInstance.reduceAllOfNodes(Collections.singletonList((ObjectNode) schema));
+
+        String schemaAsString = schema.toString();
+        JSONAssert.assertEquals('\n' + schemaAsString + '\n', expectedOutput, schemaAsString, JSONCompareMode.STRICT);
     }
 }
