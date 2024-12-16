@@ -119,19 +119,33 @@ public class SchemaCleanUpUtilsTest {
         JSONAssert.assertEquals('\n' + schemaAsString +'\n', expectedOutput, schemaAsString, JSONCompareMode.STRICT);
     }
 
-    @Test
-    public void testAllOfCleanup() throws Exception {
-        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(
-                SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON);
+    Stream<Arguments> parametersForTestReduceAllOfNodes() {
+        return Stream.of(
+                Arguments.of(
+                        "{\"allOf\":[{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}}}," +
+                                "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"},\"b\":{\"type\":\"string\"}}}]}",
+                        "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"},\"b\":{\"type\":\"string\"}}}"),
+                Arguments.of(
+                        "{\"allOf\":[{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"required\":[\"a\"]}," +
+                                "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"required\":[\"a\"]}]}",
+                        "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"required\":[\"a\"]}"),
+                Arguments.of(
+                        "{\"allOf\":[{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"required\":[\"a\"]}," +
+                                "{\"type\":\"object\",\"properties\":{\"b\":{\"type\":\"string\"}},\"required\":[\"a\",\"b\"]}]}",
+                        "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"},\"b\":{\"type\":\"string\"}},\"required\":[\"a\",\"b\"]}")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("parametersForTestReduceAllOfNodes")
+    public void testReduceAllOfNodes(String schemaInput, String expectedOutput) throws Exception {
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON);
         SchemaCleanUpUtils utilsInstance = new SchemaCleanUpUtils(configBuilder.build());
 
-        JsonNode schema = configBuilder.getObjectMapper().readTree(
-                "{\"allOf\":[{\"type\":\"object\",\"properties\":{\"foo\":{\"type\":\"string\"}},\"required\":[\"foo\"]},{\"type\":\"object\",\"properties\":{\"foo\":{\"type\":\"string\"}},\"required\":[\"foo\"]}]}");
-        utilsInstance.reduceAllOfNodes(List.of((ObjectNode) schema));
+        JsonNode schema = configBuilder.getObjectMapper().readTree(schemaInput);
+        utilsInstance.reduceAllOfNodes(Collections.singletonList((ObjectNode) schema));
 
         String schemaAsString = schema.toString();
-        JSONAssert.assertEquals('\n' + schemaAsString + '\n',
-                "{\"type\":\"object\",\"properties\":{\"foo\":{\"type\":\"string\"}},\"required\":[\"foo\"]}",
-                schemaAsString, JSONCompareMode.STRICT);
+        JSONAssert.assertEquals('\n' + schemaAsString + '\n', expectedOutput, schemaAsString, JSONCompareMode.STRICT);
     }
 }
