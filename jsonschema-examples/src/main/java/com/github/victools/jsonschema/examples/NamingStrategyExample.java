@@ -32,9 +32,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Example created in response to <a href="https://github.com/victools/jsonschema-generator/issues/458">#458</a>.
+ * Example created in response to <a href="https://github.com/victools/jsonschema-generator/issues/505">#458</a>.
  * <br/>
- * Demonstrating target type overrides to represent the Jackson {@code ACCEPT_SINGLE_VALUE_AS_ARRAY} feature.
+ * Demonstrating usage of the {@code SchemaDefinitionNamingStrategy} feature.
  */
 public class NamingStrategyExample implements SchemaGenerationExampleInterface {
 
