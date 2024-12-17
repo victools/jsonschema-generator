@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Example created in response to <a href="https://github.com/victools/jsonschema-generator/issues/505">#458</a>.
+ * Example created in response to <a href="https://github.com/victools/jsonschema-generator/issues/505">#505</a>.
  * <br/>
  * Demonstrating usage of the {@code SchemaDefinitionNamingStrategy} feature.
  */
