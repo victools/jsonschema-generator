@@ -203,8 +203,10 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
     @Test
     public void testFileNamePattern() throws Exception {
         File testCaseLocation = new File("src/test/resources/reference-test-cases");
-        File generationLocation = new File("target/generated-test-sources/SchemaFileName/schemas/"+
-                "com/github/victools/jsonschema/plugin/maven/testpackage");
+        File generationLocation = new File("""
+                target/generated-test-sources/SchemaFileName/schemas/\
+                com/github/victools/jsonschema/plugin/maven/testpackage\
+                """);
 
         // Execute the pom
         executePom(new File("src/test/resources/reference-test-cases/SchemaFileName-pom.xml"));

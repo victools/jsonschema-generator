@@ -191,8 +191,8 @@ public class SchemaCleanUpUtils {
     private void finaliseSchemaParts(List<ObjectNode> schemaNodes, Consumer<ObjectNode> performCleanUpOnSingleSchemaNode) {
         List<ObjectNode> nextNodesToCheck = new ArrayList<>(schemaNodes);
         Consumer<JsonNode> addNodeToCheck = node -> {
-            if (node instanceof ObjectNode) {
-                nextNodesToCheck.add((ObjectNode) node);
+            if (node instanceof ObjectNode objectNode) {
+                nextNodesToCheck.add(objectNode);
             }
         };
 
