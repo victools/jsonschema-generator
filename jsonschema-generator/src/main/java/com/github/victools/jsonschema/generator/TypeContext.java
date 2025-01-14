@@ -73,9 +73,9 @@ public class TypeContext {
      */
     public TypeContext(AnnotationConfiguration annotationConfig, SchemaGeneratorConfig generatorConfig) {
         this(annotationConfig, generatorConfig.shouldDeriveFieldsFromArgumentFreeMethods());
-        if (annotationConfig instanceof AnnotationConfiguration.StdConfiguration) {
+        if (annotationConfig instanceof AnnotationConfiguration.StdConfiguration configuration) {
             generatorConfig.getAnnotationInclusionOverrides()
-                    .forEach(((AnnotationConfiguration.StdConfiguration) annotationConfig)::setInclusion);
+                    .forEach(configuration::setInclusion);
         }
     }
 
@@ -327,8 +327,8 @@ public class TypeContext {
      * @since 4.30.0
      */
     public Stream<Annotation> getTypeParameterAnnotations(AnnotatedType annotatedContainerType, Integer containerItemIndex) {
-        if (annotatedContainerType instanceof AnnotatedParameterizedType) {
-            AnnotatedType[] typeArguments = ((AnnotatedParameterizedType) annotatedContainerType).getAnnotatedActualTypeArguments();
+        if (annotatedContainerType instanceof AnnotatedParameterizedType type) {
+            AnnotatedType[] typeArguments = type.getAnnotatedActualTypeArguments();
             int itemIndex = containerItemIndex == null ? 0 : containerItemIndex;
             if (typeArguments.length > itemIndex) {
                 return Stream.of(typeArguments[itemIndex].getAnnotations());
@@ -478,10 +478,10 @@ public class TypeContext {
     public <R> R performActionOnMember(MemberScope<?, ?> member, Function<FieldScope, R> fieldAction,
             Function<MethodScope, R> methodAction) {
         R result;
-        if (member instanceof FieldScope) {
-            result = fieldAction.apply((FieldScope) member);
-        } else if (member instanceof MethodScope) {
-            result = methodAction.apply((MethodScope) member);
+        if (member instanceof FieldScope scope) {
+            result = fieldAction.apply(scope);
+        } else if (member instanceof MethodScope scope) {
+            result = methodAction.apply(scope);
         } else {
             throw new IllegalStateException("Unsupported member scope of type: " + member.getClass());
         }

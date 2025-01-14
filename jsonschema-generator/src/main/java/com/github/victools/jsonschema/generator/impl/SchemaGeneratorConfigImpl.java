@@ -238,11 +238,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     public <M extends MemberScope<?, ?>> CustomPropertyDefinition getCustomDefinition(M scope, SchemaGenerationContext context,
             CustomPropertyDefinitionProvider<M> ignoredDefinitionProvider) {
         CustomPropertyDefinition result;
-        if (scope instanceof FieldScope) {
-            result = this.getCustomDefinition(this.fieldConfigPart, (FieldScope) scope, context,
+        if (scope instanceof FieldScope fieldScope) {
+            result = this.getCustomDefinition(this.fieldConfigPart, fieldScope, context,
                     (CustomPropertyDefinitionProvider<FieldScope>) ignoredDefinitionProvider);
-        } else if (scope instanceof MethodScope) {
-            result = this.getCustomDefinition(this.methodConfigPart, (MethodScope) scope, context,
+        } else if (scope instanceof MethodScope methodScope) {
+            result = this.getCustomDefinition(this.methodConfigPart, methodScope, context,
                     (CustomPropertyDefinitionProvider<MethodScope>) ignoredDefinitionProvider);
         } else {
             throw new IllegalArgumentException("Unexpected member scope: " + (scope == null ? null : scope.getClass().getName()));

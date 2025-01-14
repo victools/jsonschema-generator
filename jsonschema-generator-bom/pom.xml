@@ -12,6 +12,7 @@
     <packaging>pom</packaging>
 
     <properties>
+    <maven.compiler.release>17</maven.compiler.release>
         <signAndStage.skip>true</signAndStage.skip>
     </properties>
 

@@ -523,8 +523,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             configBuilder.with(new Swagger2Module());
             break;
         default:
-            throw new MojoExecutionException("Error: Module does not have a name in "
-                    + "['Jackson', 'JakartaValidation', 'JavaxValidation', 'Swagger15', 'Swagger2'] or does not have a custom classname.");
+            throw new MojoExecutionException("""
+                    Error: Module does not have a name in \
+                    ['Jackson', 'JakartaValidation', 'JavaxValidation', 'Swagger15', 'Swagger2'] or does not have a custom classname.\
+                    """);
         }
     }
 

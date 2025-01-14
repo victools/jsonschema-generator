@@ -9,6 +9,9 @@
     <name>Java JSON Schema Generator (Reactor)</name>
     <description>Java JSON Schema Generator + Modules – creating a JSON Schema from your Java classes</description>
     <url>https://github.com/victools/jsonschema-generator</url>
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+  </properties>
 
     <!-- For list of contributors, refer to jsonschema-generator-parent/pom.xml -->
 
