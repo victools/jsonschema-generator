@@ -40,6 +40,7 @@ public class ExampleTest {
             InheritanceRefExample.class,
             JacksonDescriptionAsTitleExample.class,
             JacksonSubtypeDefinitionExample.class,
+            NamingStrategyExample.class,
             SingleArrayItemExample.class,
             StrictTypeInfoExample.class,
             SubtypeLookUpExample.class,

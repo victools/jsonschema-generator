@@ -139,6 +139,11 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
     }
 
     @Override
+    public boolean shouldAlwaysWrapNullSchemaInAnyOf() {
+        return this.isOptionEnabled(Option.NULLABLE_ALWAYS_AS_ANYOF);
+    }
+
+    @Override
     public boolean shouldUsePlainDefinitionKeys() {
         return this.isOptionEnabled(Option.PLAIN_DEFINITION_KEYS);
     }

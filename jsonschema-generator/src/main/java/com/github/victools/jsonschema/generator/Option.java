@@ -239,6 +239,14 @@ public enum Option {
      */
     ENUM_KEYWORD_FOR_SINGLE_VALUES(null, null),
     /**
+     * Whether a {@code {"type":"null"}} schema should always be grouped as {@link SchemaKeyword#TAG_ANYOF "anyOf"} with the not-null schema.
+     * Otherwise, it is deemed acceptable to include the {@code "null"} option in the main schema's {@link SchemaKeyword#TAG_TYPE "type"} value, e.g.
+     * as {@code {"type":["null","string]}} resulting in a simpler/smaller schema overall.
+     *
+     * @since 4.37.0
+     */
+    NULLABLE_ALWAYS_AS_ANYOF(null, null),
+    /**
      * Whether a schema's "additionalProperties" should be set to "false" if no specific configuration says otherwise.
      * <br>
      * Without this option, i.e. by default, the "additionalProperties" keyword will be omitted and thereby allowing any additional properties in an
@@ -258,6 +266,7 @@ public enum Option {
      * and assigning a name to it like for all other defined subschemas.
      * <br>
      * Otherwise, "$ref"-erences to the main/target schema will use the empty fragment ("#") and it will not be listed in the "definitions"/"$defs".
+     *
      * <p>
      * Beware: this only results in a valid schema from {@link SchemaVersion#DRAFT_2019_09} onward. Before that, everything besides "$ref" would be
      * ignored.
@@ -288,6 +297,7 @@ public enum Option {
     /**
      * Whether all sub-schemas should be defined in-line, i.e. including no "definitions"/"$defs". This takes precedence over
      * {@link #DEFINITIONS_FOR_ALL_OBJECTS} and {@link #DEFINITION_FOR_MAIN_SCHEMA}.
+     *
      * <p>
      * Beware: This will result in an exception being thrown if a single circular reference is being encountered!
      * </p>

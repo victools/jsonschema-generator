@@ -1,0 +1,66 @@
+{
+    "$schema" : "https://json-schema.org/draft/2020-12/schema",
+    "$defs" : {
+        "Bar-A" : {
+            "type" : "object",
+            "properties" : {
+                "value" : {
+                    "type" : "string"
+                }
+            }
+        },
+        "Bar-B" : {
+            "type" : "object",
+            "properties" : {
+                "value" : {
+                    "type" : "integer"
+                }
+            }
+        },
+        "Foo(Model)" : {
+            "type" : "object",
+            "properties" : {
+                "nested" : {
+                    "$ref" : "#/$defs/Model"
+                }
+            }
+        },
+        "FooBar(Bar)" : {
+            "type" : "object",
+            "properties" : {
+                "nested" : {
+                    "$ref" : "#/$defs/Bar-A"
+                }
+            }
+        },
+        "Model" : {
+            "type" : "object",
+            "properties" : {
+                "value" : {
+                    "type" : "string"
+                }
+            }
+        }
+    },
+    "type" : "object",
+    "properties" : {
+        "barModelDuplicate" : {
+            "$ref" : "#/$defs/Bar-A"
+        },
+        "barWithoutRenaming" : {
+            "$ref" : "#/$defs/Bar-B"
+        },
+        "fooArray" : {
+            "type" : "array",
+            "items" : {
+                "$ref" : "#/$defs/Foo(Model)"
+            }
+        },
+        "fooBarGeneric" : {
+            "$ref" : "#/$defs/FooBar(Bar)"
+        },
+        "modelWithoutRenaming" : {
+            "$ref" : "#/$defs/Model"
+        }
+    }
+}

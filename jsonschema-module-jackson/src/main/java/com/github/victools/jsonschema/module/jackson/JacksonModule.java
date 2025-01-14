@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 VicTools.
+ * Copyright 2019-2024 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.members.HierarchicType;
+import com.fasterxml.classmate.members.ResolvedMember;
+import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,6 +29,7 @@ import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.github.victools.jsonschema.generator.AnnotationHelper;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
@@ -35,6 +38,8 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.TypeScope;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,6 +47,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Module for setting up schema generation aspects based on {@code jackson-annotations}.
@@ -53,6 +59,9 @@ import java.util.Set;
  * </ul>
  */
 public class JacksonModule implements Module {
+
+    static final Predicate<Annotation> NESTED_ANNOTATION_CHECK = annotation ->
+            annotation.annotationType().isAnnotationPresent(JacksonAnnotationsInside.class);
 
     private final Set<JacksonOption> options;
     private ObjectMapper objectMapper;
@@ -183,11 +192,9 @@ public class JacksonModule implements Module {
      */
     protected String resolveDescriptionForType(TypeScope scope) {
         Class<?> rawType = scope.getType().getErasedType();
-        JsonClassDescription classAnnotation = rawType.getAnnotation(JsonClassDescription.class);
-        if (classAnnotation != null) {
-            return classAnnotation.value();
-        }
-        return null;
+        return AnnotationHelper.resolveAnnotation(rawType, JsonClassDescription.class, NESTED_ANNOTATION_CHECK)
+                .map(JsonClassDescription::value)
+                .orElse(null);
     }
 
     /**
@@ -201,7 +208,7 @@ public class JacksonModule implements Module {
      * @return alternative property name (or {@code null})
      */
     protected String getPropertyNameOverrideBasedOnJsonPropertyAnnotation(MemberScope<?, ?> member) {
-        JsonProperty annotation = member.getAnnotationConsideringFieldAndGetter(JsonProperty.class);
+        JsonProperty annotation = member.getAnnotationConsideringFieldAndGetter(JsonProperty.class, NESTED_ANNOTATION_CHECK);
         if (annotation != null) {
             String nameOverride = annotation.value();
             // check for invalid overrides
@@ -237,7 +244,7 @@ public class JacksonModule implements Module {
      * @return annotated naming strategy instance (or {@code null})
      */
     private PropertyNamingStrategy getAnnotatedNamingStrategy(Class<?> declaringType) {
-        return Optional.ofNullable(declaringType.getAnnotation(JsonNaming.class))
+        return AnnotationHelper.resolveAnnotation(declaringType, JsonNaming.class, NESTED_ANNOTATION_CHECK)
                 .map(JsonNaming::value)
                 .map(strategyType -> {
                     try {
@@ -274,11 +281,11 @@ public class JacksonModule implements Module {
      * @return whether field should be excluded
      */
     protected boolean shouldIgnoreField(FieldScope field) {
-        if (field.getAnnotationConsideringFieldAndGetterIfSupported(JsonBackReference.class) != null) {
+        if (field.getAnnotationConsideringFieldAndGetterIfSupported(JsonBackReference.class, NESTED_ANNOTATION_CHECK) != null) {
             return true;
         }
         // @since 4.32.0
-        JsonUnwrapped unwrappedAnnotation = field.getAnnotationConsideringFieldAndGetterIfSupported(JsonUnwrapped.class);
+        JsonUnwrapped unwrappedAnnotation = field.getAnnotationConsideringFieldAndGetterIfSupported(JsonUnwrapped.class, NESTED_ANNOTATION_CHECK);
         if (unwrappedAnnotation != null && unwrappedAnnotation.enabled()) {
             // unwrapped properties should be ignored here, as they are included in their unwrapped form
             return true;
@@ -289,13 +296,16 @@ public class JacksonModule implements Module {
         // some kinds of field ignorals are only available via an annotation introspector
         Set<String> ignoredProperties = this.objectMapper.getSerializationConfig().getAnnotationIntrospector()
                 .findPropertyIgnoralByName(null, beanDescription.getClassInfo()).getIgnored();
-        String fieldName = field.getName();
-        if (ignoredProperties.contains(fieldName)) {
+        String declaredName = field.getDeclaredName();
+        if (ignoredProperties.contains(declaredName)) {
             return true;
         }
+        // @since 4.37.0 also consider overridden property name as it may match the getter method
+        String fieldName = field.getName();
         // other kinds of field ignorals are handled implicitly, i.e. are only available by way of being absent
         return beanDescription.findProperties().stream()
-                .noneMatch(propertyDefinition -> fieldName.equals(propertyDefinition.getInternalName()));
+                .noneMatch(propertyDefinition -> declaredName.equals(propertyDefinition.getInternalName())
+                        || fieldName.equals(propertyDefinition.getInternalName()));
     }
 
     /**
@@ -309,12 +319,12 @@ public class JacksonModule implements Module {
     protected boolean shouldIgnoreMethod(MethodScope method) {
         FieldScope getterField = method.findGetterField();
         if (getterField == null) {
-            if (method.getAnnotationConsideringFieldAndGetterIfSupported(JsonBackReference.class) != null) {
+            if (method.getAnnotationConsideringFieldAndGetterIfSupported(JsonBackReference.class, NESTED_ANNOTATION_CHECK) != null) {
                 return true;
             }
             // @since 4.32.0
-            JsonUnwrapped unwrappedAnnotation = method.getAnnotationConsideringFieldAndGetterIfSupported(JsonUnwrapped.class);
-            if (unwrappedAnnotation != null && unwrappedAnnotation.enabled()) {
+            JsonUnwrapped unwrapped = method.getAnnotationConsideringFieldAndGetterIfSupported(JsonUnwrapped.class, NESTED_ANNOTATION_CHECK);
+            if (unwrapped != null && unwrapped.enabled()) {
                 // unwrapped properties should be ignored here, as they are included in their unwrapped form
                 return true;
             }
@@ -322,7 +332,7 @@ public class JacksonModule implements Module {
             return true;
         }
         return this.options.contains(JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS)
-                && method.getAnnotationConsideringFieldAndGetter(JsonProperty.class) == null;
+                && method.getAnnotationConsideringFieldAndGetter(JsonProperty.class, NESTED_ANNOTATION_CHECK) == null;
     }
 
     /**
@@ -332,7 +342,7 @@ public class JacksonModule implements Module {
      * @return whether the field should be in the "required" list or not
      */
     protected boolean getRequiredCheckBasedOnJsonPropertyAnnotation(MemberScope<?, ?> member) {
-        JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetterIfSupported(JsonProperty.class) ;
+        JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetterIfSupported(JsonProperty.class, NESTED_ANNOTATION_CHECK);
         return jsonProperty != null && jsonProperty.required();
     }
 
@@ -343,7 +353,7 @@ public class JacksonModule implements Module {
      * @return whether the field should be marked as read-only
      */
     protected boolean getReadOnlyCheck(MemberScope<?, ?> member) {
-        JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetter(JsonProperty.class);
+        JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetter(JsonProperty.class, NESTED_ANNOTATION_CHECK);
         return jsonProperty != null && jsonProperty.access() == JsonProperty.Access.READ_ONLY;
     }
 
@@ -354,7 +364,7 @@ public class JacksonModule implements Module {
      * @return whether the field should be marked as write-only
      */
     protected boolean getWriteOnlyCheck(MemberScope<?, ?> member) {
-        JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetter(JsonProperty.class);
+        JsonProperty jsonProperty = member.getAnnotationConsideringFieldAndGetter(JsonProperty.class, NESTED_ANNOTATION_CHECK);
         return jsonProperty != null && jsonProperty.access() == JsonProperty.Access.WRITE_ONLY;
     }
 }
