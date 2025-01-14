@@ -435,11 +435,11 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
     }
 
     private JsonNode populateItemMemberSchema(TypeScope targetScope) {
-        if (targetScope instanceof FieldScope scope && !scope.isFakeContainerItemScope()) {
-            return this.populateFieldSchema(scope.asFakeContainerItemScope());
+        if (targetScope instanceof FieldScope field && !field.isFakeContainerItemScope()) {
+            return this.populateFieldSchema(field.asFakeContainerItemScope());
         }
-        if (targetScope instanceof MethodScope scope && !scope.isFakeContainerItemScope()) {
-            return this.populateMethodSchema(scope.asFakeContainerItemScope());
+        if (targetScope instanceof MethodScope method && !method.isFakeContainerItemScope()) {
+            return this.populateMethodSchema(method.asFakeContainerItemScope());
         }
         ObjectNode arrayItemDefinition = this.generatorConfig.createObjectNode();
         this.traverseGenericType(targetScope.getContainerItemType(), arrayItemDefinition);

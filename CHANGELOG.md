@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### `jsonschema-generator`
 #### Changed
+- BREAKING: drop support for JDK 11 in favor of JDK 17
 - avoid duplicate entries in `required` array when performing final clean-ups
 
 ## [4.37.0] - 2024-11-11

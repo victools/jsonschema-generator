@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.github.victools</groupId>
         <artifactId>jsonschema-generator-bom</artifactId>
-        <version>4.38.0-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../jsonschema-generator-bom/pom.xml</relativePath>
     </parent>
     <artifactId>jsonschema-generator-parent</artifactId>
@@ -61,7 +61,7 @@
                 <role>Provided PRs #116 and #118 (part of initial Swagger2Module)</role>
                 <role>Provided implementation for #204 (readOnly/writeOnly in JacksonModule)</role>
                 <role>Provided PR #299 and feedback on final implementation (inheritance of validation constraint annotations)</role>
-                <role>Provided implementation for PR #503 (avoid duplicates in required array during final clean-ups)</role>
+                <role>Provided PR #503 (avoid duplicates in required array during final clean-ups)</role>
             </roles>
         </contributor>
         <contributor>
@@ -137,13 +137,18 @@
                 <role>Provided PR #487 (support @JacksonAnnotationsInside annotations)</role>
             </roles>
         </contributor>
+        <contributor>
+            <url>https://github.com/hbzhou</url>
+            <roles>
+                <role>Provided PR #477 (drop JDK 11 support in favor of JDK 17)</role>
+            </roles>
+        </contributor>
     </contributors>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <file.encoding>UTF-8</file.encoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
         <!-- maven plugins -->
         <maven.plugin.version.checkstyle>3.6.0</maven.plugin.version.checkstyle>
         <version.checkstyle>10.19.0</version.checkstyle>
@@ -286,7 +291,7 @@
                     <version>${maven.plugin.version.compiler}</version>
                     <configuration>
                         <showDeprecation>true</showDeprecation>
-            <release>17</release>
+                        <release>${maven.compiler.release}</release>
                     </configuration>
                 </plugin>
                 <plugin>

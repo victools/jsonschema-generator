@@ -75,8 +75,8 @@ public class JsonPropertySorter implements Comparator<MemberScope<?, ?>> {
         List<String> sortedProperties = this.propertyOrderPerDeclaringType
                 .computeIfAbsent(topMostHierarchyType.getErasedType(), this::getAnnotatedPropertyOrder);
         String fieldName;
-        if (property instanceof MethodScope scope) {
-            fieldName = Optional.<MemberScope>ofNullable(scope.findGetterField())
+        if (property instanceof MethodScope method) {
+            fieldName = Optional.<MemberScope<?,?>>ofNullable(method.findGetterField())
                     // since 4.33.1: fall-back on method's property name if no getter can be found
                     .orElse(property)
                     .getSchemaPropertyName();
