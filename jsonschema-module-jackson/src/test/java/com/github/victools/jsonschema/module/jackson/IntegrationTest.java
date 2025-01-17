@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -95,6 +96,8 @@ public class IntegrationTest {
 
         public TestEnumWithJsonPropertyAnnotations enumValueWithJsonPropertyAnnotations;
 
+        public TestEnumWithJsonEnumDefaultAnnotations enumValueWithJsonEnumDefaultValueAnnotation;
+
         public BaseType interfaceWithDeclaredSubtypes;
 
         @JsonUnwrapped
@@ -129,6 +132,10 @@ public class IntegrationTest {
     enum TestEnumWithJsonPropertyAnnotations {
         @JsonProperty("x_property") X,
         @JsonProperty Y
+    }
+
+    enum TestEnumWithJsonEnumDefaultAnnotations {
+        A, @JsonEnumDefaultValue B, C
     }
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
