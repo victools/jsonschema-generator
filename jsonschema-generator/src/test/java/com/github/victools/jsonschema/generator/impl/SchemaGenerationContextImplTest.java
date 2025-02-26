@@ -287,11 +287,13 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
     public void testCreateStandardDefinition() {
         ResolvedType type = this.contextImpl.getTypeContext().resolve(TestClass.class);
         ObjectNode result = this.contextImpl.createStandardDefinition(type, null);
-        Assertions.assertEquals("{\"type\":\"object\",\"properties\":{"
-                        + "\"booleanField\":{\"allOf\":[{},{\"title\":\"Field Title\"}]},"
-                        + "\"isBooleanField()\":{\"allOf\":[{},{\"title\":\"Method Title\"}]}},"
-                        + "\"dependentRequired\":{\"booleanField\":[\"isBooleanField()\"],\"isBooleanField()\":[\"booleanField\"]}," +
-                        "\"description\":\"Type Description\"}",
+        Assertions.assertEquals("""
+                        {"type":"object","properties":{\
+                        "booleanField":{"allOf":[{},{"title":"Field Title"}]},\
+                        "isBooleanField()":{"allOf":[{},{"title":"Method Title"}]}},\
+                        "dependentRequired":{"booleanField":["isBooleanField()"],"isBooleanField()":["booleanField"]},\
+                        "description":"Type Description"}\
+                        """,
                 result.toString());
     }
 
