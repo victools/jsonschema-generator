@@ -55,7 +55,7 @@ public class IntegrationTest {
     public void setUp() {
         Swagger2Module module = new Swagger2Module();
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
-                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
+                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_ARRAY_ITEMS_ALLOWED, Option.NULLABLE_FIELDS_BY_DEFAULT)
                 .with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
                 .with(module);
         this.generator = new SchemaGenerator(configBuilder.build());
@@ -89,6 +89,8 @@ public class IntegrationTest {
 
         @Schema(hidden = true)
         public Object hiddenField;
+
+        public String unannotatedField;
 
         @ArraySchema(arraySchema = @Schema(name = "fieldWithOverriddenName", required = true),
                 schema = @Schema(defaultValue = "true", nullable = true), minItems = 1, maxItems = 20)
