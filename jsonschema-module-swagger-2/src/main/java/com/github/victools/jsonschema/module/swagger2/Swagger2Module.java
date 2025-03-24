@@ -179,9 +179,10 @@ public class Swagger2Module implements Module {
      * @param member field/method to check
      * @return whether the field/method is nullable
      */
-    protected boolean checkNullable(MemberScope<?, ?> member) {
-        return this.getSchemaAnnotationValue(member, Schema::nullable, Boolean.TRUE::equals)
-                .isPresent();
+    protected Boolean checkNullable(MemberScope<?, ?> member) {
+        return this.getSchemaAnnotationValue(member, Function.identity(), x -> true)
+                .map(Schema::nullable)
+                .orElse(null);
     }
 
     /**

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Changed
 - avoid duplicate entries in `required` array when performing final clean-ups
 
+### `jsonschema-module-swagger2`
+#### Fixed
+- respect `Option.NULLABLE_FIELDS_BY_DEFAULT`/`Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT` for fields/methods without `@Schema` annotation
+
 ## [4.37.0] - 2024-11-11
 ### `jsonschema-generator`
 #### Added
