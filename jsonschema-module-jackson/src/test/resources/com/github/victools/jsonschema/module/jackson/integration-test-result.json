@@ -54,6 +54,11 @@
             "type": "string",
             "enum": ["entry1", "entry2", "entry3"]
         },
+      "enumValueWithJsonEnumDefaultValueAnnotation": {
+            "type": "string",
+            "enum": ["A", "B", "C"],
+             "default": "B"
+        },
         "fieldWithDescription": {
             "type": "string",
             "description": "field description"
