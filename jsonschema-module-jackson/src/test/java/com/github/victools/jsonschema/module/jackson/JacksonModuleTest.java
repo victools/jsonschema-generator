@@ -16,6 +16,7 @@
 
 package com.github.victools.jsonschema.module.jackson;
 
+import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
@@ -28,6 +29,8 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.TypeScope;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -221,7 +224,7 @@ public class JacksonModuleTest {
             Arguments.of("unannotatedField", null),
             Arguments.of("fieldWithDescription", "field description 1"),
             Arguments.of("fieldWithDescriptionOnGetter", "getter description 1"),
-            Arguments.of("fieldWithDescriptionAndOnGetter", "field description 2"),
+            Arguments.of("fieldWithDescriptionAndOnGetter", "wrapped property description"),
             Arguments.of("fieldWithDescriptionOnType", null)
         );
     }
@@ -341,7 +344,7 @@ public class JacksonModuleTest {
         @JsonPropertyDescription(value = "field description 1")
         Double fieldWithDescription;
         Float fieldWithDescriptionOnGetter;
-        @JsonPropertyDescription(value = "field description 2")
+        @AnnotationWrapper
         Long fieldWithDescriptionAndOnGetter;
         TestClassForDescription fieldWithDescriptionOnType;
 
@@ -369,5 +372,10 @@ public class JacksonModuleTest {
         private String requiredAbsent;
 
     }
+
+    @JacksonAnnotationsInside
+    @JsonPropertyDescription("wrapped property description")
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface AnnotationWrapper {}
 
 }

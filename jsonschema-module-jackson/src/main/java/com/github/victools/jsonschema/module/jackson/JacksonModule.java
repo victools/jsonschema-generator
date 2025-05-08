@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 VicTools.
+ * Copyright 2019-2025 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,8 @@ public class JacksonModule implements Module {
      */
     protected String resolveDescription(MemberScope<?, ?> member) {
         // look for property specific description
-        JsonPropertyDescription propertyAnnotation = member.getAnnotationConsideringFieldAndGetterIfSupported(JsonPropertyDescription.class);
+        JsonPropertyDescription propertyAnnotation = member.getAnnotationConsideringFieldAndGetterIfSupported(JsonPropertyDescription.class,
+                NESTED_ANNOTATION_CHECK);
         if (propertyAnnotation != null) {
             return propertyAnnotation.value();
         }
