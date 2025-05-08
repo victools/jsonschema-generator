@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 VicTools.
+ * Copyright 2019-2025 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.members.HierarchicType;
-import com.fasterxml.classmate.members.ResolvedMember;
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
@@ -39,13 +38,11 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -174,7 +171,8 @@ public class JacksonModule implements Module {
      */
     protected String resolveDescription(MemberScope<?, ?> member) {
         // look for property specific description
-        JsonPropertyDescription propertyAnnotation = member.getAnnotationConsideringFieldAndGetterIfSupported(JsonPropertyDescription.class);
+        JsonPropertyDescription propertyAnnotation = member.getAnnotationConsideringFieldAndGetterIfSupported(JsonPropertyDescription.class,
+                NESTED_ANNOTATION_CHECK);
         if (propertyAnnotation != null) {
             return propertyAnnotation.value();
         }
