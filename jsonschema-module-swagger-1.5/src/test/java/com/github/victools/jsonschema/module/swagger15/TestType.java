@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.module.swagger15;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.classmate.members.ResolvedMethod;
 import com.github.victools.jsonschema.generator.FieldScope;

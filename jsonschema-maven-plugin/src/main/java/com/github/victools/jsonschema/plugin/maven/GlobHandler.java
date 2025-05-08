@@ -16,8 +16,6 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
