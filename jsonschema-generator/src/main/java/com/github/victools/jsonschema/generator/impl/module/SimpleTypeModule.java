@@ -84,9 +84,15 @@ public class SimpleTypeModule implements Module {
     public static SimpleTypeModule forPrimitiveAndAdditionalTypes() {
         SimpleTypeModule module = SimpleTypeModule.forPrimitiveTypes();
 
+        /*
+         * LocalDateTime does not fit the definition of "date-time" (a timestamp with time zone)
+         * as per RFC3339: https://datatracker.ietf.org/doc/html/rfc3339#section-5.6
+         * See also: https://json-schema.org/draft/2020-12/draft-bhutton-json-schema-validation-00#rfc.section.7.3.1
+         */
+        module.withStringType(java.time.LocalDateTime.class);
+
         module.withStandardStringType(java.time.LocalDate.class, "date");
-        Stream.of(java.time.LocalDateTime.class, java.time.ZonedDateTime.class,
-                java.time.OffsetDateTime.class, java.time.Instant.class,
+        Stream.of(java.time.ZonedDateTime.class, java.time.OffsetDateTime.class, java.time.Instant.class,
                 java.util.Date.class, java.util.Calendar.class)
                 .forEach(javaType -> module.withStandardStringType(javaType, "date-time"));
         Stream.of(java.time.LocalTime.class, java.time.OffsetTime.class)
