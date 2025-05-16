@@ -41,6 +41,7 @@ public class ExampleTest {
             JacksonDescriptionAsTitleExample.class,
             JacksonSubtypeDefinitionExample.class,
             NamingStrategyExample.class,
+            OpenAiFunctionCallingSchemaExample.class,
             SingleArrayItemExample.class,
             StrictTypeInfoExample.class,
             SubtypeLookUpExample.class,
