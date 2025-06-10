@@ -438,7 +438,8 @@ public class AttributeCollector {
                 || Boolean.class.isAssignableFrom(targetType)
                 || Number.class.isAssignableFrom(targetType)
                 || CharSequence.class.isAssignableFrom(targetType)
-                || Enum.class.isAssignableFrom(targetType);
+                || Enum.class.isAssignableFrom(targetType)
+                || Map.class.isAssignableFrom(targetType);
     }
 
     /**
