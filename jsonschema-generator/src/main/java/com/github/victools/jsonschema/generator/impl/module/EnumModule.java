@@ -126,6 +126,7 @@ public class EnumModule implements Module {
         }
         return Stream.of(erasedType.getEnumConstants())
                 .map(enumConstant -> enumConstantToString.apply((Enum<?>) enumConstant))
+                .distinct()
                 .collect(Collectors.toList());
     }
 
