@@ -120,6 +120,8 @@ public class JacksonModule implements Module {
 
         applySubtypeResolverToConfigBuilder(generalConfigPart, fieldConfigPart, methodConfigPart);
 
+        fieldConfigPart.withDefaultResolver(JsonEnumDefaultValueResolver::apply);
+
         generalConfigPart.withCustomDefinitionProvider(new JsonUnwrappedDefinitionProvider());
     }
 
