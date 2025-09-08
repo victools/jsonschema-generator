@@ -5,7 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.swagger.v3.oas.annotations.OpenAPI31;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Retention(RetentionPolicy.RUNTIME)
