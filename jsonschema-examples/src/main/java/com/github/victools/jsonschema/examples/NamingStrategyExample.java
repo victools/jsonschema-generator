@@ -18,6 +18,7 @@ package com.github.victools.jsonschema.examples;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.GeneratedSchema;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
@@ -39,7 +40,7 @@ import java.util.stream.Collectors;
 public class NamingStrategyExample implements SchemaGenerationExampleInterface {
 
     @Override
-    public ObjectNode generateSchema() {
+    public GeneratedSchema[] generateSchema() {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON);
         configBuilder.with(Option.DEFINITIONS_FOR_ALL_OBJECTS);
         configBuilder.forTypesInGeneral()

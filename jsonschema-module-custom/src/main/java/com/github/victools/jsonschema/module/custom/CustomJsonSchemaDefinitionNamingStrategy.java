@@ -21,7 +21,6 @@ import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import com.github.victools.jsonschema.generator.naming.DefaultSchemaDefinitionNamingStrategy;
 import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import com.github.victools.jsonschema.module.custom.annotations.JsonSchema;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Map;
 

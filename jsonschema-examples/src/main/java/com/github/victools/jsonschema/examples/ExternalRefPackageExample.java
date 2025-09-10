@@ -20,6 +20,7 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
+import com.github.victools.jsonschema.generator.GeneratedSchema;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
@@ -37,7 +38,7 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 public class ExternalRefPackageExample implements SchemaGenerationExampleInterface {
 
     @Override
-    public ObjectNode generateSchema() {
+    public GeneratedSchema[] generateSchema() {
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
                 .with(new ModuleImpl())
                 .build();

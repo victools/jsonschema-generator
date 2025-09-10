@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.examples;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.GeneratedSchema;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
@@ -41,7 +42,7 @@ import java.util.stream.Stream;
 public class IfThenElseExample implements SchemaGenerationExampleInterface {
 
     @Override
-    public ObjectNode generateSchema() {
+    public GeneratedSchema[] generateSchema() {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON);
         configBuilder.forTypesInGeneral().withTypeAttributeOverride(new SchemaConditionAttributeOverride());
         SchemaGeneratorConfig config = configBuilder.build();

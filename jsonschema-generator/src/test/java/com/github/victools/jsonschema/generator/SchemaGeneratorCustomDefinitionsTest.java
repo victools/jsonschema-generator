@@ -247,7 +247,7 @@ public class SchemaGeneratorCustomDefinitionsTest {
 
         // assert
         assertNumberOfGeneratedSchemas(result, 1);
-        JsonNode schema = getSchema(result, 1);
+        JsonNode schema = getSchema(result, 0);
         TestUtils.assertGeneratedSchema(schema, this.getClass(), "circular-custom-definition-" + schemaVersion.name() + ".json");
     }
 

@@ -109,7 +109,7 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
     @ParameterizedTest
     @MethodSource("parametersForTestResolveAdditionalProperties")
     @SuppressWarnings("unchecked")
-    public void testResolveAdditionalProperties(Module moduleInstance, Type expectedAdditionalProperties, Type type, Type[] typeParameters) {
+    public void testResolveAdditionalProperties(com.github.victools.jsonschema.generator.Module moduleInstance, Type expectedAdditionalProperties, Type type, Type[] typeParameters) {
         moduleInstance.applyToConfigBuilder(this.builder);
         ArgumentCaptor<ConfigFunction<TypeScope, Type>> resolverCaptor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.generalConfigPart).withAdditionalPropertiesResolver(resolverCaptor.capture());

@@ -19,6 +19,7 @@ package com.github.victools.jsonschema.examples;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.GeneratedSchema;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
@@ -37,7 +38,7 @@ import java.util.List;
 public class JacksonSubtypeDefinitionExample implements SchemaGenerationExampleInterface {
 
     @Override
-    public ObjectNode generateSchema() {
+    public GeneratedSchema[] generateSchema() {
         JacksonModule jacksonModule = new JacksonModule(JacksonOption.ALWAYS_REF_SUBTYPES, JacksonOption.INLINE_TRANSFORMED_SUBTYPES);
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
                 .with(jacksonModule)

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
+import com.github.victools.jsonschema.generator.GeneratedSchema;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
@@ -52,7 +53,7 @@ import java.util.stream.Stream;
 public class EnumMapExample implements SchemaGenerationExampleInterface {
 
     @Override
-    public ObjectNode generateSchema() {
+    public GeneratedSchema[] generateSchema() {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON);
         configBuilder.forTypesInGeneral()
                 .withCustomDefinitionProvider(new EnumMapDefinitionProvider(enumValue -> enumValue.name().toLowerCase()));

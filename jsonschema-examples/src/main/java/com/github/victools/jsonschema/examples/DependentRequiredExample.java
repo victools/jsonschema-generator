@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.examples;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.GeneratedSchema;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
@@ -38,7 +39,7 @@ import java.util.Optional;
 public class DependentRequiredExample implements SchemaGenerationExampleInterface {
 
     @Override
-    public ObjectNode generateSchema() {
+    public GeneratedSchema[] generateSchema() {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON);
         configBuilder.forFields().withDependentRequiresResolver(field -> Optional
                 .ofNullable(field.getAnnotationConsideringFieldAndGetter(IfPresentAlsoRequire.class))

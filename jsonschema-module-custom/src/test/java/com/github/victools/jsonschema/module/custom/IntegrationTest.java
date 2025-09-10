@@ -16,6 +16,19 @@
 
 package com.github.victools.jsonschema.module.custom;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.victools.jsonschema.generator.*;
+import com.github.victools.jsonschema.module.custom.annotations.JsonSchema;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
+import org.json.JSONException;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -23,168 +36,158 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Scanner;
 
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.module.custom.annotations.JsonSchema;
-
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-
 /**
  * Integration test of this module being used in a real SchemaGenerator instance.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class IntegrationTest
-{
+public class IntegrationTest {
+    private SchemaGenerator generator;
 
-  private SchemaGenerator generator;
+    @BeforeAll
+    public void setUp() {
+        SchemaVersion schemaVersion = SchemaVersion.DRAFT_2019_09;
+        OptionPreset optionPreset = OptionPreset.PLAIN_JSON;
+        CustomJsonSchemaModule module = new CustomJsonSchemaModule();
 
-  @BeforeAll
-  public void setUp()
-  {
-    CustomJsonSchemaModule module = new CustomJsonSchemaModule();
-    SchemaGeneratorConfigBuilder configBuilder =
-        new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
-            .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
-            .with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
-            .with(module);
-    this.generator = new SchemaGenerator(configBuilder.build());
-  }
+        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, optionPreset)
+                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
+                .with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
+                .with(module);
 
-  @ParameterizedTest
-  @ValueSource(classes = {TestClass.class})
-  public void testIntegration(Class<?> rawTargetType) throws Exception
-  {
-    JsonNode result = this.generator.generateSchema(rawTargetType);
-
-    String rawJsonSchema = result.toString();
-    JSONAssert.assertEquals(
-        '\n' + rawJsonSchema + '\n',
-        loadResource("integration-test-result-" + rawTargetType.getSimpleName() + ".json"),
-        rawJsonSchema,
-        JSONCompareMode.STRICT);
-  }
-
-  private static String loadResource(String resourcePath) throws IOException
-  {
-    StringBuilder stringBuilder = new StringBuilder();
-    try (InputStream inputStream = IntegrationTest.class.getResourceAsStream(resourcePath);
-        Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name()))
-    {
-      while (scanner.hasNext())
-      {
-        stringBuilder.append(scanner.nextLine()).append('\n');
-      }
+        this.generator = new SchemaGenerator(configBuilder.build());
     }
-    return stringBuilder.toString();
 
-  }
+    @ParameterizedTest
+    @ValueSource(classes = {TestClass.class})
+    public void testIntegration(Class<?> rawTargetType) throws Exception {
+        // act
+        GeneratedSchema[] result = this.generator.generateSchema(rawTargetType);
 
-  @JsonSchema(minProperties = 2, maxProperties = 5, requiredProperties = {"fieldWithInclusiveNumericRange"}, ref = "./TestClass-schema.json")
-  static class TestClass
-  {
+        // assert
+        JsonNode schema = result[0].getSchema();
+        String rawJsonSchema = schema.toString();
+        assertJsonEqualsFileContent(rawTargetType, rawJsonSchema);
+    }
 
-    @JsonSchema(hidden = true)
-    public Object hiddenField;
+    private static void assertJsonEqualsFileContent(Class<?> rawTargetType, String actualJsonSchema) throws JSONException, IOException {
 
-    // TODO: Check how to implement this
-    @ArraySchema(arraySchema = @Schema(name = "fieldWithOverriddenName", required = true),
-        schema = @Schema(defaultValue = "true", nullable = true), minItems = 1, maxItems = 20)
-    public List<Boolean> originalFieldName;
+        String message = '\n' + actualJsonSchema + '\n';
+        String expected = loadResource("integration-test-result-" + rawTargetType.getSimpleName() + ".json");
+        JSONAssert.assertEquals(message, expected, actualJsonSchema, JSONCompareMode.STRICT);
+    }
+
+    private static String loadResource(String resourcePath) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        try (InputStream inputStream = IntegrationTest.class.getResourceAsStream(resourcePath);
+             Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
+            while (scanner.hasNext()) {
+                stringBuilder.append(scanner.nextLine()).append('\n');
+            }
+        }
+
+        return stringBuilder.toString();
+    }
+
+
+    public interface JsonSchemaVersion {
+        String V1_0 = "1.0";
+        String V2_0 = "2.0";
+    }
 
     @JsonSchema(
-        description = "field description",
-        nullable = true,
-        allowableValues = {"A", "B", "C", "D"},
-        minLength = 1,
-        maxLength = 1)
-    public String fieldWithDescriptionAndAllowableValues;
-
-    @JsonSchema(
-        minimum = "15",
-        maximum = "20",
-        multipleOf = 0.0123456789,
-        required = false)
-    public BigDecimal fieldWithInclusiveNumericRange;
-
-    @JsonSchema(
-        minimum = "14",
-        maximum = "21",
-        exclusiveMinimum = true,
-        exclusiveMaximum = true,
-        multipleOf = 0.1,
-        required = true)
-    public int fieldWithExclusiveNumericRange;
-  }
-
-  @Schema(subTypes = {Reference.class, PersonReference.class})
-  interface IReference
-  {
-
-    String getName();
-  }
-
-  static class Reference<T> implements IReference
-  {
-
-    private String name;
-
-    @Override
-    public String getName()
-    {
-      return this.name;
+            versions = {JsonSchemaVersion.V1_0},
+            minProperties = 2,
+            maxProperties = 5,
+            requiredProperties = {"fieldWithInclusiveNumericRange"},
+            ref = "./TestClass-schema.json")
+    static class TestClass2 {
+        // TODO: extend test
     }
-  }
 
-  static class Person
-  {
+    @JsonSchema(minProperties = 2, maxProperties = 5, requiredProperties = {"fieldWithInclusiveNumericRange"}, ref = "./TestClass-schema.json")
+    static class TestClass {
 
-  }
+        @JsonSchema(hidden = true)
+        public Object hiddenField;
 
-  @Schema(description = "the foo's person", title = "reference title", name = "referenceToPerson")
-  static class PersonReference extends Reference<Person>
-  {
+        // TODO: Check how to implement this
+        @ArraySchema(arraySchema = @Schema(name = "fieldWithOverriddenName", required = true),
+                schema = @Schema(defaultValue = "true", nullable = true), minItems = 1, maxItems = 20)
+        public List<Boolean> originalFieldName;
 
-    @Override
-    @Schema(description = "the person's name")
-    public String getName()
-    {
-      return super.getName();
+        @JsonSchema(
+                description = "field description",
+                nullable = true,
+                allowableValues = {"A", "B", "C", "D"},
+                minLength = 1,
+                maxLength = 1)
+        public String fieldWithDescriptionAndAllowableValues;
+
+        @JsonSchema(
+                minimum = "15",
+                maximum = "20",
+                multipleOf = 0.0123456789,
+                required = false)
+        public BigDecimal fieldWithInclusiveNumericRange;
+
+        @JsonSchema(
+                minimum = "14",
+                maximum = "21",
+                exclusiveMinimum = true,
+                exclusiveMaximum = true,
+                multipleOf = 0.1,
+                required = true)
+        public int fieldWithExclusiveNumericRange;
     }
-  }
 
-  @Schema(additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
-  static class Foo
-  {
+    @Schema(subTypes = {Reference.class, PersonReference.class})
+    interface IReference {
 
-    @Schema(implementation = PersonReference.class, accessMode = Schema.AccessMode.WRITE_ONLY)
-    private Reference<Person> person;
+        String getName();
+    }
 
-    @Schema(ref = "http://example.com/bar", accessMode = Schema.AccessMode.READ_ONLY,
-        additionalProperties = Schema.AdditionalPropertiesValue.TRUE)
-    private Object bar;
+    static class Reference<T> implements IReference {
 
-    @Schema(anyOf = {Double.class, Integer.class})
-    private Object anyOfDoubleOrInt;
+        private String name;
 
-    @Schema(oneOf = {Boolean.class, String.class})
-    private Object oneOfBooleanOrString;
+        @Override
+        public String getName() {
+            return this.name;
+        }
+    }
 
-    // on a member, the "additionalProperties" attribute is ignored
+    static class Person {
+
+    }
+
+    @Schema(description = "the foo's person", title = "reference title", name = "referenceToPerson")
+    static class PersonReference extends Reference<Person> {
+
+        @Override
+        @Schema(description = "the person's name")
+        public String getName() {
+            return super.getName();
+        }
+    }
+
     @Schema(additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
-    private TestClass test;
-  }
+    static class Foo {
+
+        @Schema(implementation = PersonReference.class, accessMode = Schema.AccessMode.WRITE_ONLY)
+        private Reference<Person> person;
+
+        @Schema(ref = "http://example.com/bar", accessMode = Schema.AccessMode.READ_ONLY,
+                additionalProperties = Schema.AdditionalPropertiesValue.TRUE)
+        private Object bar;
+
+        @Schema(anyOf = {Double.class, Integer.class})
+        private Object anyOfDoubleOrInt;
+
+        @Schema(oneOf = {Boolean.class, String.class})
+        private Object oneOfBooleanOrString;
+
+        // on a member, the "additionalProperties" attribute is ignored
+        @Schema(additionalProperties = Schema.AdditionalPropertiesValue.FALSE)
+        private TestClass test;
+    }
 }

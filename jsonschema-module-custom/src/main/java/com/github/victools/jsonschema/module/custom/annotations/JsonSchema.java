@@ -1,69 +1,67 @@
 package com.github.victools.jsonschema.module.custom.annotations;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.TYPE})
-public @interface JsonSchema
-{
-  JsonSchemaVersion[] versions() default {JsonSchemaVersion.V1};
+public @interface JsonSchema {
+    String[] versions() default {};
 
-  String name() default "";
+    String name() default "";
 
-  String title() default "";
+    String title() default "";
 
-  String description() default "";
+    String description() default "";
 
-  Schema.AdditionalPropertiesValue additionalProperties() default Schema.AdditionalPropertiesValue.USE_ADDITIONAL_PROPERTIES_ANNOTATION;
+    Schema.AdditionalPropertiesValue additionalProperties() default Schema.AdditionalPropertiesValue.USE_ADDITIONAL_PROPERTIES_ANNOTATION;
 
-  String ref() default "";
+    String ref() default "";
 
-  Class<?> implementation() default Void.class;
+    Class<?> implementation() default Void.class;
 
-  boolean hidden() default false;
+    boolean hidden() default false;
 
-  boolean required() default false;
+    boolean required() default false;
 
-  boolean nullable() default false;
+    boolean nullable() default false;
 
-  String[] allowableValues() default {};
+    String[] allowableValues() default {};
 
-  String defaultValue() default "";
+    String defaultValue() default "";
 
-  int minLength() default 0;
+    int minLength() default 0;
 
-  int maxLength() default Integer.MAX_VALUE;
+    int maxLength() default Integer.MAX_VALUE;
 
-  String format() default "";
+    String format() default "";
 
-  String pattern() default "";
+    String pattern() default "";
 
-  double multipleOf() default (double)0.0F;
+    double multipleOf() default (double) 0.0F;
 
-  String maximum() default "";
+    String maximum() default "";
 
-  boolean exclusiveMaximum() default false;
+    boolean exclusiveMaximum() default false;
 
-  String minimum() default "";
+    String minimum() default "";
 
-  boolean exclusiveMinimum() default false;
+    boolean exclusiveMinimum() default false;
 
-  Class<?> not() default Void.class;
+    Class<?> not() default Void.class;
 
-  Class<?>[] allOf() default {};
+    Class<?>[] allOf() default {};
 
-  Class<?>[] oneOf() default {};
+    Class<?>[] oneOf() default {};
 
-  Class<?>[] anyOf() default {};
+    Class<?>[] anyOf() default {};
 
-  int minProperties() default 0;
+    int minProperties() default 0;
 
-  int maxProperties() default 0;
+    int maxProperties() default 0;
 
-  String[] requiredProperties() default {};
+    String[] requiredProperties() default {};
 }

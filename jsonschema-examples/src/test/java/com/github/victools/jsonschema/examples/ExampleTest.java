@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Scanner;
+import com.github.victools.jsonschema.generator.GeneratedSchema;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -48,9 +49,15 @@ public class ExampleTest {
             ValidationErrorMessageExample.class
     })
     public void testExample(Class<? extends SchemaGenerationExampleInterface> exampleType) throws Exception {
+        // arrange
         SchemaGenerationExampleInterface exampleImplementation = exampleType.getDeclaredConstructor().newInstance();
-        JsonNode result = exampleImplementation.generateSchema();
-        String rawJsonSchema = result.toPrettyString();
+
+        // act
+        GeneratedSchema[] result = exampleImplementation.generateSchema();
+
+        // assert
+        JsonNode schema = result[0].getSchema();
+        String rawJsonSchema = schema.toPrettyString();
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
                 loadResource(exampleType.getSimpleName() + "-result.json"), rawJsonSchema,
                 JSONCompareMode.STRICT);

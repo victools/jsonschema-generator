@@ -74,9 +74,14 @@ public class SchemaGeneratorConfigImpl implements SchemaGeneratorConfig {
      * @param methodConfigPart         configuration part for methods
      * @param inclusionOverrides       overrides of the rules when to include certain annotations (e.g., with or without {@code @Inherited} annotation
      */
-    public SchemaGeneratorConfigImpl(ObjectMapper objectMapper, SchemaVersion schemaVersion, Set<Option> enabledOptions,
-            SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart, SchemaGeneratorConfigPart<FieldScope> fieldConfigPart,
-            SchemaGeneratorConfigPart<MethodScope> methodConfigPart, Map<Class<? extends Annotation>, AnnotationInclusion> inclusionOverrides) {
+    public SchemaGeneratorConfigImpl(
+            ObjectMapper objectMapper,
+            SchemaVersion schemaVersion,
+            Set<Option> enabledOptions,
+            SchemaGeneratorGeneralConfigPart typesInGeneralConfigPart,
+            SchemaGeneratorConfigPart<FieldScope> fieldConfigPart,
+            SchemaGeneratorConfigPart<MethodScope> methodConfigPart,
+            Map<Class<? extends Annotation>, AnnotationInclusion> inclusionOverrides) {
         this.objectMapper = objectMapper;
         this.schemaVersion = schemaVersion;
         this.enabledOptions = enabledOptions;

@@ -18,6 +18,7 @@ package com.github.victools.jsonschema.examples;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.GeneratedSchema;
 
 /**
  * Common interface for schema generation examples, in order to allow generic testing of all examples.
@@ -29,5 +30,5 @@ public interface SchemaGenerationExampleInterface {
      *
      * @return generated schema
      */
-    ObjectNode generateSchema();
+    GeneratedSchema[] generateSchema();
 }

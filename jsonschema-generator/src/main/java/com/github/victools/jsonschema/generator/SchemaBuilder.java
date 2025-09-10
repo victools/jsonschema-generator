@@ -51,8 +51,11 @@ public class SchemaBuilder {
      * @param typeParameters optional type parameters (in case of the {@code mainTargetType} being a parameterised type)
      * @return generated JSON Schema
      */
-    static GeneratedSchema[] createSingleTypeSchema(SchemaGeneratorConfig config, TypeContext typeContext,
-            Type mainTargetType, Type... typeParameters) {
+    static GeneratedSchema[] createSingleTypeSchema(
+            SchemaGeneratorConfig config,
+            TypeContext typeContext,
+            Type mainTargetType,
+            Type... typeParameters) {
         SchemaBuilder instance = new SchemaBuilder(config, typeContext);
         return instance.createSchemaForSingleType(mainTargetType, typeParameters);
     }
@@ -110,29 +113,38 @@ public class SchemaBuilder {
         DefinitionKey mainKey = this.generationContext.parseType(mainType);
 
         ObjectNode jsonSchemaResult = this.config.createObjectNode();
-        if (this.config.shouldIncludeSchemaVersionIndicator()) {
-            jsonSchemaResult.put(this.config.getKeyword(SchemaKeyword.TAG_SCHEMA),
-                    this.config.getKeyword(SchemaKeyword.TAG_SCHEMA_VALUE));
-        }
+        addSchemaVersionIndicatorIfNecessary(jsonSchemaResult);
+
         boolean createDefinitionForMainSchema = this.config.shouldCreateDefinitionForMainSchema();
         if (createDefinitionForMainSchema) {
             this.generationContext.addReference(mainType, jsonSchemaResult, null, false);
         }
+
         String definitionsTagName = this.config.getKeyword(SchemaKeyword.TAG_DEFINITIONS);
         String referenceKeyPrefix = this.getReferenceKeyPrefix(definitionsTagName);
         ObjectNode definitionsNode = this.buildDefinitionsAndResolveReferences(referenceKeyPrefix, mainKey);
         if (!definitionsNode.isEmpty()) {
             jsonSchemaResult.set(definitionsTagName, definitionsNode);
         }
+
         if (!createDefinitionForMainSchema) {
             ObjectNode mainSchemaNode = this.generationContext.getDefinition(mainKey);
             jsonSchemaResult.setAll(mainSchemaNode);
             this.schemaNodes.add(jsonSchemaResult);
         }
+
         this.performCleanup(definitionsNode, referenceKeyPrefix);
         this.config.resetAfterSchemaGenerationFinished();
 
         return new GeneratedSchema[]{new GeneratedSchema("v1.0", jsonSchemaResult)};
+    }
+
+    private void addSchemaVersionIndicatorIfNecessary(ObjectNode jsonSchemaResult) {
+        if (this.config.shouldIncludeSchemaVersionIndicator()) {
+            jsonSchemaResult.put(
+                    this.config.getKeyword(SchemaKeyword.TAG_SCHEMA),
+                    this.config.getKeyword(SchemaKeyword.TAG_SCHEMA_VALUE));
+        }
     }
 
     /**
@@ -219,9 +231,15 @@ public class SchemaBuilder {
         final ObjectNode definitionsNode = this.config.createObjectNode();
 
         final AtomicBoolean considerOnlyDirectReferences = new AtomicBoolean(false);
-        Predicate<DefinitionKey> shouldProduceDefinition = this.getShouldProduceDefinitionCheck(mainSchemaKey, considerOnlyDirectReferences);
-        DefinitionCollectionDetails definitionCollectionDetails = new DefinitionCollectionDetails(mainSchemaKey, referenceKeyPrefix,
-                shouldProduceDefinition, definitionsNode);
+        Predicate<DefinitionKey> shouldProduceDefinition = this.getShouldProduceDefinitionCheck(
+                mainSchemaKey,
+                considerOnlyDirectReferences);
+
+        DefinitionCollectionDetails definitionCollectionDetails = new DefinitionCollectionDetails(
+                mainSchemaKey,
+                referenceKeyPrefix,
+                shouldProduceDefinition,
+                definitionsNode);
 
         Map<DefinitionKey, String> baseReferenceKeys = this.getReferenceKeys(mainSchemaKey, shouldProduceDefinition);
         considerOnlyDirectReferences.set(true);

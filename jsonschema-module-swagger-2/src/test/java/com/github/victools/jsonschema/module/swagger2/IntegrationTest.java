@@ -65,7 +65,7 @@ public class IntegrationTest {
 
         // assert
         JsonNode schema = result[0].getSchema();
-        String rawJsonSchema = result.toString();
+        String rawJsonSchema = schema.toString();
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
                 loadResource("integration-test-result-" + rawTargetType.getSimpleName() + ".json"), rawJsonSchema,
                 JSONCompareMode.STRICT);

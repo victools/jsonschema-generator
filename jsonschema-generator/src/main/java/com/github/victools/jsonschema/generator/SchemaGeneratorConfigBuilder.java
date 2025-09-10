@@ -143,28 +143,40 @@ public class SchemaGeneratorConfigBuilder {
      */
     public SchemaGeneratorConfig build() {
         // apply the configurations associated with enabled/disabled options
-        EnumSet<Option> allOptions = EnumSet.allOf(Option.class);
         Set<Option> enabledOptions = EnumSet.allOf(Option.class).stream()
-                .filter(option -> this.options.getOrDefault(option, this.preset.isOptionEnabledByDefault(option)))
+                .filter(this::filterDisabledOptions)
                 .collect(Collectors.toSet());
+
+        EnumSet<Option> allOptions = EnumSet.allOf(Option.class);
         Map<Option, Boolean> validOptions = allOptions.stream()
-                .filter((configuredOption) -> enabledOptions.stream().noneMatch(enabledOne -> enabledOne.isOverriding(configuredOption)))
+                .filter(option -> this.filterNonOverriddenOptions(enabledOptions, option))
                 .collect(Collectors.toMap(option -> option, enabledOptions::contains, (first, second) -> first, LinkedHashMap::new));
 
         validOptions.entrySet().stream()
                 .map(setting -> setting.getKey().getModule(setting.getValue()))
                 .filter(Objects::nonNull)
                 .forEach(this::with);
+
         // discard invalid enabled options
         enabledOptions.retainAll(validOptions.keySet());
+
         // construct the actual configuration instance
-        return new SchemaGeneratorConfigImpl(this.objectMapper,
+        return new SchemaGeneratorConfigImpl(
+                this.objectMapper,
                 this.schemaVersion,
                 enabledOptions,
                 this.typesInGeneralConfigPart,
                 this.fieldConfigPart,
                 this.methodConfigPart,
                 this.annotationInclusionOverrides);
+    }
+
+    private boolean filterDisabledOptions(Option option) {
+        return this.options.getOrDefault(option, this.preset.isOptionEnabledByDefault(option));
+    }
+
+    private boolean filterNonOverriddenOptions(Set<Option> enabledOptions, Option option) {
+        return enabledOptions.stream().noneMatch(enabledOne -> enabledOne.isOverriding(option));
     }
 
     /**

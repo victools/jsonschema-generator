@@ -17,6 +17,7 @@
 package com.github.victools.jsonschema.examples;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.victools.jsonschema.generator.GeneratedSchema;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
@@ -32,7 +33,7 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 public class StrictTypeInfoExample implements SchemaGenerationExampleInterface {
 
     @Override
-    public ObjectNode generateSchema() {
+    public GeneratedSchema[] generateSchema() {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_7, OptionPreset.PLAIN_JSON);
         configBuilder.with(Option.STRICT_TYPE_INFO, Option.DEFINITIONS_FOR_ALL_OBJECTS);
         configBuilder.forFields()

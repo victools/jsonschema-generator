@@ -22,8 +22,6 @@ import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.module.custom.annotations.JsonSchema;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Optional;
 
 /**
