@@ -140,16 +140,25 @@ public class SchemaGeneratorComplexTypesTest {
 
     @ParameterizedTest
     @MethodSource("parametersForTestGenerateSchema")
-    public void testGenerateSchema(String caseTitle, OptionPreset preset, Class<?> targetType, Module testModule) throws Exception {
+    public void testGenerateSchema(
+            String caseTitle,
+            OptionPreset preset,
+            Class<?> targetType,
+            Module testModule) throws Exception {
+        // arrange
         final SchemaVersion schemaVersion = SchemaVersion.DRAFT_7;
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, preset);
         configBuilder.with(testModule);
         configBuilder.with(Option.NULLABLE_ARRAY_ITEMS_ALLOWED, Option.STRICT_TYPE_INFO);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
-        JsonNode result = generator.generateSchema(targetType);
+        // act
+        GeneratedSchema[] result = generator.generateSchema(targetType);
+
+        // assert
         // ensure that the generated definition keys are valid URIs without any characters requiring encoding
-        JsonNode definitions = result.get(SchemaKeyword.TAG_DEFINITIONS.forVersion(schemaVersion));
+        JsonNode schema = result[0].getSchema();
+        JsonNode definitions = schema.get(SchemaKeyword.TAG_DEFINITIONS.forVersion(schemaVersion));
         if (definitions instanceof ObjectNode) {
             Iterator<String> definitionKeys = definitions.fieldNames();
             while (definitionKeys.hasNext()) {
@@ -157,7 +166,7 @@ public class SchemaGeneratorComplexTypesTest {
                 Assertions.assertEquals(key, new URI(key).toASCIIString());
             }
         }
-        TestUtils.assertGeneratedSchema(result, this.getClass(), caseTitle + ".json");
+        TestUtils.assertGeneratedSchema(schema, this.getClass(), caseTitle + ".json");
     }
 
     @Test

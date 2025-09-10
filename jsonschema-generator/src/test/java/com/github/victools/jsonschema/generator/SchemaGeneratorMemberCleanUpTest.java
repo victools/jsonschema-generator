@@ -44,6 +44,7 @@ public class SchemaGeneratorMemberCleanUpTest {
     @ParameterizedTest
     @MethodSource
     public void testMemberCleanup(boolean enableCleanup, List<String> expectedMemberAttributes) {
+        // arrange
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES, Option.DEFINITIONS_FOR_ALL_OBJECTS);
         if (enableCleanup) {
@@ -52,7 +53,12 @@ public class SchemaGeneratorMemberCleanUpTest {
             configBuilder.without(Option.DUPLICATE_MEMBER_ATTRIBUTE_CLEANUP_AT_THE_END);
         }
         SchemaGeneratorConfig generatorConfig = configBuilder.build();
-        ObjectNode schema = new SchemaGenerator(generatorConfig).generateSchema(TestClass.class);
+
+        // act
+        GeneratedSchema[] result = new SchemaGenerator(generatorConfig).generateSchema(TestClass.class);
+
+        // assert
+        ObjectNode schema = result[0].getSchema();
         JsonNode memberSchema = schema.get(generatorConfig.getKeyword(SchemaKeyword.TAG_PROPERTIES)).get("mapValue");
         Assertions.assertEquals(expectedMemberAttributes.size(), memberSchema.size());
         memberSchema.fieldNames()

@@ -23,15 +23,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Scanner;
 
+import com.github.victools.jsonschema.generator.*;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.swagger2.IntegrationTest.IReference;
 import com.github.victools.jsonschema.module.swagger2.IntegrationTest.Person;
 import com.github.victools.jsonschema.module.swagger2.IntegrationTest.PersonReference;
@@ -64,8 +60,11 @@ public class IntegrationTest {
     @ParameterizedTest
     @ValueSource(classes = {TestClass.class, Foo.class})
     public void testIntegration(Class<?> rawTargetType) throws Exception {
-        JsonNode result = this.generator.generateSchema(rawTargetType);
+        // act
+        GeneratedSchema[] result = this.generator.generateSchema(rawTargetType);
 
+        // assert
+        JsonNode schema = result[0].getSchema();
         String rawJsonSchema = result.toString();
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
                 loadResource("integration-test-result-" + rawTargetType.getSimpleName() + ".json"), rawJsonSchema,

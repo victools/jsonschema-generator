@@ -17,12 +17,8 @@
 package com.github.victools.jsonschema.module.javax.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.generator.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.ElementType;
@@ -56,6 +52,7 @@ public class IntegrationTest {
 
     @Test
     public void testIntegration() throws Exception {
+        // arrange
         // active all optional modules
         JavaxValidationModule module = new JavaxValidationModule(
                 JavaxValidationOption.NOT_NULLABLE_FIELD_IS_REQUIRED,
@@ -66,9 +63,13 @@ public class IntegrationTest {
                 .with(module)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
-        JsonNode result = generator.generateSchema(TestClass.class);
 
-        String rawJsonSchema = result.toString();
+        // act
+        GeneratedSchema[] result = generator.generateSchema(TestClass.class);
+
+        // assert
+        JsonNode schema = result[0].getSchema();
+        String rawJsonSchema = schema.toString();
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
                 loadResource("integration-test-result.json"), rawJsonSchema, JSONCompareMode.STRICT);
     }

@@ -17,12 +17,7 @@
 package com.github.victools.jsonschema.module.swagger15;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.generator.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.IOException;
@@ -41,6 +36,7 @@ public class IntegrationTest {
 
     @Test
     public void testIntegration() throws Exception {
+        // assert
         // active all optional modules
         SwaggerModule module = new SwaggerModule(
                 SwaggerOption.ENABLE_PROPERTY_NAME_OVERRIDES,
@@ -50,9 +46,13 @@ public class IntegrationTest {
                 .with(module)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
-        JsonNode result = generator.generateSchema(TestClass.class);
 
-        String rawJsonSchema = result.toString();
+        // act
+        GeneratedSchema[] result = generator.generateSchema(TestClass.class);
+
+        // assert
+        JsonNode schema = result[0].getSchema();
+        String rawJsonSchema = schema.toString();
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
                 loadResource("integration-test-result.json"), rawJsonSchema, JSONCompareMode.STRICT);
     }

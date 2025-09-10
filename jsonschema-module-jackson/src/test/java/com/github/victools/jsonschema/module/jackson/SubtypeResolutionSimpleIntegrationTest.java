@@ -20,12 +20,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.generator.*;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
@@ -48,18 +43,23 @@ public class SubtypeResolutionSimpleIntegrationTest {
 
     @Test
     public void testIntegration() throws Exception {
+        // arrange
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES)
                 .with(new JacksonModule(JacksonOption.ALWAYS_REF_SUBTYPES))
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
-        JsonNode result = generator.generateSchema(TestClassForSubtypeResolution.class);
 
-        String rawJsonSchema = result.toString();
+        // act
+        GeneratedSchema[] result = generator.generateSchema(TestClassForSubtypeResolution.class);
+
+        // assert
+        JsonNode schema = result[0].getSchema();
+        String rawJsonSchema = schema.toString();
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
                 loadResource("subtype-simple-integration-test-result.json"), rawJsonSchema, JSONCompareMode.STRICT);
 
-        JsonSchema schemaForValidation = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909).getSchema(result);
+        JsonSchema schemaForValidation = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909).getSchema(schema);
         String jsonInstance = config.getObjectMapper().writeValueAsString(new TestClassForSubtypeResolution());
 
         Set<ValidationMessage> validationResult = schemaForValidation.validate(config.getObjectMapper().readTree(jsonInstance));

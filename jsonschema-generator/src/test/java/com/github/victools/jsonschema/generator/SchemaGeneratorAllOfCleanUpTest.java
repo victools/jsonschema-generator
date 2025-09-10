@@ -19,15 +19,16 @@ package com.github.victools.jsonschema.generator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+
+import java.util.EnumSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Test for {@link SchemaGenerator} class.
@@ -43,32 +44,32 @@ public class SchemaGeneratorAllOfCleanUpTest {
                 + "{ \"if\":{ \"const\": 1 }, \"then\":{}, \"else\": { \"title\": \"otherwise...\" } }] }";
         List<Arguments> testCases = EnumSet.allOf(SchemaVersion.class).stream()
                 .flatMap(schemaVersion -> Stream.of(
-                    Arguments.of(schemaVersion, differentValueInMainSchema, differentValueInMainSchema),
-                    Arguments.of(schemaVersion, differentValueInAllOfPart, differentValueInAllOfPart),
-                    Arguments.of(schemaVersion, equalIfTagInMainSchema, equalIfTagInMainSchema),
-                    Arguments.of(schemaVersion, equalIfTagInAllOfPart, equalIfTagInAllOfPart),
-                    Arguments.of(schemaVersion,
-                        "{ \"type\": \"object\", \"title\":\"same in all three\", "
-                                + "\"allOf\": [{ \"title\":\"same in all three\" }, { \"title\":\"same in all three\" }] }",
-                        "{ \"type\": \"object\", \"title\":\"same in all three\" }"),
-                    Arguments.of(schemaVersion,
-                        "{ \"type\": \"object\", \"allOf\": [{ \"title\":\"from allOf[0]\" }, { \"description\":\"from allOf[1]\" }] }",
-                        "{ \"type\": \"object\", \"title\":\"from allOf[0]\", \"description\":\"from allOf[1]\" }"),
-                    Arguments.of(schemaVersion,
-                        "{ \"type\": \"object\", \"allOf\": [{ \"type\": [\"object\",\"null\"] }] }",
-                        "{ \"type\": \"object\" }"),
-                    Arguments.of(schemaVersion,
-                        "{ \"type\": [\"object\",\"null\"], \"allOf\": [{ \"type\": \"object\" }] }",
-                        "{ \"type\": \"object\" }"),
-                    Arguments.of(schemaVersion,
-                        "{ \"type\": \"object\", \"allOf\": [{ \"type\": \"null\" }] }",
-                        "{ \"type\": \"object\", \"allOf\": [{ \"type\": \"null\" }] }"),
-                    Arguments.of(schemaVersion,
-                        "{ \"type\": \"object\", \"allOf\": [{ \"type\": [\"string\",\"null\"] }] }",
-                        "{ \"type\": \"object\", \"allOf\": [{ \"type\": [\"string\",\"null\"] }] }"),
-                    Arguments.of(schemaVersion,
-                        "{ \"type\": [\"object\",\"null\"], \"allOf\": [{ \"type\": \"string\" }] }",
-                        "{ \"type\": [\"object\",\"null\"], \"allOf\": [{ \"type\": \"string\" }] }")
+                        Arguments.of(schemaVersion, differentValueInMainSchema, differentValueInMainSchema),
+                        Arguments.of(schemaVersion, differentValueInAllOfPart, differentValueInAllOfPart),
+                        Arguments.of(schemaVersion, equalIfTagInMainSchema, equalIfTagInMainSchema),
+                        Arguments.of(schemaVersion, equalIfTagInAllOfPart, equalIfTagInAllOfPart),
+                        Arguments.of(schemaVersion,
+                                "{ \"type\": \"object\", \"title\":\"same in all three\", "
+                                        + "\"allOf\": [{ \"title\":\"same in all three\" }, { \"title\":\"same in all three\" }] }",
+                                "{ \"type\": \"object\", \"title\":\"same in all three\" }"),
+                        Arguments.of(schemaVersion,
+                                "{ \"type\": \"object\", \"allOf\": [{ \"title\":\"from allOf[0]\" }, { \"description\":\"from allOf[1]\" }] }",
+                                "{ \"type\": \"object\", \"title\":\"from allOf[0]\", \"description\":\"from allOf[1]\" }"),
+                        Arguments.of(schemaVersion,
+                                "{ \"type\": \"object\", \"allOf\": [{ \"type\": [\"object\",\"null\"] }] }",
+                                "{ \"type\": \"object\" }"),
+                        Arguments.of(schemaVersion,
+                                "{ \"type\": [\"object\",\"null\"], \"allOf\": [{ \"type\": \"object\" }] }",
+                                "{ \"type\": \"object\" }"),
+                        Arguments.of(schemaVersion,
+                                "{ \"type\": \"object\", \"allOf\": [{ \"type\": \"null\" }] }",
+                                "{ \"type\": \"object\", \"allOf\": [{ \"type\": \"null\" }] }"),
+                        Arguments.of(schemaVersion,
+                                "{ \"type\": \"object\", \"allOf\": [{ \"type\": [\"string\",\"null\"] }] }",
+                                "{ \"type\": \"object\", \"allOf\": [{ \"type\": [\"string\",\"null\"] }] }"),
+                        Arguments.of(schemaVersion,
+                                "{ \"type\": [\"object\",\"null\"], \"allOf\": [{ \"type\": \"string\" }] }",
+                                "{ \"type\": [\"object\",\"null\"], \"allOf\": [{ \"type\": \"string\" }] }")
                 ))
                 .collect(Collectors.toList());
 
@@ -93,6 +94,7 @@ public class SchemaGeneratorAllOfCleanUpTest {
     @ParameterizedTest
     @MethodSource("parametersForTestAllOfCleanUp")
     public void testAllOfCleanUp(SchemaVersion schemaVersion, String inputSchema, String outputSchema) throws Exception {
+        // arrange
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON)
                 .without(Option.SCHEMA_VERSION_INDICATOR);
         configBuilder.forTypesInGeneral()
@@ -106,7 +108,11 @@ public class SchemaGeneratorAllOfCleanUpTest {
                 });
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
-        JsonNode result = generator.generateSchema(String.class);
-        JSONAssert.assertEquals(outputSchema, result.toString(), JSONCompareMode.STRICT);
+        // act
+        GeneratedSchema[] result = generator.generateSchema(String.class);
+
+        // assert
+        JsonNode schema = result[0].getSchema();
+        JSONAssert.assertEquals(outputSchema, schema.toString(), JSONCompareMode.STRICT);
     }
 }

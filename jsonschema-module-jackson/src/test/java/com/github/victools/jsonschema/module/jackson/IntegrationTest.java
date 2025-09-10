@@ -27,12 +27,8 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.generator.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -49,6 +45,7 @@ public class IntegrationTest {
 
     @Test
     public void testIntegration() throws Exception {
+        // arrange
         JacksonModule module = new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE, JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY,
                 JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS, JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID,
                 JacksonOption.ALWAYS_REF_SUBTYPES, JacksonOption.INLINE_TRANSFORMED_SUBTYPES);
@@ -58,9 +55,13 @@ public class IntegrationTest {
                 .with(module)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
-        JsonNode result = generator.generateSchema(TestClass.class);
 
-        String rawJsonSchema = result.toString();
+        // act
+        GeneratedSchema[] result = generator.generateSchema(TestClass.class);
+
+        // assert
+        JsonNode schema = result[0].getSchema();
+        String rawJsonSchema = schema.toString();
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
                 loadResource("integration-test-result.json"), rawJsonSchema, JSONCompareMode.STRICT);
     }

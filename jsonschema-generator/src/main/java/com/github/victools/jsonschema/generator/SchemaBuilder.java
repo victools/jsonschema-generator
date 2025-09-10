@@ -51,7 +51,7 @@ public class SchemaBuilder {
      * @param typeParameters optional type parameters (in case of the {@code mainTargetType} being a parameterised type)
      * @return generated JSON Schema
      */
-    static ObjectNode createSingleTypeSchema(SchemaGeneratorConfig config, TypeContext typeContext,
+    static GeneratedSchema[] createSingleTypeSchema(SchemaGeneratorConfig config, TypeContext typeContext,
             Type mainTargetType, Type... typeParameters) {
         SchemaBuilder instance = new SchemaBuilder(config, typeContext);
         return instance.createSchemaForSingleType(mainTargetType, typeParameters);
@@ -105,7 +105,7 @@ public class SchemaBuilder {
      * @param typeParameters optional type parameters (in case of the {@code mainTargetType} being a parameterised type)
      * @return generated JSON Schema
      */
-    private ObjectNode createSchemaForSingleType(Type mainTargetType, Type... typeParameters) {
+    private GeneratedSchema[] createSchemaForSingleType(Type mainTargetType, Type... typeParameters) {
         ResolvedType mainType = this.typeContext.resolve(mainTargetType, typeParameters);
         DefinitionKey mainKey = this.generationContext.parseType(mainType);
 
@@ -131,7 +131,8 @@ public class SchemaBuilder {
         }
         this.performCleanup(definitionsNode, referenceKeyPrefix);
         this.config.resetAfterSchemaGenerationFinished();
-        return jsonSchemaResult;
+
+        return new GeneratedSchema[]{new GeneratedSchema("v1.0", jsonSchemaResult)};
     }
 
     /**

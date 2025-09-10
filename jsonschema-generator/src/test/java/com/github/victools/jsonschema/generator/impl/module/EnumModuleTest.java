@@ -18,23 +18,9 @@ package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
-import com.github.victools.jsonschema.generator.CustomDefinition;
-import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
-import com.github.victools.jsonschema.generator.FieldScope;
-import com.github.victools.jsonschema.generator.MethodScope;
-import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
-import com.github.victools.jsonschema.generator.SchemaKeyword;
-import com.github.victools.jsonschema.generator.SchemaVersion;
-import java.util.stream.Stream;
+import com.github.victools.jsonschema.generator.*;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,6 +33,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+
+import java.util.stream.Stream;
 
 /**
  * Test for the {@link EnumModule} class.
@@ -140,8 +128,12 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
 
     @ParameterizedTest
     @MethodSource("parametersForTestCustomSchemaDefinition_asStrings")
-    public void testCustomSchemaDefinition_asStrings(SchemaVersion schemaVersion, EnumModule instance,
-            String value1, String value2, String value3) {
+    public void testCustomSchemaDefinition_asStrings(
+            SchemaVersion schemaVersion,
+            EnumModule instance,
+            String value1,
+            String value2,
+            String value3) {
         this.initConfigBuilder(schemaVersion);
         instance.applyToConfigBuilder(this.builder);
         ArgumentCaptor<CustomDefinitionProviderV2> captor = ArgumentCaptor.forClass(CustomDefinitionProviderV2.class);
@@ -170,11 +162,16 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
 
     @Test
     public void testRawEnumType_asString() throws JSONException {
+        // arrange
         this.initConfigBuilder(SchemaVersion.DRAFT_2020_12);
         this.builder.with(Option.PUBLIC_NONSTATIC_FIELDS, Option.NONSTATIC_NONVOID_NONGETTER_METHODS);
         instanceAsStringsFromName.applyToConfigBuilder(this.builder);
 
-        JsonNode enumSchema = new SchemaGenerator(this.builder.build()).generateSchema(TestType.class)
+        // act
+        GeneratedSchema[] result = new SchemaGenerator(this.builder.build()).generateSchema(TestType.class);
+
+        // assert
+        JsonNode enumSchema = result[0].getSchema()
                 .get(SchemaKeyword.TAG_PROPERTIES.forVersion(SchemaVersion.DRAFT_2020_12))
                 .get("rawEnum");
         JSONAssert.assertEquals("{\"type\":\"string\"}", enumSchema.toString(), JSONCompareMode.STRICT);
@@ -182,11 +179,16 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
 
     @Test
     public void testRawEnumType_asObject() throws JSONException {
+        // arrange
         this.initConfigBuilder(SchemaVersion.DRAFT_2020_12);
         this.builder.with(Option.PUBLIC_NONSTATIC_FIELDS, Option.NONSTATIC_NONVOID_NONGETTER_METHODS);
         instanceAsObjects.applyToConfigBuilder(this.builder);
 
-        JsonNode enumSchema = new SchemaGenerator(this.builder.build()).generateSchema(TestType.class)
+        // act
+        GeneratedSchema[] result = new SchemaGenerator(this.builder.build()).generateSchema(TestType.class);
+
+        // assert
+        JsonNode enumSchema = result[0].getSchema()
                 .get(SchemaKeyword.TAG_PROPERTIES.forVersion(SchemaVersion.DRAFT_2020_12))
                 .get("rawEnum");
         JSONAssert.assertEquals("{\"type\":\"object\",\"properties\":{\"compareTo(Enum<Object>)\":{\"type\":\"integer\"},\"name()\":{\"type\":\"string\"}}}",

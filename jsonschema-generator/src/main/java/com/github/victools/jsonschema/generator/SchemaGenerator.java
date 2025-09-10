@@ -56,7 +56,7 @@ public class SchemaGenerator {
      * @param typeParameters optional type parameters (in case of the {@code mainTargetType} being a parameterised type)
      * @return generated JSON Schema
      */
-    public ObjectNode generateSchema(Type mainTargetType, Type... typeParameters) {
+    public GeneratedSchema[] generateSchema(Type mainTargetType, Type... typeParameters) {
         return SchemaBuilder.createSingleTypeSchema(this.config, this.typeContext, mainTargetType, typeParameters);
     }
 

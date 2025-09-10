@@ -22,13 +22,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaKeyword;
-import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.generator.*;
+
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
@@ -53,14 +48,19 @@ public class IgnorePropertyTest {
     @ParameterizedTest
     @MethodSource("parametersForTestJsonIgnoreProperties")
     public void testJsonIgnoreProperties(Class<?> targetType, String expectedIncludedPropertyNames) throws JsonProcessingException {
+        // arrange
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
                 .with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT)
                 .with(new JacksonModule())
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
-        JsonNode result = generator.generateSchema(targetType);
 
-        JsonNode propertiesNode = result.get(config.getKeyword(SchemaKeyword.TAG_PROPERTIES));
+        // act
+        GeneratedSchema[] result = generator.generateSchema(targetType);
+
+        // assert
+        JsonNode schema = result[0].getSchema();
+        JsonNode propertiesNode = schema.get(config.getKeyword(SchemaKeyword.TAG_PROPERTIES));
         Set<String> propertyNames = new TreeSet<>();
         propertiesNode.fieldNames().forEachRemaining(propertyNames::add);
         Assertions.assertEquals(expectedIncludedPropertyNames, propertyNames.toString());

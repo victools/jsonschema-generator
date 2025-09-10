@@ -17,21 +17,8 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
-import com.github.victools.jsonschema.generator.ConfigFunction;
-import com.github.victools.jsonschema.generator.FieldScope;
-import com.github.victools.jsonschema.generator.MethodScope;
-import com.github.victools.jsonschema.generator.Module;
-import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
-import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
-import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.generator.TestUtils;
-import com.github.victools.jsonschema.generator.TypeContext;
-import com.github.victools.jsonschema.generator.TypeScope;
+import com.github.victools.jsonschema.generator.*;
+
 import java.io.IOException;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -141,6 +128,7 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
 
     @Test
     public void testAdditionalPropertyWithSubtype() throws JSONException, IOException {
+        // arrange
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON);
         configBuilder.with(Option.MAP_VALUES_AS_ADDITIONAL_PROPERTIES, Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES)
                 .without(Option.SCHEMA_VERSION_INDICATOR)
@@ -153,8 +141,13 @@ public class AdditionalPropertiesModuleTest extends AbstractTypeAwareTest {
                         ? Optional.ofNullable(field.getContainerItemAnnotation(ParamInfo.class)).map(ParamInfo::value).orElse(null)
                         : null);
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
-        JsonNode result = generator.generateSchema(A.class);
-        TestUtils.assertGeneratedSchema(result, AdditionalPropertiesModuleTest.class, "additional-property-with-subtype.json");
+
+        // act
+        GeneratedSchema[] result = generator.generateSchema(A.class);
+
+        // assert
+        JsonNode schema = result[0].getSchema();
+        TestUtils.assertGeneratedSchema(schema, AdditionalPropertiesModuleTest.class, "additional-property-with-subtype.json");
     }
 
     private static class TestMapSubType extends HashMap<Object, String> {

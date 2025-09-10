@@ -18,15 +18,16 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test for {@link SchemaGenerator} class.
@@ -46,6 +47,7 @@ public class SchemaGeneratorSubtypesTest {
     @ParameterizedTest
     @MethodSource("parametersForTestGenerateSchema")
     public void testGenerateSchema(String caseTitle, List<Class<?>> subtypes, SchemaVersion schemaVersion) throws Exception {
+        // arrange
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON)
                 .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_FIELDS_BY_DEFAULT, Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES);
         configBuilder.forTypesInGeneral()
@@ -58,8 +60,12 @@ public class SchemaGeneratorSubtypesTest {
         }
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
-        JsonNode result = generator.generateSchema(TestClassWithSuperTypeReferences.class);
-        TestUtils.assertGeneratedSchema(result, SchemaGeneratorSubtypesTest.class, "testclass-withsupertypereferences-" + caseTitle + ".json");
+        // act
+        GeneratedSchema[] result = generator.generateSchema(TestClassWithSuperTypeReferences.class);
+
+        // assert
+        JsonNode schema = result[0].getSchema();
+        TestUtils.assertGeneratedSchema(schema, SchemaGeneratorSubtypesTest.class, "testclass-withsupertypereferences-" + caseTitle + ".json");
     }
 
     private List<ResolvedType> determineTargetTypeOverrides(FieldScope field) {

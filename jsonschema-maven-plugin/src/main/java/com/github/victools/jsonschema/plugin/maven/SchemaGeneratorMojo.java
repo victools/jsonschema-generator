@@ -18,12 +18,8 @@ package com.github.victools.jsonschema.plugin.maven;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.victools.jsonschema.generator.*;
 import com.github.victools.jsonschema.generator.Module;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.impl.Util;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
@@ -38,11 +34,15 @@ import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.MavenProject;
+
+import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -51,22 +51,11 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.project.MavenProject;
 
 /**
  * Maven plugin for the victools/jsonschema-generator.
@@ -137,6 +126,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * <ul>
      * <li><code>{0}</code> - containing the simple class name of the class for which the schema was generated</li>
      * <li><code>{1}</code> - containing the package path of the class for which the schema was generated</li>
+     * <li><code>{2}</code> - containing the version name of the schema for which the schema was generated</li>
      * </ul>
      * The default name is: <code>{0}-schema.json</code>
      */
@@ -216,7 +206,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Generate the JSON schema for the given className.
      *
      * @param classOrPackageName The name or glob pattern of the class or package
-     * @param targetPackage whether the given name or glob pattern refers to a package
+     * @param targetPackage      whether the given name or glob pattern refers to a package
      * @throws MojoExecutionException In case of problems
      */
     private void generateSchema(String classOrPackageName, boolean targetPackage) throws MojoExecutionException {
@@ -264,10 +254,12 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @throws MojoExecutionException In case of problems
      */
     private void generateSchema(Class<?> schemaClass) throws MojoExecutionException {
-        JsonNode jsonSchema = getGenerator().generateSchema(schemaClass);
-        File file = getSchemaFile(schemaClass);
-        this.getLog().info("- Writing schema to file: " + file);
-        this.writeToFile(jsonSchema, file);
+        GeneratedSchema[] jsonSchemas = getGenerator().generateSchema(schemaClass);
+        for (GeneratedSchema generatedSchema : jsonSchemas) {
+            File file = getSchemaFile(schemaClass, generatedSchema.getVersion());
+            this.getLog().info("- Writing schema to file: " + file);
+            this.writeToFile(generatedSchema.getSchema(), file);
+        }
     }
 
     private void logForNoClassesMatchingFilter(String classOrPackageName) throws MojoExecutionException {
@@ -359,10 +351,12 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * <p>
      * The path is determined based on the {@link #schemaFilePath} parameter.
      * <br>
-     * The name of the file is determined based on the {@link #schemaFileName} parameter, which allows for two placeholders:
+     * The name of the file is determined based on the {@link #schemaFileName} parameter, which allows for two
+     * placeholders:
      * <ul>
      * <li><code>{0}</code> - containing the simple name of the class the schema was generated for</li>
      * <li><code>{1}</code> - containing the package path of the class the schema was generated for</li>
+     * <li><code>{2}</code> - containing the version name of the schema for which the schema was generated</li>
      * </ul>
      * </p>
      * The default path is: {@code src/main/resources}
@@ -372,32 +366,51 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @param mainType targeted class for which the schema is being generated
      * @return The full path name of the schema file
      */
-    private File getSchemaFile(Class<?> mainType) {
-        // At first find the root location where the schema files are written
-        File directory;
-        if (this.schemaFilePath == null) {
-            directory = new File("src" + File.separator + "main" + File.separator + "resources");
-            this.getLog().debug("- No 'schemaFilePath' configured. Applying default: " + directory);
-        } else {
-            directory = this.schemaFilePath;
-        }
-
-        // Then build the full qualified file name.
-        String fileName = MessageFormat.format(this.schemaFileName,
-                // placeholder {0}
-                mainType.getSimpleName(),
-                // placeholder {1}
-                mainType.getPackage().getName().replace('.', File.separatorChar));
+    private File getSchemaFile(Class<?> mainType, String version) {
+        File directory = findRootLocationWhereSchemaFileAreWritten();
+        String fileName = buildFullyQualifiedFileName(mainType, version);
         File schemaFile = new File(directory, fileName);
 
-        // Make sure the directory is available
-        try {
-            Files.createDirectories(schemaFile.getParentFile().toPath());
-        } catch (IOException e) {
-            this.getLog().warn("Failed to ensure existence of " + schemaFile.getParent(), e);
+        createDirectory(schemaFile);
+        return schemaFile;
+    }
+
+    private File findRootLocationWhereSchemaFileAreWritten() {
+        if (this.schemaFilePath == null) {
+            File directory = new File("src" + File.separator + "main" + File.separator + "resources");
+            this.getLog().debug("- No 'schemaFilePath' configured. Applying default: " + directory);
+            return directory;
         }
 
-        return schemaFile;
+        return this.schemaFilePath;
+    }
+
+    /**
+     * Builds a fully qualified fiel name by replacing placeholder values.
+     * @param mainType The class for which the schema should be generated.
+     * @param version The version of the schema file.
+     * @return The full qualified file name with replaced placeholders.
+     */
+    private String buildFullyQualifiedFileName(Class<?> mainType, String version) {
+        String className = mainType.getSimpleName();
+        String packagePath = mainType.getPackage().getName().replace('.', File.separatorChar);
+        return MessageFormat.format(
+                this.schemaFileName,
+                className,
+                packagePath,
+                version);
+    }
+
+    /**
+     * Ensure that the directory exists, by trying to create it.
+     * @param file The file for which the directory should exist.
+     */
+    private void createDirectory(File file) {
+        try {
+            Files.createDirectories(file.getParentFile().toPath());
+        } catch (IOException e) {
+            this.getLog().warn("Failed to ensure existence of " + file.getParent(), e);
+        }
     }
 
     /**
@@ -477,7 +490,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Instantiate and apply the custom module with the given class name to the config builder.
      *
      * @param moduleClassName Class name of the custom module to add.
-     * @param configBuilder The builder on which the module is added.
+     * @param configBuilder   The builder on which the module is added.
      * @throws MojoExecutionException When failing to instantiate the indicated module class.
      */
     private void addCustomModule(String moduleClassName, SchemaGeneratorConfigBuilder configBuilder) throws MojoExecutionException {
@@ -496,50 +509,50 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     /**
      * Instantiate and apply the standard module with the given name to the config builder.
      *
-     * @param module Record in the modules section from the pom containing at least a name.
+     * @param module        Record in the modules section from the pom containing at least a name.
      * @param configBuilder The builder on which the module is added.
      * @throws MojoExecutionException When an invalid module name or option is specified.
      */
     private void addStandardModule(GeneratorModule module, SchemaGeneratorConfigBuilder configBuilder) throws MojoExecutionException {
         switch (module.name) {
-        case "Jackson":
-            this.getLog().debug("- Adding Jackson Module");
-            this.addStandardModuleWithOptions(module, configBuilder, JacksonModule::new, JacksonOption.class);
-            break;
-        case "JakartaValidation":
-            this.getLog().debug("- Adding Jakarta Validation Module");
-            this.addStandardModuleWithOptions(module, configBuilder, JakartaValidationModule::new, JakartaValidationOption.class);
-            break;
-        case "JavaxValidation":
-            this.getLog().debug("- Adding Javax Validation Module");
-            this.addStandardModuleWithOptions(module, configBuilder, JavaxValidationModule::new, JavaxValidationOption.class);
-            break;
-        case "Swagger15":
-            this.getLog().debug("- Adding Swagger 1.5 Module");
-            this.addStandardModuleWithOptions(module, configBuilder, SwaggerModule::new, SwaggerOption.class);
-            break;
-        case "Swagger2":
-            this.getLog().debug("- Adding Swagger 2.x Module");
-            configBuilder.with(new Swagger2Module());
-            break;
-        default:
-            throw new MojoExecutionException("Error: Module does not have a name in "
-                    + "['Jackson', 'JakartaValidation', 'JavaxValidation', 'Swagger15', 'Swagger2'] or does not have a custom classname.");
+            case "Jackson":
+                this.getLog().debug("- Adding Jackson Module");
+                this.addStandardModuleWithOptions(module, configBuilder, JacksonModule::new, JacksonOption.class);
+                break;
+            case "JakartaValidation":
+                this.getLog().debug("- Adding Jakarta Validation Module");
+                this.addStandardModuleWithOptions(module, configBuilder, JakartaValidationModule::new, JakartaValidationOption.class);
+                break;
+            case "JavaxValidation":
+                this.getLog().debug("- Adding Javax Validation Module");
+                this.addStandardModuleWithOptions(module, configBuilder, JavaxValidationModule::new, JavaxValidationOption.class);
+                break;
+            case "Swagger15":
+                this.getLog().debug("- Adding Swagger 1.5 Module");
+                this.addStandardModuleWithOptions(module, configBuilder, SwaggerModule::new, SwaggerOption.class);
+                break;
+            case "Swagger2":
+                this.getLog().debug("- Adding Swagger 2.x Module");
+                configBuilder.with(new Swagger2Module());
+                break;
+            default:
+                throw new MojoExecutionException("Error: Module does not have a name in "
+                        + "['Jackson', 'JakartaValidation', 'JavaxValidation', 'Swagger15', 'Swagger2'] or does not have a custom classname.");
         }
     }
 
     /**
      * Add a standard module to the generator configuration.
      *
-     * @param <T> type of option enum the standard module expects in its constructor
-     * @param configBuilder builder on which the standard module should be added
-     * @param module record in the modules section from the pom
+     * @param <T>               type of option enum the standard module expects in its constructor
+     * @param configBuilder     builder on which the standard module should be added
+     * @param module            record in the modules section from the pom
      * @param moduleConstructor module constructor expecting an array of options
-     * @param optionType enum type for the module options (e.g., JacksonOption or JakartaValidationOption)
+     * @param optionType        enum type for the module options (e.g., JacksonOption or JakartaValidationOption)
      * @throws MojoExecutionException in case of problems
      */
     private <T extends Enum<T>> void addStandardModuleWithOptions(GeneratorModule module, SchemaGeneratorConfigBuilder configBuilder,
-            Function<T[], Module> moduleConstructor, Class<T> optionType) throws MojoExecutionException {
+                                                                  Function<T[], Module> moduleConstructor, Class<T> optionType) throws MojoExecutionException {
         Stream.Builder<T> optionStream = Stream.builder();
         for (String optionName : Util.nullSafe(module.options)) {
             try {
@@ -563,7 +576,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             // this does not affect filtering, as the classgraph library uses its own classloader and allows for caching
             List<URL> urls = ClasspathType.WITH_ALL_DEPENDENCIES_AND_TESTS.getUrls(this.project);
             this.classLoader = new URLClassLoader(urls.toArray(new URL[0]),
-                Thread.currentThread().getContextClassLoader());
+                    Thread.currentThread().getContextClassLoader());
         }
         return this.classLoader;
     }
@@ -587,13 +600,13 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * Write generated schema to a file.
      *
      * @param jsonSchema Generated schema to be written
-     * @param file The file to write to
+     * @param file       The file to write to
      * @throws MojoExecutionException In case of problems when writing the targeted file
      */
     private void writeToFile(JsonNode jsonSchema, File file) throws MojoExecutionException {
         ObjectMapper mapper = getGenerator().getConfig().getObjectMapper();
         try (FileOutputStream outputStream = new FileOutputStream(file);
-                PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
+             PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
             writer.print(mapper.writeValueAsString(jsonSchema));
         } catch (IOException e) {
             throw new MojoExecutionException("Error: Can not write to file " + file, e);

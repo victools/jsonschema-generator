@@ -17,12 +17,7 @@
 package com.github.victools.jsonschema.module.jakarta.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.generator.*;
 import jakarta.validation.Constraint;
 import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.AssertTrue;
@@ -59,6 +54,7 @@ public class IntegrationTest {
 
     @Test
     public void testIntegration() throws Exception {
+        // arrange
         // active all optional modules
         JakartaValidationModule module = new JakartaValidationModule(
                 JakartaValidationOption.NOT_NULLABLE_FIELD_IS_REQUIRED,
@@ -69,9 +65,13 @@ public class IntegrationTest {
                 .with(module)
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
-        JsonNode result = generator.generateSchema(TestClass.class);
 
-        String rawJsonSchema = result.toString();
+        // act
+        GeneratedSchema[] result = generator.generateSchema(TestClass.class);
+
+        // assert
+        JsonNode schema = result[0].getSchema();
+        String rawJsonSchema = schema.toString();
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
                 loadResource("integration-test-result.json"), rawJsonSchema, JSONCompareMode.STRICT);
     }

@@ -21,13 +21,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaKeyword;
-import com.github.victools.jsonschema.generator.SchemaVersion;
+import com.github.victools.jsonschema.generator.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +39,7 @@ public class JsonPropertySorterIntegrationTest {
             "TestContainer, one two three"
     })
     public void testJsonPropertyOrderWithChildAnnotations(String targetTypeName, String expectedFieldOrder) throws Exception {
+        // arrange
         JacksonModule module = new JacksonModule(JacksonOption.RESPECT_JSONPROPERTY_ORDER,
                 JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS);
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
@@ -55,9 +51,13 @@ public class JsonPropertySorterIntegrationTest {
                 .findFirst()
                 .orElseThrow(IllegalArgumentException::new);
         SchemaGenerator generator = new SchemaGenerator(config);
-        JsonNode result = generator.generateSchema(targetType);
-    
-        ObjectNode properties = (ObjectNode) result.get(config.getKeyword(SchemaKeyword.TAG_PROPERTIES));
+
+        // act
+        GeneratedSchema[] result = generator.generateSchema(targetType);
+
+        // assert
+        JsonNode schema = result[0].getSchema();
+        ObjectNode properties = (ObjectNode) schema.get(config.getKeyword(SchemaKeyword.TAG_PROPERTIES));
         List<String> resultPropertyNames = new ArrayList<>();
         properties.fieldNames().forEachRemaining(resultPropertyNames::add);
         Assertions.assertEquals(Arrays.asList(expectedFieldOrder.split(" ")), resultPropertyNames);
