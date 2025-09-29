@@ -1,0 +1,31 @@
+{
+    "tools" : [ {
+        "type" : "function",
+        "name" : "get_humidity",
+        "description" : "Get current humidity for a given location.",
+        "parameters" : {
+            "type" : "object",
+            "properties" : {
+                "location" : {
+                    "type" : "string",
+                    "description" : "City and country e.g. Bogotá, Colombia"
+                }
+            },
+            "required" : [ "location" ]
+        }
+    }, {
+        "type" : "function",
+        "name" : "get_temperature",
+        "description" : "Get current temperature for a given location.",
+        "parameters" : {
+            "type" : "object",
+            "properties" : {
+                "location" : {
+                    "type" : "string",
+                    "description" : "City and country e.g. Bogotá, Colombia"
+                }
+            },
+            "required" : [ "location" ]
+        }
+    } ]
+}
