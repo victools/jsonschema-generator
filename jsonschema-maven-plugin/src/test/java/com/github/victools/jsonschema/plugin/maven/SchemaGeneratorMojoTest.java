@@ -57,6 +57,7 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         "JakartaValidationModule",
         "Swagger15Module",
         "Swagger2Module",
+        "MicroProfileOpenApi3Module",
         "Complete"
     })
     public void testGeneration(String testCaseName) throws Exception {
