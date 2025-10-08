@@ -303,7 +303,18 @@ public class JacksonModule implements Module {
         // other kinds of field ignorals are handled implicitly, i.e. are only available by way of being absent
         return beanDescription.findProperties().stream()
                 .noneMatch(propertyDefinition -> declaredName.equals(propertyDefinition.getInternalName())
-                        || fieldName.equals(propertyDefinition.getInternalName()));
+                        || fieldName.equals(propertyDefinition.getInternalName())
+                        || fieldName.equals(toNonJavaBeanConformingName(propertyDefinition.getInternalName())));
+    }
+
+    private String toNonJavaBeanConformingName(String fieldName) {
+        // a field name like "xIndex" will have a propertyDefinition name "xindex", but should not be ignored.
+        if(fieldName == null || fieldName.length() < 2) {
+            return fieldName;
+        }
+        return fieldName.charAt(0)
+               + fieldName.substring(1, 2).toUpperCase()
+               + fieldName.substring(2);
     }
 
     /**
