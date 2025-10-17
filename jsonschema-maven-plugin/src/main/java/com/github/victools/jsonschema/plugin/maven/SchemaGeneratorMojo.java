@@ -31,6 +31,7 @@ import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidatio
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationOption;
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationModule;
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationOption;
+import com.github.victools.jsonschema.module.microprofile.openapi3.MicroProfileOpenApi3Module;
 import com.github.victools.jsonschema.module.swagger15.SwaggerModule;
 import com.github.victools.jsonschema.module.swagger15.SwaggerOption;
 import com.github.victools.jsonschema.module.swagger2.Swagger2Module;
@@ -522,9 +523,14 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             this.getLog().debug("- Adding Swagger 2.x Module");
             configBuilder.with(new Swagger2Module());
             break;
+        case "MicroProfileOpenApi3":
+            this.getLog().debug("- Adding MicroProfile OpenAPI 3.x Module");
+            configBuilder.with(new MicroProfileOpenApi3Module());
+            break;
         default:
             throw new MojoExecutionException("Error: Module does not have a name in "
-                    + "['Jackson', 'JakartaValidation', 'JavaxValidation', 'Swagger15', 'Swagger2'] or does not have a custom classname.");
+                    + "['Jackson', 'JakartaValidation', 'JavaxValidation', 'MicroProfileOpenApi3', 'Swagger15', 'Swagger2']"
+                    + " or does not have a custom classname.");
         }
     }
 

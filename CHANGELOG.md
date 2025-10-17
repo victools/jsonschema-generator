@@ -44,6 +44,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - support `<skipAbstractTypes>` flag to exclude abstract types (not interfaces)
 - support `<skipInterfaces>` flag to exclude interface types
 
+### `jsonschema-module-microprofile-openapi-3`
+#### Added
+***NOTE: `org.eclipse.microprofile.openapi:microprofile-openapi-api` minimum version is `3.1.1`!***
+- Initial implementation of `MicroProfileOpenApi3Module` for deriving schema attributes from MicroProfile OpenAPI 3 `@Schema` annotations.
+
 ## [4.36.0] - 2024-07-20
 ### `jsonschema-generator`
 #### Added

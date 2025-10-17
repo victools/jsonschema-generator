@@ -187,10 +187,11 @@ When you want to have more control over the modules that are to be used during g
 ```
 This configuration will generate the schema using the Jackson module.
 
-There are five standard modules that can be used:
+There are six standard modules that can be used:
 - `Jackson`
 - `JakartaValidation`
 - `JavaxValidation`
+- `MicroProfileOpenApi3`
 - `Swagger15` 
 - `Swagger2`
 

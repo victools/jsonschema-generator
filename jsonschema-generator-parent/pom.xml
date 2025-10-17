@@ -172,6 +172,7 @@
         <version.javax.validation>2.0.1.Final</version.javax.validation>
         <version.swagger-1.5>1.6.14</version.swagger-1.5>
         <version.swagger-2>2.2.25</version.swagger-2>
+        <version.microprofile-openapi-3>3.1.1</version.microprofile-openapi-3>
         <!-- maven plugin runtime dependencies -->
         <version.classgraph>4.8.177</version.classgraph>
     </properties>
@@ -219,6 +220,11 @@
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
                 <version>${version.classgraph}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.microprofile.openapi</groupId>
+                <artifactId>microprofile-openapi-api</artifactId>
+                <version>${version.microprofile-openapi-3}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
