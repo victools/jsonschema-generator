@@ -223,7 +223,21 @@ To enable a custom module in the generation the following construct can be used:
 </configuration>
 ```
 Make sure your custom module is on the classpath and has a default constructor.
-It is not possible to configure options for custom modules.
+If your module implements `com.github.victools.jsonschema.generator.CustomModule`, you can configure options:
+```xml
+<configuration>
+    <classNames>com.myOrg.myApp.MyClass</classNames>
+    <modules>
+        <module>
+            <className>com.myOrg.myApp.CustomModule</className>
+            <options>
+                <option>MyOptionStringOne</option>
+                <option>MyOptionStringTwo</option>
+            </options>
+        </module>
+    </modules>
+</configuration>
+```
 
 ### Complete Example
 ```xml
