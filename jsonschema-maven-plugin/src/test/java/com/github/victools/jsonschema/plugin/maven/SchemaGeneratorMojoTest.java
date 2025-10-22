@@ -57,7 +57,8 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
         "JakartaValidationModule",
         "Swagger15Module",
         "Swagger2Module",
-        "Complete"
+        "Complete",
+        "CustomModuleWithOptions"
     })
     public void testGeneration(String testCaseName) throws Exception {
         File testCaseLocation = new File("src/test/resources/reference-test-cases");

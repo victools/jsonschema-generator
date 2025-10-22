@@ -1,0 +1,22 @@
+<project>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.victools</groupId>
+                <artifactId>jsonschema-maven-plugin</artifactId>
+                <configuration>
+                    <classNames>com.github.victools.jsonschema.plugin.maven.TestClass</classNames>
+                    <schemaFilePath>target/generated-test-sources/CustomModuleWithOptions</schemaFilePath>
+                    <modules>
+                        <module>
+                            <className>com.github.victools.jsonschema.plugin.maven.TestCustomModule</className>
+                            <options>
+                                <option>a</option>
+                            </options>
+                        </module>
+                    </modules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -18,6 +18,7 @@ package com.github.victools.jsonschema.plugin.maven;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.victools.jsonschema.generator.CustomModule;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
@@ -466,7 +467,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private void setModules(SchemaGeneratorConfigBuilder configBuilder) throws MojoExecutionException {
         for (GeneratorModule module : Util.nullSafe(this.modules)) {
             if (!Util.isNullOrEmpty(module.className)) {
-                this.addCustomModule(module.className, configBuilder);
+                this.addCustomModule(module, configBuilder);
             } else if (!Util.isNullOrEmpty(module.name)) {
                 this.addStandardModule(module, configBuilder);
             }
@@ -476,15 +477,22 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     /**
      * Instantiate and apply the custom module with the given class name to the config builder.
      *
-     * @param moduleClassName Class name of the custom module to add.
+     * @param module Record in the modules section from the pom containing at least a name.
      * @param configBuilder The builder on which the module is added.
      * @throws MojoExecutionException When failing to instantiate the indicated module class.
      */
-    private void addCustomModule(String moduleClassName, SchemaGeneratorConfigBuilder configBuilder) throws MojoExecutionException {
+    private void addCustomModule(GeneratorModule module, SchemaGeneratorConfigBuilder configBuilder) throws MojoExecutionException {
+        String moduleClassName = module.className;
         this.getLog().debug("- Adding custom Module " + moduleClassName);
         try {
             Class<? extends Module> moduleClass = (Class<? extends Module>) this.loadClass(moduleClassName);
             Module moduleInstance = moduleClass.getConstructor().newInstance();
+            if (moduleInstance instanceof CustomModule) {
+                CustomModule customModule = (CustomModule) moduleInstance;
+                List<String> options = Util.nullSafe(module.options);
+                this.getLog().debug("- Adding custom Module options " + options);
+                customModule.setOptions(options);
+            }
             configBuilder.with(moduleInstance);
         } catch (ClassCastException | InstantiationException
                  | IllegalAccessException | NoSuchMethodException
