@@ -19,29 +19,28 @@ package com.github.victools.jsonschema.module.jackson;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.networknt.schema.JsonSchema;
-import com.networknt.schema.JsonSchemaFactory;
-import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
+import com.networknt.schema.Error;
+import com.networknt.schema.Schema;
+import com.networknt.schema.SchemaRegistry;
+import com.networknt.schema.SpecificationVersion;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Integration test of this module being used in a real SchemaGenerator instance, focusing on the subtype resolution.
@@ -62,13 +61,13 @@ public class SubtypeResolutionIntegrationTest {
         JSONAssert.assertEquals('\n' + rawJsonSchema + '\n',
                 loadResource("subtype-integration-test-result.json"), rawJsonSchema, JSONCompareMode.STRICT);
 
-        JsonSchema schemaForValidation = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909).getSchema(result);
+        Schema schemaForValidation = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2019_09).getSchema(result);
         String jsonInstance = config.getObjectMapper().writeValueAsString(new TestClassForSubtypeResolution());
 
-        Set<ValidationMessage> validationResult = schemaForValidation.validate(config.getObjectMapper().readTree(jsonInstance));
+        List<Error> validationResult = schemaForValidation.validate(config.getObjectMapper().readTree(jsonInstance));
         if (!validationResult.isEmpty()) {
             Assertions.fail("\n" + jsonInstance + "\n  " + validationResult.stream()
-                    .map(ValidationMessage::getMessage)
+                    .map(Error::getMessage)
                     .collect(Collectors.joining("\n  ")));
         }
     }

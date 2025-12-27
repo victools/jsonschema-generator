@@ -16,11 +16,11 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Utility class offering various helper functions to simplify common checks, e.g., with the goal reduce the complexity of checks and conditions.

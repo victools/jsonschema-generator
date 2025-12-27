@@ -16,7 +16,6 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -24,6 +23,7 @@ import java.util.Scanner;
 import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Common helper functions within tests.

@@ -18,10 +18,6 @@ package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.classmate.AnnotationInclusion;
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.CustomPropertyDefinition;
@@ -49,6 +45,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Default implementation of a schema generator's configuration.

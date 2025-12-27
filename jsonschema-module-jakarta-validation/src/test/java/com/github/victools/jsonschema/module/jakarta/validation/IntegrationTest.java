@@ -16,7 +16,6 @@
 
 package com.github.victools.jsonschema.module.jakarta.validation;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
@@ -51,6 +50,7 @@ import java.util.Scanner;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Integration test of this module being used in a real SchemaGenerator instance.

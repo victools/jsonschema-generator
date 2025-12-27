@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MemberScope;
@@ -29,6 +28,7 @@ import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.function.BiFunction;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Default module being included if {@code Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT} is enabled.

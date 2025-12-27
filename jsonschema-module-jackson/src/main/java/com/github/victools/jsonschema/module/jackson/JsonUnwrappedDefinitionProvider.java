@@ -20,9 +20,6 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedMember;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.AnnotationHelper;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
@@ -33,6 +30,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Definition provider handling the integration of properties with the {@link JsonUnwrapped} annotation.
@@ -110,8 +110,7 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
     private void applyPrefixAndSuffixToPropertyNames(JsonNode definition, String prefix, String suffix, SchemaGenerationContext context) {
         JsonNode properties = definition.get(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));
         if (properties instanceof ObjectNode && !properties.isEmpty()) {
-            List<String> fieldNames = new ArrayList<>();
-            properties.fieldNames().forEachRemaining(fieldNames::add);
+            List<String> fieldNames = new ArrayList<>(properties.propertyNames());
             for (String fieldName : fieldNames) {
                 JsonNode propertySchema = ((ObjectNode) properties).remove(fieldName);
                 ((ObjectNode) properties).set(prefix + fieldName + suffix, propertySchema);

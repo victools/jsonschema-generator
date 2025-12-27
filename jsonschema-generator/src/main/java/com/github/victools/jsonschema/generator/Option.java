@@ -226,7 +226,7 @@ public enum Option {
     /**
      * Whether each property with a container/{@link java.util.Collection Collection} type should also allow for a single collection item to be
      * provided instead of an array. This corresponds to the Jackson
-     * {@link com.fasterxml.jackson.databind.DeserializationFeature#ACCEPT_SINGLE_VALUE_AS_ARRAY ACCEPT_SINGLE_VALUE_AS_ARRAY} feature.
+     * {@link tools.jackson.databind.DeserializationFeature#ACCEPT_SINGLE_VALUE_AS_ARRAY ACCEPT_SINGLE_VALUE_AS_ARRAY} feature.
      *
      * @since 4.36.0
      */

@@ -19,8 +19,6 @@ package com.github.victools.jsonschema.module.jackson;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
@@ -35,6 +33,8 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class JsonPropertySorterIntegrationTest {
 
@@ -58,8 +58,7 @@ public class JsonPropertySorterIntegrationTest {
         JsonNode result = generator.generateSchema(targetType);
     
         ObjectNode properties = (ObjectNode) result.get(config.getKeyword(SchemaKeyword.TAG_PROPERTIES));
-        List<String> resultPropertyNames = new ArrayList<>();
-        properties.fieldNames().forEachRemaining(resultPropertyNames::add);
+        List<String> resultPropertyNames = new ArrayList<>(properties.propertyNames());
         Assertions.assertEquals(Arrays.asList(expectedFieldOrder.split(" ")), resultPropertyNames);
     }
 

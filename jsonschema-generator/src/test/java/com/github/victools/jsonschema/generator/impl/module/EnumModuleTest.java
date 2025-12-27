@@ -17,9 +17,6 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
@@ -46,6 +43,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.JsonNodeType;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Test for the {@link EnumModule} class.
@@ -154,17 +154,17 @@ public class EnumModuleTest extends AbstractTypeAwareTest {
 
         JsonNode typeNode = node.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion));
         Assertions.assertEquals(JsonNodeType.STRING, typeNode.getNodeType());
-        Assertions.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(schemaVersion), typeNode.textValue());
+        Assertions.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(schemaVersion), typeNode.stringValue());
 
         JsonNode enumNode = node.get(SchemaKeyword.TAG_ENUM.forVersion(schemaVersion));
         Assertions.assertEquals(JsonNodeType.ARRAY, enumNode.getNodeType());
         Assertions.assertEquals(3, enumNode.size());
         Assertions.assertEquals(JsonNodeType.STRING, enumNode.get(0).getNodeType());
-        Assertions.assertEquals(value1, enumNode.get(0).textValue());
+        Assertions.assertEquals(value1, enumNode.get(0).stringValue());
         Assertions.assertEquals(JsonNodeType.STRING, enumNode.get(1).getNodeType());
-        Assertions.assertEquals(value2, enumNode.get(1).textValue());
+        Assertions.assertEquals(value2, enumNode.get(1).stringValue());
         Assertions.assertEquals(JsonNodeType.STRING, enumNode.get(2).getNodeType());
-        Assertions.assertEquals(value3, enumNode.get(2).textValue());
+        Assertions.assertEquals(value3, enumNode.get(2).stringValue());
     }
 
     @Test
