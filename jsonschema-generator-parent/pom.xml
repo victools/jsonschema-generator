@@ -142,8 +142,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <file.encoding>UTF-8</file.encoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <!-- maven plugins -->
         <maven.plugin.version.checkstyle>3.6.0</maven.plugin.version.checkstyle>
         <version.checkstyle>10.19.0</version.checkstyle>
