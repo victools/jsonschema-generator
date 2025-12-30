@@ -500,8 +500,8 @@ public class AttributeCollector {
 
     private boolean isNullOrTrue(JsonNode nodeToCheck) {
         return nodeToCheck == null
-               || nodeToCheck.isNull()
-               || nodeToCheck.isBoolean() && nodeToCheck.asBoolean();
+                || nodeToCheck.isNull()
+                || nodeToCheck.isBoolean() && nodeToCheck.asBoolean();
     }
 
     /**

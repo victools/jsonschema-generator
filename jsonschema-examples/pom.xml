@@ -77,9 +77,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             <plugin>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>

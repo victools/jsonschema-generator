@@ -108,6 +108,6 @@ public final class Util {
             return false;
         }
         return one.hashCode() == other.hashCode()
-               && one.equals(other);
+                && one.equals(other);
     }
 }

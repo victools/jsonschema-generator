@@ -388,9 +388,9 @@ public class SchemaBuilder {
      */
     private boolean areDefinitionKeysDistinct(DefinitionKey mainSchemaKey, List<DefinitionKey> definitionKeys) {
         return definitionKeys.size() == 1
-               || (definitionKeys.size() == 2
-                   && !this.config.shouldCreateDefinitionForMainSchema()
-                   && definitionKeys.contains(mainSchemaKey));
+                || (definitionKeys.size() == 2
+                    && !this.config.shouldCreateDefinitionForMainSchema()
+                    && definitionKeys.contains(mainSchemaKey));
     }
 
     /**
