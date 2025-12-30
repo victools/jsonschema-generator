@@ -284,7 +284,7 @@ public class SimpleTypeModule implements Module {
 
     private boolean shouldHaveEmptySchema(TypeScope scope) {
         return scope.getType() == null
-               || SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType());
+                || SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType());
     }
 
     /**

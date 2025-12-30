@@ -322,7 +322,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
 
     private boolean shouldAddReferenceForExistingDefinition(GenericTypeDetails typeDetails) {
         return !typeDetails.isInlineDefinition()
-               && this.containsDefinition(typeDetails.getScope().getType(), typeDetails.getIgnoredDefinitionProvider());
+                && this.containsDefinition(typeDetails.getScope().getType(), typeDetails.getIgnoredDefinitionProvider());
     }
 
     private Map.Entry<ObjectNode, Boolean> applyCustomDefinition(CustomDefinition customDefinition, ObjectNode targetNode,
