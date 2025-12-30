@@ -17,10 +17,6 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.AnnotationInclusion;
-import com.fasterxml.jackson.core.json.JsonWriteFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.github.victools.jsonschema.generator.impl.SchemaGeneratorConfigImpl;
 import java.lang.annotation.Annotation;
 import java.util.EnumSet;
@@ -30,6 +26,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import tools.jackson.core.json.JsonWriteFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.JsonNodeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Builder class for creating a configuration object to be passed into the SchemaGenerator's constructor.
@@ -42,16 +43,14 @@ public class SchemaGeneratorConfigBuilder {
      * @return default ObjectMapper instance
      */
     private static ObjectMapper createDefaultObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper()
+        return JsonMapper.builder()
                 // since version 4.32.0; pretty print by default (can be overridden by supplying explicit mapper)
-                .enable(SerializationFeature.INDENT_OUTPUT);
-        mapper.getSerializationConfig()
+                .enable(SerializationFeature.INDENT_OUTPUT)
                 // since version 4.21.0
-                .with(JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS);
-        // since version 4.25.0; as the above doesn't always work
-        mapper.setNodeFactory(JsonNodeFactory.withExactBigDecimals(true));
-
-        return mapper;
+                .enable(JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS)
+                // since version 4.25.0; as the above doesn't always work
+                .enable(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES)
+                .build();
     }
 
     private ObjectMapper objectMapper;

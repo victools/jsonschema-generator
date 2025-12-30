@@ -20,8 +20,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
@@ -36,6 +34,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Test for the ignored properties being exclude as expected.
@@ -52,7 +51,7 @@ public class IgnorePropertyTest {
 
     @ParameterizedTest
     @MethodSource("parametersForTestJsonIgnoreProperties")
-    public void testJsonIgnoreProperties(Class<?> targetType, String expectedIncludedPropertyNames) throws JsonProcessingException {
+    public void testJsonIgnoreProperties(Class<?> targetType, String expectedIncludedPropertyNames) {
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
                 .with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT)
                 .with(new JacksonModule())
@@ -61,8 +60,7 @@ public class IgnorePropertyTest {
         JsonNode result = generator.generateSchema(targetType);
 
         JsonNode propertiesNode = result.get(config.getKeyword(SchemaKeyword.TAG_PROPERTIES));
-        Set<String> propertyNames = new TreeSet<>();
-        propertiesNode.fieldNames().forEachRemaining(propertyNames::add);
+        Set<String> propertyNames = new TreeSet<>(propertiesNode.propertyNames());
         Assertions.assertEquals(expectedIncludedPropertyNames, propertyNames.toString());
     }
 

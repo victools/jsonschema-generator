@@ -20,10 +20,6 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.members.ResolvedMethod;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
@@ -42,6 +38,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Answers;
 import org.mockito.Mockito;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Test for the {@link CustomEnumDefinitionProvider}.
@@ -86,19 +86,19 @@ public class CustomEnumDefinitionProviderTest {
         ObjectNode customDefinitionNode = result.getValue();
         Assertions.assertEquals(2, customDefinitionNode.size());
         Assertions.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(SchemaVersion.DRAFT_2019_09),
-                customDefinitionNode.get(SchemaKeyword.TAG_TYPE.forVersion(SchemaVersion.DRAFT_2019_09)).asText());
+                customDefinitionNode.get(SchemaKeyword.TAG_TYPE.forVersion(SchemaVersion.DRAFT_2019_09)).asString());
         int expectedValueCount = values.size();
         if (expectedValueCount == 1) {
             JsonNode constNode = customDefinitionNode.get(SchemaKeyword.TAG_CONST.forVersion(SchemaVersion.DRAFT_2019_09));
-            Assertions.assertTrue(constNode.isTextual());
-            Assertions.assertEquals(values.get(0), constNode.asText());
+            Assertions.assertTrue(constNode.isString());
+            Assertions.assertEquals(values.get(0), constNode.asString());
         } else {
             JsonNode enumNode = customDefinitionNode.get(SchemaKeyword.TAG_ENUM.forVersion(SchemaVersion.DRAFT_2019_09));
             Assertions.assertTrue(enumNode.isArray());
             ArrayNode arrayNode = (ArrayNode) enumNode;
             Assertions.assertEquals(expectedValueCount, arrayNode.size());
             for (int index = 0; index < expectedValueCount; index++) {
-                Assertions.assertEquals(values.get(index), arrayNode.get(index).asText());
+                Assertions.assertEquals(values.get(index), arrayNode.get(index).asString());
             }
         }
     }
@@ -116,14 +116,14 @@ public class CustomEnumDefinitionProviderTest {
         ObjectNode customDefinitionNode = result.getValue();
         Assertions.assertEquals(2, customDefinitionNode.size());
         Assertions.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(SchemaVersion.DRAFT_2019_09),
-                customDefinitionNode.get(SchemaKeyword.TAG_TYPE.forVersion(SchemaVersion.DRAFT_2019_09)).asText());
+                customDefinitionNode.get(SchemaKeyword.TAG_TYPE.forVersion(SchemaVersion.DRAFT_2019_09)).asString());
         JsonNode enumNode = customDefinitionNode.get(SchemaKeyword.TAG_ENUM.forVersion(SchemaVersion.DRAFT_2019_09));
         Assertions.assertTrue(enumNode.isArray());
         int expectedValueCount = values.size();
         ArrayNode arrayNode = (ArrayNode) enumNode;
         Assertions.assertEquals(expectedValueCount, arrayNode.size());
         for (int index = 0; index < expectedValueCount; index++) {
-            Assertions.assertEquals(values.get(index), arrayNode.get(index).asText());
+            Assertions.assertEquals(values.get(index), arrayNode.get(index).asString());
         }
     }
 

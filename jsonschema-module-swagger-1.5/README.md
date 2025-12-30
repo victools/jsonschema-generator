@@ -73,13 +73,13 @@ SwaggerModule module = new SwaggerModule(SwaggerOption.NO_APIMODEL_DESCRIPTION, 
 
 #### Complete Example
 ```java
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.module.swagger15.SwaggerModule;
+import tools.jackson.databind.JsonNode;
 ```
 ```java
 SwaggerModule module = new SwaggerModule();

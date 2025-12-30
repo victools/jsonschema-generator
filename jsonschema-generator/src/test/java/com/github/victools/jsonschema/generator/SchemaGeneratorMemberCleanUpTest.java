@@ -17,8 +17,6 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +25,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Test for {@link SchemaGenerator} class.
@@ -54,8 +54,8 @@ public class SchemaGeneratorMemberCleanUpTest {
         ObjectNode schema = new SchemaGenerator(generatorConfig).generateSchema(TestClass.class);
         JsonNode memberSchema = schema.get(generatorConfig.getKeyword(SchemaKeyword.TAG_PROPERTIES)).get("mapValue");
         Assertions.assertEquals(expectedMemberAttributes.size(), memberSchema.size());
-        memberSchema.fieldNames()
-                .forEachRemaining(fieldName -> Assertions.assertTrue(expectedMemberAttributes.contains(fieldName)));
+        memberSchema.propertyNames()
+                .forEach(fieldName -> Assertions.assertTrue(expectedMemberAttributes.contains(fieldName)));
     }
 
     private static class TestClass {

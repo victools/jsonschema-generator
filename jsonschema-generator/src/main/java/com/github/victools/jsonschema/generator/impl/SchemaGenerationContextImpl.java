@@ -17,11 +17,6 @@
 package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.CustomPropertyDefinitionProvider;
@@ -49,6 +44,11 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.BooleanNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 
 /**
  * Generation context in which to collect definitions of traversed types and remember where they are being referenced.
@@ -410,11 +410,11 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
         final Set<String> allowedSchemaTypes;
         if (declaredTypes == null) {
             allowedSchemaTypes = Collections.emptySet();
-        } else if (declaredTypes.isTextual()) {
-            allowedSchemaTypes = Collections.singleton(declaredTypes.textValue());
+        } else if (declaredTypes.isString()) {
+            allowedSchemaTypes = Collections.singleton(declaredTypes.stringValue());
         } else {
             allowedSchemaTypes = StreamSupport.stream(declaredTypes.spliterator(), false)
-                    .map(JsonNode::textValue)
+                    .map(JsonNode::stringValue)
                     .collect(Collectors.toSet());
         }
         return allowedSchemaTypes;
@@ -715,7 +715,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             ArrayNode arrayOfTypes = (ArrayNode) fixedJsonSchemaType;
             // one of the existing "type" values could be null
             for (JsonNode arrayEntry : arrayOfTypes) {
-                if (nullTypeName.equals(arrayEntry.textValue())) {
+                if (nullTypeName.equals(arrayEntry.stringValue())) {
                     return;
                 }
             }
@@ -723,7 +723,7 @@ public class SchemaGenerationContextImpl implements SchemaGenerationContext {
             node.putArray(config.getKeyword(SchemaKeyword.TAG_TYPE))
                     .addAll(arrayOfTypes)
                     .add(nullTypeName);
-        } else if (fixedJsonSchemaType instanceof TextNode && !nullTypeName.equals(fixedJsonSchemaType.textValue())) {
+        } else if (fixedJsonSchemaType instanceof StringNode && !nullTypeName.equals(fixedJsonSchemaType.stringValue())) {
             // add null as second "type" option
             node.putArray(config.getKeyword(SchemaKeyword.TAG_TYPE))
                     .add(fixedJsonSchemaType)
