@@ -305,7 +305,7 @@ configBuilder.without(
     </tr>
     <tr>
       <td>For a member (field/method), having a declared type for which subtypes are being detected, include a single definition with any collected member attributes assigned directly. Any subtypes are only being handled as generic types, i.e., outside of the member context. That means, certain relevant annotations may be ignored (e.g. a jackson <code>@JsonTypeInfo</code> override on a single member would not be correctly reflected in the produced schema).</td>
-      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a list of definittions: one for each subtype in the given member's context. This allows independently interpreting contextual information (e.g., member annotations) for each subtype.</td>
+      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a list of definitions: one for each subtype in the given member's context. This allows independently interpreting contextual information (e.g., member annotations) for each subtype.</td>
     </tr>
     <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
