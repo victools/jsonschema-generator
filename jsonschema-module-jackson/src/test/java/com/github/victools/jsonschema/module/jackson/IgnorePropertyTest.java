@@ -45,7 +45,8 @@ public class IgnorePropertyTest {
         return Stream.of(
             Arguments.of(SubType.class, "[includedChildField, includedParentField1, includedParentField2]"),
             Arguments.of(SuperType.class, "[ignoredParentField2, includedParentField1]"),
-            Arguments.of(TypeWithUnderscoreField.class, "[import]")
+            Arguments.of(TypeWithUnderscoreField.class, "[import]"),
+            Arguments.of(TypeWithNonCompatibleGetter.class, "[aIncludedField2, included1]")
         );
     }
 
@@ -95,6 +96,17 @@ public class IgnorePropertyTest {
 
         public String getIgnoredValue() {
             return "method being ignored, because there is no matching field";
+        }
+    }
+
+    private static class TypeWithNonCompatibleGetter {
+        public String included1;
+
+//        @JsonProperty("aIncludedField2") // This will fix the test
+        private int aIncludedField2;
+
+        public int getAIncludedField2() {
+            return this.aIncludedField2;
         }
     }
 }
