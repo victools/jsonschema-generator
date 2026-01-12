@@ -395,10 +395,10 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
 
     private ObjectNode getAttributesToInclude(TypeScope scope, SchemaGenerationContext context) {
         ObjectNode attributesToInclude;
-        if (scope instanceof FieldScope) {
-            attributesToInclude = AttributeCollector.collectFieldAttributes((FieldScope) scope, context);
-        } else if (scope instanceof MethodScope) {
-            attributesToInclude = AttributeCollector.collectMethodAttributes((MethodScope) scope, context);
+        if (scope instanceof FieldScope fieldScope) {
+            attributesToInclude = AttributeCollector.collectFieldAttributes(fieldScope, context);
+        } else if (scope instanceof MethodScope methodScope) {
+            attributesToInclude = AttributeCollector.collectMethodAttributes(methodScope, context);
         } else {
             attributesToInclude = null;
         }

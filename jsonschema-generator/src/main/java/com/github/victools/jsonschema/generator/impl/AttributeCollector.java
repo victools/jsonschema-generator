@@ -376,47 +376,47 @@ public class AttributeCollector {
 
     private void addRawPropertyValue(ObjectNode node, String propertyName, Object value) {
         // need to specifically add simple/primitive values by type
-        if (value instanceof String) {
+        if (value instanceof String stringValue) {
             // explicit inclusion as string results in wrapping quote symbols
-            node.put(propertyName, (String) value);
-        } else if (value instanceof BigDecimal) {
-            node.put(propertyName, (BigDecimal) value);
-        } else if (value instanceof BigInteger) {
-            node.put(propertyName, (BigInteger) value);
-        } else if (value instanceof Boolean) {
-            node.put(propertyName, (Boolean) value);
-        } else if (value instanceof Double) {
-            node.put(propertyName, (Double) value);
-        } else if (value instanceof Float) {
-            node.put(propertyName, (Float) value);
-        } else if (value instanceof Integer) {
-            node.put(propertyName, (Integer) value);
+            node.put(propertyName, stringValue);
+        } else if (value instanceof BigDecimal decimalValue) {
+            node.put(propertyName, decimalValue);
+        } else if (value instanceof BigInteger intValue) {
+            node.put(propertyName, intValue);
+        } else if (value instanceof Boolean boolValue) {
+            node.put(propertyName, boolValue);
+        } else if (value instanceof Double doubleValue) {
+            node.put(propertyName, doubleValue);
+        } else if (value instanceof Float floatValue) {
+            node.put(propertyName, floatValue);
+        } else if (value instanceof Integer intValue) {
+            node.put(propertyName, intValue);
         } else {
             // everything else is simply forwarded as-is to the JSON Schema, it's up to the configurator to ensure the value's correctness
             node.putPOJO(propertyName, value);
         }
     }
 
-    private void addRawArrayItem(ArrayNode node, Object value) {
+    private void addRawArrayItem(ArrayNode node, Object item) {
         // need to specifically add simple/primitive values by type
-        if (value instanceof String) {
+        if (item instanceof String stringItem) {
             // explicit inclusion as string results in wrapping quote symbols
-            node.add((String) value);
-        } else if (value instanceof BigDecimal) {
-            node.add((BigDecimal) value);
-        } else if (value instanceof BigInteger) {
-            node.add((BigInteger) value);
-        } else if (value instanceof Boolean) {
-            node.add((Boolean) value);
-        } else if (value instanceof Double) {
-            node.add((Double) value);
-        } else if (value instanceof Float) {
-            node.add((Float) value);
-        } else if (value instanceof Integer) {
-            node.add((Integer) value);
+            node.add(stringItem);
+        } else if (item instanceof BigDecimal decimalItem) {
+            node.add(decimalItem);
+        } else if (item instanceof BigInteger intItem) {
+            node.add(intItem);
+        } else if (item instanceof Boolean boolItem) {
+            node.add(boolItem);
+        } else if (item instanceof Double doubleItem) {
+            node.add(doubleItem);
+        } else if (item instanceof Float floatItem) {
+            node.add(floatItem);
+        } else if (item instanceof Integer intItem) {
+            node.add(intItem);
         } else {
             // everything else is simply forwarded as-is to the JSON Schema, it's up to the configurator to ensure the value's correctness
-            node.addPOJO(value);
+            node.addPOJO(item);
         }
     }
 

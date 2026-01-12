@@ -419,7 +419,7 @@ public class Swagger2Module implements Module {
      */
     protected CustomPropertyDefinition provideCustomSchemaDefinition(MemberScope<?, ?> scope, SchemaGenerationContext context) {
         Optional<String> externalReference = this.getSchemaAnnotationValue(scope, Schema::ref, ref -> !ref.isEmpty());
-        if (!externalReference.isPresent()) {
+        if (externalReference.isEmpty()) {
             return null;
         }
         // in Draft 6 and Draft 7, no other keywords are allowed besides a "$ref"

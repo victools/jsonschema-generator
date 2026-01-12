@@ -61,7 +61,7 @@
                 <role>Provided PRs #116 and #118 (part of initial Swagger2Module)</role>
                 <role>Provided implementation for #204 (readOnly/writeOnly in JacksonModule)</role>
                 <role>Provided PR #299 and feedback on final implementation (inheritance of validation constraint annotations)</role>
-                <role>Provided implementation for PR #503 (avoid duplicates in required array during final clean-ups)</role>
+                <role>Provided PR #503 (avoid duplicates in required array during final clean-ups)</role>
             </roles>
         </contributor>
         <contributor>
@@ -138,6 +138,12 @@
             </roles>
         </contributor>
         <contributor>
+            <url>https://github.com/hbzhou</url>
+            <roles>
+                <role>Provided PR #477 (drop JDK 11 support in favor of JDK 17)</role>
+            </roles>
+        </contributor>
+        <contributor>
             <name>Filip Hrisafov</name>
             <url>https://github.com/filiphr</url>
             <roles>
@@ -149,8 +155,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <file.encoding>UTF-8</file.encoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
         <!-- maven plugins -->
         <maven.plugin.version.checkstyle>3.6.0</maven.plugin.version.checkstyle>
         <version.checkstyle>12.3.0</version.checkstyle>
@@ -292,9 +297,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.plugin.version.compiler}</version>
                     <configuration>
-                        <source>${maven.compiler.source}</source>
-                        <target>${maven.compiler.target}</target>
                         <showDeprecation>true</showDeprecation>
+                        <release>${maven.compiler.release}</release>
                     </configuration>
                 </plugin>
                 <plugin>
