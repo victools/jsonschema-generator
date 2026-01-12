@@ -109,8 +109,8 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      */
     private void applyPrefixAndSuffixToPropertyNames(JsonNode definition, String prefix, String suffix, SchemaGenerationContext context) {
         JsonNode properties = definition.get(context.getKeyword(SchemaKeyword.TAG_PROPERTIES));
-        if (properties instanceof ObjectNode && !properties.isEmpty()) {
-            List<String> fieldNames = new ArrayList<>(properties.propertyNames());
+        if (properties instanceof ObjectNode propertiesNode && !propertiesNode.isEmpty()) {
+            List<String> fieldNames = new ArrayList<>(propertiesNode.propertyNames());
             for (String fieldName : fieldNames) {
                 JsonNode propertySchema = propertiesNode.remove(fieldName);
                 propertiesNode.set(prefix + fieldName + suffix, propertySchema);
