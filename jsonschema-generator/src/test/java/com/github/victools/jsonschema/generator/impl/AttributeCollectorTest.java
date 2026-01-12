@@ -17,10 +17,6 @@
 package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
@@ -38,6 +34,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.BooleanNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Test for the {@link AttributeCollector} class.
@@ -87,8 +87,8 @@ public class AttributeCollectorTest {
         this.collector.setEnum(this.definitionNode, Collections.singletonList("A"), this.generateContext(schemaVersion));
         JsonNode constNode = this.definitionNode.get(SchemaKeyword.TAG_CONST.forVersion(schemaVersion));
         Assertions.assertNotNull(constNode);
-        Assertions.assertTrue(constNode.isTextual());
-        Assertions.assertEquals("A", constNode.textValue());
+        Assertions.assertTrue(constNode.isString());
+        Assertions.assertEquals("A", constNode.stringValue());
     }
 
     @ParameterizedTest
@@ -101,8 +101,8 @@ public class AttributeCollectorTest {
         Assertions.assertEquals(1, enumNode.size());
         JsonNode singleValueItem = enumNode.get(0);
         Assertions.assertNotNull(singleValueItem);
-        Assertions.assertTrue(singleValueItem.isTextual());
-        Assertions.assertEquals("A", singleValueItem.textValue());
+        Assertions.assertTrue(singleValueItem.isString());
+        Assertions.assertEquals("A", singleValueItem.stringValue());
     }
 
     @ParameterizedTest
@@ -116,12 +116,12 @@ public class AttributeCollectorTest {
         Assertions.assertEquals(2, enumNode.size());
         JsonNode firstValueItem = enumNode.get(0);
         Assertions.assertNotNull(firstValueItem);
-        Assertions.assertTrue(firstValueItem.isTextual());
-        Assertions.assertEquals("A", firstValueItem.textValue());
+        Assertions.assertTrue(firstValueItem.isString());
+        Assertions.assertEquals("A", firstValueItem.stringValue());
         JsonNode secondValueItem = enumNode.get(1);
         Assertions.assertNotNull(secondValueItem);
-        Assertions.assertTrue(secondValueItem.isTextual());
-        Assertions.assertEquals("B", secondValueItem.textValue());
+        Assertions.assertTrue(secondValueItem.isString());
+        Assertions.assertEquals("B", secondValueItem.stringValue());
     }
 
     @ParameterizedTest

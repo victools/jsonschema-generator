@@ -1,7 +1,7 @@
 {
     "$ref": "#/definitions/TestClass2...",
     "definitions": {
-        "TestClass2": {
+        "TestClass2_Object_": {
             "type": "object",
             "properties": {
                 "genericArray": {
@@ -14,7 +14,7 @@
         "TestClass2...": {
             "type": "array",
             "items": {
-                "$ref": "#/definitions/TestClass2"
+                "$ref": "#/definitions/TestClass2_Object_"
             }
         }
     }

@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.github.victools</groupId>
         <artifactId>jsonschema-generator-parent</artifactId>
-        <version>4.39.0-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../jsonschema-generator-parent/pom.xml</relativePath>
     </parent>
     <artifactId>jsonschema-examples</artifactId>
@@ -75,9 +75,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>

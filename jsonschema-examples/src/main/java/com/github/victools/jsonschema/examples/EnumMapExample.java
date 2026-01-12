@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.examples;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.OptionPreset;
@@ -31,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Example created in response to <a href="https://github.com/victools/jsonschema-generator/discussions/376">#376</a>.

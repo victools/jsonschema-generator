@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.MemberScope;
@@ -34,6 +33,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Default module being included for the {@code Option.ADDITIONAL_FIXED_TYPES}.
@@ -290,7 +290,7 @@ public class SimpleTypeModule implements Module {
 
     private boolean shouldHaveEmptySchema(TypeScope scope) {
         return scope.getType() == null
-               || SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType());
+                || SchemaKeyword.TAG_TYPE_NULL == this.fixedJsonSchemaTypes.get(scope.getType().getErasedType());
     }
 
     /**

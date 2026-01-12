@@ -23,12 +23,18 @@ import com.github.victools.jsonschema.generator.Option;
  */
 public class GeneratorOptions {
 
-    // The preset options
+    /**
+     * The options preset/template to use as the basis, for including some standard options.
+     */
     public StandardOptionPreset preset;
 
-    // The options of the generator that should be enabled
+    /**
+     * The options of the generator that should be enabled (in addition to the ones defined in the {@code preset}).
+     */
     public Option[] enabled;
 
-    // The options of the generator that should be disabled
+    /**
+     * The options of the generator that should be disabled (i.e., excluding some of the {@code preset}'s standard options).
+     */
     public Option[] disabled;
 }

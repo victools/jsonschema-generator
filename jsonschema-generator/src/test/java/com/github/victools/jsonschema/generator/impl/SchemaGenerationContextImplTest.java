@@ -17,9 +17,6 @@
 package com.github.victools.jsonschema.generator.impl;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
@@ -35,6 +32,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Test for the {@link SchemaGenerationContextImpl} class.
@@ -287,11 +287,13 @@ public class SchemaGenerationContextImplTest extends AbstractTypeAwareTest {
     public void testCreateStandardDefinition() {
         ResolvedType type = this.contextImpl.getTypeContext().resolve(TestClass.class);
         ObjectNode result = this.contextImpl.createStandardDefinition(type, null);
-        Assertions.assertEquals("{\"type\":\"object\",\"properties\":{"
-                        + "\"booleanField\":{\"allOf\":[{},{\"title\":\"Field Title\"}]},"
-                        + "\"isBooleanField()\":{\"allOf\":[{},{\"title\":\"Method Title\"}]}},"
-                        + "\"dependentRequired\":{\"booleanField\":[\"isBooleanField()\"],\"isBooleanField()\":[\"booleanField\"]}," +
-                        "\"description\":\"Type Description\"}",
+        Assertions.assertEquals("""
+                        {"type":"object","properties":{\
+                        "booleanField":{"allOf":[{},{"title":"Field Title"}]},\
+                        "isBooleanField()":{"allOf":[{},{"title":"Method Title"}]}},\
+                        "dependentRequired":{"booleanField":["isBooleanField()"],"isBooleanField()":["booleanField"]},\
+                        "description":"Type Description"}\
+                        """,
                 result.toString());
     }
 

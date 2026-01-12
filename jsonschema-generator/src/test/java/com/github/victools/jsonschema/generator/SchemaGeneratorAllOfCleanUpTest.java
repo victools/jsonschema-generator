@@ -16,9 +16,6 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +25,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Test for {@link SchemaGenerator} class.
@@ -37,10 +36,14 @@ public class SchemaGeneratorAllOfCleanUpTest {
     static Stream<Arguments> parametersForTestAllOfCleanUp() {
         String differentValueInMainSchema = "{ \"type\":\"object\", \"title\":\"main schema\", \"allOf\":[{ \"title\":\"different title\" }, {}] }";
         String differentValueInAllOfPart = "{ \"type\":\"object\", \"allOf\":[{ \"title\":\"title X\" }, { \"title\":\"title Y\" }] }";
-        String equalIfTagInMainSchema = "{ \"type\":\"object\", \"if\":{ \"const\": 1 }, \"then\":{}, "
-                + "\"allOf\":[{ \"if\":{ \"const\": 1 }, \"then\":{}, \"else\": { \"title\": \"otherwise...\" } }, {}] }";
-        String equalIfTagInAllOfPart = "{ \"type\":\"object\", \"allOf\":[{ \"if\":{ \"const\": 1 }, \"then\":{} }, "
-                + "{ \"if\":{ \"const\": 1 }, \"then\":{}, \"else\": { \"title\": \"otherwise...\" } }] }";
+        String equalIfTagInMainSchema = """
+                { "type":"object", "if":{ "const": 1 }, "then":{}, \
+                "allOf":[{ "if":{ "const": 1 }, "then":{}, "else": { "title": "otherwise..." } }, {}] }\
+                """;
+        String equalIfTagInAllOfPart = """
+                { "type":"object", "allOf":[{ "if":{ "const": 1 }, "then":{} }, \
+                { "if":{ "const": 1 }, "then":{}, "else": { "title": "otherwise..." } }] }\
+                """;
         List<Arguments> testCases = EnumSet.allOf(SchemaVersion.class).stream()
                 .flatMap(schemaVersion -> Stream.of(
                     Arguments.of(schemaVersion, differentValueInMainSchema, differentValueInMainSchema),
@@ -48,8 +51,10 @@ public class SchemaGeneratorAllOfCleanUpTest {
                     Arguments.of(schemaVersion, equalIfTagInMainSchema, equalIfTagInMainSchema),
                     Arguments.of(schemaVersion, equalIfTagInAllOfPart, equalIfTagInAllOfPart),
                     Arguments.of(schemaVersion,
-                        "{ \"type\": \"object\", \"title\":\"same in all three\", "
-                                + "\"allOf\": [{ \"title\":\"same in all three\" }, { \"title\":\"same in all three\" }] }",
+                        """
+                        { "type": "object", "title":"same in all three", \
+                        "allOf": [{ "title":"same in all three" }, { "title":"same in all three" }] }\
+                        """,
                         "{ \"type\": \"object\", \"title\":\"same in all three\" }"),
                     Arguments.of(schemaVersion,
                         "{ \"type\": \"object\", \"allOf\": [{ \"title\":\"from allOf[0]\" }, { \"description\":\"from allOf[1]\" }] }",
@@ -96,14 +101,8 @@ public class SchemaGeneratorAllOfCleanUpTest {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(schemaVersion, OptionPreset.PLAIN_JSON)
                 .without(Option.SCHEMA_VERSION_INDICATOR);
         configBuilder.forTypesInGeneral()
-                .withCustomDefinitionProvider((_type, context) -> {
-                    try {
-                        return new CustomDefinition((ObjectNode) context.getGeneratorConfig().getObjectMapper()
-                                .readTree(inputSchema));
-                    } catch (JsonProcessingException ex) {
-                        throw new IllegalStateException("This should never happen", ex);
-                    }
-                });
+                .withCustomDefinitionProvider((_type, context) ->
+                        new CustomDefinition((ObjectNode) context.getGeneratorConfig().getObjectMapper().readTree(inputSchema)));
         SchemaGenerator generator = new SchemaGenerator(configBuilder.build());
 
         JsonNode result = generator.generateSchema(String.class);

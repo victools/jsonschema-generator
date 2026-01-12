@@ -16,7 +16,6 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +24,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Test for {@link SchemaGenerator} class.
@@ -107,7 +107,7 @@ public class SchemaGeneratorSimpleTypesTest {
         } else {
             Assertions.assertEquals(1, result.size());
             Assertions.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
-                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
+                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asString());
         }
     }
 
@@ -125,12 +125,12 @@ public class SchemaGeneratorSimpleTypesTest {
         } else if (expectedFormat == null) {
             Assertions.assertEquals(1, result.size());
             Assertions.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
-                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
+                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asString());
         } else {
             Assertions.assertEquals(2, result.size());
             Assertions.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
-                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
-            Assertions.assertEquals(expectedFormat, result.get(SchemaKeyword.TAG_FORMAT.forVersion(schemaVersion)).asText());
+                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asString());
+            Assertions.assertEquals(expectedFormat, result.get(SchemaKeyword.TAG_FORMAT.forVersion(schemaVersion)).asString());
         }
     }
 
@@ -148,7 +148,7 @@ public class SchemaGeneratorSimpleTypesTest {
         } else {
             Assertions.assertEquals(1, result.size());
             Assertions.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
-                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
+                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asString());
         }
     }
 
@@ -166,12 +166,12 @@ public class SchemaGeneratorSimpleTypesTest {
         } else if (expectedFormat == null) {
             Assertions.assertEquals(1, result.size());
             Assertions.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
-                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
+                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asString());
         } else {
             Assertions.assertEquals(2, result.size());
             Assertions.assertEquals(expectedJsonSchemaType.forVersion(schemaVersion),
-                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
-            Assertions.assertEquals(expectedFormat, result.get(SchemaKeyword.TAG_FORMAT.forVersion(schemaVersion)).asText());
+                    result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asString());
+            Assertions.assertEquals(expectedFormat, result.get(SchemaKeyword.TAG_FORMAT.forVersion(schemaVersion)).asString());
         }
     }
 }

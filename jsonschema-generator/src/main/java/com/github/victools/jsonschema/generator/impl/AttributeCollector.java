@@ -16,11 +16,6 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
@@ -31,7 +26,6 @@ import com.github.victools.jsonschema.generator.TypeScope;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +33,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Helper class for looking-up various attribute values for a field or method via a given configuration instance.
@@ -190,9 +189,7 @@ public class AttributeCollector {
         if (attributeContainer == null) {
             return;
         }
-        Iterator<Map.Entry<String, JsonNode>> attributeIterator = attributeContainer.fields();
-        while (attributeIterator.hasNext()) {
-            Map.Entry<String, JsonNode> attribute = attributeIterator.next();
+        for (Map.Entry<String, JsonNode> attribute : attributeContainer.properties()) {
             if (!targetNode.has(attribute.getKey())) {
                 targetNode.set(attribute.getKey(), attribute.getValue());
             }
@@ -379,47 +376,47 @@ public class AttributeCollector {
 
     private void addRawPropertyValue(ObjectNode node, String propertyName, Object value) {
         // need to specifically add simple/primitive values by type
-        if (value instanceof String) {
+        if (value instanceof String stringValue) {
             // explicit inclusion as string results in wrapping quote symbols
-            node.put(propertyName, (String) value);
-        } else if (value instanceof BigDecimal) {
-            node.put(propertyName, (BigDecimal) value);
-        } else if (value instanceof BigInteger) {
-            node.put(propertyName, (BigInteger) value);
-        } else if (value instanceof Boolean) {
-            node.put(propertyName, (Boolean) value);
-        } else if (value instanceof Double) {
-            node.put(propertyName, (Double) value);
-        } else if (value instanceof Float) {
-            node.put(propertyName, (Float) value);
-        } else if (value instanceof Integer) {
-            node.put(propertyName, (Integer) value);
+            node.put(propertyName, stringValue);
+        } else if (value instanceof BigDecimal decimalValue) {
+            node.put(propertyName, decimalValue);
+        } else if (value instanceof BigInteger intValue) {
+            node.put(propertyName, intValue);
+        } else if (value instanceof Boolean boolValue) {
+            node.put(propertyName, boolValue);
+        } else if (value instanceof Double doubleValue) {
+            node.put(propertyName, doubleValue);
+        } else if (value instanceof Float floatValue) {
+            node.put(propertyName, floatValue);
+        } else if (value instanceof Integer intValue) {
+            node.put(propertyName, intValue);
         } else {
             // everything else is simply forwarded as-is to the JSON Schema, it's up to the configurator to ensure the value's correctness
             node.putPOJO(propertyName, value);
         }
     }
 
-    private void addRawArrayItem(ArrayNode node, Object value) {
+    private void addRawArrayItem(ArrayNode node, Object item) {
         // need to specifically add simple/primitive values by type
-        if (value instanceof String) {
+        if (item instanceof String stringItem) {
             // explicit inclusion as string results in wrapping quote symbols
-            node.add((String) value);
-        } else if (value instanceof BigDecimal) {
-            node.add((BigDecimal) value);
-        } else if (value instanceof BigInteger) {
-            node.add((BigInteger) value);
-        } else if (value instanceof Boolean) {
-            node.add((Boolean) value);
-        } else if (value instanceof Double) {
-            node.add((Double) value);
-        } else if (value instanceof Float) {
-            node.add((Float) value);
-        } else if (value instanceof Integer) {
-            node.add((Integer) value);
+            node.add(stringItem);
+        } else if (item instanceof BigDecimal decimalItem) {
+            node.add(decimalItem);
+        } else if (item instanceof BigInteger intItem) {
+            node.add(intItem);
+        } else if (item instanceof Boolean boolItem) {
+            node.add(boolItem);
+        } else if (item instanceof Double doubleItem) {
+            node.add(doubleItem);
+        } else if (item instanceof Float floatItem) {
+            node.add(floatItem);
+        } else if (item instanceof Integer intItem) {
+            node.add(intItem);
         } else {
             // everything else is simply forwarded as-is to the JSON Schema, it's up to the configurator to ensure the value's correctness
-            node.addPOJO(value);
+            node.addPOJO(item);
         }
     }
 
@@ -442,7 +439,7 @@ public class AttributeCollector {
     }
 
     /**
-     * Call {@link ObjectMapper#writeValueAsString(Object)} on the given object and determining whether any {@link JsonProcessingException} occurs.
+     * Call {@link ObjectMapper#writeValueAsString(Object)} on the given object and determining whether any {@link JacksonException} occurs.
      *
      * @param target object to convert
      * @return whether the underlying ObjectMapper is able to convert the given object without encountering an exception
@@ -450,7 +447,7 @@ public class AttributeCollector {
     private boolean canBeConvertedToString(Object target) {
         try {
             return target == null || this.objectMapper.writeValueAsString(target) != null;
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             logger.warn("Failed to convert value to string via ObjectMapper: {}", target, ex);
             return false;
         }
@@ -503,8 +500,8 @@ public class AttributeCollector {
 
     private boolean isNullOrTrue(JsonNode nodeToCheck) {
         return nodeToCheck == null
-               || nodeToCheck.isNull()
-               || nodeToCheck.isBoolean() && nodeToCheck.asBoolean();
+                || nodeToCheck.isNull()
+                || nodeToCheck.isBoolean() && nodeToCheck.asBoolean();
     }
 
     /**

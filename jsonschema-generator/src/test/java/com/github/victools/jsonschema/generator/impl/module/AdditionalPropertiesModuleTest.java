@@ -16,7 +16,6 @@
 
 package com.github.victools.jsonschema.generator.impl.module;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.AbstractTypeAwareTest;
 import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.FieldScope;
@@ -55,6 +54,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Test for the {@link AdditionalPropertiesModule} class.
