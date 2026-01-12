@@ -17,14 +17,13 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.classmate.ResolvedTypeWithMembers;
 import com.fasterxml.classmate.members.ResolvedField;
 import com.fasterxml.classmate.members.ResolvedMethod;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.util.stream.Stream;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Abstract test class catering for the type resolution of a dummy/test class to perform tests against introspected fields/methods.

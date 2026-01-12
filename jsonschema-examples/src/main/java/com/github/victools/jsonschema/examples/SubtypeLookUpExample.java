@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.examples;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
@@ -28,11 +27,11 @@ import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.SubtypeResolver;
 import com.github.victools.jsonschema.generator.TypeContext;
 import io.github.classgraph.ClassGraph;
-import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
 import java.util.List;
 import java.util.stream.Collectors;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Example created to show-case generic subtype look-up.

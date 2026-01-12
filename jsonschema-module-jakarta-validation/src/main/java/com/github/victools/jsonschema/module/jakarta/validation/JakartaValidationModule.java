@@ -17,8 +17,6 @@
 package com.github.victools.jsonschema.module.jakarta.validation;
 
 import com.fasterxml.classmate.AnnotationInclusion;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MemberScope;
 import com.github.victools.jsonschema.generator.MethodScope;
@@ -47,7 +45,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -58,6 +55,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntBiFunction;
 import java.util.stream.Stream;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * JSON Schema Generation Module: based on annotations from the {@code jakarta.validation.constraints} package.

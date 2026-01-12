@@ -29,6 +29,9 @@
                 "type": ["boolean", "null"],
                 "default": "true"
             }
+        },
+        "unannotatedField": {
+            "type": ["string", "null"]
         }
     },
     "required": ["fieldWithExclusiveNumericRange", "fieldWithOverriddenName"]

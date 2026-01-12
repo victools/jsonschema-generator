@@ -16,32 +16,26 @@
 
 package com.github.victools.jsonschema.module.swagger2;
 
+import com.github.victools.jsonschema.generator.Option;
+import com.github.victools.jsonschema.generator.OptionPreset;
+import com.github.victools.jsonschema.generator.SchemaGenerator;
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import com.github.victools.jsonschema.generator.SchemaVersion;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Scanner;
-
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.github.victools.jsonschema.generator.Option;
-import com.github.victools.jsonschema.generator.OptionPreset;
-import com.github.victools.jsonschema.generator.SchemaGenerator;
-import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
-import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.module.swagger2.IntegrationTest.IReference;
-import com.github.victools.jsonschema.module.swagger2.IntegrationTest.Person;
-import com.github.victools.jsonschema.module.swagger2.IntegrationTest.PersonReference;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Integration test of this module being used in a real SchemaGenerator instance.
@@ -55,7 +49,7 @@ public class IntegrationTest {
     public void setUp() {
         Swagger2Module module = new Swagger2Module();
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
-                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_ARRAY_ITEMS_ALLOWED)
+                .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_ARRAY_ITEMS_ALLOWED, Option.NULLABLE_FIELDS_BY_DEFAULT)
                 .with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
                 .with(module);
         this.generator = new SchemaGenerator(configBuilder.build());
@@ -89,6 +83,8 @@ public class IntegrationTest {
 
         @Schema(hidden = true)
         public Object hiddenField;
+
+        public String unannotatedField;
 
         @ArraySchema(arraySchema = @Schema(name = "fieldWithOverriddenName", required = true),
                 schema = @Schema(defaultValue = "true", nullable = true), minItems = 1, maxItems = 20)

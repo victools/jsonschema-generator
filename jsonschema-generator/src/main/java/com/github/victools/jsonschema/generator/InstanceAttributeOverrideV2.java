@@ -16,7 +16,7 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Entry point for customising the JSON Schema attributes being collected for a property.

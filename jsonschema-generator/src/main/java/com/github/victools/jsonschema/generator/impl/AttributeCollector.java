@@ -16,11 +16,6 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MethodScope;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
@@ -31,7 +26,6 @@ import com.github.victools.jsonschema.generator.TypeScope;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +33,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Helper class for looking-up various attribute values for a field or method via a given configuration instance.
@@ -190,9 +189,7 @@ public class AttributeCollector {
         if (attributeContainer == null) {
             return;
         }
-        Iterator<Map.Entry<String, JsonNode>> attributeIterator = attributeContainer.fields();
-        while (attributeIterator.hasNext()) {
-            Map.Entry<String, JsonNode> attribute = attributeIterator.next();
+        for (Map.Entry<String, JsonNode> attribute : attributeContainer.properties()) {
             if (!targetNode.has(attribute.getKey())) {
                 targetNode.set(attribute.getKey(), attribute.getValue());
             }
@@ -442,7 +439,7 @@ public class AttributeCollector {
     }
 
     /**
-     * Call {@link ObjectMapper#writeValueAsString(Object)} on the given object and determining whether any {@link JsonProcessingException} occurs.
+     * Call {@link ObjectMapper#writeValueAsString(Object)} on the given object and determining whether any {@link JacksonException} occurs.
      *
      * @param target object to convert
      * @return whether the underlying ObjectMapper is able to convert the given object without encountering an exception
@@ -450,7 +447,7 @@ public class AttributeCollector {
     private boolean canBeConvertedToString(Object target) {
         try {
             return target == null || this.objectMapper.writeValueAsString(target) != null;
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             logger.warn("Failed to convert value to string via ObjectMapper: {}", target, ex);
             return false;
         }
@@ -503,8 +500,8 @@ public class AttributeCollector {
 
     private boolean isNullOrTrue(JsonNode nodeToCheck) {
         return nodeToCheck == null
-               || nodeToCheck.isNull()
-               || nodeToCheck.isBoolean() && nodeToCheck.asBoolean();
+                || nodeToCheck.isNull()
+                || nodeToCheck.isBoolean() && nodeToCheck.asBoolean();
     }
 
     /**

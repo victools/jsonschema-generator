@@ -7,8 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### `jsonschema-generator`
 #### Changed
-- BREAKING: drop support for JDK 11 in favor of JDK 17
+- BREAKING CHANGE: minimum Java version `17`
+- BREAKING CHANGE: minimum Jackson version `3.x`
+
+### `jsonschema-module-jackson`
+#### Fixed
+- support `@JacksonAnnotationsInside` annotated combo annotations also when looking for `@JsonPropertyDescription`  
+
+## [4.38.0] - 2025-03-24
+### `jsonschema-generator`
+#### Changed
 - avoid duplicate entries in `required` array when performing final clean-ups
+
+### `jsonschema-module-swagger2`
+#### Fixed
+- respect `Option.NULLABLE_FIELDS_BY_DEFAULT`/`Option.NULLABLE_METHOD_RETURN_VALUES_BY_DEFAULT` for fields/methods without `@Schema` annotation
 
 ## [4.37.0] - 2024-11-11
 ### `jsonschema-generator`
@@ -865,7 +878,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Indicate a number's "exclusiveMaximum" according to `@DecimalMax` or `@Negative`
 
 
-[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.37.0...HEAD
+[Unreleased]: https://github.com/victools/jsonschema-generator/compare/v4.38.0...HEAD
+[4.38.0]: https://github.com/victools/jsonschema-generator/compare/v4.37.0...v4.38.0
 [4.37.0]: https://github.com/victools/jsonschema-generator/compare/v4.36.0...v4.37.0
 [4.36.0]: https://github.com/victools/jsonschema-generator/compare/v4.35.0...v4.36.0
 [4.35.0]: https://github.com/victools/jsonschema-generator/compare/v4.34.0...v4.35.0

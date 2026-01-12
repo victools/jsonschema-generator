@@ -16,10 +16,10 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import java.lang.reflect.Type;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Generator for JSON Schema definitions via reflection based analysis of a given class.

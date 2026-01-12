@@ -35,7 +35,7 @@ Additional documentation and configuration examples can be found here: https://v
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-generator</artifactId>
-    <version>4.37.0</version>
+    <version>4.38.0</version>
 </dependency>
 ```
 
@@ -47,12 +47,12 @@ It is discouraged to use an older/lower `jsonschema-generator` version than any 
 ### Code
 #### Complete/Minimal Example
 ```java
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
+import tools.jackson.databind.JsonNode;
 ```
 ```java
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON);

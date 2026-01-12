@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.AttributeCollector;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
 import com.github.victools.jsonschema.generator.impl.SchemaCleanUpUtils;
@@ -36,6 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Builder for a single schema being generated.
@@ -388,9 +388,9 @@ public class SchemaBuilder {
      */
     private boolean areDefinitionKeysDistinct(DefinitionKey mainSchemaKey, List<DefinitionKey> definitionKeys) {
         return definitionKeys.size() == 1
-               || (definitionKeys.size() == 2
-                   && !this.config.shouldCreateDefinitionForMainSchema()
-                   && definitionKeys.contains(mainSchemaKey));
+                || (definitionKeys.size() == 2
+                    && !this.config.shouldCreateDefinitionForMainSchema()
+                    && definitionKeys.contains(mainSchemaKey));
     }
 
     /**

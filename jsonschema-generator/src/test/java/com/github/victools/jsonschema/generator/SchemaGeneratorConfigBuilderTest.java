@@ -16,10 +16,10 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Test for the {@link SchemaGeneratorConfigBuilder} class.

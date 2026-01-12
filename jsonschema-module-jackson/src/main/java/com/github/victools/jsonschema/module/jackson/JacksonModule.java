@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 VicTools.
+ * Copyright 2019-2025 VicTools.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,12 @@ package com.github.victools.jsonschema.module.jackson;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.members.HierarchicType;
-import com.fasterxml.classmate.members.ResolvedMember;
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.github.victools.jsonschema.generator.AnnotationHelper;
 import com.github.victools.jsonschema.generator.FieldScope;
 import com.github.victools.jsonschema.generator.MemberScope;
@@ -39,15 +34,19 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.TypeScope;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import tools.jackson.databind.BeanDescription;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.PropertyNamingStrategy;
+import tools.jackson.databind.annotation.JsonNaming;
+import tools.jackson.databind.introspect.ClassIntrospector;
 
 /**
  * Module for setting up schema generation aspects based on {@code jackson-annotations}.
@@ -174,7 +173,8 @@ public class JacksonModule implements Module {
      */
     protected String resolveDescription(MemberScope<?, ?> member) {
         // look for property specific description
-        JsonPropertyDescription propertyAnnotation = member.getAnnotationConsideringFieldAndGetterIfSupported(JsonPropertyDescription.class);
+        JsonPropertyDescription propertyAnnotation = member.getAnnotationConsideringFieldAndGetterIfSupported(JsonPropertyDescription.class,
+                NESTED_ANNOTATION_CHECK);
         if (propertyAnnotation != null) {
             return propertyAnnotation.value();
         }
@@ -268,7 +268,13 @@ public class JacksonModule implements Module {
         // use a map to cater for some caching (and thereby performance improvement)
         synchronized (this.beanDescriptions) {
             return this.beanDescriptions.computeIfAbsent(targetType.getErasedType(),
-                    type -> this.objectMapper.getSerializationConfig().introspect(this.objectMapper.getTypeFactory().constructType(type)));
+                    type -> {
+                        ClassIntrospector classIntrospector = this.objectMapper.serializationConfig()
+                                .classIntrospectorInstance();
+                        JavaType javaType = this.objectMapper.getTypeFactory().constructType(type);
+                        return classIntrospector
+                                .introspectForSerialization(javaType, classIntrospector.introspectClassAnnotations(javaType));
+                    });
         }
     }
 
@@ -294,7 +300,7 @@ public class JacksonModule implements Module {
         HierarchicType topMostHierarchyType = field.getDeclaringTypeMembers().allTypesAndOverrides().get(0);
         BeanDescription beanDescription = this.getBeanDescriptionForClass(topMostHierarchyType.getType());
         // some kinds of field ignorals are only available via an annotation introspector
-        Set<String> ignoredProperties = this.objectMapper.getSerializationConfig().getAnnotationIntrospector()
+        Set<String> ignoredProperties = this.objectMapper.serializationConfig().getAnnotationIntrospector()
                 .findPropertyIgnoralByName(null, beanDescription.getClassInfo()).getIgnored();
         String declaredName = field.getDeclaredName();
         if (ignoredProperties.contains(declaredName)) {

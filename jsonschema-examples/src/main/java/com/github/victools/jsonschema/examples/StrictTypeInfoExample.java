@@ -16,13 +16,13 @@
 
 package com.github.victools.jsonschema.examples;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.Option;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Example created in response to <a href="https://github.com/victools/jsonschema-generator/discussions/333">#333</a>.

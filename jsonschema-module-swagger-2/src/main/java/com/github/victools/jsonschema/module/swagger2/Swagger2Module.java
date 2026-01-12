@@ -17,8 +17,6 @@
 package com.github.victools.jsonschema.module.swagger2;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.ConfigFunction;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomPropertyDefinition;
@@ -44,6 +42,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * JSON Schema Generator Module - Swagger (2.x).
@@ -179,9 +179,10 @@ public class Swagger2Module implements Module {
      * @param member field/method to check
      * @return whether the field/method is nullable
      */
-    protected boolean checkNullable(MemberScope<?, ?> member) {
-        return this.getSchemaAnnotationValue(member, Schema::nullable, Boolean.TRUE::equals)
-                .isPresent();
+    protected Boolean checkNullable(MemberScope<?, ?> member) {
+        return this.getSchemaAnnotationValue(member, Function.identity(), x -> true)
+                .map(Schema::nullable)
+                .orElse(null);
     }
 
     /**
@@ -497,7 +498,7 @@ public class Swagger2Module implements Module {
             ArrayNode requiredFieldNames = memberAttributes
                     .withArray(context.getKeyword(SchemaKeyword.TAG_REQUIRED));
             requiredFieldNames
-                    .forEach(arrayItem -> alreadyMentionedRequiredFields.add(arrayItem.asText()));
+                    .forEach(arrayItem -> alreadyMentionedRequiredFields.add(arrayItem.asString()));
             Stream.of(annotation.requiredProperties())
                     .filter(field -> !alreadyMentionedRequiredFields.contains(field))
                     .forEach(requiredFieldNames::add);

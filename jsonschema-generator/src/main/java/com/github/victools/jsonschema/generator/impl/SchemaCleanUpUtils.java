@@ -16,10 +16,6 @@
 
 package com.github.victools.jsonschema.generator.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
@@ -39,7 +35,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 
 /**
  * Utility for cleaning up generated schemas.
@@ -138,11 +137,9 @@ public class SchemaCleanUpUtils {
      */
     public void reduceRedundantMemberAttributes(List<ObjectNode> jsonSchemas, ObjectNode definitionsNode, String referenceKeyPrefix) {
         final Map<String, Map<String, JsonNode>> definitions = new HashMap<>();
-        for (Iterator<Map.Entry<String, JsonNode>> defIt = definitionsNode.fields(); defIt.hasNext(); ) {
-            Map.Entry<String, JsonNode> definition = defIt.next();
+        for (Map.Entry<String, JsonNode> definition : definitionsNode.properties()) {
             Map<String, JsonNode> attributes = new HashMap<>();
-            for (Iterator<Map.Entry<String, JsonNode>> attIt = definition.getValue().fields(); attIt.hasNext(); ) {
-                Map.Entry<String, JsonNode> attriibute = attIt.next();
+            for (Map.Entry<String, JsonNode> attriibute : definition.getValue().properties()) {
                 attributes.put(attriibute.getKey(), attriibute.getValue());
             }
             definitions.put(referenceKeyPrefix + definition.getKey(), attributes);
@@ -287,9 +284,7 @@ public class SchemaCleanUpUtils {
         }
         ObjectNode mergedObjectNode = this.config.createObjectNode();
         for (JsonNode singleObjectNode : objectNodesToMerge) {
-            Iterator<Map.Entry<String, JsonNode>> it = singleObjectNode.fields();
-            while (it.hasNext()) {
-                Map.Entry<String, JsonNode> singleField = it.next();
+            for (Map.Entry<String, JsonNode> singleField : singleObjectNode.properties()) {
                 if (!mergedObjectNode.has(singleField.getKey())) {
                     mergedObjectNode.set(singleField.getKey(), singleField.getValue());
                 } else if (!mergedObjectNode.get(singleField.getKey()).equals(singleField.getValue())) {
@@ -330,9 +325,7 @@ public class SchemaCleanUpUtils {
             // dependentRequired node is not an object as expected, abort merge
             return false;
         }
-        Iterator<Map.Entry<String, JsonNode>> it = objectNode.fields();
-        while (it.hasNext()) {
-            Map.Entry<String, JsonNode> dependentRequiredFieldsOfSingleLead = it.next();
+        for (Map.Entry<String, JsonNode> dependentRequiredFieldsOfSingleLead : objectNode.properties()) {
             Set<String> propertyNames = this.collectTextItemsFromArrayNode(dependentRequiredFieldsOfSingleLead.getValue());
             if (propertyNames == null) {
                 // cannot consolidate when anything but an array of other plain property names is being provided
@@ -356,10 +349,10 @@ public class SchemaCleanUpUtils {
         }
         Set<String> textItems = new LinkedHashSet<>();
         for (JsonNode item : arrayNode) {
-            if (!item.isTextual()) {
+            if (!item.isString()) {
                 return null;
             }
-            textItems.add(item.asText());
+            textItems.add(item.asString());
         }
         return textItems;
     }
@@ -419,7 +412,7 @@ public class SchemaCleanUpUtils {
      */
     private Map<String, List<JsonNode>> getFieldsFromAllParts(List<ObjectNode> parts) {
         return parts.stream()
-                .flatMap(part -> StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) part::fields).spliterator(), false))
+                .flatMap(ObjectNode::propertyStream)
                 .collect(Collectors.groupingBy(Map.Entry::getKey, LinkedHashMap::new, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
     }
 
@@ -499,11 +492,11 @@ public class SchemaCleanUpUtils {
             }
         }
         if (encounteredValues.size() == 1) {
-            return () -> new TextNode(encounteredValues.get(0));
+            return () -> new StringNode(encounteredValues.get(0));
         }
         return () -> {
             ArrayNode arrayNode = this.config.createArrayNode();
-            encounteredValues.stream().map(TextNode::new).forEach(arrayNode::add);
+            encounteredValues.stream().map(StringNode::new).forEach(arrayNode::add);
             return arrayNode;
         };
     }
@@ -511,12 +504,14 @@ public class SchemaCleanUpUtils {
     private List<String> getStringValuesFromStringOrStringArray(JsonNode node) {
         List<String> result = new ArrayList<>();
         if (node.isArray()) {
-            node.forEach(arrayItem -> result.add(arrayItem.asText(null)));
-            if (result.contains(null)) {
-                return null;
+            for (JsonNode arrayItem : node) {
+                if (arrayItem.isNull()) {
+                    return null;
+                }
+                result.add(arrayItem.asString());
             }
-        } else if (node.isTextual()) {
-            result.add(node.asText());
+        } else if (node.isString()) {
+            result.add(node.asString());
         } else {
             // neither array nor text node; abort merge
             return null;
@@ -596,15 +591,14 @@ public class SchemaCleanUpUtils {
         if (propertiesNode == null || !propertiesNode.isObject()) {
             return;
         }
-        for (Iterator<JsonNode> it = propertiesNode.elements(); it.hasNext(); ) {
-            JsonNode memberSchema = it.next();
+        for (JsonNode memberSchema : propertiesNode.values()) {
             JsonNode reference = memberSchema.get(refKeyword);
             if (reference == null || !(memberSchema instanceof ObjectNode)) {
                 // only considering a property/member schema containing a direct reference to a common definition
                 continue;
             }
-            if (definitions.containsKey(reference.asText())) {
-                this.reduceRedundantAttributesIfPossible((ObjectNode) memberSchema, definitions.get(reference.asText()));
+            if (definitions.containsKey(reference.asString())) {
+                this.reduceRedundantAttributesIfPossible((ObjectNode) memberSchema, definitions.get(reference.asString()));
             }
         }
     }
@@ -628,7 +622,7 @@ public class SchemaCleanUpUtils {
             skippedKeywords.add(thenKeyword);
             skippedKeywords.add(elseKeyword);
         }
-        for (Iterator<Map.Entry<String, JsonNode>> it = memberSchema.fields(); it.hasNext(); ) {
+        for (Iterator<Map.Entry<String, JsonNode>> it = memberSchema.properties().iterator(); it.hasNext(); ) {
             Map.Entry<String, JsonNode> memberAttribute = it.next();
             String keyword = memberAttribute.getKey();
             if (!skippedKeywords.contains(keyword) && memberAttribute.getValue().equals(referencedDefinition.get(keyword))) {

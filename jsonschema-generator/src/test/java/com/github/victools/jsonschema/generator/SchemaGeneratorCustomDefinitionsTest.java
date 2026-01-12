@@ -16,11 +16,9 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.DefinitionKey;
+import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,6 +29,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Test for {@link SchemaGenerator} class.
@@ -49,7 +49,7 @@ public class SchemaGeneratorCustomDefinitionsTest {
         JsonNode result = generator.generateSchema(Integer.class);
         Assertions.assertEquals(1, result.size());
         Assertions.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(schemaVersion),
-                result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
+                result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asString());
     }
 
     @ParameterizedTest
@@ -73,14 +73,14 @@ public class SchemaGeneratorCustomDefinitionsTest {
         JsonNode result = generator.generateSchema(ArrayList.class, String.class);
         Assertions.assertEquals(2, result.size());
         Assertions.assertEquals(SchemaKeyword.TAG_TYPE_OBJECT.forVersion(schemaVersion),
-                result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
+                result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asString());
         Assertions.assertNotNull(result.get(SchemaKeyword.TAG_PROPERTIES.forVersion(schemaVersion)));
         Assertions.assertNotNull(result.get(SchemaKeyword.TAG_PROPERTIES.forVersion(schemaVersion)).get(accessProperty));
         JsonNode accessPropertyType = result.get(SchemaKeyword.TAG_PROPERTIES.forVersion(schemaVersion))
                 .get(accessProperty).get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion));
         Assertions.assertNotNull(accessPropertyType);
-        Assertions.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(schemaVersion), accessPropertyType.get(0).asText());
-        Assertions.assertEquals(SchemaKeyword.TAG_TYPE_NULL.forVersion(schemaVersion), accessPropertyType.get(1).asText());
+        Assertions.assertEquals(SchemaKeyword.TAG_TYPE_STRING.forVersion(schemaVersion), accessPropertyType.get(0).asString());
+        Assertions.assertEquals(SchemaKeyword.TAG_TYPE_NULL.forVersion(schemaVersion), accessPropertyType.get(1).asString());
     }
 
     @ParameterizedTest
@@ -108,10 +108,10 @@ public class SchemaGeneratorCustomDefinitionsTest {
         JsonNode result = generator.generateSchema(Integer.class);
         Assertions.assertEquals(4, result.size());
         Assertions.assertEquals(SchemaKeyword.TAG_TYPE_INTEGER.forVersion(schemaVersion),
-                result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asText());
-        Assertions.assertEquals("custom override of Integer", result.get("$comment").asText());
-        Assertions.assertEquals("custom title", result.get(SchemaKeyword.TAG_TITLE.forVersion(schemaVersion)).asText());
-        Assertions.assertEquals("type description", result.get(SchemaKeyword.TAG_DESCRIPTION.forVersion(schemaVersion)).asText());
+                result.get(SchemaKeyword.TAG_TYPE.forVersion(schemaVersion)).asString());
+        Assertions.assertEquals("custom override of Integer", result.get("$comment").asString());
+        Assertions.assertEquals("custom title", result.get(SchemaKeyword.TAG_TITLE.forVersion(schemaVersion)).asString());
+        Assertions.assertEquals("type description", result.get(SchemaKeyword.TAG_DESCRIPTION.forVersion(schemaVersion)).asString());
     }
 
     @ParameterizedTest

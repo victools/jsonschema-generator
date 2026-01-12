@@ -16,8 +16,7 @@
 
 package com.github.victools.jsonschema.examples;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Common interface for schema generation examples, in order to allow generic testing of all examples.

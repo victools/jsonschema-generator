@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.MethodScope;
@@ -31,6 +30,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Default module being included for the {@code Option.ENUM_AS_STRING}.
@@ -126,6 +126,7 @@ public class EnumModule implements Module {
         }
         return Stream.of(erasedType.getEnumConstants())
                 .map(enumConstant -> enumConstantToString.apply((Enum<?>) enumConstant))
+                .distinct()
                 .collect(Collectors.toList());
     }
 
