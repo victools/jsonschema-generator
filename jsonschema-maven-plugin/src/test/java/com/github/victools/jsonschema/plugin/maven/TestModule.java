@@ -16,15 +16,15 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 public class TestModule implements Module {
 
     @Override
     public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
-        builder.withObjectMapper(new ObjectMapper().disable(SerializationFeature.INDENT_OUTPUT));
+        builder.withObjectMapper(JsonMapper.builder().disable(SerializationFeature.INDENT_OUTPUT).build());
     }
 }

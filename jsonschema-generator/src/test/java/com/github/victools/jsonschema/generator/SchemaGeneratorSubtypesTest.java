@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +26,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Test for {@link SchemaGenerator} class.

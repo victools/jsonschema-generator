@@ -16,7 +16,6 @@
 
 package com.github.victools.jsonschema.examples;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import tools.jackson.databind.JsonNode;
 
 public class ExampleTest {
 
@@ -60,7 +60,7 @@ public class ExampleTest {
     private static String loadResource(String resourcePath) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         try (InputStream inputStream = Objects.requireNonNull(ExampleTest.class.getResourceAsStream(resourcePath));
-             Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
+             Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8)) {
             while (scanner.hasNext()) {
                 stringBuilder.append(scanner.nextLine()).append('\n');
             }

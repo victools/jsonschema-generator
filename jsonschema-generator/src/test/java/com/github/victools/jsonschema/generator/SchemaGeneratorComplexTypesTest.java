@@ -16,8 +16,6 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -25,7 +23,6 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +34,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Test for {@link SchemaGenerator} class.
@@ -151,9 +150,7 @@ public class SchemaGeneratorComplexTypesTest {
         // ensure that the generated definition keys are valid URIs without any characters requiring encoding
         JsonNode definitions = result.get(SchemaKeyword.TAG_DEFINITIONS.forVersion(schemaVersion));
         if (definitions instanceof ObjectNode) {
-            Iterator<String> definitionKeys = definitions.fieldNames();
-            while (definitionKeys.hasNext()) {
-                String key = definitionKeys.next();
+            for (String key : definitions.propertyNames()) {
                 Assertions.assertEquals(key, new URI(key).toASCIIString());
             }
         }

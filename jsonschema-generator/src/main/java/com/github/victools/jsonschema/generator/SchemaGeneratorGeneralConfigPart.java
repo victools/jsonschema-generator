@@ -16,7 +16,6 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.victools.jsonschema.generator.impl.PropertySortUtils;
 import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import java.lang.reflect.Type;
@@ -30,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Generic collection of reflection based analysis for populating a JSON Schema targeting a specific type in general.

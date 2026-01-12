@@ -62,7 +62,7 @@ public enum JacksonOption {
      */
     INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS,
     /**
-     * Use this option to skip property name changes according to {@link com.fasterxml.jackson.databind.annotation.JsonNaming JsonNaming} annotations.
+     * Use this option to skip property name changes according to {@link tools.jackson.databind.annotation.JsonNaming JsonNaming} annotations.
      */
     IGNORE_PROPERTY_NAMING_STRATEGY,
     /**

@@ -20,8 +20,6 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.AnnotationHelper;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
@@ -43,6 +41,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Look-up of subtypes from a {@link JsonSubTypes} annotation.
@@ -395,10 +395,10 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
 
     private ObjectNode getAttributesToInclude(TypeScope scope, SchemaGenerationContext context) {
         ObjectNode attributesToInclude;
-        if (scope instanceof FieldScope) {
-            attributesToInclude = AttributeCollector.collectFieldAttributes((FieldScope) scope, context);
-        } else if (scope instanceof MethodScope) {
-            attributesToInclude = AttributeCollector.collectMethodAttributes((MethodScope) scope, context);
+        if (scope instanceof FieldScope fieldScope) {
+            attributesToInclude = AttributeCollector.collectFieldAttributes(fieldScope, context);
+        } else if (scope instanceof MethodScope methodScope) {
+            attributesToInclude = AttributeCollector.collectMethodAttributes(methodScope, context);
         } else {
             attributesToInclude = null;
         }

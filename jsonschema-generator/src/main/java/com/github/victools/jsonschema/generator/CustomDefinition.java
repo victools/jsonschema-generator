@@ -16,7 +16,7 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The result of a custom definition look-up.

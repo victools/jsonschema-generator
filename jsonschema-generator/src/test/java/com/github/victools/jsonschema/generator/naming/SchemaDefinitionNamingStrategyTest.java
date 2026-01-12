@@ -17,8 +17,6 @@
 package com.github.victools.jsonschema.generator.naming;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies.NamingBase;
 import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.TypeContext;
@@ -35,6 +33,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.PropertyNamingStrategies.NamingBase;
 
 /**
  * Test/examples of possible {@link SchemaDefinitionNamingStrategy} implementations.
@@ -62,7 +62,7 @@ public class SchemaDefinitionNamingStrategyTest {
         SchemaDefinitionNamingStrategy snakeCase = new DefaultSchemaDefinitionNamingStrategy() {
             @Override
             public String getDefinitionNameForKey(DefinitionKey key, SchemaGenerationContext generationContext) {
-                return jacksonSnakeCase.translate(super.getDefinitionNameForKey(key, generationContext))
+                return jacksonSnakeCase.nameForField(null, null, super.getDefinitionNameForKey(key, generationContext))
                         .replaceAll("<_", "<")
                         .replaceAll(", _", ",");
             }
@@ -71,7 +71,7 @@ public class SchemaDefinitionNamingStrategyTest {
         SchemaDefinitionNamingStrategy dotCase = new DefaultSchemaDefinitionNamingStrategy() {
             @Override
             public String getDefinitionNameForKey(DefinitionKey key, SchemaGenerationContext generationContext) {
-                return jacksonDotCase.translate(super.getDefinitionNameForKey(key, generationContext))
+                return jacksonDotCase.nameForField(null, null, super.getDefinitionNameForKey(key, generationContext))
                         .replaceAll("<.", "<")
                         .replaceAll(", .", "-");
             }

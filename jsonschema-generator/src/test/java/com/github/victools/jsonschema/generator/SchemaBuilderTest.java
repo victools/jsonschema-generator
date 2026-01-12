@@ -16,11 +16,11 @@
 
 package com.github.victools.jsonschema.generator;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.TypeContextFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Test for the {@link SchemaBuilder}.

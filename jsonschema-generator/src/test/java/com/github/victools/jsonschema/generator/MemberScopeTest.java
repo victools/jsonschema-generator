@@ -87,7 +87,7 @@ public class MemberScopeTest extends AbstractTypeAwareTest {
     static Stream<Arguments> parametersForTestTypeDescription() {
         return Stream.of(
             Arguments.of("getStringArray", "String[]", "java.lang.String[]"),
-            Arguments.of("getRawCollection", "Collection", "java.util.Collection"),
+            Arguments.of("getRawCollection", "Collection<Object>", "java.util.Collection<java.lang.Object>"),
             Arguments.of("getListOfIntArrays", "List<int[]>", "java.util.List<int[]>"),
             Arguments.of("getMapWithNestedGenerics", "Map<String, Map<String, List<Set<Class<Object>>>>>",
                 "java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.util.List<java.util.Set<java.lang.Class<java.lang.Object>>>>>"),

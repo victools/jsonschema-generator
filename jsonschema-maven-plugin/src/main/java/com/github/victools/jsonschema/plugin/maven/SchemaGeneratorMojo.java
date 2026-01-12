@@ -16,8 +16,6 @@
 
 package com.github.victools.jsonschema.plugin.maven;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.victools.jsonschema.generator.Module;
 import com.github.victools.jsonschema.generator.OptionPreset;
 import com.github.victools.jsonschema.generator.SchemaGenerator;
@@ -67,6 +65,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Maven plugin for the victools/jsonschema-generator.
@@ -523,8 +523,10 @@ public class SchemaGeneratorMojo extends AbstractMojo {
             configBuilder.with(new Swagger2Module());
             break;
         default:
-            throw new MojoExecutionException("Error: Module does not have a name in "
-                    + "['Jackson', 'JakartaValidation', 'JavaxValidation', 'Swagger15', 'Swagger2'] or does not have a custom classname.");
+            throw new MojoExecutionException("""
+                    Error: Module does not have a name in \
+                    ['Jackson', 'JakartaValidation', 'JavaxValidation', 'Swagger15', 'Swagger2'] or does not have a custom classname.\
+                    """);
         }
     }
 

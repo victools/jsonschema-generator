@@ -246,7 +246,7 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
                 .map(prefix -> methodName.substring(prefix.length()))
                 .filter(name -> !name.isEmpty())
                 .findFirst();
-        if (!possibleFieldName.isPresent()) {
+        if (possibleFieldName.isEmpty()) {
             return methodName + "()";
         }
         String methodNameWithoutPrefix = possibleFieldName.get();

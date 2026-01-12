@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.generator.impl.module;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.Module;
@@ -25,6 +24,7 @@ import com.github.victools.jsonschema.generator.SchemaGenerationContext;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Default module being included if {@code Option.INLINE_ALL_SCHEMAS} is enabled.

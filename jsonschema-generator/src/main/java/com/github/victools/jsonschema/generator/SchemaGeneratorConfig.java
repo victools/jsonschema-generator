@@ -18,10 +18,6 @@ package com.github.victools.jsonschema.generator;
 
 import com.fasterxml.classmate.AnnotationInclusion;
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.impl.Util;
 import com.github.victools.jsonschema.generator.naming.SchemaDefinitionNamingStrategy;
 import java.lang.annotation.Annotation;
@@ -29,6 +25,10 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Default implementation of a schema generator's configuration.

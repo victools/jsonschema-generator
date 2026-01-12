@@ -17,7 +17,6 @@
 package com.github.victools.jsonschema.examples;
 
 import com.fasterxml.classmate.ResolvedType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.victools.jsonschema.generator.CustomDefinition;
 import com.github.victools.jsonschema.generator.CustomDefinitionProviderV2;
 import com.github.victools.jsonschema.generator.Option;
@@ -29,6 +28,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import java.time.LocalDate;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Example created in response to <a href="https://github.com/victools/jsonschema-generator/issues/407">#407</a>.
