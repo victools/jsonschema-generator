@@ -52,7 +52,7 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
     @ValueSource(strings = {
         "DefaultConfig",
         "SchemaVersion",
-        "JacksonModule",
+        "JacksonSchemaModule",
         "JavaxValidationModule",
         "JakartaValidationModule",
         "Swagger15Module",

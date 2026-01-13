@@ -30,8 +30,8 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaKeyword;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
+import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Iterator;
@@ -50,7 +50,7 @@ public class OpenAiFunctionCallingSchemaExample implements SchemaGenerationExamp
     public ObjectNode generateSchema() {
         SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON);
         configBuilder.with(Option.INLINE_ALL_SCHEMAS);
-        configBuilder.with(new JacksonModule(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED));
+        configBuilder.with(new JacksonSchemaModule(JacksonOption.RESPECT_JSONPROPERTY_REQUIRED));
         configBuilder.forFields().withCustomDefinitionProvider(this);
         SchemaGeneratorConfig config = configBuilder.build();
         SchemaGenerator generator = new SchemaGenerator(config);

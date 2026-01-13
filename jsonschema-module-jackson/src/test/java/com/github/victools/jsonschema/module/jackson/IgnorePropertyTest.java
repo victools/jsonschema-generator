@@ -54,7 +54,7 @@ public class IgnorePropertyTest {
     public void testJsonIgnoreProperties(Class<?> targetType, String expectedIncludedPropertyNames) {
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
                 .with(Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT)
-                .with(new JacksonModule())
+                .with(new JacksonSchemaModule())
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(targetType);
