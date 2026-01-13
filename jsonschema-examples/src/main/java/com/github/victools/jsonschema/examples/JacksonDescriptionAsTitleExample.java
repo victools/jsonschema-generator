@@ -26,7 +26,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.TypeScope;
-import com.github.victools.jsonschema.module.jackson.JacksonModule;
+import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import java.util.UUID;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -59,9 +59,9 @@ public class JacksonDescriptionAsTitleExample implements SchemaGenerationExample
     }
 
     /**
-     * Override of the standard JacksonModule, that assigns all description values to the title keyword instead.
+     * Override of the standard JacksonSchemaModule, that assigns all description values to the title keyword instead.
      */
-    static class JacksonTitleModule extends JacksonModule {
+    static class JacksonTitleModule extends JacksonSchemaModule {
         @Override
         public void applyToConfigBuilder(SchemaGeneratorConfigBuilder builder) {
             super.applyToConfigBuilder(builder);

@@ -23,8 +23,8 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
 import com.github.victools.jsonschema.generator.impl.Util;
-import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
+import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationModule;
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationOption;
 import com.github.victools.jsonschema.module.javax.validation.JavaxValidationModule;
@@ -504,7 +504,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         switch (module.name) {
         case "Jackson":
             this.getLog().debug("- Adding Jackson Module");
-            this.addStandardModuleWithOptions(module, configBuilder, JacksonModule::new, JacksonOption.class);
+            this.addStandardModuleWithOptions(module, configBuilder, JacksonSchemaModule::new, JacksonOption.class);
             break;
         case "JakartaValidation":
             this.getLog().debug("- Adding Jakarta Validation Module");

@@ -44,9 +44,9 @@ import tools.jackson.databind.PropertyNamingStrategies;
 import tools.jackson.databind.annotation.JsonNaming;
 
 /**
- * Test for the {@link JacksonModule}.
+ * Test for the {@link JacksonSchemaModule}.
  */
-public class JacksonModuleTest {
+public class JacksonSchemaModuleTest {
 
     private SchemaGeneratorConfigBuilder configBuilder;
     private SchemaGeneratorConfigPart<FieldScope> fieldConfigPart;
@@ -66,7 +66,7 @@ public class JacksonModuleTest {
 
     @Test
     public void testApplyToConfigBuilder() {
-        new JacksonModule().applyToConfigBuilder(this.configBuilder);
+        new JacksonSchemaModule().applyToConfigBuilder(this.configBuilder);
 
         this.verifyCommonConfigurations(true, 1);
 
@@ -81,7 +81,7 @@ public class JacksonModuleTest {
 
     @Test
     public void testApplyToConfigBuilderWithRespectJsonPropertyOrderOption() {
-        new JacksonModule(JacksonOption.RESPECT_JSONPROPERTY_ORDER, JacksonOption.SKIP_SUBTYPE_LOOKUP, JacksonOption.IGNORE_TYPE_INFO_TRANSFORM)
+        new JacksonSchemaModule(JacksonOption.RESPECT_JSONPROPERTY_ORDER, JacksonOption.SKIP_SUBTYPE_LOOKUP, JacksonOption.IGNORE_TYPE_INFO_TRANSFORM)
                 .applyToConfigBuilder(this.configBuilder);
 
         this.verifyCommonConfigurations(true, 0);
@@ -93,7 +93,7 @@ public class JacksonModuleTest {
 
     @Test
     public void testApplyToConfigBuilderWithoutOptionalFeatures() {
-        new JacksonModule(JacksonOption.IGNORE_PROPERTY_NAMING_STRATEGY, JacksonOption.SKIP_SUBTYPE_LOOKUP, JacksonOption.IGNORE_TYPE_INFO_TRANSFORM)
+        new JacksonSchemaModule(JacksonOption.IGNORE_PROPERTY_NAMING_STRATEGY, JacksonOption.SKIP_SUBTYPE_LOOKUP, JacksonOption.IGNORE_TYPE_INFO_TRANSFORM)
                 .applyToConfigBuilder(this.configBuilder);
 
         this.verifyCommonConfigurations(false, 0);
@@ -103,7 +103,7 @@ public class JacksonModuleTest {
 
     @Test
     public void testApplyToConfigBuilderWithSkipSubtypeLookupOption() {
-        new JacksonModule(JacksonOption.SKIP_SUBTYPE_LOOKUP)
+        new JacksonSchemaModule(JacksonOption.SKIP_SUBTYPE_LOOKUP)
                 .applyToConfigBuilder(this.configBuilder);
 
         this.verifyCommonConfigurations(true, 1);
@@ -116,7 +116,7 @@ public class JacksonModuleTest {
 
     @Test
     public void testApplyToConfigBuilderWithIgnoreTypeInfoTranformOption() {
-        new JacksonModule(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM)
+        new JacksonSchemaModule(JacksonOption.IGNORE_TYPE_INFO_TRANSFORM)
                 .applyToConfigBuilder(this.configBuilder);
 
         this.verifyCommonConfigurations(true, 0);
@@ -139,7 +139,7 @@ public class JacksonModuleTest {
     @ParameterizedTest
     @MethodSource("parametersForTestApplyToConfigBuilderWithEnumOptions")
     public void testApplyToConfigBuilderWithEnumOptions(JacksonOption[] options) {
-        new JacksonModule(options)
+        new JacksonSchemaModule(options)
                 .applyToConfigBuilder(this.configBuilder);
 
         this.verifyCommonConfigurations(true, 2);
@@ -155,7 +155,7 @@ public class JacksonModuleTest {
 
     @Test
     public void testApplyToConfigBuilderWithIdentityReferenceOption() {
-        new JacksonModule(JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID)
+        new JacksonSchemaModule(JacksonOption.JSONIDENTITY_REFERENCE_ALWAYS_AS_ID)
                 .applyToConfigBuilder(this.configBuilder);
 
         this.verifyCommonConfigurations(true, 2);
@@ -206,7 +206,7 @@ public class JacksonModuleTest {
     @ParameterizedTest
     @MethodSource("parametersForTestPropertyNameOverride")
     public void testPropertyNameOverride(String fieldName, String expectedOverrideValue, String kebabCaseName) throws Exception {
-        new JacksonModule().applyToConfigBuilder(this.configBuilder);
+        new JacksonSchemaModule().applyToConfigBuilder(this.configBuilder);
 
         ArgumentCaptor<ConfigFunction<FieldScope, String>> captor = ArgumentCaptor.forClass(ConfigFunction.class);
         Mockito.verify(this.fieldConfigPart, Mockito.times(2)).withPropertyNameOverrideResolver(captor.capture());
@@ -232,7 +232,7 @@ public class JacksonModuleTest {
     @ParameterizedTest
     @MethodSource("parametersForTestDescriptionResolver")
     public void testDescriptionResolver(String fieldName, String expectedDescription) throws Exception {
-        new JacksonModule().applyToConfigBuilder(this.configBuilder);
+        new JacksonSchemaModule().applyToConfigBuilder(this.configBuilder);
 
         FieldScope field = new TestType(TestClassForDescription.class).getMemberField(fieldName);
 
@@ -258,7 +258,7 @@ public class JacksonModuleTest {
     @ParameterizedTest
     @MethodSource("parametersForTestRequiredProperty")
     public void testRequiredProperty(JacksonOption requiredOption, String fieldName, boolean expectedRequired) {
-        new JacksonModule(requiredOption).applyToConfigBuilder(this.configBuilder);
+        new JacksonSchemaModule(requiredOption).applyToConfigBuilder(this.configBuilder);
 
         FieldScope field = new TestType(TestClassWithRequiredAnnotatedFields.class).getMemberField(fieldName);
 
@@ -277,7 +277,7 @@ public class JacksonModuleTest {
     @ParameterizedTest
     @MethodSource("parametersForTestReadOnlyWriteOnly")
     public void testReadOnlyWriteOnly(String fieldName, boolean expectedReadOnly, boolean expectedWriteOnly) {
-        new JacksonModule().applyToConfigBuilder(this.configBuilder);
+        new JacksonSchemaModule().applyToConfigBuilder(this.configBuilder);
 
         FieldScope field = new TestType(TestClassWithRequiredAnnotatedFields.class).getMemberField(fieldName);
 
@@ -298,7 +298,7 @@ public class JacksonModuleTest {
     @ParameterizedTest
     @MethodSource("parametersForTestDescriptionForTypeResolver")
     public void testDescriptionForTypeResolver(String fieldName, String expectedDescription) throws Exception {
-        new JacksonModule().applyToConfigBuilder(this.configBuilder);
+        new JacksonSchemaModule().applyToConfigBuilder(this.configBuilder);
 
         FieldScope field = new TestType(TestClassForDescription.class).getMemberField(fieldName);
 

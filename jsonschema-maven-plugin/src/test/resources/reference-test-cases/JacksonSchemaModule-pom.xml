@@ -6,7 +6,7 @@
                 <artifactId>jsonschema-maven-plugin</artifactId>
                 <configuration>
                     <classNames>com.github.victools.jsonschema.plugin.maven.TestClass</classNames>
-                    <schemaFilePath>target/generated-test-sources/JacksonModule</schemaFilePath>
+                    <schemaFilePath>target/generated-test-sources/JacksonSchemaModule</schemaFilePath>
                     <modules>
                         <module>
                             <name>Jackson</name>

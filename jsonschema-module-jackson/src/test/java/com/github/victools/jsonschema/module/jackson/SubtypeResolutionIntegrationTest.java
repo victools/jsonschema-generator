@@ -49,7 +49,7 @@ public class SubtypeResolutionIntegrationTest {
 
     @Test
     public void testIntegration() throws Exception {
-        JacksonModule module = new JacksonModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE);
+        JacksonSchemaModule module = new JacksonSchemaModule(JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE);
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(Option.DEFINITIONS_FOR_ALL_OBJECTS, Option.NULLABLE_FIELDS_BY_DEFAULT)
                 .with(module)

@@ -75,7 +75,7 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      * @return whether the given member has an {@code enabled} {@link JsonUnwrapped @JsonUnwrapped} annotation
      */
     private boolean hasJsonUnwrappedAnnotation(ResolvedMember<?> member) {
-        return AnnotationHelper.resolveAnnotation(member, JsonUnwrapped.class, JacksonModule.NESTED_ANNOTATION_CHECK)
+        return AnnotationHelper.resolveAnnotation(member, JsonUnwrapped.class, JacksonSchemaModule.NESTED_ANNOTATION_CHECK)
                 .filter(JsonUnwrapped::enabled)
                 .isPresent();
     }
@@ -88,7 +88,7 @@ public class JsonUnwrappedDefinitionProvider implements CustomDefinitionProvider
      * @return created schema
      */
     private Optional<ObjectNode> createUnwrappedMemberSchema(ResolvedMember<?> member, SchemaGenerationContext context) {
-        return AnnotationHelper.resolveAnnotation(member, JsonUnwrapped.class, JacksonModule.NESTED_ANNOTATION_CHECK)
+        return AnnotationHelper.resolveAnnotation(member, JsonUnwrapped.class, JacksonSchemaModule.NESTED_ANNOTATION_CHECK)
                 .filter(JsonUnwrapped::enabled)
                 .map(annotation -> {
                     ObjectNode definition = context.createStandardDefinition(member.getType(), null);

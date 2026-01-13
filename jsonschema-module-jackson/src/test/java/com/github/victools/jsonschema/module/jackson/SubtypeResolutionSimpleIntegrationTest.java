@@ -51,7 +51,7 @@ public class SubtypeResolutionSimpleIntegrationTest {
     public void testIntegration() throws Exception {
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(Option.DEFINITIONS_FOR_MEMBER_SUPERTYPES)
-                .with(new JacksonModule(JacksonOption.ALWAYS_REF_SUBTYPES))
+                .with(new JacksonSchemaModule(JacksonOption.ALWAYS_REF_SUBTYPES))
                 .build();
         SchemaGenerator generator = new SchemaGenerator(config);
         JsonNode result = generator.generateSchema(TestClassForSubtypeResolution.class);

@@ -76,7 +76,7 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
      */
     public Optional<ResolvedType> getIdentityReferenceType(ResolvedType javaType, TypeContext typeContext) {
         JsonIdentityReference referenceAnnotation = AnnotationHelper.resolveAnnotation(javaType.getErasedType(), JsonIdentityReference.class,
-                JacksonModule.NESTED_ANNOTATION_CHECK).orElse(null);
+                JacksonSchemaModule.NESTED_ANNOTATION_CHECK).orElse(null);
         return this.getIdentityReferenceType(referenceAnnotation, javaType, typeContext);
     }
 
@@ -90,9 +90,10 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
      */
     public Optional<ResolvedType> getIdentityReferenceType(MemberScope<?, ?> scope) {
         JsonIdentityReference referenceAnnotation = scope.getContainerItemAnnotationConsideringFieldAndGetterIfSupported(JsonIdentityReference.class,
-                JacksonModule.NESTED_ANNOTATION_CHECK);
+                JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
         if (referenceAnnotation == null) {
-            referenceAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonIdentityReference.class, JacksonModule.NESTED_ANNOTATION_CHECK);
+            referenceAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonIdentityReference.class,
+                    JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
         }
         return this.getIdentityReferenceType(referenceAnnotation, scope.getType(), scope.getContext());
     }
@@ -115,13 +116,13 @@ public class JsonIdentityReferenceDefinitionProvider implements CustomDefinition
         }
         // additionally, the type itself must have a @JsonIdentityInfo annotation
         ResolvedType typeWithIdentityInfoAnnotation = typeContext.getTypeWithAnnotation(javaType, JsonIdentityInfo.class,
-                JacksonModule.NESTED_ANNOTATION_CHECK);
+                JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
         if (typeWithIdentityInfoAnnotation == null) {
             // otherwise, the @JsonIdentityReference annotation is simply ignored
             return Optional.empty();
         }
         JsonIdentityInfo identityInfoAnnotation = typeContext.getAnnotationFromList(JsonIdentityInfo.class,
-                Arrays.asList(typeWithIdentityInfoAnnotation.getErasedType().getAnnotations()), JacksonModule.NESTED_ANNOTATION_CHECK);
+                Arrays.asList(typeWithIdentityInfoAnnotation.getErasedType().getAnnotations()), JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
         // @JsonIdentityInfo annotation declares generator with specific identity type
         ResolvedType identityTypeFromGenerator = typeContext.getTypeParameterFor(typeContext.resolve(identityInfoAnnotation.generator()),
                 ObjectIdGenerator.class, 0);
