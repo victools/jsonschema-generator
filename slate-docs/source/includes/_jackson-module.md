@@ -4,11 +4,11 @@ The [victools:jsonschema-module-jackson](https://github.com/victools/jsonschema-
 ```java
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.module.jackson.JacksonModule;
 import com.github.victools.jsonschema.module.jackson.JacksonOption;
+import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 
 
-JacksonModule module = new JacksonModule(
+JacksonSchemaModule module = new JacksonSchemaModule(
         JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE
 );
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09)

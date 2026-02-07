@@ -17,7 +17,7 @@
 package com.github.victools.jsonschema.module.jackson;
 
 /**
- * Flags to enable/disable certain aspects of the {@link JacksonModule}'s processing.
+ * Flags to enable/disable certain aspects of the {@link JacksonSchemaModule}'s processing.
  */
 public enum JacksonOption {
     /**

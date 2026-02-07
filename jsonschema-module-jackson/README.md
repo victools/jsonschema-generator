@@ -52,10 +52,10 @@ It is recommended to use identical versions for both dependencies to ensure comp
 ```java
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.module.jackson.JacksonModule;
+import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 ```
 ```java
-JacksonModule module = new JacksonModule();
+JacksonSchemaModule module = new JacksonSchemaModule();
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09)
     .with(module);
 ```
@@ -67,11 +67,11 @@ import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaVersion;
-import com.github.victools.jsonschema.module.jackson.JacksonModule;
+import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule;
 import tools.jackson.databind.JsonNode;
 ```
 ```java
-JacksonModule module = new JacksonModule();
+JacksonSchemaModule module = new JacksonSchemaModule();
 SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
     .with(module);
 SchemaGeneratorConfig config = configBuilder.build();

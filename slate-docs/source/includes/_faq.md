@@ -62,7 +62,7 @@ Enums are a special construct for which there are multiple options:
 2. `Option.SIMPLIFIED_ENUMS`(which is part of the `OptionPreset.JAVA_OBJECT` and `OptionPreset.FULL_DOCUMENTATION`)
    * This treats enums like any other class but hiding some methods and listing the possible enum values as `"enum"`/`"const"` on the `name()` method.
 3. Using neither of the two `Option`s above will let them be handled like any other class (unless there are further configurations taking care of enums).
-4. The `JacksonModule` comes with two more alternatives:
+4. The `JacksonSchemaModule` comes with two more alternatives:
    * `JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE`, behaving like `Option.FLATTENED_ENUMS` but looking-up the respective values via the `@JsonValue` annotated method.
    * `JacksonOption.FLATTENED_ENUMS_FROM_JSONPROPERTY`, behaving like `Option.FLATTENED_ENUMS` but looking-up the respective values via the `@JsonProperty` annotation on each enum value/constant.
 5. Write your own custom definition provider or re-use the `EnumModule` class as in the shown example.

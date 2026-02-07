@@ -113,7 +113,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
             return null;
         }
         JsonSubTypes subtypesAnnotation = AnnotationHelper.resolveAnnotation(declaredType.getErasedType(), JsonSubTypes.class,
-                JacksonModule.NESTED_ANNOTATION_CHECK).orElse(null);
+                JacksonSchemaModule.NESTED_ANNOTATION_CHECK).orElse(null);
         return this.lookUpSubtypesFromAnnotation(declaredType, subtypesAnnotation, context.getTypeContext());
     }
 
@@ -127,7 +127,8 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         if (this.skipSubtypeResolution(property)) {
             return null;
         }
-        JsonSubTypes subtypesAnnotation = property.getAnnotationConsideringFieldAndGetter(JsonSubTypes.class, JacksonModule.NESTED_ANNOTATION_CHECK);
+        JsonSubTypes subtypesAnnotation = property.getAnnotationConsideringFieldAndGetter(JsonSubTypes.class,
+                JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
         return this.lookUpSubtypesFromAnnotation(property.getType(), subtypesAnnotation, property.getContext());
     }
 
@@ -175,9 +176,10 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
             return null;
         }
         final TypeContext typeContext = context.getTypeContext();
-        ResolvedType typeWithTypeInfo = typeContext.getTypeWithAnnotation(javaType, JsonTypeInfo.class, JacksonModule.NESTED_ANNOTATION_CHECK);
+        ResolvedType typeWithTypeInfo = typeContext.getTypeWithAnnotation(javaType, JsonTypeInfo.class, JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
         if (typeWithTypeInfo == null
-                || AnnotationHelper.resolveAnnotation(javaType.getErasedType(), JsonSubTypes.class, JacksonModule.NESTED_ANNOTATION_CHECK).isPresent()
+                || AnnotationHelper.resolveAnnotation(javaType.getErasedType(), JsonSubTypes.class,
+                    JacksonSchemaModule.NESTED_ANNOTATION_CHECK).isPresent()
                 || this.skipSubtypeResolution(javaType, typeContext)) {
             // no @JsonTypeInfo annotation found or the given javaType is the super type, that should be replaced
             return null;
@@ -185,9 +187,9 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         Class<?> erasedTypeWithTypeInfo = typeWithTypeInfo.getErasedType();
         final List<Annotation> annotationsList = Arrays.asList(erasedTypeWithTypeInfo.getAnnotations());
         JsonTypeInfo typeInfoAnnotation = typeContext.getAnnotationFromList(JsonTypeInfo.class, annotationsList,
-                JacksonModule.NESTED_ANNOTATION_CHECK);
+                JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
         JsonSubTypes subTypesAnnotation = typeContext.getAnnotationFromList(JsonSubTypes.class, annotationsList,
-                JacksonModule.NESTED_ANNOTATION_CHECK);
+                JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
         TypeScope scope = typeContext.createTypeScope(javaType);
         ObjectNode definition = this.createSubtypeDefinition(scope, typeInfoAnnotation, subTypesAnnotation, context);
         if (definition == null) {
@@ -205,10 +207,11 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      */
     public CustomPropertyDefinition provideCustomPropertySchemaDefinition(MemberScope<?, ?> scope, SchemaGenerationContext context) {
         if (this.skipSubtypeResolution(scope) || AnnotationHelper.resolveAnnotation(scope.getType().getErasedType(), JsonSubTypes.class,
-                JacksonModule.NESTED_ANNOTATION_CHECK).isPresent()) {
+                JacksonSchemaModule.NESTED_ANNOTATION_CHECK).isPresent()) {
             return null;
         }
-        JsonTypeInfo typeInfoAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonTypeInfo.class, JacksonModule.NESTED_ANNOTATION_CHECK);
+        JsonTypeInfo typeInfoAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonTypeInfo.class,
+                JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
         if (typeInfoAnnotation == null) {
             // the normal per-type behaviour is not being overridden, i.e., no need for an inline custom property schema
             return null;
@@ -220,7 +223,8 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
                     .add(context.createStandardDefinitionReference(scope.getType(), this));
             return new CustomPropertyDefinition(definition, CustomDefinition.AttributeInclusion.YES);
         }
-        JsonSubTypes subTypesAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonSubTypes.class, JacksonModule.NESTED_ANNOTATION_CHECK);
+        JsonSubTypes subTypesAnnotation = scope.getAnnotationConsideringFieldAndGetter(JsonSubTypes.class,
+                JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
         ObjectNode definition = this.createSubtypeDefinition(scope, typeInfoAnnotation, subTypesAnnotation, context);
         if (definition == null) {
             return null;
@@ -279,7 +283,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      * @return simple class name, with declaring class's unqualified name as prefix for member classes
      */
     private static Optional<String> getNameFromTypeNameAnnotation(Class<?> erasedTargetType) {
-        return AnnotationHelper.resolveAnnotation(erasedTargetType, JsonTypeName.class, JacksonModule.NESTED_ANNOTATION_CHECK)
+        return AnnotationHelper.resolveAnnotation(erasedTargetType, JsonTypeName.class, JacksonSchemaModule.NESTED_ANNOTATION_CHECK)
                 .map(JsonTypeName::value)
                 .filter(name -> !name.isEmpty());
     }
