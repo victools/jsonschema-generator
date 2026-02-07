@@ -33,6 +33,7 @@ import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigPart;
 import com.github.victools.jsonschema.generator.SchemaGeneratorGeneralConfigPart;
 import com.github.victools.jsonschema.generator.TypeScope;
+import com.github.victools.jsonschema.generator.impl.Util;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
@@ -214,7 +215,7 @@ public class JacksonSchemaModule implements Module {
         }
         String nameOverride = annotation.value();
         // check for invalid overrides
-        if (nameOverride == null || nameOverride.isEmpty() || nameOverride.equals(member.getDeclaredName())) {
+        if (Util.isNullOrEmpty(nameOverride) || nameOverride.equals(member.getDeclaredName())) {
             return null;
         }
         return nameOverride;
