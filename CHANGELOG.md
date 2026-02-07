@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - remove invalid `format` for standard `LocalDateTime` string definition
 
 ### `jsonschema-module-jackson`
+#### Added
+- introduce `JacksonSchemaModule` as alternative name to the `JacksonModule` (old class name kept for backward compatibility)
+
 #### Fixed
 - support `@JacksonAnnotationsInside` annotated combo annotations also when looking for `@JsonPropertyDescription`  
 

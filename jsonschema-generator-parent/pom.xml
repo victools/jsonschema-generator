@@ -155,6 +155,7 @@
             <url>https://github.com/filiphr</url>
             <roles>
                 <role>Provided PR #556 (Migration from Jackson 2.x to 3.x)</role>
+                <role>Provided PR #561 (Renaming JacksonModule to avoid clash with class of same name in Jackson 3.x)</role>
             </roles>
         </contributor>
     </contributors>
