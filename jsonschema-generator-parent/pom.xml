@@ -144,6 +144,13 @@
             </roles>
         </contributor>
         <contributor>
+            <name>Matthias Bechthold</name>
+            <url>https://github.com/mbechto</url>
+            <roles>
+                <role>Provided PR #524 (fix incorrect standard format declaration for LocalDateTime)</role>
+            </roles>
+        </contributor>
+        <contributor>
             <name>Filip Hrisafov</name>
             <url>https://github.com/filiphr</url>
             <roles>

@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BREAKING CHANGE: minimum Java version `17`
 - BREAKING CHANGE: minimum Jackson version `3.x`
 
+#### Fixed
+- remove invalid `format` for standard `LocalDateTime` string definition
+
 ### `jsonschema-module-jackson`
 #### Fixed
 - support `@JacksonAnnotationsInside` annotated combo annotations also when looking for `@JsonPropertyDescription`  
