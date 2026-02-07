@@ -122,7 +122,7 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
         ResolvedMethod[] memberMethods = context.getTypeContext().resolveWithMembers(javaType).getMemberMethods();
         Set<ResolvedMethod> jsonValueAnnotatedMethods = Stream.of(memberMethods)
                 .filter(method -> method.getArgumentCount() == 0)
-                .filter(method -> AnnotationHelper.resolveAnnotation(method, JsonValue.class, JacksonModule.NESTED_ANNOTATION_CHECK)
+                .filter(method -> AnnotationHelper.resolveAnnotation(method, JsonValue.class, JacksonSchemaModule.NESTED_ANNOTATION_CHECK)
                         .map(JsonValue::value)
                         .orElse(false))
                 .collect(Collectors.toSet());
@@ -145,7 +145,7 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
             for (Object enumConstant : enumConstants) {
                 String enumValueName = ((Enum<?>) enumConstant).name();
                 Optional<JsonProperty> annotation = AnnotationHelper.resolveAnnotation(javaType.getErasedType().getDeclaredField(enumValueName),
-                        JsonProperty.class, JacksonModule.NESTED_ANNOTATION_CHECK);
+                        JsonProperty.class, JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
                 if (!annotation.isPresent()) {
                     // enum constant without @JsonProperty annotation
                     return null;

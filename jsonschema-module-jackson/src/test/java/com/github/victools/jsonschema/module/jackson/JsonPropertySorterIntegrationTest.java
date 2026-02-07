@@ -44,7 +44,7 @@ public class JsonPropertySorterIntegrationTest {
             "TestContainer, one two three"
     })
     public void testJsonPropertyOrderWithChildAnnotations(String targetTypeName, String expectedFieldOrder) throws Exception {
-        JacksonModule module = new JacksonModule(JacksonOption.RESPECT_JSONPROPERTY_ORDER,
+        JacksonSchemaModule module = new JacksonSchemaModule(JacksonOption.RESPECT_JSONPROPERTY_ORDER,
                 JacksonOption.INCLUDE_ONLY_JSONPROPERTY_ANNOTATED_METHODS);
         SchemaGeneratorConfig config = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2019_09, OptionPreset.PLAIN_JSON)
                 .with(Option.NONSTATIC_NONVOID_NONGETTER_METHODS, Option.FIELDS_DERIVED_FROM_ARGUMENTFREE_METHODS)
