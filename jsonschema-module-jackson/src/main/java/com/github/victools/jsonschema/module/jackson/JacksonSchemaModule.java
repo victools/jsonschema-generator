@@ -209,14 +209,15 @@ public class JacksonSchemaModule implements Module {
      */
     protected String getPropertyNameOverrideBasedOnJsonPropertyAnnotation(MemberScope<?, ?> member) {
         JsonProperty annotation = member.getAnnotationConsideringFieldAndGetter(JsonProperty.class, NESTED_ANNOTATION_CHECK);
-        if (annotation != null) {
-            String nameOverride = annotation.value();
-            // check for invalid overrides
-            if (nameOverride != null && !nameOverride.isEmpty() && !nameOverride.equals(member.getDeclaredName())) {
-                return nameOverride;
-            }
+        if (annotation == null) {
+            return null;
         }
-        return null;
+        String nameOverride = annotation.value();
+        // check for invalid overrides
+        if (nameOverride == null || nameOverride.isEmpty() || nameOverride.equals(member.getDeclaredName())) {
+            return null;
+        }
+        return nameOverride;
     }
 
     /**
