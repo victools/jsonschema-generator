@@ -13,7 +13,7 @@ BOM for the [jsonschema-generator](../jsonschema-generator) – ensuring a compa
     <dependency>
         <groupId>com.github.victools</groupId>
         <artifactId>jsonschema-generator-bom</artifactId>
-        <version>[4.24.3,5.0.0)</version>
+        <version>[5.0.0,6.0.0)</version>
         <type>pom</type>
         <scope>import</scope>
     </dependency>

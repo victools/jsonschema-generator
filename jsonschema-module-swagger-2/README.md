@@ -58,7 +58,7 @@ Additional documentation can be found in the [Project Wiki](https://github.com/v
 <dependency>
     <groupId>com.github.victools</groupId>
     <artifactId>jsonschema-module-swagger-2</artifactId>
-    <version>[4.21.0,5.0.0)</version>
+    <version>[5.0.0,6.0.0)</version>
 </dependency>
 ```
 
