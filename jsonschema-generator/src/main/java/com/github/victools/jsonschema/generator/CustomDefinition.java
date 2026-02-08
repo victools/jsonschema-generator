@@ -120,8 +120,13 @@ public class CustomDefinition {
         return this.attributeInclusion;
     }
 
+    /**
+     * Check whether this custom definition allows for additional attributes being collected and applied.
+     *
+     * @return whether {@link #getAttributeInclusion()} returns {@code AttributeInclusion.YES}
+     */
     public boolean shouldIncludeAttributes() {
-        return this.attributeInclusion == AttributeInclusion.YES;
+        return this.getAttributeInclusion() == AttributeInclusion.YES;
     }
 
     /**

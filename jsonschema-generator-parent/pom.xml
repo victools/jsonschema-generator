@@ -184,7 +184,7 @@
         <!-- test dependencies -->
         <version.jsonassert>1.5.3</version.jsonassert>
         <version.junit>5.14.0</version.junit>
-        <version.logback>1.5.23</version.logback>
+        <version.logback>1.5.25</version.logback>
         <version.mockito>4.11.0</version.mockito>
         <version.validator>3.0.0</version.validator>
         <!-- provided module dependencies -->
@@ -360,7 +360,7 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${maven.plugin.version.javadoc}</version>
                     <configuration>
-                        <source>${maven.compiler.source}</source>
+                        <release>${maven.compiler.release}</release>
                     </configuration>
                     <executions>
                         <execution>

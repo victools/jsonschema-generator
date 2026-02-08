@@ -214,7 +214,7 @@ public class JacksonSchemaModuleTest {
         FieldScope field = new TestType(TestClassForPropertyNameOverride.class).getMemberField(fieldName);
         List<String> overrideValues = captor.getAllValues().stream()
                 .map(nameOverride -> nameOverride.apply(field))
-                .collect(Collectors.toList());
+                .toList();
         Assertions.assertEquals(expectedOverrideValue, overrideValues.get(0));
         Assertions.assertEquals(kebabCaseName, overrideValues.get(1));
     }
