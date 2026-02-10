@@ -820,7 +820,7 @@ Various aspects can be toggled on/off by including or excluding respective <code
     </tr>
     <tr>
       <td>For a member (field/method), having a declared type for which subtypes are being detected, include a single definition with any collected member attributes assigned directly. Any subtypes are only being handled as generic types, i.e., outside of the member context. That means, certain relevant annotations may be ignored (e.g. a jackson <code>@JsonTypeInfo</code> override on a single member would not be correctly reflected in the produced schema).</td>
-      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a list of definittions: one for each subtype in the given member's context. This allows independently interpreting contextual information (e.g., member annotations) for each subtype.</td>
+      <td>For a member (field/method), having a declared type for which subtypes are being detected, include a list of definitions: one for each subtype in the given member's context. This allows independently interpreting contextual information (e.g., member annotations) for each subtype.</td>
     </tr>
     <tr><th>#</th><th>Behavior if included</th><th>Behavior if excluded</th></tr>
     <tr>
@@ -1870,11 +1870,11 @@ With disabled property sorting, your compiler decides the order of the propertie
 <p>The <a href="https://github.com/victools/jsonschema-generator/tree/master/jsonschema-module-jackson">victools:jsonschema-module-jackson</a> provides a number of standard configurations for deriving JSON Schema attributes from <code>jackson</code> annotations as well as looking up appropriate (annotated) subtypes.</p>
 <div class="highlight"><pre class="highlight java tab-java"><code><span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.generator.SchemaVersion</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.module.jackson.JacksonModule</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.module.jackson.JacksonOption</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.github.victools.jsonschema.module.jackson.JacksonSchemaModule</span><span class="o">;</span>
 
 
-<span class="nc">JacksonModule</span> <span class="n">module</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JacksonModule</span><span class="o">(</span>
+<span class="nc">JacksonSchemaModule</span> <span class="n">module</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">JacksonSchemaModule</span><span class="o">(</span>
         <span class="nc">JacksonOption</span><span class="o">.</span><span class="na">FLATTENED_ENUMS_FROM_JSONVALUE</span>
 <span class="o">);</span>
 <span class="nc">SchemaGeneratorConfigBuilder</span> <span class="n">configBuilder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SchemaGeneratorConfigBuilder</span><span class="o">(</span><span class="nc">SchemaVersion</span><span class="o">.</span><span class="na">DRAFT_2019_09</span><span class="o">)</span>
@@ -2292,7 +2292,7 @@ Checkout https://github.com/victools/jsonschema-gradle-example for the complete 
 <li>This treats enums like any other class but hiding some methods and listing the possible enum values as <code>&quot;enum&quot;</code>/<code>&quot;const&quot;</code> on the <code>name()</code> method.</li>
 </ul></li>
 <li>Using neither of the two <code>Option</code>s above will let them be handled like any other class (unless there are further configurations taking care of enums).</li>
-<li>The <code>JacksonModule</code> comes with two more alternatives:
+<li>The <code>JacksonSchemaModule</code> comes with two more alternatives:
 
 <ul>
 <li><code>JacksonOption.FLATTENED_ENUMS_FROM_JSONVALUE</code>, behaving like <code>Option.FLATTENED_ENUMS</code> but looking-up the respective values via the <code>@JsonValue</code> annotated method.</li>
