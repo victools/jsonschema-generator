@@ -194,6 +194,8 @@
         <version.swagger-2>2.2.41</version.swagger-2>
         <!-- maven plugin runtime dependencies -->
         <version.classgraph>4.8.184</version.classgraph>
+        <!-- bnd plugin for osgi meta-data generation-->
+		<bnd-maven-plugin.version>7.2.1</bnd-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
