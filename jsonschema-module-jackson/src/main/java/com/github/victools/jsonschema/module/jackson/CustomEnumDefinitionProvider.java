@@ -146,7 +146,7 @@ public class CustomEnumDefinitionProvider implements CustomDefinitionProviderV2 
                 String enumValueName = ((Enum<?>) enumConstant).name();
                 Optional<JsonProperty> annotation = AnnotationHelper.resolveAnnotation(javaType.getErasedType().getDeclaredField(enumValueName),
                         JsonProperty.class, JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
-                if (!annotation.isPresent()) {
+                if (annotation.isEmpty()) {
                     // enum constant without @JsonProperty annotation
                     return null;
                 }

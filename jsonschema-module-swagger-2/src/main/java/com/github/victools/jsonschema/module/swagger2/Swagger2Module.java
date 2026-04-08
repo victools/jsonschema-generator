@@ -196,17 +196,17 @@ public class Swagger2Module implements Module {
             // prevent invalid combination of "$ref" with "additionalProperties": false
             return Object.class;
         }
-        switch (annotation.additionalProperties()) {
-        case TRUE:
-            // allow any additional properties
-            return Object.class;
-        case FALSE:
-            // block any additional properties
-            return Void.class;
-        default:
-            // fall-back on other configuration, e.g., as per Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT
-            return null;
-        }
+        return switch (annotation.additionalProperties()) {
+            case TRUE ->
+                // allow any additional properties
+                    Object.class;
+            case FALSE ->
+                // block any additional properties
+                    Void.class;
+            default ->
+                // fall-back on other configuration, e.g., as per Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT
+                    null;
+        };
     }
 
     /**
@@ -423,16 +423,11 @@ public class Swagger2Module implements Module {
             return null;
         }
         // in Draft 6 and Draft 7, no other keywords are allowed besides a "$ref"
-        CustomDefinition.AttributeInclusion attributeInclusion;
-        switch (context.getGeneratorConfig().getSchemaVersion()) {
-        case DRAFT_6:
-        // fall-through (same as Draft 7)
-        case DRAFT_7:
-            attributeInclusion = CustomDefinition.AttributeInclusion.NO;
-            break;
-        default:
-            attributeInclusion = CustomDefinition.AttributeInclusion.YES;
-        }
+        CustomDefinition.AttributeInclusion attributeInclusion = switch (context.getGeneratorConfig().getSchemaVersion()) {
+            // fall-through (same as Draft 7)
+            case DRAFT_6, DRAFT_7 -> CustomDefinition.AttributeInclusion.NO;
+            default -> CustomDefinition.AttributeInclusion.YES;
+        };
         ObjectNode reference = context.getGeneratorConfig().createObjectNode()
                 .put(context.getKeyword(SchemaKeyword.TAG_REF), externalReference.get());
         return new CustomPropertyDefinition(reference, attributeInclusion);
