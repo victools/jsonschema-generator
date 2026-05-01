@@ -44,6 +44,56 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
     }
 
     /**
+     * Unit that will check the generation is skipped via the {@code skip} configuration parameter.
+     *
+     * @throws Exception In case something goes wrong
+     */
+    @Test
+    public void testSkipViaConfiguration() throws Exception {
+        File pomFile = new File("src/test/resources/reference-test-cases/SkipTrue-pom.xml");
+
+        // Execute the pom
+        executePom(pomFile);
+
+        // Extract the schemaFilePath provided in the pomFile
+        PlexusConfiguration configuration = getPluginConfigurationOf(pomFile);
+        File generationLocation = new File(configuration.getChild("schemaFilePath").getValue());
+
+        // Validate that no output is created at the configured schemaFilePath
+        Assertions.assertFalse(generationLocation.exists());
+    }
+
+    /**
+     * Unit that will check the generation is skipped via the {@code jsonschema.skip} user property.
+     *
+     * @throws Exception In case something goes wrong
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "true",
+        "True",
+        "TRUE",
+    })
+    public void testSkipViaUserProperty(String value) throws Exception {
+        String userProperty = "jsonschema.skip";
+        System.setProperty(userProperty, value);
+
+        File pomFile = new File("src/test/resources/reference-test-cases/SkipFalse-pom.xml");
+
+        // Execute the pom
+        executePom(pomFile);
+
+        // Extract the schemaFilePath provided in the pomFile
+        PlexusConfiguration configuration = getPluginConfigurationOf(pomFile);
+        File generationLocation = new File(configuration.getChild("schemaFilePath").getValue());
+
+        // Validate that no output is created at the configured schemaFilePath
+        Assertions.assertFalse(generationLocation.exists());
+
+        System.clearProperty(userProperty);
+    }
+
+    /**
      * Unit that will generate from a maven pom file fragment and compare with a reference file
      *
      * @throws Exception In case something goes wrong
@@ -335,12 +385,7 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
      */
     private void executePom(File pomFile) throws Exception {
         // Get the maven pom file content
-        Xpp3Dom pomDom;
-        PlexusConfiguration configuration;
-        try (FileReader pomReader = new FileReader(pomFile)) {
-            pomDom = Xpp3DomBuilder.build(pomReader);
-            configuration = this.extractPluginConfiguration("jsonschema-maven-plugin", pomDom);
-        }
+        PlexusConfiguration configuration = getPluginConfigurationOf(pomFile);
         MavenProject project = new MavenProject();
         // hack to get the plugin think that the classes in the testpackage are part of the project and get scanned
         project.getBuild().setOutputDirectory("target/test-classes");
@@ -350,6 +395,19 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
 
         // And execute
         myMojo.execute();
+    }
+
+    /**
+     * Extracts the schema-generator plugin configuration as defined in the given pom file
+     *
+     * @param pomFile The pom file
+     * @throws Exception In case of problems
+     */
+    private PlexusConfiguration getPluginConfigurationOf(File pomFile) throws Exception {
+        try (FileReader pomReader = new FileReader(pomFile)) {
+            Xpp3Dom pomDom = Xpp3DomBuilder.build(pomReader);
+            return this.extractPluginConfiguration("jsonschema-maven-plugin", pomDom);
+        }
     }
 
 }
