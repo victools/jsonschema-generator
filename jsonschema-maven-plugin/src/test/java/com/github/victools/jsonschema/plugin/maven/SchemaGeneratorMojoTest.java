@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
@@ -89,6 +90,39 @@ public class SchemaGeneratorMojoTest extends AbstractMojoTestCase {
 
         // Validate that no output is created at the configured schemaFilePath
         Assertions.assertFalse(generationLocation.exists());
+
+        System.clearProperty(userProperty);
+    }
+
+    /**
+     * Unit that will generate from a maven pom file fragment with the {@code skip} configuration parameter
+     * set to {@code true}, overridden via the {@code jsonschema.skip} user property.
+     *
+     * @throws Exception In case something goes wrong
+     */
+    @ParameterizedTest
+    @EmptySource
+    @ValueSource(strings = {
+        "false",
+        "False",
+        "FALSE",
+    })
+    public void testSkipOverriddenViaUserProperty(String value) throws Exception {
+        String userProperty = "jsonschema.skip";
+        System.setProperty(userProperty, value);
+
+        File pomFile = new File("src/test/resources/reference-test-cases/SkipTrueOverridden-pom.xml");
+
+        // Execute the pom
+        executePom(pomFile);
+
+        // Extract the schemaFilePath provided in the pomFile
+        PlexusConfiguration configuration = getPluginConfigurationOf(pomFile);
+        File generationLocation = new File(configuration.getChild("schemaFilePath").getValue());
+        generationLocation.deleteOnExit();
+
+        // Validate that the schema files are created.
+        Assertions.assertTrue(generationLocation.exists());
 
         System.clearProperty(userProperty);
     }
