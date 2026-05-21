@@ -74,10 +74,9 @@ public class DefinitionKey {
         if (other == this) {
             return true;
         }
-        if (!(other instanceof DefinitionKey)) {
+        if (!(other instanceof DefinitionKey otherReference)) {
             return false;
         }
-        DefinitionKey otherReference = (DefinitionKey) other;
         return this.type.equals(otherReference.getType()) && this.ignoredDefinitionProvider == otherReference.getIgnoredDefinitionProvider();
     }
 }

@@ -224,7 +224,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         List<PotentialSchemaClass> matchingClasses = this.getAllClassNames().stream()
                 .filter(entry -> filter.test(entry.getAbsolutePathToMatch()))
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
         for (PotentialSchemaClass potentialTarget : matchingClasses) {
             if (potentialTarget.isAlreadyGenerated()) {
                 this.getLog().info("- Skipping already generated " + potentialTarget.getFullClassName());
@@ -462,7 +462,6 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      * @param configBuilder The builder on which the modules are added.
      * @throws MojoExecutionException Invalid module name or className configured
      */
-    @SuppressWarnings("unchecked")
     private void setModules(SchemaGeneratorConfigBuilder configBuilder) throws MojoExecutionException {
         for (GeneratorModule module : Util.nullSafe(this.modules)) {
             if (!Util.isNullOrEmpty(module.className)) {
