@@ -55,6 +55,7 @@ public class SchemaGeneratorSimpleTypesTest {
             Arguments.of(float.class, SchemaKeyword.TAG_TYPE_NUMBER, "float", null),
             Arguments.of(java.time.LocalDate.class, SchemaKeyword.TAG_TYPE_STRING, "date", "date"),
             Arguments.of(java.time.LocalDateTime.class, SchemaKeyword.TAG_TYPE_STRING, null, null),
+            Arguments.of(java.time.YearMonth.class, SchemaKeyword.TAG_TYPE_STRING, null, null),
             Arguments.of(java.time.LocalTime.class, SchemaKeyword.TAG_TYPE_STRING, "time", "time"),
             Arguments.of(java.time.ZonedDateTime.class, SchemaKeyword.TAG_TYPE_STRING, "date-time", "date-time"),
             Arguments.of(java.time.OffsetDateTime.class, SchemaKeyword.TAG_TYPE_STRING, "date-time", "date-time"),
