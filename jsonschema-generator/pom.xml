@@ -16,6 +16,7 @@
 
     <properties>
         <java.module.name>com.github.victools.jsonschema.generator</java.module.name>
+        <bnd-bundle-name>com.github.victools.jsonschema.generator</bnd-bundle-name>
     </properties>
 
     <dependencies>
@@ -51,6 +52,39 @@
                 <groupId>org.moditect</groupId>
                 <artifactId>moditect-maven-plugin</artifactId>
             </plugin>
+			<plugin>
+			    <groupId>biz.aQute.bnd</groupId>
+			    <artifactId>bnd-maven-plugin</artifactId>
+			    <version>${bnd-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>bnd-process</id>
+						<goals>
+							<goal>bnd-process</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<bnd><![CDATA[
+						Bundle-Name:            Bundle ${project.groupId} : ${project.artifactId}
+						Bundle-SymbolicName:    ${bnd-bundle-name}
+						Export-Package: 		${bnd-bundle-name}.*
+						Bundle-Version:         ${version}
+						-noimportjava:          true;
+						-nouses:                true;
+						]]>
+					</bnd>
+				</configuration>
+			</plugin>
+		   <plugin>
+		        <groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-jar-plugin</artifactId>
+		        <configuration>
+		        	<archive>
+		             	<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+		          	</archive>
+		        </configuration>
+		    </plugin>
         </plugins>
     </build>
 
