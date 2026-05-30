@@ -17,9 +17,14 @@
 package com.github.victools.jsonschema.plugin.maven;
 
 import com.fasterxml.jackson.annotation.JsonClassDescription;
+import jakarta.validation.constraints.Size;
 
 @JsonClassDescription("Jackson annotation class")
 public class TestClass {
+
+    @Size(min = 1)
+    private String name;
+
     private int anInt;
 
     public TestClass(int anInt) {
@@ -28,5 +33,9 @@ public class TestClass {
 
     public int getAnInt() {
         return this.anInt;
+    }
+
+    public String getName() {
+        return this.name;
     }
 }
