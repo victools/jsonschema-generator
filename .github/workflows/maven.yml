@@ -27,7 +27,7 @@ jobs:
         java-version: ${{ matrix.java-version }}
         distribution: 'temurin'
     - name: Build
-      run: mvn install -DskipTests=true -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -B -V
+      run: ./mvnw install -DskipTests=true -Dcheckstyle.skip=true -Dmaven.javadoc.skip=true -B -V
       env:
         CI: true
 
@@ -48,7 +48,7 @@ jobs:
         java-version: ${{ matrix.java-version }}
         distribution: 'temurin'
     - name: Test
-      run: mvn test -B
+      run: ./mvnw test -B
       env:
         CI: true
 
@@ -65,7 +65,7 @@ jobs:
         java-version: 17
         distribution: 'temurin'
     - name: Checkstyle
-      run: mvn verify -DskipTests=true -Dmaven.javadoc.skip=true -B
+      run: ./mvnw verify -DskipTests=true -Dmaven.javadoc.skip=true -B
       env:
         CI: true
 
@@ -82,6 +82,6 @@ jobs:
         java-version: 17
         distribution: 'temurin'
     - name: Generate JavaDoc
-      run: mvn verify -DskipTests=true -Dcheckstyle.skip=true -B
+      run: ./mvnw verify -DskipTests=true -Dcheckstyle.skip=true -B
       env:
         CI: true
