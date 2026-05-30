@@ -103,6 +103,14 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     private List<AnnotationParameter> annotations = new ArrayList<>();
 
     /**
+     * Set this to "true" to skip invoking any goals or reports of the plugin.
+     *
+     * @since 5.1.0
+     */
+    @Parameter(property = "jsonschema.skip", defaultValue = "false")
+    private boolean skip;
+
+    /**
      * Flag indicating whether abstract classes should be ignored, even if they are matching the classname and/or package pattern.
      *
      * @since 4.37.0
@@ -195,6 +203,11 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     @Override
     public synchronized void execute() throws MojoExecutionException {
+        if (Boolean.parseBoolean(System.getProperty("jsonschema.skip", Boolean.toString(this.skip)))) {
+            this.getLog().info("Skipping JSON Schema generation");
+            return;
+        }
+
         // trigger initialization of the generator instance
         this.getGenerator();
 
