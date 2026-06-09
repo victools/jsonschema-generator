@@ -102,6 +102,7 @@ public class SimpleTypeModule implements Module {
         module.withStandardStringType(java.util.UUID.class, "uuid");
         module.withStandardStringType(java.net.URI.class, "uri");
         module.withStringType(java.time.ZoneId.class);
+        module.withStringType(java.time.YearMonth.class);
         module.withIntegerType(java.math.BigInteger.class);
 
         Stream.of(java.math.BigDecimal.class, Number.class)
