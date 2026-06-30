@@ -1,0 +1,15 @@
+<project>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.github.victools</groupId>
+        <artifactId>jsonschema-maven-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+          <packageNames>com.github.victools.jsonschema.plugin.maven.testpackage</packageNames>
+          <schemaFilePath>target/generated-test-sources/SkipTrue</schemaFilePath>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

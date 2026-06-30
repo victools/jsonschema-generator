@@ -10,6 +10,7 @@ Maven plugin for the [jsonschema-generator](../jsonschema-generator) – Integra
 4. Configure the `OptionPreset` and individual `Option`s to be considered during schema generation.
 5. Configure the standard modules and their respective options to be applied.
 6. Configure any custom modules to be applied.
+7. Skip the execution.
 
 ## Usage
 ### Plugin definition
@@ -224,6 +225,16 @@ To enable a custom module in the generation the following construct can be used:
 ```
 Make sure your custom module is on the classpath and has a default constructor.
 It is not possible to configure options for custom modules.
+
+### Skip the execution
+To skip invoking any goals or reports of the plugin, you can set `skip` to `true`.
+```xml
+<configuration>
+    <skip>true</skip>
+</configuration>
+```
+The same can be achieved via the `-Djsonschema.skip` user property. If both are provided, the user property
+overrides the configuration parameter.
 
 ### Complete Example
 ```xml
