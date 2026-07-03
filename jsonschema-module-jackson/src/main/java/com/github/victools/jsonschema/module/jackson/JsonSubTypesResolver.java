@@ -179,7 +179,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         ResolvedType typeWithTypeInfo = typeContext.getTypeWithAnnotation(javaType, JsonTypeInfo.class, JacksonSchemaModule.NESTED_ANNOTATION_CHECK);
         if (typeWithTypeInfo == null
                 || AnnotationHelper.resolveAnnotation(javaType.getErasedType(), JsonSubTypes.class,
-                    JacksonSchemaModule.NESTED_ANNOTATION_CHECK).isPresent()
+                JacksonSchemaModule.NESTED_ANNOTATION_CHECK).isPresent()
                 || this.skipSubtypeResolution(javaType, typeContext)) {
             // no @JsonTypeInfo annotation found or the given javaType is the super type, that should be replaced
             return null;
@@ -242,20 +242,13 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      */
     private String getTypeIdentifier(ResolvedType javaType, JsonTypeInfo typeInfoAnnotation, JsonSubTypes subTypesAnnotation) {
         Class<?> erasedTargetType = javaType.getErasedType();
-        final String typeIdentifier;
-        switch (typeInfoAnnotation.use()) {
-        case NAME:
-            typeIdentifier = getNameFromSubTypeAnnotation(erasedTargetType, subTypesAnnotation)
+        return switch (typeInfoAnnotation.use()) {
+            case NAME -> getNameFromSubTypeAnnotation(erasedTargetType, subTypesAnnotation)
                     .orElseGet(() -> getNameFromTypeNameAnnotation(erasedTargetType)
-                    .orElseGet(() -> getUnqualifiedClassName(erasedTargetType)));
-            break;
-        case CLASS:
-            typeIdentifier = erasedTargetType.getName();
-            break;
-        default:
-            typeIdentifier = null;
-        }
-        return typeIdentifier;
+                            .orElseGet(() -> getUnqualifiedClassName(erasedTargetType)));
+            case CLASS -> erasedTargetType.getName();
+            default -> null;
+        };
     }
 
     /**
@@ -312,7 +305,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
      * @return created custom definition (or {@code null} if no supported subtype resolution scenario could be detected
      */
     private ObjectNode createSubtypeDefinition(TypeScope scope, JsonTypeInfo typeInfoAnnotation, JsonSubTypes subTypesAnnotation,
-            SchemaGenerationContext context) {
+                                               SchemaGenerationContext context) {
         ResolvedType javaType = scope.getType();
         final String typeIdentifier = this.getTypeIdentifier(javaType, typeInfoAnnotation, subTypesAnnotation);
         if (typeIdentifier == null) {
@@ -322,18 +315,18 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         final ObjectNode definition = context.getGeneratorConfig().createObjectNode();
         SubtypeDefinitionDetails subtypeDetails = new SubtypeDefinitionDetails(javaType, attributesToInclude, context, typeIdentifier, definition);
         switch (typeInfoAnnotation.include()) {
-        case WRAPPER_ARRAY:
-            createSubtypeDefinitionForWrapperArrayTypeInfo(subtypeDetails);
-            break;
-        case WRAPPER_OBJECT:
-            this.createSubtypeDefinitionForWrapperObjectTypeInfo(subtypeDetails);
-            break;
-        case PROPERTY:
-        case EXISTING_PROPERTY:
-            this.createSubtypeDefinitionForPropertyTypeInfo(subtypeDetails, typeInfoAnnotation);
-            break;
-        default:
-            return null;
+            case WRAPPER_ARRAY:
+                createSubtypeDefinitionForWrapperArrayTypeInfo(subtypeDetails);
+                break;
+            case WRAPPER_OBJECT:
+                this.createSubtypeDefinitionForWrapperObjectTypeInfo(subtypeDetails);
+                break;
+            case PROPERTY:
+            case EXISTING_PROPERTY:
+                this.createSubtypeDefinitionForPropertyTypeInfo(subtypeDetails, typeInfoAnnotation);
+                break;
+            default:
+                return null;
         }
         return definition;
     }
@@ -417,7 +410,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         private final ObjectNode definition;
 
         SubtypeDefinitionDetails(ResolvedType javaType, ObjectNode attributesToInclude, SchemaGenerationContext context,
-                String typeIdentifier, ObjectNode definition) {
+                                 String typeIdentifier, ObjectNode definition) {
             this.javaType = javaType;
             this.attributesToInclude = attributesToInclude;
             this.context = context;

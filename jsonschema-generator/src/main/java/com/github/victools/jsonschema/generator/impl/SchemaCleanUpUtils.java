@@ -226,10 +226,9 @@ public class SchemaCleanUpUtils {
      * @param reverseKeywordMap mapping from actual tag name in generated schema to underlying {@link SchemaKeyword}
      */
     private void mergeAllOfPartsIfPossible(JsonNode schemaNode, String allOfTagName, Map<String, SchemaKeyword> reverseKeywordMap) {
-        if (!(schemaNode instanceof ObjectNode)) {
+        if (!(schemaNode instanceof ObjectNode schemaObjectNode)) {
             return;
         }
-        ObjectNode schemaObjectNode = (ObjectNode) schemaNode;
         JsonNode allOfTag = schemaObjectNode.get(allOfTagName);
         if (!(allOfTag instanceof ArrayNode)) {
             return;
