@@ -123,10 +123,12 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
         "isBehavingSomehow, false, isBehavingSomehow()",
         "getxIndex, false, getxIndex()",
         "isURL, false, isURL()",
+        "getX, false, getX()",
         "getCalculatedValue, true, calculatedValue",
         "isBehavingSomehow, true, behavingSomehow",
         "getxIndex, true, xIndex",
         "isURL, true, URL",
+        "getX, true, x",
     })
     public void testGetSchemaPropertyName(String methodName, boolean deriveFieldNameFromArgumentFreeMethod, String expectedPropertyName) {
         MethodScope method = this.getTestClassMethod(methodName);
@@ -203,6 +205,10 @@ public class MethodScopeTest extends AbstractTypeAwareTest {
 
         public boolean isURL() {
             return false;
+        }
+
+        public int getX() {
+            return 0;
         }
 
         public int calculateSomething() {
