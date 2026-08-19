@@ -250,7 +250,8 @@ public class MethodScope extends MemberScope<ResolvedMethod, Method> {
             return methodName + "()";
         }
         String methodNameWithoutPrefix = possibleFieldName.get();
-        if (Character.isUpperCase(methodNameWithoutPrefix.charAt(1))) {
+        if (methodNameWithoutPrefix.length() > 1
+                && Character.isUpperCase(methodNameWithoutPrefix.charAt(1))) {
             // since 4.33.0 according to the Java Beans specification, if the second character is uppercase the first should remain as-is
             // e.g., getxIndex() corresponds to "xIndex" and isURL() to "URL"
             return methodNameWithoutPrefix;
