@@ -4,6 +4,10 @@
   "properties" : {
     "anInt" : {
       "type" : "integer"
+    },
+    "name" : {
+      "type" : "string",
+      "minLength" : 1
     }
   }
 }

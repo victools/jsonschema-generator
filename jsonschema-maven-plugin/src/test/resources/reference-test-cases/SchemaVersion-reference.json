@@ -4,6 +4,9 @@
   "properties" : {
     "anInt" : {
       "type" : "integer"
+    },
+    "name" : {
+      "type" : "string"
     }
   }
 }

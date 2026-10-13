@@ -46,8 +46,6 @@ public class SchemaGeneratorConfigBuilder {
         return JsonMapper.builder()
                 // since version 4.32.0; pretty print by default (can be overridden by supplying explicit mapper)
                 .enable(SerializationFeature.INDENT_OUTPUT)
-                // since version 4.21.0
-                .enable(JsonWriteFeature.WRITE_NUMBERS_AS_STRINGS)
                 // since version 4.25.0; as the above doesn't always work
                 .enable(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES)
                 .build();

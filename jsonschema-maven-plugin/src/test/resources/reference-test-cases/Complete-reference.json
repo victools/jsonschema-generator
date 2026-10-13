@@ -1,1 +1,1 @@
-{"type":"object","properties":{"anInt":{"type":"integer"},"getAnInt()":{"type":"integer"}},"description":"Jackson annotation class","additionalProperties":false}
+{"type":"object","properties":{"anInt":{"type":"integer"},"name":{"type":["string","null"]},"getAnInt()":{"type":"integer"},"getName()":{"type":["string","null"]}},"description":"Jackson annotation class","additionalProperties":false}
