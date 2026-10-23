@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Added
 - include `java.time.YearMonth` in `SimpleTypeModule.forPrimitiveAndAdditionalTypes()` (mapped to `string`)
 
+### `jsonschema-module-jackson`
+#### Added
+- support `@JsonSubTypes.Type#names` in subtype resolution, producing an `enum` of all names instead of a single `const`
+
+#### Fixed
+- avoid duplicate `anyOf` entries when the same subtype is listed multiple times in `@JsonSubTypes`
+
 
 ## [5.0.0] - 2026-02-07
 ### `jsonschema-generator`

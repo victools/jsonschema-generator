@@ -1,0 +1,45 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "$defs": {
+        "TestSubClassAB": {
+            "type": "object",
+            "properties": {
+                "abProperty": {
+                    "type": "string"
+                },
+                "type": {
+                    "enum": ["A", "B"]
+                }
+            },
+            "required": ["type"]
+        },
+        "TestSubClassC": {
+            "type": "object",
+            "properties": {
+                "cProperty": {
+                    "type": "integer"
+                },
+                "type": {
+                    "const": "C"
+                }
+            },
+            "required": ["type"]
+        },
+        "TestSuperClass": {
+            "anyOf": [{
+                    "$ref": "#/$defs/TestSubClassAB"
+                }, {
+                    "$ref": "#/$defs/TestSubClassC"
+                }]
+        }
+    },
+    "type": "object",
+    "properties": {
+        "multiNameSubtype": {
+            "$ref": "#/$defs/TestSuperClass"
+        },
+        "singleNameSubtype": {
+            "$ref": "#/$defs/TestSuperClass"
+        }
+    }
+}

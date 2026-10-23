@@ -80,6 +80,23 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
             Arguments.of(TestSubClass1.class, """
                 {"allOf":[{},\
                 {"type":"object","properties":{"@type":{"const":"SUB_CLASS_1"}},"required":["@type"]}]}\
+                """),
+            Arguments.of(TestSuperClassWithMultipleNames.class, null),
+            Arguments.of(TestSubClassWithMultipleNames.class, """
+                {"allOf":[{},\
+                {"type":"object","properties":{"type":{"enum":["A","B"]}},"required":["type"]}]}\
+                """),
+            Arguments.of(TestSubClassWithNameAndNames.class, """
+                {"allOf":[{},\
+                {"type":"object","properties":{"type":{"enum":["C","D","E"]}},"required":["type"]}]}\
+                """),
+            Arguments.of(TestSubClassListedTwice.class, """
+                {"allOf":[{},\
+                {"type":"object","properties":{"type":{"enum":["F","G"]}},"required":["type"]}]}\
+                """),
+            Arguments.of(TestSubClassWithSingleName.class, """
+                {"allOf":[{},\
+                {"type":"object","properties":{"type":{"const":"H"}},"required":["type"]}]}\
                 """)
         );
     }
@@ -142,6 +159,22 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
                 {"allOf":[{},{"type":"object","properties":{"fullClass":{"const":\
                 "com.github.victools.jsonschema.module.jackson.JsonSubTypesResolverCustomDefinitionsTest$TestSubClass4"}},\
                 "required":["fullClass"]}]}\
+                """),
+            Arguments.of("multipleNamesAsWrapperArray", TestSubClassWithMultipleNames.class,
+                """
+                {"type":"array","prefixItems":[{"type":"string","enum":["A","B"]},{}]}\
+                """),
+            Arguments.of("multipleNamesAsWrapperArray", TestSubClassWithSingleName.class,
+                """
+                {"type":"array","prefixItems":[{"type":"string","const":"H"},{}]}\
+                """),
+            Arguments.of("multipleNamesAsWrapperObject", TestSubClassWithMultipleNames.class,
+                """
+                {"type":"object","properties":{"A":{}},"required":["A"]}\
+                """),
+            Arguments.of("multipleNamesAsWrapperObject", TestSubClassWithSingleName.class,
+                """
+                {"type":"object","properties":{"H":{}},"required":["H"]}\
                 """)
         );
     }
@@ -217,6 +250,18 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
         public TestSuperClassWithNameProperty superTypeWithAnnotationOnFieldAndGetter;
         @FullClassProperty
         public TestSuperInterface superInterfaceWithAnnotationOnField;
+        @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_ARRAY)
+        @JsonSubTypes({
+            @JsonSubTypes.Type(value = TestSubClassWithMultipleNames.class, names = {"A", "B"}),
+            @JsonSubTypes.Type(value = TestSubClassWithSingleName.class, name = "H")
+        })
+        public TestSuperClassWithMultipleNames multipleNamesAsWrapperArray;
+        @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
+        @JsonSubTypes({
+            @JsonSubTypes.Type(value = TestSubClassWithMultipleNames.class, names = {"A", "B"}),
+            @JsonSubTypes.Type(value = TestSubClassWithSingleName.class, name = "H")
+        })
+        public TestSuperClassWithMultipleNames multipleNamesAsWrapperObject;
 
         public TestSuperClassWithNameProperty getSuperTypeNoAnnotation() {
             return this.superTypeNoAnnotation;
@@ -274,5 +319,28 @@ public class JsonSubTypesResolverCustomDefinitionsTest extends AbstractTypeAware
 
     @JsonTypeName("SUB_CLASS_4")
     private static class TestSubClass4 implements TestSuperInterface {
+    }
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+    @JsonSubTypes({
+        @JsonSubTypes.Type(value = TestSubClassWithMultipleNames.class, names = {"A", "B"}),
+        @JsonSubTypes.Type(value = TestSubClassWithNameAndNames.class, name = "C", names = {"D", "E"}),
+        @JsonSubTypes.Type(value = TestSubClassListedTwice.class, name = "F"),
+        @JsonSubTypes.Type(value = TestSubClassWithSingleName.class, name = "H"),
+        @JsonSubTypes.Type(value = TestSubClassListedTwice.class, name = "G")
+    })
+    private static class TestSuperClassWithMultipleNames {
+    }
+
+    private static class TestSubClassWithMultipleNames extends TestSuperClassWithMultipleNames {
+    }
+
+    private static class TestSubClassWithNameAndNames extends TestSuperClassWithMultipleNames {
+    }
+
+    private static class TestSubClassListedTwice extends TestSuperClassWithMultipleNames {
+    }
+
+    private static class TestSubClassWithSingleName extends TestSuperClassWithMultipleNames {
     }
 }

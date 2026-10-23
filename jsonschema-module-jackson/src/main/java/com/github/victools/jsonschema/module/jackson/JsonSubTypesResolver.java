@@ -134,6 +134,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
 
     /**
      * Mapping the declared erased types from the annotation to resolved types. Returns {@code null} if annotation is {@code null}/not present.
+     * A subtype listed multiple times (e.g., once per alternative name) is only included once.
      *
      * @param declaredType supertype encountered while generating a schema
      * @param subtypesAnnotation annotation to derive applicable subtypes from.
@@ -146,6 +147,7 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         }
         return Stream.of(subtypesAnnotation.value())
                 .map(entry -> this.resolveSubtype(declaredType, entry, context))
+                .distinct()
                 .collect(Collectors.toList());
     }
 
@@ -233,47 +235,55 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
     }
 
     /**
-     * Determine the appropriate type identifier according to {@link JsonTypeInfo#use()}.
+     * Determine the appropriate type identifier(s) according to {@link JsonTypeInfo#use()}. In case of {@code JsonTypeInfo.Id.NAME}, a subtype may
+     * be associated with multiple names, i.e., through {@link JsonSubTypes.Type#names()} or by being listed in multiple {@link JsonSubTypes.Type}
+     * entries. Jackson accepts any of those as discriminator value when deserializing, hence all of them are being returned here.
      *
      * @param javaType specific subtype to identify
      * @param typeInfoAnnotation annotation for determining what kind of identifier to use
      * @param subTypesAnnotation annotation to consider for certain kinds of discriminators
-     * @return type identifier (or {@code null} if no supported value could be found)
+     * @return type identifiers (or an empty list if no supported value could be found)
      */
-    private String getTypeIdentifier(ResolvedType javaType, JsonTypeInfo typeInfoAnnotation, JsonSubTypes subTypesAnnotation) {
+    private List<String> getTypeIdentifiers(ResolvedType javaType, JsonTypeInfo typeInfoAnnotation, JsonSubTypes subTypesAnnotation) {
         Class<?> erasedTargetType = javaType.getErasedType();
-        final String typeIdentifier;
+        final List<String> typeIdentifiers;
         switch (typeInfoAnnotation.use()) {
         case NAME:
-            typeIdentifier = getNameFromSubTypeAnnotation(erasedTargetType, subTypesAnnotation)
-                    .orElseGet(() -> getNameFromTypeNameAnnotation(erasedTargetType)
-                    .orElseGet(() -> getUnqualifiedClassName(erasedTargetType)));
+            List<String> namesFromSubTypeAnnotation = getNamesFromSubTypeAnnotation(erasedTargetType, subTypesAnnotation);
+            if (namesFromSubTypeAnnotation.isEmpty()) {
+                typeIdentifiers = Collections.singletonList(getNameFromTypeNameAnnotation(erasedTargetType)
+                        .orElseGet(() -> getUnqualifiedClassName(erasedTargetType)));
+            } else {
+                typeIdentifiers = namesFromSubTypeAnnotation;
+            }
             break;
         case CLASS:
-            typeIdentifier = erasedTargetType.getName();
+            typeIdentifiers = Collections.singletonList(erasedTargetType.getName());
             break;
         default:
-            typeIdentifier = null;
+            typeIdentifiers = Collections.emptyList();
         }
-        return typeIdentifier;
+        return typeIdentifiers;
     }
 
     /**
-     * In case of a {@code JsonTypeInfo.Id.NAME}, try to look up the reference via {@link JsonSubTypes} annotation.
+     * In case of a {@code JsonTypeInfo.Id.NAME}, look up all names associated with the given subtype via {@link JsonSubTypes} annotation. This
+     * considers both {@link JsonSubTypes.Type#name()} and {@link JsonSubTypes.Type#names()} on every entry referencing the given subtype.
      *
-     * @param erasedTargetType class to look-up the "name" for
+     * @param erasedTargetType class to look-up the name(s) for
      * @param subTypesAnnotation {@link JsonSubTypes} annotation instance of consider
-     * @return successfully looked-up "name" (otherwise an empty {@code Optional})
+     * @return successfully looked-up names in declaration order, without duplicates (otherwise an empty list)
      */
-    private static Optional<String> getNameFromSubTypeAnnotation(Class<?> erasedTargetType, JsonSubTypes subTypesAnnotation) {
+    private static List<String> getNamesFromSubTypeAnnotation(Class<?> erasedTargetType, JsonSubTypes subTypesAnnotation) {
         if (subTypesAnnotation == null) {
-            return Optional.empty();
+            return Collections.emptyList();
         }
         return Stream.of(subTypesAnnotation.value())
                 .filter(subTypeAnnotation -> erasedTargetType.equals(subTypeAnnotation.value()))
-                .findFirst()
-                .map(JsonSubTypes.Type::name)
-                .filter(name -> !name.isEmpty());
+                .flatMap(subTypeAnnotation -> Stream.concat(Stream.of(subTypeAnnotation.name()), Stream.of(subTypeAnnotation.names())))
+                .filter(name -> !name.isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     /**
@@ -314,13 +324,13 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
     private ObjectNode createSubtypeDefinition(TypeScope scope, JsonTypeInfo typeInfoAnnotation, JsonSubTypes subTypesAnnotation,
             SchemaGenerationContext context) {
         ResolvedType javaType = scope.getType();
-        final String typeIdentifier = this.getTypeIdentifier(javaType, typeInfoAnnotation, subTypesAnnotation);
-        if (typeIdentifier == null) {
+        final List<String> typeIdentifiers = this.getTypeIdentifiers(javaType, typeInfoAnnotation, subTypesAnnotation);
+        if (typeIdentifiers.isEmpty()) {
             return null;
         }
         ObjectNode attributesToInclude = this.getAttributesToInclude(scope, context);
         final ObjectNode definition = context.getGeneratorConfig().createObjectNode();
-        SubtypeDefinitionDetails subtypeDetails = new SubtypeDefinitionDetails(javaType, attributesToInclude, context, typeIdentifier, definition);
+        SubtypeDefinitionDetails subtypeDetails = new SubtypeDefinitionDetails(javaType, attributesToInclude, context, typeIdentifiers, definition);
         switch (typeInfoAnnotation.include()) {
         case WRAPPER_ARRAY:
             createSubtypeDefinitionForWrapperArrayTypeInfo(subtypeDetails);
@@ -341,9 +351,9 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
     private void createSubtypeDefinitionForWrapperArrayTypeInfo(SubtypeDefinitionDetails details) {
         details.getDefinition().put(details.getKeyword(SchemaKeyword.TAG_TYPE), details.getKeyword(SchemaKeyword.TAG_TYPE_ARRAY));
         ArrayNode itemsArray = details.getDefinition().withArray(details.getKeyword(SchemaKeyword.TAG_PREFIX_ITEMS));
-        itemsArray.addObject()
-                .put(details.getKeyword(SchemaKeyword.TAG_TYPE), details.getKeyword(SchemaKeyword.TAG_TYPE_STRING))
-                .put(details.getKeyword(SchemaKeyword.TAG_CONST), details.getTypeIdentifier());
+        ObjectNode typeIdentifierSchema = itemsArray.addObject()
+                .put(details.getKeyword(SchemaKeyword.TAG_TYPE), details.getKeyword(SchemaKeyword.TAG_TYPE_STRING));
+        this.putTypeIdentifiers(typeIdentifierSchema, details);
         if (details.getAttributesToInclude() == null || details.getAttributesToInclude().isEmpty()) {
             itemsArray.add(this.createNestedSubtypeSchema(details.getJavaType(), details.getContext()));
         } else {
@@ -359,15 +369,17 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         ObjectNode propertiesNode = details.getDefinition()
                 .putObject(details.getKeyword(SchemaKeyword.TAG_PROPERTIES));
         ObjectNode nestedSubtypeSchema = this.createNestedSubtypeSchema(details.getJavaType(), details.getContext());
+        // the type identifier is the wrapping property's name, i.e., only the primary name can be used here
+        String typeIdentifier = details.getTypeIdentifiers().get(0);
         if (details.getAttributesToInclude() == null || details.getAttributesToInclude().isEmpty()) {
-            propertiesNode.set(details.getTypeIdentifier(), nestedSubtypeSchema);
+            propertiesNode.set(typeIdentifier, nestedSubtypeSchema);
         } else {
-            propertiesNode.putObject(details.getTypeIdentifier())
+            propertiesNode.putObject(typeIdentifier)
                     .withArray(details.getKeyword(SchemaKeyword.TAG_ALLOF))
                     .add(nestedSubtypeSchema)
                     .add(details.getAttributesToInclude());
         }
-        details.getDefinition().withArray(details.getKeyword(SchemaKeyword.TAG_REQUIRED)).add(details.getTypeIdentifier());
+        details.getDefinition().withArray(details.getKeyword(SchemaKeyword.TAG_REQUIRED)).add(typeIdentifier);
     }
 
     private void createSubtypeDefinitionForPropertyTypeInfo(SubtypeDefinitionDetails details, JsonTypeInfo typeInfoAnnotation) {
@@ -380,13 +392,30 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         if (details.getAttributesToInclude() != null && !details.getAttributesToInclude().isEmpty()) {
             additionalPart.setAll(details.getAttributesToInclude());
         }
-        additionalPart.put(details.getKeyword(SchemaKeyword.TAG_TYPE), details.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT))
+        ObjectNode typeIdentifierSchema = additionalPart
+                .put(details.getKeyword(SchemaKeyword.TAG_TYPE), details.getKeyword(SchemaKeyword.TAG_TYPE_OBJECT))
                 .putObject(details.getKeyword(SchemaKeyword.TAG_PROPERTIES))
-                .putObject(propertyName)
-                .put(details.getKeyword(SchemaKeyword.TAG_CONST), details.getTypeIdentifier());
+                .putObject(propertyName);
+        this.putTypeIdentifiers(typeIdentifierSchema, details);
         if (!details.getJavaType().getErasedType().equals(typeInfoAnnotation.defaultImpl())) {
             additionalPart.withArray(details.getKeyword(SchemaKeyword.TAG_REQUIRED))
                     .add(propertyName);
+        }
+    }
+
+    /**
+     * Add the type identifier(s) to the given schema node: as {@code const} if there is only one, otherwise as {@code enum}.
+     *
+     * @param typeIdentifierSchema node to add the {@code const} or {@code enum} to
+     * @param details subtype details holding the type identifier(s)
+     */
+    private void putTypeIdentifiers(ObjectNode typeIdentifierSchema, SubtypeDefinitionDetails details) {
+        List<String> typeIdentifiers = details.getTypeIdentifiers();
+        if (typeIdentifiers.size() == 1) {
+            typeIdentifierSchema.put(details.getKeyword(SchemaKeyword.TAG_CONST), typeIdentifiers.get(0));
+        } else {
+            ArrayNode enumArray = typeIdentifierSchema.putArray(details.getKeyword(SchemaKeyword.TAG_ENUM));
+            typeIdentifiers.forEach(enumArray::add);
         }
     }
 
@@ -413,15 +442,15 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
         private final ResolvedType javaType;
         private final ObjectNode attributesToInclude;
         private final SchemaGenerationContext context;
-        private final String typeIdentifier;
+        private final List<String> typeIdentifiers;
         private final ObjectNode definition;
 
         SubtypeDefinitionDetails(ResolvedType javaType, ObjectNode attributesToInclude, SchemaGenerationContext context,
-                String typeIdentifier, ObjectNode definition) {
+                List<String> typeIdentifiers, ObjectNode definition) {
             this.javaType = javaType;
             this.attributesToInclude = attributesToInclude;
             this.context = context;
-            this.typeIdentifier = typeIdentifier;
+            this.typeIdentifiers = typeIdentifiers;
             this.definition = definition;
         }
 
@@ -437,8 +466,8 @@ public class JsonSubTypesResolver implements SubtypeResolver, CustomDefinitionPr
             return this.context;
         }
 
-        String getTypeIdentifier() {
-            return this.typeIdentifier;
+        List<String> getTypeIdentifiers() {
+            return this.typeIdentifiers;
         }
 
         ObjectNode getDefinition() {
